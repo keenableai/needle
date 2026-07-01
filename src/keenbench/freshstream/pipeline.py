@@ -4,8 +4,9 @@ from typing import Any
 
 from keenbench.freshstream.feeds import SeedSource, fetch_all_sources, pick_per_feed
 from keenbench.freshstream.models import QueryRow, build_query_row
-from keenbench.freshstream.projection import project_all
+from keenbench.freshstream.projection import project_all, project_trends
 from keenbench.freshstream.taxonomy import TOPICAL_DOMAINS
+from keenbench.freshstream.trends import TrendsProvider
 from keenbench.shared.llm import LLMClient
 
 
@@ -33,6 +34,17 @@ def _rss_provenance(record: dict[str, Any]) -> dict[str, Any]:
         "url": record.get("url"),
         "title": record.get("title"),
         "lastmod_or_pub_at": record.get("lastmod_or_pub_at"),
+    }
+
+
+def _trend_provenance(trend: Any) -> dict[str, Any]:
+    return {
+        "producer": "trends_queries",
+        "topic": trend.topic,
+        "approx_traffic": trend.approx_traffic,
+        "news_items": [
+            {"title": n.title, "url": n.url, "source": n.source} for n in trend.news_items[:5]
+        ],
     }
 
 
@@ -73,6 +85,44 @@ async def run_rss(
             bucket="rss",
             topical_domain=topical_domain,
             provenance=_rss_provenance(record),
+        )
+        if row.query_id in seen_ids:
+            stats.duplicates += 1
+            continue
+        seen_ids.add(row.query_id)
+        rows.append(row)
+
+    stats.projected = len(rows)
+    return rows, stats
+
+
+async def run_trends(
+    provider: TrendsProvider,
+    llm: LLMClient,
+    *,
+    hour_ts: datetime,
+    llm_concurrency: int = 8,
+) -> tuple[list[QueryRow], RunStats]:
+    trends = await provider.fetch()
+    today = hour_ts.strftime("%Y-%m-%d")
+    projections = await project_trends(llm, trends, today=today, concurrency=llm_concurrency)
+
+    rows: list[QueryRow] = []
+    seen_ids: set[str] = set()
+    stats = RunStats(candidates=len(trends))
+    for trend, query_text, err in projections:
+        if err is not None:
+            stats.llm_errors += 1
+            continue
+        if not query_text:
+            stats.no_news_event += 1
+            continue
+        row = build_query_row(
+            query_text=query_text,
+            hour_ts=hour_ts,
+            bucket="trending",
+            topical_domain="other",
+            provenance=_trend_provenance(trend),
         )
         if row.query_id in seen_ids:
             stats.duplicates += 1

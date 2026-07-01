@@ -30,8 +30,12 @@ to keep fresh. Two independent real-time streams feed one cohort, both tagged
    feeds, 168h for academic papers), and project each survivor into a query via
    an LLM. Evergreen content (explainers, how-tos, reviews, opinion) is refused
    with a `NO_NEWS_EVENT` sentinel and dropped.
-2. **Google Trends** (`query_origin.bucket = "trending"`) — *not yet shipped*;
-   the provider protocol and pipeline hooks are in place.
+2. **Google Trends** (`query_origin.bucket = "trending"`) — fetch the keyless
+   Google Trends RSS feed (`trends.google.com/trending/rss?geo=US`), which
+   carries each trending topic plus the news articles behind it, and project
+   each into a query via an LLM (same `NO_NEWS_EVENT` refusal). Keyless — no
+   API key beyond the LLM. (A `TrendsProvider` protocol leaves room for a
+   SearchAPI adapter for those with a key.)
 
 ### Run
 
@@ -43,7 +47,8 @@ exported variable takes precedence.
 ```bash
 cp .env.example .env    # then set OPENROUTER_API_KEY
 # default model is google/gemini-2.5-flash-lite; override with --llm-model or $KEENBENCH_LLM_MODEL
-keenbench freshstream run --out queries.jsonl
+keenbench freshstream run --source rss --out queries.jsonl
+keenbench freshstream run --source trending --geo US --out trending.jsonl
 ```
 
 Each output line is one canonical query row:
