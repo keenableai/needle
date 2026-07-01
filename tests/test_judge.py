@@ -26,6 +26,13 @@ def test_parse_fenced_yaml():
     assert j.rating == 4 and j.label == "FullyM"
 
 
+def test_parse_json_fence_and_unclosed_fence():
+    j = parse_judgement('```json\nrating: 3\nlabel: HM\nreasoning: r\n```')
+    assert j.rating == 3
+    j2 = parse_judgement("```yaml\nrating: 4\nlabel: FullyM\nreasoning: r")
+    assert j2 is not None and j2.rating == 4
+
+
 def test_parse_derives_label_when_missing():
     j = parse_judgement("rating: 2\nreasoning: partial")
     assert j.rating == 2 and j.label == "SM"

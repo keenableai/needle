@@ -11,7 +11,24 @@ DEFAULT_MAX_CONTENT_CHARS = 50_000
 JUDGE_TEMPLATE = "judgement.jinja"
 
 _LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
-_FENCE_RE = re.compile(r"```(?:yaml)?\s*(.*?)```", re.DOTALL | re.IGNORECASE)
+
+_FENCE_PATTERNS = (
+    re.compile(r"[ \t]*```(?:ya?ml|json)[ \t]*\n(.*?)\n[ \t]*```", re.DOTALL | re.IGNORECASE),
+    re.compile(r"[ \t]*```[ \t]*\n(.*?)\n[ \t]*```", re.DOTALL),
+    re.compile(r"[ \t]*```(?:ya?ml|json)[ \t]*(.*?)```", re.DOTALL | re.IGNORECASE),
+    re.compile(r"```(.*?)```", re.DOTALL),
+    re.compile(r"[ \t]*```(?:ya?ml|json)[ \t]*\n?(.*)", re.DOTALL | re.IGNORECASE),
+    re.compile(r"[ \t]*```[ \t]*\n?(.*)", re.DOTALL),
+)
+
+
+def _extract_yaml_block(content: str) -> str:
+    content = content.strip()
+    for pattern in _FENCE_PATTERNS:
+        match = pattern.search(content)
+        if match:
+            return match.group(1).strip()
+    return content
 
 
 @dataclass(frozen=True)
@@ -83,10 +100,8 @@ def build_judge_prompt(
 def parse_judgement(text: str | None) -> Judgement | None:
     if not text:
         return None
-    match = _FENCE_RE.search(text)
-    body = match.group(1) if match else text
     try:
-        data = yaml.safe_load(body)
+        data = yaml.safe_load(_extract_yaml_block(text))
     except yaml.YAMLError:
         return None
     if not isinstance(data, dict) or "rating" not in data:
@@ -122,7 +137,7 @@ async def judge_one(
         today=today,
         max_content_chars=max_content_chars,
     )
-    text, err = await llm.complete(prompt, max_tokens=1024, reasoning_effort="minimal")
+    text, err = await llm.complete(prompt, max_tokens=32_768, reasoning_effort="minimal")
     if err is not None:
         return None, err
     judgement = parse_judgement(text)
