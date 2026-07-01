@@ -71,7 +71,7 @@ hour produces byte-identical rows.
 ### Custom feed list
 
 The built-in seed list is a curated set of ~124 US feeds, defined in
-[`src/keenbench/freshstream/feeds.default.toml`](src/keenbench/freshstream/feeds.default.toml)
+[`src/keenbench/freshstream/configs/feeds.default.toml`](src/keenbench/freshstream/configs/feeds.default.toml)
 (the single source of truth — `SEED_SOURCES` loads it at import). Copy it, edit,
 and pass your version with `--feeds`:
 

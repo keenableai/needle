@@ -35,8 +35,8 @@ def load_sources_from_toml(path: str | Path) -> tuple[SeedSource, ...]:
 
 
 def _load_packaged_default() -> tuple[SeedSource, ...]:
-    text = resources.files(__package__).joinpath(_DEFAULT_FEEDS_FILE).read_text(encoding="utf-8")
-    return _sources_from_data(tomllib.loads(text))
+    resource = resources.files(__package__).joinpath("configs", _DEFAULT_FEEDS_FILE)
+    return _sources_from_data(tomllib.loads(resource.read_text(encoding="utf-8")))
 
 
 SEED_SOURCES: tuple[SeedSource, ...] = _load_packaged_default()
