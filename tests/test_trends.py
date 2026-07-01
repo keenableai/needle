@@ -56,8 +56,7 @@ def test_build_trend_prompt_has_topic_and_news():
     trend = Trend(
         topic="nikola vucevic",
         approx_traffic="500+",
-        pub_date=None,
-        news_items=(NewsItem(title="Vucevic to Magic", url="u", source="ESPN", snippet=None),),
+        news_items=(NewsItem(title="Vucevic to Magic", url="u", source="ESPN"),),
     )
     prompt = build_trend_prompt(trend, today="2026-07-01")
     assert "Today's date: 2026-07-01" in prompt
@@ -67,8 +66,8 @@ def test_build_trend_prompt_has_topic_and_news():
 
 async def test_run_trends_end_to_end():
     trends = [
-        Trend("vucevic", "500+", None, (NewsItem("Vucevic to Magic", "u", "ESPN", None),)),
-        Trend("evergreen", "200+", None, ()),
+        Trend("vucevic", "500+", (NewsItem("Vucevic to Magic", "u", "ESPN"),)),
+        Trend("evergreen", "200+", ()),
     ]
     llm = FakeLLM()
     hour_ts = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
@@ -89,9 +88,7 @@ async def test_run_trends_end_to_end():
 
 
 async def test_run_trends_respects_max_trends():
-    trends = [
-        Trend(f"t{i}", None, None, (NewsItem("vucevic", "u", "ESPN", None),)) for i in range(5)
-    ]
+    trends = [Trend(f"t{i}", None, (NewsItem("vucevic", "u", "ESPN"),)) for i in range(5)]
     rows, stats = await run_trends(
         FakeProvider(trends), FakeLLM(), hour_ts=datetime(2026, 7, 1, tzinfo=UTC), max_trends=2
     )

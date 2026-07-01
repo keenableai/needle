@@ -1,10 +1,15 @@
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
 from keenbench.freshstream.feeds import SeedSource, fetch_all_sources, pick_per_feed
 from keenbench.freshstream.models import QueryRow, build_query_row
-from keenbench.freshstream.projection import project_all, project_trends
+from keenbench.freshstream.projection import (
+    build_projection_prompt,
+    build_trend_prompt,
+    project_batch,
+)
 from keenbench.freshstream.taxonomy import TOPICAL_DOMAINS
 from keenbench.freshstream.trends import TrendsProvider
 from keenbench.shared.llm import LLMClient
@@ -37,6 +42,46 @@ def _rss_provenance(record: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _rss_row_meta(record: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+    td = str(record.get("topical_domain_default") or "other")
+    if td not in TOPICAL_DOMAINS:
+        td = "other"
+    return td, _rss_provenance(record)
+
+
+def _collect_rows(
+    projections: list[tuple[Any, str | None, dict[str, str] | None]],
+    *,
+    hour_ts: datetime,
+    bucket: str,
+    row_meta: Callable[[Any], tuple[str, dict[str, Any]]],
+) -> tuple[list[QueryRow], int, int, int]:
+    rows: list[QueryRow] = []
+    seen_ids: set[str] = set()
+    llm_errors = no_news_event = duplicates = 0
+    for item, query_text, err in projections:
+        if err is not None:
+            llm_errors += 1
+            continue
+        if not query_text:
+            no_news_event += 1
+            continue
+        topical_domain, provenance = row_meta(item)
+        row = build_query_row(
+            query_text=query_text,
+            hour_ts=hour_ts,
+            bucket=bucket,
+            topical_domain=topical_domain,
+            provenance=provenance,
+        )
+        if row.query_id in seen_ids:
+            duplicates += 1
+            continue
+        seen_ids.add(row.query_id)
+        rows.append(row)
+    return rows, llm_errors, no_news_event, duplicates
+
+
 def _trend_provenance(trend: Any) -> dict[str, Any]:
     return {
         "producer": "trends_queries",
@@ -64,36 +109,24 @@ async def run_rss(
     anchor = now if now is not None else _fetch_anchor(items)
     candidates = pick_per_feed(items, now=anchor)
     today = hour_ts.strftime("%Y-%m-%d")
-    projections = await project_all(llm, candidates, today=today, concurrency=llm_concurrency)
-
-    rows: list[QueryRow] = []
-    seen_ids: set[str] = set()
-    stats = RunStats(feeds=len(sources), candidates=len(candidates), feed_health=health)
-    for record, query_text, err in projections:
-        if err is not None:
-            stats.llm_errors += 1
-            continue
-        if not query_text:
-            stats.no_news_event += 1
-            continue
-        topical_domain = str(record.get("topical_domain_default") or "other")
-        if topical_domain not in TOPICAL_DOMAINS:
-            topical_domain = "other"
-        row = build_query_row(
-            query_text=query_text,
-            hour_ts=hour_ts,
-            bucket="rss",
-            topical_domain=topical_domain,
-            provenance=_rss_provenance(record),
-        )
-        if row.query_id in seen_ids:
-            stats.duplicates += 1
-            continue
-        seen_ids.add(row.query_id)
-        rows.append(row)
-
-    stats.projected = len(rows)
-    return rows, stats
+    projections = await project_batch(
+        llm,
+        candidates,
+        lambda r: build_projection_prompt(r, today=today),
+        concurrency=llm_concurrency,
+    )
+    rows, llm_errors, no_news_event, duplicates = _collect_rows(
+        projections, hour_ts=hour_ts, bucket="rss", row_meta=_rss_row_meta
+    )
+    return rows, RunStats(
+        feeds=len(sources),
+        candidates=len(candidates),
+        projected=len(rows),
+        no_news_event=no_news_event,
+        llm_errors=llm_errors,
+        duplicates=duplicates,
+        feed_health=health,
+    )
 
 
 async def run_trends(
@@ -108,30 +141,19 @@ async def run_trends(
     if max_trends > 0:
         trends = trends[:max_trends]
     today = hour_ts.strftime("%Y-%m-%d")
-    projections = await project_trends(llm, trends, today=today, concurrency=llm_concurrency)
-
-    rows: list[QueryRow] = []
-    seen_ids: set[str] = set()
-    stats = RunStats(candidates=len(trends))
-    for trend, query_text, err in projections:
-        if err is not None:
-            stats.llm_errors += 1
-            continue
-        if not query_text:
-            stats.no_news_event += 1
-            continue
-        row = build_query_row(
-            query_text=query_text,
-            hour_ts=hour_ts,
-            bucket="trending",
-            topical_domain="other",
-            provenance=_trend_provenance(trend),
-        )
-        if row.query_id in seen_ids:
-            stats.duplicates += 1
-            continue
-        seen_ids.add(row.query_id)
-        rows.append(row)
-
-    stats.projected = len(rows)
-    return rows, stats
+    projections = await project_batch(
+        llm, trends, lambda t: build_trend_prompt(t, today=today), concurrency=llm_concurrency
+    )
+    rows, llm_errors, no_news_event, duplicates = _collect_rows(
+        projections,
+        hour_ts=hour_ts,
+        bucket="trending",
+        row_meta=lambda t: ("other", _trend_provenance(t)),
+    )
+    return rows, RunStats(
+        candidates=len(trends),
+        projected=len(rows),
+        no_news_event=no_news_event,
+        llm_errors=llm_errors,
+        duplicates=duplicates,
+    )

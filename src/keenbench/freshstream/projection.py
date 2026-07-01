@@ -1,5 +1,6 @@
 import asyncio
-from typing import Any
+from collections.abc import Callable, Sequence
+from typing import Any, TypeVar
 
 from keenbench.freshstream.trends import Trend
 from keenbench.shared.llm import LLMClient
@@ -7,6 +8,8 @@ from keenbench.shared.prompts import render_prompt
 
 PROJECTION_TEMPLATE = "projection.jinja"
 TRENDS_TEMPLATE = "trends_projection.jinja"
+
+T = TypeVar("T")
 
 
 def clean_projection(text: str | None) -> str | None:
@@ -38,67 +41,31 @@ def build_trend_prompt(trend: Trend, *, today: str) -> str:
     )
 
 
-async def project_one(
-    llm: LLMClient, record: dict[str, Any], *, today: str
-) -> tuple[str | None, dict[str, str] | None]:
-    prompt = build_projection_prompt(record, today=today)
-    text, err = await llm.complete(prompt, max_tokens=512, reasoning_effort="minimal")
-    if err is not None:
-        return None, err
-    return clean_projection(text), None
-
-
-async def project_trend_one(
-    llm: LLMClient, trend: Trend, *, today: str
-) -> tuple[str | None, dict[str, str] | None]:
-    prompt = build_trend_prompt(trend, today=today)
-    text, err = await llm.complete(prompt, max_tokens=512, reasoning_effort="minimal")
-    if err is not None:
-        return None, err
-    return clean_projection(text), None
-
-
-async def project_all(
+async def project_batch(
     llm: LLMClient,
-    records: list[dict[str, Any]],
+    items: Sequence[T],
+    build_prompt: Callable[[T], str],
     *,
-    today: str,
     concurrency: int = 8,
-) -> list[tuple[dict[str, Any], str | None, dict[str, str] | None]]:
+) -> list[tuple[T, str | None, dict[str, str] | None]]:
     if concurrency < 1:
         raise ValueError("concurrency must be >= 1")
     sem = asyncio.Semaphore(concurrency)
 
-    async def _one(
-        r: dict[str, Any],
-    ) -> tuple[dict[str, Any], str | None, dict[str, str] | None]:
+    async def _one(item: T) -> tuple[T, str | None, dict[str, str] | None]:
         async with sem:
             try:
-                text, err = await project_one(llm, r, today=today)
+                text, err = await llm.complete(
+                    build_prompt(item), max_tokens=512, reasoning_effort="minimal"
+                )
             except Exception as exc:
-                return r, None, {"error_type": "projection_crash", "error_message": str(exc)[:500]}
-            return r, text, err
+                return (
+                    item,
+                    None,
+                    {"error_type": "projection_crash", "error_message": str(exc)[:500]},
+                )
+        if err is not None:
+            return item, None, err
+        return item, clean_projection(text), None
 
-    return list(await asyncio.gather(*[_one(r) for r in records]))
-
-
-async def project_trends(
-    llm: LLMClient,
-    trends: list[Trend],
-    *,
-    today: str,
-    concurrency: int = 8,
-) -> list[tuple[Trend, str | None, dict[str, str] | None]]:
-    if concurrency < 1:
-        raise ValueError("concurrency must be >= 1")
-    sem = asyncio.Semaphore(concurrency)
-
-    async def _one(t: Trend) -> tuple[Trend, str | None, dict[str, str] | None]:
-        async with sem:
-            try:
-                text, err = await project_trend_one(llm, t, today=today)
-            except Exception as exc:
-                return t, None, {"error_type": "projection_crash", "error_message": str(exc)[:500]}
-            return t, text, err
-
-    return list(await asyncio.gather(*[_one(t) for t in trends]))
+    return list(await asyncio.gather(*[_one(item) for item in items]))

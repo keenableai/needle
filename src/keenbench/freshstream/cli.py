@@ -58,17 +58,14 @@ class Freshstream:
 
         if source == "trending":
 
-            async def _go():
-                try:
-                    return await run_trends(
-                        GoogleTrendsRssProvider(geo=geo),
-                        llm,
-                        hour_ts=hour_ts,
-                        max_trends=max_trends,
-                        llm_concurrency=llm_concurrency,
-                    )
-                finally:
-                    await llm.aclose()
+            def pipeline():
+                return run_trends(
+                    GoogleTrendsRssProvider(geo=geo),
+                    llm,
+                    hour_ts=hour_ts,
+                    max_trends=max_trends,
+                    llm_concurrency=llm_concurrency,
+                )
         else:
             if feeds:
                 try:
@@ -78,18 +75,21 @@ class Freshstream:
             else:
                 sources = SEED_SOURCES
 
-            async def _go():
-                try:
-                    return await run_rss(
-                        sources,
-                        llm,
-                        hour_ts=hour_ts,
-                        fetch_concurrency=max(1, fetch_concurrency),
-                        llm_concurrency=llm_concurrency,
-                        max_rows_per_source=max_rows_per_source,
-                    )
-                finally:
-                    await llm.aclose()
+            def pipeline():
+                return run_rss(
+                    sources,
+                    llm,
+                    hour_ts=hour_ts,
+                    fetch_concurrency=max(1, fetch_concurrency),
+                    llm_concurrency=llm_concurrency,
+                    max_rows_per_source=max_rows_per_source,
+                )
+
+        async def _go():
+            try:
+                return await pipeline()
+            finally:
+                await llm.aclose()
 
         try:
             rows, stats = asyncio.run(_go())
