@@ -77,14 +77,19 @@ class GoogleTrendsRssProvider:
         self.timeout = httpx.Timeout(timeout_s) if timeout_s else HTTP_TIMEOUT
 
     async def fetch(self) -> list[Trend]:
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            resp = await client.get(
-                self.base_url,
-                params={"geo": self.geo},
-                headers={"User-Agent": USER_AGENT},
-                follow_redirects=True,
-            )
-        resp.raise_for_status()
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.get(
+                    self.base_url,
+                    params={"geo": self.geo},
+                    headers={"User-Agent": USER_AGENT},
+                    follow_redirects=True,
+                )
+            resp.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise ValueError(
+                f"could not fetch Google Trends RSS (geo={self.geo}): {type(exc).__name__}: {exc}"
+            ) from exc
         try:
             return parse_trends(resp.text)
         except (ParseError, DefusedXmlException) as exc:

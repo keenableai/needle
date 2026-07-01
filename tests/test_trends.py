@@ -1,9 +1,11 @@
 import json
 from datetime import UTC, datetime
 
+import pytest
+
 from keenbench.freshstream.pipeline import run_trends
 from keenbench.freshstream.projection import build_trend_prompt
-from keenbench.freshstream.trends import NewsItem, Trend, parse_trends
+from keenbench.freshstream.trends import GoogleTrendsRssProvider, NewsItem, Trend, parse_trends
 
 SAMPLE = """<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:ht="https://trends.google.com/trending/rss" version="2.0"><channel>
@@ -84,3 +86,19 @@ async def test_run_trends_end_to_end():
     assert origin["provenance"]["producer"] == "trends_queries"
     assert origin["provenance"]["topic"] == "vucevic"
     assert json.loads(json.dumps(row.to_dict()))["query_origin"]["bucket"] == "trending"
+
+
+async def test_run_trends_respects_max_trends():
+    trends = [
+        Trend(f"t{i}", None, None, (NewsItem("vucevic", "u", "ESPN", None),)) for i in range(5)
+    ]
+    rows, stats = await run_trends(
+        FakeProvider(trends), FakeLLM(), hour_ts=datetime(2026, 7, 1, tzinfo=UTC), max_trends=2
+    )
+    assert stats.candidates == 2
+
+
+async def test_fetch_wraps_http_errors_as_valueerror():
+    provider = GoogleTrendsRssProvider(base_url="http://127.0.0.1:1", timeout_s=2.0)
+    with pytest.raises(ValueError):
+        await provider.fetch()

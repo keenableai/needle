@@ -101,9 +101,12 @@ async def run_trends(
     llm: LLMClient,
     *,
     hour_ts: datetime,
+    max_trends: int = 0,
     llm_concurrency: int = 8,
 ) -> tuple[list[QueryRow], RunStats]:
     trends = await provider.fetch()
+    if max_trends > 0:
+        trends = trends[:max_trends]
     today = hour_ts.strftime("%Y-%m-%d")
     projections = await project_trends(llm, trends, today=today, concurrency=llm_concurrency)
 
