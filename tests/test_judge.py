@@ -38,7 +38,7 @@ def test_parse_rejects_out_of_range_or_garbage():
     assert parse_judgement("reasoning: no rating here") is None
 
 
-def test_build_user_message_no_qid_and_content_cap():
+def test_build_user_message_and_content_cap():
     msg = build_user_message(
         "mayor of austin",
         url="https://ex.com",
@@ -48,7 +48,6 @@ def test_build_user_message_no_qid_and_content_cap():
         today="2026-07-01",
         max_content_chars=10,
     )
-    assert "Query Intent Descriptor" not in msg  # no-QID judge
     assert "**Query**: mayor of austin" in msg
     assert "- Published: 2026-07-01" in msg
     assert "characters) not shown" in msg

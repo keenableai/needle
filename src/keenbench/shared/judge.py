@@ -8,7 +8,7 @@ from keenbench.shared.llm import LLMClient
 from keenbench.shared.prompts import render_prompt
 
 DEFAULT_MAX_CONTENT_CHARS = 50_000
-JUDGE_TEMPLATE = "judgement_no_qid.jinja"
+JUDGE_TEMPLATE = "judgement.jinja"
 
 _LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
 _FENCE_RE = re.compile(r"```(?:yaml)?\s*(.*?)```", re.DOTALL | re.IGNORECASE)

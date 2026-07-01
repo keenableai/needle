@@ -139,9 +139,9 @@ Add an engine by subclassing `HttpSearchClient` (lazy connection reuse +
 `keenbench.shared.judge` + `keenbench.shared.metrics` + the `keenbench rankeval`
 CLI score how well a search engine ranks results for a query:
 
-- **Judge** — a no-query-descriptor LLM relevance judge (Google "Needs Met"
-  0–4 framework, ported from the internal eval), run through OpenRouter. The
-  default judge model is `google/gemini-3-flash-preview`
+- **Judge** — an LLM relevance judge (Google "Needs Met" 0–4 framework, ported
+  from the internal eval) that infers intent straight from the query text, run
+  through OpenRouter. The default judge model is `google/gemini-3-flash-preview`
   (`--judge-model` / `$KEENBENCH_JUDGE_MODEL`).
 - **RBP@5** — Rank-Biased Precision (`p=0.8`), gain `{4:1.0, 3:0.667, 2:0.117}`,
   ceiling `1 - p^5 ≈ 0.672`. (Plain gain-weighted RBP; the internal SQL kernel's
