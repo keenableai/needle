@@ -56,9 +56,6 @@ async def run_rbp(
     judge_concurrency: int = 8,
     max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
 ) -> dict[str, Any]:
-    """Search each query on each engine, judge the top ``num_results`` with the
-    Needs-Met judge, and return per-engine mean RBP@k. Engines run concurrently;
-    the shared judge semaphore caps total in-flight judge calls."""
     sem = asyncio.Semaphore(judge_concurrency)
 
     async def run_engine(name: str, client: SearchClient) -> tuple[str, dict[str, Any]]:

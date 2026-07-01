@@ -18,7 +18,6 @@ class FakeEngine:
 
 
 class FakeJudge:
-    # Sentinel avoids collisions with the (large) real system prompt text.
     async def complete(self, prompt, *, max_tokens, reasoning_effort):
         rating = 4 if "GOODDOC" in prompt else 0
         label = "FullyM" if rating == 4 else "FailsM"

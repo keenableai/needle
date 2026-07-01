@@ -14,8 +14,6 @@ class KeenableClient(HttpSearchClient):
         timeout_s: float = 30.0,
         max_concurrency: int | None = None,
     ) -> None:
-        # The keyless public endpoint (/v1/search/public) is burst-rate-limited,
-        # so default it low; keyed requests get the standard default.
         if max_concurrency is None:
             max_concurrency = 8 if api_key else 2
         super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)

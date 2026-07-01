@@ -55,7 +55,6 @@ def build_user_message(
 
 @cache
 def _system_prompt() -> str:
-    # Static (no template vars) — render once, reuse for every judgement.
     return render_prompt("keenbench.shared", JUDGE_TEMPLATE)
 
 

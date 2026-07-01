@@ -55,7 +55,6 @@ class Rankeval:
         if not query_texts:
             raise SystemExit(f"error: no queries loaded from {queries!r}")
 
-        # Fire turns a comma-separated --engines value into a tuple; accept both.
         if isinstance(engines, str):
             engine_names = [e.strip() for e in engines.split(",") if e.strip()]
         else:
