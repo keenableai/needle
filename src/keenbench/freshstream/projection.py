@@ -17,7 +17,9 @@ def clean_projection(text: str | None) -> str | None:
     if not text:
         return None
     cleaned = text.splitlines()[0].strip(" \"'")
-    if not cleaned or cleaned.upper() == "NO_NEWS_EVENT":
+    # Substring, not equality: refusals arrive with punctuation or prefixes
+    # ("NO_NEWS_EVENT.", "Answer: NO_NEWS_EVENT") and must not become queries.
+    if not cleaned or "NO_NEWS_EVENT" in cleaned.upper():
         return None
     return cleaned
 

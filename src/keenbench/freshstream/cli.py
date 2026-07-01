@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 from keenbench.freshstream.feeds import SEED_SOURCES, load_sources_from_toml
 from keenbench.freshstream.pipeline import run_rss, run_trends
-from keenbench.freshstream.trends import GoogleTrendsRssProvider
+from keenbench.freshstream.trends import US_GEOS, GoogleTrendsRssProvider
 from keenbench.shared.io import write_jsonl, write_stdout
 from keenbench.shared.llm import OpenRouterClient
 
@@ -18,7 +18,7 @@ class Freshstream:
         source: str = "rss",
         out: str = "-",
         feeds: str | None = None,
-        geo: str = "US",
+        geos: str = "us-all",
         max_trends: int = 0,
         llm_model: str | None = None,
         max_rows_per_source: int = 50,
@@ -41,7 +41,10 @@ class Freshstream:
         else:
             misused = [
                 name
-                for name, used in (("--geo", geo != "US"), ("--max-trends", max_trends != 0))
+                for name, used in (
+                    ("--geos", geos != "us-all"),
+                    ("--max-trends", max_trends != 0),
+                )
                 if used
             ]
         if misused:
@@ -57,13 +60,20 @@ class Freshstream:
         llm_concurrency = max(1, llm_concurrency)
 
         if source == "trending":
+            if geos == "us-all":
+                geo_list = US_GEOS
+            else:
+                geo_list = tuple(g.strip() for g in geos.split(",") if g.strip())
+            if not geo_list:
+                raise SystemExit(f"error: no geos parsed from --geos {geos!r}")
 
             def pipeline():
                 return run_trends(
-                    GoogleTrendsRssProvider(geo=geo),
+                    GoogleTrendsRssProvider(),
                     llm,
                     hour_ts=hour_ts,
                     max_trends=max_trends,
+                    geos=geo_list,
                     llm_concurrency=llm_concurrency,
                 )
         else:
@@ -103,7 +113,10 @@ class Freshstream:
             write_jsonl(records, out)
 
         if source == "trending":
-            source_summary = f"{stats.candidates} {geo} trends"
+            source_summary = (
+                f"{stats.candidates} trends across {len(geo_list)} geos "
+                f"({stats.fetch_errors} geo fetch errors)"
+            )
         else:
             source_summary = f"{stats.candidates} candidates across {stats.feeds} feeds"
         print(

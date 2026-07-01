@@ -30,12 +30,14 @@ to keep fresh. Two independent real-time streams feed one cohort, both tagged
    feeds, 168h for academic papers), and project each survivor into a query via
    an LLM. Evergreen content (explainers, how-tos, reviews, opinion) is refused
    with a `NO_NEWS_EVENT` sentinel and dropped.
-2. **Google Trends** (`query_origin.bucket = "trending"`) — fetch the keyless
-   Google Trends RSS feed (`trends.google.com/trending/rss?geo=US`), which
-   carries each trending topic plus the news articles behind it, and project
-   each into a query via an LLM (same `NO_NEWS_EVENT` refusal). Keyless — no
-   API key beyond the LLM. (A `TrendsProvider` protocol leaves room for a
-   SearchAPI adapter for those with a key.)
+2. **Google Trends** (`query_origin.bucket = "trending"`) — fan out over the
+   keyless Google Trends RSS feed (`trends.google.com/trending/rss?geo=...`)
+   for all 52 US geos (`--geos` to override), merge topics across geos with
+   geo tracking, collapse fuzzy near-duplicates (highest volume wins), drop
+   non-ASCII topics, cap by approximate traffic, project each survivor into a
+   query via an LLM (same `NO_NEWS_EVENT` refusal), and fuzzy-dedup the
+   generated queries. Keyless — no API key beyond the LLM. (A `TrendsProvider`
+   protocol leaves room for a SearchAPI adapter for those with a key.)
 
 ### Run
 
@@ -149,8 +151,9 @@ CLI score how well a search engine ranks results for a query:
   through OpenRouter. The default judge model is `google/gemini-3-flash-preview`
   (`--judge-model` / `$KEENBENCH_JUDGE_MODEL`).
 - **RBP@5** — Rank-Biased Precision (`p=0.8`), gain `{4:1.0, 3:0.667, 2:0.117}`,
-  ceiling `1 - p^5 ≈ 0.672`. (Plain gain-weighted RBP; the internal SQL kernel's
-  domain-redundancy penalties are not applied here.)
+  ceiling `1 - p^5 ≈ 0.672`, with the internal SQL kernel's redundancy
+  penalties applied per query: duplicate URL −4, third-plus result from a
+  domain −2, second −1 (floored at 0; `site:` queries exempt).
 
 ```bash
 keenbench freshstream run --out fresh.jsonl
@@ -165,12 +168,17 @@ use the authenticated endpoint at higher concurrency. `--exa-concurrency`
 Queries whose search failed or that have any missing judgement are excluded
 from `mean_rbp_at_5` (reported via `num_scored`, `search_errors`,
 `judge_errors`) rather than scored as zero, so transient API failures don't
-skew the engine comparison.
+skew the engine comparison. Each unique `(query, url)` pair is judged once
+across all engines (`judged_pairs` in the report), the judge's "Today's date"
+comes from each query row's `hour_ts` when present, and `--limit N` takes a
+deterministic stratified sample across `topical_domain` (`--sample
+uniform|head` for the alternatives, `--seed` to vary it).
 
 **First numbers** (20 fresh RSS-derived queries, top-5, snippet-only judging,
 judge `gemini-3-flash-preview`): **Exa 0.578** vs **Keenable 0.503** (ceiling
-0.672; both engines 0 search/judge errors). Small sample and snippet-only (no
-full-page fetch) — directional, not a headline metric.
+0.672; both engines 0 search/judge errors). Small sample, snippet-only (no
+full-page fetch), and measured before redundancy penalties and cross-engine
+judging landed — directional, not a headline metric.
 
 ## Development
 

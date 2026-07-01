@@ -1,3 +1,4 @@
+import json
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any
@@ -45,6 +46,9 @@ class QueryRow:
         d = asdict(self)
         d["hour_ts"] = self.hour_ts.isoformat()
         d["query_produced_at"] = self.query_produced_at.isoformat()
+        # Serialized string with sorted keys — the canonical query_origin wire
+        # format shared with keenable-eval's BQ column.
+        d["query_origin"] = json.dumps(self.query_origin, sort_keys=True)
         return d
 
 

@@ -16,7 +16,17 @@ from keenbench.freshstream.projection import (
     project_batch,
 )
 from keenbench.freshstream.taxonomy import TOPICAL_DOMAINS
-from keenbench.freshstream.trends import TrendsProvider
+from keenbench.freshstream.trends import (
+    GEO_CONCURRENCY,
+    US_GEOS,
+    TrendsProvider,
+    cap_by_volume,
+    collect_unique_trends,
+    dedupe_projected_queries,
+    dedupe_topics,
+    fetch_all_geos,
+    filter_ascii_topics,
+)
 from keenbench.shared.llm import LLMClient
 
 
@@ -28,6 +38,7 @@ class RunStats:
     no_news_event: int = 0
     llm_errors: int = 0
     duplicates: int = 0
+    fetch_errors: int = 0
     feed_health: list[dict[str, Any]] = field(default_factory=list)
 
 
@@ -101,6 +112,8 @@ def _trend_provenance(trend: Any) -> dict[str, Any]:
         "topic": trend.topic,
         "approx_traffic": trend.approx_traffic,
         "pub_date": trend.pub_date,
+        "geos": list(trend.geos),
+        "geo_count": len(trend.geos),
         "news_items": [
             {"title": n.title, "url": n.url, "source": n.source} for n in trend.news_items[:5]
         ],
@@ -151,16 +164,24 @@ async def run_trends(
     now: datetime | None = None,
     max_age: timedelta = TRENDS_MAX_AGE,
     max_trends: int = 0,
+    geos: tuple[str, ...] = US_GEOS,
+    geo_concurrency: int = GEO_CONCURRENCY,
     llm_concurrency: int = 8,
 ) -> tuple[list[QueryRow], RunStats]:
     now = now or datetime.now(UTC)
-    trends = [t for t in await provider.fetch() if _trend_is_fresh(t, now=now, max_age=max_age)]
-    if max_trends > 0:
-        trends = trends[:max_trends]
+    # Same pipeline as keenable-eval's news_queries (minus SearchAPI enrichment):
+    # multi-geo fan-out -> exact merge -> fuzzy topic dedup -> ASCII filter ->
+    # volume cap -> project -> fuzzy query dedup.
+    trends_by_geo, fetch_errors = await fetch_all_geos(provider, geos, concurrency=geo_concurrency)
+    trends = dedupe_topics(collect_unique_trends(trends_by_geo))
+    trends = filter_ascii_topics(trends)
+    trends = [t for t in trends if _trend_is_fresh(t, now=now, max_age=max_age)]
+    trends = cap_by_volume(trends, max_trends)
     today = hour_ts.strftime("%Y-%m-%d")
     projections = await project_batch(
         llm, trends, lambda t: build_trend_prompt(t, today=today), concurrency=llm_concurrency
     )
+    projections, fuzzy_duplicates = dedupe_projected_queries(projections)
     rows, llm_errors, no_news_event, duplicates = _collect_rows(
         projections,
         hour_ts=hour_ts,
@@ -172,5 +193,6 @@ async def run_trends(
         projected=len(rows),
         no_news_event=no_news_event,
         llm_errors=llm_errors,
-        duplicates=duplicates,
+        duplicates=duplicates + fuzzy_duplicates,
+        fetch_errors=fetch_errors,
     )

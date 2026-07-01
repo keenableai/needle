@@ -78,3 +78,23 @@ def test_rankeval_passes_keenable_api_key(monkeypatch, tmp_path):
         queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json")
     )
     assert created == {"api_key": "kb-key", "mode": "pro"}
+
+
+def test_rankeval_load_rows_and_per_query_today(tmp_path):
+    f = tmp_path / "q.jsonl"
+    f.write_text(
+        '{"query_text": "a", "topical_domain": "tech", "hour_ts": "2026-07-01T14:00:00+00:00"}\n'
+        "plain text query\n"
+    )
+    rows = rankeval_cli._load_query_rows(str(f))
+    assert rows[0]["topical_domain"] == "tech"
+    assert rankeval_cli._today_for_row(rows[0], "1999-01-01") == "2026-07-01"
+    assert rankeval_cli._today_for_row(rows[1], "1999-01-01") == "1999-01-01"
+
+
+def test_rankeval_rejects_unknown_sample(tmp_path, monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "x")
+    f = tmp_path / "q.jsonl"
+    f.write_text("a\nb\n")
+    with pytest.raises(SystemExit):
+        rankeval_cli.Rankeval().run(queries=str(f), limit=1, sample="bogus")
