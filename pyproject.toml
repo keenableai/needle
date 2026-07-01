@@ -1,0 +1,37 @@
+[project]
+name = "keenbench"
+version = "0.1.0"
+description = "Keenbench — a collection of search/retrieval benchmarks and query-stream generators from Keenable.ai. Each benchmark is a self-contained module under the keenbench package."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Keenable.ai" }]
+keywords = ["search", "retrieval", "benchmark", "eval", "queries", "rss", "trends"]
+dependencies = [
+    "httpx>=0.27",
+    "defusedxml>=0.7",
+    "fire>=0.6",
+]
+
+[project.optional-dependencies]
+# --- freshstream: Google Trends providers (second increment) ---
+trends-pytrends = ["pytrends>=4.9"]
+# --- freshstream: fuzzy topic/query dedup used by the Trends path ---
+dedup = ["rapidfuzz>=3.0"]
+
+[project.scripts]
+keenbench = "keenbench.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.23"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/keenbench"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
