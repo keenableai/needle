@@ -100,6 +100,40 @@ Any object with an errors-as-data
 `async complete(prompt, *, max_tokens, reasoning_effort) -> (text, error)`
 method satisfies the `LLMClient` protocol.
 
+## Search clients
+
+`keenbench.shared.search` provides a common client interface across search
+engines — a `SearchResult` (`url`, `title`, `snippet`, `published_date`,
+`score`, `raw`) and a `SearchClient` protocol
+(`async search(query, *, num_results) -> (results, error)`, errors-as-data,
+never raises). Shipped engines:
+
+| Client | Endpoint | Key |
+| --- | --- | --- |
+| `KeenableClient` | `POST /v1/search/public` when keyless, `POST /v1/search` with a key | `X-API-Key` (optional — the keyless endpoint is rate-limited) |
+| `ExaClient` | `POST https://api.exa.ai/search` | `x-api-key` (required) |
+
+```python
+import asyncio
+from keenbench.shared.search import KeenableClient, ExaClient
+
+async def go():
+    kb = KeenableClient()                    # or KeenableClient(api_key=...)
+    results, err = await kb.search("who is the mayor of austin", num_results=10)
+    await kb.aclose()
+    return results
+
+asyncio.run(go())
+```
+
+Each client caps in-flight requests via `max_concurrency` (default 8) — a
+per-client semaphore — so a fan-out over many queries won't overwhelm the API
+or your connection pool: `KeenableClient(max_concurrency=4)`.
+
+Add an engine by subclassing `HttpSearchClient` (lazy connection reuse +
+`aclose` + concurrency limiter + JSON error mapping) and mapping its response to
+`SearchResult`.
+
 ## Development
 
 ```bash
