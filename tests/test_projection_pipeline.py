@@ -1,5 +1,6 @@
-import pytest
 from datetime import UTC, datetime
+
+import pytest
 
 from keenbench.freshstream.models import build_query_row
 from keenbench.freshstream.pipeline import _rss_provenance
@@ -95,7 +96,6 @@ async def test_run_rss_end_to_end(monkeypatch):
 
     llm = FakeLLM([("acme thing launch", None)])
     hour_ts = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
-    # No `now` passed: freshness must anchor to the item's observed_at, not wall clock.
     rows, stats = await pipeline.run_rss((), llm, hour_ts=hour_ts, llm_concurrency=1)
 
     assert len(rows) == 1

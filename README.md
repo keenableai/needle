@@ -1,5 +1,7 @@
 # keenbench
 
+[![CI](https://github.com/keenableai/keenbench/actions/workflows/ci.yaml/badge.svg)](https://github.com/keenableai/keenbench/actions/workflows/ci.yaml)
+
 A collection of search/retrieval benchmarks and query-stream generators from
 [Keenable.ai](https://keenable.ai). Each benchmark is a self-contained module
 under the `keenbench` package, exposed as a `keenbench <benchmark>` subcommand.

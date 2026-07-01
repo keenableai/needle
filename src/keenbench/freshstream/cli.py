@@ -37,7 +37,7 @@ class Freshstream:
             try:
                 sources = load_sources_from_toml(feeds)
             except (OSError, ValueError, KeyError) as exc:
-                raise SystemExit(f"error: could not load --feeds {feeds!r}: {exc}")
+                raise SystemExit(f"error: could not load --feeds {feeds!r}: {exc}") from exc
         else:
             sources = SEED_SOURCES
         llm = OpenRouterClient(api_key=api_key, model=model)

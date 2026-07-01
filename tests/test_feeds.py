@@ -7,8 +7,8 @@ from keenbench.freshstream import feeds as feeds_mod
 from keenbench.freshstream.feeds import (
     SEED_SOURCES,
     SeedSource,
-    _FetchOutcome,
     _fetch_one,
+    _FetchOutcome,
     _parse_feed,
     fetch_all_sources,
     load_sources_from_toml,
@@ -20,6 +20,7 @@ from keenbench.freshstream.feeds import (
 async def test_fetch_all_sources_rejects_zero_concurrency():
     with pytest.raises(ValueError):
         await fetch_all_sources((), concurrency=0)
+
 
 ENTITY_BOMB = (
     '<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x "y">]>'

@@ -25,9 +25,7 @@ class SeedSource:
 
 def _sources_from_data(data: dict[str, Any]) -> tuple[SeedSource, ...]:
     return tuple(
-        SeedSource(
-            url=s["url"], source_kind=s["source_kind"], topical_domain=s["topical_domain"]
-        )
+        SeedSource(url=s["url"], source_kind=s["source_kind"], topical_domain=s["topical_domain"])
         for s in data.get("source", [])
     )
 
@@ -97,7 +95,9 @@ async def _fetch_text(client: httpx.AsyncClient, url: str) -> _FetchOutcome:
     try:
         r = await client.get(url, headers={"User-Agent": USER_AGENT}, follow_redirects=True)
     except (httpx.HTTPError, httpx.InvalidURL) as exc:
-        return _FetchOutcome(text=None, http_status=-1, fetch_error_class=_classify_httpx_error(exc))
+        return _FetchOutcome(
+            text=None, http_status=-1, fetch_error_class=_classify_httpx_error(exc)
+        )
     if r.status_code != 200:
         return _FetchOutcome(text=None, http_status=r.status_code, fetch_error_class="http_error")
     return _FetchOutcome(text=r.text, http_status=200, fetch_error_class=None)
@@ -118,7 +118,8 @@ def _parse_feed(root: Element) -> list[dict[str, str | None]]:
                 "title": _text_of(item.find("title")),
                 "summary": _text_of(item.find("description")),
                 "url": _text_of(item.find("link")),
-                "published_at": _text_of(item.find("pubDate")) or _text_of(item.find("dc:date", NS)),
+                "published_at": _text_of(item.find("pubDate"))
+                or _text_of(item.find("dc:date", NS)),
             }
         )
 
