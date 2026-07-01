@@ -29,21 +29,31 @@ class Freshstream:
         if not api_key:
             raise SystemExit("error: OPENROUTER_API_KEY is not set")
 
-        model = llm_model or os.environ.get("KEENBENCH_LLM_MODEL", DEFAULT_MODEL)
-        sources = load_sources_from_toml(feeds) if feeds else SEED_SOURCES
+        model = llm_model or os.environ.get("KEENBENCH_LLM_MODEL") or DEFAULT_MODEL
+        if feeds:
+            try:
+                sources = load_sources_from_toml(feeds)
+            except (OSError, ValueError, KeyError) as exc:
+                raise SystemExit(f"error: could not load --feeds {feeds!r}: {exc}")
+        else:
+            sources = SEED_SOURCES
         llm = OpenRouterClient(api_key=api_key, model=model)
         hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
 
-        rows, stats = asyncio.run(
-            run_rss(
-                sources,
-                llm,
-                hour_ts=hour_ts,
-                fetch_concurrency=fetch_concurrency,
-                llm_concurrency=llm_concurrency,
-                max_rows_per_source=max_rows_per_source,
-            )
-        )
+        async def _go():
+            try:
+                return await run_rss(
+                    sources,
+                    llm,
+                    hour_ts=hour_ts,
+                    fetch_concurrency=fetch_concurrency,
+                    llm_concurrency=llm_concurrency,
+                    max_rows_per_source=max_rows_per_source,
+                )
+            finally:
+                await llm.aclose()
+
+        rows, stats = asyncio.run(_go())
 
         records = [r.to_dict() for r in rows]
         if out == "-":

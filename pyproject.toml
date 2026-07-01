@@ -13,12 +13,6 @@ dependencies = [
     "fire>=0.6",
 ]
 
-[project.optional-dependencies]
-# --- freshstream: Google Trends providers (second increment) ---
-trends-pytrends = ["pytrends>=4.9"]
-# --- freshstream: fuzzy topic/query dedup used by the Trends path ---
-dedup = ["rapidfuzz>=3.0"]
-
 [project.scripts]
 keenbench = "keenbench.cli:main"
 

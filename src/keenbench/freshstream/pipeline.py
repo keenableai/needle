@@ -20,6 +20,11 @@ class RunStats:
     feed_health: list[dict[str, Any]] = field(default_factory=list)
 
 
+def _fetch_anchor(items: list[dict[str, Any]]) -> datetime:
+    times = [i["observed_at"] for i in items if i.get("observed_at")]
+    return max(times) if times else datetime.now(UTC)
+
+
 def _rss_provenance(record: dict[str, Any]) -> dict[str, Any]:
     return {
         "producer": "rss_queries",
@@ -41,11 +46,11 @@ async def run_rss(
     llm_concurrency: int = 8,
     max_rows_per_source: int = 50,
 ) -> tuple[list[QueryRow], RunStats]:
-    now = now or datetime.now(UTC)
     items, health = await fetch_all_sources(
         sources, max_rows_per_source=max_rows_per_source, concurrency=fetch_concurrency
     )
-    candidates = pick_per_feed(items, now=now)
+    anchor = now if now is not None else _fetch_anchor(items)
+    candidates = pick_per_feed(items, now=anchor)
     projections = await project_all(llm, candidates, concurrency=llm_concurrency)
 
     rows: list[QueryRow] = []

@@ -13,7 +13,7 @@ under the `keenbench` package, exposed as a `keenbench <benchmark>` subcommand.
 Uses [uv](https://docs.astral.sh/uv/).
 
 ```bash
-uv sync --all-extras
+uv sync
 ```
 
 ## freshstream
@@ -99,7 +99,7 @@ method satisfies the `LLMClient` protocol.
 ## Development
 
 ```bash
-uv sync --all-extras
+uv sync
 uv run pytest              # unit tests are deterministic and need no network
 ```
 

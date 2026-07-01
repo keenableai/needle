@@ -65,7 +65,10 @@ async def project_all(
         r: dict[str, Any],
     ) -> tuple[dict[str, Any], str | None, dict[str, str] | None]:
         async with sem:
-            text, err = await project_one(llm, r)
+            try:
+                text, err = await project_one(llm, r)
+            except Exception as exc:
+                return r, None, {"error_type": "projection_crash", "error_message": str(exc)[:500]}
             return r, text, err
 
     return list(await asyncio.gather(*[_one(r) for r in records]))
