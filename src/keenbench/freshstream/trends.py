@@ -23,6 +23,7 @@ class NewsItem:
 class Trend:
     topic: str
     approx_traffic: str | None
+    pub_date: str | None
     news_items: tuple[NewsItem, ...]
 
 
@@ -49,6 +50,7 @@ def parse_trends(xml: str) -> list[Trend]:
             Trend(
                 topic=topic,
                 approx_traffic=_text_of(item.find("ht:approx_traffic", HT_NS)),
+                pub_date=_text_of(item.find("pubDate")),
                 news_items=tuple(news),
             )
         )

@@ -7,6 +7,11 @@ from keenbench.freshstream.pipeline import run_trends
 from keenbench.freshstream.projection import build_trend_prompt
 from keenbench.freshstream.trends import GoogleTrendsRssProvider, NewsItem, Trend, parse_trends
 
+NOW = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
+FRESH_PUB = "2026-07-01T13:30:00+00:00"
+STALE_PUB = "2026-06-25T00:00:00+00:00"
+FUTURE_PUB = "2026-07-05T00:00:00+00:00"
+
 SAMPLE = """<?xml version="1.0" encoding="UTF-8"?>
 <rss xmlns:ht="https://trends.google.com/trending/rss" version="2.0"><channel>
 <item>
@@ -49,13 +54,16 @@ def test_parse_trends():
     assert len(t.news_items) == 1
     assert t.news_items[0].title == "Vucevic reuniting with Magic on 1-year deal"
     assert t.news_items[0].source == "ESPN"
+    assert t.pub_date == "Wed, 1 Jul 2026 08:20:00 -0700"
     assert trends[1].news_items == ()
+    assert trends[1].pub_date is None
 
 
 def test_build_trend_prompt_has_topic_and_news():
     trend = Trend(
         topic="nikola vucevic",
         approx_traffic="500+",
+        pub_date=FRESH_PUB,
         news_items=(NewsItem(title="Vucevic to Magic", url="u", source="ESPN"),),
     )
     prompt = build_trend_prompt(trend, today="2026-07-01")
@@ -66,12 +74,12 @@ def test_build_trend_prompt_has_topic_and_news():
 
 async def test_run_trends_end_to_end():
     trends = [
-        Trend("vucevic", "500+", (NewsItem("Vucevic to Magic", "u", "ESPN"),)),
-        Trend("evergreen", "200+", ()),
+        Trend("vucevic", "500+", FRESH_PUB, (NewsItem("Vucevic to Magic", "u", "ESPN"),)),
+        Trend("evergreen", "200+", FRESH_PUB, ()),
     ]
-    llm = FakeLLM()
-    hour_ts = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
-    rows, stats = await run_trends(FakeProvider(trends), llm, hour_ts=hour_ts, llm_concurrency=2)
+    rows, stats = await run_trends(
+        FakeProvider(trends), FakeLLM(), hour_ts=NOW, now=NOW, llm_concurrency=2
+    )
 
     assert stats.candidates == 2
     assert stats.projected == 1
@@ -84,13 +92,30 @@ async def test_run_trends_end_to_end():
     assert origin["subcategory"] == "google_trends"
     assert origin["provenance"]["producer"] == "trends_queries"
     assert origin["provenance"]["topic"] == "vucevic"
+    assert origin["provenance"]["pub_date"] == FRESH_PUB
     assert json.loads(json.dumps(row.to_dict()))["query_origin"]["bucket"] == "trending"
 
 
+async def test_run_trends_drops_stale_future_and_undated():
+    news = (NewsItem("vucevic", "u", "ESPN"),)
+    trends = [
+        Trend("fresh", "1", FRESH_PUB, news),
+        Trend("stale", "1", STALE_PUB, news),
+        Trend("future", "1", FUTURE_PUB, news),
+        Trend("undated", "1", None, news),
+    ]
+    rows, stats = await run_trends(FakeProvider(trends), FakeLLM(), hour_ts=NOW, now=NOW)
+    assert stats.candidates == 1
+    assert stats.projected == 1
+    assert rows[0].query_origin["provenance"]["topic"] == "fresh"
+
+
 async def test_run_trends_respects_max_trends():
-    trends = [Trend(f"t{i}", None, (NewsItem("vucevic", "u", "ESPN"),)) for i in range(5)]
+    trends = [
+        Trend(f"t{i}", None, FRESH_PUB, (NewsItem("vucevic", "u", "ESPN"),)) for i in range(5)
+    ]
     rows, stats = await run_trends(
-        FakeProvider(trends), FakeLLM(), hour_ts=datetime(2026, 7, 1, tzinfo=UTC), max_trends=2
+        FakeProvider(trends), FakeLLM(), hour_ts=NOW, now=NOW, max_trends=2
     )
     assert stats.candidates == 2
 

@@ -1,9 +1,14 @@
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from keenbench.freshstream.feeds import SeedSource, fetch_all_sources, pick_per_feed
+from keenbench.freshstream.feeds import (
+    SeedSource,
+    fetch_all_sources,
+    parse_published_date,
+    pick_per_feed,
+)
 from keenbench.freshstream.models import QueryRow, build_query_row
 from keenbench.freshstream.projection import (
     build_projection_prompt,
@@ -82,11 +87,23 @@ def _collect_rows(
     return rows, llm_errors, no_news_event, duplicates
 
 
+TRENDS_MAX_AGE = timedelta(hours=24)
+
+
+def _trend_is_fresh(trend: Any, *, now: datetime, max_age: timedelta) -> bool:
+    dt = parse_published_date(trend.pub_date)
+    if dt is None:
+        return False
+    age = (now - dt).total_seconds()
+    return 0 <= age <= max_age.total_seconds()
+
+
 def _trend_provenance(trend: Any) -> dict[str, Any]:
     return {
         "producer": "trends_queries",
         "topic": trend.topic,
         "approx_traffic": trend.approx_traffic,
+        "pub_date": trend.pub_date,
         "news_items": [
             {"title": n.title, "url": n.url, "source": n.source} for n in trend.news_items[:5]
         ],
@@ -134,10 +151,13 @@ async def run_trends(
     llm: LLMClient,
     *,
     hour_ts: datetime,
+    now: datetime | None = None,
+    max_age: timedelta = TRENDS_MAX_AGE,
     max_trends: int = 0,
     llm_concurrency: int = 8,
 ) -> tuple[list[QueryRow], RunStats]:
-    trends = await provider.fetch()
+    now = now or datetime.now(UTC)
+    trends = [t for t in await provider.fetch() if _trend_is_fresh(t, now=now, max_age=max_age)]
     if max_trends > 0:
         trends = trends[:max_trends]
     today = hour_ts.strftime("%Y-%m-%d")
