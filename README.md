@@ -110,8 +110,8 @@ never raises). Shipped engines:
 
 | Client | Endpoint | Key |
 | --- | --- | --- |
-| `KeenableClient` | `https://api.keenable.ai/v1/search` (public) | `X-API-Key` (optional — public rate limits without it) |
-| `ExaClient` | `https://api.exa.ai/search` | `x-api-key` (required) |
+| `KeenableClient` | `POST /v1/search/public` when keyless, `POST /v1/search` with a key | `X-API-Key` (optional — the keyless endpoint is rate-limited) |
+| `ExaClient` | `POST https://api.exa.ai/search` | `x-api-key` (required) |
 
 ```python
 import asyncio

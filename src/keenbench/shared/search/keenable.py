@@ -10,6 +10,7 @@ class KeenableClient(HttpSearchClient):
         api_key: str | None = None,
         base_url: str = "https://api.keenable.ai",
         mode: str = "pro",
+        app_title: str = "keenbench",
         timeout_s: float = 30.0,
         max_concurrency: int = 8,
     ) -> None:
@@ -17,14 +18,20 @@ class KeenableClient(HttpSearchClient):
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.mode = mode
+        self.app_title = app_title
 
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
-        headers = {"X-API-Key": self.api_key} if self.api_key else {}
+        headers = {"X-Keenable-Title": self.app_title}
+        if self.api_key:
+            path = "/v1/search"
+            headers["X-API-Key"] = self.api_key
+        else:
+            path = "/v1/search/public"
         payload, err = await self._request_json(
             "POST",
-            f"{self.base_url}/v1/search",
+            f"{self.base_url}{path}",
             json={"query": query, "mode": self.mode},
             headers=headers,
         )
