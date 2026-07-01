@@ -15,7 +15,8 @@ T = TypeVar("T")
 def clean_projection(text: str | None) -> str | None:
     if not text:
         return None
-    cleaned = text.strip().splitlines()[0].strip(" \"'")
+    lines = text.strip().splitlines()
+    cleaned = lines[0].strip(" \"'") if lines else ""
     if not cleaned or cleaned.upper() == "NO_NEWS_EVENT":
         return None
     return cleaned

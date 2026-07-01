@@ -4,6 +4,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from keenbench.freshstream.feeds import (
+    FUTURE_SKEW_TOLERANCE,
     SeedSource,
     fetch_all_sources,
     parse_published_date,
@@ -95,7 +96,7 @@ def _trend_is_fresh(trend: Any, *, now: datetime, max_age: timedelta) -> bool:
     if dt is None:
         return False
     age = (now - dt).total_seconds()
-    return 0 <= age <= max_age.total_seconds()
+    return -FUTURE_SKEW_TOLERANCE.total_seconds() <= age <= max_age.total_seconds()
 
 
 def _trend_provenance(trend: Any) -> dict[str, Any]:

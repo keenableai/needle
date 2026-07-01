@@ -32,6 +32,7 @@ def test_clean_projection():
     assert clean_projection("NO_NEWS_EVENT") is None
     assert clean_projection("no news event blackout 2026") == "no news event blackout 2026"
     assert clean_projection(None) is None
+    assert clean_projection("  \n  ") is None
 
 
 async def test_project_batch_cleans_and_passes_errors():

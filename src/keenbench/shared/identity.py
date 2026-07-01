@@ -1,7 +1,7 @@
 import hashlib
 import re
 import unicodedata
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 def canonicalize(text: str) -> str:
@@ -18,4 +18,8 @@ def query_hash(text: str) -> str:
 
 
 def query_id(text: str, *, hour_ts: datetime) -> str:
+    # The hour label drops the offset, so normalize to UTC first; naive datetimes
+    # are assumed to already be UTC.
+    if hour_ts.tzinfo is not None:
+        hour_ts = hour_ts.astimezone(UTC)
     return f"{query_hash(text)}_{hour_ts:%Y-%m-%dT%H}"

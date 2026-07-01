@@ -34,7 +34,7 @@ def sample_stratified(
 
     by_domain: dict[str, list[dict[str, Any]]] = {}
     for r in records:
-        by_domain.setdefault(r[key], []).append(r)
+        by_domain.setdefault(str(r.get(key) or ""), []).append(r)
 
     for d, rs in by_domain.items():
         domain_seed = seed ^ int.from_bytes(hashlib.sha256(d.encode()).digest()[:8], "big")

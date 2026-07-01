@@ -22,6 +22,11 @@ async def test_fetch_all_sources_rejects_zero_concurrency():
         await fetch_all_sources((), concurrency=0)
 
 
+async def test_fetch_all_sources_rejects_zero_max_rows():
+    with pytest.raises(ValueError):
+        await fetch_all_sources((), max_rows_per_source=0)
+
+
 ENTITY_BOMB = (
     '<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x "y">]>'
     "<rss><channel><item><title>&x;</title></item></channel></rss>"
@@ -52,6 +57,34 @@ def test_parse_atom_entries():
     entries = _parse_feed(ET.fromstring(ATOM))
     assert entries[0]["title"] == "Gamma"
     assert entries[0]["url"] == "https://ex.com/g"
+
+
+def test_parse_atom_link_prefers_alternate():
+    atom = """<?xml version="1.0"?>
+    <feed xmlns="http://www.w3.org/2005/Atom">
+      <entry><title>T</title>
+        <link rel="self" href="https://ex.com/entry.atom"/>
+        <link rel="alternate" href="https://ex.com/article"/>
+      </entry>
+    </feed>"""
+    entries = _parse_feed(ET.fromstring(atom))
+    assert entries[0]["url"] == "https://ex.com/article"
+
+
+def test_parse_rss1_rdf_items():
+    rdf = """<?xml version="1.0"?>
+    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+             xmlns="http://purl.org/rss/1.0/"
+             xmlns:dc="http://purl.org/dc/elements/1.1/">
+      <item rdf:about="https://ex.com/p">
+        <title>Paper</title><link>https://ex.com/p</link>
+        <description>abs</description><dc:date>2026-07-01T13:00:00Z</dc:date>
+      </item>
+    </rdf:RDF>"""
+    entries = _parse_feed(ET.fromstring(rdf))
+    assert entries[0]["title"] == "Paper"
+    assert entries[0]["url"] == "https://ex.com/p"
+    assert entries[0]["published_at"] == "2026-07-01T13:00:00Z"
 
 
 def test_parse_published_date_rss_and_iso():
@@ -115,6 +148,66 @@ def test_seed_sources_are_well_formed():
     for s in SEED_SOURCES:
         assert s.url.startswith("http")
         assert s.source_kind in kinds
+
+
+def _rfc822(dt):
+    return dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+
+async def test_fetch_one_drops_undated_items_so_they_cannot_crowd_out_fresh(monkeypatch):
+    fresh = _rfc822(datetime.now(UTC) - timedelta(minutes=5))
+    xml = (
+        "<rss><channel>"
+        "<item><title>undated1</title><link>https://x/1</link></item>"
+        "<item><title>undated2</title><link>https://x/2</link></item>"
+        f"<item><title>fresh</title><link>https://x/f</link><pubDate>{fresh}</pubDate></item>"
+        "</channel></rss>"
+    )
+
+    async def fake_fetch_text(client, url):
+        return _FetchOutcome(text=xml, http_status=200, fetch_error_class=None)
+
+    monkeypatch.setattr(feeds_mod, "_fetch_text", fake_fetch_text)
+    src = SeedSource("https://ex.com/feed", "rss_news", "tech")
+    items, health = await _fetch_one(None, src, max_rows_per_source=2)
+    assert [i["title"] for i in items] == ["fresh"]
+    assert health["items_total"] == 3
+
+
+async def test_fetch_one_tolerates_small_future_skew(monkeypatch):
+    now = datetime.now(UTC)
+    skewed = _rfc822(now + timedelta(seconds=30))
+    far_future = _rfc822(now + timedelta(hours=1))
+    xml = (
+        "<rss><channel>"
+        f"<item><title>skewed</title><link>https://x/s</link><pubDate>{skewed}</pubDate></item>"
+        f"<item><title>far</title><link>https://x/z</link><pubDate>{far_future}</pubDate></item>"
+        "</channel></rss>"
+    )
+
+    async def fake_fetch_text(client, url):
+        return _FetchOutcome(text=xml, http_status=200, fetch_error_class=None)
+
+    monkeypatch.setattr(feeds_mod, "_fetch_text", fake_fetch_text)
+    src = SeedSource("https://ex.com/feed", "rss_news", "tech")
+    items, health = await _fetch_one(None, src, max_rows_per_source=10)
+    assert [i["title"] for i in items] == ["skewed"]
+    assert health["newest_item_age_minutes"] == 0.0
+    assert health["items_lt_1h"] == 1
+
+
+def test_pick_per_feed_tolerates_small_future_skew():
+    now = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
+    items = [
+        {
+            "parent_site": "https://ex.com/feed",
+            "source_kind": "rss_news",
+            "lastmod_or_pub_at": _rfc822(now + timedelta(seconds=30)),
+            "title": "skewed",
+        }
+    ]
+    picked = pick_per_feed(items, now=now)
+    assert [r["title"] for r in picked] == ["skewed"]
 
 
 async def test_fetch_one_handles_defused_parse_failure(monkeypatch):

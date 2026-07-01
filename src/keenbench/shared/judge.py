@@ -97,6 +97,20 @@ def build_judge_prompt(
     return _system_prompt() + "\n\n" + user
 
 
+def _parse_rating(raw: object) -> int | None:
+    # Strict on purpose: YAML `true` would int() to 1 and `3.7` would truncate to 3.
+    if isinstance(raw, bool):
+        return None
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, str):
+        try:
+            return int(raw.strip())
+        except ValueError:
+            return None
+    return None
+
+
 def parse_judgement(text: str | None) -> Judgement | None:
     if not text:
         return None
@@ -106,15 +120,12 @@ def parse_judgement(text: str | None) -> Judgement | None:
         return None
     if not isinstance(data, dict) or "rating" not in data:
         return None
-    try:
-        rating = int(data["rating"])
-    except (TypeError, ValueError):
+    rating = _parse_rating(data["rating"])
+    if rating is None or not 0 <= rating <= 4:
         return None
-    if not 0 <= rating <= 4:
-        return None
-    label = str(data.get("label") or _LABELS[rating])
     reasoning = str(data.get("reasoning") or "")
-    return Judgement(rating=rating, label=label, reasoning=reasoning)
+    # Derive the label from the rating; the model's own label can contradict it.
+    return Judgement(rating=rating, label=_LABELS[rating], reasoning=reasoning)
 
 
 async def judge_one(

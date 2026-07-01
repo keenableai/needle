@@ -63,7 +63,9 @@ class Rankeval:
         clients: dict[str, SearchClient] = {}
         for name in engine_names:
             if name == "keenable":
-                clients[name] = KeenableClient(mode=keenable_mode)
+                clients[name] = KeenableClient(
+                    api_key=os.environ.get("KEENABLE_API_KEY") or None, mode=keenable_mode
+                )
             elif name == "exa":
                 exa_key = os.environ.get("EXA_API_KEY")
                 if not exa_key:
@@ -107,7 +109,7 @@ class Rankeval:
         for name, e in report["engines"].items():
             print(
                 f"  {name:10s} RBP@5 = {e['mean_rbp_at_5']:.4f}  "
-                f"(max {e['rbp_max']:.3f}; {e['search_errors']} search errs, "
-                f"{e['judge_errors']} judge errs)",
+                f"({e['num_scored']}/{report['num_queries']} scored; max {e['rbp_max']:.3f}; "
+                f"{e['search_errors']} search errs, {e['judge_errors']} judge errs)",
                 file=sys.stderr,
             )

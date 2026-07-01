@@ -45,6 +45,18 @@ def test_parse_rejects_out_of_range_or_garbage():
     assert parse_judgement("reasoning: no rating here") is None
 
 
+def test_parse_corrects_mismatched_label():
+    j = parse_judgement("rating: 4\nlabel: FailsM\nreasoning: r")
+    assert j.rating == 4 and j.label == "FullyM"
+
+
+def test_parse_rejects_non_integer_ratings():
+    assert parse_judgement("rating: true\nlabel: HM") is None
+    assert parse_judgement("rating: 3.7\nlabel: HM") is None
+    j = parse_judgement('rating: "3"\nreasoning: r')
+    assert j is not None and j.rating == 3 and j.label == "HM"
+
+
 def test_build_user_message_and_content_cap():
     msg = build_user_message(
         "mayor of austin",

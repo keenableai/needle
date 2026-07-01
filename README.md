@@ -158,8 +158,14 @@ keenbench rankeval run --queries fresh.jsonl --limit 20 --engines keenable,exa -
 ```
 
 The keyless Keenable endpoint is burst-rate-limited, so `KeenableClient`
-defaults to low concurrency when used without a key; `--exa-concurrency`
+defaults to low concurrency when used without a key; set `$KEENABLE_API_KEY` to
+use the authenticated endpoint at higher concurrency. `--exa-concurrency`
 (default 4) throttles Exa in a run.
+
+Queries whose search failed or that have any missing judgement are excluded
+from `mean_rbp_at_5` (reported via `num_scored`, `search_errors`,
+`judge_errors`) rather than scored as zero, so transient API failures don't
+skew the engine comparison.
 
 **First numbers** (20 fresh RSS-derived queries, top-5, snippet-only judging,
 judge `gemini-3-flash-preview`): **Exa 0.578** vs **Keenable 0.503** (ceiling

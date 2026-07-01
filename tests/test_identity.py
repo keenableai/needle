@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta, timezone
 
 from keenbench.shared.identity import canonicalize, query_hash, query_id
 
@@ -16,3 +16,11 @@ def test_query_id_format():
     ts = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
     qid = query_id("lakers trade deadline", hour_ts=ts)
     assert qid == f"{query_hash('lakers trade deadline')}_2026-07-01T14"
+
+
+def test_query_id_normalizes_timezone():
+    utc = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
+    same_instant = utc.astimezone(timezone(timedelta(hours=2)))
+    assert query_id("q", hour_ts=same_instant) == query_id("q", hour_ts=utc)
+    naive_utc = datetime(2026, 7, 1, 14, 0)
+    assert query_id("q", hour_ts=naive_utc) == query_id("q", hour_ts=utc)

@@ -12,17 +12,32 @@ async def _score_query(
     query: str,
     results: list[SearchResult] | None,
     *,
+    search_error: dict[str, str] | None,
     today: str,
     k: int,
     sem: asyncio.Semaphore,
     max_content_chars: int,
 ) -> dict[str, Any]:
+    # rbp stays None (excluded from the mean) when the search failed or any
+    # judgement is missing — a defaulted rating of 0 would bias the comparison.
+    out: dict[str, Any] = {
+        "query": query,
+        "rbp": None,
+        "ratings": [],
+        "n_results": 0,
+        "judge_errors": 0,
+        "search_error": search_error,
+    }
+    if search_error is not None:
+        return out
     if not results:
-        return {"query": query, "rbp": 0.0, "ratings": [], "n_results": 0, "judge_errors": 0}
+        out["rbp"] = 0.0
+        return out
+    out["n_results"] = len(results)
 
-    async def judge_result(r: SearchResult) -> tuple[int, bool]:
+    async def judge_result(r: SearchResult) -> int | None:
         async with sem:
-            judgement, err = await judge_one(
+            judgement, _err = await judge_one(
                 judge,
                 query,
                 url=r.url,
@@ -32,17 +47,14 @@ async def _score_query(
                 today=today,
                 max_content_chars=max_content_chars,
             )
-        return (judgement.rating if judgement is not None else 0), (err is not None)
+        return judgement.rating if judgement is not None else None
 
-    judged = await asyncio.gather(*[judge_result(r) for r in results])
-    ratings = [rating for rating, _ in judged]
-    return {
-        "query": query,
-        "rbp": rbp_at_k(ratings, k=k),
-        "ratings": ratings,
-        "n_results": len(results),
-        "judge_errors": sum(1 for _, e in judged if e),
-    }
+    ratings = list(await asyncio.gather(*[judge_result(r) for r in results]))
+    out["ratings"] = ratings
+    out["judge_errors"] = sum(1 for r in ratings if r is None)
+    if out["judge_errors"] == 0:
+        out["rbp"] = rbp_at_k([r for r in ratings if r is not None], k=k)
+    return out
 
 
 async def run_rbp(
@@ -67,7 +79,8 @@ async def run_rbp(
                 _score_query(
                     judge,
                     q,
-                    results if err is None else None,
+                    results,
+                    search_error=err,
                     today=today,
                     k=k,
                     sem=sem,
@@ -76,11 +89,12 @@ async def run_rbp(
                 for q, (results, err) in zip(query_texts, searches, strict=True)
             ]
         )
-        mean_rbp = sum(pq["rbp"] for pq in per_query) / len(per_query) if per_query else 0.0
+        scored = [pq["rbp"] for pq in per_query if pq["rbp"] is not None]
         return name, {
-            "mean_rbp_at_5": mean_rbp,
+            "mean_rbp_at_5": sum(scored) / len(scored) if scored else 0.0,
             "rbp_max": RBP_MAX,
-            "search_errors": sum(1 for pq in per_query if pq["n_results"] == 0),
+            "num_scored": len(scored),
+            "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
             "judge_errors": sum(pq["judge_errors"] for pq in per_query),
             "per_query": per_query,
         }

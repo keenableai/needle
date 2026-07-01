@@ -43,12 +43,13 @@ SEED_SOURCES: tuple[SeedSource, ...] = _load_packaged_default()
 
 
 HTTP_TIMEOUT = httpx.Timeout(20.0, connect=10.0)
-USER_AGENT = "keenbench-freshstream/0.1 (+https://github.com/keenable/keenbench)"
+USER_AGENT = "keenbench-freshstream/0.1 (+https://github.com/keenableai/keenbench)"
 
 NS = {
     "atom": "http://www.w3.org/2005/Atom",
     "content": "http://purl.org/rss/1.0/modules/content/",
     "dc": "http://purl.org/dc/elements/1.1/",
+    "rss1": "http://purl.org/rss/1.0/",
 }
 
 RAW_MAX_AGE_DEFAULT = timedelta(hours=6)
@@ -56,6 +57,9 @@ RAW_MAX_AGE_BY_KIND: dict[str, timedelta] = {"rss_paper": timedelta(hours=168)}
 
 QUERY_MAX_AGE_DEFAULT = timedelta(hours=1)
 QUERY_MAX_AGE_BY_KIND: dict[str, timedelta] = {"rss_paper": timedelta(hours=168)}
+
+# Publisher clocks drift; items dated slightly in the future are the freshest, not garbage.
+FUTURE_SKEW_TOLERANCE = timedelta(minutes=5)
 
 HEALTH_WINDOWS: tuple[tuple[str, timedelta], ...] = (
     ("items_lt_1h", timedelta(hours=1)),
@@ -109,6 +113,14 @@ def _text_of(el: Element | None) -> str | None:
     return el.text.strip() or None
 
 
+def _atom_entry_link(entry: Element) -> str | None:
+    links = entry.findall("atom:link", NS)
+    for el in links:
+        if el.get("rel", "alternate") == "alternate":
+            return el.get("href")
+    return links[0].get("href") if links else None
+
+
 def _parse_feed(root: Element) -> list[dict[str, str | None]]:
     entries: list[dict[str, str | None]] = []
 
@@ -123,15 +135,24 @@ def _parse_feed(root: Element) -> list[dict[str, str | None]]:
             }
         )
 
+    # RSS 1.0 (RDF) puts items in their own namespace, so ".//item" misses them.
+    for item in root.findall(".//rss1:item", NS):
+        entries.append(
+            {
+                "title": _text_of(item.find("rss1:title", NS)),
+                "summary": _text_of(item.find("rss1:description", NS)),
+                "url": _text_of(item.find("rss1:link", NS)),
+                "published_at": _text_of(item.find("dc:date", NS)),
+            }
+        )
+
     for entry in root.findall("atom:entry", NS):
-        link_el = entry.find("atom:link", NS)
-        link = link_el.get("href") if link_el is not None else None
         entries.append(
             {
                 "title": _text_of(entry.find("atom:title", NS)),
                 "summary": _text_of(entry.find("atom:summary", NS))
                 or _text_of(entry.find("atom:content", NS)),
-                "url": link,
+                "url": _atom_entry_link(entry),
                 "published_at": _text_of(entry.find("atom:updated", NS))
                 or _text_of(entry.find("atom:published", NS)),
             }
@@ -215,11 +236,13 @@ async def _fetch_one(
     for e in parsed_items:
         dt = parse_published_date(e.get("published_at"))
         if dt is None:
-            recent_items.append(e)
+            # pick_per_feed can never select undated items; keeping them would
+            # only crowd dated ones out of the max_rows_per_source cut.
             continue
         age = (now - dt).total_seconds()
-        if age < 0:
+        if age < -FUTURE_SKEW_TOLERANCE.total_seconds():
             continue
+        age = max(age, 0.0)
         item_ages_seconds.append(age)
         if newest_age_seconds is None or age < newest_age_seconds:
             newest_age_seconds = age
@@ -257,6 +280,8 @@ async def fetch_all_sources(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     if concurrency < 1:
         raise ValueError("concurrency must be >= 1")
+    if max_rows_per_source < 1:
+        raise ValueError("max_rows_per_source must be >= 1")
     sem = asyncio.Semaphore(concurrency)
     async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
 
@@ -284,7 +309,10 @@ def pick_per_feed(items: list[dict[str, Any]], *, now: datetime) -> list[dict[st
         if dt is None:
             continue
         age = (now - dt).total_seconds()
-        if age < 0 or age > _query_max_age_for_kind(source_kind).total_seconds():
+        if age < -FUTURE_SKEW_TOLERANCE.total_seconds():
+            continue
+        age = max(age, 0.0)
+        if age > _query_max_age_for_kind(source_kind).total_seconds():
             continue
         parent = str(r.get("parent_site") or "")
         prev = by_feed.get(parent)
