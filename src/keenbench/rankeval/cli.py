@@ -64,7 +64,7 @@ class Rankeval:
         for name in engine_names:
             if name == "keenable":
                 clients[name] = KeenableClient(
-                    api_key=os.environ.get("KEENABLE_API_KEY") or None, mode=keenable_mode
+                    api_key=os.environ.get("KEENABLE_API_KEY"), mode=keenable_mode
                 )
             elif name == "exa":
                 exa_key = os.environ.get("EXA_API_KEY")

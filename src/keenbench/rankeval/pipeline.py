@@ -30,9 +30,7 @@ async def _score_query(
     }
     if search_error is not None:
         return out
-    if not results:
-        out["rbp"] = 0.0
-        return out
+    results = results or []
     out["n_results"] = len(results)
 
     async def judge_result(r: SearchResult) -> int | None:
@@ -49,11 +47,12 @@ async def _score_query(
             )
         return judgement.rating if judgement is not None else None
 
-    ratings = list(await asyncio.gather(*[judge_result(r) for r in results]))
+    ratings = await asyncio.gather(*[judge_result(r) for r in results])
+    rated = [r for r in ratings if r is not None]
     out["ratings"] = ratings
-    out["judge_errors"] = sum(1 for r in ratings if r is None)
-    if out["judge_errors"] == 0:
-        out["rbp"] = rbp_at_k([r for r in ratings if r is not None], k=k)
+    out["judge_errors"] = len(ratings) - len(rated)
+    if len(rated) == len(ratings):
+        out["rbp"] = rbp_at_k(rated, k=k)
     return out
 
 

@@ -32,6 +32,20 @@ ENTITY_BOMB = (
     "<rss><channel><item><title>&x;</title></item></channel></rss>"
 )
 
+
+def _rfc822(dt):
+    return dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+
+async def _run_fetch_one(monkeypatch, xml, *, max_rows=50):
+    async def fake_fetch_text(client, url):
+        return _FetchOutcome(text=xml, http_status=200, fetch_error_class=None)
+
+    monkeypatch.setattr(feeds_mod, "_fetch_text", fake_fetch_text)
+    src = SeedSource("https://ex.com/feed", "rss_news", "tech")
+    return await _fetch_one(None, src, max_rows_per_source=max_rows)
+
+
 RSS = """<?xml version="1.0"?>
 <rss version="2.0"><channel>
   <item><title>Alpha</title><description>d1</description>
@@ -117,7 +131,7 @@ def test_pick_per_feed_newest_within_window():
 
 def test_pick_per_feed_paper_window_is_wider():
     now = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
-    two_days_ago = (now - timedelta(hours=48)).strftime("%a, %d %b %Y %H:%M:%S GMT")
+    two_days_ago = _rfc822(now - timedelta(hours=48))
     items = [
         {
             "parent_site": "https://arxiv/feed",
@@ -150,10 +164,6 @@ def test_seed_sources_are_well_formed():
         assert s.source_kind in kinds
 
 
-def _rfc822(dt):
-    return dt.strftime("%a, %d %b %Y %H:%M:%S GMT")
-
-
 async def test_fetch_one_drops_undated_items_so_they_cannot_crowd_out_fresh(monkeypatch):
     fresh = _rfc822(datetime.now(UTC) - timedelta(minutes=5))
     xml = (
@@ -163,13 +173,7 @@ async def test_fetch_one_drops_undated_items_so_they_cannot_crowd_out_fresh(monk
         f"<item><title>fresh</title><link>https://x/f</link><pubDate>{fresh}</pubDate></item>"
         "</channel></rss>"
     )
-
-    async def fake_fetch_text(client, url):
-        return _FetchOutcome(text=xml, http_status=200, fetch_error_class=None)
-
-    monkeypatch.setattr(feeds_mod, "_fetch_text", fake_fetch_text)
-    src = SeedSource("https://ex.com/feed", "rss_news", "tech")
-    items, health = await _fetch_one(None, src, max_rows_per_source=2)
+    items, health = await _run_fetch_one(monkeypatch, xml, max_rows=2)
     assert [i["title"] for i in items] == ["fresh"]
     assert health["items_total"] == 3
 
@@ -184,13 +188,7 @@ async def test_fetch_one_tolerates_small_future_skew(monkeypatch):
         f"<item><title>far</title><link>https://x/z</link><pubDate>{far_future}</pubDate></item>"
         "</channel></rss>"
     )
-
-    async def fake_fetch_text(client, url):
-        return _FetchOutcome(text=xml, http_status=200, fetch_error_class=None)
-
-    monkeypatch.setattr(feeds_mod, "_fetch_text", fake_fetch_text)
-    src = SeedSource("https://ex.com/feed", "rss_news", "tech")
-    items, health = await _fetch_one(None, src, max_rows_per_source=10)
+    items, health = await _run_fetch_one(monkeypatch, xml)
     assert [i["title"] for i in items] == ["skewed"]
     assert health["newest_item_age_minutes"] == 0.0
     assert health["items_lt_1h"] == 1
@@ -211,12 +209,7 @@ def test_pick_per_feed_tolerates_small_future_skew():
 
 
 async def test_fetch_one_handles_defused_parse_failure(monkeypatch):
-    async def fake_fetch_text(client, url):
-        return _FetchOutcome(text=ENTITY_BOMB, http_status=200, fetch_error_class=None)
-
-    monkeypatch.setattr(feeds_mod, "_fetch_text", fake_fetch_text)
-    src = SeedSource("https://ex.com/feed", "rss_news", "tech")
-    items, health = await _fetch_one(None, src, max_rows_per_source=50)
+    items, health = await _run_fetch_one(monkeypatch, ENTITY_BOMB)
     assert items == []
     assert health["parse_ok"] is False
 

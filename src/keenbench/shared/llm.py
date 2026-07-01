@@ -92,7 +92,7 @@ class OpenRouterClient:
             content = choice["message"].get("content")
         except (KeyError, IndexError, TypeError):
             return None, {"error_type": "no_content", "error_message": "no choices in response"}
-        if isinstance(choice, dict) and choice.get("finish_reason") == "length":
+        if choice.get("finish_reason") == "length":
             return None, {
                 "error_type": "truncated",
                 "error_message": "response hit max_tokens before completing",

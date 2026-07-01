@@ -60,6 +60,7 @@ QUERY_MAX_AGE_BY_KIND: dict[str, timedelta] = {"rss_paper": timedelta(hours=168)
 
 # Publisher clocks drift; items dated slightly in the future are the freshest, not garbage.
 FUTURE_SKEW_TOLERANCE = timedelta(minutes=5)
+_FUTURE_SKEW_TOLERANCE_S = FUTURE_SKEW_TOLERANCE.total_seconds()
 
 HEALTH_WINDOWS: tuple[tuple[str, timedelta], ...] = (
     ("items_lt_1h", timedelta(hours=1)),
@@ -181,6 +182,17 @@ def parse_published_date(s: str | None) -> datetime | None:
         return None
 
 
+# None means undated or implausibly future-dated; tolerated skew clamps to age 0.
+def published_age_seconds(published_at: str | None, *, now: datetime) -> float | None:
+    dt = parse_published_date(published_at)
+    if dt is None:
+        return None
+    age = (now - dt).total_seconds()
+    if age < -_FUTURE_SKEW_TOLERANCE_S:
+        return None
+    return max(age, 0.0)
+
+
 def _raw_max_age_for_kind(source_kind: str) -> timedelta:
     return RAW_MAX_AGE_BY_KIND.get(source_kind, RAW_MAX_AGE_DEFAULT)
 
@@ -233,16 +245,12 @@ async def _fetch_one(
     item_ages_seconds: list[float] = []
     recent_items: list[dict[str, str | None]] = []
     newest_age_seconds: float | None = None
+    # Only dated, plausibly-timestamped items go on: undated ones can't be
+    # age-filtered and would crowd dated items out of the max_rows_per_source cut.
     for e in parsed_items:
-        dt = parse_published_date(e.get("published_at"))
-        if dt is None:
-            # pick_per_feed can never select undated items; keeping them would
-            # only crowd dated ones out of the max_rows_per_source cut.
+        age = published_age_seconds(e.get("published_at"), now=now)
+        if age is None:
             continue
-        age = (now - dt).total_seconds()
-        if age < -FUTURE_SKEW_TOLERANCE.total_seconds():
-            continue
-        age = max(age, 0.0)
         item_ages_seconds.append(age)
         if newest_age_seconds is None or age < newest_age_seconds:
             newest_age_seconds = age
@@ -305,14 +313,8 @@ def pick_per_feed(items: list[dict[str, Any]], *, now: datetime) -> list[dict[st
         source_kind = str(r.get("source_kind") or "")
         if source_kind not in RSS_KINDS:
             continue
-        dt = parse_published_date(r.get("lastmod_or_pub_at"))
-        if dt is None:
-            continue
-        age = (now - dt).total_seconds()
-        if age < -FUTURE_SKEW_TOLERANCE.total_seconds():
-            continue
-        age = max(age, 0.0)
-        if age > _query_max_age_for_kind(source_kind).total_seconds():
+        age = published_age_seconds(r.get("lastmod_or_pub_at"), now=now)
+        if age is None or age > _query_max_age_for_kind(source_kind).total_seconds():
             continue
         parent = str(r.get("parent_site") or "")
         prev = by_feed.get(parent)
