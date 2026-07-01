@@ -152,8 +152,9 @@ keenbench freshstream run --out fresh.jsonl
 keenbench rankeval run --queries fresh.jsonl --limit 20 --engines keenable,exa --out rbp.json
 ```
 
-The keyless Keenable endpoint is burst-rate-limited, so the CLI throttles it
-(`--keenable-concurrency`, default 2; `--exa-concurrency`, default 4).
+The keyless Keenable endpoint is burst-rate-limited, so `KeenableClient`
+defaults to low concurrency when used without a key; `--exa-concurrency`
+(default 4) throttles Exa in a run.
 
 **First numbers** (20 fresh RSS-derived queries, top-5, snippet-only judging,
 judge `gemini-3-flash-preview`): **Exa 0.578** vs **Keenable 0.503** (ceiling

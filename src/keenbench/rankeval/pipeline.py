@@ -7,50 +7,34 @@ from keenbench.shared.metrics import RBP_K, RBP_MAX, rbp_at_k
 from keenbench.shared.search import SearchClient, SearchResult
 
 
-async def _judge_result(
-    judge: LLMClient,
-    query: str,
-    result: SearchResult,
-    *,
-    today: str,
-    sem: asyncio.Semaphore,
-    max_content_chars: int,
-) -> tuple[int, bool]:
-    async with sem:
-        judgement, err = await judge_one(
-            judge,
-            query,
-            url=result.url,
-            title=result.title,
-            published=result.published_date,
-            content=result.snippet,
-            today=today,
-            max_content_chars=max_content_chars,
-        )
-    return (judgement.rating if judgement is not None else 0), (err is not None)
-
-
 async def _score_query(
     judge: LLMClient,
     query: str,
     results: list[SearchResult] | None,
-    search_error: dict[str, str] | None,
     *,
     today: str,
     k: int,
     sem: asyncio.Semaphore,
     max_content_chars: int,
 ) -> dict[str, Any]:
-    if search_error is not None or not results:
-        return {"query": query, "rbp": 0.0, "ratings": [], "n_results": 0, "search_error": True}
-    judged = await asyncio.gather(
-        *[
-            _judge_result(
-                judge, query, r, today=today, sem=sem, max_content_chars=max_content_chars
+    if not results:
+        return {"query": query, "rbp": 0.0, "ratings": [], "n_results": 0, "judge_errors": 0}
+
+    async def judge_result(r: SearchResult) -> tuple[int, bool]:
+        async with sem:
+            judgement, err = await judge_one(
+                judge,
+                query,
+                url=r.url,
+                title=r.title,
+                published=r.published_date,
+                content=r.snippet,
+                today=today,
+                max_content_chars=max_content_chars,
             )
-            for r in results
-        ]
-    )
+        return (judgement.rating if judgement is not None else 0), (err is not None)
+
+    judged = await asyncio.gather(*[judge_result(r) for r in results])
     ratings = [rating for rating, _ in judged]
     return {
         "query": query,
@@ -58,7 +42,6 @@ async def _score_query(
         "ratings": ratings,
         "n_results": len(results),
         "judge_errors": sum(1 for _, e in judged if e),
-        "search_error": False,
     }
 
 
@@ -74,10 +57,11 @@ async def run_rbp(
     max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
 ) -> dict[str, Any]:
     """Search each query on each engine, judge the top ``num_results`` with the
-    no-descriptor Needs-Met judge, and return per-engine mean RBP@k."""
+    no-descriptor Needs-Met judge, and return per-engine mean RBP@k. Engines run
+    concurrently; the shared judge semaphore caps total in-flight judge calls."""
     sem = asyncio.Semaphore(judge_concurrency)
-    engines_out: dict[str, Any] = {}
-    for name, client in engines.items():
+
+    async def run_engine(name: str, client: SearchClient) -> tuple[str, dict[str, Any]]:
         searches = await asyncio.gather(
             *[client.search(q, num_results=num_results) for q in query_texts]
         )
@@ -86,8 +70,7 @@ async def run_rbp(
                 _score_query(
                     judge,
                     q,
-                    results,
-                    err,
+                    results if err is None else None,
                     today=today,
                     k=k,
                     sem=sem,
@@ -97,11 +80,17 @@ async def run_rbp(
             ]
         )
         mean_rbp = sum(pq["rbp"] for pq in per_query) / len(per_query) if per_query else 0.0
-        engines_out[name] = {
+        return name, {
             "mean_rbp_at_5": mean_rbp,
             "rbp_max": RBP_MAX,
-            "search_errors": sum(1 for pq in per_query if pq["search_error"]),
-            "judge_errors": sum(pq.get("judge_errors", 0) for pq in per_query),
+            "search_errors": sum(1 for pq in per_query if pq["n_results"] == 0),
+            "judge_errors": sum(pq["judge_errors"] for pq in per_query),
             "per_query": per_query,
         }
-    return {"num_queries": len(query_texts), "num_results": num_results, "engines": engines_out}
+
+    engines_out = await asyncio.gather(*[run_engine(n, c) for n, c in engines.items()])
+    return {
+        "num_queries": len(query_texts),
+        "num_results": num_results,
+        "engines": dict(engines_out),
+    }

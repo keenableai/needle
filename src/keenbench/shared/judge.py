@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Any
+from functools import cache
 
 import yaml
 
@@ -53,9 +53,32 @@ def build_user_message(
     return "\n".join(lines) + "\n"
 
 
-def build_judge_prompt(query: str, **doc: Any) -> str:
-    system = render_prompt("keenbench.shared", JUDGE_TEMPLATE)
-    return system + "\n\n" + build_user_message(query, **doc)
+@cache
+def _system_prompt() -> str:
+    # Static (no template vars) — render once, reuse for every judgement.
+    return render_prompt("keenbench.shared", JUDGE_TEMPLATE)
+
+
+def build_judge_prompt(
+    query: str,
+    *,
+    url: str,
+    title: str | None = None,
+    published: str | None = None,
+    content: str | None = None,
+    today: str,
+    max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
+) -> str:
+    user = build_user_message(
+        query,
+        url=url,
+        title=title,
+        published=published,
+        content=content,
+        today=today,
+        max_content_chars=max_content_chars,
+    )
+    return _system_prompt() + "\n\n" + user
 
 
 def parse_judgement(text: str | None) -> Judgement | None:

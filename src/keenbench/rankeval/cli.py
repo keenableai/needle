@@ -37,11 +37,10 @@ class Rankeval:
         self,
         queries: str,
         out: str = "-",
-        engines: str = "keenable,exa",
+        engines: str | tuple[str, ...] = "keenable,exa",
         num_results: int = 5,
         judge_model: str | None = None,
         keenable_mode: str = "pro",
-        keenable_concurrency: int = 2,
         exa_concurrency: int = 4,
         limit: int = 0,
         judge_concurrency: int = 8,
@@ -65,9 +64,7 @@ class Rankeval:
         clients: dict[str, SearchClient] = {}
         for name in engine_names:
             if name == "keenable":
-                clients[name] = KeenableClient(
-                    mode=keenable_mode, max_concurrency=keenable_concurrency
-                )
+                clients[name] = KeenableClient(mode=keenable_mode)
             elif name == "exa":
                 exa_key = os.environ.get("EXA_API_KEY")
                 if not exa_key:

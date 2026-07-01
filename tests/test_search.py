@@ -111,6 +111,12 @@ def test_rejects_zero_max_concurrency():
         KeenableClient(max_concurrency=0)
 
 
+def test_keenable_keyless_defaults_to_low_concurrency():
+    assert KeenableClient()._sem._value == 2
+    assert KeenableClient(api_key="k")._sem._value == 8
+    assert KeenableClient(max_concurrency=5)._sem._value == 5
+
+
 async def test_max_concurrency_caps_in_flight(monkeypatch):
     active = 0
     peak = 0
