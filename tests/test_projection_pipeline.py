@@ -4,18 +4,22 @@ import pytest
 
 from keenbench.freshstream.models import build_query_row
 from keenbench.freshstream.pipeline import _rss_provenance
-from keenbench.freshstream.projection import build_projection_prompt, project_all, project_one
+from keenbench.freshstream.projection import (
+    build_projection_prompt,
+    clean_projection,
+    project_batch,
+)
 from keenbench.shared.sampling import sample_stratified
 
 TODAY = "2026-07-01"
 
 
 class FakeLLM:
-    def __init__(self, replies):
-        self._replies = list(replies)
+    def __init__(self, reply):
+        self._reply = reply
 
     async def complete(self, prompt, *, max_tokens, reasoning_effort):
-        return self._replies.pop(0)
+        return self._reply
 
 
 class BoomLLM:
@@ -23,49 +27,39 @@ class BoomLLM:
         raise RuntimeError("boom")
 
 
-async def test_project_one_cleans_query():
-    llm = FakeLLM([('  "Lakers trade deadline"\nextra line ', None)])
-    query, err = await project_one(llm, {"title": "t"}, today=TODAY)
-    assert query == "Lakers trade deadline"
-    assert err is None
+def test_clean_projection():
+    assert clean_projection('  "Lakers trade deadline"\nextra line ') == "Lakers trade deadline"
+    assert clean_projection("NO_NEWS_EVENT") is None
+    assert clean_projection("no news event blackout 2026") == "no news event blackout 2026"
+    assert clean_projection(None) is None
 
 
-async def test_project_one_no_news_event_is_not_error():
-    llm = FakeLLM([("NO_NEWS_EVENT", None)])
-    query, err = await project_one(llm, {"title": "t"}, today=TODAY)
-    assert query is None and err is None
+async def test_project_batch_cleans_and_passes_errors():
+    llm = FakeLLM(("  query one  ", None))
+    out = await project_batch(llm, [{"title": "a"}], build_projection_prompt_today, concurrency=1)
+    item, query, err = out[0]
+    assert item == {"title": "a"} and query == "query one" and err is None
+
+    errllm = FakeLLM((None, {"error_type": "http_error", "error_message": "500"}))
+    _, query, err = (await project_batch(errllm, [{"title": "a"}], build_projection_prompt_today))[
+        0
+    ]
+    assert query is None and err["error_type"] == "http_error"
 
 
-async def test_project_one_keeps_query_containing_sentinel_substring():
-    llm = FakeLLM([("no news event blackout 2026", None)])
-    query, err = await project_one(llm, {"title": "t"}, today=TODAY)
-    assert query == "no news event blackout 2026"
-    assert err is None
+async def test_project_batch_preserves_items_and_survives_crash():
+    out = await project_batch(BoomLLM(), [{"title": "a"}], build_projection_prompt_today)
+    item, text, err = out[0]
+    assert item == {"title": "a"} and text is None and err["error_type"] == "projection_crash"
 
 
-async def test_project_one_error_passthrough():
-    llm = FakeLLM([(None, {"error_type": "http_error", "error_message": "500"})])
-    query, err = await project_one(llm, {"title": "t"}, today=TODAY)
-    assert query is None and err == {"error_type": "http_error", "error_message": "500"}
-
-
-async def test_project_all_preserves_records():
-    llm = FakeLLM([("query one", None), ("NO_NEWS_EVENT", None)])
-    recs = [{"title": "a"}, {"title": "b"}]
-    out = await project_all(llm, recs, today=TODAY, concurrency=2)
-    assert {r["title"] for r, _, _ in out} == {"a", "b"}
-
-
-async def test_project_all_survives_a_crashing_projection():
-    out = await project_all(BoomLLM(), [{"title": "a"}], today=TODAY, concurrency=1)
-    record, text, err = out[0]
-    assert text is None
-    assert err["error_type"] == "projection_crash"
-
-
-async def test_project_all_rejects_zero_concurrency():
+async def test_project_batch_rejects_zero_concurrency():
     with pytest.raises(ValueError):
-        await project_all(FakeLLM([]), [], today=TODAY, concurrency=0)
+        await project_batch(FakeLLM((None, None)), [], build_projection_prompt_today, concurrency=0)
+
+
+def build_projection_prompt_today(record):
+    return build_projection_prompt(record, today=TODAY)
 
 
 def test_build_projection_prompt_uses_explicit_today():
@@ -94,7 +88,7 @@ async def test_run_rss_end_to_end(monkeypatch):
 
     monkeypatch.setattr(pipeline, "fetch_all_sources", fake_fetch)
 
-    llm = FakeLLM([("acme thing launch", None)])
+    llm = FakeLLM(("acme thing launch", None))
     hour_ts = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
     rows, stats = await pipeline.run_rss((), llm, hour_ts=hour_ts, llm_concurrency=1)
 

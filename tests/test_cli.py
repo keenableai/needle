@@ -6,7 +6,17 @@ from keenbench.shared.llm import OpenRouterClient, _content_to_text
 
 def test_run_rejects_unsupported_source():
     with pytest.raises(SystemExit):
-        Freshstream().run(source="trending")
+        Freshstream().run(source="bogus")
+
+
+def test_trending_rejects_rss_only_flags():
+    with pytest.raises(SystemExit):
+        Freshstream().run(source="trending", feeds="x.toml")
+
+
+def test_rss_rejects_trends_only_flags():
+    with pytest.raises(SystemExit):
+        Freshstream().run(source="rss", max_trends=5)
 
 
 def test_run_rejects_bad_feeds_file(tmp_path, monkeypatch):
