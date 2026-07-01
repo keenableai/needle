@@ -2,12 +2,21 @@ from datetime import UTC, datetime, timedelta
 
 import defusedxml.ElementTree as ET
 
+from keenbench.freshstream import feeds as feeds_mod
 from keenbench.freshstream.feeds import (
     SEED_SOURCES,
+    SeedSource,
+    _FetchOutcome,
+    _fetch_one,
     _parse_feed,
     load_sources_from_toml,
     parse_published_date,
     pick_per_feed,
+)
+
+ENTITY_BOMB = (
+    '<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x "y">]>'
+    "<rss><channel><item><title>&x;</title></item></channel></rss>"
 )
 
 RSS = """<?xml version="1.0"?>
@@ -98,6 +107,17 @@ def test_seed_sources_are_well_formed():
     for s in SEED_SOURCES:
         assert s.url.startswith("http")
         assert s.source_kind in kinds
+
+
+async def test_fetch_one_handles_defused_parse_failure(monkeypatch):
+    async def fake_fetch_text(client, url):
+        return _FetchOutcome(text=ENTITY_BOMB, http_status=200, fetch_error_class=None)
+
+    monkeypatch.setattr(feeds_mod, "_fetch_text", fake_fetch_text)
+    src = SeedSource("https://ex.com/feed", "rss_news", "tech")
+    items, health = await _fetch_one(None, src, max_rows_per_source=50)
+    assert items == []
+    assert health["parse_ok"] is False
 
 
 def test_load_sources_from_toml(tmp_path):

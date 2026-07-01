@@ -7,10 +7,11 @@ from email.utils import parsedate_to_datetime
 from importlib import resources
 from pathlib import Path
 from typing import Any
-from xml.etree.ElementTree import Element
+from xml.etree.ElementTree import Element, ParseError
 
 import defusedxml.ElementTree as ET
 import httpx
+from defusedxml.common import DefusedXmlException
 
 _DEFAULT_FEEDS_FILE = "feeds.default.toml"
 
@@ -199,7 +200,7 @@ async def _fetch_one(
 
     try:
         root = ET.fromstring(outcome.text)
-    except ET.ParseError:
+    except (ParseError, DefusedXmlException):
         return [], base_health
     base_health["parse_ok"] = True
 

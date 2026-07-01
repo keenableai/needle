@@ -22,7 +22,7 @@ class OpenRouterClient:
         model: str,
         base_url: str = "https://openrouter.ai/api/v1",
         timeout_s: float = 60.0,
-        temperature: float = 0.7,
+        temperature: float = 0.0,
     ) -> None:
         self.api_key = api_key
         self.model = model
