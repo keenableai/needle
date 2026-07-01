@@ -25,6 +25,8 @@ class SearchClient(Protocol):
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]: ...
 
+    async def aclose(self) -> None: ...
+
 
 class HttpSearchClient:
     engine: str = ""

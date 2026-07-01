@@ -3,11 +3,13 @@ from dotenv import load_dotenv
 
 from keenbench import __version__
 from keenbench.freshstream.cli import Freshstream
+from keenbench.rankeval.cli import Rankeval
 
 
 class Keenbench:
     def __init__(self) -> None:
         self.freshstream = Freshstream()
+        self.rankeval = Rankeval()
 
     def version(self) -> str:
         return f"keenbench {__version__}"
