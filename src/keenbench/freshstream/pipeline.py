@@ -51,7 +51,8 @@ async def run_rss(
     )
     anchor = now if now is not None else _fetch_anchor(items)
     candidates = pick_per_feed(items, now=anchor)
-    projections = await project_all(llm, candidates, concurrency=llm_concurrency)
+    today = hour_ts.strftime("%Y-%m-%d")
+    projections = await project_all(llm, candidates, today=today, concurrency=llm_concurrency)
 
     rows: list[QueryRow] = []
     seen_ids: set[str] = set()

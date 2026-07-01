@@ -25,6 +25,9 @@ class Freshstream:
         if source != "rss":
             raise SystemExit(f"error: unsupported --source {source!r} (only 'rss' is implemented)")
 
+        fetch_concurrency = max(1, fetch_concurrency)
+        llm_concurrency = max(1, llm_concurrency)
+
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
             raise SystemExit("error: OPENROUTER_API_KEY is not set")

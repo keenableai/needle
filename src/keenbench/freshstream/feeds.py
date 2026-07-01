@@ -254,6 +254,8 @@ async def fetch_all_sources(
     max_rows_per_source: int = 50,
     concurrency: int = 15,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    if concurrency < 1:
+        raise ValueError("concurrency must be >= 1")
     sem = asyncio.Semaphore(concurrency)
     async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
 

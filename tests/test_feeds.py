@@ -1,6 +1,7 @@
 from datetime import UTC, datetime, timedelta
 
 import defusedxml.ElementTree as ET
+import pytest
 
 from keenbench.freshstream import feeds as feeds_mod
 from keenbench.freshstream.feeds import (
@@ -9,10 +10,16 @@ from keenbench.freshstream.feeds import (
     _FetchOutcome,
     _fetch_one,
     _parse_feed,
+    fetch_all_sources,
     load_sources_from_toml,
     parse_published_date,
     pick_per_feed,
 )
+
+
+async def test_fetch_all_sources_rejects_zero_concurrency():
+    with pytest.raises(ValueError):
+        await fetch_all_sources((), concurrency=0)
 
 ENTITY_BOMB = (
     '<?xml version="1.0"?><!DOCTYPE r [<!ENTITY x "y">]>'

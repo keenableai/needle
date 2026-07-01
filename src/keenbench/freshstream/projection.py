@@ -1,5 +1,4 @@
 import asyncio
-from datetime import UTC, datetime
 from typing import Any
 
 from keenbench.shared.llm import LLMClient
@@ -28,9 +27,9 @@ Respond with ONLY the query string (or NO_NEWS_EVENT). No quotes, no explanation
 """
 
 
-def build_projection_prompt(record: dict[str, Any]) -> str:
+def build_projection_prompt(record: dict[str, Any], *, today: str) -> str:
     return PROJECTION_PROMPT.format(
-        today=datetime.now(UTC).strftime("%Y-%m-%d"),
+        today=today,
         source_kind=record.get("source_kind") or "",
         title=record.get("title") or "",
         summary=(record.get("summary") or "")[:500],
@@ -39,16 +38,16 @@ def build_projection_prompt(record: dict[str, Any]) -> str:
 
 
 async def project_one(
-    llm: LLMClient, record: dict[str, Any]
+    llm: LLMClient, record: dict[str, Any], *, today: str
 ) -> tuple[str | None, dict[str, str] | None]:
-    prompt = build_projection_prompt(record)
+    prompt = build_projection_prompt(record, today=today)
     text, err = await llm.complete(prompt, max_tokens=512, reasoning_effort="minimal")
     if err is not None:
         return None, err
     if not text:
         return None, None
     cleaned = text.strip().splitlines()[0].strip(" \"'")
-    if not cleaned or "NO_NEWS_EVENT" in cleaned.upper():
+    if not cleaned or cleaned.upper() == "NO_NEWS_EVENT":
         return None, None
     return cleaned, None
 
@@ -57,8 +56,11 @@ async def project_all(
     llm: LLMClient,
     records: list[dict[str, Any]],
     *,
+    today: str,
     concurrency: int = 8,
 ) -> list[tuple[dict[str, Any], str | None, dict[str, str] | None]]:
+    if concurrency < 1:
+        raise ValueError("concurrency must be >= 1")
     sem = asyncio.Semaphore(concurrency)
 
     async def _one(
@@ -66,7 +68,7 @@ async def project_all(
     ) -> tuple[dict[str, Any], str | None, dict[str, str] | None]:
         async with sem:
             try:
-                text, err = await project_one(llm, r)
+                text, err = await project_one(llm, r, today=today)
             except Exception as exc:
                 return r, None, {"error_type": "projection_crash", "error_message": str(exc)[:500]}
             return r, text, err

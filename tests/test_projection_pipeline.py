@@ -1,9 +1,12 @@
+import pytest
 from datetime import UTC, datetime
 
 from keenbench.freshstream.models import build_query_row
 from keenbench.freshstream.pipeline import _rss_provenance
-from keenbench.freshstream.projection import project_all, project_one
+from keenbench.freshstream.projection import build_projection_prompt, project_all, project_one
 from keenbench.shared.sampling import sample_stratified
+
+TODAY = "2026-07-01"
 
 
 class FakeLLM:
@@ -21,35 +24,52 @@ class BoomLLM:
 
 async def test_project_one_cleans_query():
     llm = FakeLLM([('  "Lakers trade deadline"\nextra line ', None)])
-    query, err = await project_one(llm, {"title": "t"})
+    query, err = await project_one(llm, {"title": "t"}, today=TODAY)
     assert query == "Lakers trade deadline"
     assert err is None
 
 
 async def test_project_one_no_news_event_is_not_error():
     llm = FakeLLM([("NO_NEWS_EVENT", None)])
-    query, err = await project_one(llm, {"title": "t"})
+    query, err = await project_one(llm, {"title": "t"}, today=TODAY)
     assert query is None and err is None
+
+
+async def test_project_one_keeps_query_containing_sentinel_substring():
+    llm = FakeLLM([("no news event blackout 2026", None)])
+    query, err = await project_one(llm, {"title": "t"}, today=TODAY)
+    assert query == "no news event blackout 2026"
+    assert err is None
 
 
 async def test_project_one_error_passthrough():
     llm = FakeLLM([(None, {"error_type": "http_error", "error_message": "500"})])
-    query, err = await project_one(llm, {"title": "t"})
+    query, err = await project_one(llm, {"title": "t"}, today=TODAY)
     assert query is None and err == {"error_type": "http_error", "error_message": "500"}
 
 
 async def test_project_all_preserves_records():
     llm = FakeLLM([("query one", None), ("NO_NEWS_EVENT", None)])
     recs = [{"title": "a"}, {"title": "b"}]
-    out = await project_all(llm, recs, concurrency=2)
+    out = await project_all(llm, recs, today=TODAY, concurrency=2)
     assert {r["title"] for r, _, _ in out} == {"a", "b"}
 
 
 async def test_project_all_survives_a_crashing_projection():
-    out = await project_all(BoomLLM(), [{"title": "a"}], concurrency=1)
+    out = await project_all(BoomLLM(), [{"title": "a"}], today=TODAY, concurrency=1)
     record, text, err = out[0]
     assert text is None
     assert err["error_type"] == "projection_crash"
+
+
+async def test_project_all_rejects_zero_concurrency():
+    with pytest.raises(ValueError):
+        await project_all(FakeLLM([]), [], today=TODAY, concurrency=0)
+
+
+def test_build_projection_prompt_uses_explicit_today():
+    prompt = build_projection_prompt({"title": "t"}, today="2020-01-01")
+    assert "Today's date: 2020-01-01" in prompt
 
 
 async def test_run_rss_end_to_end(monkeypatch):
