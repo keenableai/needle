@@ -34,10 +34,12 @@ to keep fresh. Two independent real-time streams feed one cohort, both tagged
 ### Run
 
 Projection goes through [OpenRouter](https://openrouter.ai) (OpenAI-compatible),
-so a single key reaches Claude, GPT, Gemini and others.
+so a single key reaches Claude, GPT, Gemini and others. The CLI auto-loads a
+`.env` from the working directory (copy [`.env.example`](.env.example)); a real
+exported variable takes precedence.
 
 ```bash
-export OPENROUTER_API_KEY=sk-or-...
+cp .env.example .env    # then set OPENROUTER_API_KEY
 # default model is google/gemini-2.5-flash-lite; override with --llm-model or $KEENBENCH_LLM_MODEL
 keenbench freshstream run --out queries.jsonl
 ```
