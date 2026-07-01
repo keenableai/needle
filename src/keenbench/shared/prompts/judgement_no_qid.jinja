@@ -1,0 +1,204 @@
+Evaluate how well a search result document matches a user's query intent using the Needs Met rating framework (0-4 scale).
+
+You are provided with:
+- **Query**: The user's search query
+- **Document**: Title, URL, snippet, content (full or snippet-only), content source, and optional domain context
+
+Infer the query's objective, key questions, exclusion signals, and expected source hierarchy directly from the query text.
+
+## CRITICAL RATING-LABEL CONSISTENCY RULE
+
+**Rating and label MUST ALWAYS be consistent. This is non-negotiable.**
+- Rating 0 → Label: FailsM
+- Rating 1 → Label: FailsM
+- Rating 2 → Label: SM
+- Rating 3 → Label: HM
+- Rating 4 → Label: FullyM
+
+If there is any mismatch, STOP and correct it before outputting. This is the most common error.
+
+## Rating Scale
+
+- **4 (FullyM)**: All CORE aspects covered with substantial depth. Authoritative, comprehensive, directly answers the query's primary objective. One-stop resource.
+- **3 (HM)**: Major CORE aspects covered with good depth. Minor gaps in auxiliary details or slight limitations, but the user's primary need is substantially met.
+- **2 (SM)**: Partial CORE coverage, or only passing/superficial mention without actionable depth. May address the general topic but misses the specific query elements. Fails one or more R-CORE-SPIRIT gates.
+- **1 (FailsM)**: Marginal relevance only. Topic-adjacent but fundamentally misses the query's spirit or provides negligible useful information.
+- **0 (FailsM)**: Off-topic, broken, inaccessible, duplicate URL, or completely fails to meet the query.
+
+## Step 1: Query Analysis
+
+### 1.1 Query Type Classification
+
+Before evaluating the document, classify the query type. This determines how strictly to apply content requirements.
+
+- **Type A (Broad/Exploratory)**: General topic queries ("what is diabetes", "chris pratt", "history of AI").
+  - CORE = foundational defining facts. AUXILIARY = statistics, supplementary details.
+  - Document must provide substantial coverage of at least ONE core aspect to qualify for 3+.
+- **Type B (Specific/Closed)**: Queries requesting a specific answer ("release date of X", "who won the game", "net worth of Y").
+  - CORE = the specific requested fact. Nothing else substitutes.
+  - **HARD GATE**: Missing the specific answer = capped at 2/SM, regardless of how much related context is provided.
+- **Type C (List/Multi-Part)**: Comparisons, multi-item requests, pros-and-cons ("X vs Y", "top 10 movies", "benefits and risks of Z").
+  - CORE = coverage of all requested items/aspects.
+  - **HARD GATE**: Covering <50% of requested items = capped at 2/SM.
+
+### 1.2 CORE vs AUXILIARY Classification
+
+For each key aspect implied by the query (its objective, sub-questions, and the kind of source it calls for):
+- **CORE**: Directly answers the query's primary objective. Foundational facts the user needs.
+- **AUXILIARY**: Supporting details, statistics, context that enhances but doesn't define the answer.
+
+Missing AUXILIARY alone never drops a document below 3/HM if all CORE aspects are adequately covered.
+
+### 1.3 Content Archetype Classification
+
+Classify the query's expected content to determine staleness evaluation:
+- **Ephemeral**: Sports scores, weather, breaking news, stock prices, event schedules. Value decays rapidly.
+- **Persistent**: Official websites, product pages, how-to guides for software. URL always relevant but content freshness matters.
+- **Evergreen**: Historical facts, scientific principles, definitions, recipes. Largely time-insensitive.
+
+### 1.4 Search Operator Extraction (MANDATORY before scoring)
+
+Parse the raw query string for explicit search operators. These are HARD constraints the user typed deliberately — they are NOT optional concepts.
+
+- Exact-phrase: any span inside double quotes "…" must appear VERBATIM in the page body text (the content between `<<<CONTENT>>>` and `<<</CONTENT>>>`) or the document Title (case-insensitive, whitespace-normalized; ignore surrounding punctuation). A match in the URL, breadcrumb, navigation links, or any other metadata does NOT count and never satisfies the operator. Do not assume or infer presence: locate the exact span in the body or title, or treat it as missing. Each quoted span is a separate required string.
+- site:domain = the document URL host must equal or be a subdomain of `domain`.
+
+If the query has no operators, skip 2.5 and score normally.
+
+## Step 2: Document Analysis
+
+### 2.0 Document Integrity Check (HARD GATE — evaluate first)
+
+Before any relevance analysis, verify the document is accessible and functional:
+- **Fails integrity** (rate 0): Error pages (404, 500), blank/metadata-only pages, hard paywalls blocking all content, pages with only boilerplate/navigation and no substantive content.
+- **Passes with limitation**: Social media previews, academic abstracts behind paywalls — evaluate visible content, note limitation in reasoning. Cap at 2/SM if full content is needed but unavailable.
+
+### 2.1 R-CORE-SPIRIT Gate System
+
+Three conditions that constrain the maximum rating. All applicable conditions must hold for the document to qualify for 3/HM or higher.
+
+**Condition I — Spirit Match (all query types)**:
+- Document must address the correct topic, entity, jurisdiction, and domain context.
+- Wrong entity = 0/FailsM regardless of content quality (e.g., Burlington franchise for "North End Regina Pizzeria" query).
+- Wrong jurisdiction = 0/FailsM for legal/financial queries.
+- General topic match without specific query elements = fails spirit for Type B queries.
+
+**Condition II — Adequate CORE Coverage (all query types)**:
+- CORE aspects must be present with **substantial depth**, not just keywords or passing mentions.
+- "Coming soon" without a date ≠ adequate for a "when does X release" query.
+- A title mention without explanation ≠ adequate coverage.
+- **Type A**: At least one CORE aspect with meaningful depth.
+- **Type B**: The specific requested answer must be present.
+- **Type C**: ≥50% of requested items/aspects must be covered.
+- If condition fails → capped at 2/SM.
+
+**Condition III — Completeness for Type C (list/multi-part only)**:
+- Covering <50% of requested items = capped at 2/SM.
+- Covering ≥50% but <100% = eligible for 3/HM.
+- Covering ~100% with depth = eligible for 4/FullyM.
+
+**Gate logic summary**:
+- All conditions pass → eligible for 3/HM or 4/FullyM based on depth and authority
+- Any condition fails → maximum 2/SM (or 0/FailsM for Condition I failures)
+- See "Current Event Freshness Gate" below for additional constraints for specific, dated current-event queries.
+
+### Current Event Freshness Gate (MANDATORY for specific, dated current-event queries)
+When the query refers to a SPECIFIC, dated current event (e.g., "Medvedev vs Berrettini Monte-Carlo Masters Round of 32, April 8, 2026"), these constraints OVERRIDE the standard 2/SM cap. Apply strictly — topical overlap is NOT sufficient. The document must address the SPECIFIC event the query names.
+
+- **Entity-without-event → 1/FailsM maximum.** The document discusses the correct entity but does NOT address the specific event the query names. No exceptions. This includes: Wikipedia biographies, player/team profile pages, career statistics pages, game logs missing the requested date, generic relationship or biography articles, stats dashboards without the specific game, and any page that covers the entity generally without referencing the event itself.
+- **Wrong-event → 1/FailsM maximum.** The document covers a DIFFERENT event involving the same entity. Use the query to distinguish: a 1st-leg match article is wrong-event for a 2nd-leg query; a March committee markup article is wrong-event for an April 8 debate query; a 2024 Tommy John article is wrong-event for a 2026 shoulder injury query.
+- **Pre-event for result queries → 1/FailsM maximum.** When the query seeks a result, outcome, or post-event status, any preview, prediction, or pre-event article → 1/FailsM. This includes odds/previews for completed games, pre-match analyses for result queries, and pre-announcement speculation for outcome queries.
+- **How to verify**: Before rating 2+ for a specific dated-event query, confirm the document contains at least one CONCRETE detail matching the queried event (the specific date, score, quote, ruling, or named development). General coverage of the entity or topic without a concrete detail from the event = 1/FailsM.
+- **Scope**: This gate only fires for specific, dated current-event queries. Otherwise, the standard max 2/SM for Condition II failures remains unchanged.
+
+### 2.2 Criteria Flexibility
+
+Apply these principles to avoid over-penalizing high-quality documents:
+
+- **Authoritative documents trump inferred criteria**: If a high-authority source (Mayo Clinic, official government site, ESPN, established news outlet) presents information that differs from what the query seems to expect, trust the document. Only penalize if the document is demonstrably stale or from a low-authority source contradicting multiple authorities.
+- **Semantic equivalence**: The query's criteria represent concepts, not exact keywords. "Documentary-style comedy" = "mockumentary". "Revenue allocation" = "how profits are distributed". Give full credit for equivalent concepts — **EXCEPT** for spans the user placed in double quotes or other explicit operators (see 1.4 / 2.5), which must be matched literally and are not subject to conceptual substitution.
+- **Numerical variance**: For live/dynamic data (stock prices, weather, sports scores), minor differences from expected values are acceptable from authoritative sources. Only penalize significant deviations indicating staleness.
+- **"Such as" lists**: Examples implied by the query are illustrative, not mandatory. A document covering equivalent examples satisfies the criterion.
+- **Concepts over keywords**: Evaluate whether the document addresses the underlying informational need, not whether specific keywords appear.
+
+### 2.3 Staleness and Temporal Fit
+
+Based on the content archetype (Step 1.3), apply staleness checks:
+
+**Ephemeral content**:
+- Strict temporal alignment required. A document about 2024 performers is irrelevant for a "2025 performers" query.
+- Breaking news: 0-48 hours = recency paramount. 2-7 days = balance with comprehensiveness.
+- Event lifecycle: Future-tense queries accept predictions/previews. Past-tense queries require actual results — a preview published before the event cannot answer "who won".
+- Recurring annual events: Previous year's info is acceptable until next year's is announced.
+
+**Persistent content**:
+- Obsolete technology/platforms (Flash, Internet Explorer, defunct services) = stale.
+- Outdated business info (old CEO, wrong pricing, old contact details) = stale.
+- Stale "New!" announcements for features that have been standard for years = stale.
+
+**Evergreen content**:
+- Publication date alone doesn't make it stale. Only superseded factual developments, withdrawn methodologies, or incomplete timelines qualify.
+- A 2018 article on a stable scientific principle outranks a superficial 2025 article.
+
+**Staleness penalties**:
+- Critical mismatch (wrong year event, wrong entity status) → 0/FailsM
+- Severe (multiple outdated facts, functionally broken purpose) → downgrade 2 levels
+- Moderate (some outdated details, minor temporal issues) → downgrade 1 level
+- Minor/peripheral (old copyright year, minor detail) → note in reasoning only
+
+### 2.4 Domain-Specific Hard Gates
+
+Apply when the query falls into these domains:
+
+- **Medical/Health**: Authority paramount (Mayo Clinic, CDC > blogs). One dangerous error (unproven therapy, downplayed risk) = 0/FailsM. Prioritize peer-reviewed sources and official guidelines.
+- **Legal**: Jurisdiction must match. Mismatch = 0/FailsM. Critical error (wrong fees, outdated deadlines) caps at 2/SM.
+- **Financial**: Entity verification mandatory (correct company/ticker/exchange). Wrong entity = 0/FailsM. Require concrete quantitative data, not vague claims.
+- **Academic**: Core formula/principle errors = 1-2. Peripheral citation errors don't drop below 3/HM if core is correct.
+- **Technical troubleshooting**: Safety warnings mandatory for risky procedures (registry editing, BIOS flashing, hardware disassembly). Community-verified solutions can outrank brief official pages.
+- **News**: Critical factual errors = 1-2. Distinguish fact from speculation. Prefer established outlets.
+- **E-Commerce/Product**: Exact product match required (correct model/version/color/size). Wrong variant with same brand = 2/SM max. Different product line = 0/FailsM.
+- **Jobs**: If query specifies work modality (remote/telemedicine), listings must match. On-site listings for remote queries = significant downgrade.
+
+### 2.5 Operator Compliance Gate (HARD — applies only when 1.4 found operators)
+
+Operators are explicit user constraints, equal in force to entity/jurisdiction:
+- Required exact "phrase" absent from both the page body text and the Title → 0/FailsM. A match found only in the URL, breadcrumb, navigation, or metadata does NOT satisfy the operator.
+- site: host mismatch → 0/FailsM
+A document may be perfectly on-topic and still fail this gate. That is correct: the user demanded the literal constraint; topical relevance does not substitute.
+
+## Step 3: Self-Critique (internal — do NOT output the checklist)
+
+Before finalizing, verify internally:
+1. Query Type identified (A/B/C)?
+2. CORE vs AUXILIARY distinguished correctly?
+3. R-CORE-SPIRIT gates: which passed, which failed?
+4. Criteria flexibility applied where warranted (authoritative source, semantic equivalence)?
+5. Staleness/temporal fit checked against content archetype?
+6. Domain-specific hard gates checked if applicable?
+7. Content source limitations (snippet-only) accounted for?
+8. Rating-label consistency verified?
+
+If self-critique reveals an error, revise before outputting.
+
+## Step 4: Output
+
+Respond with ONLY a YAML block. No text before or after.
+
+```yaml
+rating: <0-4>
+reasoning: "<2-3 sentences. State the query type (A/B/C), which R-CORE-SPIRIT conditions passed/failed, key evidence from the document, and any penalties applied (staleness, domain gate). Be specific about WHAT content was present or missing.>"
+label: <FailsM|SM|HM|FullyM>
+```
+
+**Output rules**:
+- YAML only. No markdown fences, no commentary, no extra fields.
+- `reasoning` must be 2-3 sentences grounded in document evidence.
+- Rating and label must be consistent (see rule above).
+
+## Hard Guardrails (cannot be overridden)
+
+These always apply regardless of other evaluation:
+- Wrong entity/person/product for the query → 0/FailsM
+- Violates an explicit query operator (required "exact phrase" absent from the page body and Title — matches in URL/breadcrumb/metadata do NOT count — or site: host mismatch) → 0/FailsM
+- Broken/inaccessible content (error pages, blank pages) → 0/FailsM
+- Rating-label mismatch → STOP and correct before output

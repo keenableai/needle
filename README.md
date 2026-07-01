@@ -134,6 +134,32 @@ Add an engine by subclassing `HttpSearchClient` (lazy connection reuse +
 `aclose` + concurrency limiter + JSON error mapping) and mapping its response to
 `SearchResult`.
 
+## Ranking eval (RBP@5)
+
+`keenbench.shared.judge` + `keenbench.shared.metrics` + the `keenbench rankeval`
+CLI score how well a search engine ranks results for a query:
+
+- **Judge** — a no-query-descriptor LLM relevance judge (Google "Needs Met"
+  0–4 framework, ported from the internal eval), run through OpenRouter. The
+  default judge model is `google/gemini-3-flash-preview`
+  (`--judge-model` / `$KEENBENCH_JUDGE_MODEL`).
+- **RBP@5** — Rank-Biased Precision (`p=0.8`), gain `{4:1.0, 3:0.667, 2:0.117}`,
+  ceiling `1 - p^5 ≈ 0.672`. (Plain gain-weighted RBP; the internal SQL kernel's
+  domain-redundancy penalties are not applied here.)
+
+```bash
+keenbench freshstream run --out fresh.jsonl
+keenbench rankeval run --queries fresh.jsonl --limit 20 --engines keenable,exa --out rbp.json
+```
+
+The keyless Keenable endpoint is burst-rate-limited, so the CLI throttles it
+(`--keenable-concurrency`, default 2; `--exa-concurrency`, default 4).
+
+**First numbers** (20 fresh RSS-derived queries, top-5, snippet-only judging,
+judge `gemini-3-flash-preview`): **Exa 0.578** vs **Keenable 0.503** (ceiling
+0.672; both engines 0 search/judge errors). Small sample and snippet-only (no
+full-page fetch) — directional, not a headline metric.
+
 ## Development
 
 ```bash
