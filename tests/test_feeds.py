@@ -1,5 +1,4 @@
 from datetime import UTC, datetime, timedelta
-from pathlib import Path
 
 import defusedxml.ElementTree as ET
 
@@ -10,8 +9,6 @@ from keenbench.freshstream.feeds import (
     parse_published_date,
     pick_per_feed,
 )
-
-DEFAULT_FEEDS_TOML = Path(__file__).resolve().parent.parent / "feeds.default.toml"
 
 RSS = """<?xml version="1.0"?>
 <rss version="2.0"><channel>
@@ -113,7 +110,3 @@ def test_load_sources_from_toml(tmp_path):
     assert len(sources) == 1
     assert sources[0].url == "https://ex.com/feed"
     assert sources[0].topical_domain == "tech"
-
-
-def test_default_feeds_toml_matches_seed_sources():
-    assert load_sources_from_toml(DEFAULT_FEEDS_TOML) == SEED_SOURCES

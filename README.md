@@ -66,12 +66,13 @@ hour produces byte-identical rows.
 
 ### Custom feed list
 
-The built-in seed list is a curated set of ~124 US feeds. The full list is also
-checked in as [`feeds.default.toml`](feeds.default.toml) — copy it, edit, and
-pass your version with `--feeds`:
+The built-in seed list is a curated set of ~124 US feeds, defined in
+[`src/keenbench/freshstream/feeds.default.toml`](src/keenbench/freshstream/feeds.default.toml)
+(the single source of truth — `SEED_SOURCES` loads it at import). Copy it, edit,
+and pass your version with `--feeds`:
 
 ```bash
-keenbench freshstream run --feeds feeds.default.toml --out queries.jsonl
+keenbench freshstream run --feeds my-feeds.toml --out queries.jsonl
 ```
 
 ### As a library

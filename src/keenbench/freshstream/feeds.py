@@ -4,12 +4,15 @@ import tomllib
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from email.utils import parsedate_to_datetime
+from importlib import resources
 from pathlib import Path
 from typing import Any
 from xml.etree.ElementTree import Element
 
 import defusedxml.ElementTree as ET
 import httpx
+
+_DEFAULT_FEEDS_FILE = "feeds.default.toml"
 
 
 @dataclass(frozen=True)
@@ -19,136 +22,25 @@ class SeedSource:
     topical_domain: str
 
 
-SEED_SOURCES: tuple[SeedSource, ...] = (
-    SeedSource("https://www.local10.com/arc/outboundfeeds/rss/", "rss_news", "local_civic"),
-    SeedSource("https://www.seattletimes.com/feed/", "rss_news", "local_civic"),
-    SeedSource("https://chicago.suntimes.com/rss/index.xml", "rss_news", "local_civic"),
-    SeedSource("https://nypost.com/metro/feed/", "rss_news", "local_civic"),
-    SeedSource("https://rss.nytimes.com/services/xml/rss/nyt/NYRegion.xml", "rss_news", "local_civic"),
-    SeedSource("https://gothamist.com/feed", "rss_news", "local_civic"),
-    SeedSource("https://www.12news.com/feeds/syndication/rss/news/local", "rss_news", "local_civic"),
-    SeedSource("https://www.kxan.com/feed/", "rss_news", "local_civic"),
-    SeedSource("https://blockclubchicago.org/feed/", "rss_news", "local_civic"),
-    SeedSource("https://www.latimes.com/california/rss2.0.xml", "rss_news", "local_civic"),
-    SeedSource("https://www.westword.com/feed", "rss_news", "local_civic"),
-    SeedSource("https://missionlocal.org/feed/", "rss_news", "local_civic"),
-    SeedSource("https://www.cpr.org/feed/", "rss_news", "local_civic"),
-    SeedSource("https://www.dallasobserver.com/feed", "rss_news", "local_civic"),
-    SeedSource("https://www.nbcmiami.com/news/local/feed/", "rss_news", "local_civic"),
-    SeedSource("https://www.thecity.nyc/feed", "rss_news", "local_civic"),
-    SeedSource("https://newbostonpost.com/feed/", "rss_news", "local_civic"),
-    SeedSource("https://www.texasstandard.org/feed/", "rss_news", "local_civic"),
-    SeedSource("https://www.washingtoncitypaper.com/feed/", "rss_news", "local_civic"),
-    SeedSource("https://www.universalhub.com/rss.xml", "rss_news", "local_civic"),
-    SeedSource("https://www.phoenixnewtimes.com/feed", "rss_news", "local_civic"),
-    SeedSource("https://www.miaminewtimes.com/feed", "rss_news", "local_civic"),
-    SeedSource("https://www.bostonmagazine.com/feed/", "rss_news", "local_civic"),
-    SeedSource("https://sfist.com/feed/", "rss_news", "local_civic"),
-    SeedSource("https://www.wbez.org/rss", "rss_news", "local_civic"),
-    SeedSource("https://news.wttw.com/feed", "rss_news", "local_civic"),
-    SeedSource("https://www.texastribune.org/feed/", "rss_news", "local_civic"),
-    SeedSource("https://www.minnpost.com/feed/", "rss_news", "local_civic"),
-    SeedSource("https://denverite.com/feed/", "rss_news", "local_civic"),
-    SeedSource("https://voiceofsandiego.org/feed/", "rss_news", "local_civic"),
-    SeedSource("https://techcrunch.com/feed/", "rss_news", "tech"),
-    SeedSource("https://www.theverge.com/rss/index.xml", "rss_news", "tech"),
-    SeedSource("https://www.wired.com/feed/rss", "rss_news", "tech"),
-    SeedSource("https://www.engadget.com/rss.xml", "rss_news", "tech"),
-    SeedSource("https://gizmodo.com/rss", "rss_news", "tech"),
-    SeedSource("https://9to5mac.com/feed/", "rss_news", "tech"),
-    SeedSource("https://www.androidauthority.com/feed", "rss_news", "tech"),
-    SeedSource("https://feeds.macrumors.com/MacRumors-All", "rss_news", "tech"),
-    SeedSource("https://appleinsider.com/rss/news/", "rss_news", "tech"),
-    SeedSource("https://www.tomshardware.com/feeds/all", "rss_news", "tech"),
-    SeedSource("https://www.cnet.com/rss/news/", "rss_news", "tech"),
-    SeedSource("https://www.theregister.com/headlines.atom", "rss_news", "tech"),
-    SeedSource("https://thenextweb.com/feed/", "rss_news", "tech"),
-    SeedSource("http://feeds.mashable.com/Mashable", "rss_news", "tech"),
-    SeedSource("https://hnrss.org/frontpage", "rss_social", "tech"),
-    SeedSource("https://hnrss.org/best", "rss_social", "tech"),
-    SeedSource("https://hnrss.org/show", "rss_social", "tech"),
-    SeedSource("https://lobste.rs/rss", "rss_social", "tech"),
-    SeedSource("https://dev.to/feed", "rss_social", "tech"),
-    SeedSource("https://stackoverflow.com/feeds", "rss_social", "tech"),
-    SeedSource(
-        "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114",
-        "rss_news",
-        "finance",
-    ),
-    SeedSource("https://finance.yahoo.com/news/rssindex", "rss_news", "finance"),
-    SeedSource("https://feeds.content.dowjones.io/public/rss/mw_topstories", "rss_news", "finance"),
-    SeedSource("https://seekingalpha.com/feed.xml", "rss_news", "finance"),
-    SeedSource("https://www.thestreet.com/.rss/full/", "rss_news", "finance"),
-    SeedSource("https://www.forbes.com/business/feed/", "rss_news", "finance"),
-    SeedSource("https://fortune.com/feed", "rss_news", "finance"),
-    SeedSource("https://www.inc.com/rss/", "rss_news", "finance"),
-    SeedSource("https://www.nerdwallet.com/blog/feed/", "rss_news", "finance"),
-    SeedSource("https://www.investing.com/rss/news.rss", "rss_news", "finance"),
-    SeedSource("https://variety.com/feed/", "rss_news", "entertainment"),
-    SeedSource("https://www.hollywoodreporter.com/feed/", "rss_news", "entertainment"),
-    SeedSource("https://deadline.com/feed/", "rss_news", "entertainment"),
-    SeedSource("https://www.thewrap.com/feed/", "rss_news", "entertainment"),
-    SeedSource("https://screenrant.com/feed/", "rss_news", "entertainment"),
-    SeedSource("https://collider.com/feed/", "rss_news", "entertainment"),
-    SeedSource("https://decider.com/feed/", "rss_news", "entertainment"),
-    SeedSource("https://pitchfork.com/rss/news/", "rss_news", "entertainment"),
-    SeedSource("https://www.rollingstone.com/feed/", "rss_news", "entertainment"),
-    SeedSource("http://consequenceofsound.net/feed", "rss_news", "entertainment"),
-    SeedSource("https://www.comingsoon.net/feed", "rss_news", "entertainment"),
-    SeedSource("https://tvline.com/feed/", "rss_news", "entertainment"),
-    SeedSource("https://www.indiewire.com/feed", "rss_news", "entertainment"),
-    SeedSource("https://sports.yahoo.com/rss/", "rss_news", "sports"),
-    SeedSource("https://www.espn.com/espn/rss/news", "rss_news", "sports"),
-    SeedSource("https://profootballtalk.nbcsports.com/feed/", "rss_news", "sports"),
-    SeedSource("https://www.espn.com/espn/rss/nfl/news", "rss_news", "sports"),
-    SeedSource("https://www.espn.com/espn/rss/nba/news", "rss_news", "sports"),
-    SeedSource("https://www.espn.com/espn/rss/mlb/news", "rss_news", "sports"),
-    SeedSource("https://www.cbssports.com/rss/headlines/nba/", "rss_news", "sports"),
-    SeedSource("https://www.cbssports.com/rss/headlines/nfl/", "rss_news", "sports"),
-    SeedSource("https://defector.com/feed", "rss_news", "sports"),
-    SeedSource("https://www.sbnation.com/rss/index.xml", "rss_news", "sports"),
-    SeedSource("https://www.polygon.com/rss/index.xml", "rss_news", "gaming"),
-    SeedSource("https://www.eurogamer.net/feed", "rss_news", "gaming"),
-    SeedSource("https://feeds.ign.com/ign/games-all", "rss_news", "gaming"),
-    SeedSource("https://www.pcgamer.com/rss/", "rss_news", "gaming"),
-    SeedSource("https://kotaku.com/rss", "rss_news", "gaming"),
-    SeedSource("https://www.gamespot.com/feeds/mashup/", "rss_news", "gaming"),
-    SeedSource("https://www.destructoid.com/feed/", "rss_news", "gaming"),
-    SeedSource("https://www.rockpapershotgun.com/feed/news", "rss_news", "gaming"),
-    SeedSource("https://www.statnews.com/feed/", "rss_news", "health"),
-    SeedSource("https://feeds.npr.org/1128/rss.xml", "rss_news", "health"),
-    SeedSource("https://www.medpagetoday.com/rss/headlines.xml", "rss_news", "health"),
-    SeedSource("https://www.endpts.com/feed/", "rss_news", "health"),
-    SeedSource("https://kffhealthnews.org/feed/", "rss_news", "health"),
-    SeedSource("https://phys.org/rss-feed/", "rss_news", "science"),
-    SeedSource("https://www.space.com/feeds/all", "rss_news", "science"),
-    SeedSource("https://scitechdaily.com/feed/", "rss_news", "science"),
-    SeedSource("https://rss.nytimes.com/services/xml/rss/nyt/Science.xml", "rss_news", "science"),
-    SeedSource("https://www.nasa.gov/news-release/feed/", "rss_news", "science"),
-    SeedSource("https://www.livescience.com/feeds/all", "rss_news", "science"),
-    SeedSource("https://export.arxiv.org/rss/cs.IR", "rss_paper", "science"),
-    SeedSource("https://export.arxiv.org/rss/cs.CL", "rss_paper", "science"),
-    SeedSource("https://export.arxiv.org/rss/cs.LG", "rss_paper", "science"),
-    SeedSource("https://feeds.npr.org/1014/rss.xml", "rss_news", "government"),
-    SeedSource("https://thehill.com/news/feed/", "rss_news", "government"),
-    SeedSource("https://www.producthunt.com/feed", "rss_release", "commerce"),
-    SeedSource("https://www.howtogeek.com/feed/", "rss_news", "commerce"),
-    SeedSource("https://www.makeuseof.com/feed/", "rss_news", "commerce"),
-    SeedSource("https://www.gearpatrol.com/feed/", "rss_news", "commerce"),
-    SeedSource("https://petapixel.com/feed/", "rss_news", "commerce"),
-    SeedSource("https://www.thekitchn.com/main.rss", "rss_news", "commerce"),
-    SeedSource("https://www.nytimes.com/wirecutter/feed/", "rss_news", "commerce"),
-    SeedSource("https://www.caranddriver.com/rss/all.xml", "rss_news", "automotive"),
-    SeedSource("https://electrek.co/feed/", "rss_news", "automotive"),
-    SeedSource("https://jalopnik.com/rss", "rss_news", "automotive"),
-    SeedSource("https://www.the74million.org/feed/", "rss_news", "education"),
-    SeedSource("https://www.insidehighered.com/rss.xml", "rss_news", "education"),
-    SeedSource("https://www.k12dive.com/feeds/news/", "rss_news", "education"),
-    SeedSource("https://onemileatatime.com/feed/", "rss_news", "travel"),
-    SeedSource("https://www.cntraveler.com/feed/rss", "rss_news", "travel"),
-    SeedSource("https://skift.com/feed/", "rss_news", "travel"),
-    SeedSource("https://viewfromthewing.com/feed/", "rss_news", "travel"),
-)
+def _sources_from_data(data: dict[str, Any]) -> tuple[SeedSource, ...]:
+    return tuple(
+        SeedSource(
+            url=s["url"], source_kind=s["source_kind"], topical_domain=s["topical_domain"]
+        )
+        for s in data.get("source", [])
+    )
+
+
+def load_sources_from_toml(path: str | Path) -> tuple[SeedSource, ...]:
+    return _sources_from_data(tomllib.loads(Path(path).read_text(encoding="utf-8")))
+
+
+def _load_packaged_default() -> tuple[SeedSource, ...]:
+    text = resources.files(__package__).joinpath(_DEFAULT_FEEDS_FILE).read_text(encoding="utf-8")
+    return _sources_from_data(tomllib.loads(text))
+
+
+SEED_SOURCES: tuple[SeedSource, ...] = _load_packaged_default()
 
 
 HTTP_TIMEOUT = httpx.Timeout(20.0, connect=10.0)
@@ -176,16 +68,6 @@ HEALTH_WINDOWS: tuple[tuple[str, timedelta], ...] = (
 RSS_KINDS: frozenset[str] = frozenset(
     {"rss_news", "rss_release", "rss_blog", "rss_paper", "rss_social"}
 )
-
-
-def load_sources_from_toml(path: str | Path) -> tuple[SeedSource, ...]:
-    data = tomllib.loads(Path(path).read_text())
-    return tuple(
-        SeedSource(
-            url=s["url"], source_kind=s["source_kind"], topical_domain=s["topical_domain"]
-        )
-        for s in data.get("source", [])
-    )
 
 
 @dataclass(frozen=True)
