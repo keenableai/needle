@@ -7,7 +7,7 @@ from pathlib import Path
 
 from keenbench.rankeval.pipeline import EvalQuery, run_rbp
 from keenbench.shared.llm import OpenRouterClient
-from keenbench.shared.sampling import sample_stratified, sample_uniform
+from keenbench.shared.sampling import sample as sample_rows
 from keenbench.shared.search import ExaClient, KeenableClient, SearchClient
 
 DEFAULT_JUDGE_MODEL = "google/gemini-3-flash-preview"
@@ -22,19 +22,21 @@ def _load_query_rows(path: str) -> list[dict]:
         try:
             obj = json.loads(line)
         except json.JSONDecodeError:
-            rows.append({"query_text": line})
+            rows.append({"query_text": line, "topical_domain": "other"})
             continue
         if isinstance(obj, dict):
             if obj.get("query_text"):
                 rows.append(
                     {
                         "query_text": str(obj["query_text"]),
+                        # One "unknown domain" bucket for stratified sampling,
+                        # matching the plain-text rows below.
                         "topical_domain": str(obj.get("topical_domain") or "other"),
                         "hour_ts": obj.get("hour_ts"),
                     }
                 )
         elif isinstance(obj, str):
-            rows.append({"query_text": obj})
+            rows.append({"query_text": obj, "topical_domain": "other"})
     return rows
 
 
@@ -69,27 +71,16 @@ class Rankeval:
 
         rows = _load_query_rows(queries)
         if limit > 0 and len(rows) > limit:
-            if sample == "head":
-                rows = rows[:limit]
-            elif sample == "uniform":
-                rows = sample_uniform(rows, limit, seed)
-            elif sample == "stratified":
-                rows = sample_stratified(rows, limit, seed)
-            else:
-                raise SystemExit(
-                    f"error: unknown --sample {sample!r} (known: stratified, uniform, head)"
-                )
+            try:
+                rows = sample_rows(rows, limit, seed, strategy=sample)
+            except ValueError as exc:
+                raise SystemExit(f"error: --sample: {exc}") from exc
         if not rows:
             raise SystemExit(f"error: no queries loaded from {queries!r}")
 
         fallback_today = datetime.now(UTC).strftime("%Y-%m-%d")
         eval_queries = [
-            EvalQuery(
-                text=r["query_text"],
-                today=_today_for_row(r, fallback_today),
-                topical_domain=str(r.get("topical_domain") or "other"),
-            )
-            for r in rows
+            EvalQuery(text=r["query_text"], today=_today_for_row(r, fallback_today)) for r in rows
         ]
 
         if isinstance(engines, str):

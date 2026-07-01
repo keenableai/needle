@@ -3,12 +3,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from keenbench.freshstream.feeds import (
-    SeedSource,
-    fetch_all_sources,
-    pick_per_feed,
-    published_age_seconds,
-)
+from keenbench.freshstream.feeds import SeedSource, fetch_all_sources, pick_per_feed
 from keenbench.freshstream.models import QueryRow, build_query_row
 from keenbench.freshstream.projection import (
     build_projection_prompt,
@@ -18,14 +13,11 @@ from keenbench.freshstream.projection import (
 from keenbench.freshstream.taxonomy import TOPICAL_DOMAINS
 from keenbench.freshstream.trends import (
     GEO_CONCURRENCY,
+    TRENDS_MAX_AGE,
     US_GEOS,
     TrendsProvider,
-    cap_by_volume,
-    collect_unique_trends,
     dedupe_projected_queries,
-    dedupe_topics,
-    fetch_all_geos,
-    filter_ascii_topics,
+    select_trends,
 )
 from keenbench.shared.llm import LLMClient
 
@@ -98,14 +90,6 @@ def _collect_rows(
     return rows, llm_errors, no_news_event, duplicates
 
 
-TRENDS_MAX_AGE = timedelta(hours=24)
-
-
-def _trend_is_fresh(trend: Any, *, now: datetime, max_age: timedelta) -> bool:
-    age = published_age_seconds(trend.pub_date, now=now)
-    return age is not None and age <= max_age.total_seconds()
-
-
 def _trend_provenance(trend: Any) -> dict[str, Any]:
     return {
         "producer": "trends_queries",
@@ -169,14 +153,14 @@ async def run_trends(
     llm_concurrency: int = 8,
 ) -> tuple[list[QueryRow], RunStats]:
     now = now or datetime.now(UTC)
-    # Same pipeline as keenable-eval's news_queries (minus SearchAPI enrichment):
-    # multi-geo fan-out -> exact merge -> fuzzy topic dedup -> ASCII filter ->
-    # volume cap -> project -> fuzzy query dedup.
-    trends_by_geo, fetch_errors = await fetch_all_geos(provider, geos, concurrency=geo_concurrency)
-    trends = dedupe_topics(collect_unique_trends(trends_by_geo))
-    trends = filter_ascii_topics(trends)
-    trends = [t for t in trends if _trend_is_fresh(t, now=now, max_age=max_age)]
-    trends = cap_by_volume(trends, max_trends)
+    trends, fetch_errors = await select_trends(
+        provider,
+        geos,
+        now=now,
+        max_age=max_age,
+        max_trends=max_trends,
+        concurrency=geo_concurrency,
+    )
     today = hour_ts.strftime("%Y-%m-%d")
     projections = await project_batch(
         llm, trends, lambda t: build_trend_prompt(t, today=today), concurrency=llm_concurrency

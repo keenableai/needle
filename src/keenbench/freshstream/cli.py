@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 from keenbench.freshstream.feeds import SEED_SOURCES, load_sources_from_toml
 from keenbench.freshstream.pipeline import run_rss, run_trends
-from keenbench.freshstream.trends import US_GEOS, GoogleTrendsRssProvider
+from keenbench.freshstream.trends import GoogleTrendsRssProvider, parse_geos
 from keenbench.shared.io import write_jsonl, write_stdout
 from keenbench.shared.llm import OpenRouterClient
 
@@ -59,17 +59,17 @@ class Freshstream:
         hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
         llm_concurrency = max(1, llm_concurrency)
 
+        provider = None
         if source == "trending":
-            if geos == "us-all":
-                geo_list = US_GEOS
-            else:
-                geo_list = tuple(g.strip() for g in geos.split(",") if g.strip())
-            if not geo_list:
-                raise SystemExit(f"error: no geos parsed from --geos {geos!r}")
+            try:
+                geo_list = parse_geos(geos)
+            except ValueError as exc:
+                raise SystemExit(f"error: --geos: {exc}") from exc
+            provider = GoogleTrendsRssProvider()
 
             def pipeline():
                 return run_trends(
-                    GoogleTrendsRssProvider(),
+                    provider,
                     llm,
                     hour_ts=hour_ts,
                     max_trends=max_trends,
@@ -100,6 +100,8 @@ class Freshstream:
                 return await pipeline()
             finally:
                 await llm.aclose()
+                if provider is not None:
+                    await provider.aclose()
 
         try:
             rows, stats = asyncio.run(_go())

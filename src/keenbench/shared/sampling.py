@@ -61,6 +61,18 @@ def sample_stratified(
     return picked
 
 
+def sample(
+    records: list[dict[str, Any]], k: int, seed: int, *, strategy: str
+) -> list[dict[str, Any]]:
+    if strategy == "head":
+        return records[:k]
+    if strategy == "uniform":
+        return sample_uniform(records, k, seed)
+    if strategy == "stratified":
+        return sample_stratified(records, k, seed)
+    raise ValueError(f"unknown sample strategy {strategy!r} (known: stratified, uniform, head)")
+
+
 def seed_from_hour_ts(hour_ts: datetime) -> int:
     digest = hashlib.sha256(hour_ts.isoformat().encode()).digest()
     return int.from_bytes(digest[:8], "big")

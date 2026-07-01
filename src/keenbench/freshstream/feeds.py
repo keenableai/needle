@@ -1,4 +1,3 @@
-import asyncio
 import time
 import tomllib
 from dataclasses import dataclass
@@ -12,6 +11,8 @@ from xml.etree.ElementTree import Element, ParseError
 import defusedxml.ElementTree as ET
 import httpx
 from defusedxml.common import DefusedXmlException
+
+from keenbench.shared.concurrency import bounded_gather
 
 _DEFAULT_FEEDS_FILE = "feeds.default.toml"
 
@@ -286,18 +287,14 @@ async def fetch_all_sources(
     max_rows_per_source: int = 50,
     concurrency: int = 15,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    if concurrency < 1:
-        raise ValueError("concurrency must be >= 1")
     if max_rows_per_source < 1:
         raise ValueError("max_rows_per_source must be >= 1")
-    sem = asyncio.Semaphore(concurrency)
     async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
 
         async def _one(s: SeedSource) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-            async with sem:
-                return await _fetch_one(client, s, max_rows_per_source=max_rows_per_source)
+            return await _fetch_one(client, s, max_rows_per_source=max_rows_per_source)
 
-        results = await asyncio.gather(*[_one(s) for s in sources])
+        results = await bounded_gather(sources, _one, concurrency=concurrency)
 
     items: list[dict[str, Any]] = []
     healths: list[dict[str, Any]] = []
