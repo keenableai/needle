@@ -8,7 +8,6 @@ _GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
 
 RBP_MAX = 1.0 - RBP_P**RBP_K
 
-# Domain-redundancy penalties, ported from keenable-eval's shared/rbp_kernel.py.
 DUPLICATE_URL_PENALTY = 4
 PARTIAL_DOMAIN_PENALTY = 1
 FULL_DOMAIN_PENALTY = 2
@@ -19,7 +18,6 @@ def gain(rating: int) -> float:
 
 
 def url_domain(url: str) -> str:
-    # Parity with the kernel's LOWER(NET.HOST(url)) — plain host, no eTLD+1 folding.
     try:
         return (urlsplit(url).hostname or "").lower()
     except ValueError:
@@ -29,14 +27,6 @@ def url_domain(url: str) -> str:
 def apply_redundancy_penalties(
     urls: Sequence[str], ratings: Sequence[int], *, query_text: str = ""
 ) -> list[int]:
-    """Knock down ratings of repeated URLs/domains in rank order.
-
-    Mirrors the ``penalized`` CTE in keenable-eval's rbp_kernel: duplicate URL
-    -4, third-or-later result from a domain -2, second -1, floored at 0;
-    ``site:`` queries are exempt (repetition is the point). The kernel's
-    reasoning-text exemptions only fire on rating 0, where every branch yields
-    0 anyway, so they are not ported.
-    """
     if "site:" in query_text.lower():
         return list(ratings)
     seen_urls: set[str] = set()

@@ -29,8 +29,6 @@ def _load_query_rows(path: str) -> list[dict]:
                 rows.append(
                     {
                         "query_text": str(obj["query_text"]),
-                        # One "unknown domain" bucket for stratified sampling,
-                        # matching the plain-text rows below.
                         "topical_domain": str(obj.get("topical_domain") or "other"),
                         "hour_ts": obj.get("hour_ts"),
                     }

@@ -16,7 +16,6 @@ from keenbench.shared.concurrency import bounded_gather
 HT_NS = {"ht": "https://trends.google.com/trending/rss"}
 USER_AGENT = "Mozilla/5.0 (compatible; keenbench-freshstream/0.1)"
 
-# Same fan-out as keenable-eval's news_queries: national + every state + DC.
 US_GEOS: tuple[str, ...] = (
     "US",
     "US-AL",
@@ -76,13 +75,11 @@ GEO_CONCURRENCY = 10
 
 TRENDS_MAX_AGE = timedelta(hours=24)
 
-# Fuzzy-match thresholds mirrored from keenable-eval (tuned against prod trends).
-DEDUP_THRESHOLD = 90  # near-duplicate *topics* across geos
-QUERY_DEDUP_THRESHOLD = 85  # near-duplicate *generated queries*
+DEDUP_THRESHOLD = 90
+QUERY_DEDUP_THRESHOLD = 85
 
 
 def parse_geos(spec: str) -> tuple[str, ...]:
-    """``"us-all"`` -> the full US fan-out; otherwise comma-separated geo codes."""
     if spec == "us-all":
         return US_GEOS
     geos = tuple(g.strip() for g in spec.split(",") if g.strip())
@@ -112,7 +109,6 @@ class TrendsProvider(Protocol):
 
 
 def approx_traffic_value(s: str | None) -> int:
-    """Parse the RSS ``ht:approx_traffic`` label ("100,000+", "2M+") to an int."""
     if not s:
         return 0
     m = re.match(r"([\d,.]+)\s*([KM]?)", s.strip(), re.IGNORECASE)
@@ -161,8 +157,6 @@ class GoogleTrendsRssProvider:
     ) -> None:
         self.base_url = base_url
         self.timeout = httpx.Timeout(timeout_s) if timeout_s else HTTP_TIMEOUT
-        # One lazy client so the multi-geo fan-out reuses connections to the
-        # same host instead of paying a TLS handshake per geo.
         self._client: httpx.AsyncClient | None = None
 
     def _http(self) -> httpx.AsyncClient:
@@ -200,8 +194,6 @@ async def fetch_all_geos(
     *,
     concurrency: int = GEO_CONCURRENCY,
 ) -> tuple[dict[str, list[Trend]], int]:
-    """Fetch every geo concurrently. A failed geo is dropped (fail-soft);
-    returns ``(trends_by_geo, fetch_errors)``."""
 
     async def _one(geo: str) -> tuple[str, list[Trend] | None]:
         try:
@@ -216,8 +208,6 @@ async def fetch_all_geos(
 
 TOPIC_DEDUP_FLUFF_RE = re.compile(r"\b(vs?|and)\b")
 
-# Queries additionally shed date-ish/timing tokens so entries differing only in
-# timing language collide (mirrors keenable-eval).
 QUERY_DEDUP_FLUFF_RE = re.compile(
     r"\b(vs?|and|match|results?|score|live|today"
     r"|january|february|march|april|may|june|july|august"
@@ -227,8 +217,6 @@ QUERY_DEDUP_FLUFF_RE = re.compile(
 
 
 def _normalize(s: str, fluff_re: re.Pattern[str]) -> str:
-    """Fold into a comparable form: ASCII-fold, lowercase, drop fluff tokens,
-    strip punctuation, sort tokens (mirrors keenable-eval)."""
     s = unicodedata.normalize("NFKD", s).encode("ascii", "ignore").decode()
     s = s.lower()
     s = fluff_re.sub("", s)
@@ -237,8 +225,6 @@ def _normalize(s: str, fluff_re: re.Pattern[str]) -> str:
 
 
 def collect_unique_trends(trends_by_geo: dict[str, list[Trend]]) -> list[Trend]:
-    """Merge exact-topic duplicates across geos, tracking every geo a topic
-    appeared in. The first geo's payload is the representative."""
     seen: dict[str, Trend] = {}
     for geo, trends in trends_by_geo.items():
         for trend in trends:
@@ -251,8 +237,6 @@ def collect_unique_trends(trends_by_geo: dict[str, list[Trend]]) -> list[Trend]:
 
 
 def dedupe_topics(trends: list[Trend]) -> list[Trend]:
-    """Collapse fuzzy-duplicate topics; the highest-volume entry survives and
-    absorbs its aliases' geo lists."""
     ordered = sorted(trends, key=lambda t: approx_traffic_value(t.approx_traffic), reverse=True)
     clusters: list[tuple[str, Trend]] = []
     for trend in ordered:
@@ -271,7 +255,6 @@ def dedupe_topics(trends: list[Trend]) -> list[Trend]:
 
 
 def filter_ascii_topics(trends: list[Trend]) -> list[Trend]:
-    # The query model is English-first; non-ASCII topics are non-English.
     return [t for t in trends if t.topic.isascii()]
 
 
@@ -297,11 +280,6 @@ async def select_trends(
     max_trends: int = 0,
     concurrency: int = GEO_CONCURRENCY,
 ) -> tuple[list[Trend], int]:
-    """The projectable-trend selection chain, ordering included: multi-geo
-    fan-out -> exact merge -> fuzzy dedup -> ASCII filter -> freshness gate ->
-    volume cap (dedup before the cap, or the cap admits near-duplicates).
-    Returns ``(trends, fetch_errors)``. Mirrors keenable-eval's
-    prepare_enrichment_inputs minus the SearchAPI enrichment."""
     trends_by_geo, fetch_errors = await fetch_all_geos(provider, geos, concurrency=concurrency)
     trends = dedupe_topics(collect_unique_trends(trends_by_geo))
     trends = filter_ascii_topics(trends)
@@ -312,9 +290,6 @@ async def select_trends(
 def dedupe_projected_queries(
     projections: list[tuple[Trend, str | None, dict[str, str] | None]],
 ) -> tuple[list[tuple[Trend, str | None, dict[str, str] | None]], int]:
-    """Drop projections whose generated query is a near-duplicate of a
-    higher-volume entry's. Errors and refusals pass through untouched.
-    Returns ``(kept, dropped_count)``."""
     passthrough = [p for p in projections if p[1] is None]
     successes = sorted(
         ((trend, text) for trend, text, _err in projections if text is not None),

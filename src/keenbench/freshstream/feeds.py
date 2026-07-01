@@ -59,7 +59,6 @@ RAW_MAX_AGE_BY_KIND: dict[str, timedelta] = {"rss_paper": timedelta(hours=168)}
 QUERY_MAX_AGE_DEFAULT = timedelta(hours=1)
 QUERY_MAX_AGE_BY_KIND: dict[str, timedelta] = {"rss_paper": timedelta(hours=168)}
 
-# Publisher clocks drift; items dated slightly in the future are the freshest, not garbage.
 FUTURE_SKEW_TOLERANCE = timedelta(minutes=5)
 _FUTURE_SKEW_TOLERANCE_S = FUTURE_SKEW_TOLERANCE.total_seconds()
 
@@ -137,7 +136,6 @@ def _parse_feed(root: Element) -> list[dict[str, str | None]]:
             }
         )
 
-    # RSS 1.0 (RDF) puts items in their own namespace, so ".//item" misses them.
     for item in root.findall(".//rss1:item", NS):
         entries.append(
             {
@@ -183,7 +181,6 @@ def parse_published_date(s: str | None) -> datetime | None:
         return None
 
 
-# None means undated or implausibly future-dated; tolerated skew clamps to age 0.
 def published_age_seconds(published_at: str | None, *, now: datetime) -> float | None:
     dt = parse_published_date(published_at)
     if dt is None:
@@ -246,8 +243,6 @@ async def _fetch_one(
     item_ages_seconds: list[float] = []
     recent_items: list[dict[str, str | None]] = []
     newest_age_seconds: float | None = None
-    # Only dated, plausibly-timestamped items go on: undated ones can't be
-    # age-filtered and would crowd dated items out of the max_rows_per_source cut.
     for e in parsed_items:
         age = published_age_seconds(e.get("published_at"), now=now)
         if age is None:

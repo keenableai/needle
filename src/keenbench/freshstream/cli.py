@@ -9,7 +9,7 @@ from keenbench.freshstream.trends import GoogleTrendsRssProvider, parse_geos
 from keenbench.shared.io import write_jsonl, write_stdout
 from keenbench.shared.llm import OpenRouterClient
 
-DEFAULT_MODEL = "google/gemini-2.5-flash-lite"
+DEFAULT_MODEL = "google/gemini-3.1-flash-lite"
 
 
 class Freshstream:

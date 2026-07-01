@@ -48,9 +48,9 @@ exported variable takes precedence.
 
 ```bash
 cp .env.example .env    # then set OPENROUTER_API_KEY
-# default model is google/gemini-2.5-flash-lite; override with --llm-model or $KEENBENCH_LLM_MODEL
+# default model is google/gemini-3.1-flash-lite; override with --llm-model or $KEENBENCH_LLM_MODEL
 keenbench freshstream run --source rss --out queries.jsonl
-keenbench freshstream run --source trending --geo US --out trending.jsonl
+keenbench freshstream run --source trending --out trending.jsonl   # all 52 US geos; --geos US,US-CA to narrow
 ```
 
 Each output line is one canonical query row:
@@ -98,7 +98,7 @@ from keenbench.freshstream import run_rss
 from keenbench.freshstream.feeds import SEED_SOURCES
 from keenbench.shared.llm import OpenRouterClient
 
-llm = OpenRouterClient(api_key="sk-or-...", model="google/gemini-2.5-flash-lite")
+llm = OpenRouterClient(api_key="sk-or-...", model="google/gemini-3.1-flash-lite")
 hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
 rows, stats = asyncio.run(run_rss(SEED_SOURCES, llm, hour_ts=hour_ts))
 ```

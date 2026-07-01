@@ -46,7 +46,6 @@ def test_parse_rejects_out_of_range_or_garbage():
 
 
 def test_parse_keeps_model_label_even_when_mismatched():
-    # Parity with keenable-eval: a mismatch is the judge's signal, not ours to hide.
     j = parse_judgement("rating: 4\nlabel: FailsM\nreasoning: r")
     assert j.rating == 4 and j.label == "FailsM"
 
@@ -57,13 +56,11 @@ def test_parse_derives_label_when_invalid():
 
 
 def test_parse_falls_back_to_json():
-    # Tab-indented JSON is invalid YAML but valid JSON.
     j = parse_judgement('{\n\t"rating": 3,\n\t"label": "HM",\n\t"reasoning": "r"\n}')
     assert j is not None and j.rating == 3 and j.label == "HM"
 
 
 def test_parse_falls_back_to_regex_scrape():
-    # Unquoted nested colons break YAML; the field scrape still recovers it.
     j = parse_judgement("rating: 3\nlabel: HM\nreasoning: broken: nested: colons")
     assert j is not None and j.rating == 3 and j.label == "HM"
     assert "broken: nested: colons" in j.reasoning

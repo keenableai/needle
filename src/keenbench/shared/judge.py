@@ -12,8 +12,6 @@ DEFAULT_MAX_CONTENT_CHARS = 50_000
 JUDGE_TEMPLATE = "judgement.jinja"
 
 _LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
-# MM is legacy (never produced by the current prompt) but accepted for parity
-# with keenable-eval's NeedsMetLabel enum.
 _VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
 
 _FENCE_PATTERNS = (
@@ -102,7 +100,6 @@ def build_judge_prompt(
 
 
 def _parse_rating(raw: object) -> int | None:
-    # Strict on purpose: YAML `true` would int() to 1 and `3.7` would truncate to 3.
     if isinstance(raw, bool):
         return None
     if isinstance(raw, int):
@@ -115,8 +112,6 @@ def _parse_rating(raw: object) -> int | None:
     return None
 
 
-# Last-resort field scrape when the response is not valid YAML/JSON; mirrors
-# keenable-eval's llm_extract._extract_fields_regex.
 def _extract_fields_regex(content: str) -> dict[str, object] | None:
     rating_match = re.search(r"^rating:\s*(\d+)", content, re.MULTILINE)
     label_match = re.search(r"^label:\s*(\S+)", content, re.MULTILINE)
@@ -154,8 +149,6 @@ def parse_judgement(text: str | None) -> Judgement | None:
     rating = _parse_rating(data["rating"])
     if rating is None or not 0 <= rating <= 4:
         return None
-    # Keep the model's label when it's a known value (mismatches are the
-    # judge's signal, per keenable-eval); derive only when missing/invalid.
     label = str(data.get("label") or "").strip()
     if label not in _VALID_LABELS:
         label = _LABELS[rating]

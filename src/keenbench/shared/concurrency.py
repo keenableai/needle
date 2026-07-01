@@ -9,7 +9,6 @@ R = TypeVar("R")
 async def bounded_gather(
     items: Sequence[T], worker: Callable[[T], Awaitable[R]], *, concurrency: int
 ) -> list[R]:
-    """Run ``worker`` over ``items`` concurrently, at most ``concurrency`` in flight."""
     if concurrency < 1:
         raise ValueError("concurrency must be >= 1")
     sem = asyncio.Semaphore(concurrency)

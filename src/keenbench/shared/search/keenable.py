@@ -31,8 +31,6 @@ class KeenableClient(HttpSearchClient):
             headers["X-API-Key"] = self.api_key
         else:
             path = "/v1/search/public"
-        # The search API has no result-count parameter, so num_results is
-        # enforced client-side below.
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}{path}",

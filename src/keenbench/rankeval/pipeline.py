@@ -11,18 +11,10 @@ from keenbench.shared.search import SearchClient, SearchResult
 @dataclass(frozen=True)
 class EvalQuery:
     text: str
-    # Judge "Today's date" anchor; per-query (e.g. from the row's hour_ts) so
-    # re-judging an old query set is deterministic instead of drifting with
-    # wall clock.
     today: str
 
 
 def _merge_pair(results: list[SearchResult]) -> SearchResult:
-    """Collapse one (query, url) pair's per-engine results into one judge doc.
-
-    Longest snippet wins (most content for the judge); title/published fall
-    back across engines in encounter order.
-    """
     snippet = max(results, key=lambda r: len(r.snippet or "")).snippet
     return SearchResult(
         url=results[0].url,
@@ -40,8 +32,6 @@ def _score_query(
     *,
     k: int,
 ) -> dict[str, Any]:
-    # rbp stays None (excluded from the mean) when the search failed or any
-    # judgement is missing — a defaulted rating of 0 would bias the comparison.
     out: dict[str, Any] = {
         "query": query.text,
         "rbp": None,
@@ -95,10 +85,6 @@ async def run_rbp(
             )
         return judgement.rating if judgement is not None else None
 
-    # One judgement per unique (query, url) pair across all engines — the same
-    # document gets one rating everywhere, and overlapping engines don't pay
-    # for duplicate LLM calls. Queries run independently end-to-end, so one
-    # query's judging overlaps another's searches.
     async def run_query(query: EvalQuery) -> tuple[list[Any], dict[str, int | None]]:
         searches = await asyncio.gather(
             *[engines[n].search(query.text, num_results=num_results) for n in names]

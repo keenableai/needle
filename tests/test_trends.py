@@ -56,7 +56,6 @@ def trend(topic, traffic=None, pub=FRESH_PUB, news=(), geos=()):
 
 class FakeProvider:
     def __init__(self, by_geo):
-        # by_geo: {geo: list[Trend] | Exception}
         self._by_geo = by_geo
 
     async def fetch(self, geo):
@@ -116,7 +115,7 @@ def test_dedupe_topics_fuzzy_merges_and_keeps_highest_volume():
     ]
     deduped = dedupe_topics(trends)
     topics = [t.topic for t in deduped]
-    assert "warriors lakers" in topics  # higher volume survives
+    assert "warriors lakers" in topics
     assert "Lakers vs Warriors" not in topics
     survivor = next(t for t in deduped if t.topic == "warriors lakers")
     assert set(survivor.geos) == {"US", "US-CA"}
@@ -148,10 +147,10 @@ def test_dedupe_projected_queries_collapses_near_duplicates():
     kept, dropped = dedupe_projected_queries(projections)
     texts = [t for _, t, _ in kept if t]
     assert dropped == 1
-    assert "Lakers vs Warriors score 2026" in texts  # higher volume survives
+    assert "Lakers vs Warriors score 2026" in texts
     assert "lakers warriors game score" not in texts
     assert "senate budget vote" in texts
-    assert sum(1 for _, t, _ in kept if t is None) == 2  # error + refusal pass through
+    assert sum(1 for _, t, _ in kept if t is None) == 2
 
 
 async def test_fetch_all_geos_fail_soft():

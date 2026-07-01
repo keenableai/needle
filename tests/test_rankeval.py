@@ -115,7 +115,6 @@ async def test_run_rbp_judges_each_query_url_pair_once_across_engines():
     )
     assert report["judged_pairs"] == 1
     assert judge.calls == 1
-    # The merged doc carries the longest snippet and the first non-null title.
     assert "GOODDOC but much longer" in judge.prompts[0]
     assert report["engines"]["a"]["per_query"][0]["ratings"] == [4]
     assert report["engines"]["b"]["per_query"][0]["ratings"] == [4]
