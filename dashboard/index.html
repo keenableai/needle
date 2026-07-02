@@ -142,6 +142,11 @@
   .chips { display: inline-flex; gap: 3px; }
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
+
+  /* filled matrix cells: separate borders so the 2px surface gap and radius apply */
+  #overlap-table table { border-collapse: separate; border-spacing: 2px; }
+  #overlap-table th, #overlap-table td { border-bottom: none; }
+  #overlap-table td.overlap-cell { border-radius: 4px; text-align: center; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -192,6 +197,12 @@
     <h2>companyfill — recall@5 by field (latest run)</h2>
     <div class="sub" id="fields-sub"></div>
     <div id="fields-table"></div>
+  </div>
+
+  <div class="card" id="card-overlap">
+    <h2>Engine overlap — shared result URLs (last 24h)</h2>
+    <div class="sub" id="overlap-sub"></div>
+    <div id="overlap-table"></div>
   </div>
 
   <div class="card" id="card-runs">
@@ -502,6 +513,61 @@ function renderHistoryTable(rows) {
 const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
 const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 
+// overlap is magnitude too — same validated sequential ramp, value printed in-cell
+function renderOverlap(rows) {
+  const holder = document.getElementById("overlap-table");
+  holder.replaceChildren();
+  const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
+  const cutoff = Date.now() - 24 * 3600e3;
+  const recent = rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
+  const pairs = new Map();
+  for (const r of recent) {
+    const agg = pairs.get(pairKey(r.a, r.b)) || { jsum: 0, n: 0 };
+    agg.jsum += r.jaccard_sum;
+    agg.n += r.num_queries;
+    pairs.set(pairKey(r.a, r.b), agg);
+  }
+  const engines = ENGINES.filter((e) => recent.some((r) => r.a === e || r.b === e));
+  if (engines.length < 2) {
+    holder.appendChild(el("div", { class: "empty" }, "No overlap data in the last 24h yet — accumulates from hourly runs."));
+    return;
+  }
+  const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
+  document.getElementById("overlap-sub").textContent =
+    `mean Jaccard overlap of top-K URL sets on the same queries, freshstream + companyfill — up to ${nQueries} queries per pair, last 24h`;
+  const table = el("table");
+  const head = el("tr");
+  head.appendChild(el("th", {}, ""));
+  for (const e of engines) head.appendChild(el("th", { class: "num" }, e));
+  table.appendChild(head);
+  for (const a of engines) {
+    const tr = el("tr");
+    const nameCell = el("td");
+    const key = el("span", { class: "key" });
+    key.style.background = colorOf(a);
+    nameCell.append(key, document.createTextNode(a));
+    tr.appendChild(nameCell);
+    for (const b of engines) {
+      if (a === b) {
+        tr.appendChild(el("td", { class: "overlap-cell" }, "–"));
+        continue;
+      }
+      const agg = pairs.get(pairKey(a, b));
+      const v = agg && agg.n ? agg.jsum / agg.n : null;
+      const td = el("td", { class: "overlap-cell" }, v == null ? "–" : v.toFixed(2));
+      if (v != null) {
+        const step = Math.min(4, Math.floor(v * 5));
+        td.style.background = RATING_BG[step];
+        td.style.color = RATING_INK[step];
+        td.title = `${a} ∩ ${b}: ${v.toFixed(3)} over ${agg.n} queries`;
+      }
+      tr.appendChild(td);
+    }
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
 function ratingChip(rating, title) {
   const chip = el("span", { class: "chip" }, rating == null ? "?" : String(rating));
   chip.style.background = rating == null ? "var(--grid)" : RATING_BG[rating];
@@ -682,13 +748,17 @@ function renderLegend() {
 }
 
 async function main() {
-  const [histText, latestCompanyfill] = await Promise.all([
-    fetch("data/history.jsonl", { cache: "no-store" })
+  const fetchLines = (url) =>
+    fetch(url, { cache: "no-store" })
       .then((r) => (r.ok ? r.text() : ""))
-      .catch(() => ""),
+      .catch(() => "");
+  const [histText, overlapText, latestCompanyfill] = await Promise.all([
+    fetchLines("data/history.jsonl"),
+    fetchLines("data/overlap.jsonl"),
     fetchJson("data/latest_companyfill.json").catch(() => null),
   ]);
   history = histText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
+  const overlapRows = overlapText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
   registerEngines(history.map((r) => r.engine));
   registerEngines(Object.keys(latestCompanyfill?.engines || {}));
   renderLegend();
@@ -711,6 +781,8 @@ async function main() {
   }
 
   renderAll(latestCompanyfill);
+  // fixed 24h window by design, independent of the range filter above
+  renderOverlap(overlapRows);
   initRunBrowser();
   document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
   let resizeTimer;
