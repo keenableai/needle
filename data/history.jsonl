@@ -8,3 +8,5 @@
 {"ts": "2026-07-02T15:54Z", "bench": "companyfill", "engine": "exa", "recall": 0.83, "mrr": 0.6273333333333335, "num_scored": 100, "num_queries": 100, "search_errors": 0}
 {"ts": "2026-07-02T16:03Z", "bench": "freshstream", "engine": "keenable", "rbp": 0.506036092631579, "rbp_max": 0.6723199999999999, "num_scored": 19, "num_queries": 20, "search_errors": 1, "judge_errors": 0}
 {"ts": "2026-07-02T16:03Z", "bench": "freshstream", "engine": "exa", "rbp": 0.49544977599999995, "rbp_max": 0.6723199999999999, "num_scored": 20, "num_queries": 20, "search_errors": 0, "judge_errors": 0}
+{"ts": "2026-07-02T16:18Z", "bench": "freshstream", "engine": "keenable", "rbp": 0.5008382879999999, "rbp_max": 0.6723199999999999, "num_scored": 20, "num_queries": 20, "search_errors": 0, "judge_errors": 0}
+{"ts": "2026-07-02T16:18Z", "bench": "freshstream", "engine": "exa", "rbp": 0.49834355199999986, "rbp_max": 0.6723199999999999, "num_scored": 20, "num_queries": 20, "search_errors": 0, "judge_errors": 0}
