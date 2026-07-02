@@ -19,3 +19,11 @@ def write_jsonl(records: Iterable[Record], path: str | Path) -> None:
 
 def write_stdout(records: Iterable[Record]) -> None:
     _write(records, sys.stdout)
+
+
+def write_json(obj: Any, out: str | Path) -> None:
+    text = json.dumps(obj, ensure_ascii=False, indent=2)
+    if out == "-":
+        print(text)
+    else:
+        Path(out).write_text(text + "\n", encoding="utf-8")

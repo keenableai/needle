@@ -1,30 +1,29 @@
 import pytest
 
 from keenbench.freshstream import cli as freshstream_cli
-from keenbench.freshstream.cli import Freshstream
 from keenbench.shared.llm import OpenRouterClient, _content_to_text
 from keenbench.shared.search import factory as search_factory
 
 
 def test_run_rejects_unsupported_source():
     with pytest.raises(SystemExit):
-        Freshstream().generate(source="bogus")
+        freshstream_cli.Freshstream().generate(source="bogus")
 
 
 def test_trending_rejects_rss_only_flags():
     with pytest.raises(SystemExit):
-        Freshstream().generate(source="trending", feeds="x.toml")
+        freshstream_cli.Freshstream().generate(source="trending", feeds="x.toml")
 
 
 def test_rss_rejects_trends_only_flags():
     with pytest.raises(SystemExit):
-        Freshstream().generate(source="rss", max_trends=5)
+        freshstream_cli.Freshstream().generate(source="rss", max_trends=5)
 
 
 def test_run_rejects_bad_feeds_file(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     with pytest.raises(SystemExit):
-        Freshstream().generate(feeds=str(tmp_path / "does-not-exist.toml"))
+        freshstream_cli.Freshstream().generate(feeds=str(tmp_path / "does-not-exist.toml"))
 
 
 def test_openrouter_default_temperature_is_deterministic():
@@ -75,7 +74,9 @@ def test_freshstream_run_passes_keenable_api_key(monkeypatch, tmp_path):
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(freshstream_cli, "run_rbp", fake_run_rbp)
-    Freshstream().run(queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json"))
+    freshstream_cli.Freshstream().run(
+        queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json")
+    )
     assert created == {"api_key": "kb-key", "mode": "pro"}
 
 
@@ -96,4 +97,4 @@ def test_freshstream_run_rejects_unknown_sample(tmp_path, monkeypatch):
     f = tmp_path / "q.jsonl"
     f.write_text("a\nb\n")
     with pytest.raises(SystemExit):
-        Freshstream().run(queries=str(f), limit=1, sample="bogus")
+        freshstream_cli.Freshstream().run(queries=str(f), limit=1, sample="bogus")

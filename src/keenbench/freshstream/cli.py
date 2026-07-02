@@ -8,11 +8,10 @@ from pathlib import Path
 from keenbench.freshstream.feeds import SEED_SOURCES, load_sources_from_toml
 from keenbench.freshstream.pipeline import run_rss, run_trends
 from keenbench.freshstream.trends import GoogleTrendsRssProvider, parse_geos
-from keenbench.shared.io import write_jsonl, write_stdout
+from keenbench.shared.cli import build_clients_or_exit, sample_or_exit
+from keenbench.shared.io import write_json, write_jsonl, write_stdout
 from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
 from keenbench.shared.rankeval import EvalQuery, run_rbp
-from keenbench.shared.sampling import sample as sample_rows
-from keenbench.shared.search import build_search_clients
 
 DEFAULT_MODEL = "google/gemini-3.1-flash-lite"
 
@@ -188,11 +187,7 @@ class Freshstream:
             raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for the judge)")
 
         rows = _load_query_rows(queries)
-        if limit > 0 and len(rows) > limit:
-            try:
-                rows = sample_rows(rows, limit, seed, strategy=sample)
-            except ValueError as exc:
-                raise SystemExit(f"error: --sample: {exc}") from exc
+        rows = sample_or_exit(rows, limit, seed, strategy=sample)
         if not rows:
             raise SystemExit(f"error: no queries loaded from {queries!r}")
 
@@ -201,20 +196,12 @@ class Freshstream:
             EvalQuery(text=r["query_text"], today=_today_for_row(r, fallback_today)) for r in rows
         ]
 
-        if isinstance(engines, str):
-            engine_names = [e.strip() for e in engines.split(",") if e.strip()]
-        else:
-            engine_names = [str(e).strip() for e in engines]
-
-        try:
-            clients = build_search_clients(
-                engine_names,
-                keenable_mode=keenable_mode,
-                exa_concurrency=exa_concurrency,
-                exa_highlight_chars=snippet_chars,
-            )
-        except ValueError as exc:
-            raise SystemExit(f"error: {exc}") from exc
+        clients = build_clients_or_exit(
+            engines,
+            keenable_mode=keenable_mode,
+            exa_concurrency=exa_concurrency,
+            snippet_chars=snippet_chars,
+        )
 
         model = resolve_judge_model(judge_model)
         judge = OpenRouterClient(api_key=openrouter_key, model=model)
@@ -236,12 +223,7 @@ class Freshstream:
 
         report = asyncio.run(_go())
         report["judge_model"] = model
-
-        text = json.dumps(report, ensure_ascii=False, indent=2)
-        if out == "-":
-            print(text)
-        else:
-            Path(out).write_text(text + "\n", encoding="utf-8")
+        write_json(report, out)
 
         print(
             f"\nfreshstream: {report['num_queries']} queries, judge={model}",
