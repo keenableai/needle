@@ -196,6 +196,17 @@
   </div>
 
   <div class="grid2">
+    <div class="card" id="card-latency-p50">
+      <h2>Search latency — p50</h2>
+      <div class="sub">median duration of successful search API calls, freshstream runs</div>
+    </div>
+    <div class="card" id="card-latency-p95">
+      <h2>Search latency — p95</h2>
+      <div class="sub">95th percentile, same runs</div>
+    </div>
+  </div>
+
+  <div class="grid2">
     <div class="card" id="card-recall">
       <h2>companyfill — answer-recall@5</h2>
       <div class="sub">100 gold queries per run</div>
@@ -265,6 +276,17 @@ let rangeMs = Infinity;
 let history = [];
 
 const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
+const fmtMs = (v) => v == null ? "–" : v >= 1000 ? `${(v / 1000).toFixed(v >= 9950 ? 0 : 1)} s` : `${Math.round(v)} ms`;
+
+function msScale(maxV) {
+  const raw = Math.max(maxV, 1) / 4;
+  const pow = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * pow).find((s) => raw <= s);
+  const top = Math.max(step, Math.ceil(maxV / step) * step);
+  const ticks = [];
+  for (let v = 0; v <= top; v += step) ticks.push(v);
+  return { domain: [0, top], ticks };
+}
 const fmtTime = (d) => d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
 
 function seriesFor(bench, metric, rows) {
@@ -298,11 +320,13 @@ function drawChart(card, series, opts) {
   card.querySelectorAll("svg, .tooltip, .empty").forEach((n) => n.remove());
   const points = ENGINES.flatMap((e) => series[e]);
   if (!points.length) {
-    card.appendChild(el("div", { class: "empty" }, "No data yet — first scheduled run pending."));
+    card.appendChild(el("div", { class: "empty" }, opts.empty || "No data yet — first scheduled run pending."));
     return;
   }
+  const fmt = opts.fmt || fmt3;
+  const tickFmt = opts.tickFmt || ((v) => v.toFixed(1));
   const W = Math.max(card.clientWidth - 32, 280), H = 200;
-  const M = { top: 12, right: 76, bottom: 26, left: 40 };
+  const M = { top: 12, right: 76, bottom: 26, left: opts.left || 40 };
   const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
   const ts = points.map((p) => p.t.getTime());
   let t0 = Math.min(...ts), t1 = Math.max(...ts);
@@ -315,7 +339,7 @@ function drawChart(card, series, opts) {
 
   for (const gv of opts.ticks) {
     svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(gv), y2: y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
-    svg.appendChild(el("text", { x: M.left - 6, y: y(gv) + 3, "text-anchor": "end", class: "axis-text" }, gv.toFixed(1)));
+    svg.appendChild(el("text", { x: M.left - 6, y: y(gv) + 3, "text-anchor": "end", class: "axis-text" }, tickFmt(gv)));
   }
   svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(y0), y2: y(y0), stroke: "var(--baseline)", "stroke-width": 1 }));
   if (opts.ceiling) {
@@ -339,12 +363,24 @@ function drawChart(card, series, opts) {
     endLabels.push({ e, yPos: y(last.v), xPos: x(last.t.getTime()) });
   }
   endLabels.sort((a, b) => a.yPos - b.yPos);
-  // direct end-labels; skip the second when the two collide (legend still carries identity)
-  let lastY = -Infinity;
+  // spread colliding end-labels apart and reconnect them with leader lines,
+  // so every engine stays labeled even when the lines converge
+  const gap = 13;
+  let lo = M.top + 4;
   for (const l of endLabels) {
-    if (l.yPos - lastY < 13) continue;
-    lastY = l.yPos;
-    svg.appendChild(el("text", { x: l.xPos + 8, y: l.yPos + 4, class: "end-label" }, l.e));
+    l.labelY = Math.max(l.yPos, lo);
+    lo = l.labelY + gap;
+  }
+  let hi = M.top + ih;
+  for (let i = endLabels.length - 1; i >= 0; i--) {
+    endLabels[i].labelY = Math.min(endLabels[i].labelY, hi);
+    hi = endLabels[i].labelY - gap;
+  }
+  for (const l of endLabels) {
+    if (Math.abs(l.labelY - l.yPos) > 3) {
+      svg.appendChild(el("line", { x1: l.xPos + 5, y1: l.yPos, x2: l.xPos + 11, y2: l.labelY, stroke: "var(--baseline)", "stroke-width": 1 }));
+    }
+    svg.appendChild(el("text", { x: l.xPos + 13, y: l.labelY + 4, class: "end-label" }, l.e));
   }
 
   const cross = el("line", { y1: M.top, y2: M.top + ih, stroke: "var(--baseline)", "stroke-width": 1, visibility: "hidden" });
@@ -376,7 +412,7 @@ function drawChart(card, series, opts) {
     for (const { e, v } of atT) {
       const row = el("div", { class: "row" });
       const key = el("span", { class: "key" }); key.style.background = colorOf(e);
-      row.append(key, el("span", { class: "val" }, fmt3(v)), el("span", { class: "name" }, e));
+      row.append(key, el("span", { class: "val" }, fmt(v)), el("span", { class: "name" }, e));
       tip.appendChild(row);
     }
     tip.style.display = "block";
@@ -501,8 +537,8 @@ function renderHistoryTable(rows) {
   holder.replaceChildren();
   const table = el("table");
   const head = el("tr");
-  for (const h of ["time (UTC)", "benchmark", "engine", "metric", "value", "scored", "errors"]) {
-    head.appendChild(el("th", { class: ["value", "scored", "errors"].includes(h) ? "num" : "" }, h));
+  for (const h of ["time (UTC)", "benchmark", "engine", "metric", "value", "p50", "p95", "scored", "errors"]) {
+    head.appendChild(el("th", { class: ["value", "p50", "p95", "scored", "errors"].includes(h) ? "num" : "" }, h));
   }
   table.appendChild(head);
   for (const r of [...rows].reverse()) {
@@ -514,6 +550,8 @@ function renderHistoryTable(rows) {
       tr.appendChild(el("td", {}, r.engine));
       tr.appendChild(el("td", {}, name));
       tr.appendChild(el("td", { class: "num" }, fmt3(v)));
+      tr.appendChild(el("td", { class: "num" }, fmtMs(r.p50_ms)));
+      tr.appendChild(el("td", { class: "num" }, fmtMs(r.p95_ms)));
       tr.appendChild(el("td", { class: "num" }, `${r.num_scored}/${r.num_queries}`));
       tr.appendChild(el("td", { class: "num" }, String((r.search_errors || 0) + (r.judge_errors || 0))));
       table.appendChild(tr);
@@ -751,6 +789,14 @@ function drawCharts(rows) {
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
+  for (const [metric, name] of [["p50_ms", "p50"], ["p95_ms", "p95"]]) {
+    const lat = seriesFor("freshstream", metric, rows);
+    const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((p) => p.v))));
+    drawChart(document.getElementById(`card-latency-${name}`), lat,
+      { domain: sc.domain, ticks: sc.ticks, fmt: fmtMs, tickFmt: fmtMs, left: 56,
+        label: `${name} search latency over time per engine`,
+        empty: "No latency data yet — collected from new runs." });
+  }
 }
 
 function refreshHistoryTable() {

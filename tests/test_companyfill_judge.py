@@ -26,6 +26,7 @@ def _r(url, title=None, snippet=None):
 class FakeEngine:
     def __init__(self, canned):
         self.canned = canned
+        self.latencies_ms = []
 
     async def search(self, query, *, num_results=10):
         return self.canned.get(query, ([], None))

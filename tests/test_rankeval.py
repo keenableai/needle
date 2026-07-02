@@ -16,6 +16,7 @@ class FakeEngine:
     def __init__(self, results, error=None):
         self._results = results
         self._error = error
+        self.latencies_ms = []
 
     async def search(self, query, *, num_results=10):
         if self._error is not None:
@@ -61,6 +62,7 @@ async def test_run_rbp_excludes_search_errors_from_mean():
 
     class FlakyEngine:
         engine = "flaky"
+        latencies_ms = []
 
         async def search(self, query, *, num_results=10):
             if query == "q_err":
@@ -132,6 +134,20 @@ async def test_run_rbp_applies_domain_redundancy_penalties():
     assert pq["penalized_ratings"] == [4, 3, 2]
     expected = (1 - 0.8) * (1.0 + 0.8 * 0.667 + 0.8**2 * 0.117)
     assert pq["rbp"] == pytest.approx(expected)
+
+
+async def test_run_rbp_reports_latency():
+    timed = FakeEngine([])
+    timed.latencies_ms = [100.0, 300.0]
+
+    report = await run_rbp([q("q1")], {"timed": timed, "plain": FakeEngine([])}, FakeJudge())
+    assert report["engines"]["timed"]["latency"] == {
+        "n": 2,
+        "mean_ms": 200.0,
+        "p50_ms": 100.0,
+        "p95_ms": 300.0,
+    }
+    assert report["engines"]["plain"]["latency"] is None
 
 
 async def test_run_rbp_uses_per_query_today():
