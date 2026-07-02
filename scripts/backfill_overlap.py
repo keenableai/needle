@@ -27,7 +27,11 @@ def parse_ts(ts: str) -> datetime:
 
 def backfill(site: str, hours: int = 24) -> None:
     data = Path(site) / "data"
-    runs = json.loads((data / "runs.json").read_text(encoding="utf-8"))
+    index_path = data / "runs.json"
+    if not index_path.exists():
+        print("no runs.json yet; nothing to backfill")
+        return
+    runs = json.loads(index_path.read_text(encoding="utf-8"))
     out_path = data / "overlap.jsonl"
     existing = []
     if out_path.exists():

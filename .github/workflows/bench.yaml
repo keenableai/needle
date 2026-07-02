@@ -77,6 +77,8 @@ jobs:
 
       - name: Publish
         run: |
+          # seeds overlap.jsonl from HF-archived runs; no-op once caught up
+          uv run python scripts/backfill_overlap.py --site site-data --hours 24
           TS=$(date -u +%Y-%m-%dT%H:%MZ)
           args="--site site-data --runs-out staged --ts $TS --rbp rbp.json --fresh fresh.jsonl"
           if [ -s recall.json ]; then
