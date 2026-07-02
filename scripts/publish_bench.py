@@ -17,6 +17,7 @@ from pathlib import Path
 import fire
 
 from keenbench.shared.io import write_json
+from keenbench.shared.overlap import overlap_rows
 
 
 def freshstream_rows(report: dict, ts: str) -> list[dict]:
@@ -78,24 +79,27 @@ def publish(
     run_dir.mkdir(parents=True, exist_ok=True)
 
     rows = []
-    for path, to_rows, latest, archive_name in (
-        (rbp, freshstream_rows, "latest_freshstream.json", "rbp.json"),
-        (recall, companyfill_rows, "latest_companyfill.json", "recall.json"),
+    overlap = []
+    for path, to_rows, latest, archive_name, bench in (
+        (rbp, freshstream_rows, "latest_freshstream.json", "rbp.json", "freshstream"),
+        (recall, companyfill_rows, "latest_companyfill.json", "recall.json", "companyfill"),
     ):
         if not path:
             continue
         raw = Path(path).read_text(encoding="utf-8")
         report = json.loads(raw)
         rows.extend(to_rows(report, ts))
+        overlap.extend(overlap_rows(report, ts=ts, bench=bench))
         write_json(slim_report(report), str(data / latest))
         (run_dir / archive_name).write_text(raw, encoding="utf-8")
     for path, archive_name in ((fresh, "fresh.jsonl"), (gold, "gold.jsonl")):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
 
-    with open(data / "history.jsonl", "a", encoding="utf-8") as fh:
-        for row in rows:
-            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+    for name, out_rows in (("history.jsonl", rows), ("overlap.jsonl", overlap)):
+        with open(data / name, "a", encoding="utf-8") as fh:
+            for row in out_rows:
+                fh.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     index_path = data / "runs.json"
     runs = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []
