@@ -98,6 +98,7 @@ async def run_answers(
         pq = {
             "query": query.text,
             "field": query.field,
+            "value": query.value,
             "bucket": query.bucket,
             "freshness_window": query.freshness_window,
             "hit_rank": None,
@@ -105,12 +106,17 @@ async def run_answers(
             "judged": 0,
             "judge_errors": 0,
             "n_results": 0,
+            "results": [],
             "search_error": err,
         }
         if err is not None:
             return pq
         results = results or []
         pq["n_results"] = len(results)
+        pq["results"] = [
+            {"url": r.url, "title": r.title, "snippet": _capped_snippet(r, snippet_chars)}
+            for r in results
+        ]
         det_rank = first_hit_rank(query, results, snippet_chars=snippet_chars)
         pq["det_rank"] = det_rank
         pq["hit_rank"] = det_rank

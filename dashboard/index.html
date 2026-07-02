@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>keenbench — search engine benchmarks</title>
+<style>
+  :root {
+    --surface-1: #fcfcfb;
+    --page: #f9f9f7;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #898781;
+    --grid: #e1e0d9;
+    --baseline: #c3c2b7;
+    --border: rgba(11, 11, 11, 0.10);
+    --delta-up: #006300;
+    --delta-down: #d03b3b;
+    /* categorical slots (validated palette, fixed order — see dataviz notes) */
+    --series-1: #2a78d6;
+    --series-2: #1baf7a;
+    --series-3: #eda100;
+    --series-4: #008300;
+    --series-5: #4a3aa7;
+    --series-6: #e34948;
+    --series-7: #e87ba4;
+    --series-8: #eb6834;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-1: #1a1a19;
+      --page: #0d0d0d;
+      --text-primary: #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted: #898781;
+      --grid: #2c2c2a;
+      --baseline: #383835;
+      --border: rgba(255, 255, 255, 0.10);
+      --delta-up: #0ca30c;
+      --delta-down: #e66767;
+      --series-1: #3987e5;
+      --series-2: #199e70;
+      --series-3: #c98500;
+      --series-4: #008300;
+      --series-5: #9085e9;
+      --series-6: #e66767;
+      --series-7: #d55181;
+      --series-8: #d95926;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 56px; }
+  header h1 { font-size: 20px; font-weight: 600; margin: 0; }
+  header p { margin: 4px 0 0; color: var(--text-secondary); }
+  header a { color: inherit; }
+
+  .filters { display: flex; gap: 6px; margin: 20px 0 16px; }
+  .filters button {
+    font: inherit; color: var(--text-secondary);
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 12px; cursor: pointer;
+  }
+  .filters button[aria-pressed="true"] {
+    color: var(--text-primary); font-weight: 600; border-color: var(--baseline);
+  }
+
+  td .key {
+    display: inline-block; width: 14px; height: 3px; border-radius: 2px;
+    vertical-align: middle; margin-right: 6px;
+  }
+  .delta.up { color: var(--delta-up); }
+  .delta.down { color: var(--delta-down); }
+
+  .legend { display: flex; gap: 18px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
+  .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 16px 8px; margin-bottom: 12px;
+    position: relative;
+  }
+  .card h2 { font-size: 14px; font-weight: 600; margin: 0; }
+  .card .sub { color: var(--text-muted); font-size: 12px; margin: 1px 0 6px; }
+  .card .sub a { color: inherit; }
+  .card svg { display: block; width: 100%; }
+  .card svg:focus { outline: 1px solid var(--baseline); outline-offset: 2px; }
+  .empty { color: var(--text-muted); padding: 32px 0 40px; text-align: center; }
+
+  .tooltip {
+    position: absolute; pointer-events: none; display: none; z-index: 2;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    font-size: 12px; min-width: 130px;
+  }
+  .tooltip .when { color: var(--text-muted); margin-bottom: 4px; }
+  .tooltip .row { display: flex; align-items: center; gap: 6px; }
+  .tooltip .row .key { width: 12px; height: 2px; border-radius: 1px; flex: none; }
+  .tooltip .row .val { font-weight: 600; }
+  .tooltip .row .name { color: var(--text-secondary); }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--grid); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  th { color: var(--text-secondary); font-weight: 500; }
+  tr:last-child td { border-bottom: none; }
+  .best { font-weight: 600; }
+
+  details { margin-top: 14px; }
+  summary { cursor: pointer; color: var(--text-secondary); }
+  .axis-text { fill: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .end-label { fill: var(--text-secondary); font-size: 11px; }
+
+  .runbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0 12px; }
+  .runbar select {
+    font: inherit; color: var(--text-primary); background: var(--surface-1);
+    border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px;
+  }
+  .qrow { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+  .qrow > summary {
+    list-style: none; display: flex; gap: 10px; align-items: baseline;
+    padding: 8px 12px; color: var(--text-primary);
+  }
+  .qrow > summary::-webkit-details-marker { display: none; }
+  .qrow > summary .score { margin-left: auto; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .qrow[open] > summary { border-bottom: 1px solid var(--grid); }
+  .result { padding: 10px 12px; border-bottom: 1px solid var(--grid); }
+  .result:last-child { border-bottom: none; }
+  .result .head { display: flex; gap: 8px; align-items: baseline; }
+  .result .title { font-weight: 500; }
+  .result .title a { color: inherit; }
+  .result .host { color: var(--text-muted); font-size: 12px; }
+  .result .reasoning { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
+  .result .snippet { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+  .chip {
+    display: inline-block; min-width: 20px; text-align: center; border-radius: 5px;
+    font-size: 11px; font-weight: 600; padding: 1px 5px; flex: none;
+  }
+  .chips { display: inline-flex; gap: 3px; }
+  .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
+  .miss-marker { color: var(--text-muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>keenbench — search engine benchmarks</h1>
+    <p>Hourly search-engine benchmarks from
+      <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.
+      freshstream runs hourly (RBP@5, LLM judge); companyfill daily
+      (answer-recall@5, deterministic). All times UTC.
+      <span id="updated"></span></p>
+  </header>
+
+  <div class="filters" id="filters" role="group" aria-label="Time range"></div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>freshstream — latest run</h2>
+      <div class="sub" id="lb-fresh-sub"></div>
+      <div id="lb-fresh"></div>
+    </div>
+    <div class="card">
+      <h2>companyfill — latest run</h2>
+      <div class="sub" id="lb-company-sub"></div>
+      <div id="lb-company"></div>
+    </div>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="card" id="card-rbp">
+    <h2>freshstream — RBP@5</h2>
+    <div class="sub">20 fresh queries per run; the hairline marks the metric ceiling</div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" id="card-recall">
+      <h2>companyfill — answer-recall@5</h2>
+      <div class="sub">100 gold queries per run</div>
+    </div>
+    <div class="card" id="card-mrr">
+      <h2>companyfill — MRR@5</h2>
+      <div class="sub">same runs as recall</div>
+    </div>
+  </div>
+
+  <div class="card" id="card-fields">
+    <h2>companyfill — recall@5 by field (latest run)</h2>
+    <div class="sub" id="fields-sub"></div>
+    <div id="fields-table"></div>
+  </div>
+
+  <div class="card" id="card-runs">
+    <h2>Judgement browser</h2>
+    <div class="sub">Every run is archived in full on the
+      <a href="https://huggingface.co/datasets/keenable-ai/keenbench-results">HF dataset</a>
+      — pick one to inspect each query, its results, and the judge's reasoning.</div>
+    <div class="runbar">
+      <select id="run-select" aria-label="Run"></select>
+      <select id="run-bench" aria-label="Benchmark"></select>
+      <select id="run-engine" aria-label="Engine"></select>
+    </div>
+    <div id="run-detail"></div>
+  </div>
+
+  <details id="history-details">
+    <summary>Table view — all runs in range</summary>
+    <div class="card" id="history-table" style="margin-top:8px"></div>
+  </details>
+</div>
+
+<script>
+"use strict";
+const RUNS_BASE = "https://huggingface.co/datasets/keenable-ai/keenbench-results/resolve/main/runs";
+
+// Engines are discovered from the data; slots are assigned by first appearance
+// in the full history so an engine keeps its color across filters and new
+// engines never repaint existing ones.
+let ENGINES = [];
+const ENGINE_SLOT = new Map();
+
+function registerEngines(names) {
+  for (const name of names) {
+    if (!ENGINE_SLOT.has(name)) {
+      ENGINE_SLOT.set(name, ENGINE_SLOT.size);
+      ENGINES.push(name);
+    }
+  }
+}
+
+function colorOf(engine) {
+  const slot = ENGINE_SLOT.get(engine);
+  return slot == null || slot >= 8 ? "var(--text-muted)" : `var(--series-${slot + 1})`;
+}
+const RANGES = [["24h", 24 * 3600e3], ["7d", 7 * 86400e3], ["30d", 30 * 86400e3], ["All", Infinity]];
+let rangeMs = Infinity;
+let history = [];
+
+const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
+const fmtTime = (d) => d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
+
+function seriesFor(bench, metric, rows) {
+  const out = {};
+  for (const e of ENGINES) out[e] = [];
+  for (const r of rows) {
+    if (r.bench === bench && r[metric] != null && out[r.engine]) {
+      out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
+    }
+  }
+  for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
+  return out;
+}
+
+function inRange(rows) {
+  if (rangeMs === Infinity) return rows;
+  const cutoff = Date.now() - rangeMs;
+  return rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
+}
+
+function el(tag, attrs, text) {
+  const ns = "http://www.w3.org/2000/svg";
+  const node = ["svg", "path", "line", "circle", "text"].includes(tag)
+    ? document.createElementNS(ns, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+function drawChart(card, series, opts) {
+  card.querySelectorAll("svg, .tooltip, .empty").forEach((n) => n.remove());
+  const points = ENGINES.flatMap((e) => series[e]);
+  if (!points.length) {
+    card.appendChild(el("div", { class: "empty" }, "No data yet — first scheduled run pending."));
+    return;
+  }
+  const W = Math.max(card.clientWidth - 32, 280), H = 200;
+  const M = { top: 12, right: 76, bottom: 26, left: 40 };
+  const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
+  const ts = points.map((p) => p.t.getTime());
+  let t0 = Math.min(...ts), t1 = Math.max(...ts);
+  if (t0 === t1) { t0 -= 3600e3; t1 += 3600e3; }
+  const [y0, y1] = opts.domain;
+  const x = (t) => M.left + ((t - t0) / (t1 - t0)) * iw;
+  const y = (v) => M.top + (1 - (v - y0) / (y1 - y0)) * ih;
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, tabindex: "0", role: "img", "aria-label": opts.label });
+
+  for (const gv of opts.ticks) {
+    svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(gv), y2: y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.left - 6, y: y(gv) + 3, "text-anchor": "end", class: "axis-text" }, gv.toFixed(1)));
+  }
+  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(y0), y2: y(y0), stroke: "var(--baseline)", "stroke-width": 1 }));
+  if (opts.ceiling) {
+    svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(opts.ceiling), y2: y(opts.ceiling), stroke: "var(--baseline)", "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.left + 4, y: y(opts.ceiling) - 4, class: "axis-text" }, `ceiling ${opts.ceiling.toFixed(3)}`));
+  }
+  const nTicks = Math.min(5, Math.max(2, Math.round(iw / 140)));
+  for (let i = 0; i < nTicks; i++) {
+    const t = t0 + ((t1 - t0) * i) / (nTicks - 1);
+    svg.appendChild(el("text", { x: x(t), y: H - 8, "text-anchor": i === 0 ? "start" : i === nTicks - 1 ? "end" : "middle", class: "axis-text" }, fmtTime(new Date(t))));
+  }
+
+  const endLabels = [];
+  for (const e of ENGINES) {
+    const pts = series[e];
+    if (!pts.length) continue;
+    const d = pts.map((p, i) => `${i ? "L" : "M"}${x(p.t.getTime()).toFixed(1)},${y(p.v).toFixed(1)}`).join("");
+    svg.appendChild(el("path", { d, fill: "none", stroke: colorOf(e), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    const last = pts[pts.length - 1];
+    svg.appendChild(el("circle", { cx: x(last.t.getTime()), cy: y(last.v), r: 4, fill: colorOf(e), stroke: "var(--surface-1)", "stroke-width": 2 }));
+    endLabels.push({ e, yPos: y(last.v), xPos: x(last.t.getTime()) });
+  }
+  endLabels.sort((a, b) => a.yPos - b.yPos);
+  // direct end-labels; skip the second when the two collide (legend still carries identity)
+  let lastY = -Infinity;
+  for (const l of endLabels) {
+    if (l.yPos - lastY < 13) continue;
+    lastY = l.yPos;
+    svg.appendChild(el("text", { x: l.xPos + 8, y: l.yPos + 4, class: "end-label" }, l.e));
+  }
+
+  const cross = el("line", { y1: M.top, y2: M.top + ih, stroke: "var(--baseline)", "stroke-width": 1, visibility: "hidden" });
+  svg.appendChild(cross);
+  const hoverDots = {};
+  for (const e of ENGINES) {
+    hoverDots[e] = el("circle", { r: 4, fill: colorOf(e), stroke: "var(--surface-1)", "stroke-width": 2, visibility: "hidden" });
+    svg.appendChild(hoverDots[e]);
+  }
+
+  const tip = el("div", { class: "tooltip" });
+  card.appendChild(tip);
+  const stamps = [...new Set(ts)].sort((a, b) => a - b);
+
+  function showAt(t) {
+    cross.setAttribute("x1", x(t)); cross.setAttribute("x2", x(t));
+    cross.setAttribute("visibility", "visible");
+    tip.replaceChildren();
+    tip.appendChild(el("div", { class: "when" }, fmtTime(new Date(t))));
+    for (const e of ENGINES) {
+      const p = series[e].find((q) => q.t.getTime() === t);
+      hoverDots[e].setAttribute("visibility", p ? "visible" : "hidden");
+      if (!p) continue;
+      hoverDots[e].setAttribute("cx", x(t)); hoverDots[e].setAttribute("cy", y(p.v));
+      const row = el("div", { class: "row" });
+      const key = el("span", { class: "key" }); key.style.background = colorOf(e);
+      row.append(key, el("span", { class: "val" }, fmt3(p.v)), el("span", { class: "name" }, e));
+      tip.appendChild(row);
+    }
+    tip.style.display = "block";
+    const rect = card.getBoundingClientRect();
+    const px = (x(t) / W) * rect.width;
+    tip.style.left = Math.min(px + 14, rect.width - tip.offsetWidth - 8) + "px";
+    tip.style.top = "36px";
+  }
+  let shownIdx = -1;
+  function showIdx(i) {
+    if (i === shownIdx) return;
+    shownIdx = i;
+    showAt(stamps[i]);
+  }
+  function hide() {
+    shownIdx = -1;
+    cross.setAttribute("visibility", "hidden");
+    tip.style.display = "none";
+    for (const e of ENGINES) hoverDots[e].setAttribute("visibility", "hidden");
+  }
+  let focusIdx = stamps.length - 1;
+  svg.addEventListener("pointermove", (ev) => {
+    const rect = svg.getBoundingClientRect();
+    const t = t0 + (((ev.clientX - rect.left) / rect.width) * W - M.left) / iw * (t1 - t0);
+    let best = 0;
+    for (let i = 1; i < stamps.length; i++) {
+      if (Math.abs(stamps[i] - t) < Math.abs(stamps[best] - t)) best = i;
+    }
+    focusIdx = best;
+    showIdx(best);
+  });
+  svg.addEventListener("pointerleave", hide);
+  svg.addEventListener("focus", () => showIdx(focusIdx));
+  svg.addEventListener("blur", hide);
+  svg.addEventListener("keydown", (ev) => {
+    if (ev.key === "ArrowLeft") focusIdx = Math.max(0, focusIdx - 1);
+    else if (ev.key === "ArrowRight") focusIdx = Math.min(stamps.length - 1, focusIdx + 1);
+    else return;
+    ev.preventDefault();
+    showIdx(focusIdx);
+  });
+  card.appendChild(svg);
+}
+
+function renderLeaderboard(holderId, subId, rows, bench, metrics) {
+  const holder = document.getElementById(holderId);
+  holder.replaceChildren();
+  const byMetric = metrics.map(([m]) => seriesFor(bench, m, rows));
+  const entries = ENGINES.map((e) => {
+    const pts = byMetric[0][e] || [];
+    return { e, last: pts.at(-1), prev: pts.at(-2), extra: byMetric.slice(1).map((s) => (s[e] || []).at(-1)) };
+  }).filter((x) => x.last);
+  if (!entries.length) {
+    document.getElementById(subId).textContent = "";
+    holder.appendChild(el("div", { class: "empty" }, "No data yet."));
+    return;
+  }
+  entries.sort((a, b) => b.last.v - a.last.v);
+  document.getElementById(subId).textContent = `as of ${fmtTime(entries[0].last.t)} UTC`;
+  const table = el("table");
+  const head = el("tr");
+  head.appendChild(el("th", {}, "engine"));
+  for (const [, label] of metrics) head.appendChild(el("th", { class: "num" }, label));
+  head.appendChild(el("th", { class: "num" }, "Δ prev"));
+  table.appendChild(head);
+  for (const [i, x] of entries.entries()) {
+    const tr = el("tr");
+    const best = i === 0 && entries.length > 1 ? " best" : "";
+    const nameCell = el("td", { class: best });
+    const key = el("span", { class: "key" });
+    key.style.background = colorOf(x.e);
+    nameCell.append(key, document.createTextNode(x.e));
+    tr.appendChild(nameCell);
+    tr.appendChild(el("td", { class: "num" + best }, fmt3(x.last.v)));
+    for (const pt of x.extra) tr.appendChild(el("td", { class: "num" }, pt ? fmt3(pt.v) : "–"));
+    if (x.prev) {
+      const d = x.last.v - x.prev.v;
+      const cls = d > 0.0005 ? "up" : d < -0.0005 ? "down" : "";
+      tr.appendChild(el("td", { class: `num delta ${cls}` }, `${d >= 0 ? "+" : ""}${d.toFixed(3)}`));
+    } else {
+      tr.appendChild(el("td", { class: "num delta" }, "first run"));
+    }
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
+function renderLeaderboards(rows) {
+  renderLeaderboard("lb-fresh", "lb-fresh-sub", rows, "freshstream", [["rbp", "RBP@5"]]);
+  renderLeaderboard("lb-company", "lb-company-sub", rows, "companyfill", [
+    ["recall", "recall@5"],
+    ["mrr", "MRR@5"],
+  ]);
+}
+
+function renderFields(latest) {
+  const holder = document.getElementById("fields-table");
+  holder.replaceChildren();
+  if (!latest) {
+    holder.appendChild(el("div", { class: "empty" }, "No companyfill run yet."));
+    return;
+  }
+  document.getElementById("fields-sub").textContent =
+    `${latest.num_queries} queries, top-${latest.num_results}`;
+  const engines = ENGINES.filter((e) => latest.engines[e]);
+  const fields = [...new Set(engines.flatMap((e) => Object.keys(latest.engines[e].by_field || {})))].sort();
+  const table = el("table");
+  const head = el("tr");
+  head.appendChild(el("th", {}, "field"));
+  head.appendChild(el("th", { class: "num" }, "n"));
+  for (const e of engines) head.appendChild(el("th", { class: "num" }, e));
+  table.appendChild(head);
+  for (const f of fields) {
+    const tr = el("tr");
+    tr.appendChild(el("td", {}, f));
+    const n = engines.map((e) => latest.engines[e].by_field?.[f]?.n).find((v) => v != null);
+    tr.appendChild(el("td", { class: "num" }, n ?? "–"));
+    const vals = engines.map((e) => latest.engines[e].by_field?.[f]?.recall_at_k);
+    const best = Math.max(...vals.filter((v) => v != null));
+    for (const v of vals) {
+      tr.appendChild(el("td", { class: "num" + (v === best && vals.filter((q) => q === best).length === 1 ? " best" : "") }, v == null ? "–" : v.toFixed(2)));
+    }
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
+function renderHistoryTable(rows) {
+  const holder = document.getElementById("history-table");
+  holder.replaceChildren();
+  const table = el("table");
+  const head = el("tr");
+  for (const h of ["time (UTC)", "benchmark", "engine", "metric", "value", "scored", "errors"]) {
+    head.appendChild(el("th", { class: ["value", "scored", "errors"].includes(h) ? "num" : "" }, h));
+  }
+  table.appendChild(head);
+  for (const r of [...rows].reverse()) {
+    const metrics = r.bench === "freshstream" ? [["RBP@5", r.rbp]] : [["recall@5", r.recall], ["MRR@5", r.mrr]];
+    for (const [name, v] of metrics) {
+      const tr = el("tr");
+      tr.appendChild(el("td", {}, fmtTime(new Date(r.ts))));
+      tr.appendChild(el("td", {}, r.bench));
+      tr.appendChild(el("td", {}, r.engine));
+      tr.appendChild(el("td", {}, name));
+      tr.appendChild(el("td", { class: "num" }, fmt3(v)));
+      tr.appendChild(el("td", { class: "num" }, `${r.num_scored}/${r.num_queries}`));
+      tr.appendChild(el("td", { class: "num" }, String((r.search_errors || 0) + (r.judge_errors || 0))));
+      table.appendChild(tr);
+    }
+  }
+  holder.appendChild(table);
+}
+
+// ratings are magnitude → sequential blue ramp (0..4), ink picked by step luminance
+const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
+const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
+
+function ratingChip(rating, title) {
+  const chip = el("span", { class: "chip" }, rating == null ? "?" : String(rating));
+  chip.style.background = rating == null ? "var(--grid)" : RATING_BG[rating];
+  chip.style.color = rating == null ? "var(--text-secondary)" : RATING_INK[rating];
+  if (title) chip.title = title;
+  return chip;
+}
+
+async function fetchJson(url) {
+  const resp = await fetch(url, { cache: "no-store" });
+  if (!resp.ok) throw new Error(`${url}: ${resp.status}`);
+  return resp.json();
+}
+
+function host(url) {
+  try { return new URL(url).hostname; } catch { return url; }
+}
+
+function resultBlock(r, extras) {
+  const div = el("div", { class: "result" });
+  const head = el("div", { class: "head" });
+  for (const node of extras) head.appendChild(node);
+  const title = el("span", { class: "title" });
+  const a = el("a", { href: r.url, rel: "noopener noreferrer", target: "_blank" });
+  a.textContent = r.title || r.url;
+  title.appendChild(a);
+  head.appendChild(title);
+  head.appendChild(el("span", { class: "host" }, host(r.url)));
+  div.appendChild(head);
+  if (r.reasoning) {
+    div.appendChild(el("div", { class: "reasoning" }, `${r.label ?? ""} — ${r.reasoning}`));
+  }
+  if (r.snippet) div.appendChild(el("div", { class: "snippet" }, r.snippet));
+  return div;
+}
+
+function renderFreshstreamRun(holder, report, engine) {
+  const per = report.engines[engine]?.per_query || [];
+  for (const pq of per) {
+    const row = el("details", { class: "qrow" });
+    const summary = el("summary");
+    summary.appendChild(el("span", {}, pq.query));
+    const chips = el("span", { class: "chips" });
+    for (const r of pq.ratings || []) chips.appendChild(ratingChip(r));
+    summary.appendChild(chips);
+    summary.appendChild(el("span", { class: "score" },
+      pq.search_error ? "search error" : `RBP ${fmt3(pq.rbp)}`));
+    row.appendChild(summary);
+    for (const r of pq.results || []) {
+      const extras = [ratingChip(r.rating, "judge rating")];
+      if (r.penalized != null && r.penalized !== r.rating) {
+        extras.push(ratingChip(r.penalized, "after redundancy penalty"));
+      }
+      row.appendChild(resultBlock(r, extras));
+    }
+    if (pq.search_error) {
+      row.appendChild(el("div", { class: "result" }, `search error: ${pq.search_error.error_type}`));
+    }
+    holder.appendChild(row);
+  }
+}
+
+function renderCompanyfillRun(holder, report, engine) {
+  const per = report.engines[engine]?.per_query || [];
+  for (const pq of per) {
+    const row = el("details", { class: "qrow" });
+    const summary = el("summary");
+    summary.appendChild(el("span", {}, pq.query));
+    summary.appendChild(el("span", { class: "host" }, `gold: ${pq.value ?? "–"}`));
+    summary.appendChild(el("span", { class: "score" },
+      pq.search_error ? "search error"
+        : pq.hit_rank ? `hit @${pq.hit_rank}` : "miss"));
+    row.appendChild(summary);
+    (pq.results || []).forEach((r, i) => {
+      const rank = i + 1;
+      const mark = rank === pq.hit_rank
+        ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
+        : el("span", { class: "miss-marker" }, `#${rank}`);
+      row.appendChild(resultBlock(r, [mark]));
+    });
+    holder.appendChild(row);
+  }
+}
+
+async function renderRunDetail(runs) {
+  const holder = document.getElementById("run-detail");
+  const runSel = document.getElementById("run-select");
+  const benchSel = document.getElementById("run-bench");
+  const engineSel = document.getElementById("run-engine");
+  holder.replaceChildren();
+  const run = runs.find((r) => r.id === runSel.value);
+  if (!run) {
+    holder.appendChild(el("div", { class: "empty" }, "No archived runs yet."));
+    return;
+  }
+  const artifact = benchSel.value === "companyfill" ? "recall.json" : "rbp.json";
+  if (!run.artifacts.includes(artifact)) {
+    holder.appendChild(el("div", { class: "empty" }, `This run has no ${benchSel.value} results.`));
+    return;
+  }
+  holder.appendChild(el("div", { class: "empty" }, "Loading…"));
+  try {
+    const report = await fetchJson(`${RUNS_BASE}/${run.id}/${artifact}`);
+    // the archived run is the source of truth for which engines it compared
+    const available = Object.keys(report.engines || {});
+    if (!available.includes(engineSel.value)) {
+      const current = engineSel.value;
+      engineSel.replaceChildren();
+      for (const e of available) engineSel.appendChild(el("option", { value: e }, e));
+      engineSel.value = available.includes(current) ? current : available[0] || "";
+    }
+    holder.replaceChildren();
+    if (benchSel.value === "companyfill") renderCompanyfillRun(holder, report, engineSel.value);
+    else renderFreshstreamRun(holder, report, engineSel.value);
+    if (!holder.children.length) {
+      holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
+    }
+  } catch (err) {
+    holder.replaceChildren();
+    holder.appendChild(el("div", { class: "empty" }, `Could not load run: ${err.message}`));
+  }
+}
+
+async function initRunBrowser() {
+  const runSel = document.getElementById("run-select");
+  const benchSel = document.getElementById("run-bench");
+  const engineSel = document.getElementById("run-engine");
+  let runs = [];
+  try { runs = await fetchJson("data/runs.json"); } catch { /* no archive yet */ }
+  runs = [...runs].reverse();
+  for (const r of runs) {
+    const label = `${fmtTime(new Date(r.ts))}${r.artifacts.includes("recall.json") ? " (fresh + company)" : ""}`;
+    runSel.appendChild(el("option", { value: r.id }, label));
+  }
+  for (const b of ["freshstream", "companyfill"]) benchSel.appendChild(el("option", { value: b }, b));
+  for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, e));
+  const rerender = () => renderRunDetail(runs);
+  runSel.addEventListener("change", rerender);
+  benchSel.addEventListener("change", rerender);
+  engineSel.addEventListener("change", rerender);
+  rerender();
+}
+
+function drawCharts(rows) {
+  // the pipeline publishes the RBP ceiling with every row — don't hardcode it
+  const ceiling = rows.filter((r) => r.bench === "freshstream").at(-1)?.rbp_max;
+  drawChart(document.getElementById("card-rbp"), seriesFor("freshstream", "rbp", rows),
+    { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine" });
+  drawChart(document.getElementById("card-recall"), seriesFor("companyfill", "recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
+  drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
+}
+
+function refreshHistoryTable() {
+  if (document.getElementById("history-details").open) {
+    renderHistoryTable(inRange(history));
+  }
+}
+
+function renderAll(latestCompanyfill) {
+  const rows = inRange(history);
+  renderLeaderboards(rows);
+  drawCharts(rows);
+  refreshHistoryTable();
+  renderFields(latestCompanyfill);
+}
+
+function renderLegend() {
+  const legend = document.getElementById("legend");
+  legend.replaceChildren();
+  for (const e of ENGINES) {
+    const item = el("span");
+    const key = el("span", { class: "key" }); key.style.background = colorOf(e);
+    item.append(key, document.createTextNode(e));
+    legend.appendChild(item);
+  }
+}
+
+async function main() {
+  const [histText, latestCompanyfill] = await Promise.all([
+    fetch("data/history.jsonl", { cache: "no-store" })
+      .then((r) => (r.ok ? r.text() : ""))
+      .catch(() => ""),
+    fetchJson("data/latest_companyfill.json").catch(() => null),
+  ]);
+  history = histText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
+  registerEngines(history.map((r) => r.engine));
+  registerEngines(Object.keys(latestCompanyfill?.engines || {}));
+  renderLegend();
+
+  if (history.length) {
+    const lastTs = history[history.length - 1].ts;
+    document.getElementById("updated").textContent = `Last run: ${fmtTime(new Date(lastTs))} UTC.`;
+  }
+
+  const filters = document.getElementById("filters");
+  for (const [name, ms] of RANGES) {
+    const btn = el("button", { "aria-pressed": String(ms === rangeMs) }, name);
+    btn.addEventListener("click", () => {
+      rangeMs = ms;
+      filters.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
+      btn.setAttribute("aria-pressed", "true");
+      renderAll(latestCompanyfill);
+    });
+    filters.appendChild(btn);
+  }
+
+  renderAll(latestCompanyfill);
+  initRunBrowser();
+  document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => drawCharts(inRange(history)), 150);
+  });
+}
+main();
+</script>
+</body>
+</html>

@@ -139,8 +139,6 @@ class Companyfill:
         engines: str | tuple[str, ...] = "keenable,exa",
         num_results: int = 5,
         snippet_chars: int = 500,
-        keenable_mode: str = "pro",
-        exa_concurrency: int = 4,
         limit: int = 0,
         sample: str = "stratified",
         seed: int = 0,
@@ -154,12 +152,7 @@ class Companyfill:
         rows = sample_or_exit(rows, limit, seed, strategy=sample, key=lambda r: r["gold"]["field"])
         gold_queries = [_gold_query(r) for r in rows]
 
-        clients = build_clients_or_exit(
-            engines,
-            keenable_mode=keenable_mode,
-            exa_concurrency=exa_concurrency,
-            snippet_chars=snippet_chars,
-        )
+        clients = build_clients_or_exit(engines, snippet_chars=snippet_chars)
 
         judge_llm = None
         model = None

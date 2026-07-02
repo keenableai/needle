@@ -2,7 +2,7 @@ import asyncio
 from dataclasses import dataclass
 from typing import Any
 
-from keenbench.shared.judge import DEFAULT_MAX_CONTENT_CHARS, judge_one
+from keenbench.shared.judge import DEFAULT_MAX_CONTENT_CHARS, Judgement, judge_one
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.metrics import RBP_K, RBP_P, apply_redundancy_penalties, rbp_at_k
 from keenbench.shared.search import SearchClient, SearchResult
@@ -28,7 +28,7 @@ def _score_query(
     query: EvalQuery,
     results: list[SearchResult] | None,
     search_error: dict[str, str] | None,
-    ratings_by_url: dict[str, int | None],
+    judgements_by_url: dict[str, Judgement | None],
     *,
     k: int,
 ) -> dict[str, Any]:
@@ -37,6 +37,7 @@ def _score_query(
         "rbp": None,
         "ratings": [],
         "penalized_ratings": [],
+        "results": [],
         "n_results": 0,
         "judge_errors": 0,
         "search_error": search_error,
@@ -45,7 +46,8 @@ def _score_query(
         return out
     results = results or []
     out["n_results"] = len(results)
-    ratings = [ratings_by_url[r.url] for r in results]
+    judgements = [judgements_by_url[r.url] for r in results]
+    ratings = [j.rating if j is not None else None for j in judgements]
     rated = [r for r in ratings if r is not None]
     out["ratings"] = ratings
     out["judge_errors"] = len(ratings) - len(rated)
@@ -55,6 +57,18 @@ def _score_query(
         )
         out["penalized_ratings"] = penalized
         out["rbp"] = rbp_at_k(penalized, k=k)
+    out["results"] = [
+        {
+            "url": r.url,
+            "title": r.title,
+            "snippet": r.snippet,
+            "rating": j.rating if j is not None else None,
+            "label": j.label if j is not None else None,
+            "reasoning": j.reasoning if j is not None else None,
+            "penalized": out["penalized_ratings"][i] if out["penalized_ratings"] else None,
+        }
+        for i, (r, j) in enumerate(zip(results, judgements, strict=True))
+    ]
     return out
 
 
@@ -71,7 +85,7 @@ async def run_rbp(
     names = list(engines)
     judge_sem = asyncio.Semaphore(judge_concurrency)
 
-    async def judge_pair(query: EvalQuery, doc: SearchResult) -> int | None:
+    async def judge_pair(query: EvalQuery, doc: SearchResult) -> Judgement | None:
         async with judge_sem:
             judgement, _err = await judge_one(
                 judge,
@@ -83,9 +97,9 @@ async def run_rbp(
                 today=query.today,
                 max_content_chars=max_content_chars,
             )
-        return judgement.rating if judgement is not None else None
+        return judgement
 
-    async def run_query(query: EvalQuery) -> tuple[list[Any], dict[str, int | None]]:
+    async def run_query(query: EvalQuery) -> tuple[list[Any], dict[str, Judgement | None]]:
         searches = await asyncio.gather(
             *[engines[n].search(query.text, num_results=num_results) for n in names]
         )
@@ -94,19 +108,19 @@ async def run_rbp(
             if err is None:
                 for r in results or []:
                     pair_docs.setdefault(r.url, []).append(r)
-        ratings = await asyncio.gather(
+        judgements = await asyncio.gather(
             *[judge_pair(query, _merge_pair(docs)) for docs in pair_docs.values()]
         )
-        return searches, dict(zip(pair_docs, ratings, strict=True))
+        return searches, dict(zip(pair_docs, judgements, strict=True))
 
     query_outs = await asyncio.gather(*[run_query(q) for q in queries])
 
     engines_out: dict[str, dict[str, Any]] = {}
     for ni, name in enumerate(names):
         per_query = []
-        for query, (searches, ratings_by_url) in zip(queries, query_outs, strict=True):
+        for query, (searches, judgements_by_url) in zip(queries, query_outs, strict=True):
             results, err = searches[ni]
-            per_query.append(_score_query(query, results, err, ratings_by_url, k=k))
+            per_query.append(_score_query(query, results, err, judgements_by_url, k=k))
         scored = [pq["rbp"] for pq in per_query if pq["rbp"] is not None]
         engines_out[name] = {
             "mean_rbp": sum(scored) / len(scored) if scored else 0.0,

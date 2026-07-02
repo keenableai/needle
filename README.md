@@ -61,9 +61,10 @@ Both benchmarks' `run` commands share one interface:
 | `--num-results` | `5` | Top-K results fetched and scored per engine |
 | `--snippet-chars` | `500` | Uniform cap on per-result evidence text, so engines returning fatter content don't get free evidence; `0` = uncapped |
 | `--limit` / `--sample` / `--seed` | `0` / `stratified` / `0` | `--limit N` takes a deterministic stratified sample (`--sample uniform\|head` for alternatives, `--seed` to vary it) |
-| `--keenable-mode` | `pro` | Keenable search mode |
-| `--exa-concurrency` | `4` | In-flight request cap for Exa |
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
+
+Per-engine tuning is env-based so the flag set stays flat as engines are
+added: `KEENABLE_MODE` (default `pro`), `EXA_CONCURRENCY` (default `4`).
 
 Error accounting is shared too: queries whose search or judging failed are
 excluded from the mean via `num_scored` (with `search_errors` /
@@ -259,9 +260,21 @@ asyncio.run(go())
 ```
 
 Each client caps in-flight requests via a per-client `max_concurrency`
-semaphore (default 8). Add an engine by subclassing `HttpSearchClient` (lazy
-connection reuse + `aclose` + concurrency limiter + JSON error mapping) and
-mapping its response to `SearchResult`.
+semaphore (default 8).
+
+Everything downstream — the pipelines, reports, scheduled runs, and the
+dashboard — is engine-count-agnostic, so adding an engine to the comparison
+is three steps:
+
+1. subclass `HttpSearchClient` (lazy connection reuse + `aclose` +
+   concurrency limiter + JSON error mapping) and map its response to
+   `SearchResult`;
+2. add an `EngineSpec` to `ENGINES` in
+   [`shared/search/factory.py`](src/keenbench/shared/search/factory.py)
+   (name, API-key env var, build function);
+3. put the key in the environment (a repo secret for CI) and add the name to
+   `--engines` / the workflow's `ENGINES` env. The dashboard picks the new
+   engine up from the data and assigns it a stable color slot automatically.
 
 ### Pipelines as a library
 
@@ -285,6 +298,24 @@ Any object with an errors-as-data
 method satisfies the `LLMClient` protocol. The ranking harness is
 `keenbench.shared.rankeval.run_rbp`, the recall scorer is
 `keenbench.companyfill.score.run_answers`.
+
+## Continuous benchmarks
+
+[`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule
+against `keenable,exa`: freshstream hourly (`--limit 20`), companyfill daily at
+00:17 UTC (fresh gold, `--limit 100`). Each run:
+
+- appends summary rows to `data/history.jsonl` on the `gh-pages` branch —
+  rendered as a dashboard (trends, latest tiles, per-field table, judgement
+  browser) at <https://super-journey-4z52474.pages.github.io/> (the URL becomes
+  `keenableai.github.io/keenbench` when the repo goes public);
+- archives the full artifacts (reports with per-result judge reasoning, the
+  generated queries, the gold) to the public HF dataset
+  [`keenable-ai/keenbench-results`](https://huggingface.co/datasets/keenable-ai/keenbench-results)
+  under `runs/<utc-hour>/`, which the dashboard's judgement browser reads.
+
+Needs repo secrets: `OPENROUTER_API_KEY`, `EXA_API_KEY`, `HF_TOKEN`
+(`KEENABLE_API_KEY` optional).
 
 ## Development
 
