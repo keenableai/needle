@@ -1,0 +1,174 @@
+{
+  "num_queries": 100,
+  "num_results": 5,
+  "snippet_chars": 500,
+  "judged": false,
+  "engines": {
+    "keenable": {
+      "recall_at_k": 0.88,
+      "mrr_at_k": 0.7073333333333334,
+      "num_scored": 100,
+      "search_errors": 0,
+      "judged_results": 0,
+      "judge_errors": 0,
+      "judge_upgrades": 0,
+      "by_field": {
+        "ceo": {
+          "n": 9,
+          "recall_at_k": 0.8888888888888888
+        },
+        "employees": {
+          "n": 6,
+          "recall_at_k": 1.0
+        },
+        "founded_year": {
+          "n": 9,
+          "recall_at_k": 0.7777777777777778
+        },
+        "hq_country": {
+          "n": 8,
+          "recall_at_k": 1.0
+        },
+        "industry": {
+          "n": 9,
+          "recall_at_k": 0.7777777777777778
+        },
+        "lei": {
+          "n": 9,
+          "recall_at_k": 1.0
+        },
+        "net_income": {
+          "n": 9,
+          "recall_at_k": 0.6666666666666666
+        },
+        "revenue": {
+          "n": 8,
+          "recall_at_k": 1.0
+        },
+        "stockholders_equity": {
+          "n": 9,
+          "recall_at_k": 0.6666666666666666
+        },
+        "ticker": {
+          "n": 8,
+          "recall_at_k": 1.0
+        },
+        "total_assets": {
+          "n": 8,
+          "recall_at_k": 1.0
+        },
+        "website": {
+          "n": 8,
+          "recall_at_k": 0.875
+        }
+      },
+      "by_bucket": {
+        "companyfill": {
+          "n": 66,
+          "recall_at_k": 0.9090909090909091
+        },
+        "financials": {
+          "n": 34,
+          "recall_at_k": 0.8235294117647058
+        }
+      },
+      "by_freshness": {
+        "1y": {
+          "n": 49,
+          "recall_at_k": 0.8571428571428571
+        },
+        "5y": {
+          "n": 9,
+          "recall_at_k": 0.7777777777777778
+        },
+        "static": {
+          "n": 42,
+          "recall_at_k": 0.9285714285714286
+        }
+      }
+    },
+    "exa": {
+      "recall_at_k": 0.81,
+      "mrr_at_k": 0.583,
+      "num_scored": 100,
+      "search_errors": 0,
+      "judged_results": 0,
+      "judge_errors": 0,
+      "judge_upgrades": 0,
+      "by_field": {
+        "ceo": {
+          "n": 9,
+          "recall_at_k": 0.8888888888888888
+        },
+        "employees": {
+          "n": 6,
+          "recall_at_k": 1.0
+        },
+        "founded_year": {
+          "n": 9,
+          "recall_at_k": 0.6666666666666666
+        },
+        "hq_country": {
+          "n": 8,
+          "recall_at_k": 0.875
+        },
+        "industry": {
+          "n": 9,
+          "recall_at_k": 0.6666666666666666
+        },
+        "lei": {
+          "n": 9,
+          "recall_at_k": 1.0
+        },
+        "net_income": {
+          "n": 9,
+          "recall_at_k": 0.6666666666666666
+        },
+        "revenue": {
+          "n": 8,
+          "recall_at_k": 1.0
+        },
+        "stockholders_equity": {
+          "n": 9,
+          "recall_at_k": 0.2222222222222222
+        },
+        "ticker": {
+          "n": 8,
+          "recall_at_k": 1.0
+        },
+        "total_assets": {
+          "n": 8,
+          "recall_at_k": 1.0
+        },
+        "website": {
+          "n": 8,
+          "recall_at_k": 0.875
+        }
+      },
+      "by_bucket": {
+        "companyfill": {
+          "n": 66,
+          "recall_at_k": 0.8636363636363636
+        },
+        "financials": {
+          "n": 34,
+          "recall_at_k": 0.7058823529411765
+        }
+      },
+      "by_freshness": {
+        "1y": {
+          "n": 49,
+          "recall_at_k": 0.7755102040816326
+        },
+        "5y": {
+          "n": 9,
+          "recall_at_k": 0.6666666666666666
+        },
+        "static": {
+          "n": 42,
+          "recall_at_k": 0.8809523809523809
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+{"ts": "2026-07-02T15:05Z", "bench": "freshstream", "engine": "keenable", "rbp": 0.5546334719999999, "rbp_max": 0.6723199999999999, "num_scored": 20, "num_queries": 20, "search_errors": 0, "judge_errors": 0}
+{"ts": "2026-07-02T15:05Z", "bench": "freshstream", "engine": "exa", "rbp": 0.4745025599999999, "rbp_max": 0.6723199999999999, "num_scored": 20, "num_queries": 20, "search_errors": 0, "judge_errors": 0}
+{"ts": "2026-07-02T15:05Z", "bench": "companyfill", "engine": "keenable", "recall": 0.88, "mrr": 0.7073333333333334, "num_scored": 100, "num_queries": 100, "search_errors": 0}
+{"ts": "2026-07-02T15:05Z", "bench": "companyfill", "engine": "exa", "recall": 0.81, "mrr": 0.583, "num_scored": 100, "num_queries": 100, "search_errors": 0}

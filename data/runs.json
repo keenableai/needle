@@ -1,0 +1,12 @@
+[
+  {
+    "id": "2026-07-02T1505Z",
+    "ts": "2026-07-02T15:05Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "rbp.json",
+      "recall.json"
+    ]
+  }
+]
