@@ -2,17 +2,17 @@
   "num_queries": 20,
   "num_results": 5,
   "k": 5,
-  "judged_pairs": 192,
+  "judged_pairs": 190,
   "engines": {
     "keenable": {
-      "mean_rbp": 0.5641948799999998,
+      "mean_rbp": 0.506036092631579,
       "rbp_max": 0.6723199999999999,
-      "num_scored": 20,
-      "search_errors": 0,
+      "num_scored": 19,
+      "search_errors": 1,
       "judge_errors": 0
     },
     "exa": {
-      "mean_rbp": 0.5749744319999999,
+      "mean_rbp": 0.49544977599999995,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
