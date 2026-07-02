@@ -2,56 +2,98 @@
   "num_queries": 20,
   "num_results": 5,
   "k": 5,
-  "judged_pairs": 475,
+  "judged_pairs": 476,
   "engines": {
     "keenable": {
-      "mean_rbp": 0.4699232159999999,
+      "mean_rbp": 0.44911641599999996,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
-      "judge_errors": 0
+      "judge_errors": 0,
+      "latency": {
+        "n": 20,
+        "mean_ms": 997.7,
+        "p50_ms": 196.1,
+        "p95_ms": 4143.1
+      }
     },
     "exa": {
-      "mean_rbp": 0.448083104,
+      "mean_rbp": 0.4347309599999999,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
-      "judge_errors": 0
+      "judge_errors": 0,
+      "latency": {
+        "n": 20,
+        "mean_ms": 775.1,
+        "p50_ms": 903.8,
+        "p95_ms": 1682.2
+      }
     },
     "google": {
-      "mean_rbp": 0.31134699199999993,
+      "mean_rbp": 0.27729814399999997,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
-      "judge_errors": 0
+      "judge_errors": 0,
+      "latency": {
+        "n": 20,
+        "mean_ms": 3577.4,
+        "p50_ms": 3024.3,
+        "p95_ms": 6319.7
+      }
     },
     "bing": {
-      "mean_rbp": 0.47444446399999995,
+      "mean_rbp": 0.471373952,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
-      "judge_errors": 0
+      "judge_errors": 0,
+      "latency": {
+        "n": 20,
+        "mean_ms": 1872.5,
+        "p50_ms": 1607.7,
+        "p95_ms": 2714.3
+      }
     },
     "brave": {
-      "mean_rbp": 0.44857547200000003,
+      "mean_rbp": 0.40773987199999995,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
-      "judge_errors": 0
+      "judge_errors": 0,
+      "latency": {
+        "n": 20,
+        "mean_ms": 530.2,
+        "p50_ms": 515.5,
+        "p95_ms": 868.3
+      }
     },
     "parallel": {
-      "mean_rbp": 0.41280958399999995,
+      "mean_rbp": 0.35641359999999994,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
-      "judge_errors": 0
+      "judge_errors": 0,
+      "latency": {
+        "n": 20,
+        "mean_ms": 903.4,
+        "p50_ms": 907.3,
+        "p95_ms": 1255.4
+      }
     },
     "tavily": {
-      "mean_rbp": 0.34897601599999994,
+      "mean_rbp": 0.3375622880000001,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
-      "judge_errors": 0
+      "judge_errors": 0,
+      "latency": {
+        "n": 20,
+        "mean_ms": 1392.9,
+        "p50_ms": 1288.4,
+        "p95_ms": 2438.5
+      }
     }
   },
   "judge_model": "google/gemini-3-flash-preview"
