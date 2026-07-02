@@ -2,7 +2,16 @@ import asyncio
 
 import pytest
 
-from keenbench.shared.search import ExaClient, KeenableClient, SearchResult
+from keenbench.shared.search import (
+    BraveClient,
+    ExaClient,
+    KeenableClient,
+    ParallelClient,
+    SearchApiClient,
+    SearchResult,
+    TavilyClient,
+    build_search_clients,
+)
 
 
 def _canned(payload):
@@ -102,6 +111,131 @@ async def test_exa_highlights_mode(monkeypatch):
     results, err = await c.search("hi")
     assert calls["json"]["contents"] == {"highlights": {"maxCharacters": 500}}
     assert results[0].snippet == "one\ntwo"
+
+
+async def test_searchapi_maps_kg_answer_box_and_organic(monkeypatch):
+    payload = {
+        "knowledge_graph": {"website": "https://kg", "title": "KG", "description": "dk"},
+        "answer_box": {"link": "https://ab", "title": "AB", "snippet": "sa"},
+        "organic_results": [
+            {"link": "https://a", "title": "A", "snippet": "so", "date": "Mar 3, 2026"},
+            {"title": "no link"},
+        ],
+    }
+    c = SearchApiClient(api_key="k", engine="google")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=3)
+    assert err is None
+    assert [r.url for r in results] == ["https://kg", "https://ab", "https://a"]
+    assert results[2].published_date == "Mar 3, 2026"
+    assert calls["method"] == "GET"
+    assert calls["params"] == {"q": "hi", "num": 3, "engine": "google", "gl": "us", "hl": "en"}
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_searchapi_error_field(monkeypatch):
+    c = SearchApiClient(api_key="k", engine="bing")
+    fake, _ = _canned({"error": "invalid key"})
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("q")
+    assert results is None
+    assert err == {"error_type": "api_error", "error_message": "invalid key"}
+
+
+async def test_brave_maps_fields(monkeypatch):
+    payload = {
+        "web": {
+            "results": [
+                {
+                    "url": "https://a",
+                    "title": "A",
+                    "description": "da",
+                    "page_age": "2026-06-30T00:00:00",
+                },
+                {"title": "no url"},
+            ]
+        }
+    }
+    c = BraveClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=30)
+    assert err is None
+    assert len(results) == 1
+    assert results[0].snippet == "da"
+    assert results[0].published_date == "2026-06-30T00:00:00"
+    assert calls["params"]["count"] == 20
+    assert calls["headers"]["X-Subscription-Token"] == "k"
+
+
+async def test_parallel_joins_excerpts_and_builds_body(monkeypatch):
+    payload = {"results": [{"url": "https://a", "title": "A", "excerpts": ["one", "two"]}]}
+    c = ParallelClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert results[0].snippet == "one\ntwo"
+    assert calls["json"] == {
+        "search_queries": ["hi"],
+        "mode": "basic",
+        "advanced_settings": {"max_results": 5},
+    }
+    assert calls["headers"] == {"x-api-key": "k"}
+
+
+async def test_tavily_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "results": [
+            {
+                "url": "https://a",
+                "title": "A",
+                "content": "ca",
+                "published_date": "2026-07-01",
+                "score": 0.9,
+            }
+        ]
+    }
+    c = TavilyClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=25)
+    assert err is None
+    assert results[0].snippet == "ca"
+    assert results[0].published_date == "2026-07-01"
+    assert results[0].score == 0.9
+    assert calls["json"] == {
+        "query": "hi",
+        "max_results": 20,
+        "search_depth": "basic",
+        "topic": "general",
+    }
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+def test_factory_builds_new_engines(monkeypatch):
+    monkeypatch.setenv("SEARCHAPI_API_KEY", "sk")
+    monkeypatch.setenv("BRAVE_API_KEY", "bk")
+    monkeypatch.setenv("PARALLEL_API_KEY", "pk")
+    monkeypatch.setenv("TAVILY_API_KEY", "tk")
+    clients = build_search_clients(["google", "bing", "brave", "parallel", "tavily"])
+    assert clients["google"].engine == "google"
+    assert clients["bing"].engine == "bing"
+    assert clients["google"].api_key == clients["bing"].api_key == "sk"
+    assert isinstance(clients["brave"], BraveClient)
+    assert isinstance(clients["parallel"], ParallelClient)
+    assert isinstance(clients["tavily"], TavilyClient)
+
+
+def test_factory_requires_key(monkeypatch):
+    monkeypatch.delenv("BRAVE_API_KEY", raising=False)
+    with pytest.raises(ValueError, match="BRAVE_API_KEY"):
+        build_search_clients(["brave"])
 
 
 async def test_error_passthrough(monkeypatch):
