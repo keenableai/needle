@@ -24,9 +24,15 @@ rendered:
    fixture files under `site/data/`: `history.jsonl`, `runs.json`, and a run
    artifact (`rbp.json` or `recall.json`) matching the rankeval report shape.
 2. Serve `site/` over local HTTP (any static server; `fetch` fails on file://).
-3. Drive it with playwright-core. No local install needed:
-   - module: `/home/yallen/.nvm/versions/node/v20.11.0/lib/node_modules/openclaw/node_modules/playwright-core/index.mjs`
-   - browser: `chromium.launch({ executablePath: "~/.cache/ms-playwright/chromium_headless_shell-*/chrome-headless-shell-linux64/chrome-headless-shell" })`
+3. Drive it with playwright-core, reusing what the machine already has before
+   installing anything:
+   - module: `find "$(npm root -g)" -path '*/playwright-core/index.mjs'` often
+     finds a copy vendored by a global package — import it by absolute path
+     (ESM ignores NODE_PATH). Otherwise `npm i playwright-core` in the scratch
+     dir.
+   - browser: pass `executablePath` pointing at a cached build under
+     `~/.cache/ms-playwright/` or a system chromium; otherwise
+     `npx playwright install chromium-headless-shell`.
 4. Intercept the HF artifact fetch with
    `page.route('**/huggingface.co/**', ...)` and fulfill from the local
    fixture, open the page, click a `.qrow summary` to expand a query, and
