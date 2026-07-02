@@ -28,7 +28,11 @@ FINANCIAL_CONCEPTS = {
         "RevenueFromContractWithCustomerIncludingAssessedTax",
         "SalesRevenueNet",
     ],
-    "net_income": ["NetIncomeLoss"],
+    "net_income": [
+        "NetIncomeLoss",
+        "ProfitLoss",
+        "NetIncomeLossAvailableToCommonStockholdersBasic",
+    ],
     "total_assets": ["Assets"],
     "stockholders_equity": [
         "StockholdersEquity",

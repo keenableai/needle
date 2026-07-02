@@ -158,6 +158,9 @@ def _match_year(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool:
     return bool(golds & text_years(raw_text))
 
 
+_GENERIC_COUNTRY_FORMS = frozenset({"state", "states", "union", "republic", "kingdom"})
+
+
 def _match_country(value: Any, aliases: tuple[str, ...], text_norm: str, raw_text: str) -> bool:
     gold_norm = squad_norm(value)
     canonical = COUNTRY_ALIASES.get(gold_norm, gold_norm)
@@ -167,7 +170,7 @@ def _match_country(value: Any, aliases: tuple[str, ...], text_norm: str, raw_tex
         norm = squad_norm(a)
         if len(norm.replace(" ", "")) <= 3:
             short_forms.add(str(a).strip())
-        elif norm:
+        elif norm and norm not in _GENERIC_COUNTRY_FORMS:
             long_forms.add(norm)
     for surface, canon in COUNTRY_ALIASES.items():
         if canon != canonical:

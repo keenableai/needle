@@ -84,6 +84,12 @@ def test_country_phrases_aliases_and_short_forms():
     assert not gold_in_text(
         "country", "United States of America", aliases, text="trust us on this one"
     )
+    assert not gold_in_text(
+        "country",
+        "United States of America",
+        ("the States",),
+        text="operates stores in all 50 states",
+    )
 
 
 def test_domain_matches_result_url_or_text():

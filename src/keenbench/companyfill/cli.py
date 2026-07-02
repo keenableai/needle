@@ -6,9 +6,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from keenbench.companyfill.generate import GenStats, run_generate
+from keenbench.companyfill.judge import DEFAULT_JUDGE_MODEL
 from keenbench.companyfill.registries import GleifClient, SecClient, WikidataClient
 from keenbench.companyfill.score import GoldQuery, run_answers
 from keenbench.shared.io import write_jsonl, write_stdout
+from keenbench.shared.llm import OpenRouterClient
 from keenbench.shared.sampling import sample_stratified, sample_uniform
 from keenbench.shared.search import ExaClient, KeenableClient, SearchClient
 
@@ -145,6 +147,9 @@ class Companyfill:
         limit: int = 0,
         sample: str = "stratified",
         seed: int = 0,
+        judge: bool = False,
+        judge_model: str | None = None,
+        judge_concurrency: int = 8,
     ) -> None:
         rows = _load_gold_rows(queries)
         if not rows:
@@ -187,6 +192,15 @@ class Companyfill:
         if not clients:
             raise SystemExit("error: no engines selected")
 
+        judge_llm = None
+        model = None
+        if judge:
+            openrouter_key = os.environ.get("OPENROUTER_API_KEY")
+            if not openrouter_key:
+                raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for --judge)")
+            model = judge_model or os.environ.get("KEENBENCH_JUDGE_MODEL") or DEFAULT_JUDGE_MODEL
+            judge_llm = OpenRouterClient(api_key=openrouter_key, model=model)
+
         async def _go() -> dict:
             try:
                 return await run_answers(
@@ -194,12 +208,18 @@ class Companyfill:
                     clients,
                     num_results=num_results,
                     snippet_chars=snippet_chars,
+                    judge=judge_llm,
+                    judge_concurrency=judge_concurrency,
                 )
             finally:
                 for c in clients.values():
                     await c.aclose()
+                if judge_llm is not None:
+                    await judge_llm.aclose()
 
         report = asyncio.run(_go())
+        if model is not None:
+            report["judge_model"] = model
 
         text = json.dumps(report, ensure_ascii=False, indent=2)
         if out == "-":
@@ -207,12 +227,18 @@ class Companyfill:
         else:
             Path(out).write_text(text + "\n", encoding="utf-8")
 
-        print(f"\ncompanyfill: {report['num_queries']} queries, top-{num_results}", file=sys.stderr)
+        judged = f", judge={model}" if model else ""
+        print(
+            f"\ncompanyfill: {report['num_queries']} queries, top-{num_results}{judged}",
+            file=sys.stderr,
+        )
         for name, e in report["engines"].items():
+            extras = f"{e['search_errors']} search errs"
+            if model:
+                extras += f"; {e['judge_upgrades']} judge upgrades, {e['judge_errors']} judge errs"
             print(
                 f"  {name:10s} answer-recall@{num_results} = {e['recall_at_k']:.4f}  "
                 f"MRR = {e['mrr_at_k']:.4f}  "
-                f"({e['num_scored']}/{report['num_queries']} scored; "
-                f"{e['search_errors']} search errs)",
+                f"({e['num_scored']}/{report['num_queries']} scored; {extras})",
                 file=sys.stderr,
             )

@@ -59,8 +59,8 @@ _TRAILING_TOKENS = frozenset(
 
 
 def display_name(title: str) -> str:
-    tokens = title.strip().lower().split()
-    while tokens and tokens[-1].strip(".,/") in _TRAILING_TOKENS:
+    tokens = [t for t in title.strip().lower().split() if not t.startswith("/")]
+    while tokens and (tokens[-1] == "&" or tokens[-1].strip(".,/") in _TRAILING_TOKENS):
         tokens.pop()
     name = " ".join(tokens).rstrip(" ,.")
     return name or title.strip().lower()

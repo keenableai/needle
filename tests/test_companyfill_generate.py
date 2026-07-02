@@ -75,6 +75,11 @@ def test_display_name():
     assert display_name("AMAZON COM INC") == "amazon com"
     assert display_name("Salesforce, Inc.") == "salesforce"
     assert display_name("BERKSHIRE HATHAWAY INC") == "berkshire hathaway"
+    assert display_name("JPMORGAN CHASE & CO") == "jpmorgan chase"
+    assert display_name("ELI LILLY & Co") == "eli lilly"
+    assert display_name("JOHNSON & JOHNSON") == "johnson & johnson"
+    assert display_name("APPLIED MATERIALS INC /DE") == "applied materials"
+    assert display_name("BANK OF AMERICA CORP /DE/") == "bank of america"
 
 
 async def test_companyfill_rows_fields_and_gold():
@@ -179,6 +184,38 @@ async def test_single_letter_ticker_skipped():
     assert fields and "ticker" not in fields
 
 
+async def test_resolve_uses_title_without_state_markers():
+    wd = FakeWikidata(qids={"APPLIED MATERIALS INC": "Q1"}, claims={"Q1": NVDA_CLAIMS})
+    rows, stats = await run_generate(
+        [{"ticker": "AMAT", "title": "APPLIED MATERIALS INC /DE", "cik": 6951}],
+        wikidata=wd,
+        sec=None,
+        gleif=None,
+        suites=("companyfill",),
+        hour_ts=HOUR,
+        min_employee_year=2025,
+    )
+    assert stats.resolved == 1
+    assert rows[0]["query_text"].startswith("applied materials ")
+
+
+async def test_isic_junk_industry_dropped():
+    claims = dict(NVDA_CLAIMS)
+    claims["P452"] = [_stmt({"id": "Q_ISIC"})]
+    LABELS["Q_ISIC"] = ("financial service activities, except insurance and pension funding", [])
+    wd = FakeWikidata(qids={"NVIDIA Corp": "Q1"}, claims={"Q1": claims})
+    rows, _ = await run_generate(
+        [NVDA_SEED],
+        wikidata=wd,
+        sec=None,
+        gleif=None,
+        suites=("companyfill",),
+        hour_ts=HOUR,
+        min_employee_year=2025,
+    )
+    assert "industry" not in {r["gold"]["field"] for r in rows}
+
+
 async def test_gleif_backfills_missing_lei():
     claims = {k: v for k, v in NVDA_CLAIMS.items() if k != "P1278"}
     wd = FakeWikidata(qids={"NVIDIA Corp": "Q1"}, claims={"Q1": claims})
@@ -253,6 +290,49 @@ async def test_financials_rows_pin_fiscal_year():
     assert by_field["revenue"]["gold"]["value"] == 130497000000
     assert by_field["revenue"]["query_origin"]["bucket"] == "financials"
     assert stats.rows == 4
+
+
+async def test_financials_stale_concept_falls_back_and_recency_gated():
+    facts = _fin_facts(
+        {
+            "Revenues": 67589000000,
+            "Assets": 98585000000,
+            "StockholdersEquity": 21318000000,
+        }
+    )
+    facts["NetIncomeLoss"] = {
+        "units": {"USD": [{"form": "10-K", "fp": "FY", "end": "2010-12-31", "val": 27, "fy": 2010}]}
+    }
+    facts["ProfitLoss"] = {
+        "units": {
+            "USD": [{"form": "10-K", "fp": "FY", "end": "2026-01-25", "val": 11000000, "fy": 2026}]
+        }
+    }
+    sec = FakeSec(facts={1045810: facts})
+    rows, _ = await run_generate(
+        [NVDA_SEED],
+        wikidata=None,
+        sec=sec,
+        gleif=None,
+        suites=("financials",),
+        hour_ts=HOUR,
+        min_employee_year=2025,
+    )
+    net = [r for r in rows if r["gold"]["field"] == "net_income"]
+    assert net[0]["gold"]["value"] == 11000000
+    assert net[0]["query_text"].endswith("fiscal year 2026")
+
+    del facts["ProfitLoss"]
+    rows, _ = await run_generate(
+        [NVDA_SEED],
+        wikidata=None,
+        sec=FakeSec(facts={1045810: facts}),
+        gleif=None,
+        suites=("financials",),
+        hour_ts=HOUR,
+        min_employee_year=2025,
+    )
+    assert "net_income" not in {r["gold"]["field"] for r in rows}
 
 
 async def test_financials_below_min_fields_dropped():

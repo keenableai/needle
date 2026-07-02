@@ -136,7 +136,7 @@ keenbench companyfill generate --limit 200 --out gold.jsonl
 keenbench companyfill run --queries gold.jsonl --engines keenable,exa --out report.json
 ```
 
-Scoring is deterministic — no LLM judge. Each result's title + snippet
+Scoring is deterministic by default — no LLM judge. Each result's title + snippet
 (capped uniformly at `--snippet_chars`, default 500, so engines returning
 fatter content don't get free evidence) is checked for the gold value with
 per-field-type matchers: person names tolerate nicknames (Tim ~ Timothy) via
@@ -147,6 +147,16 @@ websites match the result URL's registrable domain, tickers/LEIs match
 case-sensitively on word boundaries. Low-entropy fields (founded_year,
 employees, ticker) additionally require a cue word (`founded`, `employees`,
 `ticker`, …) in the text so a stray number can't score.
+
+`--judge` adds an LLM backstop (OpenRouter, same judge-model knobs as
+rankeval) for the deterministic matcher's blind spots — paraphrases, odd
+formatting, cue words the snippet skipped. It is only consulted for results
+the containment check rejected *ranked ahead of the first deterministic hit*,
+so it can upgrade a miss (or improve a rank) but never revoke a deterministic
+hit, and most results cost no LLM calls at all. The report tracks
+`judge_upgrades` and `judge_errors`; a query whose miss might be a judge
+failure (judge errored, no hit found) is excluded from `num_scored` rather
+than counted as a miss.
 
 The report gives per-engine **answer-recall@K** and **MRR@K** over queries
 whose search succeeded (errors are excluded via `num_scored`, not scored as

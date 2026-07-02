@@ -27,7 +27,12 @@ from keenbench.companyfill.registries import (
 
 COMPANYFILL_MIN_FIELDS = 4
 FINANCIALS_MIN_FIELDS = 3
-_JUNK_INDUSTRY = ("classification", "standard industrial")
+FINANCIALS_MAX_AGE_YEARS = 2
+_JUNK_INDUSTRY = ("classification", "standard industrial", "except", "n.e.c")
+
+
+def _seed_title(title: str) -> str:
+    return " ".join(t for t in title.split() if not t.startswith("/"))
 
 
 @dataclass
@@ -84,7 +89,7 @@ async def _companyfill_rows(
     hour_ts: datetime,
 ) -> list[dict]:
     title, ticker, cik = seed_row["title"], seed_row["ticker"], seed_row["cik"]
-    qid = await wikidata.resolve(title)
+    qid = await wikidata.resolve(_seed_title(title))
     fields: list[tuple[str, Any, list[str], str, str]] = []
     if qid:
         source_url = f"https://www.wikidata.org/wiki/{qid}"
@@ -100,7 +105,7 @@ async def _companyfill_rows(
         lei_val = lei(claims)
         lei_registry = "wikidata"
         if gleif is not None and not lei_val:
-            lei_val = await gleif.lei_by_name(title)
+            lei_val = await gleif.lei_by_name(_seed_title(title))
             lei_registry = "gleif"
         if lei_val:
             fields.append(("lei", lei_val, [], lei_registry, source_url))
@@ -135,8 +140,10 @@ async def _financials_rows(seed_row: dict, sec: SecClient, *, hour_ts: datetime)
         return []
     fields = []
     for field, concepts in FINANCIAL_CONCEPTS.items():
-        val, _end, fy = latest_annual(facts, concepts)
-        if val is None or not fy:
+        val, end, fy = latest_annual(facts, concepts)
+        if val is None or not fy or not end:
+            continue
+        if int(end[:4]) < hour_ts.year - FINANCIALS_MAX_AGE_YEARS:
             continue
         fields.append((field, int(val), fy))
     if len(fields) < FINANCIALS_MIN_FIELDS:
