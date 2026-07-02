@@ -1,8 +1,8 @@
-import asyncio
 from collections.abc import Callable, Sequence
 from typing import Any, TypeVar
 
 from keenbench.freshstream.trends import Trend
+from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.prompts import render_prompt
 
@@ -13,10 +13,11 @@ T = TypeVar("T")
 
 
 def clean_projection(text: str | None) -> str | None:
+    text = (text or "").strip()
     if not text:
         return None
-    cleaned = text.strip().splitlines()[0].strip(" \"'")
-    if not cleaned or cleaned.upper() == "NO_NEWS_EVENT":
+    cleaned = text.splitlines()[0].strip(" \"'")
+    if not cleaned or "NO_NEWS_EVENT" in cleaned.upper():
         return None
     return cleaned
 
@@ -48,24 +49,15 @@ async def project_batch(
     *,
     concurrency: int = 8,
 ) -> list[tuple[T, str | None, dict[str, str] | None]]:
-    if concurrency < 1:
-        raise ValueError("concurrency must be >= 1")
-    sem = asyncio.Semaphore(concurrency)
-
     async def _one(item: T) -> tuple[T, str | None, dict[str, str] | None]:
-        async with sem:
-            try:
-                text, err = await llm.complete(
-                    build_prompt(item), max_tokens=512, reasoning_effort="minimal"
-                )
-            except Exception as exc:
-                return (
-                    item,
-                    None,
-                    {"error_type": "projection_crash", "error_message": str(exc)[:500]},
-                )
+        try:
+            text, err = await llm.complete(
+                build_prompt(item), max_tokens=512, reasoning_effort="minimal"
+            )
+        except Exception as exc:
+            return item, None, {"error_type": "projection_crash", "error_message": str(exc)[:500]}
         if err is not None:
             return item, None, err
         return item, clean_projection(text), None
 
-    return list(await asyncio.gather(*[_one(item) for item in items]))
+    return await bounded_gather(items, _one, concurrency=concurrency)

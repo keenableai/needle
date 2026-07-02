@@ -5,7 +5,20 @@ import pytest
 
 from keenbench.freshstream.pipeline import run_trends
 from keenbench.freshstream.projection import build_trend_prompt
-from keenbench.freshstream.trends import GoogleTrendsRssProvider, NewsItem, Trend, parse_trends
+from keenbench.freshstream.trends import (
+    US_GEOS,
+    GoogleTrendsRssProvider,
+    NewsItem,
+    Trend,
+    approx_traffic_value,
+    cap_by_volume,
+    collect_unique_trends,
+    dedupe_projected_queries,
+    dedupe_topics,
+    fetch_all_geos,
+    filter_ascii_topics,
+    parse_trends,
+)
 
 NOW = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
 FRESH_PUB = "2026-07-01T13:30:00+00:00"
@@ -31,12 +44,25 @@ SAMPLE = """<?xml version="1.0" encoding="UTF-8"?>
 </channel></rss>"""
 
 
-class FakeProvider:
-    def __init__(self, trends):
-        self._trends = trends
+def trend(topic, traffic=None, pub=FRESH_PUB, news=(), geos=()):
+    return Trend(
+        topic=topic,
+        approx_traffic=traffic,
+        pub_date=pub,
+        news_items=tuple(news),
+        geos=tuple(geos),
+    )
 
-    async def fetch(self):
-        return self._trends
+
+class FakeProvider:
+    def __init__(self, by_geo):
+        self._by_geo = by_geo
+
+    async def fetch(self, geo):
+        val = self._by_geo[geo]
+        if isinstance(val, Exception):
+            raise val
+        return val
 
 
 class FakeLLM:
@@ -44,6 +70,11 @@ class FakeLLM:
         if "vucevic" in prompt:
             return "vucevic magic deal 2026", None
         return "NO_NEWS_EVENT", None
+
+
+def test_us_geos_covers_states():
+    assert len(US_GEOS) == 52
+    assert "US" in US_GEOS and "US-CA" in US_GEOS
 
 
 def test_parse_trends():
@@ -59,31 +90,107 @@ def test_parse_trends():
     assert trends[1].pub_date is None
 
 
+def test_approx_traffic_value():
+    assert approx_traffic_value("500+") == 500
+    assert approx_traffic_value("1,000,000+") == 1_000_000
+    assert approx_traffic_value("2M+") == 2_000_000
+    assert approx_traffic_value("50K+") == 50_000
+    assert approx_traffic_value(None) == 0
+    assert approx_traffic_value("garbage") == 0
+
+
+def test_collect_unique_trends_merges_geos():
+    a = trend("lakers")
+    merged = collect_unique_trends({"US": [a], "US-CA": [trend("lakers")], "US-NY": [trend("x")]})
+    by_topic = {t.topic: t for t in merged}
+    assert by_topic["lakers"].geos == ("US", "US-CA")
+    assert by_topic["x"].geos == ("US-NY",)
+
+
+def test_dedupe_topics_fuzzy_merges_and_keeps_highest_volume():
+    trends = [
+        trend("Lakers vs Warriors", "500+", geos=("US",)),
+        trend("warriors lakers", "10,000+", geos=("US-CA",)),
+        trend("unrelated topic", "200+", geos=("US",)),
+    ]
+    deduped = dedupe_topics(trends)
+    topics = [t.topic for t in deduped]
+    assert "warriors lakers" in topics
+    assert "Lakers vs Warriors" not in topics
+    survivor = next(t for t in deduped if t.topic == "warriors lakers")
+    assert set(survivor.geos) == {"US", "US-CA"}
+    assert "unrelated topic" in topics
+
+
+def test_filter_ascii_topics():
+    kept = filter_ascii_topics([trend("lakers"), trend("東京オリンピック")])
+    assert [t.topic for t in kept] == ["lakers"]
+
+
+def test_cap_by_volume_keeps_top_by_traffic():
+    trends = [trend("low", "100+"), trend("high", "10,000+"), trend("mid", "500+")]
+    assert [t.topic for t in cap_by_volume(trends, 2)] == ["high", "mid"]
+    assert cap_by_volume(trends, 0) == trends
+
+
+def test_dedupe_projected_queries_collapses_near_duplicates():
+    high = trend("a", "10,000+")
+    low = trend("b", "100+")
+    other = trend("c", "50+")
+    projections = [
+        (low, "lakers warriors game score", None),
+        (high, "Lakers vs Warriors score 2026", None),
+        (other, "senate budget vote", None),
+        (trend("err"), None, {"error_type": "x", "error_message": "y"}),
+        (trend("refused"), None, None),
+    ]
+    kept, dropped = dedupe_projected_queries(projections)
+    texts = [t for _, t, _ in kept if t]
+    assert dropped == 1
+    assert "Lakers vs Warriors score 2026" in texts
+    assert "lakers warriors game score" not in texts
+    assert "senate budget vote" in texts
+    assert sum(1 for _, t, _ in kept if t is None) == 2
+
+
+async def test_fetch_all_geos_fail_soft():
+    provider = FakeProvider({"US": [trend("a")], "US-CA": ValueError("down")})
+    by_geo, errors = await fetch_all_geos(provider, ("US", "US-CA"))
+    assert errors == 1
+    assert list(by_geo) == ["US"]
+
+
 def test_build_trend_prompt_has_topic_and_news():
-    trend = Trend(
-        topic="nikola vucevic",
-        approx_traffic="500+",
-        pub_date=FRESH_PUB,
-        news_items=(NewsItem(title="Vucevic to Magic", url="u", source="ESPN"),),
+    t = trend(
+        "nikola vucevic",
+        "500+",
+        news=(NewsItem(title="Vucevic to Magic", url="u", source="ESPN"),),
     )
-    prompt = build_trend_prompt(trend, today="2026-07-01")
+    prompt = build_trend_prompt(t, today="2026-07-01")
     assert "Today's date: 2026-07-01" in prompt
     assert "Trending topic: nikola vucevic" in prompt
     assert "[ESPN] Vucevic to Magic" in prompt
 
 
 async def test_run_trends_end_to_end():
-    trends = [
-        Trend("vucevic", "500+", FRESH_PUB, (NewsItem("Vucevic to Magic", "u", "ESPN"),)),
-        Trend("evergreen", "200+", FRESH_PUB, ()),
-    ]
+    news = (NewsItem("Vucevic to Magic", "u", "ESPN"),)
+    by_geo = {
+        "US": [trend("vucevic", "500+", news=news), trend("evergreen", "200+")],
+        "US-FL": [trend("vucevic", "500+", news=news)],
+    }
     rows, stats = await run_trends(
-        FakeProvider(trends), FakeLLM(), hour_ts=NOW, now=NOW, llm_concurrency=2
+        FakeProvider(by_geo),
+        FakeLLM(),
+        hour_ts=NOW,
+        now=NOW,
+        geos=("US", "US-FL"),
+        llm_concurrency=2,
     )
 
     assert stats.candidates == 2
     assert stats.projected == 1
     assert stats.no_news_event == 1
+    assert stats.fetch_errors == 0
     row = rows[0]
     assert row.query_text == "vucevic magic deal 2026"
     assert row.query_source == "fresh-queries"
@@ -93,29 +200,36 @@ async def test_run_trends_end_to_end():
     assert origin["provenance"]["producer"] == "trends_queries"
     assert origin["provenance"]["topic"] == "vucevic"
     assert origin["provenance"]["pub_date"] == FRESH_PUB
-    assert json.loads(json.dumps(row.to_dict()))["query_origin"]["bucket"] == "trending"
+    assert origin["provenance"]["geos"] == ["US", "US-FL"]
+    assert origin["provenance"]["geo_count"] == 2
+    wire = json.loads(json.dumps(row.to_dict()))
+    assert json.loads(wire["query_origin"])["bucket"] == "trending"
 
 
 async def test_run_trends_drops_stale_future_and_undated():
     news = (NewsItem("vucevic", "u", "ESPN"),)
-    trends = [
-        Trend("fresh", "1", FRESH_PUB, news),
-        Trend("stale", "1", STALE_PUB, news),
-        Trend("future", "1", FUTURE_PUB, news),
-        Trend("undated", "1", None, news),
-    ]
-    rows, stats = await run_trends(FakeProvider(trends), FakeLLM(), hour_ts=NOW, now=NOW)
+    by_geo = {
+        "US": [
+            trend("fresh", "1", FRESH_PUB, news),
+            trend("stale", "1", STALE_PUB, news),
+            trend("future", "1", FUTURE_PUB, news),
+            trend("undated", "1", None, news),
+        ]
+    }
+    rows, stats = await run_trends(
+        FakeProvider(by_geo), FakeLLM(), hour_ts=NOW, now=NOW, geos=("US",)
+    )
     assert stats.candidates == 1
     assert stats.projected == 1
     assert rows[0].query_origin["provenance"]["topic"] == "fresh"
 
 
-async def test_run_trends_respects_max_trends():
-    trends = [
-        Trend(f"t{i}", None, FRESH_PUB, (NewsItem("vucevic", "u", "ESPN"),)) for i in range(5)
-    ]
+async def test_run_trends_caps_by_volume():
+    news = (NewsItem("vucevic", "u", "ESPN"),)
+    topics = ["lakers game", "senate vote", "hurricane update", "iphone launch"]
+    by_geo = {"US": [trend(t, f"{(i + 1) * 100}+", news=news) for i, t in enumerate(topics)]}
     rows, stats = await run_trends(
-        FakeProvider(trends), FakeLLM(), hour_ts=NOW, now=NOW, max_trends=2
+        FakeProvider(by_geo), FakeLLM(), hour_ts=NOW, now=NOW, geos=("US",), max_trends=2
     )
     assert stats.candidates == 2
 
@@ -123,4 +237,4 @@ async def test_run_trends_respects_max_trends():
 async def test_fetch_wraps_http_errors_as_valueerror():
     provider = GoogleTrendsRssProvider(base_url="http://127.0.0.1:1", timeout_s=2.0)
     with pytest.raises(ValueError):
-        await provider.fetch()
+        await provider.fetch("US")

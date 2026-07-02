@@ -30,12 +30,14 @@ to keep fresh. Two independent real-time streams feed one cohort, both tagged
    feeds, 168h for academic papers), and project each survivor into a query via
    an LLM. Evergreen content (explainers, how-tos, reviews, opinion) is refused
    with a `NO_NEWS_EVENT` sentinel and dropped.
-2. **Google Trends** (`query_origin.bucket = "trending"`) — fetch the keyless
-   Google Trends RSS feed (`trends.google.com/trending/rss?geo=US`), which
-   carries each trending topic plus the news articles behind it, and project
-   each into a query via an LLM (same `NO_NEWS_EVENT` refusal). Keyless — no
-   API key beyond the LLM. (A `TrendsProvider` protocol leaves room for a
-   SearchAPI adapter for those with a key.)
+2. **Google Trends** (`query_origin.bucket = "trending"`) — fan out over the
+   keyless Google Trends RSS feed (`trends.google.com/trending/rss?geo=...`)
+   for all 52 US geos (`--geos` to override), merge topics across geos with
+   geo tracking, collapse fuzzy near-duplicates (highest volume wins), drop
+   non-ASCII topics, cap by approximate traffic, project each survivor into a
+   query via an LLM (same `NO_NEWS_EVENT` refusal), and fuzzy-dedup the
+   generated queries. Keyless — no API key beyond the LLM. (A `TrendsProvider`
+   protocol leaves room for a SearchAPI adapter for those with a key.)
 
 ### Run
 
@@ -46,9 +48,9 @@ exported variable takes precedence.
 
 ```bash
 cp .env.example .env    # then set OPENROUTER_API_KEY
-# default model is google/gemini-2.5-flash-lite; override with --llm-model or $KEENBENCH_LLM_MODEL
+# default model is google/gemini-3.1-flash-lite; override with --llm-model or $KEENBENCH_LLM_MODEL
 keenbench freshstream run --source rss --out queries.jsonl
-keenbench freshstream run --source trending --geo US --out trending.jsonl
+keenbench freshstream run --source trending --out trending.jsonl   # all 52 US geos; --geos US,US-CA to narrow
 ```
 
 Each output line is one canonical query row:
@@ -96,7 +98,7 @@ from keenbench.freshstream import run_rss
 from keenbench.freshstream.feeds import SEED_SOURCES
 from keenbench.shared.llm import OpenRouterClient
 
-llm = OpenRouterClient(api_key="sk-or-...", model="google/gemini-2.5-flash-lite")
+llm = OpenRouterClient(api_key="sk-or-...", model="google/gemini-3.1-flash-lite")
 hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
 rows, stats = asyncio.run(run_rss(SEED_SOURCES, llm, hour_ts=hour_ts))
 ```
@@ -149,8 +151,9 @@ CLI score how well a search engine ranks results for a query:
   through OpenRouter. The default judge model is `google/gemini-3-flash-preview`
   (`--judge-model` / `$KEENBENCH_JUDGE_MODEL`).
 - **RBP@5** — Rank-Biased Precision (`p=0.8`), gain `{4:1.0, 3:0.667, 2:0.117}`,
-  ceiling `1 - p^5 ≈ 0.672`. (Plain gain-weighted RBP; the internal SQL kernel's
-  domain-redundancy penalties are not applied here.)
+  ceiling `1 - p^5 ≈ 0.672`, with the internal SQL kernel's redundancy
+  penalties applied per query: duplicate URL −4, third-plus result from a
+  domain −2, second −1 (floored at 0; `site:` queries exempt).
 
 ```bash
 keenbench freshstream run --out fresh.jsonl
@@ -158,13 +161,29 @@ keenbench rankeval run --queries fresh.jsonl --limit 20 --engines keenable,exa -
 ```
 
 The keyless Keenable endpoint is burst-rate-limited, so `KeenableClient`
-defaults to low concurrency when used without a key; `--exa-concurrency`
+defaults to low concurrency when used without a key; set `$KEENABLE_API_KEY` to
+use the authenticated endpoint at higher concurrency. `--exa-concurrency`
 (default 4) throttles Exa in a run.
+
+Exa's full page text vs Keenable's short snippets hands the judge asymmetric
+evidence (the Needs-Met rubric caps thin-content documents at 2/SM), so
+rankeval requests Exa highlights capped at ~500 chars by default
+(`--exa-highlight-chars`, 0 restores full text).
+
+Queries whose search failed or that have any missing judgement are excluded
+from `mean_rbp_at_5` (reported via `num_scored`, `search_errors`,
+`judge_errors`) rather than scored as zero, so transient API failures don't
+skew the engine comparison. Each unique `(query, url)` pair is judged once
+across all engines (`judged_pairs` in the report), the judge's "Today's date"
+comes from each query row's `hour_ts` when present, and `--limit N` takes a
+deterministic stratified sample across `topical_domain` (`--sample
+uniform|head` for the alternatives, `--seed` to vary it).
 
 **First numbers** (20 fresh RSS-derived queries, top-5, snippet-only judging,
 judge `gemini-3-flash-preview`): **Exa 0.578** vs **Keenable 0.503** (ceiling
-0.672; both engines 0 search/judge errors). Small sample and snippet-only (no
-full-page fetch) — directional, not a headline metric.
+0.672; both engines 0 search/judge errors). Small sample, snippet-only (no
+full-page fetch), and measured before redundancy penalties and cross-engine
+judging landed — directional, not a headline metric.
 
 ## Development
 

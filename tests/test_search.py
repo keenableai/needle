@@ -94,6 +94,16 @@ async def test_exa_omits_contents_when_text_disabled(monkeypatch):
     assert "contents" not in calls["json"]
 
 
+async def test_exa_highlights_mode(monkeypatch):
+    c = ExaClient(api_key="x", highlight_chars=500)
+    payload = {"results": [{"url": "https://a", "highlights": ["one", "two"]}]}
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi")
+    assert calls["json"]["contents"] == {"highlights": {"maxCharacters": 500}}
+    assert results[0].snippet == "one\ntwo"
+
+
 async def test_error_passthrough(monkeypatch):
     c = ExaClient(api_key="x")
 

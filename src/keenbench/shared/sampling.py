@@ -34,7 +34,7 @@ def sample_stratified(
 
     by_domain: dict[str, list[dict[str, Any]]] = {}
     for r in records:
-        by_domain.setdefault(r[key], []).append(r)
+        by_domain.setdefault(str(r.get(key) or ""), []).append(r)
 
     for d, rs in by_domain.items():
         domain_seed = seed ^ int.from_bytes(hashlib.sha256(d.encode()).digest()[:8], "big")
@@ -59,6 +59,18 @@ def sample_stratified(
                 next_round.append(d)
         domain_order = next_round
     return picked
+
+
+def sample(
+    records: list[dict[str, Any]], k: int, seed: int, *, strategy: str
+) -> list[dict[str, Any]]:
+    if strategy == "head":
+        return records[:k]
+    if strategy == "uniform":
+        return sample_uniform(records, k, seed)
+    if strategy == "stratified":
+        return sample_stratified(records, k, seed)
+    raise ValueError(f"unknown sample strategy {strategy!r} (known: stratified, uniform, head)")
 
 
 def seed_from_hour_ts(hour_ts: datetime) -> int:

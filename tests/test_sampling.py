@@ -41,6 +41,12 @@ def test_sample_stratified_custom_key():
     assert {r["kind"] for r in picked} == {"a", "b"}
 
 
+def test_sample_stratified_tolerates_missing_key():
+    recs = [{"topical_domain": "tech", "i": 0}, {"i": 1}]
+    picked = sample_stratified(recs, 2, seed=1)
+    assert len(picked) == 2
+
+
 def test_seed_from_hour_ts_deterministic():
     ts = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
     assert seed_from_hour_ts(ts) == seed_from_hour_ts(ts)

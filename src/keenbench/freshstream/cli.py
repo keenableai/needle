@@ -5,11 +5,11 @@ from datetime import UTC, datetime
 
 from keenbench.freshstream.feeds import SEED_SOURCES, load_sources_from_toml
 from keenbench.freshstream.pipeline import run_rss, run_trends
-from keenbench.freshstream.trends import GoogleTrendsRssProvider
+from keenbench.freshstream.trends import GoogleTrendsRssProvider, parse_geos
 from keenbench.shared.io import write_jsonl, write_stdout
 from keenbench.shared.llm import OpenRouterClient
 
-DEFAULT_MODEL = "google/gemini-2.5-flash-lite"
+DEFAULT_MODEL = "google/gemini-3.1-flash-lite"
 
 
 class Freshstream:
@@ -18,7 +18,7 @@ class Freshstream:
         source: str = "rss",
         out: str = "-",
         feeds: str | None = None,
-        geo: str = "US",
+        geos: str = "us-all",
         max_trends: int = 0,
         llm_model: str | None = None,
         max_rows_per_source: int = 50,
@@ -41,7 +41,10 @@ class Freshstream:
         else:
             misused = [
                 name
-                for name, used in (("--geo", geo != "US"), ("--max-trends", max_trends != 0))
+                for name, used in (
+                    ("--geos", geos != "us-all"),
+                    ("--max-trends", max_trends != 0),
+                )
                 if used
             ]
         if misused:
@@ -56,14 +59,21 @@ class Freshstream:
         hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
         llm_concurrency = max(1, llm_concurrency)
 
+        provider = None
         if source == "trending":
+            try:
+                geo_list = parse_geos(geos)
+            except ValueError as exc:
+                raise SystemExit(f"error: --geos: {exc}") from exc
+            provider = GoogleTrendsRssProvider()
 
             def pipeline():
                 return run_trends(
-                    GoogleTrendsRssProvider(geo=geo),
+                    provider,
                     llm,
                     hour_ts=hour_ts,
                     max_trends=max_trends,
+                    geos=geo_list,
                     llm_concurrency=llm_concurrency,
                 )
         else:
@@ -90,6 +100,8 @@ class Freshstream:
                 return await pipeline()
             finally:
                 await llm.aclose()
+                if provider is not None:
+                    await provider.aclose()
 
         try:
             rows, stats = asyncio.run(_go())
@@ -103,7 +115,10 @@ class Freshstream:
             write_jsonl(records, out)
 
         if source == "trending":
-            source_summary = f"{stats.candidates} {geo} trends"
+            source_summary = (
+                f"{stats.candidates} trends across {len(geo_list)} geos "
+                f"({stats.fetch_errors} geo fetch errors)"
+            )
         else:
             source_summary = f"{stats.candidates} candidates across {stats.feeds} feeds"
         print(

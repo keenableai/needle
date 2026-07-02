@@ -1,3 +1,3 @@
-from keenbench.rankeval.pipeline import run_rbp
+from keenbench.rankeval.pipeline import EvalQuery, run_rbp
 
-__all__ = ["run_rbp"]
+__all__ = ["EvalQuery", "run_rbp"]

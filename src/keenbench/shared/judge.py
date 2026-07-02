@@ -1,3 +1,4 @@
+import json
 import re
 from dataclasses import dataclass
 from functools import cache
@@ -11,6 +12,7 @@ DEFAULT_MAX_CONTENT_CHARS = 50_000
 JUDGE_TEMPLATE = "judgement.jinja"
 
 _LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
+_VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
 
 _FENCE_PATTERNS = (
     re.compile(r"[ \t]*```(?:ya?ml|json)[ \t]*\n(.*?)\n[ \t]*```", re.DOTALL | re.IGNORECASE),
@@ -97,22 +99,59 @@ def build_judge_prompt(
     return _system_prompt() + "\n\n" + user
 
 
+def _parse_rating(raw: object) -> int | None:
+    if isinstance(raw, bool):
+        return None
+    if isinstance(raw, int):
+        return raw
+    if isinstance(raw, str):
+        try:
+            return int(raw.strip())
+        except ValueError:
+            return None
+    return None
+
+
+def _extract_fields_regex(content: str) -> dict[str, object] | None:
+    rating_match = re.search(r"^rating:\s*(\d+)", content, re.MULTILINE)
+    label_match = re.search(r"^label:\s*(\S+)", content, re.MULTILINE)
+    if not rating_match or not label_match:
+        return None
+    result: dict[str, object] = {
+        "rating": int(rating_match.group(1)),
+        "label": label_match.group(1).strip("\"'"),
+    }
+    reasoning_match = re.search(
+        r"^reasoning:\s*(.*?)(?:\n[a-z_]+:|\Z)", content, re.MULTILINE | re.DOTALL
+    )
+    if reasoning_match:
+        result["reasoning"] = reasoning_match.group(1).strip().strip("\"'")
+    return result
+
+
+def _load_judgement_dict(block: str) -> dict[str, object] | None:
+    try:
+        data = yaml.safe_load(block)
+    except yaml.YAMLError:
+        try:
+            data = json.loads(block)
+        except (json.JSONDecodeError, ValueError):
+            data = _extract_fields_regex(block)
+    return data if isinstance(data, dict) else None
+
+
 def parse_judgement(text: str | None) -> Judgement | None:
     if not text:
         return None
-    try:
-        data = yaml.safe_load(_extract_yaml_block(text))
-    except yaml.YAMLError:
+    data = _load_judgement_dict(_extract_yaml_block(text))
+    if data is None or "rating" not in data:
         return None
-    if not isinstance(data, dict) or "rating" not in data:
+    rating = _parse_rating(data["rating"])
+    if rating is None or not 0 <= rating <= 4:
         return None
-    try:
-        rating = int(data["rating"])
-    except (TypeError, ValueError):
-        return None
-    if not 0 <= rating <= 4:
-        return None
-    label = str(data.get("label") or _LABELS[rating])
+    label = str(data.get("label") or "").strip()
+    if label not in _VALID_LABELS:
+        label = _LABELS[rating]
     reasoning = str(data.get("reasoning") or "")
     return Judgement(rating=rating, label=label, reasoning=reasoning)
 

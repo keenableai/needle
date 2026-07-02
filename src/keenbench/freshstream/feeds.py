@@ -1,4 +1,3 @@
-import asyncio
 import time
 import tomllib
 from dataclasses import dataclass
@@ -12,6 +11,8 @@ from xml.etree.ElementTree import Element, ParseError
 import defusedxml.ElementTree as ET
 import httpx
 from defusedxml.common import DefusedXmlException
+
+from keenbench.shared.concurrency import bounded_gather
 
 _DEFAULT_FEEDS_FILE = "feeds.default.toml"
 
@@ -43,12 +44,13 @@ SEED_SOURCES: tuple[SeedSource, ...] = _load_packaged_default()
 
 
 HTTP_TIMEOUT = httpx.Timeout(20.0, connect=10.0)
-USER_AGENT = "keenbench-freshstream/0.1 (+https://github.com/keenable/keenbench)"
+USER_AGENT = "keenbench-freshstream/0.1 (+https://github.com/keenableai/keenbench)"
 
 NS = {
     "atom": "http://www.w3.org/2005/Atom",
     "content": "http://purl.org/rss/1.0/modules/content/",
     "dc": "http://purl.org/dc/elements/1.1/",
+    "rss1": "http://purl.org/rss/1.0/",
 }
 
 RAW_MAX_AGE_DEFAULT = timedelta(hours=6)
@@ -56,6 +58,9 @@ RAW_MAX_AGE_BY_KIND: dict[str, timedelta] = {"rss_paper": timedelta(hours=168)}
 
 QUERY_MAX_AGE_DEFAULT = timedelta(hours=1)
 QUERY_MAX_AGE_BY_KIND: dict[str, timedelta] = {"rss_paper": timedelta(hours=168)}
+
+FUTURE_SKEW_TOLERANCE = timedelta(minutes=5)
+_FUTURE_SKEW_TOLERANCE_S = FUTURE_SKEW_TOLERANCE.total_seconds()
 
 HEALTH_WINDOWS: tuple[tuple[str, timedelta], ...] = (
     ("items_lt_1h", timedelta(hours=1)),
@@ -109,6 +114,14 @@ def _text_of(el: Element | None) -> str | None:
     return el.text.strip() or None
 
 
+def _atom_entry_link(entry: Element) -> str | None:
+    links = entry.findall("atom:link", NS)
+    for el in links:
+        if el.get("rel", "alternate") == "alternate":
+            return el.get("href")
+    return links[0].get("href") if links else None
+
+
 def _parse_feed(root: Element) -> list[dict[str, str | None]]:
     entries: list[dict[str, str | None]] = []
 
@@ -123,15 +136,23 @@ def _parse_feed(root: Element) -> list[dict[str, str | None]]:
             }
         )
 
+    for item in root.findall(".//rss1:item", NS):
+        entries.append(
+            {
+                "title": _text_of(item.find("rss1:title", NS)),
+                "summary": _text_of(item.find("rss1:description", NS)),
+                "url": _text_of(item.find("rss1:link", NS)),
+                "published_at": _text_of(item.find("dc:date", NS)),
+            }
+        )
+
     for entry in root.findall("atom:entry", NS):
-        link_el = entry.find("atom:link", NS)
-        link = link_el.get("href") if link_el is not None else None
         entries.append(
             {
                 "title": _text_of(entry.find("atom:title", NS)),
                 "summary": _text_of(entry.find("atom:summary", NS))
                 or _text_of(entry.find("atom:content", NS)),
-                "url": link,
+                "url": _atom_entry_link(entry),
                 "published_at": _text_of(entry.find("atom:updated", NS))
                 or _text_of(entry.find("atom:published", NS)),
             }
@@ -158,6 +179,16 @@ def parse_published_date(s: str | None) -> datetime | None:
         return dt.astimezone(UTC)
     except Exception:
         return None
+
+
+def published_age_seconds(published_at: str | None, *, now: datetime) -> float | None:
+    dt = parse_published_date(published_at)
+    if dt is None:
+        return None
+    age = (now - dt).total_seconds()
+    if age < -_FUTURE_SKEW_TOLERANCE_S:
+        return None
+    return max(age, 0.0)
 
 
 def _raw_max_age_for_kind(source_kind: str) -> timedelta:
@@ -213,12 +244,8 @@ async def _fetch_one(
     recent_items: list[dict[str, str | None]] = []
     newest_age_seconds: float | None = None
     for e in parsed_items:
-        dt = parse_published_date(e.get("published_at"))
-        if dt is None:
-            recent_items.append(e)
-            continue
-        age = (now - dt).total_seconds()
-        if age < 0:
+        age = published_age_seconds(e.get("published_at"), now=now)
+        if age is None:
             continue
         item_ages_seconds.append(age)
         if newest_age_seconds is None or age < newest_age_seconds:
@@ -255,16 +282,14 @@ async def fetch_all_sources(
     max_rows_per_source: int = 50,
     concurrency: int = 15,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    if concurrency < 1:
-        raise ValueError("concurrency must be >= 1")
-    sem = asyncio.Semaphore(concurrency)
+    if max_rows_per_source < 1:
+        raise ValueError("max_rows_per_source must be >= 1")
     async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
 
         async def _one(s: SeedSource) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-            async with sem:
-                return await _fetch_one(client, s, max_rows_per_source=max_rows_per_source)
+            return await _fetch_one(client, s, max_rows_per_source=max_rows_per_source)
 
-        results = await asyncio.gather(*[_one(s) for s in sources])
+        results = await bounded_gather(sources, _one, concurrency=concurrency)
 
     items: list[dict[str, Any]] = []
     healths: list[dict[str, Any]] = []
@@ -280,11 +305,8 @@ def pick_per_feed(items: list[dict[str, Any]], *, now: datetime) -> list[dict[st
         source_kind = str(r.get("source_kind") or "")
         if source_kind not in RSS_KINDS:
             continue
-        dt = parse_published_date(r.get("lastmod_or_pub_at"))
-        if dt is None:
-            continue
-        age = (now - dt).total_seconds()
-        if age < 0 or age > _query_max_age_for_kind(source_kind).total_seconds():
+        age = published_age_seconds(r.get("lastmod_or_pub_at"), now=now)
+        if age is None or age > _query_max_age_for_kind(source_kind).total_seconds():
             continue
         parent = str(r.get("parent_site") or "")
         prev = by_feed.get(parent)

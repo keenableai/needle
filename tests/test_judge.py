@@ -45,6 +45,34 @@ def test_parse_rejects_out_of_range_or_garbage():
     assert parse_judgement("reasoning: no rating here") is None
 
 
+def test_parse_keeps_model_label_even_when_mismatched():
+    j = parse_judgement("rating: 4\nlabel: FailsM\nreasoning: r")
+    assert j.rating == 4 and j.label == "FailsM"
+
+
+def test_parse_derives_label_when_invalid():
+    j = parse_judgement("rating: 4\nlabel: Amazing\nreasoning: r")
+    assert j.rating == 4 and j.label == "FullyM"
+
+
+def test_parse_falls_back_to_json():
+    j = parse_judgement('{\n\t"rating": 3,\n\t"label": "HM",\n\t"reasoning": "r"\n}')
+    assert j is not None and j.rating == 3 and j.label == "HM"
+
+
+def test_parse_falls_back_to_regex_scrape():
+    j = parse_judgement("rating: 3\nlabel: HM\nreasoning: broken: nested: colons")
+    assert j is not None and j.rating == 3 and j.label == "HM"
+    assert "broken: nested: colons" in j.reasoning
+
+
+def test_parse_rejects_non_integer_ratings():
+    assert parse_judgement("rating: true\nlabel: HM") is None
+    assert parse_judgement("rating: 3.7\nlabel: HM") is None
+    j = parse_judgement('rating: "3"\nreasoning: r')
+    assert j is not None and j.rating == 3 and j.label == "HM"
+
+
 def test_build_user_message_and_content_cap():
     msg = build_user_message(
         "mayor of austin",
