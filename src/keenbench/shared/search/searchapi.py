@@ -1,4 +1,4 @@
-from keenbench.shared.search.base import MAX_ERROR_CHARS, HttpSearchClient, SearchResult
+from keenbench.shared.search.base import HttpSearchClient, SearchResult
 
 
 class SearchApiClient(HttpSearchClient):
@@ -8,8 +8,6 @@ class SearchApiClient(HttpSearchClient):
         api_key: str,
         engine: str,
         base_url: str = "https://www.searchapi.io/api/v1",
-        country: str = "us",
-        language: str = "en",
         timeout_s: float = 30.0,
         max_concurrency: int = 8,
     ) -> None:
@@ -17,8 +15,6 @@ class SearchApiClient(HttpSearchClient):
         self.api_key = api_key
         self.engine = engine
         self.base_url = base_url.rstrip("/")
-        self.country = country
-        self.language = language
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -26,12 +22,13 @@ class SearchApiClient(HttpSearchClient):
         payload, err = await self._request_json(
             "GET",
             f"{self.base_url}/search",
+            error_field="error",
             params={
                 "q": query,
                 "num": min(num_results, 100),
                 "engine": self.engine,
-                "gl": self.country,
-                "hl": self.language,
+                "gl": "us",
+                "hl": "en",
             },
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
@@ -39,11 +36,6 @@ class SearchApiClient(HttpSearchClient):
             return None, err
         if not isinstance(payload, dict):
             payload = {}
-        if payload.get("error"):
-            return None, {
-                "error_type": "api_error",
-                "error_message": str(payload["error"])[:MAX_ERROR_CHARS],
-            }
 
         results: list[SearchResult] = []
         kg = payload.get("knowledge_graph")

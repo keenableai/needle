@@ -1,4 +1,4 @@
-from keenbench.shared.search.base import MAX_ERROR_CHARS, HttpSearchClient, SearchResult
+from keenbench.shared.search.base import HttpSearchClient, SearchResult
 
 
 class ParallelClient(HttpSearchClient):
@@ -24,6 +24,7 @@ class ParallelClient(HttpSearchClient):
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/v1/search",
+            error_field="error",
             json={
                 "search_queries": [query],
                 "mode": self.mode,
@@ -33,13 +34,7 @@ class ParallelClient(HttpSearchClient):
         )
         if err is not None:
             return None, err
-        if not isinstance(payload, dict):
-            payload = {}
-        if payload.get("error"):
-            return None, {
-                "error_type": "api_error",
-                "error_message": str(payload["error"])[:MAX_ERROR_CHARS],
-            }
+        raw_results = payload.get("results", []) if isinstance(payload, dict) else []
         results = [
             SearchResult(
                 url=r["url"],
@@ -47,7 +42,7 @@ class ParallelClient(HttpSearchClient):
                 snippet="\n".join(r.get("excerpts") or []) or None,
                 raw=r,
             )
-            for r in payload.get("results") or []
+            for r in raw_results[:num_results]
             if r.get("url")
         ]
-        return results[:num_results], None
+        return results, None

@@ -10,7 +10,6 @@ class TavilyClient(HttpSearchClient):
         api_key: str,
         base_url: str = "https://api.tavily.com",
         search_depth: str = "basic",
-        topic: str = "general",
         timeout_s: float = 30.0,
         max_concurrency: int = 8,
     ) -> None:
@@ -18,7 +17,6 @@ class TavilyClient(HttpSearchClient):
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.search_depth = search_depth
-        self.topic = topic
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -30,7 +28,6 @@ class TavilyClient(HttpSearchClient):
                 "query": query,
                 "max_results": min(num_results, 20),
                 "search_depth": self.search_depth,
-                "topic": self.topic,
             },
             headers={"Authorization": f"Bearer {self.api_key}"},
         )

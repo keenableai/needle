@@ -135,10 +135,19 @@ async def test_searchapi_maps_kg_answer_box_and_organic(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
-async def test_searchapi_error_field(monkeypatch):
+async def test_request_json_error_field(monkeypatch):
+    class FakeResp:
+        status_code = 200
+
+        def json(self):
+            return {"error": "invalid key"}
+
+    class FakeHttp:
+        async def request(self, method, url, **kwargs):
+            return FakeResp()
+
     c = SearchApiClient(api_key="k", engine="bing")
-    fake, _ = _canned({"error": "invalid key"})
-    monkeypatch.setattr(c, "_request_json", fake)
+    monkeypatch.setattr(c, "_http", lambda: FakeHttp())
     results, err = await c.search("q")
     assert results is None
     assert err == {"error_type": "api_error", "error_message": "invalid key"}
@@ -209,12 +218,7 @@ async def test_tavily_maps_fields_and_builds_body(monkeypatch):
     assert results[0].snippet == "ca"
     assert results[0].published_date == "2026-07-01"
     assert results[0].score == 0.9
-    assert calls["json"] == {
-        "query": "hi",
-        "max_results": 20,
-        "search_depth": "basic",
-        "topic": "general",
-    }
+    assert calls["json"] == {"query": "hi", "max_results": 20, "search_depth": "basic"}
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
