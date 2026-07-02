@@ -1,6 +1,7 @@
 import pytest
 
 from keenbench.companyfill.canon import (
+    FIELD_TYPES,
     gold_in_text,
     registrable_domain,
     squad_norm,
@@ -24,6 +25,9 @@ def test_registrable_domain():
     assert registrable_domain("https://www.nvidia.com/en-us/") == "nvidia.com"
     assert registrable_domain("http://investor.apple.com/faq") == "apple.com"
     assert registrable_domain("nvidia.com") == "nvidia.com"
+    assert registrable_domain("https://www.bbc.co.uk/news") == "bbc.co.uk"
+    assert registrable_domain("shop.example.com.au") == "example.com.au"
+    assert registrable_domain("https://www.gov.uk/") == "www.gov.uk"
 
 
 def test_text_years_word_boundaries():
@@ -96,6 +100,14 @@ def test_domain_matches_result_url_or_text():
     assert gold_in_text("domain", "nvidia.com", text="", url="https://www.nvidia.com/about")
     assert gold_in_text("domain", "nvidia.com", text="visit nvidia.com for details", url="")
     assert not gold_in_text("domain", "nvidia.com", text="visit amd.com", url="https://amd.com")
+    assert gold_in_text("domain", "bbc.co.uk", text="", url="https://www.bbc.co.uk/news/live")
+
+
+def test_domain_text_match_respects_boundaries():
+    assert not gold_in_text("domain", "nvidia.com", text="deals at notnvidia.com today", url="")
+    assert not gold_in_text("domain", "nvidia.com", text="see nvidia.community forum", url="")
+    assert gold_in_text("domain", "nvidia.com", text="Visit NVIDIA.com.", url="")
+    assert gold_in_text("domain", "nvidia.com", text="found at investor.nvidia.com/reports", url="")
 
 
 def test_exact_id_ticker_case_sensitive_word_boundary():
@@ -126,3 +138,8 @@ def test_entity_token_boundaries():
 def test_unknown_field_type_raises():
     with pytest.raises(ValueError):
         gold_in_text("bogus", "x", text="x")
+
+
+def test_field_types_allowlist_matches_dispatch():
+    for field_type in FIELD_TYPES:
+        gold_in_text(field_type, "1993", text="some text 1993")

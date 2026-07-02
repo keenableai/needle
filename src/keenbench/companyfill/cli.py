@@ -6,6 +6,7 @@ from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
+from keenbench.companyfill.canon import FIELD_TYPES
 from keenbench.companyfill.generate import GenStats, run_generate
 from keenbench.companyfill.registries import GleifClient, SecClient, WikidataClient
 from keenbench.companyfill.score import GoldQuery, run_answers
@@ -38,6 +39,12 @@ def _load_gold_rows(path: str) -> list[dict]:
         gold = obj.get("gold")
         if not isinstance(gold, dict) or not gold.get("field") or not gold.get("field_type"):
             continue
+        field_type = str(gold["field_type"])
+        if field_type not in FIELD_TYPES:
+            raise SystemExit(
+                f"error: unsupported gold.field_type {field_type!r} for query "
+                f"{str(obj['query_text'])!r} (known: {', '.join(sorted(FIELD_TYPES))})"
+            )
         rows.append(obj)
     return rows
 

@@ -131,6 +131,13 @@ def test_load_gold_rows_skips_rows_without_gold(tmp_path):
     assert len(rows) == 1
 
 
+def test_load_gold_rows_rejects_unknown_field_type(tmp_path):
+    f = tmp_path / "q.jsonl"
+    _write_rows(f, [_gold_row(field_type="bogus")])
+    with pytest.raises(SystemExit, match="unsupported gold.field_type 'bogus'"):
+        companyfill_cli._load_gold_rows(str(f))
+
+
 def test_gold_query_parses_stringified_origin():
     q = companyfill_cli._gold_query(_gold_row())
     assert q.bucket == "companyfill" and q.field == "ceo" and q.value == "Jensen Huang"

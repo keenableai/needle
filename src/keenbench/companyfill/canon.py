@@ -4,6 +4,8 @@ import unicodedata
 from functools import lru_cache
 from typing import Any
 
+import tldextract
+
 LEGAL_SUFFIXES = frozenset(
     "incorporated inc corporation corp company co limited ltd llc plc gmbh ag sa nv se spa"
     " kk pte pty bv oyj ab as lp holding holdings group the".split()
@@ -79,13 +81,14 @@ def strip_legal(value: Any) -> str:
     return " ".join(t for t in squad_norm(value).split() if t not in LEGAL_SUFFIXES)
 
 
+_TLD_EXTRACT = tldextract.TLDExtract(suffix_list_urls=(), cache_dir=None)
+
+
 def registrable_domain(value: Any) -> str:
     s = unicodedata.normalize("NFKC", str(value if value is not None else "")).strip().lower()
     s = re.sub(r"^[a-z][a-z0-9+.\-]*://", "", s)
-    s = s.split("/")[0].split("?")[0].split(":")[0]
-    s = re.sub(r"^www\.", "", s)
-    parts = [p for p in s.split(".") if p]
-    return ".".join(parts[-2:]) if len(parts) >= 2 else s
+    host = s.split("/")[0].split("?")[0].split(":")[0]
+    return _TLD_EXTRACT(host).top_domain_under_public_suffix or host
 
 
 def phrase_in(phrase: str, text_norm: str) -> bool:
@@ -189,11 +192,14 @@ def _match_country(value: Any, aliases: tuple[str, ...], text_norm: str, raw_tex
 
 
 def _match_domain(value: Any, aliases: tuple[str, ...], raw_text: str, url: str) -> bool:
+    text = raw_text.lower()
     for form in _forms(value, aliases):
         dom = registrable_domain(form)
         if not dom or "." not in dom:
             continue
-        if registrable_domain(url) == dom or dom in raw_text.lower():
+        if registrable_domain(url) == dom:
+            return True
+        if re.search(rf"(?<![a-z0-9-]){re.escape(dom)}(?![a-z0-9-])", text):
             return True
     return False
 
@@ -228,6 +234,11 @@ def _match_amount(value: Any, aliases: tuple[str, ...], raw_text: str, *, rel_to
             elif abs(amount - gold) / abs(gold) <= rel_tol:
                 return True
     return False
+
+
+FIELD_TYPES = frozenset(
+    {"person", "entity", "list", "year", "country", "domain", "exact_id", "money", "numeric_band"}
+)
 
 
 def gold_in_text(
