@@ -189,14 +189,13 @@
   </div>
 
   <div class="grid2">
-    <div class="card" id="card-latency-latest">
-      <h2>Search latency — latest run</h2>
-      <div class="sub" id="latency-latest-sub"></div>
-      <div id="latency-bars"></div>
+    <div class="card" id="card-latency-p50">
+      <h2>Search latency — p50</h2>
+      <div class="sub">median duration of successful search API calls, freshstream runs</div>
     </div>
-    <div class="card" id="card-latency">
-      <h2>Search latency — median over time</h2>
-      <div class="sub">p50 duration of successful search API calls, freshstream runs</div>
+    <div class="card" id="card-latency-p95">
+      <h2>Search latency — p95</h2>
+      <div class="sub">95th percentile, same runs</div>
     </div>
   </div>
 
@@ -542,58 +541,6 @@ function renderHistoryTable(rows) {
   holder.appendChild(table);
 }
 
-function renderLatencyBars(rows) {
-  const card = document.getElementById("card-latency-latest");
-  const holder = document.getElementById("latency-bars");
-  const sub = document.getElementById("latency-latest-sub");
-  holder.replaceChildren();
-  const fresh = rows.filter((r) => r.bench === "freshstream" && r.p50_ms != null);
-  if (!fresh.length) {
-    sub.textContent = "";
-    holder.appendChild(el("div", { class: "empty" }, "No latency data yet — collected from new runs."));
-    return;
-  }
-  const lastTs = fresh[fresh.length - 1].ts;
-  const latest = fresh.filter((r) => r.ts === lastTs).sort((a, b) => a.p50_ms - b.p50_ms);
-  sub.textContent = `bar = p50, tick = p95 — successful calls, run at ${fmtTime(new Date(lastTs))} UTC`;
-
-  const W = Math.max(card.clientWidth - 32, 280);
-  const rowH = 26, barH = 12;
-  const M = { top: 4, right: 116, bottom: 22, left: 70 };
-  const H = M.top + rowH * latest.length + M.bottom;
-  const iw = W - M.left - M.right;
-  const sc = msScale(Math.max(...latest.map((r) => r.p95_ms ?? r.p50_ms)));
-  const x = (v) => M.left + (v / sc.domain[1]) * iw;
-
-  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img", "aria-label": "search latency per engine, latest run" });
-  for (const gv of sc.ticks) {
-    if (gv === 0) continue;
-    svg.appendChild(el("line", { x1: x(gv), x2: x(gv), y1: M.top, y2: H - M.bottom, stroke: "var(--grid)", "stroke-width": 1 }));
-    svg.appendChild(el("text", { x: x(gv), y: H - 8, "text-anchor": "middle", class: "axis-text" }, fmtMs(gv)));
-  }
-  svg.appendChild(el("line", { x1: M.left, x2: M.left, y1: M.top, y2: H - M.bottom, stroke: "var(--baseline)", "stroke-width": 1 }));
-  for (const [i, r] of latest.entries()) {
-    const yTop = M.top + i * rowH + (rowH - barH) / 2;
-    const yMid = yTop + barH / 2;
-    svg.appendChild(el("text", { x: M.left - 8, y: yMid + 4, "text-anchor": "end", class: "end-label" }, r.engine));
-    const w = Math.max(x(r.p50_ms) - M.left, 2);
-    const rr = Math.min(4, w / 2);
-    svg.appendChild(el("path", {
-      d: `M${M.left},${yTop} h${w - rr} a${rr},${rr} 0 0 1 ${rr},${rr} v${barH - 2 * rr} a${rr},${rr} 0 0 1 ${-rr},${rr} h${rr - w} z`,
-      fill: colorOf(r.engine),
-    }));
-    let tip = r.p50_ms;
-    if (r.p95_ms != null && r.p95_ms > r.p50_ms) {
-      tip = r.p95_ms;
-      svg.appendChild(el("line", { x1: x(r.p50_ms), x2: x(r.p95_ms), y1: yMid, y2: yMid, stroke: colorOf(r.engine), "stroke-width": 1, opacity: "0.45" }));
-      svg.appendChild(el("line", { x1: x(r.p95_ms), x2: x(r.p95_ms), y1: yTop, y2: yTop + barH, stroke: colorOf(r.engine), "stroke-width": 2 }));
-    }
-    svg.appendChild(el("text", { x: x(tip) + 8, y: yMid + 4, class: "end-label" },
-      `${fmtMs(r.p50_ms)}${r.p95_ms != null ? ` · p95 ${fmtMs(r.p95_ms)}` : ""}`));
-  }
-  holder.appendChild(svg);
-}
-
 // ratings are magnitude → sequential blue ramp (0..4), ink picked by step luminance
 const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
 const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
@@ -815,13 +762,14 @@ function drawCharts(rows) {
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
-  const lat = seriesFor("freshstream", "p50_ms", rows);
-  const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((p) => p.v))));
-  drawChart(document.getElementById("card-latency"), lat,
-    { domain: sc.domain, ticks: sc.ticks, fmt: fmtMs, tickFmt: fmtMs, left: 56,
-      label: "median search latency over time per engine",
-      empty: "No latency data yet — collected from new runs." });
-  renderLatencyBars(rows);
+  for (const [metric, name] of [["p50_ms", "p50"], ["p95_ms", "p95"]]) {
+    const lat = seriesFor("freshstream", metric, rows);
+    const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((p) => p.v))));
+    drawChart(document.getElementById(`card-latency-${name}`), lat,
+      { domain: sc.domain, ticks: sc.ticks, fmt: fmtMs, tickFmt: fmtMs, left: 56,
+        label: `${name} search latency over time per engine`,
+        empty: "No latency data yet — collected from new runs." });
+  }
 }
 
 function refreshHistoryTable() {
