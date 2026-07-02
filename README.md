@@ -286,6 +286,23 @@ method satisfies the `LLMClient` protocol. The ranking harness is
 `keenbench.shared.rankeval.run_rbp`, the recall scorer is
 `keenbench.companyfill.score.run_answers`.
 
+## Continuous benchmarks
+
+[`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule
+against `keenable,exa`: freshstream hourly (`--limit 20`), companyfill daily at
+00:17 UTC (fresh gold, `--limit 100`). Each run:
+
+- appends summary rows to `data/history.jsonl` on the `gh-pages` branch —
+  rendered as a dashboard (trends, latest tiles, per-field table, judgement
+  browser) at <https://keenableai.github.io/keenbench/>;
+- archives the full artifacts (reports with per-result judge reasoning, the
+  generated queries, the gold) to the public HF dataset
+  [`keenable-ai/keenbench-results`](https://huggingface.co/datasets/keenable-ai/keenbench-results)
+  under `runs/<utc-hour>/`, which the dashboard's judgement browser reads.
+
+Needs repo secrets: `OPENROUTER_API_KEY`, `EXA_API_KEY`, `HF_TOKEN`
+(`KEENABLE_API_KEY` optional).
+
 ## Development
 
 ```bash

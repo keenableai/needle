@@ -1,0 +1,80 @@
+name: Bench
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bench
+
+env:
+  PYTHON_VERSION: "3.11"
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+  EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+  KEENABLE_API_KEY: ${{ secrets.KEENABLE_API_KEY }}
+  HF_TOKEN: ${{ secrets.HF_TOKEN }}
+  HF_DATASET: keenable-ai/keenbench-results
+
+jobs:
+  bench:
+    name: Run benchmarks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site-data
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: freshstream (hourly)
+        run: |
+          uv run keenbench freshstream generate --source rss --out fresh.jsonl
+          uv run keenbench freshstream run --queries fresh.jsonl --limit 20 \
+            --engines keenable,exa --out rbp.json
+
+      - name: companyfill (daily at 00:17 UTC)
+        run: |
+          hour=$(date -u +%H)
+          if [ "$hour" != "00" ] && [ -s site-data/data/gold.jsonl ]; then
+            echo "skipping companyfill at hour $hour"
+            exit 0
+          fi
+          mkdir -p site-data/data
+          uv run keenbench companyfill generate --max-companies 100 \
+            --out site-data/data/gold.jsonl
+          uv run keenbench companyfill run --queries site-data/data/gold.jsonl \
+            --limit 100 --engines keenable,exa --out recall.json
+
+      - name: Publish
+        run: |
+          TS=$(date -u +%Y-%m-%dT%H:%MZ)
+          ID=${TS//:/}
+          args="--site site-data --runs-out staged --ts $TS --rbp rbp.json --fresh fresh.jsonl"
+          if [ -s recall.json ]; then
+            args="$args --recall recall.json --gold site-data/data/gold.jsonl"
+          fi
+          uv run python scripts/publish_bench.py $args
+          # full artifacts to the HF dataset first, so runs.json never dangles
+          uvx --from huggingface_hub hf upload "$HF_DATASET" "staged/$ID" "runs/$ID" \
+            --repo-type dataset --commit-message "bench: $TS"
+          cp site/index.html site-data/index.html
+          touch site-data/.nojekyll
+          cd site-data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "bench: $TS" || echo "nothing to publish"
+          git push
