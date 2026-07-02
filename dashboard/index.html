@@ -568,6 +568,12 @@ const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 // the in-cell values are the CVD relief for the red↔green pair
 const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
+// jaccard of top-K URL sets skews low, so the ramp is nonlinear: 0.5+ is already full red
+const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
+const overlapStep = (v) => {
+  const i = OVERLAP_STEPS.findIndex((t) => v < t);
+  return i === -1 ? 4 : i;
+};
 
 function renderOverlap(rows) {
   const holder = document.getElementById("overlap-table");
@@ -615,7 +621,7 @@ function renderOverlap(rows) {
       const v = agg && agg.n ? agg.jsum / agg.n : null;
       const td = el("td", { class: "overlap-cell" }, v == null ? "–" : v.toFixed(2));
       if (v != null) {
-        const step = Math.min(4, Math.floor(v * 5));
+        const step = overlapStep(v);
         td.style.background = OVERLAP_BG[step];
         td.style.color = OVERLAP_INK[step];
         td.title = `${a} ∩ ${b}: ${v.toFixed(3)} over ${agg.n} queries`;
