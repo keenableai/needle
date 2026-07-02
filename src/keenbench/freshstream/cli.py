@@ -9,24 +9,31 @@ from keenbench.freshstream.feeds import SEED_SOURCES, load_sources_from_toml
 from keenbench.freshstream.pipeline import run_rss, run_trends
 from keenbench.freshstream.trends import GoogleTrendsRssProvider, parse_geos
 from keenbench.shared.cli import build_clients_or_exit, sample_or_exit
-from keenbench.shared.io import write_json, write_jsonl, write_stdout
+from keenbench.shared.io import write_json, write_jsonl
+from keenbench.shared.judge import DEFAULT_MAX_CONTENT_CHARS
 from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
 from keenbench.shared.rankeval import EvalQuery, run_rbp
 
 DEFAULT_MODEL = "google/gemini-3.1-flash-lite"
 
 
+def _read_queries_file(path: str) -> list[str]:
+    try:
+        return Path(path).read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise SystemExit(f"error: could not read --queries {path!r}: {exc}") from exc
+
+
 def _load_query_rows(path: str) -> list[dict]:
     rows: list[dict] = []
-    for line in Path(path).read_text(encoding="utf-8").splitlines():
+    for line in _read_queries_file(path):
         line = line.strip()
         if not line:
             continue
         try:
             obj = json.loads(line)
         except json.JSONDecodeError:
-            rows.append({"query_text": line, "topical_domain": "other"})
-            continue
+            obj = line
         if isinstance(obj, dict):
             if obj.get("query_text"):
                 rows.append(
@@ -38,6 +45,9 @@ def _load_query_rows(path: str) -> list[dict]:
                 )
         elif isinstance(obj, str):
             rows.append({"query_text": obj, "topical_domain": "other"})
+        else:
+            # plain-text query that happens to parse as a JSON scalar (e.g. "1984")
+            rows.append({"query_text": line, "topical_domain": "other"})
     return rows
 
 
@@ -148,10 +158,7 @@ class Freshstream:
             raise SystemExit(f"error: {exc}") from exc
 
         records = [r.to_dict() for r in rows]
-        if out == "-":
-            write_stdout(records)
-        else:
-            write_jsonl(records, out)
+        write_jsonl(records, out)
 
         if source == "trending":
             source_summary = (
@@ -213,8 +220,10 @@ class Freshstream:
                     clients,
                     judge,
                     num_results=num_results,
+                    k=num_results,
                     judge_concurrency=judge_concurrency,
-                    max_content_chars=snippet_chars,
+                    # 0 restores full-text retrieval but keeps the judge's safety cap
+                    max_content_chars=snippet_chars or DEFAULT_MAX_CONTENT_CHARS,
                 )
             finally:
                 await judge.aclose()
@@ -231,7 +240,7 @@ class Freshstream:
         )
         for name, e in report["engines"].items():
             print(
-                f"  {name:10s} RBP@5 = {e['mean_rbp_at_5']:.4f}  "
+                f"  {name:10s} RBP@{num_results} = {e['mean_rbp']:.4f}  "
                 f"({e['num_scored']}/{report['num_queries']} scored; max {e['rbp_max']:.3f}; "
                 f"{e['search_errors']} search errs, {e['judge_errors']} judge errs)",
                 file=sys.stderr,

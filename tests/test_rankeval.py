@@ -49,8 +49,8 @@ async def test_run_rbp_ranks_engines():
         num_results=5,
     )
     assert report["num_queries"] == 2
-    g = report["engines"]["good"]["mean_rbp_at_5"]
-    b = report["engines"]["bad"]["mean_rbp_at_5"]
+    g = report["engines"]["good"]["mean_rbp"]
+    b = report["engines"]["bad"]["mean_rbp"]
     assert g > b
     assert g == pytest.approx((1 - 0.8) * (1.0 + 0.8 * 1.0))
     assert b == 0.0
@@ -71,7 +71,7 @@ async def test_run_rbp_excludes_search_errors_from_mean():
     e = report["engines"]["flaky"]
     assert e["search_errors"] == 1
     assert e["num_scored"] == 1
-    assert e["mean_rbp_at_5"] == pytest.approx((1 - 0.8) * 1.0)
+    assert e["mean_rbp"] == pytest.approx((1 - 0.8) * 1.0)
     errored = next(pq for pq in e["per_query"] if pq["query"] == "q_err")
     assert errored["rbp"] is None
     assert errored["search_error"]["error_type"] == "http_error"
@@ -82,7 +82,7 @@ async def test_run_rbp_scores_empty_results_as_zero_not_error():
     e = report["engines"]["empty"]
     assert e["search_errors"] == 0
     assert e["num_scored"] == 1
-    assert e["mean_rbp_at_5"] == 0.0
+    assert e["mean_rbp"] == 0.0
 
 
 async def test_run_rbp_excludes_judge_errors_from_mean():
@@ -98,7 +98,7 @@ async def test_run_rbp_excludes_judge_errors_from_mean():
     e = report["engines"]["e"]
     assert e["judge_errors"] == 1
     assert e["num_scored"] == 1
-    assert e["mean_rbp_at_5"] == pytest.approx((1 - 0.8) * 1.0)
+    assert e["mean_rbp"] == pytest.approx((1 - 0.8) * 1.0)
     bad = next(pq for pq in e["per_query"] if pq["query"] == "q_bad")
     assert bad["rbp"] is None
     assert bad["ratings"] == [None]

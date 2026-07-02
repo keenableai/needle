@@ -92,6 +92,14 @@ def test_freshstream_run_load_rows_and_per_query_today(tmp_path):
     assert freshstream_cli._today_for_row(rows[1], "1999-01-01") == "1999-01-01"
 
 
+def test_freshstream_run_loader_keeps_scalar_lines_and_rejects_missing_file(tmp_path):
+    f = tmp_path / "q.jsonl"
+    f.write_text("1984\n")
+    assert freshstream_cli._load_query_rows(str(f))[0]["query_text"] == "1984"
+    with pytest.raises(SystemExit):
+        freshstream_cli._load_query_rows(str(tmp_path / "missing.jsonl"))
+
+
 def test_freshstream_run_rejects_unknown_sample(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     f = tmp_path / "q.jsonl"

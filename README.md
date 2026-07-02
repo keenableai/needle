@@ -145,7 +145,9 @@ keenbench freshstream run --queries queries.jsonl --limit 20 --engines keenable,
 Keenable returns short snippets, which would hand the judge asymmetric
 evidence (the Needs-Met rubric caps thin-content documents at 2/SM). The cap
 is applied both to Exa's highlights request and to the evidence the judge
-sees, uniformly across engines.
+sees, uniformly across engines. `--snippet-chars 0` restores Exa's full page
+text, but the judge's evidence keeps a 50,000-char safety cap so one huge
+page can't blow the judge's context window.
 
 `--queries` also accepts plain text (one query per line), so the harness works
 on any query stream, not just freshstream output.

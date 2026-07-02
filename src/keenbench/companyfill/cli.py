@@ -11,15 +11,19 @@ from keenbench.companyfill.generate import GenStats, run_generate
 from keenbench.companyfill.registries import GleifClient, SecClient, WikidataClient
 from keenbench.companyfill.score import GoldQuery, run_answers
 from keenbench.shared.cli import build_clients_or_exit, parse_csv, sample_or_exit
-from keenbench.shared.io import write_json, write_jsonl, write_stdout
+from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
 
 KNOWN_SUITES = ("companyfill", "financials")
 
 
 def _load_gold_rows(path: str) -> list[dict]:
+    try:
+        lines = Path(path).read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise SystemExit(f"error: could not read --queries {path!r}: {exc}") from exc
     rows = []
-    for line in Path(path).read_text(encoding="utf-8").splitlines():
+    for line in lines:
         line = line.strip()
         if not line:
             continue
@@ -118,10 +122,7 @@ class Companyfill:
             record = dict(row)
             record["query_origin"] = json.dumps(record["query_origin"], sort_keys=True)
             records.append(record)
-        if out == "-":
-            write_stdout(records)
-        else:
-            write_jsonl(records, out)
+        write_jsonl(records, out)
 
         by_bucket = Counter(row["query_origin"]["bucket"] for row in rows)
         buckets = ", ".join(f"{b}={n}" for b, n in sorted(by_bucket.items())) or "none"
