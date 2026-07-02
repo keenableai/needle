@@ -128,7 +128,7 @@ async def run_rbp(
             "num_scored": len(scored),
             "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
             "judge_errors": sum(pq["judge_errors"] for pq in per_query),
-            "latency": latency_stats(getattr(engines[name], "latencies_ms", [])),
+            "latency": latency_stats(engines[name].latencies_ms),
             "per_query": per_query,
         }
 

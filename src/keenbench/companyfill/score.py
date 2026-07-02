@@ -160,7 +160,7 @@ async def run_answers(
                 for pq in scored
                 if pq["hit_rank"] is not None and pq["hit_rank"] != pq["det_rank"]
             ),
-            "latency": latency_stats(getattr(engines[name], "latencies_ms", [])),
+            "latency": latency_stats(engines[name].latencies_ms),
             "by_field": dict(sorted(_group(scored, lambda pq: pq["field"]).items())),
             "by_bucket": dict(sorted(_group(scored, lambda pq: pq["bucket"]).items())),
             "by_freshness": _ladder_order(_group(scored, lambda pq: pq["freshness_window"])),

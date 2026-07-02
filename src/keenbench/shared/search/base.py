@@ -38,6 +38,7 @@ class SearchResult:
 
 class SearchClient(Protocol):
     engine: str
+    latencies_ms: list[float]
 
     async def search(
         self, query: str, *, num_results: int = 10
