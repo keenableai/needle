@@ -15,7 +15,6 @@
     --baseline: #c3c2b7;
     --border: rgba(11, 11, 11, 0.10);
     --delta-up: #006300;
-    /* categorical slots (validated palette, fixed order — see dataviz notes) */
     --series-1: #2a78d6;
     --series-2: #1baf7a;
     --series-3: #eda100;
@@ -149,7 +148,6 @@
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
-  /* filled matrix cells: separate borders so the 2px surface gap and radius apply */
   #overlap-table { overflow-x: auto; }
   #overlap-table table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; }
   #overlap-table th, #overlap-table td { border-bottom: none; }
@@ -252,9 +250,6 @@
 "use strict";
 const RUNS_BASE = "https://huggingface.co/datasets/keenable-ai/keenbench-results/resolve/main/runs";
 
-// Engines are discovered from the data; slots are assigned by first appearance
-// in the full history so an engine keeps its color across filters and new
-// engines never repaint existing ones.
 let ENGINES = [];
 const ENGINE_SLOT = new Map();
 
@@ -363,8 +358,6 @@ function drawChart(card, series, opts) {
     endLabels.push({ e, yPos: y(last.v), xPos: x(last.t.getTime()) });
   }
   endLabels.sort((a, b) => a.yPos - b.yPos);
-  // spread colliding end-labels apart and reconnect them with leader lines,
-  // so every engine stays labeled even when the lines converge
   const gap = 13;
   let lo = M.top + 4;
   for (const l of endLabels) {
@@ -560,14 +553,16 @@ function renderHistoryTable(rows) {
   holder.appendChild(table);
 }
 
-// ratings are magnitude → sequential blue ramp (0..4), ink picked by step luminance
 const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
 const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 
-// overlap reads as polarity — low (diverse) green, high (redundant) red, gray midpoint;
-// the in-cell values are the CVD relief for the red↔green pair
 const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
+const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
+const overlapStep = (v) => {
+  const i = OVERLAP_STEPS.findIndex((t) => v < t);
+  return i === -1 ? 4 : i;
+};
 
 function renderOverlap(rows) {
   const holder = document.getElementById("overlap-table");
@@ -615,7 +610,7 @@ function renderOverlap(rows) {
       const v = agg && agg.n ? agg.jsum / agg.n : null;
       const td = el("td", { class: "overlap-cell" }, v == null ? "–" : v.toFixed(2));
       if (v != null) {
-        const step = Math.min(4, Math.floor(v * 5));
+        const step = overlapStep(v);
         td.style.background = OVERLAP_BG[step];
         td.style.color = OVERLAP_INK[step];
         td.title = `${a} ∩ ${b}: ${v.toFixed(3)} over ${agg.n} queries`;
@@ -740,7 +735,6 @@ async function renderRunDetail(runs) {
   holder.appendChild(el("div", { class: "empty" }, "Loading…"));
   try {
     const report = await fetchJson(`${RUNS_BASE}/${run.id}/${artifact}`);
-    // the archived run is the source of truth for which engines it compared
     const available = Object.keys(report.engines || {});
     if (!available.includes(engineSel.value)) {
       const current = engineSel.value;
@@ -765,7 +759,7 @@ async function initRunBrowser() {
   const benchSel = document.getElementById("run-bench");
   const engineSel = document.getElementById("run-engine");
   let runs = [];
-  try { runs = await fetchJson("data/runs.json"); } catch { /* no archive yet */ }
+  try { runs = await fetchJson("data/runs.json"); } catch {}
   runs = [...runs].reverse();
   for (const r of runs) {
     const label = `${fmtTime(new Date(r.ts))}${r.artifacts.includes("recall.json") ? " (fresh + company)" : ""}`;
@@ -781,7 +775,6 @@ async function initRunBrowser() {
 }
 
 function drawCharts(rows) {
-  // the pipeline publishes the RBP ceiling with every row — don't hardcode it
   const ceiling = rows.filter((r) => r.bench === "freshstream").at(-1)?.rbp_max;
   drawChart(document.getElementById("card-rbp"), seriesFor("freshstream", "rbp", rows),
     { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine" });
@@ -858,7 +851,6 @@ async function main() {
   }
 
   renderAll(latestCompanyfill);
-  // fixed 24h window by design, independent of the range filter above
   renderOverlap(overlapRows);
   initRunBrowser();
   document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
