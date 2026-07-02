@@ -2,52 +2,52 @@
   "num_queries": 20,
   "num_results": 5,
   "k": 5,
-  "judged_pairs": 477,
+  "judged_pairs": 475,
   "engines": {
     "keenable": {
-      "mean_rbp": 0.4429603519999999,
+      "mean_rbp": 0.4470220319999999,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
       "judge_errors": 0
     },
     "exa": {
-      "mean_rbp": 0.4551567519999999,
+      "mean_rbp": 0.497239632,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
       "judge_errors": 0
     },
     "google": {
-      "mean_rbp": 0.329201664,
+      "mean_rbp": 0.325497952,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
       "judge_errors": 0
     },
     "bing": {
-      "mean_rbp": 0.5396648159999999,
+      "mean_rbp": 0.498707152,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
       "judge_errors": 0
     },
     "brave": {
-      "mean_rbp": 0.4157688959999999,
+      "mean_rbp": 0.4325955199999999,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
       "judge_errors": 0
     },
     "parallel": {
-      "mean_rbp": 0.39495404799999995,
+      "mean_rbp": 0.406101824,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
       "judge_errors": 0
     },
     "tavily": {
-      "mean_rbp": 0.349084,
+      "mean_rbp": 0.366304048,
       "rbp_max": 0.6723199999999999,
       "num_scored": 20,
       "search_errors": 0,
