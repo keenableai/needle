@@ -14,7 +14,7 @@ from defusedxml.common import DefusedXmlException
 
 from keenbench.shared.concurrency import bounded_gather
 
-_DEFAULT_FEEDS_FILE = "feeds.default.toml"
+DEFAULT_FEEDS_FILE = "feeds.default.toml"
 
 
 @dataclass(frozen=True)
@@ -36,7 +36,7 @@ def load_sources_from_toml(path: str | Path) -> tuple[SeedSource, ...]:
 
 
 def _load_packaged_default() -> tuple[SeedSource, ...]:
-    resource = resources.files(__package__).joinpath("configs", _DEFAULT_FEEDS_FILE)
+    resource = resources.files(__package__).joinpath("configs", DEFAULT_FEEDS_FILE)
     return _sources_from_data(tomllib.loads(resource.read_text(encoding="utf-8")))
 
 
@@ -60,7 +60,7 @@ QUERY_MAX_AGE_DEFAULT = timedelta(hours=1)
 QUERY_MAX_AGE_BY_KIND: dict[str, timedelta] = {"rss_paper": timedelta(hours=168)}
 
 FUTURE_SKEW_TOLERANCE = timedelta(minutes=5)
-_FUTURE_SKEW_TOLERANCE_S = FUTURE_SKEW_TOLERANCE.total_seconds()
+FUTURE_SKEW_TOLERANCE_S = FUTURE_SKEW_TOLERANCE.total_seconds()
 
 HEALTH_WINDOWS: tuple[tuple[str, timedelta], ...] = (
     ("items_lt_1h", timedelta(hours=1)),
@@ -186,7 +186,7 @@ def published_age_seconds(published_at: str | None, *, now: datetime) -> float |
     if dt is None:
         return None
     age = (now - dt).total_seconds()
-    if age < -_FUTURE_SKEW_TOLERANCE_S:
+    if age < -FUTURE_SKEW_TOLERANCE_S:
         return None
     return max(age, 0.0)
 

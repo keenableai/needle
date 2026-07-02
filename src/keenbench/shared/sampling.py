@@ -1,18 +1,19 @@
 import hashlib
+from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
-_MASK64 = (1 << 64) - 1
+MASK64 = (1 << 64) - 1
 
 
 def shuffle_indices(n: int, seed: int) -> list[int]:
     indices = list(range(n))
-    state = seed & _MASK64
+    state = seed & MASK64
     for i in range(n - 1, 0, -1):
-        state = (state + 0x9E3779B97F4A7C15) & _MASK64
+        state = (state + 0x9E3779B97F4A7C15) & MASK64
         z = state
-        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & _MASK64
-        z = (z ^ (z >> 27)) * 0x94D049BB133111EB & _MASK64
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & MASK64
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EB & MASK64
         z = z ^ (z >> 31)
         j = z % (i + 1)
         indices[i], indices[j] = indices[j], indices[i]
@@ -27,14 +28,19 @@ def sample_uniform(records: list[dict[str, Any]], k: int, seed: int) -> list[dic
 
 
 def sample_stratified(
-    records: list[dict[str, Any]], k: int, seed: int, *, key: str = "topical_domain"
+    records: list[dict[str, Any]],
+    k: int,
+    seed: int,
+    *,
+    key: str | Callable[[dict[str, Any]], str] = "topical_domain",
 ) -> list[dict[str, Any]]:
     if k <= 0 or not records:
         return []
 
+    key_fn = key if callable(key) else (lambda r: str(r.get(key) or ""))
     by_domain: dict[str, list[dict[str, Any]]] = {}
     for r in records:
-        by_domain.setdefault(str(r.get(key) or ""), []).append(r)
+        by_domain.setdefault(key_fn(r), []).append(r)
 
     for d, rs in by_domain.items():
         domain_seed = seed ^ int.from_bytes(hashlib.sha256(d.encode()).digest()[:8], "big")
@@ -62,14 +68,19 @@ def sample_stratified(
 
 
 def sample(
-    records: list[dict[str, Any]], k: int, seed: int, *, strategy: str
+    records: list[dict[str, Any]],
+    k: int,
+    seed: int,
+    *,
+    strategy: str,
+    key: str | Callable[[dict[str, Any]], str] = "topical_domain",
 ) -> list[dict[str, Any]]:
     if strategy == "head":
         return records[:k]
     if strategy == "uniform":
         return sample_uniform(records, k, seed)
     if strategy == "stratified":
-        return sample_stratified(records, k, seed)
+        return sample_stratified(records, k, seed, key=key)
     raise ValueError(f"unknown sample strategy {strategy!r} (known: stratified, uniform, head)")
 
 

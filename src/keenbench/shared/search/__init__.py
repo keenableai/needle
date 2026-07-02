@@ -1,5 +1,6 @@
 from keenbench.shared.search.base import HttpSearchClient, SearchClient, SearchResult
 from keenbench.shared.search.exa import ExaClient
+from keenbench.shared.search.factory import build_search_clients
 from keenbench.shared.search.keenable import KeenableClient
 
 __all__ = [
@@ -8,4 +9,5 @@ __all__ = [
     "KeenableClient",
     "SearchClient",
     "SearchResult",
+    "build_search_clients",
 ]

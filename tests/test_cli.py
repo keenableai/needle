@@ -3,6 +3,7 @@ import pytest
 from keenbench.freshstream.cli import Freshstream
 from keenbench.rankeval import cli as rankeval_cli
 from keenbench.shared.llm import OpenRouterClient, _content_to_text
+from keenbench.shared.search import factory as search_factory
 
 
 def test_run_rejects_unsupported_source():
@@ -72,7 +73,7 @@ def test_rankeval_passes_keenable_api_key(monkeypatch, tmp_path):
     async def fake_run_rbp(queries, clients, judge, **kwargs):
         return {"num_queries": len(queries), "num_results": 5, "engines": {}}
 
-    monkeypatch.setattr(rankeval_cli, "KeenableClient", FakeKeenable)
+    monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(rankeval_cli, "run_rbp", fake_run_rbp)
     rankeval_cli.Rankeval().run(
         queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json")

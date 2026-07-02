@@ -11,10 +11,10 @@ from keenbench.shared.prompts import render_prompt
 DEFAULT_MAX_CONTENT_CHARS = 50_000
 JUDGE_TEMPLATE = "judgement.jinja"
 
-_LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
-_VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
+RATING_LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
+VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
 
-_FENCE_PATTERNS = (
+FENCE_PATTERNS = (
     re.compile(r"[ \t]*```(?:ya?ml|json)[ \t]*\n(.*?)\n[ \t]*```", re.DOTALL | re.IGNORECASE),
     re.compile(r"[ \t]*```[ \t]*\n(.*?)\n[ \t]*```", re.DOTALL),
     re.compile(r"[ \t]*```(?:ya?ml|json)[ \t]*(.*?)```", re.DOTALL | re.IGNORECASE),
@@ -26,7 +26,7 @@ _FENCE_PATTERNS = (
 
 def _extract_yaml_block(content: str) -> str:
     content = content.strip()
-    for pattern in _FENCE_PATTERNS:
+    for pattern in FENCE_PATTERNS:
         match = pattern.search(content)
         if match:
             return match.group(1).strip()
@@ -150,8 +150,8 @@ def parse_judgement(text: str | None) -> Judgement | None:
     if rating is None or not 0 <= rating <= 4:
         return None
     label = str(data.get("label") or "").strip()
-    if label not in _VALID_LABELS:
-        label = _LABELS[rating]
+    if label not in VALID_LABELS:
+        label = RATING_LABELS[rating]
     reasoning = str(data.get("reasoning") or "")
     return Judgement(rating=rating, label=label, reasoning=reasoning)
 
