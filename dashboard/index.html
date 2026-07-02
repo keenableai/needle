@@ -356,12 +356,24 @@ function drawChart(card, series, opts) {
     endLabels.push({ e, yPos: y(last.v), xPos: x(last.t.getTime()) });
   }
   endLabels.sort((a, b) => a.yPos - b.yPos);
-  // direct end-labels; skip the second when the two collide (legend still carries identity)
-  let lastY = -Infinity;
+  // spread colliding end-labels apart and reconnect them with leader lines,
+  // so every engine stays labeled even when the lines converge
+  const gap = 13;
+  let lo = M.top + 4;
   for (const l of endLabels) {
-    if (l.yPos - lastY < 13) continue;
-    lastY = l.yPos;
-    svg.appendChild(el("text", { x: l.xPos + 8, y: l.yPos + 4, class: "end-label" }, l.e));
+    l.labelY = Math.max(l.yPos, lo);
+    lo = l.labelY + gap;
+  }
+  let hi = M.top + ih;
+  for (let i = endLabels.length - 1; i >= 0; i--) {
+    endLabels[i].labelY = Math.min(endLabels[i].labelY, hi);
+    hi = endLabels[i].labelY - gap;
+  }
+  for (const l of endLabels) {
+    if (Math.abs(l.labelY - l.yPos) > 3) {
+      svg.appendChild(el("line", { x1: l.xPos + 5, y1: l.yPos, x2: l.xPos + 11, y2: l.labelY, stroke: "var(--baseline)", "stroke-width": 1 }));
+    }
+    svg.appendChild(el("text", { x: l.xPos + 13, y: l.labelY + 4, class: "end-label" }, l.e));
   }
 
   const cross = el("line", { y1: M.top, y2: M.top + ih, stroke: "var(--baseline)", "stroke-width": 1, visibility: "hidden" });
