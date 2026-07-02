@@ -10,23 +10,20 @@ from keenbench.companyfill.canon import FIELD_TYPES
 from keenbench.companyfill.generate import GenStats, run_generate
 from keenbench.companyfill.registries import GleifClient, SecClient, WikidataClient
 from keenbench.companyfill.score import GoldQuery, run_answers
-from keenbench.shared.io import write_jsonl, write_stdout
+from keenbench.shared.cli import build_clients_or_exit, parse_csv, sample_or_exit
+from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
-from keenbench.shared.sampling import sample as sample_rows
-from keenbench.shared.search import build_search_clients
 
 KNOWN_SUITES = ("companyfill", "financials")
 
 
-def _parse_csv(value: str | tuple[str, ...]) -> list[str]:
-    if isinstance(value, str):
-        return [v.strip() for v in value.split(",") if v.strip()]
-    return [str(v).strip() for v in value]
-
-
 def _load_gold_rows(path: str) -> list[dict]:
+    try:
+        lines = Path(path).read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise SystemExit(f"error: could not read --queries {path!r}: {exc}") from exc
     rows = []
-    for line in Path(path).read_text(encoding="utf-8").splitlines():
+    for line in lines:
         line = line.strip()
         if not line:
             continue
@@ -71,14 +68,14 @@ def _gold_query(row: dict) -> GoldQuery:
 class Companyfill:
     def generate(
         self,
-        out: str = "-",
         suites: str | tuple[str, ...] = "companyfill,financials",
-        limit: int = 100,
+        out: str = "-",
+        max_companies: int = 100,
         use_gleif: bool = False,
         min_employee_year: int = 0,
         registry_concurrency: int = 4,
     ) -> None:
-        suite_names = tuple(_parse_csv(suites))
+        suite_names = tuple(parse_csv(suites))
         unknown = [s for s in suite_names if s not in KNOWN_SUITES]
         if unknown or not suite_names:
             raise SystemExit(
@@ -102,7 +99,7 @@ class Companyfill:
 
         async def _go() -> tuple[list[dict], GenStats]:
             try:
-                seed = await sec.tickers(limit)
+                seed = await sec.tickers(max_companies)
                 if not seed:
                     raise SystemExit("error: could not load the SEC company_tickers seed")
                 return await run_generate(
@@ -125,10 +122,7 @@ class Companyfill:
             record = dict(row)
             record["query_origin"] = json.dumps(record["query_origin"], sort_keys=True)
             records.append(record)
-        if out == "-":
-            write_stdout(records)
-        else:
-            write_jsonl(records, out)
+        write_jsonl(records, out)
 
         by_bucket = Counter(row["query_origin"]["bucket"] for row in rows)
         buckets = ", ".join(f"{b}={n}" for b, n in sorted(by_bucket.items())) or "none"
@@ -157,24 +151,15 @@ class Companyfill:
         rows = _load_gold_rows(queries)
         if not rows:
             raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
-        if limit > 0 and len(rows) > limit:
-            try:
-                rows = sample_rows(
-                    rows, limit, seed, strategy=sample, key=lambda r: r["gold"]["field"]
-                )
-            except ValueError as exc:
-                raise SystemExit(f"error: --sample: {exc}") from exc
+        rows = sample_or_exit(rows, limit, seed, strategy=sample, key=lambda r: r["gold"]["field"])
         gold_queries = [_gold_query(r) for r in rows]
 
-        try:
-            clients = build_search_clients(
-                _parse_csv(engines),
-                keenable_mode=keenable_mode,
-                exa_concurrency=exa_concurrency,
-                exa_highlight_chars=snippet_chars,
-            )
-        except ValueError as exc:
-            raise SystemExit(f"error: {exc}") from exc
+        clients = build_clients_or_exit(
+            engines,
+            keenable_mode=keenable_mode,
+            exa_concurrency=exa_concurrency,
+            snippet_chars=snippet_chars,
+        )
 
         judge_llm = None
         model = None
@@ -204,12 +189,7 @@ class Companyfill:
         report = asyncio.run(_go())
         if model is not None:
             report["judge_model"] = model
-
-        text = json.dumps(report, ensure_ascii=False, indent=2)
-        if out == "-":
-            print(text)
-        else:
-            Path(out).write_text(text + "\n", encoding="utf-8")
+        write_json(report, out)
 
         judged = f", judge={model}" if model else ""
         print(

@@ -12,10 +12,17 @@ def _write(records: Iterable[Record], fh: TextIO) -> None:
         fh.write(json.dumps(record, ensure_ascii=False) + "\n")
 
 
-def write_jsonl(records: Iterable[Record], path: str | Path) -> None:
-    with open(path, "w", encoding="utf-8") as fh:
+def write_jsonl(records: Iterable[Record], out: str) -> None:
+    if out == "-":
+        _write(records, sys.stdout)
+        return
+    with open(out, "w", encoding="utf-8") as fh:
         _write(records, fh)
 
 
-def write_stdout(records: Iterable[Record]) -> None:
-    _write(records, sys.stdout)
+def write_json(obj: Any, out: str) -> None:
+    text = json.dumps(obj, ensure_ascii=False, indent=2)
+    if out == "-":
+        print(text)
+    else:
+        Path(out).write_text(text + "\n", encoding="utf-8")
