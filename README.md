@@ -46,6 +46,10 @@ Keys are read only from the environment.
 | `OPENROUTER_API_KEY` | `freshstream generate`, `freshstream run`, `companyfill run --judge` | One [OpenRouter](https://openrouter.ai) key reaches Claude, GPT, Gemini, … |
 | `EXA_API_KEY` | the `exa` engine | Required when `--engines` includes `exa` |
 | `KEENABLE_API_KEY` | the `keenable` engine | Optional — without it the keyless (rate-limited) endpoint is used |
+| `SEARCHAPI_API_KEY` | the `google` and `bing` engines | One [SearchAPI](https://www.searchapi.io) key covers both |
+| `BRAVE_API_KEY` | the `brave` engine | [Brave Search API](https://brave.com/search/api/) |
+| `PARALLEL_API_KEY` | the `parallel` engine | [Parallel](https://parallel.ai) v1 search |
+| `TAVILY_API_KEY` | the `tavily` engine | [Tavily](https://tavily.com) search |
 | `KEENBENCH_LLM_MODEL` | query projection | Default `google/gemini-3.1-flash-lite`; `--llm-model` overrides |
 | `KEENBENCH_JUDGE_MODEL` | judging | Default `google/gemini-3-flash-preview`; `--judge-model` overrides |
 
@@ -64,7 +68,8 @@ Both benchmarks' `run` commands share one interface:
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
 Per-engine tuning is env-based so the flag set stays flat as engines are
-added: `KEENABLE_MODE` (default `pro`), `EXA_CONCURRENCY` (default `4`).
+added: `KEENABLE_MODE` (default `pro`), `EXA_CONCURRENCY` (default `4`),
+`PARALLEL_MODE` (default `basic`), `TAVILY_DEPTH` (default `basic`).
 
 Error accounting is shared too: queries whose search or judging failed are
 excluded from the mean via `num_scored` (with `search_errors` /
@@ -245,6 +250,10 @@ never raises). Shipped engines:
 | --- | --- | --- |
 | `KeenableClient` | `POST /v1/search/public` when keyless, `POST /v1/search` with a key | `X-API-Key` (optional — the keyless endpoint is burst-rate-limited, so the client defaults to low concurrency without one) |
 | `ExaClient` | `POST https://api.exa.ai/search` | `x-api-key` (required) |
+| `SearchApiClient` | `GET https://www.searchapi.io/api/v1/search` — wraps Google and Bing (the `google` / `bing` engines) | `Authorization: Bearer` (required) |
+| `BraveClient` | `GET https://api.search.brave.com/res/v1/web/search` | `X-Subscription-Token` (required) |
+| `ParallelClient` | `POST https://api.parallel.ai/v1/search` | `x-api-key` (required) |
+| `TavilyClient` | `POST https://api.tavily.com/search` | `Authorization: Bearer` (required) |
 
 ```python
 import asyncio

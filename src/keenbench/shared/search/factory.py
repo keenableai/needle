@@ -9,8 +9,12 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
 from keenbench.shared.search.base import SearchClient
+from keenbench.shared.search.brave import BraveClient
 from keenbench.shared.search.exa import ExaClient
 from keenbench.shared.search.keenable import KeenableClient
+from keenbench.shared.search.parallel import ParallelClient
+from keenbench.shared.search.searchapi import SearchApiClient
+from keenbench.shared.search.tavily import TavilyClient
 
 
 @dataclass(frozen=True)
@@ -34,9 +38,37 @@ def _build_exa(api_key: str | None, snippet_chars: int) -> SearchClient:
     )
 
 
+def _build_searchapi(engine: str) -> Callable[[str | None, int], SearchClient]:
+    def build(api_key: str | None, snippet_chars: int) -> SearchClient:
+        return SearchApiClient(api_key=api_key or "", engine=engine)
+
+    return build
+
+
+def _build_brave(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return BraveClient(api_key=api_key or "")
+
+
+def _build_parallel(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return ParallelClient(api_key=api_key or "", mode=os.environ.get("PARALLEL_MODE", "basic"))
+
+
+def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return TavilyClient(api_key=api_key or "", search_depth=os.environ.get("TAVILY_DEPTH", "basic"))
+
+
 ENGINES: dict[str, EngineSpec] = {
     "keenable": EngineSpec(key_env="KEENABLE_API_KEY", key_required=False, build=_build_keenable),
     "exa": EngineSpec(key_env="EXA_API_KEY", key_required=True, build=_build_exa),
+    "google": EngineSpec(
+        key_env="SEARCHAPI_API_KEY", key_required=True, build=_build_searchapi("google")
+    ),
+    "bing": EngineSpec(
+        key_env="SEARCHAPI_API_KEY", key_required=True, build=_build_searchapi("bing")
+    ),
+    "brave": EngineSpec(key_env="BRAVE_API_KEY", key_required=True, build=_build_brave),
+    "parallel": EngineSpec(key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel),
+    "tavily": EngineSpec(key_env="TAVILY_API_KEY", key_required=True, build=_build_tavily),
 }
 
 

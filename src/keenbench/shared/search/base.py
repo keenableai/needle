@@ -49,7 +49,7 @@ class HttpSearchClient:
             self._client = None
 
     async def _request_json(
-        self, method: str, url: str, **kwargs: Any
+        self, method: str, url: str, *, error_field: str | None = None, **kwargs: Any
     ) -> tuple[Any, dict[str, str] | None]:
         try:
             async with self._sem:
@@ -62,6 +62,12 @@ class HttpSearchClient:
                 "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
             }
         try:
-            return resp.json(), None
+            payload = resp.json()
         except (json.JSONDecodeError, ValueError) as exc:
             return None, {"error_type": "bad_json", "error_message": str(exc)[:MAX_ERROR_CHARS]}
+        if error_field and isinstance(payload, dict) and payload.get(error_field):
+            return None, {
+                "error_type": "api_error",
+                "error_message": str(payload[error_field])[:MAX_ERROR_CHARS],
+            }
+        return payload, None
