@@ -70,7 +70,7 @@ jobs:
           # full artifacts to the HF dataset first, so runs.json never dangles
           uvx --from huggingface_hub hf upload "$HF_DATASET" "staged/$ID" "runs/$ID" \
             --repo-type dataset --commit-message "bench: $TS"
-          cp site/index.html site-data/index.html
+          cp dashboard/index.html site-data/index.html
           touch site-data/.nojekyll
           cd site-data
           git config user.name "github-actions[bot]"
