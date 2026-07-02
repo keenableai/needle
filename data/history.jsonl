@@ -20,3 +20,5 @@
 {"ts": "2026-07-02T17:55Z", "bench": "freshstream", "engine": "exa", "rbp": 0.4590332159999999, "rbp_max": 0.6723199999999999, "num_scored": 20, "num_queries": 20, "search_errors": 0, "judge_errors": 0}
 {"ts": "2026-07-02T18:49Z", "bench": "freshstream", "engine": "keenable", "rbp": 0.5902202399999997, "rbp_max": 0.6723199999999999, "num_scored": 20, "num_queries": 20, "search_errors": 0, "judge_errors": 0}
 {"ts": "2026-07-02T18:49Z", "bench": "freshstream", "engine": "exa", "rbp": 0.5285746239999999, "rbp_max": 0.6723199999999999, "num_scored": 20, "num_queries": 20, "search_errors": 0, "judge_errors": 0}
+{"ts": "2026-07-02T19:50Z", "bench": "freshstream", "engine": "keenable", "rbp": 0.50303872, "rbp_max": 0.6723199999999999, "num_scored": 19, "num_queries": 20, "search_errors": 1, "judge_errors": 0}
+{"ts": "2026-07-02T19:50Z", "bench": "freshstream", "engine": "exa", "rbp": 0.457841984, "rbp_max": 0.6723199999999999, "num_scored": 20, "num_queries": 20, "search_errors": 0, "judge_errors": 0}
