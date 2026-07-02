@@ -5,7 +5,7 @@ from typing import Any
 from keenbench.shared.judge import DEFAULT_MAX_CONTENT_CHARS, Judgement, judge_one
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.metrics import RBP_K, RBP_P, apply_redundancy_penalties, rbp_at_k
-from keenbench.shared.search import SearchClient, SearchResult
+from keenbench.shared.search import SearchClient, SearchResult, latency_stats
 
 
 @dataclass(frozen=True)
@@ -128,6 +128,7 @@ async def run_rbp(
             "num_scored": len(scored),
             "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
             "judge_errors": sum(pq["judge_errors"] for pq in per_query),
+            "latency": latency_stats(getattr(engines[name], "latencies_ms", [])),
             "per_query": per_query,
         }
 

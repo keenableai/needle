@@ -134,6 +134,24 @@ async def test_run_rbp_applies_domain_redundancy_penalties():
     assert pq["rbp"] == pytest.approx(expected)
 
 
+async def test_run_rbp_reports_latency():
+    class TimedEngine(FakeEngine):
+        def __init__(self):
+            super().__init__([])
+            self.latencies_ms = [100.0, 300.0]
+
+    report = await run_rbp(
+        [q("q1")], {"timed": TimedEngine(), "plain": FakeEngine([])}, FakeJudge()
+    )
+    assert report["engines"]["timed"]["latency"] == {
+        "n": 2,
+        "mean_ms": 200.0,
+        "p50_ms": 100.0,
+        "p95_ms": 300.0,
+    }
+    assert report["engines"]["plain"]["latency"] is None
+
+
 async def test_run_rbp_uses_per_query_today():
     judge = FakeJudge()
     queries = [

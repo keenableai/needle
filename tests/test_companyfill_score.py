@@ -105,6 +105,19 @@ async def test_run_answers_zero_queries_and_all_errors():
     assert e["recall_at_k"] == 0.0 and e["mrr_at_k"] == 0.0 and e["num_scored"] == 0
 
 
+async def test_run_answers_reports_latency():
+    timed = FakeEngine({})
+    timed.latencies_ms = [50.0]
+    report = await run_answers([CEO_Q], {"timed": timed, "plain": FakeEngine({})})
+    assert report["engines"]["timed"]["latency"] == {
+        "n": 1,
+        "mean_ms": 50.0,
+        "p50_ms": 50.0,
+        "p95_ms": 50.0,
+    }
+    assert report["engines"]["plain"]["latency"] is None
+
+
 def _write_rows(path, rows):
     path.write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
 
