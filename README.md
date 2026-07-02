@@ -165,6 +165,11 @@ defaults to low concurrency when used without a key; set `$KEENABLE_API_KEY` to
 use the authenticated endpoint at higher concurrency. `--exa-concurrency`
 (default 4) throttles Exa in a run.
 
+By default Exa returns full page text while Keenable returns short snippets,
+which hands the judge asymmetric evidence (the Needs-Met rubric caps
+thin-content documents at 2/SM). `--exa-highlight-chars 500` requests
+Exa highlights capped at ~500 chars instead, evidence-matching the engines.
+
 Queries whose search failed or that have any missing judgement are excluded
 from `mean_rbp_at_5` (reported via `num_scored`, `search_errors`,
 `judge_errors`) rather than scored as zero, so transient API failures don't

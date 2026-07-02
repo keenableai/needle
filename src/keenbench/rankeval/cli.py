@@ -58,6 +58,7 @@ class Rankeval:
         judge_model: str | None = None,
         keenable_mode: str = "pro",
         exa_concurrency: int = 4,
+        exa_highlight_chars: int = 0,
         limit: int = 0,
         sample: str = "stratified",
         seed: int = 0,
@@ -96,7 +97,11 @@ class Rankeval:
                 exa_key = os.environ.get("EXA_API_KEY")
                 if not exa_key:
                     raise SystemExit("error: EXA_API_KEY is not set (needed for the exa engine)")
-                clients[name] = ExaClient(api_key=exa_key, max_concurrency=exa_concurrency)
+                clients[name] = ExaClient(
+                    api_key=exa_key,
+                    max_concurrency=exa_concurrency,
+                    highlight_chars=exa_highlight_chars,
+                )
             else:
                 raise SystemExit(f"error: unknown engine {name!r} (known: keenable, exa)")
 
