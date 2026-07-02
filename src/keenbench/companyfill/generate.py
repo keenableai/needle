@@ -30,7 +30,7 @@ COMPANYFILL_MIN_FIELDS = 4
 FINANCIALS_MIN_FIELDS = 3
 FINANCIALS_MAX_AGE_YEARS = 2
 COMPANY_CONCURRENCY = 16
-_JUNK_INDUSTRY = ("classification", "standard industrial", "except", "n.e.c")
+JUNK_INDUSTRY_MARKERS = ("classification", "standard industrial", "except", "n.e.c")
 
 
 def _seed_title(title: str) -> str:
@@ -50,7 +50,7 @@ def _grounded_fields(
     labels: dict[str, tuple[str, list[str]]],
     ceo_qid: str | None,
     country: str | None,
-    inds: list[str],
+    industry_qids: list[str],
     *,
     min_employee_year: int,
 ) -> list[tuple[str, Any, list[str]]]:
@@ -58,24 +58,25 @@ def _grounded_fields(
     if ceo_qid and ceo_qid in labels:
         label, aliases = labels[ceo_qid]
         fields.append(("ceo", label, aliases))
-    fy = founded_year(claims)
-    if fy is not None:
-        fields.append(("founded_year", fy, []))
+    founded = founded_year(claims)
+    if founded is not None:
+        fields.append(("founded_year", founded, []))
     if country and country in labels:
         label, aliases = labels[country]
         fields.append(("hq_country", label, aliases))
-    ind_labels = [
+    industry_labels = [
         re.sub(r"\s+industry$", "", labels[q][0], flags=re.IGNORECASE)
-        for q in inds
-        if q in labels and not any(j in labels[q][0].lower() for j in _JUNK_INDUSTRY)
+        for q in industry_qids
+        if q in labels
+        and not any(marker in labels[q][0].lower() for marker in JUNK_INDUSTRY_MARKERS)
     ]
-    if ind_labels:
-        fields.append(("industry", ind_labels, []))
-    web = website(claims)
-    if web:
-        dom = registrable_domain(web)
-        if dom and "." in dom:
-            fields.append(("website", dom, [web]))
+    if industry_labels:
+        fields.append(("industry", industry_labels, []))
+    site = website(claims)
+    if site:
+        domain = registrable_domain(site)
+        if domain and "." in domain:
+            fields.append(("website", domain, [site]))
     emp, emp_year = employees(claims)
     if emp is not None and emp_year and emp_year >= min_employee_year:
         fields.append(("employees", emp, []))
@@ -98,10 +99,12 @@ async def _companyfill_rows(
         claims = await wikidata.entity(qid)
         ceo_qid = current_ceo(claims)
         country = await wikidata.country_qid(claims)
-        inds = industry_qids(claims)
-        labels = await wikidata.labels_and_aliases([q for q in [ceo_qid, country, *inds] if q])
+        industries = industry_qids(claims)
+        labels = await wikidata.labels_and_aliases(
+            [q for q in [ceo_qid, country, *industries] if q]
+        )
         for field, value, aliases in _grounded_fields(
-            claims, labels, ceo_qid, country, inds, min_employee_year=min_employee_year
+            claims, labels, ceo_qid, country, industries, min_employee_year=min_employee_year
         ):
             fields.append((field, value, aliases, "wikidata", source_url))
         lei_val = lei(claims)
@@ -193,7 +196,7 @@ async def run_generate(
         companies.append(row)
     stats.companies = len(companies)
 
-    async def one(row: dict) -> list[dict]:
+    async def company_rows(row: dict) -> list[dict]:
         tasks = []
         if "companyfill" in suites and wikidata is not None:
             tasks.append(
@@ -213,7 +216,7 @@ async def run_generate(
             stats.resolved += 1
         return out
 
-    results = await bounded_gather(companies, one, concurrency=COMPANY_CONCURRENCY)
+    results = await bounded_gather(companies, company_rows, concurrency=COMPANY_CONCURRENCY)
     rows = [r for batch in results for r in batch]
     stats.rows = len(rows)
     return rows, stats

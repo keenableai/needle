@@ -3,17 +3,17 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
-_MASK64 = (1 << 64) - 1
+MASK64 = (1 << 64) - 1
 
 
 def shuffle_indices(n: int, seed: int) -> list[int]:
     indices = list(range(n))
-    state = seed & _MASK64
+    state = seed & MASK64
     for i in range(n - 1, 0, -1):
-        state = (state + 0x9E3779B97F4A7C15) & _MASK64
+        state = (state + 0x9E3779B97F4A7C15) & MASK64
         z = state
-        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & _MASK64
-        z = (z ^ (z >> 27)) * 0x94D049BB133111EB & _MASK64
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9 & MASK64
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EB & MASK64
         z = z ^ (z >> 31)
         j = z % (i + 1)
         indices[i], indices[j] = indices[j], indices[i]

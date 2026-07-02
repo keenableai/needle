@@ -7,7 +7,7 @@ import httpx
 MAX_ERROR_CHARS = 500
 DEFAULT_JUDGE_MODEL = "google/gemini-3-flash-preview"
 
-_NO_REASONING = frozenset({"", "none", "minimal"})
+NO_REASONING_EFFORTS = frozenset({"", "none", "minimal"})
 
 
 def resolve_judge_model(explicit: str | None) -> str:
@@ -64,7 +64,7 @@ class OpenRouterClient:
             "max_tokens": max_tokens,
             "temperature": self.temperature,
         }
-        if reasoning_effort not in _NO_REASONING:
+        if reasoning_effort not in NO_REASONING_EFFORTS:
             body["reasoning"] = {"effort": reasoning_effort}
 
         try:

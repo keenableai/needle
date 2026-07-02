@@ -11,7 +11,7 @@ LEGAL_SUFFIXES = frozenset(
     " kk pte pty bv oyj ab as lp holding holdings group the".split()
 )
 
-_RAW_COUNTRY_ALIASES = {
+RAW_COUNTRY_ALIASES = {
     "us": "united states",
     "usa": "united states",
     "u.s.": "united states",
@@ -33,15 +33,15 @@ _RAW_COUNTRY_ALIASES = {
     "holland": "netherlands",
 }
 
-_PUNCT_TABLE = str.maketrans(dict.fromkeys(string.punctuation, " "))
-_ARTICLES = re.compile(r"\b(a|an|the)\b")
-_YEAR_RE = re.compile(r"\b(1[5-9]\d{2}|20\d{2})\b")
-_AMOUNT_RE = re.compile(
+PUNCT_TABLE = str.maketrans(dict.fromkeys(string.punctuation, " "))
+ARTICLES_RE = re.compile(r"\b(a|an|the)\b")
+YEAR_RE = re.compile(r"\b(1[5-9]\d{2}|20\d{2})\b")
+AMOUNT_RE = re.compile(
     r"(\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)"
     r"[ \t]*(trillion|billion|million|thousand|tn|bn|mn|mm|[tbmk])?\b",
     re.IGNORECASE,
 )
-_SCALE = {
+AMOUNT_SCALES = {
     "trillion": 1e12,
     "tn": 1e12,
     "t": 1e12,
@@ -59,36 +59,42 @@ _SCALE = {
 
 def squad_norm(value: Any) -> str:
     s = unicodedata.normalize("NFKC", str(value if value is not None else "")).lower()
-    s = s.translate(_PUNCT_TABLE)
-    s = _ARTICLES.sub(" ", s)
+    s = s.translate(PUNCT_TABLE)
+    s = ARTICLES_RE.sub(" ", s)
     return " ".join(s.split())
 
 
-_norm_form = lru_cache(maxsize=4096)(squad_norm)
+cached_squad_norm = lru_cache(maxsize=4096)(squad_norm)
 
-COUNTRY_ALIASES = {squad_norm(k): v for k, v in _RAW_COUNTRY_ALIASES.items()}
+COUNTRY_ALIASES = {squad_norm(k): v for k, v in RAW_COUNTRY_ALIASES.items()}
 
-_COUNTRY_LONG: dict[str, set[str]] = {}
-_COUNTRY_SHORT: dict[str, set[str]] = {}
-for _surface, _canonical in COUNTRY_ALIASES.items():
-    if len(_surface.replace(" ", "")) <= 3:
-        _COUNTRY_SHORT.setdefault(_canonical, set()).add("".join(_surface.split()).upper())
-    else:
-        _COUNTRY_LONG.setdefault(_canonical, set()).add(_surface)
+
+def country_form_indexes() -> tuple[dict[str, set[str]], dict[str, set[str]]]:
+    long_forms: dict[str, set[str]] = {}
+    short_forms: dict[str, set[str]] = {}
+    for surface, canonical in COUNTRY_ALIASES.items():
+        if len(surface.replace(" ", "")) <= 3:
+            short_forms.setdefault(canonical, set()).add("".join(surface.split()).upper())
+        else:
+            long_forms.setdefault(canonical, set()).add(surface)
+    return long_forms, short_forms
+
+
+COUNTRY_LONG_FORMS, COUNTRY_SHORT_FORMS = country_form_indexes()
 
 
 def strip_legal(value: Any) -> str:
     return " ".join(t for t in squad_norm(value).split() if t not in LEGAL_SUFFIXES)
 
 
-_TLD_EXTRACT = tldextract.TLDExtract(suffix_list_urls=(), cache_dir=None)
+TLD_EXTRACT = tldextract.TLDExtract(suffix_list_urls=(), cache_dir=None)
 
 
 def registrable_domain(value: Any) -> str:
     s = unicodedata.normalize("NFKC", str(value if value is not None else "")).strip().lower()
     s = re.sub(r"^[a-z][a-z0-9+.\-]*://", "", s)
     host = s.split("/")[0].split("?")[0].split(":")[0]
-    return _TLD_EXTRACT(host).top_domain_under_public_suffix or host
+    return TLD_EXTRACT(host).top_domain_under_public_suffix or host
 
 
 def phrase_in(phrase: str, text_norm: str) -> bool:
@@ -96,13 +102,13 @@ def phrase_in(phrase: str, text_norm: str) -> bool:
 
 
 def text_years(raw_text: str) -> set[int]:
-    return {int(m) for m in _YEAR_RE.findall(raw_text)}
+    return {int(m) for m in YEAR_RE.findall(raw_text)}
 
 
 def text_amounts(raw_text: str) -> list[float]:
     out = []
-    for num, suffix in _AMOUNT_RE.findall(raw_text):
-        out.append(float(num.replace(",", "")) * _SCALE.get(suffix.lower(), 1.0))
+    for num, suffix in AMOUNT_RE.findall(raw_text):
+        out.append(float(num.replace(",", "")) * AMOUNT_SCALES.get(suffix.lower(), 1.0))
     return out
 
 
@@ -113,37 +119,39 @@ def parse_amount(value: Any) -> float | None:
     return amounts[0] if amounts else None
 
 
-def _forms(value: Any, aliases: tuple[str, ...]) -> list[Any]:
+def _gold_forms(value: Any, aliases: tuple[str, ...]) -> list[Any]:
     return [f for f in [value, *aliases] if f not in (None, "")]
 
 
-def _short_in(form_raw: str, raw_text: str) -> bool:
+def _short_form_in(form_raw: str, raw_text: str) -> bool:
     pat = rf"(?<![A-Za-z0-9]){re.escape(form_raw)}(?![A-Za-z0-9])"
     return re.search(pat, raw_text) is not None
 
 
 def _match_person(value: Any, aliases: tuple[str, ...], text_norm: str) -> bool:
     text_tokens = text_norm.split()
-    for form in _forms(value, aliases):
-        f = squad_norm(form)
-        if phrase_in(f, text_norm):
+    for form in _gold_forms(value, aliases):
+        form_norm = squad_norm(form)
+        if phrase_in(form_norm, text_norm):
             return True
-        tokens = f.split()
-        if len(tokens) < 2:
+        name_tokens = form_norm.split()
+        if len(name_tokens) < 2:
             continue
-        first, last = tokens[0], tokens[-1]
-        if len(first) < 3:
+        given, surname = name_tokens[0], name_tokens[-1]
+        if len(given) < 3:
             continue
-        for i, t in enumerate(text_tokens):
-            if t != last:
+        for i, token in enumerate(text_tokens):
+            if token != surname:
                 continue
-            for w in text_tokens[max(0, i - 3) : i]:
-                if len(w) >= 3 and (w.startswith(first) or first.startswith(w)):
+            for preceding in text_tokens[max(0, i - 3) : i]:
+                if len(preceding) >= 3 and (
+                    preceding.startswith(given) or given.startswith(preceding)
+                ):
                     return True
     return False
 
 
-def _item_in(item_norm: str, text_norm: str) -> bool:
+def _item_in_text(item_norm: str, text_norm: str) -> bool:
     if phrase_in(item_norm, text_norm):
         return True
     if " " not in item_norm and len(item_norm) > 3:
@@ -154,7 +162,7 @@ def _item_in(item_norm: str, text_norm: str) -> bool:
 
 def _match_entity(value: Any, aliases: tuple[str, ...], text_norm: str) -> bool:
     stripped_text = " ".join(t for t in text_norm.split() if t not in LEGAL_SUFFIXES)
-    return any(_item_in(strip_legal(f), stripped_text) for f in _forms(value, aliases))
+    return any(_item_in_text(strip_legal(f), stripped_text) for f in _gold_forms(value, aliases))
 
 
 def _match_list(value: Any, aliases: tuple[str, ...], text_norm: str) -> bool:
@@ -164,7 +172,7 @@ def _match_list(value: Any, aliases: tuple[str, ...], text_norm: str) -> bool:
 
 def _match_year(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool:
     golds = set()
-    for f in _forms(value, aliases):
+    for f in _gold_forms(value, aliases):
         try:
             golds.add(int(f))
         except (TypeError, ValueError):
@@ -172,28 +180,28 @@ def _match_year(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool:
     return bool(golds & text_years(raw_text))
 
 
-_GENERIC_COUNTRY_FORMS = frozenset({"state", "states", "union", "republic", "kingdom"})
+GENERIC_COUNTRY_FORMS = frozenset({"state", "states", "union", "republic", "kingdom"})
 
 
 def _match_country(value: Any, aliases: tuple[str, ...], text_norm: str, raw_text: str) -> bool:
     gold_norm = squad_norm(value)
     canonical = COUNTRY_ALIASES.get(gold_norm, gold_norm)
-    long_forms = {canonical, gold_norm} | _COUNTRY_LONG.get(canonical, set())
-    short_forms = set(_COUNTRY_SHORT.get(canonical, ()))
+    long_forms = {canonical, gold_norm} | COUNTRY_LONG_FORMS.get(canonical, set())
+    short_forms = set(COUNTRY_SHORT_FORMS.get(canonical, ()))
     for a in aliases:
         norm = squad_norm(a)
         if len(norm.replace(" ", "")) <= 3:
             short_forms.add(str(a).strip())
-        elif norm and norm not in _GENERIC_COUNTRY_FORMS:
+        elif norm and norm not in GENERIC_COUNTRY_FORMS:
             long_forms.add(norm)
     if any(phrase_in(f, text_norm) for f in long_forms):
         return True
-    return any(_short_in(f, raw_text) for f in short_forms if f)
+    return any(_short_form_in(f, raw_text) for f in short_forms if f)
 
 
 def _match_domain(value: Any, aliases: tuple[str, ...], raw_text: str, url: str) -> bool:
     text = raw_text.lower()
-    for form in _forms(value, aliases):
+    for form in _gold_forms(value, aliases):
         dom = registrable_domain(form)
         if not dom or "." not in dom:
             continue
@@ -206,12 +214,12 @@ def _match_domain(value: Any, aliases: tuple[str, ...], raw_text: str, url: str)
 
 def _match_exact_id(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool:
     compact = None
-    for form in _forms(value, aliases):
+    for form in _gold_forms(value, aliases):
         norm = re.sub(r"[\s.]", "", str(form)).upper()
         if len(norm) < 2:
             continue
         if len(norm) <= 6:
-            if _short_in(norm, raw_text):
+            if _short_form_in(norm, raw_text):
                 return True
         else:
             if compact is None:
@@ -223,7 +231,7 @@ def _match_exact_id(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool
 
 def _match_amount(value: Any, aliases: tuple[str, ...], raw_text: str, *, rel_tol: float) -> bool:
     amounts = text_amounts(raw_text)
-    for form in _forms(value, aliases):
+    for form in _gold_forms(value, aliases):
         gold = parse_amount(form)
         if gold is None:
             continue
@@ -252,7 +260,7 @@ def gold_in_text(
 ) -> bool:
     raw = text or ""
     norm = squad_norm(raw)
-    if cues and not any(phrase_in(_norm_form(c), norm) for c in cues):
+    if cues and not any(phrase_in(cached_squad_norm(c), norm) for c in cues):
         return False
     if field_type == "person":
         return _match_person(value, aliases, norm)

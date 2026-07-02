@@ -40,35 +40,35 @@ FINANCIAL_CONCEPTS = {
     ],
 }
 
-_TIME_YEAR = re.compile(r"([+-]?\d{1,4})-")
+TIME_YEAR_RE = re.compile(r"([+-]?\d{1,4})-")
 
 
-def _dv(stmt: dict) -> Any:
+def _datavalue(stmt: dict) -> Any:
     return (stmt.get("mainsnak") or {}).get("datavalue", {}).get("value")
 
 
 def _entity_id(stmt: dict) -> str | None:
-    v = _dv(stmt)
+    v = _datavalue(stmt)
     return v.get("id") if isinstance(v, dict) else None
 
 
 def _time_year(stmt: dict) -> int | None:
-    v = _dv(stmt)
+    v = _datavalue(stmt)
     t = v.get("time") if isinstance(v, dict) else None
     if t:
-        m = _TIME_YEAR.search(t)
+        m = TIME_YEAR_RE.search(t)
         if m:
             return abs(int(m.group(1)))
     return None
 
 
 def _string(stmt: dict) -> str | None:
-    v = _dv(stmt)
+    v = _datavalue(stmt)
     return v if isinstance(v, str) else None
 
 
 def _quantity(stmt: dict) -> int | None:
-    v = _dv(stmt)
+    v = _datavalue(stmt)
     if isinstance(v, dict) and "amount" in v:
         try:
             return int(float(v["amount"]))
@@ -81,64 +81,64 @@ def _qual_year(stmt: dict, pcode: str) -> int | None:
     for q in (stmt.get("qualifiers") or {}).get(pcode, []):
         t = (q.get("datavalue") or {}).get("value", {})
         if isinstance(t, dict) and t.get("time"):
-            m = _TIME_YEAR.search(t["time"])
+            m = TIME_YEAR_RE.search(t["time"])
             if m:
                 return abs(int(m.group(1)))
     return None
 
 
 def current_ceo(claims: dict) -> str | None:
-    cands = []
-    for st in claims.get("P169", []):
-        if "P582" in (st.get("qualifiers") or {}):
+    candidates = []
+    for stmt in claims.get("P169", []):
+        if "P582" in (stmt.get("qualifiers") or {}):
             continue
-        pid = _entity_id(st)
+        pid = _entity_id(stmt)
         if not pid:
             continue
-        cands.append((st.get("rank") == "preferred", _qual_year(st, "P580") or 0, pid))
-    if not cands:
+        candidates.append((stmt.get("rank") == "preferred", _qual_year(stmt, "P580") or 0, pid))
+    if not candidates:
         return None
-    cands.sort(reverse=True)
-    return cands[0][2]
+    candidates.sort(reverse=True)
+    return candidates[0][2]
 
 
 def founded_year(claims: dict) -> int | None:
-    for st in claims.get("P571", []):
-        y = _time_year(st)
+    for stmt in claims.get("P571", []):
+        y = _time_year(stmt)
         if y:
             return y
     return None
 
 
 def website(claims: dict) -> str | None:
-    for st in claims.get("P856", []):
-        u = _string(st)
-        if u:
-            return u
+    for stmt in claims.get("P856", []):
+        url = _string(stmt)
+        if url:
+            return url
     return None
 
 
 def industry_qids(claims: dict) -> list[str]:
-    return [q for q in (_entity_id(st) for st in claims.get("P452", [])) if q]
+    return [q for q in (_entity_id(stmt) for stmt in claims.get("P452", [])) if q]
 
 
 def employees(claims: dict) -> tuple[int | None, int | None]:
     best, best_year = None, -1
-    for st in claims.get("P1128", []):
-        n = _quantity(st)
-        if n is None:
+    for stmt in claims.get("P1128", []):
+        count = _quantity(stmt)
+        if count is None:
             continue
-        y = _qual_year(st, "P585") or 0
-        if y >= best_year:
-            best, best_year = n, y
+        year = _qual_year(stmt, "P585") or 0
+        if year >= best_year:
+            best, best_year = count, year
     return best, (best_year if best_year > 0 else None)
 
 
 def lei(claims: dict) -> str | None:
-    for st in claims.get("P1278", []):
-        s = _string(st)
-        if s:
-            return s
+    for stmt in claims.get("P1278", []):
+        value = _string(stmt)
+        if value:
+            return value
     return None
 
 
@@ -146,13 +146,13 @@ def latest_annual(
     facts: dict, concepts: list[str], unit: str = "USD"
 ) -> tuple[int | None, str | None, int | None]:
     best: tuple[int, str, int | None] | None = None
-    for c in concepts:
-        for x in ((facts.get(c, {}) or {}).get("units", {}) or {}).get(unit, []):
-            if x.get("form") == "10-K" and x.get("fp") == "FY" and x.get("end"):
-                if x.get("val") is None:
+    for concept in concepts:
+        for fact in ((facts.get(concept, {}) or {}).get("units", {}) or {}).get(unit, []):
+            if fact.get("form") == "10-K" and fact.get("fp") == "FY" and fact.get("end"):
+                if fact.get("val") is None:
                     continue
-                if best is None or x["end"] > best[1]:
-                    best = (x["val"], x["end"], x.get("fy"))
+                if best is None or fact["end"] > best[1]:
+                    best = (fact["val"], fact["end"], fact.get("fy"))
     return best if best else (None, None, None)
 
 
@@ -186,13 +186,13 @@ class WikidataClient(RegistryClient):
     async def entity(self, qid: str) -> dict:
         if qid in self._entities:
             return self._entities[qid]
-        js = await self._get(WIKIDATA_ENTITYDATA.format(qid=qid))
-        claims = (((js or {}).get("entities") or {}).get(qid) or {}).get("claims", {})
+        payload = await self._get(WIKIDATA_ENTITYDATA.format(qid=qid))
+        claims = (((payload or {}).get("entities") or {}).get(qid) or {}).get("claims", {})
         self._entities[qid] = claims
         return claims
 
     async def resolve(self, name: str) -> str | None:
-        js = await self._get(
+        payload = await self._get(
             WIKIDATA_API,
             params={
                 "action": "wbsearchentities",
@@ -203,7 +203,7 @@ class WikidataClient(RegistryClient):
                 "limit": 5,
             },
         )
-        for hit in (js or {}).get("search", []):
+        for hit in (payload or {}).get("search", []):
             qid = hit.get("id")
             if not qid:
                 continue
@@ -217,7 +217,7 @@ class WikidataClient(RegistryClient):
         out: dict[str, tuple[str, list[str]]] = {}
         ids = [i for i in dict.fromkeys(ids) if i]
         for i in range(0, len(ids), 50):
-            js = await self._get(
+            payload = await self._get(
                 WIKIDATA_API,
                 params={
                     "action": "wbgetentities",
@@ -227,7 +227,7 @@ class WikidataClient(RegistryClient):
                     "format": "json",
                 },
             )
-            for qid, ent in ((js or {}).get("entities") or {}).items():
+            for qid, ent in ((payload or {}).get("entities") or {}).items():
                 label = ((ent.get("labels") or {}).get("en") or {}).get("value")
                 aliases = [
                     a["value"]
@@ -239,12 +239,12 @@ class WikidataClient(RegistryClient):
         return out
 
     async def country_qid(self, claims: dict) -> str | None:
-        for st in claims.get("P17", []):
-            q = _entity_id(st)
+        for stmt in claims.get("P17", []):
+            q = _entity_id(stmt)
             if q:
                 return q
-        for st in claims.get("P159", []):
-            loc = _entity_id(st)
+        for stmt in claims.get("P159", []):
+            loc = _entity_id(stmt)
             if not loc:
                 continue
             loc_claims = await self.entity(loc)
@@ -262,34 +262,36 @@ class SecClient(RegistryClient):
 
     async def tickers(self, limit: int = 0) -> list[dict]:
         if self._tickers is None:
-            js = await self._get(SEC_TICKERS_URL)
-            rows = js.values() if isinstance(js, dict) else (js or [])
+            payload = await self._get(SEC_TICKERS_URL)
+            rows = payload.values() if isinstance(payload, dict) else (payload or [])
             out = []
             for row in rows:
-                t = (row.get("ticker") or "").strip().upper()
+                ticker = (row.get("ticker") or "").strip().upper()
                 title = (row.get("title") or "").strip()
-                if t and title:
-                    out.append({"ticker": t, "title": title, "cik": int(row.get("cik_str", 0))})
+                if ticker and title:
+                    out.append(
+                        {"ticker": ticker, "title": title, "cik": int(row.get("cik_str", 0))}
+                    )
             self._tickers = out
         return self._tickers[:limit] if limit > 0 else list(self._tickers)
 
     async def companyfacts(self, cik: int) -> dict | None:
-        js = await self._get(SEC_FACTS_URL.format(cik=int(cik)))
-        facts = ((js or {}).get("facts") or {}).get("us-gaap")
+        payload = await self._get(SEC_FACTS_URL.format(cik=int(cik)))
+        facts = ((payload or {}).get("facts") or {}).get("us-gaap")
         return facts or None
 
 
 class GleifClient(RegistryClient):
     async def lei_by_name(self, legal_name: str) -> str | None:
-        js = await self._get(
+        payload = await self._get(
             GLEIF_API,
             params={"filter[entity.legalName]": legal_name, "page[size]": 5},
             headers={"Accept": "application/vnd.api+json"},
         )
-        n = legal_name.strip().lower()
-        for rec in (js or {}).get("data") or []:
+        wanted = legal_name.strip().lower()
+        for rec in (payload or {}).get("data") or []:
             attrs = rec.get("attributes") or {}
-            nm = ((attrs.get("entity") or {}).get("legalName") or {}).get("name", "")
-            if nm.strip().lower() == n:
+            record_name = ((attrs.get("entity") or {}).get("legalName") or {}).get("name", "")
+            if record_name.strip().lower() == wanted:
                 return attrs.get("lei") or rec.get("id")
         return None

@@ -4,7 +4,7 @@ from urllib.parse import urlsplit
 RBP_P = 0.8
 RBP_K = 5
 
-_GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
+GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
 
 RBP_MAX = 1.0 - RBP_P**RBP_K
 
@@ -14,7 +14,7 @@ FULL_DOMAIN_PENALTY = 2
 
 
 def gain(rating: int) -> float:
-    return _GAIN.get(rating, 0.0)
+    return GAIN.get(rating, 0.0)
 
 
 def url_domain(url: str) -> str:

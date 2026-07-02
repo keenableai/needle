@@ -76,7 +76,7 @@ async def run_answers(
     judge: LLMClient | None = None,
     judge_concurrency: int = 8,
 ) -> dict[str, Any]:
-    names = list(engines)
+    engine_names = list(engines)
     judge_sem = asyncio.Semaphore(max(1, judge_concurrency))
 
     async def judge_result(query: GoldQuery, result: SearchResult) -> tuple[bool | None, bool]:
@@ -115,8 +115,8 @@ async def run_answers(
         pq["det_rank"] = det_rank
         pq["hit_rank"] = det_rank
         if judge is not None:
-            upto = det_rank - 1 if det_rank is not None else len(results)
-            candidates = list(enumerate(results[:upto], start=1))
+            cutoff = det_rank - 1 if det_rank is not None else len(results)
+            candidates = list(enumerate(results[:cutoff], start=1))
             verdicts = await asyncio.gather(*[judge_result(query, r) for _, r in candidates])
             pq["judged"] = len(candidates)
             pq["judge_errors"] = sum(1 for _, errored in verdicts if errored)
@@ -127,15 +127,15 @@ async def run_answers(
 
     async def run_query(query: GoldQuery) -> list[dict]:
         searches = await asyncio.gather(
-            *[engines[n].search(query.text, num_results=num_results) for n in names]
+            *[engines[n].search(query.text, num_results=num_results) for n in engine_names]
         )
         return await asyncio.gather(*[eval_engine(query, r, e) for r, e in searches])
 
     query_outs = await asyncio.gather(*[run_query(q) for q in queries])
 
     engines_out: dict[str, dict[str, Any]] = {}
-    for ni, name in enumerate(names):
-        per_query = [entries[ni] for entries in query_outs]
+    for idx, name in enumerate(engine_names):
+        per_query = [entries[idx] for entries in query_outs]
         scored = [
             pq
             for pq in per_query
