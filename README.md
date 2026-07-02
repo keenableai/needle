@@ -294,7 +294,8 @@ against `keenable,exa`: freshstream hourly (`--limit 20`), companyfill daily at
 
 - appends summary rows to `data/history.jsonl` on the `gh-pages` branch —
   rendered as a dashboard (trends, latest tiles, per-field table, judgement
-  browser) at <https://keenableai.github.io/keenbench/>;
+  browser) at <https://super-journey-4z52474.pages.github.io/> (the URL becomes
+  `keenableai.github.io/keenbench` when the repo goes public);
 - archives the full artifacts (reports with per-result judge reasoning, the
   generated queries, the gold) to the public HF dataset
   [`keenable-ai/keenbench-results`](https://huggingface.co/datasets/keenable-ai/keenbench-results)
