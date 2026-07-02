@@ -58,7 +58,7 @@ class Rankeval:
         judge_model: str | None = None,
         keenable_mode: str = "pro",
         exa_concurrency: int = 4,
-        exa_highlight_chars: int = 0,
+        exa_highlight_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
         seed: int = 0,
