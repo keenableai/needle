@@ -133,8 +133,14 @@
   .result .title { font-weight: 500; }
   .result .title a { color: inherit; }
   .result .host { color: var(--text-muted); font-size: 12px; }
-  .result .reasoning { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
-  .result .snippet { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+  .result .snippet { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+  .result .judgement {
+    display: flex; gap: 8px; align-items: baseline;
+    margin-top: 8px; padding: 7px 10px;
+    background: var(--page); border: 1px solid var(--grid); border-radius: 8px;
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .result .judgement .label { font-weight: 600; color: var(--text-primary); }
   .chip {
     display: inline-block; min-width: 20px; text-align: center; border-radius: 5px;
     font-size: 11px; font-weight: 600; padding: 1px 5px; flex: none;
@@ -586,10 +592,10 @@ function host(url) {
   try { return new URL(url).hostname; } catch { return url; }
 }
 
-function resultBlock(r, extras) {
+function resultBlock(r, headExtras, judgeChips = []) {
   const div = el("div", { class: "result" });
   const head = el("div", { class: "head" });
-  for (const node of extras) head.appendChild(node);
+  for (const node of headExtras) head.appendChild(node);
   const title = el("span", { class: "title" });
   const a = el("a", { href: r.url, rel: "noopener noreferrer", target: "_blank" });
   a.textContent = r.title || r.url;
@@ -597,10 +603,20 @@ function resultBlock(r, extras) {
   head.appendChild(title);
   head.appendChild(el("span", { class: "host" }, host(r.url)));
   div.appendChild(head);
-  if (r.reasoning) {
-    div.appendChild(el("div", { class: "reasoning" }, `${r.label ?? ""} — ${r.reasoning}`));
-  }
   if (r.snippet) div.appendChild(el("div", { class: "snippet" }, r.snippet));
+  if (judgeChips.length || r.reasoning) {
+    const box = el("div", { class: "judgement" });
+    if (judgeChips.length) {
+      const chips = el("span", { class: "chips" });
+      for (const c of judgeChips) chips.appendChild(c);
+      box.appendChild(chips);
+    }
+    const text = el("span");
+    if (r.label) text.appendChild(el("span", { class: "label" }, r.label));
+    if (r.reasoning) text.appendChild(document.createTextNode(`${r.label ? " — " : ""}${r.reasoning}`));
+    box.appendChild(text);
+    div.appendChild(box);
+  }
   return div;
 }
 
@@ -617,11 +633,11 @@ function renderFreshstreamRun(holder, report, engine) {
       pq.search_error ? "search error" : `RBP ${fmt3(pq.rbp)}`));
     row.appendChild(summary);
     for (const r of pq.results || []) {
-      const extras = [ratingChip(r.rating, "judge rating")];
+      const chips = [ratingChip(r.rating, "judge rating")];
       if (r.penalized != null && r.penalized !== r.rating) {
-        extras.push(ratingChip(r.penalized, "after redundancy penalty"));
+        chips.push(ratingChip(r.penalized, "after redundancy penalty"));
       }
-      row.appendChild(resultBlock(r, extras));
+      row.appendChild(resultBlock(r, [], chips));
     }
     if (pq.search_error) {
       row.appendChild(el("div", { class: "result" }, `search error: ${pq.search_error.error_type}`));
