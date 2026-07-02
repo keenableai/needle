@@ -73,7 +73,7 @@
     vertical-align: middle; margin-right: 6px;
   }
 
-  .legend { display: flex; gap: 18px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
   .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
 
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -150,9 +150,16 @@
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
   /* filled matrix cells: separate borders so the 2px surface gap and radius apply */
-  #overlap-table table { border-collapse: separate; border-spacing: 2px; }
+  #overlap-table { overflow-x: auto; }
+  #overlap-table table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; }
   #overlap-table th, #overlap-table td { border-bottom: none; }
-  #overlap-table td.overlap-cell { border-radius: 4px; text-align: center; font-variant-numeric: tabular-nums; }
+  #overlap-table td:first-child { white-space: nowrap; }
+  #overlap-table th.col { vertical-align: bottom; text-align: center; padding: 4px 0; font-weight: 500; }
+  #overlap-table th.col span { writing-mode: vertical-rl; rotate: 180deg; }
+  #overlap-table td.overlap-cell {
+    width: 44px; min-width: 44px; height: 44px; padding: 0;
+    border-radius: 4px; text-align: center; font-variant-numeric: tabular-nums;
+  }
 </style>
 </head>
 <body>
@@ -519,7 +526,11 @@ function renderHistoryTable(rows) {
 const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
 const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 
-// overlap is magnitude too — same validated sequential ramp, value printed in-cell
+// overlap reads as polarity — low (diverse) green, high (redundant) red, gray midpoint;
+// the in-cell values are the CVD relief for the red↔green pair
+const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
+const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
+
 function renderOverlap(rows) {
   const holder = document.getElementById("overlap-table");
   holder.replaceChildren();
@@ -544,7 +555,11 @@ function renderOverlap(rows) {
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, ""));
-  for (const e of engines) head.appendChild(el("th", { class: "num" }, e));
+  for (const e of engines) {
+    const th = el("th", { class: "col" });
+    th.appendChild(el("span", {}, e));
+    head.appendChild(th);
+  }
   table.appendChild(head);
   for (const a of engines) {
     const tr = el("tr");
@@ -563,8 +578,8 @@ function renderOverlap(rows) {
       const td = el("td", { class: "overlap-cell" }, v == null ? "–" : v.toFixed(2));
       if (v != null) {
         const step = Math.min(4, Math.floor(v * 5));
-        td.style.background = RATING_BG[step];
-        td.style.color = RATING_INK[step];
+        td.style.background = OVERLAP_BG[step];
+        td.style.color = OVERLAP_INK[step];
         td.title = `${a} ∩ ${b}: ${v.toFixed(3)} over ${agg.n} queries`;
       }
       tr.appendChild(td);
