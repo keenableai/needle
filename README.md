@@ -9,6 +9,7 @@ under the `keenbench` package, exposed as a `keenbench <benchmark>` subcommand.
 | Module | What it does | Status |
 | --- | --- | --- |
 | [`freshstream`](#freshstream) | Mine live RSS (and, soon, Google Trends) and project each item into a fresh, terse search query | RSS path shipped |
+| [`companyfill`](#companyfill) | Generate company fact-lookup queries with registry-grounded gold answers, then score engines on answer-recall@K | Shipped |
 
 ## Install
 
@@ -106,6 +107,57 @@ rows, stats = asyncio.run(run_rss(SEED_SOURCES, llm, hour_ts=hour_ts))
 Any object with an errors-as-data
 `async complete(prompt, *, max_tokens, reasoning_effort) -> (text, error)`
 method satisfies the `LLMClient` protocol.
+
+## companyfill
+
+An enrichment-style benchmark: keyword queries about public companies
+(`"nvidia ceo"`, `"apple revenue fiscal year 2025"`) whose gold answers come
+from public registries, scored by whether an engine's top-K results *contain
+the answer* — not whether they hit one pinned gold URL, so any page that
+actually answers gets credit. Gold is generated on demand from public APIs
+(Wikidata CC0, SEC public domain, GLEIF CC0); nothing is committed. Adapted
+from the public-registry core of Keenable's internal enrichment bench.
+
+Two suites, one query row per grounded field:
+
+- **`companyfill`** — SEC `company_tickers.json` seeds the companies; each is
+  resolved to Wikidata (gated on company-class or LEI/exchange signals) and
+  every grounded field becomes a query: ceo (P169 with no end date),
+  founded_year, hq_country, industry, website, employees (omitted when
+  Wikidata's latest figure is stale), lei (P1278, or GLEIF with
+  `--use_gleif`), ticker. Companies with fewer than 4 grounded fields are
+  dropped as likely mis-resolutions.
+- **`financials`** — SEC XBRL companyfacts (authoritative and fresh): latest
+  annual revenue, net income, total assets, stockholders' equity, with the
+  fiscal year pinned in the query text so the gold is unambiguous.
+
+```bash
+keenbench companyfill generate --limit 200 --out gold.jsonl
+keenbench companyfill run --queries gold.jsonl --engines keenable,exa --out report.json
+```
+
+Scoring is deterministic — no LLM judge. Each result's title + snippet
+(capped uniformly at `--snippet_chars`, default 500, so engines returning
+fatter content don't get free evidence) is checked for the gold value with
+per-field-type matchers: person names tolerate nicknames (Tim ~ Timothy) via
+surname + given-name-prefix matching, money matches within a 2% band
+(`$416.16 billion` ≈ `416161000000`), employee counts within 15%, countries
+match alias surface forms (`US`, `U.S.`, `United States of America`),
+websites match the result URL's registrable domain, tickers/LEIs match
+case-sensitively on word boundaries. Low-entropy fields (founded_year,
+employees, ticker) additionally require a cue word (`founded`, `employees`,
+`ticker`, …) in the text so a stray number can't score.
+
+The report gives per-engine **answer-recall@K** and **MRR@K** over queries
+whose search succeeded (errors are excluded via `num_scored`, not scored as
+zero), plus breakdowns by field, by suite, and by freshness cadence (`1y`
+fields like ceo/revenue vs `static` ones like founded_year). Snippet-only
+checking is a *lower bound* on true answer presence — comparable across
+engines, not an absolute coverage number. Known caveat: ceo/employees gold
+comes from Wikidata, so a stale registry entry can mark a correct fresh
+answer wrong; the `financials` suite has no such gap. `--limit N` takes a
+deterministic stratified sample across gold fields (`--sample uniform|head`,
+`--seed`).
 
 ## Search clients
 
