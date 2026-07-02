@@ -15,7 +15,6 @@
     --baseline: #c3c2b7;
     --border: rgba(11, 11, 11, 0.10);
     --delta-up: #006300;
-    --delta-down: #d03b3b;
     /* categorical slots (validated palette, fixed order — see dataviz notes) */
     --series-1: #2a78d6;
     --series-2: #1baf7a;
@@ -37,7 +36,6 @@
       --baseline: #383835;
       --border: rgba(255, 255, 255, 0.10);
       --delta-up: #0ca30c;
-      --delta-down: #e66767;
       --series-1: #3987e5;
       --series-2: #199e70;
       --series-3: #c98500;
@@ -74,8 +72,6 @@
     display: inline-block; width: 14px; height: 3px; border-radius: 2px;
     vertical-align: middle; margin-right: 6px;
   }
-  .delta.up { color: var(--delta-up); }
-  .delta.down { color: var(--delta-down); }
 
   .legend { display: flex; gap: 18px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
   .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
@@ -344,14 +340,19 @@ function drawChart(card, series, opts) {
     cross.setAttribute("visibility", "visible");
     tip.replaceChildren();
     tip.appendChild(el("div", { class: "when" }, fmtTime(new Date(t))));
+    const atT = [];
     for (const e of ENGINES) {
       const p = series[e].find((q) => q.t.getTime() === t);
       hoverDots[e].setAttribute("visibility", p ? "visible" : "hidden");
       if (!p) continue;
       hoverDots[e].setAttribute("cx", x(t)); hoverDots[e].setAttribute("cy", y(p.v));
+      atT.push({ e, v: p.v });
+    }
+    atT.sort((a, b) => b.v - a.v);
+    for (const { e, v } of atT) {
       const row = el("div", { class: "row" });
       const key = el("span", { class: "key" }); key.style.background = colorOf(e);
-      row.append(key, el("span", { class: "val" }, fmt3(p.v)), el("span", { class: "name" }, e));
+      row.append(key, el("span", { class: "val" }, fmt3(v)), el("span", { class: "name" }, e));
       tip.appendChild(row);
     }
     tip.style.display = "block";
@@ -402,7 +403,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const byMetric = metrics.map(([m]) => seriesFor(bench, m, rows));
   const entries = ENGINES.map((e) => {
     const pts = byMetric[0][e] || [];
-    return { e, last: pts.at(-1), prev: pts.at(-2), extra: byMetric.slice(1).map((s) => (s[e] || []).at(-1)) };
+    return { e, last: pts.at(-1), extra: byMetric.slice(1).map((s) => (s[e] || []).at(-1)) };
   }).filter((x) => x.last);
   if (!entries.length) {
     document.getElementById(subId).textContent = "";
@@ -415,7 +416,6 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
   for (const [, label] of metrics) head.appendChild(el("th", { class: "num" }, label));
-  head.appendChild(el("th", { class: "num" }, "Δ prev"));
   table.appendChild(head);
   for (const [i, x] of entries.entries()) {
     const tr = el("tr");
@@ -427,13 +427,6 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     tr.appendChild(nameCell);
     tr.appendChild(el("td", { class: "num" + best }, fmt3(x.last.v)));
     for (const pt of x.extra) tr.appendChild(el("td", { class: "num" }, pt ? fmt3(pt.v) : "–"));
-    if (x.prev) {
-      const d = x.last.v - x.prev.v;
-      const cls = d > 0.0005 ? "up" : d < -0.0005 ? "down" : "";
-      tr.appendChild(el("td", { class: `num delta ${cls}` }, `${d >= 0 ? "+" : ""}${d.toFixed(3)}`));
-    } else {
-      tr.appendChild(el("td", { class: "num delta" }, "first run"));
-    }
     table.appendChild(tr);
   }
   holder.appendChild(table);
