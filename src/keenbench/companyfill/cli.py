@@ -71,9 +71,9 @@ def _gold_query(row: dict) -> GoldQuery:
 class Companyfill:
     def generate(
         self,
-        out: str = "-",
         suites: str | tuple[str, ...] = "companyfill,financials",
-        limit: int = 100,
+        out: str = "-",
+        max_companies: int = 100,
         use_gleif: bool = False,
         min_employee_year: int = 0,
         registry_concurrency: int = 4,
@@ -102,7 +102,7 @@ class Companyfill:
 
         async def _go() -> tuple[list[dict], GenStats]:
             try:
-                seed = await sec.tickers(limit)
+                seed = await sec.tickers(max_companies)
                 if not seed:
                     raise SystemExit("error: could not load the SEC company_tickers seed")
                 return await run_generate(

@@ -1,30 +1,30 @@
 import pytest
 
+from keenbench.freshstream import cli as freshstream_cli
 from keenbench.freshstream.cli import Freshstream
-from keenbench.rankeval import cli as rankeval_cli
 from keenbench.shared.llm import OpenRouterClient, _content_to_text
 from keenbench.shared.search import factory as search_factory
 
 
 def test_run_rejects_unsupported_source():
     with pytest.raises(SystemExit):
-        Freshstream().run(source="bogus")
+        Freshstream().generate(source="bogus")
 
 
 def test_trending_rejects_rss_only_flags():
     with pytest.raises(SystemExit):
-        Freshstream().run(source="trending", feeds="x.toml")
+        Freshstream().generate(source="trending", feeds="x.toml")
 
 
 def test_rss_rejects_trends_only_flags():
     with pytest.raises(SystemExit):
-        Freshstream().run(source="rss", max_trends=5)
+        Freshstream().generate(source="rss", max_trends=5)
 
 
 def test_run_rejects_bad_feeds_file(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     with pytest.raises(SystemExit):
-        Freshstream().run(feeds=str(tmp_path / "does-not-exist.toml"))
+        Freshstream().generate(feeds=str(tmp_path / "does-not-exist.toml"))
 
 
 def test_openrouter_default_temperature_is_deterministic():
@@ -55,7 +55,7 @@ async def test_openrouter_reports_truncation(monkeypatch):
     assert text is None and err["error_type"] == "truncated"
 
 
-def test_rankeval_passes_keenable_api_key(monkeypatch, tmp_path):
+def test_freshstream_run_passes_keenable_api_key(monkeypatch, tmp_path):
     qfile = tmp_path / "q.jsonl"
     qfile.write_text("mayor of austin\n")
     monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
@@ -74,28 +74,26 @@ def test_rankeval_passes_keenable_api_key(monkeypatch, tmp_path):
         return {"num_queries": len(queries), "num_results": 5, "engines": {}}
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
-    monkeypatch.setattr(rankeval_cli, "run_rbp", fake_run_rbp)
-    rankeval_cli.Rankeval().run(
-        queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json")
-    )
+    monkeypatch.setattr(freshstream_cli, "run_rbp", fake_run_rbp)
+    Freshstream().run(queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json"))
     assert created == {"api_key": "kb-key", "mode": "pro"}
 
 
-def test_rankeval_load_rows_and_per_query_today(tmp_path):
+def test_freshstream_run_load_rows_and_per_query_today(tmp_path):
     f = tmp_path / "q.jsonl"
     f.write_text(
         '{"query_text": "a", "topical_domain": "tech", "hour_ts": "2026-07-01T14:00:00+00:00"}\n'
         "plain text query\n"
     )
-    rows = rankeval_cli._load_query_rows(str(f))
+    rows = freshstream_cli._load_query_rows(str(f))
     assert rows[0]["topical_domain"] == "tech"
-    assert rankeval_cli._today_for_row(rows[0], "1999-01-01") == "2026-07-01"
-    assert rankeval_cli._today_for_row(rows[1], "1999-01-01") == "1999-01-01"
+    assert freshstream_cli._today_for_row(rows[0], "1999-01-01") == "2026-07-01"
+    assert freshstream_cli._today_for_row(rows[1], "1999-01-01") == "1999-01-01"
 
 
-def test_rankeval_rejects_unknown_sample(tmp_path, monkeypatch):
+def test_freshstream_run_rejects_unknown_sample(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     f = tmp_path / "q.jsonl"
     f.write_text("a\nb\n")
     with pytest.raises(SystemExit):
-        rankeval_cli.Rankeval().run(queries=str(f), limit=1, sample="bogus")
+        Freshstream().run(queries=str(f), limit=1, sample="bogus")

@@ -1,6 +1,6 @@
 import pytest
 
-from keenbench.rankeval import EvalQuery, run_rbp
+from keenbench.shared.rankeval import EvalQuery, run_rbp
 from keenbench.shared.search import SearchResult
 
 TODAY = "2026-07-01"
