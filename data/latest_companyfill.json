@@ -6,7 +6,7 @@
   "engines": {
     "keenable": {
       "recall_at_k": 0.88,
-      "mrr_at_k": 0.7073333333333334,
+      "mrr_at_k": 0.7448333333333335,
       "num_scored": 100,
       "search_errors": 0,
       "judged_results": 0,
@@ -18,7 +18,7 @@
           "recall_at_k": 0.8888888888888888
         },
         "employees": {
-          "n": 6,
+          "n": 5,
           "recall_at_k": 1.0
         },
         "founded_year": {
@@ -26,7 +26,7 @@
           "recall_at_k": 0.7777777777777778
         },
         "hq_country": {
-          "n": 8,
+          "n": 9,
           "recall_at_k": 1.0
         },
         "industry": {
@@ -43,7 +43,7 @@
         },
         "revenue": {
           "n": 8,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.875
         },
         "stockholders_equity": {
           "n": 9,
@@ -59,37 +59,37 @@
         },
         "website": {
           "n": 8,
-          "recall_at_k": 0.875
+          "recall_at_k": 1.0
         }
       },
       "by_bucket": {
         "companyfill": {
           "n": 66,
-          "recall_at_k": 0.9090909090909091
+          "recall_at_k": 0.9242424242424242
         },
         "financials": {
           "n": 34,
-          "recall_at_k": 0.8235294117647058
+          "recall_at_k": 0.7941176470588235
         }
       },
       "by_freshness": {
         "1y": {
-          "n": 49,
-          "recall_at_k": 0.8571428571428571
+          "n": 48,
+          "recall_at_k": 0.8333333333333334
         },
         "5y": {
           "n": 9,
           "recall_at_k": 0.7777777777777778
         },
         "static": {
-          "n": 42,
-          "recall_at_k": 0.9285714285714286
+          "n": 43,
+          "recall_at_k": 0.9534883720930233
         }
       }
     },
     "exa": {
-      "recall_at_k": 0.81,
-      "mrr_at_k": 0.583,
+      "recall_at_k": 0.83,
+      "mrr_at_k": 0.6273333333333335,
       "num_scored": 100,
       "search_errors": 0,
       "judged_results": 0,
@@ -98,10 +98,10 @@
       "by_field": {
         "ceo": {
           "n": 9,
-          "recall_at_k": 0.8888888888888888
+          "recall_at_k": 1.0
         },
         "employees": {
-          "n": 6,
+          "n": 5,
           "recall_at_k": 1.0
         },
         "founded_year": {
@@ -109,24 +109,24 @@
           "recall_at_k": 0.6666666666666666
         },
         "hq_country": {
-          "n": 8,
-          "recall_at_k": 0.875
+          "n": 9,
+          "recall_at_k": 1.0
         },
         "industry": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 0.7777777777777778
         },
         "lei": {
           "n": 9,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.8888888888888888
         },
         "net_income": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 0.7777777777777778
         },
         "revenue": {
           "n": 8,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.875
         },
         "stockholders_equity": {
           "n": 9,
@@ -138,35 +138,35 @@
         },
         "total_assets": {
           "n": 8,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.875
         },
         "website": {
           "n": 8,
-          "recall_at_k": 0.875
+          "recall_at_k": 1.0
         }
       },
       "by_bucket": {
         "companyfill": {
           "n": 66,
-          "recall_at_k": 0.8636363636363636
+          "recall_at_k": 0.9090909090909091
         },
         "financials": {
           "n": 34,
-          "recall_at_k": 0.7058823529411765
+          "recall_at_k": 0.6764705882352942
         }
       },
       "by_freshness": {
         "1y": {
-          "n": 49,
-          "recall_at_k": 0.7755102040816326
+          "n": 48,
+          "recall_at_k": 0.7708333333333334
         },
         "5y": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 0.7777777777777778
         },
         "static": {
-          "n": 42,
-          "recall_at_k": 0.8809523809523809
+          "n": 43,
+          "recall_at_k": 0.9069767441860465
         }
       }
     }
