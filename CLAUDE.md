@@ -34,10 +34,6 @@ rendered:
 5. Read the PNG to check the rendering; share it via paste.keenable.ai when a
    PR needs a screenshot.
 
-A ready-made harness from a past session may exist at
-`/tmp/claude-1000/*/scratchpad/dashcheck/` (`shot.mjs` + fixtures); recreate it
-from the steps above if it's gone.
-
 ## Rules
 
 - No code comments or docstrings; rationale goes in commit/PR messages.
