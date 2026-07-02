@@ -1,7 +1,8 @@
 # keenbench
 
 Hourly search-engine benchmarks. Two benches: freshstream (hourly, RBP@5, LLM
-judge) and companyfill (daily, answer-recall@5 + MRR@5, deterministic).
+judge) and companyfill (daily, answer-recall@5 + MRR@5, deterministic matcher
+with an LLM judge backstop on misses).
 
 ## Layout
 

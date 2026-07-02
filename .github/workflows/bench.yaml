@@ -73,7 +73,7 @@ jobs:
           uv run keenbench companyfill generate --max-companies 100 \
             --out site-data/data/gold.jsonl
           uv run keenbench companyfill run --queries site-data/data/gold.jsonl \
-            --limit 100 --engines "$ENGINES" --out recall.json
+            --limit 100 --engines "$ENGINES" --judge --out recall.json
 
       - name: Publish
         run: |

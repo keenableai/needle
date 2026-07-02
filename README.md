@@ -312,7 +312,7 @@ method satisfies the `LLMClient` protocol. The ranking harness is
 
 [`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule
 against all registered engines: freshstream hourly (`--limit 20`), companyfill
-daily at 00:17 UTC (fresh gold, `--limit 100`). Each run:
+daily at 00:17 UTC (fresh gold, `--limit 100`, `--judge` backstop). Each run:
 
 - appends summary rows to `data/history.jsonl` and per-engine-pair URL-overlap
   rows (mean Jaccard of normalized top-K URL sets per query) to
