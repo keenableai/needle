@@ -10,7 +10,7 @@ import httpx
 MAX_ERROR_CHARS = 500
 
 
-def latency_stats(latencies_ms: list[float]) -> dict[str, float] | None:
+def latency_stats(latencies_ms: list[float]) -> dict[str, float | int] | None:
     if not latencies_ms:
         return None
     values = sorted(latencies_ms)
