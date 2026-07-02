@@ -87,7 +87,7 @@ def _qual_year(stmt: dict, pcode: str) -> int | None:
     return None
 
 
-def current_ceo(claims: dict) -> tuple[str | None, int | None]:
+def current_ceo(claims: dict) -> str | None:
     cands = []
     for st in claims.get("P169", []):
         if "P582" in (st.get("qualifiers") or {}):
@@ -97,9 +97,9 @@ def current_ceo(claims: dict) -> tuple[str | None, int | None]:
             continue
         cands.append((st.get("rank") == "preferred", _qual_year(st, "P580") or 0, pid))
     if not cands:
-        return None, None
+        return None
     cands.sort(reverse=True)
-    return cands[0][2], (cands[0][1] or None)
+    return cands[0][2]
 
 
 def founded_year(claims: dict) -> int | None:
@@ -289,7 +289,7 @@ class GleifClient(RegistryClient):
         n = legal_name.strip().lower()
         for rec in (js or {}).get("data") or []:
             attrs = rec.get("attributes") or {}
-            nm = (((attrs.get("entity") or {}).get("legalName") or {}) or {}).get("name", "")
+            nm = ((attrs.get("entity") or {}).get("legalName") or {}).get("name", "")
             if nm.strip().lower() == n:
                 return attrs.get("lei") or rec.get("id")
         return None

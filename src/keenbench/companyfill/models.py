@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
+from keenbench.companyfill.canon import LEGAL_SUFFIXES
 from keenbench.shared.identity import query_hash, query_id
 
 COMPANYFILL_PRODUCER_ID = "companyfill"
@@ -52,15 +53,10 @@ FINANCIALS_FIELDS = {
 
 FIELD_SPECS = {**COMPANYFILL_FIELDS, **FINANCIALS_FIELDS}
 
-_TRAILING_TOKENS = frozenset(
-    "inc incorporated corp corporation company co ltd limited plc llc lp"
-    " nv sa ag se holdings group".split()
-)
-
 
 def display_name(title: str) -> str:
     tokens = [t for t in title.strip().lower().split() if not t.startswith("/")]
-    while tokens and (tokens[-1] == "&" or tokens[-1].strip(".,/") in _TRAILING_TOKENS):
+    while tokens and (tokens[-1] == "&" or tokens[-1].strip(".,/") in LEGAL_SUFFIXES):
         tokens.pop()
     name = " ".join(tokens).rstrip(" ,.")
     return name or title.strip().lower()

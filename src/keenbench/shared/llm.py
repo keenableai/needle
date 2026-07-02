@@ -1,11 +1,17 @@
 import json
+import os
 from typing import Any, Protocol
 
 import httpx
 
 MAX_ERROR_CHARS = 500
+DEFAULT_JUDGE_MODEL = "google/gemini-3-flash-preview"
 
 _NO_REASONING = frozenset({"", "none", "minimal"})
+
+
+def resolve_judge_model(explicit: str | None) -> str:
+    return explicit or os.environ.get("KEENBENCH_JUDGE_MODEL") or DEFAULT_JUDGE_MODEL
 
 
 class LLMClient(Protocol):

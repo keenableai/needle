@@ -6,6 +6,7 @@ from keenbench.companyfill import cli as companyfill_cli
 from keenbench.companyfill.judge import build_answer_prompt, judge_answer, parse_verdict
 from keenbench.companyfill.score import GoldQuery, run_answers
 from keenbench.shared.search import SearchResult
+from keenbench.shared.search import factory as search_factory
 
 CEO_Q = GoldQuery(
     text="nvidia ceo",
@@ -206,7 +207,7 @@ def test_run_passes_judge_model(tmp_path, monkeypatch):
         return {"num_queries": 1, "num_results": 5, "snippet_chars": 500, "engines": {}}
 
     monkeypatch.setattr(companyfill_cli, "OpenRouterClient", FakeOpenRouter)
-    monkeypatch.setattr(companyfill_cli, "KeenableClient", FakeKeenable)
+    monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(companyfill_cli, "run_answers", fake_run_answers)
     out = tmp_path / "r.json"
     companyfill_cli.Companyfill().run(

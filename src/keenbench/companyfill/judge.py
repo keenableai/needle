@@ -3,7 +3,6 @@ from typing import Any
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.prompts import render_prompt
 
-DEFAULT_JUDGE_MODEL = "google/gemini-3-flash-preview"
 ANSWER_TEMPLATE = "answer_match.jinja"
 
 

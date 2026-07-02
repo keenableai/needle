@@ -5,6 +5,7 @@ import pytest
 from keenbench.companyfill import cli as companyfill_cli
 from keenbench.companyfill.score import GoldQuery, first_hit_rank, run_answers
 from keenbench.shared.search import SearchResult
+from keenbench.shared.search import factory as search_factory
 
 CEO_Q = GoldQuery(
     text="nvidia ceo",
@@ -176,7 +177,7 @@ def test_run_passes_keenable_api_key_and_writes_report(tmp_path, monkeypatch):
     async def fake_run_answers(queries, clients, **kwargs):
         return {"num_queries": len(queries), "num_results": 5, "snippet_chars": 500, "engines": {}}
 
-    monkeypatch.setattr(companyfill_cli, "KeenableClient", FakeKeenable)
+    monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(companyfill_cli, "run_answers", fake_run_answers)
     out = tmp_path / "report.json"
     companyfill_cli.Companyfill().run(queries=str(f), engines="keenable", out=str(out))
@@ -204,7 +205,7 @@ def test_run_stratified_sampling_by_field(tmp_path, monkeypatch):
         async def aclose(self):
             pass
 
-    monkeypatch.setattr(companyfill_cli, "KeenableClient", FakeKeenable)
+    monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(companyfill_cli, "run_answers", fake_run_answers)
     companyfill_cli.Companyfill().run(
         queries=str(f), engines="keenable", limit=4, out=str(tmp_path / "r.json")

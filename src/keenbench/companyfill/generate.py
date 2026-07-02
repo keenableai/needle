@@ -24,10 +24,12 @@ from keenbench.companyfill.registries import (
     lei,
     website,
 )
+from keenbench.shared.concurrency import bounded_gather
 
 COMPANYFILL_MIN_FIELDS = 4
 FINANCIALS_MIN_FIELDS = 3
 FINANCIALS_MAX_AGE_YEARS = 2
+COMPANY_CONCURRENCY = 16
 _JUNK_INDUSTRY = ("classification", "standard industrial", "except", "n.e.c")
 
 
@@ -94,7 +96,7 @@ async def _companyfill_rows(
     if qid:
         source_url = f"https://www.wikidata.org/wiki/{qid}"
         claims = await wikidata.entity(qid)
-        ceo_qid, _ = current_ceo(claims)
+        ceo_qid = current_ceo(claims)
         country = await wikidata.country_qid(claims)
         inds = industry_qids(claims)
         labels = await wikidata.labels_and_aliases([q for q in [ceo_qid, country, *inds] if q])
@@ -192,26 +194,26 @@ async def run_generate(
     stats.companies = len(companies)
 
     async def one(row: dict) -> list[dict]:
-        out: list[dict] = []
-        try:
-            if "companyfill" in suites and wikidata is not None:
-                cf = await _companyfill_rows(
-                    row,
-                    wikidata,
-                    gleif,
-                    min_employee_year=min_employee_year,
-                    hour_ts=hour_ts,
+        tasks = []
+        if "companyfill" in suites and wikidata is not None:
+            tasks.append(
+                _companyfill_rows(
+                    row, wikidata, gleif, min_employee_year=min_employee_year, hour_ts=hour_ts
                 )
-                if any(r["query_origin"]["provenance"].get("qid") for r in cf):
-                    stats.resolved += 1
-                out.extend(cf)
-            if "financials" in suites and sec is not None:
-                out.extend(await _financials_rows(row, sec, hour_ts=hour_ts))
+            )
+        if "financials" in suites and sec is not None:
+            tasks.append(_financials_rows(row, sec, hour_ts=hour_ts))
+        try:
+            batches = await asyncio.gather(*tasks)
         except Exception:
             stats.errors += 1
+            return []
+        out = [r for batch in batches for r in batch]
+        if any(r["query_origin"]["provenance"].get("qid") for r in out):
+            stats.resolved += 1
         return out
 
-    results = await asyncio.gather(*[one(row) for row in companies])
+    results = await bounded_gather(companies, one, concurrency=COMPANY_CONCURRENCY)
     rows = [r for batch in results for r in batch]
     stats.rows = len(rows)
     return rows, stats

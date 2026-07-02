@@ -2,17 +2,17 @@ import asyncio
 import json
 import os
 import sys
+from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
 from keenbench.companyfill.generate import GenStats, run_generate
-from keenbench.companyfill.judge import DEFAULT_JUDGE_MODEL
 from keenbench.companyfill.registries import GleifClient, SecClient, WikidataClient
 from keenbench.companyfill.score import GoldQuery, run_answers
 from keenbench.shared.io import write_jsonl, write_stdout
-from keenbench.shared.llm import OpenRouterClient
-from keenbench.shared.sampling import sample_stratified, sample_uniform
-from keenbench.shared.search import ExaClient, KeenableClient, SearchClient
+from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
+from keenbench.shared.sampling import sample as sample_rows
+from keenbench.shared.search import build_search_clients
 
 KNOWN_SUITES = ("companyfill", "financials")
 
@@ -123,11 +123,7 @@ class Companyfill:
         else:
             write_jsonl(records, out)
 
-        by_bucket: dict[str, int] = {}
-        for row in rows:
-            by_bucket[row["query_origin"]["bucket"]] = (
-                by_bucket.get(row["query_origin"]["bucket"], 0) + 1
-            )
+        by_bucket = Counter(row["query_origin"]["bucket"] for row in rows)
         buckets = ", ".join(f"{b}={n}" for b, n in sorted(by_bucket.items())) or "none"
         print(
             f"companyfill: {stats.rows} queries from {stats.companies} companies "
@@ -155,42 +151,23 @@ class Companyfill:
         if not rows:
             raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
         if limit > 0 and len(rows) > limit:
-            if sample == "stratified":
-                tagged = [dict(r, _strat=r["gold"]["field"]) for r in rows]
-                rows = [dict(r) for r in sample_stratified(tagged, limit, seed, key="_strat")]
-                for r in rows:
-                    r.pop("_strat", None)
-            elif sample == "uniform":
-                rows = sample_uniform(rows, limit, seed)
-            elif sample == "head":
-                rows = rows[:limit]
-            else:
-                raise SystemExit(
-                    f"error: --sample: unknown sample strategy {sample!r} "
-                    "(known: stratified, uniform, head)"
+            try:
+                rows = sample_rows(
+                    rows, limit, seed, strategy=sample, key=lambda r: r["gold"]["field"]
                 )
+            except ValueError as exc:
+                raise SystemExit(f"error: --sample: {exc}") from exc
         gold_queries = [_gold_query(r) for r in rows]
 
-        engine_names = _parse_csv(engines)
-        clients: dict[str, SearchClient] = {}
-        for name in engine_names:
-            if name == "keenable":
-                clients[name] = KeenableClient(
-                    api_key=os.environ.get("KEENABLE_API_KEY"), mode=keenable_mode
-                )
-            elif name == "exa":
-                exa_key = os.environ.get("EXA_API_KEY")
-                if not exa_key:
-                    raise SystemExit("error: EXA_API_KEY is not set (needed for the exa engine)")
-                clients[name] = ExaClient(
-                    api_key=exa_key,
-                    max_concurrency=exa_concurrency,
-                    highlight_chars=snippet_chars,
-                )
-            else:
-                raise SystemExit(f"error: unknown engine {name!r} (known: keenable, exa)")
-        if not clients:
-            raise SystemExit("error: no engines selected")
+        try:
+            clients = build_search_clients(
+                _parse_csv(engines),
+                keenable_mode=keenable_mode,
+                exa_concurrency=exa_concurrency,
+                exa_highlight_chars=snippet_chars,
+            )
+        except ValueError as exc:
+            raise SystemExit(f"error: {exc}") from exc
 
         judge_llm = None
         model = None
@@ -198,7 +175,7 @@ class Companyfill:
             openrouter_key = os.environ.get("OPENROUTER_API_KEY")
             if not openrouter_key:
                 raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for --judge)")
-            model = judge_model or os.environ.get("KEENBENCH_JUDGE_MODEL") or DEFAULT_JUDGE_MODEL
+            model = resolve_judge_model(judge_model)
             judge_llm = OpenRouterClient(api_key=openrouter_key, model=model)
 
         async def _go() -> dict:

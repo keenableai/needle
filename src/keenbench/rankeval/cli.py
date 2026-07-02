@@ -6,11 +6,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from keenbench.rankeval.pipeline import EvalQuery, run_rbp
-from keenbench.shared.llm import OpenRouterClient
+from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
 from keenbench.shared.sampling import sample as sample_rows
-from keenbench.shared.search import ExaClient, KeenableClient, SearchClient
-
-DEFAULT_JUDGE_MODEL = "google/gemini-3-flash-preview"
+from keenbench.shared.search import build_search_clients
 
 
 def _load_query_rows(path: str) -> list[dict]:
@@ -87,25 +85,17 @@ class Rankeval:
         else:
             engine_names = [str(e).strip() for e in engines]
 
-        clients: dict[str, SearchClient] = {}
-        for name in engine_names:
-            if name == "keenable":
-                clients[name] = KeenableClient(
-                    api_key=os.environ.get("KEENABLE_API_KEY"), mode=keenable_mode
-                )
-            elif name == "exa":
-                exa_key = os.environ.get("EXA_API_KEY")
-                if not exa_key:
-                    raise SystemExit("error: EXA_API_KEY is not set (needed for the exa engine)")
-                clients[name] = ExaClient(
-                    api_key=exa_key,
-                    max_concurrency=exa_concurrency,
-                    highlight_chars=exa_highlight_chars,
-                )
-            else:
-                raise SystemExit(f"error: unknown engine {name!r} (known: keenable, exa)")
+        try:
+            clients = build_search_clients(
+                engine_names,
+                keenable_mode=keenable_mode,
+                exa_concurrency=exa_concurrency,
+                exa_highlight_chars=exa_highlight_chars,
+            )
+        except ValueError as exc:
+            raise SystemExit(f"error: {exc}") from exc
 
-        model = judge_model or os.environ.get("KEENBENCH_JUDGE_MODEL") or DEFAULT_JUDGE_MODEL
+        model = resolve_judge_model(judge_model)
         judge = OpenRouterClient(api_key=openrouter_key, model=model)
 
         async def _go() -> dict:

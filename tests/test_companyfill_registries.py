@@ -32,7 +32,7 @@ def test_current_ceo_skips_ended_and_prefers_latest_start():
             _stmt({"id": "Q_MID"}, qualifiers=_time_qual("P580", "+2019-02-01T00:00:00Z")),
         ]
     }
-    assert current_ceo(claims) == ("Q_NEW", 2023)
+    assert current_ceo(claims) == "Q_NEW"
 
 
 def test_current_ceo_preferred_rank_wins():
@@ -42,8 +42,8 @@ def test_current_ceo_preferred_rank_wins():
             _stmt({"id": "Q_B"}, rank="preferred"),
         ]
     }
-    assert current_ceo(claims)[0] == "Q_B"
-    assert current_ceo({}) == (None, None)
+    assert current_ceo(claims) == "Q_B"
+    assert current_ceo({}) is None
 
 
 def test_scalar_extractors():

@@ -1,6 +1,7 @@
 import re
 import string
 import unicodedata
+from functools import lru_cache
 from typing import Any
 
 LEGAL_SUFFIXES = frozenset(
@@ -30,7 +31,7 @@ _RAW_COUNTRY_ALIASES = {
     "holland": "netherlands",
 }
 
-_PUNCT = set(string.punctuation)
+_PUNCT_TABLE = str.maketrans(dict.fromkeys(string.punctuation, " "))
 _ARTICLES = re.compile(r"\b(a|an|the)\b")
 _YEAR_RE = re.compile(r"\b(1[5-9]\d{2}|20\d{2})\b")
 _AMOUNT_RE = re.compile(
@@ -56,12 +57,22 @@ _SCALE = {
 
 def squad_norm(value: Any) -> str:
     s = unicodedata.normalize("NFKC", str(value if value is not None else "")).lower()
-    s = "".join(" " if ch in _PUNCT else ch for ch in s)
+    s = s.translate(_PUNCT_TABLE)
     s = _ARTICLES.sub(" ", s)
     return " ".join(s.split())
 
 
+_norm_form = lru_cache(maxsize=4096)(squad_norm)
+
 COUNTRY_ALIASES = {squad_norm(k): v for k, v in _RAW_COUNTRY_ALIASES.items()}
+
+_COUNTRY_LONG: dict[str, set[str]] = {}
+_COUNTRY_SHORT: dict[str, set[str]] = {}
+for _surface, _canonical in COUNTRY_ALIASES.items():
+    if len(_surface.replace(" ", "")) <= 3:
+        _COUNTRY_SHORT.setdefault(_canonical, set()).add("".join(_surface.split()).upper())
+    else:
+        _COUNTRY_LONG.setdefault(_canonical, set()).add(_surface)
 
 
 def strip_legal(value: Any) -> str:
@@ -164,21 +175,14 @@ _GENERIC_COUNTRY_FORMS = frozenset({"state", "states", "union", "republic", "kin
 def _match_country(value: Any, aliases: tuple[str, ...], text_norm: str, raw_text: str) -> bool:
     gold_norm = squad_norm(value)
     canonical = COUNTRY_ALIASES.get(gold_norm, gold_norm)
-    long_forms = {canonical, gold_norm}
-    short_forms = set()
+    long_forms = {canonical, gold_norm} | _COUNTRY_LONG.get(canonical, set())
+    short_forms = set(_COUNTRY_SHORT.get(canonical, ()))
     for a in aliases:
         norm = squad_norm(a)
         if len(norm.replace(" ", "")) <= 3:
             short_forms.add(str(a).strip())
         elif norm and norm not in _GENERIC_COUNTRY_FORMS:
             long_forms.add(norm)
-    for surface, canon in COUNTRY_ALIASES.items():
-        if canon != canonical:
-            continue
-        if len(surface.replace(" ", "")) <= 3:
-            short_forms.add("".join(surface.split()).upper())
-        else:
-            long_forms.add(surface)
     if any(phrase_in(f, text_norm) for f in long_forms):
         return True
     return any(_short_in(f, raw_text) for f in short_forms if f)
@@ -195,6 +199,7 @@ def _match_domain(value: Any, aliases: tuple[str, ...], raw_text: str, url: str)
 
 
 def _match_exact_id(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool:
+    compact = None
     for form in _forms(value, aliases):
         norm = re.sub(r"[\s.]", "", str(form)).upper()
         if len(norm) < 2:
@@ -202,17 +207,21 @@ def _match_exact_id(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool
         if len(norm) <= 6:
             if _short_in(norm, raw_text):
                 return True
-        elif norm in re.sub(r"[^A-Z0-9]", "", raw_text.upper()):
-            return True
+        else:
+            if compact is None:
+                compact = re.sub(r"[^A-Z0-9]", "", raw_text.upper())
+            if norm in compact:
+                return True
     return False
 
 
 def _match_amount(value: Any, aliases: tuple[str, ...], raw_text: str, *, rel_tol: float) -> bool:
+    amounts = text_amounts(raw_text)
     for form in _forms(value, aliases):
         gold = parse_amount(form)
         if gold is None:
             continue
-        for amount in text_amounts(raw_text):
+        for amount in amounts:
             if gold == 0:
                 if abs(amount) < 1:
                     return True
@@ -232,7 +241,7 @@ def gold_in_text(
 ) -> bool:
     raw = text or ""
     norm = squad_norm(raw)
-    if cues and not any(phrase_in(squad_norm(c), norm) for c in cues):
+    if cues and not any(phrase_in(_norm_form(c), norm) for c in cues):
         return False
     if field_type == "person":
         return _match_person(value, aliases, norm)
