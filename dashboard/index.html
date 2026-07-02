@@ -150,7 +150,7 @@
   /* filled matrix cells: separate borders so the 2px surface gap and radius apply */
   #overlap-table table { border-collapse: separate; border-spacing: 2px; }
   #overlap-table th, #overlap-table td { border-bottom: none; }
-  #overlap-table td.overlap-cell { border-radius: 4px; text-align: center; }
+  #overlap-table td.overlap-cell { border-radius: 4px; text-align: center; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
@@ -205,7 +205,7 @@
 
   <div class="card" id="card-overlap">
     <h2>Engine overlap — shared result URLs (last 24h)</h2>
-    <div class="sub" id="overlap-sub">mean Jaccard overlap of top-K URL sets on the same queries, freshstream + companyfill</div>
+    <div class="sub" id="overlap-sub"></div>
     <div id="overlap-table"></div>
   </div>
 
@@ -524,22 +524,22 @@ const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 function renderOverlap(rows) {
   const holder = document.getElementById("overlap-table");
   holder.replaceChildren();
+  const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
   const cutoff = Date.now() - 24 * 3600e3;
   const recent = rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
   const pairs = new Map();
   for (const r of recent) {
-    const key = r.a < r.b ? `${r.a}|${r.b}` : `${r.b}|${r.a}`;
-    const agg = pairs.get(key) || { jsum: 0, n: 0 };
+    const agg = pairs.get(pairKey(r.a, r.b)) || { jsum: 0, n: 0 };
     agg.jsum += r.jaccard_sum;
     agg.n += r.num_queries;
-    pairs.set(key, agg);
+    pairs.set(pairKey(r.a, r.b), agg);
   }
   const engines = ENGINES.filter((e) => recent.some((r) => r.a === e || r.b === e));
   if (engines.length < 2) {
     holder.appendChild(el("div", { class: "empty" }, "No overlap data in the last 24h yet — accumulates from hourly runs."));
     return;
   }
-  const nQueries = Math.max(0, ...[...pairs.values()].map((p) => p.n));
+  const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
   document.getElementById("overlap-sub").textContent =
     `mean Jaccard overlap of top-K URL sets on the same queries, freshstream + companyfill — up to ${nQueries} queries per pair, last 24h`;
   const table = el("table");
@@ -556,12 +556,12 @@ function renderOverlap(rows) {
     tr.appendChild(nameCell);
     for (const b of engines) {
       if (a === b) {
-        tr.appendChild(el("td", { class: "num overlap-cell" }, "–"));
+        tr.appendChild(el("td", { class: "overlap-cell" }, "–"));
         continue;
       }
-      const agg = pairs.get(a < b ? `${a}|${b}` : `${b}|${a}`);
+      const agg = pairs.get(pairKey(a, b));
       const v = agg && agg.n ? agg.jsum / agg.n : null;
-      const td = el("td", { class: "num overlap-cell" }, v == null ? "–" : v.toFixed(2));
+      const td = el("td", { class: "overlap-cell" }, v == null ? "–" : v.toFixed(2));
       if (v != null) {
         const step = Math.min(4, Math.floor(v * 5));
         td.style.background = RATING_BG[step];

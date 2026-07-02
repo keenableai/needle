@@ -11,13 +11,13 @@ Usage: uv run python scripts/publish_bench.py --site <gh-pages checkout>
 """
 
 import json
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import fire
 
-from keenbench.shared.io import write_json
-from keenbench.shared.overlap import overlap_rows
+from keenbench.shared.io import write_json, write_jsonl
+from keenbench.shared.overlap import TS_FMT, WINDOW_HOURS, overlap_rows
 
 
 def freshstream_rows(report: dict, ts: str) -> list[dict]:
@@ -71,7 +71,7 @@ def publish(
     gold: str | None = None,
     ts: str | None = None,
 ) -> None:
-    ts = ts or datetime.now(UTC).strftime("%Y-%m-%dT%H:%MZ")
+    ts = ts or datetime.now(UTC).strftime(TS_FMT)
     run_id = ts.replace(":", "")
     data = Path(site) / "data"
     data.mkdir(parents=True, exist_ok=True)
@@ -80,26 +80,41 @@ def publish(
 
     rows = []
     overlap = []
-    for path, to_rows, latest, archive_name, bench in (
-        (rbp, freshstream_rows, "latest_freshstream.json", "rbp.json", "freshstream"),
-        (recall, companyfill_rows, "latest_companyfill.json", "recall.json", "companyfill"),
+    for path, to_rows, latest, archive_name in (
+        (rbp, freshstream_rows, "latest_freshstream.json", "rbp.json"),
+        (recall, companyfill_rows, "latest_companyfill.json", "recall.json"),
     ):
         if not path:
             continue
         raw = Path(path).read_text(encoding="utf-8")
         report = json.loads(raw)
         rows.extend(to_rows(report, ts))
-        overlap.extend(overlap_rows(report, ts=ts, bench=bench))
+        overlap.extend(overlap_rows(report, ts=ts))
         write_json(slim_report(report), str(data / latest))
         (run_dir / archive_name).write_text(raw, encoding="utf-8")
     for path, archive_name in ((fresh, "fresh.jsonl"), (gold, "gold.jsonl")):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
 
-    for name, out_rows in (("history.jsonl", rows), ("overlap.jsonl", overlap)):
-        with open(data / name, "a", encoding="utf-8") as fh:
-            for row in out_rows:
-                fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+    with open(data / "history.jsonl", "a", encoding="utf-8") as fh:
+        for row in rows:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+    # the dashboard reads only a trailing window of overlap, so prune on rewrite
+    # instead of growing forever like history.jsonl (whose full range the charts use)
+    overlap_path = data / "overlap.jsonl"
+    kept = []
+    if overlap_path.exists():
+        cutoff_dt = datetime.strptime(ts, TS_FMT).replace(tzinfo=UTC) - timedelta(
+            hours=WINDOW_HOURS
+        )
+        cutoff = cutoff_dt.strftime(TS_FMT)
+        kept = [
+            row
+            for line in overlap_path.read_text(encoding="utf-8").splitlines()
+            if line and (row := json.loads(line))["ts"] >= cutoff
+        ]
+    write_jsonl(kept + overlap, str(overlap_path))
 
     index_path = data / "runs.json"
     runs = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []

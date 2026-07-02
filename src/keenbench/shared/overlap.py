@@ -1,13 +1,14 @@
 from typing import Any
 from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
 
+TS_FMT = "%Y-%m-%dT%H:%MZ"
+WINDOW_HOURS = 24
 TRACKING_PARAMS = {"gclid", "fbclid", "msclkid", "yclid", "igshid", "mc_cid", "mc_eid"}
 
 
 def normalize_url(url: str) -> str:
     parts = urlsplit(url.strip())
-    host = parts.netloc.rpartition("@")[2].lower()
-    host = host.removesuffix(":80").removesuffix(":443").removeprefix("www.")
+    host = (parts.hostname or "").removeprefix("www.")
     path = unquote(parts.path).rstrip("/")
     params = sorted(
         (k, v)
@@ -18,31 +19,28 @@ def normalize_url(url: str) -> str:
     return f"{host}{path}{query}"
 
 
-def overlap_rows(report: dict[str, Any], *, ts: str, bench: str) -> list[dict[str, Any]]:
-    per_query = {name: e["per_query"] for name, e in report["engines"].items()}
-    names = list(per_query)
+def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
+    url_sets = {
+        name: [
+            None
+            if pq["search_error"] is not None
+            else {normalize_url(r["url"]) for r in pq["results"]}
+            for pq in e["per_query"]
+        ]
+        for name, e in report["engines"].items()
+    }
+    names = list(url_sets)
     rows = []
     for i, a in enumerate(names):
         for b in names[i + 1 :]:
             jaccard_sum = 0.0
             n = 0
-            for pa, pb in zip(per_query[a], per_query[b], strict=True):
-                if pa["search_error"] is not None or pb["search_error"] is not None:
+            for sa, sb in zip(url_sets[a], url_sets[b], strict=True):
+                if sa is None or sb is None or not (sa or sb):
                     continue
-                urls_a = {normalize_url(r["url"]) for r in pa["results"]}
-                urls_b = {normalize_url(r["url"]) for r in pb["results"]}
-                if not (urls_a or urls_b):
-                    continue
-                jaccard_sum += len(urls_a & urls_b) / len(urls_a | urls_b)
+                jaccard_sum += len(sa & sb) / len(sa | sb)
                 n += 1
             rows.append(
-                {
-                    "ts": ts,
-                    "bench": bench,
-                    "a": a,
-                    "b": b,
-                    "jaccard_sum": round(jaccard_sum, 4),
-                    "num_queries": n,
-                }
+                {"ts": ts, "a": a, "b": b, "jaccard_sum": round(jaccard_sum, 4), "num_queries": n}
             )
     return rows
