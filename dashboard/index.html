@@ -133,8 +133,15 @@
   .result .title { font-weight: 500; }
   .result .title a { color: inherit; }
   .result .host { color: var(--text-muted); font-size: 12px; }
-  .result .reasoning { color: var(--text-secondary); font-size: 13px; margin-top: 4px; }
-  .result .snippet { color: var(--text-muted); font-size: 12px; margin-top: 4px; }
+  .result .reasoning { color: var(--text-secondary); font-size: 13px; margin-top: 6px; }
+  .result .snippet {
+    color: var(--text-muted); font-size: 12px; margin-top: 6px;
+    padding-left: 8px; border-left: 2px solid var(--grid); font-style: italic;
+  }
+  .result .flabel {
+    font-style: normal; font-size: 10px; font-weight: 600; letter-spacing: 0.5px;
+    text-transform: uppercase; color: var(--text-muted); margin-right: 6px;
+  }
   .chip {
     display: inline-block; min-width: 20px; text-align: center; border-radius: 5px;
     font-size: 11px; font-weight: 600; padding: 1px 5px; flex: none;
@@ -531,10 +538,17 @@ function resultBlock(r, extras) {
   head.appendChild(title);
   head.appendChild(el("span", { class: "host" }, host(r.url)));
   div.appendChild(head);
-  if (r.reasoning) {
-    div.appendChild(el("div", { class: "reasoning" }, `${r.label ?? ""} — ${r.reasoning}`));
+  if (r.snippet) {
+    const snippet = el("div", { class: "snippet" });
+    snippet.append(el("span", { class: "flabel" }, "snippet"), document.createTextNode(r.snippet));
+    div.appendChild(snippet);
   }
-  if (r.snippet) div.appendChild(el("div", { class: "snippet" }, r.snippet));
+  if (r.reasoning) {
+    const reasoning = el("div", { class: "reasoning" });
+    reasoning.append(el("span", { class: "flabel" }, "judge"),
+      document.createTextNode(r.label ? `${r.label} — ${r.reasoning}` : r.reasoning));
+    div.appendChild(reasoning);
+  }
   return div;
 }
 
