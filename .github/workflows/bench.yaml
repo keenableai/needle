@@ -2,8 +2,14 @@ name: Bench
 
 on:
   schedule:
-    - cron: "17 * * * *"
+    - cron: "17 0 * * *" # daily: freshstream + companyfill with fresh gold
+    - cron: "17 1-23 * * *" # hourly: freshstream only
   workflow_dispatch:
+    inputs:
+      companyfill:
+        description: "Also run companyfill (regenerates gold)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -45,11 +51,13 @@ jobs:
           uv run keenbench freshstream run --queries fresh.jsonl --limit 20 \
             --engines keenable,exa --out rbp.json
 
-      - name: companyfill (daily at 00:17 UTC)
+      - name: companyfill (daily schedule, dispatch opt-in, or gold bootstrap)
+        env:
+          # gate on why the run fired, not the runner's clock — cron fire times drift
+          RUN_COMPANYFILL: ${{ github.event.schedule == '17 0 * * *' || inputs.companyfill == true }}
         run: |
-          hour=$(date -u +%H)
-          if [ "$hour" != "00" ] && [ -s site-data/data/gold.jsonl ]; then
-            echo "skipping companyfill at hour $hour"
+          if [ "$RUN_COMPANYFILL" != "true" ] && [ -s site-data/data/gold.jsonl ]; then
+            echo "skipping companyfill"
             exit 0
           fi
           mkdir -p site-data/data
@@ -61,14 +69,14 @@ jobs:
       - name: Publish
         run: |
           TS=$(date -u +%Y-%m-%dT%H:%MZ)
-          ID=${TS//:/}
           args="--site site-data --runs-out staged --ts $TS --rbp rbp.json --fresh fresh.jsonl"
           if [ -s recall.json ]; then
             args="$args --recall recall.json --gold site-data/data/gold.jsonl"
           fi
           uv run python scripts/publish_bench.py $args
-          # full artifacts to the HF dataset first, so runs.json never dangles
-          uvx --from huggingface_hub hf upload "$HF_DATASET" "staged/$ID" "runs/$ID" \
+          # staged/ holds exactly this run's <id>/ dir, so the run id has one owner
+          # (publish_bench.py); upload before the gh-pages push so runs.json never dangles
+          uvx --from huggingface_hub hf upload "$HF_DATASET" staged runs \
             --repo-type dataset --commit-message "bench: $TS"
           cp dashboard/index.html site-data/index.html
           touch site-data/.nojekyll

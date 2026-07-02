@@ -192,7 +192,7 @@
     <div id="run-detail"></div>
   </div>
 
-  <details>
+  <details id="history-details">
     <summary>Table view — all runs in range</summary>
     <div class="card" id="history-table" style="margin-top:8px"></div>
   </details>
@@ -230,7 +230,7 @@ function inRange(rows) {
 
 function el(tag, attrs, text) {
   const ns = "http://www.w3.org/2000/svg";
-  const node = ["svg", "g", "path", "line", "circle", "text", "rect"].includes(tag)
+  const node = ["svg", "path", "line", "circle", "text"].includes(tag)
     ? document.createElementNS(ns, tag) : document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
   if (text != null) node.textContent = text;
@@ -323,7 +323,14 @@ function drawChart(card, series, opts) {
     tip.style.left = Math.min(px + 14, rect.width - tip.offsetWidth - 8) + "px";
     tip.style.top = "36px";
   }
+  let shownIdx = -1;
+  function showIdx(i) {
+    if (i === shownIdx) return;
+    shownIdx = i;
+    showAt(stamps[i]);
+  }
   function hide() {
+    shownIdx = -1;
     cross.setAttribute("visibility", "hidden");
     tip.style.display = "none";
     for (const e of ENGINES) hoverDots[e].setAttribute("visibility", "hidden");
@@ -332,20 +339,22 @@ function drawChart(card, series, opts) {
   svg.addEventListener("pointermove", (ev) => {
     const rect = svg.getBoundingClientRect();
     const t = t0 + (((ev.clientX - rect.left) / rect.width) * W - M.left) / iw * (t1 - t0);
-    let best = stamps[0];
-    for (const s of stamps) if (Math.abs(s - t) < Math.abs(best - t)) best = s;
-    focusIdx = stamps.indexOf(best);
-    showAt(best);
+    let best = 0;
+    for (let i = 1; i < stamps.length; i++) {
+      if (Math.abs(stamps[i] - t) < Math.abs(stamps[best] - t)) best = i;
+    }
+    focusIdx = best;
+    showIdx(best);
   });
   svg.addEventListener("pointerleave", hide);
-  svg.addEventListener("focus", () => showAt(stamps[focusIdx]));
+  svg.addEventListener("focus", () => showIdx(focusIdx));
   svg.addEventListener("blur", hide);
   svg.addEventListener("keydown", (ev) => {
     if (ev.key === "ArrowLeft") focusIdx = Math.max(0, focusIdx - 1);
     else if (ev.key === "ArrowRight") focusIdx = Math.min(stamps.length - 1, focusIdx + 1);
     else return;
     ev.preventDefault();
-    showAt(stamps[focusIdx]);
+    showIdx(focusIdx);
   });
   card.appendChild(svg);
 }
@@ -562,10 +571,7 @@ async function initRunBrowser() {
   const benchSel = document.getElementById("run-bench");
   const engineSel = document.getElementById("run-engine");
   let runs = [];
-  try {
-    const resp = await fetch("data/runs.json", { cache: "no-store" });
-    if (resp.ok) runs = await resp.json();
-  } catch { /* no archive yet */ }
+  try { runs = await fetchJson("data/runs.json"); } catch { /* no archive yet */ }
   runs = [...runs].reverse();
   for (const r of runs) {
     const label = `${fmtTime(new Date(r.ts))}${r.artifacts.includes("recall.json") ? " (fresh + company)" : ""}`;
@@ -580,16 +586,28 @@ async function initRunBrowser() {
   rerender();
 }
 
-function renderAll(latestCompanyfill) {
-  const rows = inRange(history);
-  renderTiles(rows);
+function drawCharts(rows) {
+  // the pipeline publishes the RBP ceiling with every row — don't hardcode it
+  const ceiling = rows.filter((r) => r.bench === "freshstream").at(-1)?.rbp_max;
   drawChart(document.getElementById("card-rbp"), seriesFor("freshstream", "rbp", rows),
-    { domain: [0, 0.7], ticks: [0, 0.2, 0.4, 0.6], ceiling: 0.672, label: "RBP at 5 over time per engine" });
+    { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine" });
   drawChart(document.getElementById("card-recall"), seriesFor("companyfill", "recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
-  renderHistoryTable(rows);
+}
+
+function refreshHistoryTable() {
+  if (document.getElementById("history-details").open) {
+    renderHistoryTable(inRange(history));
+  }
+}
+
+function renderAll(latestCompanyfill) {
+  const rows = inRange(history);
+  renderTiles(rows);
+  drawCharts(rows);
+  refreshHistoryTable();
   renderFields(latestCompanyfill);
 }
 
@@ -602,17 +620,13 @@ async function main() {
     legend.appendChild(item);
   }
 
-  let latestCompanyfill = null;
-  try {
-    const resp = await fetch("data/history.jsonl", { cache: "no-store" });
-    if (resp.ok) {
-      history = (await resp.text()).split("\n").filter(Boolean).map((l) => JSON.parse(l));
-    }
-  } catch { /* first deploy: no data yet */ }
-  try {
-    const resp = await fetch("data/latest_companyfill.json", { cache: "no-store" });
-    if (resp.ok) latestCompanyfill = await resp.json();
-  } catch { /* ignore */ }
+  const [histText, latestCompanyfill] = await Promise.all([
+    fetch("data/history.jsonl", { cache: "no-store" })
+      .then((r) => (r.ok ? r.text() : ""))
+      .catch(() => ""),
+    fetchJson("data/latest_companyfill.json").catch(() => null),
+  ]);
+  history = histText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
 
   if (history.length) {
     const lastTs = history[history.length - 1].ts;
@@ -633,10 +647,11 @@ async function main() {
 
   renderAll(latestCompanyfill);
   initRunBrowser();
+  document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => renderAll(latestCompanyfill), 150);
+    resizeTimer = setTimeout(() => drawCharts(inRange(history)), 150);
   });
 }
 main();

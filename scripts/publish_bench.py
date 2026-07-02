@@ -16,6 +16,8 @@ from pathlib import Path
 
 import fire
 
+from keenbench.shared.io import write_json
+
 
 def freshstream_rows(report: dict, ts: str) -> list[dict]:
     return [
@@ -85,10 +87,7 @@ def publish(
         raw = Path(path).read_text(encoding="utf-8")
         report = json.loads(raw)
         rows.extend(to_rows(report, ts))
-        (data / latest).write_text(
-            json.dumps(slim_report(report), ensure_ascii=False, indent=2) + "\n",
-            encoding="utf-8",
-        )
+        write_json(slim_report(report), str(data / latest))
         (run_dir / archive_name).write_text(raw, encoding="utf-8")
     for path, archive_name in ((fresh, "fresh.jsonl"), (gold, "gold.jsonl")):
         if path:
@@ -101,7 +100,7 @@ def publish(
     index_path = data / "runs.json"
     runs = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []
     runs.append({"id": run_id, "ts": ts, "artifacts": sorted(p.name for p in run_dir.iterdir())})
-    index_path.write_text(json.dumps(runs, indent=2) + "\n", encoding="utf-8")
+    write_json(runs, str(index_path))
     print(f"appended {len(rows)} rows at {ts}; staged {run_id}")
 
 
