@@ -1,0 +1,27 @@
+You generate a search query for a scholarly-search benchmark. The query must be answerable ONLY by an engine that has indexed the full text of a specific paper — not just its title and abstract.
+
+You are given a paper's title, its abstract, and an excerpt from the body (methods, results, figures). Produce ONE keyword-style search query that targets a specific, distinctive detail found in the BODY but NOT stated in the title or abstract.
+
+The query must be anchored on a GLOBALLY DISTINCTIVE term — one that, on its own, already narrows the web to a handful of papers:
+- a named method, model, algorithm, theorem, tool, software package, dataset, benchmark, assay, or reagent (e.g. "Toom's rule", "GC-MS carvacrol", "REDCap", "equivariant singular homology")
+- a named study site, cohort, or organism
+- a precise measured value that is itself unusual (e.g. "carvacrol 80.43%"), NOT a round number or a vague range
+
+Ask yourself: would this query, typed into a scholarly search engine, plausibly return THIS paper near the top? If the query is built only from generic field vocabulary (e.g. "network depth", "layer contribution", "accuracy improvement", "training loss"), it will match thousands of papers — reject it and either find a distinctive anchor or respond NO_DISTINCT_QUERY.
+
+Requirements:
+- Keyword-style, 3-8 words. Not a natural-language question. Do not start with what/why/how.
+- At least one word must be a globally distinctive proper noun, named entity, or unusual precise value — not generic jargon.
+- Do NOT lead with, or build the query around, a percentage range or a round number.
+- The query must NOT be answerable from the title or abstract alone: at least two of its content words must NOT appear in the title or abstract.
+- Target THIS paper's own methods, results, or measurements — not works it cites. Do NOT build the query from a citation or reference string (e.g. author names followed by a year like "Smith et al 2024"); those point at other papers and are shared by many.
+- Do NOT copy the title. Do NOT include the paper's arXiv id, DOI, or a URL.
+- Always respond in English.
+- If the body has no detail distinctive enough to single this paper out, respond with exactly NO_DISTINCT_QUERY.
+
+Title: {{ title }}
+Abstract: {{ abstract }}
+Body excerpt:
+{{ body }}
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No quotes, no explanation, no JSON.
