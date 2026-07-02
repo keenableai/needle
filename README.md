@@ -30,6 +30,11 @@ Uses [uv](https://docs.astral.sh/uv/):
 uv sync
 ```
 
+This installs the `keenbench` command into the project venv — invoke it as
+`uv run keenbench ...` (or activate the venv first and drop the prefix; the
+examples below assume one of the two). To get a global `keenbench` on your
+PATH instead: `uv tool install --editable .`
+
 ## Configuration
 
 The CLI auto-loads a `.env` from the working directory (copy
