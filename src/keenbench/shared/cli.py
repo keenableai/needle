@@ -32,16 +32,9 @@ def sample_or_exit(
 def build_clients_or_exit(
     engines: str | tuple[str, ...],
     *,
-    keenable_mode: str,
-    exa_concurrency: int,
     snippet_chars: int,
 ) -> dict[str, SearchClient]:
     try:
-        return build_search_clients(
-            parse_csv(engines),
-            keenable_mode=keenable_mode,
-            exa_concurrency=exa_concurrency,
-            exa_highlight_chars=snippet_chars,
-        )
+        return build_search_clients(parse_csv(engines), snippet_chars=snippet_chars)
     except ValueError as exc:
         raise SystemExit(f"error: {exc}") from exc
