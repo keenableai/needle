@@ -22,6 +22,7 @@ Requirements:
 - Do NOT reference the paper's own figures, tables, sections, theorems, or supplementary material by number (e.g. "Table 3", "Figure 2", "Theorem 7.1", "Supplementary Table") — those are internal pointers, not searchable content.
 - Do NOT copy the title. Do NOT include the paper's arXiv id, DOI, or a URL.
 - Always respond in English.
+- If ONE distinctive multi-word span (3-6 words) appears VERBATIM in the body excerpt, wrap exactly that span in double quotes so exact-match engines can phrase-match it; copy it character-for-character from the body. Leave the rest of the query unquoted. If no distinctive verbatim span exists, use no quotes.
 - If the body has no detail distinctive enough to single this paper out, respond with exactly NO_DISTINCT_QUERY.
 
 Title: {{ title }}
@@ -29,4 +30,4 @@ Abstract: {{ abstract }}
 Body excerpt:
 {{ body }}
 
-Respond with ONLY the query string (or NO_DISTINCT_QUERY). No quotes, no explanation, no JSON.
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.
