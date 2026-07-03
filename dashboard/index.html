@@ -369,27 +369,25 @@ function seriesFor(bench, metric, rows) {
 
 const WINDOW_MS = 6 * 3600e3;
 
-function bucketSeries(series, windowMs) {
+function bucketSeries(series) {
   const out = {};
   for (const e of ENGINES) {
     const buckets = new Map();
     for (const p of series[e]) {
-      const b = Math.floor(p.t.getTime() / windowMs) * windowMs;
+      const b = Math.floor(p.t.getTime() / WINDOW_MS) * WINDOW_MS;
       const agg = buckets.get(b) || { sum: 0, n: 0 };
       agg.sum += p.v;
       agg.n++;
       buckets.set(b, agg);
     }
-    out[e] = [...buckets]
-      .sort((a, b) => a[0] - b[0])
-      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
+    out[e] = [...buckets].map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
   }
   return out;
 }
 
-function inRange(rows) {
-  if (rangeMs === Infinity) return rows;
-  const cutoff = Date.now() - rangeMs;
+function inRange(rows, ms = rangeMs) {
+  if (ms === Infinity) return rows;
+  const cutoff = Date.now() - ms;
   return rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
 }
 
@@ -916,7 +914,7 @@ async function initRunBrowser() {
 
 function drawCharts(rows) {
   const ceiling = rows.filter((r) => r.bench === "freshstream").at(-1)?.rbp_max;
-  drawChart(document.getElementById("card-rbp"), bucketSeries(seriesFor("freshstream", "rbp", rows), WINDOW_MS),
+  drawChart(document.getElementById("card-rbp"), bucketSeries(seriesFor("freshstream", "rbp", rows)),
     { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine, 6-hour means" });
   drawChart(document.getElementById("card-recall"), seriesFor("companyfill", "recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
@@ -927,7 +925,7 @@ function drawCharts(rows) {
   drawChart(document.getElementById("card-scholar-body"), seriesFor("scholar", "body_recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar body-query recall at 10 over time per engine" });
   for (const [metric, name] of [["p50_ms", "p50"], ["p95_ms", "p95"]]) {
-    const lat = bucketSeries(seriesFor(null, metric, rows), WINDOW_MS);
+    const lat = bucketSeries(seriesFor(null, metric, rows));
     const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((p) => p.v))));
     drawChart(document.getElementById(`card-latency-${name}`), lat,
       { domain: sc.domain, ticks: sc.ticks, fmt: fmtMs, tickFmt: fmtMs, left: 56,
@@ -944,8 +942,6 @@ function refreshHistoryTable() {
 
 function renderAll(latestCompanyfill) {
   const rows = inRange(history);
-  const cutoff = Date.now() - 7 * 86400e3;
-  renderLeaderboards(history.filter((r) => new Date(r.ts).getTime() >= cutoff));
   drawCharts(rows);
   refreshHistoryTable();
   renderFields(latestCompanyfill);
@@ -995,6 +991,7 @@ async function main() {
     filters.appendChild(btn);
   }
 
+  renderLeaderboards(inRange(history, 7 * 86400e3));
   renderAll(latestCompanyfill);
   renderOverlap(overlapRows);
   initRunBrowser();
