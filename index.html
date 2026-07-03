@@ -131,6 +131,9 @@
   .tooltip .row .val { font-weight: 600; }
   .tooltip .row .name { color: var(--text-secondary); }
 
+  .home { background: color-mix(in srgb, var(--home, transparent) 12%, transparent); }
+  td.home, th.home { border-radius: 4px; }
+
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
   th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--grid); }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
@@ -353,6 +356,11 @@ function registerEngines(names) {
 function colorOf(engine) {
   const slot = ENGINE_SLOT.get(engine);
   return slot == null || slot >= 8 ? "var(--text-muted)" : `var(--series-${slot + 1})`;
+}
+
+const HOME_ENGINE = "keenable";
+function markHome(node, engine) {
+  if (engine === HOME_ENGINE) node.classList.add("home");
 }
 const RANGES = [["24h", 24 * 3600e3], ["7d", 7 * 86400e3], ["30d", 30 * 86400e3], ["All", Infinity]];
 let rangeMs = Infinity;
@@ -627,6 +635,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   table.appendChild(head);
   for (const [i, x] of entries.entries()) {
     const tr = el("tr");
+    markHome(tr, x.e);
     const best = i === 0 && entries.length > 1 ? " best" : "";
     const nameCell = el("td", { class: best });
     const key = el("span", { class: "key" });
@@ -668,7 +677,11 @@ function renderFields(latest) {
   const head = el("tr");
   head.appendChild(el("th", {}, "field"));
   head.appendChild(el("th", { class: "num" }, "n"));
-  for (const e of engines) head.appendChild(el("th", { class: "num" }, e));
+  for (const e of engines) {
+    const th = el("th", { class: "num" }, e);
+    markHome(th, e);
+    head.appendChild(th);
+  }
   table.appendChild(head);
   for (const f of fields) {
     const tr = el("tr");
@@ -677,8 +690,10 @@ function renderFields(latest) {
     tr.appendChild(el("td", { class: "num" }, n ?? "–"));
     const vals = engines.map((e) => latest.engines[e].by_field?.[f]?.recall_at_k);
     const best = Math.max(...vals.filter((v) => v != null));
-    for (const v of vals) {
-      tr.appendChild(el("td", { class: "num" + (v === best && vals.filter((q) => q === best).length === 1 ? " best" : "") }, v == null ? "–" : v.toFixed(2)));
+    for (const [j, v] of vals.entries()) {
+      const td = el("td", { class: "num" + (v === best && vals.filter((q) => q === best).length === 1 ? " best" : "") }, v == null ? "–" : v.toFixed(2));
+      markHome(td, engines[j]);
+      tr.appendChild(td);
     }
     table.appendChild(tr);
   }
@@ -698,6 +713,7 @@ function renderHistoryTable(rows) {
     const metrics = r.bench === "freshstream" ? [["RBP@5", r.rbp]] : [["recall@5", r.recall], ["MRR@5", r.mrr]];
     for (const [name, v] of metrics) {
       const tr = el("tr");
+      markHome(tr, r.engine);
       tr.appendChild(el("td", {}, fmtTime(new Date(r.ts))));
       tr.appendChild(el("td", {}, r.bench));
       tr.appendChild(el("td", {}, r.engine));
@@ -731,6 +747,7 @@ function overlapMatrix(holder, engines, cellFor) {
   head.appendChild(el("th", {}, ""));
   for (const e of engines) {
     const th = el("th", { class: "col" });
+    markHome(th, e);
     th.appendChild(el("span", {}, e));
     head.appendChild(th);
   }
@@ -738,6 +755,7 @@ function overlapMatrix(holder, engines, cellFor) {
   for (const a of engines) {
     const tr = el("tr");
     const nameCell = el("td");
+    markHome(nameCell, a);
     const key = el("span", { class: "key" });
     key.style.background = colorOf(a);
     nameCell.append(key, document.createTextNode(a));
@@ -835,6 +853,7 @@ function renderUniqueness(rows) {
     const { unique, total } = agg.get(e);
     const pct = unique / total;
     const tr = el("tr");
+    markHome(tr, e);
     const nameCell = el("td");
     const key = el("span", { class: "key" });
     key.style.background = colorOf(e);
@@ -1104,6 +1123,7 @@ async function main() {
   history = histRows;
   registerEngines(history.map((r) => r.engine));
   registerEngines(Object.keys(latestCompanyfill?.engines || {}));
+  document.documentElement.style.setProperty("--home", colorOf(HOME_ENGINE));
   renderLegend();
 
   if (history.length) {
