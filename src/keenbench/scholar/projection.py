@@ -115,11 +115,13 @@ def clean_body_query(text: str | None) -> str | None:
     return cleaned
 
 
+def body_has_bad_anchor(query: str) -> bool:
+    return bool(_BAD_ANCHOR_RE.search(query))
+
+
 def body_query_ok(query: str, *, title: str, abstract: str) -> bool:
     q_tokens = content_tokens(query)
     if len(query.split()) < MIN_QUERY_WORDS or not q_tokens:
-        return False
-    if _BAD_ANCHOR_RE.search(query):
         return False
     metadata = content_tokens(title) | content_tokens(abstract)
     novel = q_tokens - metadata

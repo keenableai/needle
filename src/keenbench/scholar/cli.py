@@ -17,6 +17,15 @@ from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
 KNOWN_SUITES = ("arxiv", "europepmc")
 
 
+def _as_obj(value: object) -> object:
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return None
+    return value
+
+
 def _load_gold_rows(path: str) -> list[dict]:
     try:
         lines = Path(path).read_text(encoding="utf-8").splitlines()
@@ -28,31 +37,16 @@ def _load_gold_rows(path: str) -> list[dict]:
         line = line.strip()
         if not line:
             continue
-        try:
-            obj = json.loads(line)
-        except json.JSONDecodeError:
-            malformed += 1
-            continue
+        obj = _as_obj(line)
         if not isinstance(obj, dict) or not obj.get("query_text"):
             continue
-        gold = obj.get("gold")
-        if isinstance(gold, str):
-            try:
-                gold = json.loads(gold)
-            except json.JSONDecodeError:
-                malformed += 1
-                continue
+        gold = _as_obj(obj.get("gold"))
         ids = gold.get("ids") if isinstance(gold, dict) else None
         if not isinstance(ids, dict) or not ids:
             malformed += 1
             continue
         obj["gold"] = gold
-        origin = obj.get("query_origin")
-        if isinstance(origin, str):
-            try:
-                origin = json.loads(origin)
-            except json.JSONDecodeError:
-                origin = {}
+        origin = _as_obj(obj.get("query_origin"))
         obj["query_origin"] = origin if isinstance(origin, dict) else {}
         rows.append(obj)
     if malformed:
@@ -138,8 +132,8 @@ class Scholar:
             f"papers (title={stats.title_rows}, body={stats.body_rows}; "
             f"{stats.candidates} candidates; generic_title={stats.generic_title}; "
             f"body drops: fetch={stats.body_fetch_fail}, no_query={stats.body_no_query}, "
-            f"leak={stats.body_leak_rejected}, llm_err={stats.llm_errors}; "
-            f"short_cells={stats.short_cells})",
+            f"bad_anchor={stats.body_bad_anchor}, leak={stats.body_leak_rejected}, "
+            f"llm_err={stats.llm_errors}; short_cells={stats.short_cells})",
             file=sys.stderr,
         )
 

@@ -303,8 +303,12 @@ different-but-relevant paper scores a miss — that's correct for "find this
 paper," not a measure of scholarly-search quality. Publisher landing pages that
 carry no inline identifier (ScienceDirect PII, Nature short-form) yield no
 extractable id, making recall a *lower bound*, applied symmetrically across
-engines. And the keyless `keenable` endpoint returns degraded results under the
-burst load of a full run, so a batch number undercounts it — score it with a
+engines. The title-specificity gate that drops too-generic titles at generation
+is a *lexical* heuristic (distinctive token — acronym / digit / camelCase /
+hyphenated compound — or enough content words), so a generic-but-acronymed title
+can still slip through and a distinctive short all-lowercase one can be dropped.
+And the keyless `keenable` endpoint returns degraded results under the burst
+load of a full run, so a batch number undercounts it — score it with a
 `KEENABLE_API_KEY`, or pin the raw results, before comparing.
 
 ## Shared infrastructure

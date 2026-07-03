@@ -4,6 +4,7 @@ from typing import Any
 
 from keenbench.scholar.models import AGE_BANDS, Paper, build_gold_row
 from keenbench.scholar.projection import (
+    body_has_bad_anchor,
     body_query_ok,
     build_body_prompt,
     clean_body_query,
@@ -27,6 +28,7 @@ _DROP_STAT = {
     "fetch": "body_fetch_fail",
     "llm_error": "llm_errors",
     "no_query": "body_no_query",
+    "bad_anchor": "body_bad_anchor",
     "leak": "body_leak_rejected",
 }
 
@@ -46,6 +48,7 @@ class GenStats:
     body_rows: int = 0
     body_fetch_fail: int = 0
     body_no_query: int = 0
+    body_bad_anchor: int = 0
     body_leak_rejected: int = 0
     llm_errors: int = 0
     generic_title: int = 0
@@ -139,13 +142,15 @@ async def run_generate(
     candidates: list[Candidate] = []
     for cell, papers in zip(cells, candidate_lists, strict=True):
         for paper in papers:
-            title_query = degrade_title(paper.title)
-            if not title_query or not paper.ids or paper.paper_key in seen_keys:
+            if paper.paper_key in seen_keys:
                 continue
+            title_query = degrade_title(paper.title)
+            if not title_query or not paper.ids:
+                continue
+            seen_keys.add(paper.paper_key)
             if not title_is_specific(paper.title):
                 stats.generic_title += 1
                 continue
-            seen_keys.add(paper.paper_key)
             candidates.append(Candidate(cell, replace(paper, domain=cell[0]), title_query))
     stats.candidates = len(candidates)
 
@@ -158,6 +163,8 @@ async def run_generate(
             return cand, None, "llm_error"
         if query is None:
             return cand, None, "no_query"
+        if body_has_bad_anchor(query):
+            return cand, None, "bad_anchor"
         if not body_query_ok(query, title=cand.paper.title, abstract=cand.paper.abstract):
             return cand, None, "leak"
         return cand, query, None
