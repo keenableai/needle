@@ -150,8 +150,8 @@
     <h1>keenbench — search engine benchmarks</h1>
     <p>Hourly search-engine benchmarks from
       <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.
-      freshstream runs hourly (RBP@5, LLM judge); companyfill daily
-      (answer-recall@5, deterministic). All times UTC.
+      freshstream runs hourly (RBP@5, LLM judge); companyfill and scholar
+      daily (deterministic recall). All times UTC.
       <span id="updated"></span></p>
   </header>
 
@@ -192,6 +192,29 @@
     <h2>companyfill — recall@5 by field (latest run)</h2>
     <div class="sub" id="fields-sub"></div>
     <div id="fields-table"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>scholar — latest run</h2>
+      <div class="sub" id="lb-scholar-sub"></div>
+      <div id="lb-scholar"></div>
+    </div>
+    <div class="card" id="card-scholar-shallow">
+      <h2>scholar — shallow-index rate</h2>
+      <div class="sub">share of title-found papers missed on the body query; lower = deeper full-text index</div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" id="card-scholar-recall">
+      <h2>scholar — recall@10</h2>
+      <div class="sub">known-item paper retrieval, title + body queries</div>
+    </div>
+    <div class="card" id="card-scholar-body">
+      <h2>scholar — body-query recall@10</h2>
+      <div class="sub">papers found by a full-text-only detail</div>
+    </div>
   </div>
 
   <div class="card" id="card-runs">
@@ -438,6 +461,11 @@ function renderLeaderboards(rows) {
     ["recall", "recall@5"],
     ["mrr", "MRR@5"],
   ]);
+  renderLeaderboard("lb-scholar", "lb-scholar-sub", rows, "scholar", [
+    ["recall", "recall@10"],
+    ["mrr", "MRR@10"],
+    ["shallow_index", "shallow-idx"],
+  ]);
 }
 
 function renderFields(latest) {
@@ -654,6 +682,12 @@ function drawCharts(rows) {
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
+  drawChart(document.getElementById("card-scholar-recall"), seriesFor("scholar", "recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar recall at 10 over time per engine" });
+  drawChart(document.getElementById("card-scholar-body"), seriesFor("scholar", "body_recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar body-query recall at 10 over time per engine" });
+  drawChart(document.getElementById("card-scholar-shallow"), seriesFor("scholar", "shallow_index", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar shallow-index rate over time per engine" });
 }
 
 function refreshHistoryTable() {

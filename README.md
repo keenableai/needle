@@ -385,9 +385,9 @@ method satisfies the `LLMClient` protocol. The ranking harness is
 
 ## Continuous benchmarks
 
-[`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule
-against `keenable,exa`: freshstream hourly (`--limit 20`), companyfill daily at
-00:17 UTC (fresh gold, `--limit 100`). Each run:
+[`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule:
+freshstream hourly (`--limit 20`), and companyfill + scholar daily at 00:17 UTC
+(fresh gold each — companyfill `--limit 100`, scholar `--per-cell 7`). Each run:
 
 - appends summary rows to `data/history.jsonl` on the `gh-pages` branch —
   rendered as a dashboard (trends, latest tiles, per-field table, judgement
