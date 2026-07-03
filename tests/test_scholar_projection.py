@@ -3,7 +3,27 @@ from keenbench.scholar.projection import (
     clean_body_query,
     content_tokens,
     degrade_title,
+    title_is_specific,
 )
+
+
+def test_title_is_specific():
+    # generic short titles: no distinctive token, too few content words
+    assert not title_is_specific("Temperature Measurement in Agent Systems")
+    assert not title_is_specific("A Study of Neural Networks")
+    # acronyms / coined names / digits / camelcase keep it
+    assert title_is_specific("VT-WAM: Visual-Tactile World Action Model")
+    assert title_is_specific("WorldDirector Building Controllable World Simulators")
+    assert title_is_specific("DNABERT-2 for 5500 bp Sequences")
+    assert title_is_specific("PointDiT Pixel-Space Diffusion")
+    # hyphenated compound coinages are distinctive even in title case
+    assert title_is_specific("A Cap-Axis Integral Diagnostic of Factor Models")
+    assert title_is_specific("Mixture-Preserving Interpolation for Volatility Models")
+    # long descriptive titles pass on content-word count alone
+    assert title_is_specific(
+        "association between systemic inflammation indices and recurrence risk "
+        "in primary budd chiari syndrome"
+    )
 
 
 def test_degrade_title():

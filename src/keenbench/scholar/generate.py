@@ -8,6 +8,7 @@ from keenbench.scholar.projection import (
     build_body_prompt,
     clean_body_query,
     degrade_title,
+    title_is_specific,
 )
 from keenbench.scholar.sources import ArxivClient, EuropePmcClient
 from keenbench.shared.concurrency import bounded_gather
@@ -47,6 +48,7 @@ class GenStats:
     body_no_query: int = 0
     body_leak_rejected: int = 0
     llm_errors: int = 0
+    generic_title: int = 0
     short_cells: int = 0
 
 
@@ -139,6 +141,9 @@ async def run_generate(
         for paper in papers:
             title_query = degrade_title(paper.title)
             if not title_query or not paper.ids or paper.paper_key in seen_keys:
+                continue
+            if not title_is_specific(paper.title):
+                stats.generic_title += 1
                 continue
             seen_keys.add(paper.paper_key)
             candidates.append(Candidate(cell, replace(paper, domain=cell[0]), title_query))

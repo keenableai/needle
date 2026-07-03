@@ -136,9 +136,10 @@ class Scholar:
         print(
             f"scholar: {stats.title_rows + stats.body_rows} queries from {stats.papers} paired "
             f"papers (title={stats.title_rows}, body={stats.body_rows}; "
-            f"{stats.candidates} candidates; body drops: fetch={stats.body_fetch_fail}, "
-            f"no_query={stats.body_no_query}, leak={stats.body_leak_rejected}, "
-            f"llm_err={stats.llm_errors}; short_cells={stats.short_cells})",
+            f"{stats.candidates} candidates; generic_title={stats.generic_title}; "
+            f"body drops: fetch={stats.body_fetch_fail}, no_query={stats.body_no_query}, "
+            f"leak={stats.body_leak_rejected}, llm_err={stats.llm_errors}; "
+            f"short_cells={stats.short_cells})",
             file=sys.stderr,
         )
 

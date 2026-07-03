@@ -8,6 +8,7 @@ BODY_EXCERPT_CHARS = 6000
 MIN_TITLE_WORDS = 4
 MIN_QUERY_WORDS = 3
 MIN_NOVEL_TOKENS = 2
+MIN_SPECIFIC_CONTENT = 5
 
 STOPWORDS = frozenset(
     {
@@ -72,6 +73,7 @@ STOPWORDS = frozenset(
 _TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9\-]*")
 _LATEX_RE = re.compile(r"\$[^$]*\$|\\[a-zA-Z]+\{[^}]*\}|\\[a-zA-Z]+")
 _PUNCT_RE = re.compile(r"[^a-zA-Z0-9\s\-]")
+_DISTINCTIVE_RE = re.compile(r"\d|[A-Z]{2,}|[a-z][A-Z]|[A-Za-z]{3,}-[A-Za-z]{3,}")
 
 
 def _tokens(text: str) -> list[str]:
@@ -89,6 +91,12 @@ def degrade_title(title: str) -> str | None:
     if len(words) < MIN_TITLE_WORDS:
         return None
     return " ".join(words)
+
+
+def title_is_specific(title: str) -> bool:
+    if _DISTINCTIVE_RE.search(title):
+        return True
+    return len(content_tokens(title)) >= MIN_SPECIFIC_CONTENT
 
 
 def clean_body_query(text: str | None) -> str | None:
