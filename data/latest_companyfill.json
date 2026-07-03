@@ -2,16 +2,22 @@
   "num_queries": 100,
   "num_results": 5,
   "snippet_chars": 500,
-  "judged": false,
+  "judged": true,
   "engines": {
     "keenable": {
-      "recall_at_k": 0.9,
-      "mrr_at_k": 0.7165,
-      "num_scored": 100,
-      "search_errors": 0,
-      "judged_results": 0,
+      "recall_at_k": 0.9595959595959596,
+      "mrr_at_k": 0.7873737373737374,
+      "num_scored": 99,
+      "search_errors": 1,
+      "judged_results": 89,
       "judge_errors": 0,
-      "judge_upgrades": 0,
+      "judge_upgrades": 12,
+      "latency": {
+        "n": 99,
+        "mean_ms": 225.8,
+        "p50_ms": 204.7,
+        "p95_ms": 294.5
+      },
       "by_field": {
         "ceo": {
           "n": 9,
@@ -22,8 +28,8 @@
           "recall_at_k": 1.0
         },
         "founded_year": {
-          "n": 9,
-          "recall_at_k": 0.8888888888888888
+          "n": 8,
+          "recall_at_k": 1.0
         },
         "hq_country": {
           "n": 9,
@@ -31,15 +37,15 @@
         },
         "industry": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 0.7777777777777778
         },
         "lei": {
           "n": 9,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.8888888888888888
         },
         "net_income": {
           "n": 9,
-          "recall_at_k": 0.7777777777777778
+          "recall_at_k": 0.8888888888888888
         },
         "revenue": {
           "n": 8,
@@ -47,7 +53,7 @@
         },
         "stockholders_equity": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 1.0
         },
         "ticker": {
           "n": 8,
@@ -55,7 +61,7 @@
         },
         "total_assets": {
           "n": 8,
-          "recall_at_k": 0.875
+          "recall_at_k": 1.0
         },
         "website": {
           "n": 8,
@@ -64,37 +70,43 @@
       },
       "by_bucket": {
         "companyfill": {
-          "n": 66,
-          "recall_at_k": 0.9393939393939394
+          "n": 65,
+          "recall_at_k": 0.9538461538461539
         },
         "financials": {
           "n": 34,
-          "recall_at_k": 0.8235294117647058
+          "recall_at_k": 0.9705882352941176
         }
       },
       "by_freshness": {
         "1y": {
           "n": 48,
-          "recall_at_k": 0.875
+          "recall_at_k": 0.9791666666666666
         },
         "5y": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 0.7777777777777778
         },
         "static": {
-          "n": 43,
-          "recall_at_k": 0.9767441860465116
+          "n": 42,
+          "recall_at_k": 0.9761904761904762
         }
       }
     },
     "exa": {
-      "recall_at_k": 0.88,
-      "mrr_at_k": 0.6490000000000002,
+      "recall_at_k": 0.94,
+      "mrr_at_k": 0.7484999999999999,
       "num_scored": 100,
       "search_errors": 0,
-      "judged_results": 0,
+      "judged_results": 149,
       "judge_errors": 0,
-      "judge_upgrades": 0,
+      "judge_upgrades": 26,
+      "latency": {
+        "n": 100,
+        "mean_ms": 1205.0,
+        "p50_ms": 1137.9,
+        "p95_ms": 1899.0
+      },
       "by_field": {
         "ceo": {
           "n": 9,
@@ -106,7 +118,7 @@
         },
         "founded_year": {
           "n": 9,
-          "recall_at_k": 0.8888888888888888
+          "recall_at_k": 1.0
         },
         "hq_country": {
           "n": 9,
@@ -118,11 +130,11 @@
         },
         "lei": {
           "n": 9,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.8888888888888888
         },
         "net_income": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 0.8888888888888888
         },
         "revenue": {
           "n": 8,
@@ -130,7 +142,7 @@
         },
         "stockholders_equity": {
           "n": 9,
-          "recall_at_k": 0.5555555555555556
+          "recall_at_k": 1.0
         },
         "ticker": {
           "n": 8,
@@ -152,13 +164,13 @@
         },
         "financials": {
           "n": 34,
-          "recall_at_k": 0.7647058823529411
+          "recall_at_k": 0.9411764705882353
         }
       },
       "by_freshness": {
         "1y": {
           "n": 48,
-          "recall_at_k": 0.8333333333333334
+          "recall_at_k": 0.9583333333333334
         },
         "5y": {
           "n": 9,
@@ -171,17 +183,23 @@
       }
     },
     "google": {
-      "recall_at_k": 0.81,
-      "mrr_at_k": 0.6345000000000001,
+      "recall_at_k": 0.88,
+      "mrr_at_k": 0.7610000000000001,
       "num_scored": 100,
       "search_errors": 0,
-      "judged_results": 0,
+      "judged_results": 145,
       "judge_errors": 0,
-      "judge_upgrades": 0,
+      "judge_upgrades": 22,
+      "latency": {
+        "n": 100,
+        "mean_ms": 2431.6,
+        "p50_ms": 1926.8,
+        "p95_ms": 6231.4
+      },
       "by_field": {
         "ceo": {
           "n": 9,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.8888888888888888
         },
         "employees": {
           "n": 5,
@@ -189,15 +207,15 @@
         },
         "founded_year": {
           "n": 9,
-          "recall_at_k": 0.7777777777777778
+          "recall_at_k": 0.8888888888888888
         },
         "hq_country": {
           "n": 9,
-          "recall_at_k": 0.8888888888888888
+          "recall_at_k": 1.0
         },
         "industry": {
           "n": 9,
-          "recall_at_k": 0.5555555555555556
+          "recall_at_k": 0.6666666666666666
         },
         "lei": {
           "n": 9,
@@ -209,11 +227,11 @@
         },
         "revenue": {
           "n": 8,
-          "recall_at_k": 0.875
+          "recall_at_k": 1.0
         },
         "stockholders_equity": {
           "n": 9,
-          "recall_at_k": 0.2222222222222222
+          "recall_at_k": 0.6666666666666666
         },
         "ticker": {
           "n": 8,
@@ -231,40 +249,46 @@
       "by_bucket": {
         "companyfill": {
           "n": 66,
-          "recall_at_k": 0.8939393939393939
+          "recall_at_k": 0.9242424242424242
         },
         "financials": {
           "n": 34,
-          "recall_at_k": 0.6470588235294118
+          "recall_at_k": 0.7941176470588235
         }
       },
       "by_freshness": {
         "1y": {
           "n": 48,
-          "recall_at_k": 0.75
+          "recall_at_k": 0.8333333333333334
         },
         "5y": {
           "n": 9,
-          "recall_at_k": 0.5555555555555556
+          "recall_at_k": 0.6666666666666666
         },
         "static": {
           "n": 43,
-          "recall_at_k": 0.9302325581395349
+          "recall_at_k": 0.9767441860465116
         }
       }
     },
     "bing": {
       "recall_at_k": 0.83,
-      "mrr_at_k": 0.5825000000000002,
+      "mrr_at_k": 0.5731666666666668,
       "num_scored": 100,
       "search_errors": 0,
-      "judged_results": 0,
+      "judged_results": 181,
       "judge_errors": 0,
-      "judge_upgrades": 0,
+      "judge_upgrades": 6,
+      "latency": {
+        "n": 100,
+        "mean_ms": 2170.8,
+        "p50_ms": 1876.9,
+        "p95_ms": 4145.9
+      },
       "by_field": {
         "ceo": {
           "n": 9,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.8888888888888888
         },
         "employees": {
           "n": 5,
@@ -276,15 +300,15 @@
         },
         "hq_country": {
           "n": 9,
-          "recall_at_k": 0.7777777777777778
+          "recall_at_k": 0.8888888888888888
         },
         "industry": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 0.7777777777777778
         },
         "lei": {
           "n": 9,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.8888888888888888
         },
         "net_income": {
           "n": 9,
@@ -292,11 +316,11 @@
         },
         "revenue": {
           "n": 8,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.875
         },
         "stockholders_equity": {
           "n": 9,
-          "recall_at_k": 0.2222222222222222
+          "recall_at_k": 0.3333333333333333
         },
         "ticker": {
           "n": 8,
@@ -324,11 +348,11 @@
       "by_freshness": {
         "1y": {
           "n": 48,
-          "recall_at_k": 0.7708333333333334
+          "recall_at_k": 0.75
         },
         "5y": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 0.7777777777777778
         },
         "static": {
           "n": 43,
@@ -337,17 +361,23 @@
       }
     },
     "brave": {
-      "recall_at_k": 0.83,
-      "mrr_at_k": 0.6535000000000002,
+      "recall_at_k": 0.87,
+      "mrr_at_k": 0.6435000000000002,
       "num_scored": 100,
       "search_errors": 0,
-      "judged_results": 0,
+      "judged_results": 154,
       "judge_errors": 0,
-      "judge_upgrades": 0,
+      "judge_upgrades": 7,
+      "latency": {
+        "n": 100,
+        "mean_ms": 505.9,
+        "p50_ms": 499.8,
+        "p95_ms": 694.0
+      },
       "by_field": {
         "ceo": {
           "n": 9,
-          "recall_at_k": 1.0
+          "recall_at_k": 0.8888888888888888
         },
         "employees": {
           "n": 5,
@@ -359,15 +389,15 @@
         },
         "hq_country": {
           "n": 9,
-          "recall_at_k": 0.8888888888888888
+          "recall_at_k": 1.0
         },
         "industry": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
+          "recall_at_k": 0.8888888888888888
         },
         "lei": {
           "n": 9,
-          "recall_at_k": 0.7777777777777778
+          "recall_at_k": 0.8888888888888888
         },
         "net_income": {
           "n": 9,
@@ -379,7 +409,96 @@
         },
         "stockholders_equity": {
           "n": 9,
-          "recall_at_k": 0.2222222222222222
+          "recall_at_k": 0.3333333333333333
+        },
+        "ticker": {
+          "n": 8,
+          "recall_at_k": 1.0
+        },
+        "total_assets": {
+          "n": 8,
+          "recall_at_k": 0.75
+        },
+        "website": {
+          "n": 8,
+          "recall_at_k": 1.0
+        }
+      },
+      "by_bucket": {
+        "companyfill": {
+          "n": 66,
+          "recall_at_k": 0.9393939393939394
+        },
+        "financials": {
+          "n": 34,
+          "recall_at_k": 0.7352941176470589
+        }
+      },
+      "by_freshness": {
+        "1y": {
+          "n": 48,
+          "recall_at_k": 0.7916666666666666
+        },
+        "5y": {
+          "n": 9,
+          "recall_at_k": 0.8888888888888888
+        },
+        "static": {
+          "n": 43,
+          "recall_at_k": 0.9534883720930233
+        }
+      }
+    },
+    "parallel": {
+      "recall_at_k": 0.77,
+      "mrr_at_k": 0.6060000000000001,
+      "num_scored": 100,
+      "search_errors": 0,
+      "judged_results": 197,
+      "judge_errors": 0,
+      "judge_upgrades": 11,
+      "latency": {
+        "n": 100,
+        "mean_ms": 875.8,
+        "p50_ms": 823.7,
+        "p95_ms": 1312.5
+      },
+      "by_field": {
+        "ceo": {
+          "n": 9,
+          "recall_at_k": 1.0
+        },
+        "employees": {
+          "n": 5,
+          "recall_at_k": 1.0
+        },
+        "founded_year": {
+          "n": 9,
+          "recall_at_k": 1.0
+        },
+        "hq_country": {
+          "n": 9,
+          "recall_at_k": 1.0
+        },
+        "industry": {
+          "n": 9,
+          "recall_at_k": 0.4444444444444444
+        },
+        "lei": {
+          "n": 9,
+          "recall_at_k": 0.7777777777777778
+        },
+        "net_income": {
+          "n": 9,
+          "recall_at_k": 0.3333333333333333
+        },
+        "revenue": {
+          "n": 8,
+          "recall_at_k": 0.5
+        },
+        "stockholders_equity": {
+          "n": 9,
+          "recall_at_k": 0.5555555555555556
         },
         "ticker": {
           "n": 8,
@@ -401,189 +520,113 @@
         },
         "financials": {
           "n": 34,
-          "recall_at_k": 0.7058823529411765
+          "recall_at_k": 0.5294117647058824
         }
       },
       "by_freshness": {
         "1y": {
           "n": 48,
-          "recall_at_k": 0.7916666666666666
+          "recall_at_k": 0.6666666666666666
         },
         "5y": {
           "n": 9,
-          "recall_at_k": 0.6666666666666666
-        },
-        "static": {
-          "n": 43,
-          "recall_at_k": 0.9069767441860465
-        }
-      }
-    },
-    "parallel": {
-      "recall_at_k": 0.7,
-      "mrr_at_k": 0.5348333333333334,
-      "num_scored": 100,
-      "search_errors": 0,
-      "judged_results": 0,
-      "judge_errors": 0,
-      "judge_upgrades": 0,
-      "by_field": {
-        "ceo": {
-          "n": 9,
-          "recall_at_k": 1.0
-        },
-        "employees": {
-          "n": 5,
-          "recall_at_k": 1.0
-        },
-        "founded_year": {
-          "n": 9,
-          "recall_at_k": 0.7777777777777778
-        },
-        "hq_country": {
-          "n": 9,
-          "recall_at_k": 0.6666666666666666
-        },
-        "industry": {
-          "n": 9,
-          "recall_at_k": 0.5555555555555556
-        },
-        "lei": {
-          "n": 9,
-          "recall_at_k": 0.7777777777777778
-        },
-        "net_income": {
-          "n": 9,
-          "recall_at_k": 0.3333333333333333
-        },
-        "revenue": {
-          "n": 8,
-          "recall_at_k": 0.625
-        },
-        "stockholders_equity": {
-          "n": 9,
-          "recall_at_k": 0.3333333333333333
-        },
-        "ticker": {
-          "n": 8,
-          "recall_at_k": 1.0
-        },
-        "total_assets": {
-          "n": 8,
-          "recall_at_k": 0.5
-        },
-        "website": {
-          "n": 8,
-          "recall_at_k": 1.0
-        }
-      },
-      "by_bucket": {
-        "companyfill": {
-          "n": 66,
-          "recall_at_k": 0.8333333333333334
-        },
-        "financials": {
-          "n": 34,
-          "recall_at_k": 0.4411764705882353
-        }
-      },
-      "by_freshness": {
-        "1y": {
-          "n": 48,
-          "recall_at_k": 0.6041666666666666
-        },
-        "5y": {
-          "n": 9,
-          "recall_at_k": 0.5555555555555556
-        },
-        "static": {
-          "n": 43,
-          "recall_at_k": 0.8372093023255814
-        }
-      }
-    },
-    "tavily": {
-      "recall_at_k": 0.76,
-      "mrr_at_k": 0.6756666666666667,
-      "num_scored": 100,
-      "search_errors": 0,
-      "judged_results": 0,
-      "judge_errors": 0,
-      "judge_upgrades": 0,
-      "by_field": {
-        "ceo": {
-          "n": 9,
-          "recall_at_k": 1.0
-        },
-        "employees": {
-          "n": 5,
-          "recall_at_k": 1.0
-        },
-        "founded_year": {
-          "n": 9,
-          "recall_at_k": 0.8888888888888888
-        },
-        "hq_country": {
-          "n": 9,
-          "recall_at_k": 1.0
-        },
-        "industry": {
-          "n": 9,
-          "recall_at_k": 0.5555555555555556
-        },
-        "lei": {
-          "n": 9,
-          "recall_at_k": 0.8888888888888888
-        },
-        "net_income": {
-          "n": 9,
-          "recall_at_k": 0.6666666666666666
-        },
-        "revenue": {
-          "n": 8,
-          "recall_at_k": 0.5
-        },
-        "stockholders_equity": {
-          "n": 9,
-          "recall_at_k": 0.1111111111111111
-        },
-        "ticker": {
-          "n": 8,
-          "recall_at_k": 1.0
-        },
-        "total_assets": {
-          "n": 8,
-          "recall_at_k": 0.625
-        },
-        "website": {
-          "n": 8,
-          "recall_at_k": 1.0
-        }
-      },
-      "by_bucket": {
-        "companyfill": {
-          "n": 66,
-          "recall_at_k": 0.9090909090909091
-        },
-        "financials": {
-          "n": 34,
-          "recall_at_k": 0.47058823529411764
-        }
-      },
-      "by_freshness": {
-        "1y": {
-          "n": 48,
-          "recall_at_k": 0.625
-        },
-        "5y": {
-          "n": 9,
-          "recall_at_k": 0.5555555555555556
+          "recall_at_k": 0.4444444444444444
         },
         "static": {
           "n": 43,
           "recall_at_k": 0.9534883720930233
         }
       }
+    },
+    "tavily": {
+      "recall_at_k": 0.83,
+      "mrr_at_k": 0.7003333333333334,
+      "num_scored": 100,
+      "search_errors": 0,
+      "judged_results": 166,
+      "judge_errors": 0,
+      "judge_upgrades": 13,
+      "latency": {
+        "n": 100,
+        "mean_ms": 1281.0,
+        "p50_ms": 1057.2,
+        "p95_ms": 2115.1
+      },
+      "by_field": {
+        "ceo": {
+          "n": 9,
+          "recall_at_k": 0.8888888888888888
+        },
+        "employees": {
+          "n": 5,
+          "recall_at_k": 1.0
+        },
+        "founded_year": {
+          "n": 9,
+          "recall_at_k": 1.0
+        },
+        "hq_country": {
+          "n": 9,
+          "recall_at_k": 0.8888888888888888
+        },
+        "industry": {
+          "n": 9,
+          "recall_at_k": 0.7777777777777778
+        },
+        "lei": {
+          "n": 9,
+          "recall_at_k": 1.0
+        },
+        "net_income": {
+          "n": 9,
+          "recall_at_k": 0.7777777777777778
+        },
+        "revenue": {
+          "n": 8,
+          "recall_at_k": 0.875
+        },
+        "stockholders_equity": {
+          "n": 9,
+          "recall_at_k": 0.3333333333333333
+        },
+        "ticker": {
+          "n": 8,
+          "recall_at_k": 1.0
+        },
+        "total_assets": {
+          "n": 8,
+          "recall_at_k": 0.5
+        },
+        "website": {
+          "n": 8,
+          "recall_at_k": 1.0
+        }
+      },
+      "by_bucket": {
+        "companyfill": {
+          "n": 66,
+          "recall_at_k": 0.9393939393939394
+        },
+        "financials": {
+          "n": 34,
+          "recall_at_k": 0.6176470588235294
+        }
+      },
+      "by_freshness": {
+        "1y": {
+          "n": 48,
+          "recall_at_k": 0.7083333333333334
+        },
+        "5y": {
+          "n": 9,
+          "recall_at_k": 0.7777777777777778
+        },
+        "static": {
+          "n": 43,
+          "recall_at_k": 0.9767441860465116
+        }
+      }
     }
-  }
+  },
+  "judge_model": "google/gemini-3-flash-preview"
 }
