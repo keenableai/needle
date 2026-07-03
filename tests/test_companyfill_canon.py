@@ -124,12 +124,6 @@ def test_exact_id_lei_substring():
     assert not gold_in_text("exact_id", lei, text="LEI: 549300MLUDYVRQOOXS99")
 
 
-def test_list_industry_with_plural_tolerance():
-    assert gold_in_text("list", ["semiconductors"], text="leader in the semiconductor industry")
-    assert gold_in_text("list", ["consumer electronics", "software"], text="makes software")
-    assert not gold_in_text("list", ["semiconductors"], text="a retail chain")
-
-
 def test_entity_token_boundaries():
     assert gold_in_text("entity", "Apple Inc.", text="Apple company overview")
     assert not gold_in_text("entity", "Cook Industries", text="cooking supplies wholesale")

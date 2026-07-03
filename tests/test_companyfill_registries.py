@@ -5,7 +5,6 @@ from keenbench.companyfill.registries import (
     current_ceo,
     employees,
     founded_year,
-    industry_qids,
     latest_annual,
     lei,
     website,
@@ -32,7 +31,7 @@ def test_current_ceo_skips_ended_and_prefers_latest_start():
             _stmt({"id": "Q_MID"}, qualifiers=_time_qual("P580", "+2019-02-01T00:00:00Z")),
         ]
     }
-    assert current_ceo(claims) == "Q_NEW"
+    assert current_ceo(claims) == ("Q_NEW", 2023)
 
 
 def test_current_ceo_preferred_rank_wins():
@@ -42,15 +41,14 @@ def test_current_ceo_preferred_rank_wins():
             _stmt({"id": "Q_B"}, rank="preferred"),
         ]
     }
-    assert current_ceo(claims) == "Q_B"
-    assert current_ceo({}) is None
+    assert current_ceo(claims) == ("Q_B", None)
+    assert current_ceo({}) == (None, None)
 
 
 def test_scalar_extractors():
     claims = {
         "P571": [_stmt({"time": "+1993-04-05T00:00:00Z"})],
         "P856": [_stmt("https://www.nvidia.com/")],
-        "P452": [_stmt({"id": "Q_IND"})],
         "P1278": [_stmt("549300MLUDYVRQOOXS22")],
         "P1128": [
             _stmt({"amount": "+22473"}, qualifiers=_time_qual("P585", "+2021-01-01T00:00:00Z")),
@@ -59,7 +57,6 @@ def test_scalar_extractors():
     }
     assert founded_year(claims) == 1993
     assert website(claims) == "https://www.nvidia.com/"
-    assert industry_qids(claims) == ["Q_IND"]
     assert lei(claims) == "549300MLUDYVRQOOXS22"
     assert employees(claims) == (36000, 2026)
 
