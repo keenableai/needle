@@ -23,6 +23,7 @@ ARXIV_DOMAINS = (
 )
 HEALTH_DOMAIN = "health sciences"
 OVERSAMPLE = 3
+SUBWINDOWS = {"7d": 1, "30d": 2, "1y": 6, "older": 6}
 
 _DROP_STAT = {
     "fetch": "body_fetch_fail",
@@ -55,11 +56,25 @@ class GenStats:
     short_cells: int = 0
 
 
-def _bucket_window(bucket: str, *, now: datetime) -> tuple[str, str]:
-    start_days, end_days = AGE_BANDS[bucket]
-    start = now - timedelta(days=start_days)
-    end = now - timedelta(days=end_days)
-    return start.date().isoformat(), end.date().isoformat()
+def _subwindows(bucket: str, *, now: datetime) -> list[tuple[str, str]]:
+    older, newer = AGE_BANDS[bucket]
+    k = SUBWINDOWS.get(bucket, 1)
+    edges = [newer + (older - newer) * i / k for i in range(k + 1)]
+    windows = []
+    for i in range(k):
+        from_date = (now - timedelta(days=edges[i + 1])).date().isoformat()
+        to_date = (now - timedelta(days=edges[i])).date().isoformat()
+        windows.append((from_date, to_date))
+    return windows
+
+
+def _interleave(lists: list[list[Paper]]) -> list[Paper]:
+    merged: list[Paper] = []
+    for i in range(max((len(x) for x in lists), default=0)):
+        for x in lists:
+            if i < len(x):
+                merged.append(x[i])
+    return merged
 
 
 async def _cell_candidates(
@@ -72,14 +87,24 @@ async def _cell_candidates(
     seed: int,
     now: datetime,
 ) -> list[Paper]:
-    from_date, to_date = _bucket_window(bucket, now=now)
-    if domain == HEALTH_DOMAIN:
-        if europepmc is None:
-            return []
-        return await europepmc.recent(from_date=from_date, to_date=to_date, n=n, seed=seed)
-    if arxiv is None:
-        return []
-    return await arxiv.search_domain(domain, from_date=from_date, to_date=to_date, max_results=n)
+    windows = _subwindows(bucket, now=now)
+    per = max(1, -(-n // len(windows)))
+    lists: list[list[Paper]] = []
+    for wi, (from_date, to_date) in enumerate(windows):
+        if domain == HEALTH_DOMAIN:
+            if europepmc is not None:
+                lists.append(
+                    await europepmc.recent(
+                        from_date=from_date, to_date=to_date, n=per, seed=seed + wi
+                    )
+                )
+        elif arxiv is not None:
+            lists.append(
+                await arxiv.search_domain(
+                    domain, from_date=from_date, to_date=to_date, max_results=per
+                )
+            )
+    return _interleave(lists)
 
 
 async def _fetch_body(

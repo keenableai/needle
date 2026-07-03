@@ -9,10 +9,12 @@ The query must be anchored on a GLOBALLY DISTINCTIVE term that THIS paper introd
 
 Ask yourself: would this query, typed into a scholarly search engine, plausibly return THIS paper near the top? If the query is built only from generic field vocabulary (e.g. "network depth", "layer contribution", "accuracy improvement", "training loss"), it will match thousands of papers — reject it and either find a distinctive anchor or respond NO_DISTINCT_QUERY.
 
+Shared configuration values are NOT distinctive: token counts, context-window sizes, batch sizes, parameter counts, learning rates, epochs, and similar hyperparameters recur across thousands of papers (e.g. "128 tokens", "128K context", "7B parameters", "batch size 32", "512 hidden dim"). Never anchor on these. Anchor on the specific NAME the paper gives its own artifact, or on a genuinely unusual measured result.
+
 Requirements:
 - Keyword-style, 3-8 words. Not a natural-language question. Do not start with what/why/how.
-- At least one word must be a globally distinctive proper noun, named entity, or unusual precise value — not generic jargon.
-- Do NOT lead with, or build the query around, a percentage range or a round number.
+- At least one word must be a globally distinctive proper noun, named entity, or unusual precise value — not generic jargon and not a shared hyperparameter/config value.
+- Do NOT lead with, or build the query around, a percentage range, a round number, or a common configuration value.
 - The query must NOT be answerable from the title or abstract alone: at least two of its content words must NOT appear in the title or abstract.
 - Anchor on what THIS paper contributes — NOT on prior work it cites and NOT on a well-known shared result. Specifically:
   - Do NOT use a citation or reference: no "et al", no author-surname strings (e.g. "Smith et al 2024" or "Johnstone Güdel"). Cited names point at OTHER papers.

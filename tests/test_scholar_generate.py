@@ -1,9 +1,24 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from keenbench.scholar.generate import run_generate
+from keenbench.scholar.generate import _subwindows, run_generate
 from keenbench.scholar.models import Paper
+
+
+def test_subwindows_span_the_bucket_range():
+    now = datetime(2026, 7, 2, tzinfo=UTC)
+    assert len(_subwindows("7d", now=now)) == 1
+    wins = _subwindows("1y", now=now)
+    assert len(wins) == 6
+    for fr, to in wins:
+        assert fr < to
+    # contiguous (windows ordered newest-first: each from_date meets the next to_date)
+    for i in range(len(wins) - 1):
+        assert wins[i][0] == wins[i + 1][1]
+    assert min(w[0] for w in wins) == (now - timedelta(days=364)).date().isoformat()
+    assert max(w[1] for w in wins) == (now - timedelta(days=31)).date().isoformat()
+
 
 NOW = datetime(2026, 7, 2, 12, 0, tzinfo=UTC)
 HOUR = NOW.replace(minute=0)

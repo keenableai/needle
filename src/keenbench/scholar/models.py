@@ -9,9 +9,9 @@ AGE_BUCKETS = ("7d", "30d", "1y", "older")
 AGE_BUCKET_DAYS = {"7d": 7, "30d": 30, "1y": 365}
 AGE_BANDS = {
     "7d": (7, 0),
-    "30d": (30, 23),
-    "1y": (364, 357),
-    "older": (740, 726),
+    "30d": (29, 8),
+    "1y": (364, 31),
+    "older": (1800, 366),
 }
 
 SCHOLAR_SOURCE = "scholar"
