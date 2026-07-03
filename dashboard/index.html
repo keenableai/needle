@@ -243,7 +243,7 @@
   <div class="grid2">
     <div class="card" id="card-latency-p50">
       <h2>Search latency — p50</h2>
-      <div class="sub">median duration of successful search API calls, all benchmarks, 6-hour means</div>
+      <div class="sub">median duration of successful search API calls, all benchmarks, 6-hour windows</div>
     </div>
     <div class="card" id="card-latency-p95">
       <h2>Search latency — p95</h2>
@@ -381,6 +381,34 @@ function bucketSeries(series) {
       buckets.set(b, agg);
     }
     out[e] = [...buckets].map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
+  }
+  return out;
+}
+
+function pctl(values, p) {
+  const s = [...values].sort((a, b) => a - b);
+  return s[Math.max(0, Math.ceil(p * s.length) - 1)];
+}
+
+function latencySeries(rows, p, runMetric) {
+  const out = {};
+  const byEngine = new Map();
+  for (const e of ENGINES) {
+    out[e] = [];
+    byEngine.set(e, new Map());
+  }
+  for (const r of rows) {
+    const buckets = byEngine.get(r.engine);
+    if (!buckets || (!r.lat_ms?.length && r[runMetric] == null)) continue;
+    const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
+    const agg = buckets.get(b) || { raw: [], perRun: [] };
+    if (r.lat_ms?.length) agg.raw.push(...r.lat_ms);
+    else agg.perRun.push(r[runMetric]);
+    buckets.set(b, agg);
+  }
+  for (const [e, buckets] of byEngine) {
+    out[e] = [...buckets].map(([t, agg]) =>
+      ({ t: new Date(t), v: pctl(agg.raw.length ? agg.raw : agg.perRun, p) }));
   }
   return out;
 }
@@ -924,12 +952,12 @@ function drawCharts(rows) {
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar title-query recall at 10 over time per engine" });
   drawChart(document.getElementById("card-scholar-body"), seriesFor("scholar", "body_recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar body-query recall at 10 over time per engine" });
-  for (const [metric, name] of [["p50_ms", "p50"], ["p95_ms", "p95"]]) {
-    const lat = bucketSeries(seriesFor(null, metric, rows));
-    const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((p) => p.v))));
+  for (const [p, metric, name] of [[0.5, "p50_ms", "p50"], [0.95, "p95_ms", "p95"]]) {
+    const lat = latencySeries(rows, p, metric);
+    const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((q) => q.v))));
     drawChart(document.getElementById(`card-latency-${name}`), lat,
       { domain: sc.domain, ticks: sc.ticks, fmt: fmtMs, tickFmt: fmtMs, left: 56,
-        label: `${name} search latency over time per engine, 6-hour means`,
+        label: `${name} search latency over time per engine, 6-hour windows`,
         empty: "No latency data yet — collected from new runs." });
   }
 }

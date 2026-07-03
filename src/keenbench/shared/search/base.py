@@ -23,6 +23,7 @@ def latency_stats(latencies_ms: list[float]) -> dict[str, float | int] | None:
         "mean_ms": round(sum(values) / len(values), 1),
         "p50_ms": round(pct(0.5), 1),
         "p95_ms": round(pct(0.95), 1),
+        "samples_ms": [round(v, 1) for v in values],
     }
 
 

@@ -115,6 +115,7 @@ async def test_run_answers_reports_latency():
         "mean_ms": 50.0,
         "p50_ms": 50.0,
         "p95_ms": 50.0,
+        "samples_ms": [50.0],
     }
     assert report["engines"]["plain"]["latency"] is None
 

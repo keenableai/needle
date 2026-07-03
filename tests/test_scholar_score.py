@@ -63,7 +63,13 @@ async def test_recall_mrr_and_rank():
     assert e["recall_at_k"] == 0.5
     assert e["mrr_at_k"] == pytest.approx(0.25)
     assert e["by_bucket"]["title"]["recall_at_k"] == 0.5
-    assert e["latency"] == {"n": 1, "mean_ms": 50.0, "p50_ms": 50.0, "p95_ms": 50.0}
+    assert e["latency"] == {
+        "n": 1,
+        "mean_ms": 50.0,
+        "p50_ms": 50.0,
+        "p95_ms": 50.0,
+        "samples_ms": [50.0],
+    }
 
 
 async def test_search_error_excluded():
