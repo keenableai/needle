@@ -60,7 +60,6 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
             "engine": name,
             "recall": e["recall_at_k"],
             "mrr": e["mrr_at_k"],
-            "shallow_index": e["shallow_index"]["shallow_index_rate"],
             "title_recall": e["by_bucket"].get("title", {}).get("recall_at_k"),
             "body_recall": e["by_bucket"].get("body", {}).get("recall_at_k"),
             "num_scored": e["num_scored"],

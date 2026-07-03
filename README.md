@@ -291,12 +291,14 @@ keenbench scholar run --queries gold.jsonl --engines keenable,exa,brave --out re
 Each result's URL and snippet are scanned for a paper identity — arXiv id, DOI,
 or PMID (PMC ids are resolved to PMIDs via NCBI's converter) — and a query is a
 hit when any extracted id matches the gold paper. The report gives per-engine
-**recall@K** and **MRR@K**, breakdowns by bucket / suite / age / domain, a
-**shallow-index rate** (share of title-found papers *missed* on their body
-query — a direct read on index depth), and a **misses** split of
-`system-specific` (another engine found it → ranking/indexing gap) vs
-`universal` (nobody found it → likely stale/unfindable gold). It shares the
-common `run` flags; the judge flags don't apply (there is no judge).
+**recall@K** and **MRR@K**, and — since the two query sets measure different
+things — reports the **title** and **body** query sets separately via the
+`by_bucket` breakdown (alongside by suite / age / domain). Title recall is
+metadata-answerable known-item retrieval; body recall needs a full-text index.
+A **misses** split reports `system-specific` (another engine found it →
+ranking/indexing gap) vs `universal` (nobody found it → likely stale/unfindable
+gold). It shares the common `run` flags; the judge flags don't apply (there is
+no judge).
 
 Caveats: this is *known-item* retrieval, so an engine that returns a
 different-but-relevant paper scores a miss — that's correct for "find this

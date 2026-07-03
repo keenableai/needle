@@ -190,15 +190,16 @@ class Scholar:
             file=sys.stderr,
         )
         for name, e in report["engines"].items():
-            si = e["shallow_index"]
-            si_rate = si["shallow_index_rate"]
-            si_str = f"{si_rate:.3f}" if si_rate is not None else "n/a"
+            title = e["by_bucket"].get("title", {}).get("recall_at_k")
+            body = e["by_bucket"].get("body", {}).get("recall_at_k")
+            title_str = f"{title:.3f}" if title is not None else "n/a"
+            body_str = f"{body:.3f}" if body is not None else "n/a"
             print(
                 f"  {name:10s} recall@{num_results} = {e['recall_at_k']:.4f}  "
                 f"MRR = {e['mrr_at_k']:.4f}  "
-                f"({e['num_scored']}/{report['num_queries']} scored; "
+                f"(title = {title_str}, body = {body_str}; "
+                f"{e['num_scored']}/{report['num_queries']} scored; "
                 f"{e['search_errors']} search errs; "
-                f"shallow-index-rate = {si_str}; "
                 f"misses: {e['misses_system_specific']} sys / {e['misses_universal']} univ)",
                 file=sys.stderr,
             )

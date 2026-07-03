@@ -73,7 +73,7 @@ async def test_search_error_excluded():
     assert e["recall_at_k"] == 0.0
 
 
-async def test_shallow_index_rate():
+async def test_title_and_body_reported_separately():
     queries = [
         _gold("t1", "title", {"arxiv": "2506.00001"}, "2506.00001"),
         _gold("b1", "body", {"arxiv": "2506.00001"}, "2506.00001"),
@@ -90,11 +90,10 @@ async def test_shallow_index_rate():
         },
     )
     report = await run_papers(queries, {"keenable": engine}, num_results=5)
-    si = report["engines"]["keenable"]["shallow_index"]
-    assert si["paired_papers"] == 2
-    assert si["title_hit_papers"] == 2
-    assert si["shallow_papers"] == 1
-    assert si["shallow_index_rate"] == 0.5
+    bb = report["engines"]["keenable"]["by_bucket"]
+    assert bb["title"]["recall_at_k"] == 1.0
+    assert bb["body"]["recall_at_k"] == 0.5
+    assert "shallow_index" not in report["engines"]["keenable"]
 
 
 async def test_misses_classification():

@@ -47,21 +47,6 @@ def _age_order(groups: dict[str, dict]) -> dict[str, dict]:
     return dict(sorted(groups.items(), key=lambda kv: rank(kv[0])))
 
 
-def _shallow_index(scored: list[dict]) -> dict[str, Any]:
-    by_paper: dict[str, dict[str, bool]] = {}
-    for pq in scored:
-        by_paper.setdefault(pq["paper_key"], {})[pq["bucket"]] = pq["hit_rank"] is not None
-    paired = {k: v for k, v in by_paper.items() if "title" in v and "body" in v}
-    title_hit = [v for v in paired.values() if v["title"]]
-    shallow = [v for v in title_hit if not v["body"]]
-    return {
-        "paired_papers": len(paired),
-        "title_hit_papers": len(title_hit),
-        "shallow_papers": len(shallow),
-        "shallow_index_rate": (len(shallow) / len(title_hit)) if title_hit else None,
-    }
-
-
 async def run_papers(
     queries: list[GoldPaper],
     engines: dict[str, SearchClient],
@@ -129,7 +114,6 @@ async def run_papers(
             "by_suite": _grouped(scored, "suite"),
             "by_age": _age_order(_group(scored, lambda pq: pq["age_bucket"])),
             "by_domain": _grouped(scored, "domain"),
-            "shallow_index": _shallow_index(scored),
             "per_query": per_query,
         }
 

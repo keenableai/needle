@@ -194,22 +194,16 @@
     <div id="fields-table"></div>
   </div>
 
-  <div class="grid2">
-    <div class="card">
-      <h2>scholar — latest run</h2>
-      <div class="sub" id="lb-scholar-sub"></div>
-      <div id="lb-scholar"></div>
-    </div>
-    <div class="card" id="card-scholar-shallow">
-      <h2>scholar — shallow-index rate</h2>
-      <div class="sub">share of title-found papers missed on the body query; lower = deeper full-text index</div>
-    </div>
+  <div class="card">
+    <h2>scholar — latest run</h2>
+    <div class="sub" id="lb-scholar-sub"></div>
+    <div id="lb-scholar"></div>
   </div>
 
   <div class="grid2">
-    <div class="card" id="card-scholar-recall">
-      <h2>scholar — recall@10</h2>
-      <div class="sub">known-item paper retrieval, title + body queries</div>
+    <div class="card" id="card-scholar-title">
+      <h2>scholar — title-query recall@10</h2>
+      <div class="sub">papers found by their (degraded) title</div>
     </div>
     <div class="card" id="card-scholar-body">
       <h2>scholar — body-query recall@10</h2>
@@ -463,8 +457,8 @@ function renderLeaderboards(rows) {
   ]);
   renderLeaderboard("lb-scholar", "lb-scholar-sub", rows, "scholar", [
     ["recall", "recall@10"],
-    ["mrr", "MRR@10"],
-    ["shallow_index", "shallow-idx"],
+    ["title_recall", "title"],
+    ["body_recall", "body"],
   ]);
 }
 
@@ -682,12 +676,10 @@ function drawCharts(rows) {
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
-  drawChart(document.getElementById("card-scholar-recall"), seriesFor("scholar", "recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar recall at 10 over time per engine" });
+  drawChart(document.getElementById("card-scholar-title"), seriesFor("scholar", "title_recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar title-query recall at 10 over time per engine" });
   drawChart(document.getElementById("card-scholar-body"), seriesFor("scholar", "body_recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar body-query recall at 10 over time per engine" });
-  drawChart(document.getElementById("card-scholar-shallow"), seriesFor("scholar", "shallow_index", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar shallow-index rate over time per engine" });
 }
 
 function refreshHistoryTable() {
