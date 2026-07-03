@@ -261,7 +261,7 @@ def test_rejects_zero_max_concurrency():
 
 
 def test_keenable_keyless_defaults_to_low_concurrency():
-    assert KeenableClient()._sem._value == 2
+    assert KeenableClient()._sem._value == 1
     assert KeenableClient(api_key="k")._sem._value == 8
     assert KeenableClient(max_concurrency=5)._sem._value == 5
 
