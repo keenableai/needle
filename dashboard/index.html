@@ -77,7 +77,30 @@
   .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
 
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  .section-title {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-secondary); margin: 30px 0 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--grid); scroll-margin-top: 16px;
+  }
+
+  #toc { display: none; }
+  @media (min-width: 1440px) {
+    #toc {
+      display: block; position: fixed; top: 28px; width: 150px;
+      left: calc((100vw - 1080px) / 2 - 172px);
+      font-size: 13px; line-height: 1.5;
+    }
+    #toc .toc-head {
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--text-muted); margin-bottom: 8px;
+    }
+    #toc ul { list-style: none; margin: 0; padding: 0; }
+    #toc li { margin: 5px 0; }
+    #toc a { color: var(--text-secondary); text-decoration: none; }
+    #toc a:hover { color: var(--text-primary); }
+  }
   .card {
     background: var(--surface-1); border: 1px solid var(--border);
     border-radius: 10px; padding: 14px 16px 8px; margin-bottom: 12px;
@@ -162,8 +185,20 @@
 </style>
 </head>
 <body>
+<nav id="toc" aria-label="Contents">
+  <div class="toc-head">On this page</div>
+  <ul>
+    <li><a href="#top">Overview</a></li>
+    <li><a href="#sec-latency">Search latency</a></li>
+    <li><a href="#sec-overlap">Engine overlap</a></li>
+    <li><a href="#sec-freshstream">freshstream</a></li>
+    <li><a href="#sec-companyfill">companyfill</a></li>
+    <li><a href="#sec-scholar">scholar</a></li>
+    <li><a href="#card-runs">Judgement browser</a></li>
+  </ul>
+</nav>
 <div class="wrap">
-  <header>
+  <header id="top">
     <h1>keenbench — search engine benchmarks</h1>
     <p>Hourly search-engine benchmarks from
       <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.
@@ -174,7 +209,7 @@
 
   <div class="filters" id="filters" role="group" aria-label="Time range"></div>
 
-  <div class="grid2">
+  <div class="grid3">
     <div class="card">
       <h2>freshstream — latest run</h2>
       <div class="sub" id="lb-fresh-sub"></div>
@@ -185,15 +220,16 @@
       <div class="sub" id="lb-company-sub"></div>
       <div id="lb-company"></div>
     </div>
+    <div class="card">
+      <h2>scholar — latest run</h2>
+      <div class="sub" id="lb-scholar-sub"></div>
+      <div id="lb-scholar"></div>
+    </div>
   </div>
 
   <div class="legend" id="legend"></div>
 
-  <div class="card" id="card-rbp">
-    <h2>freshstream — RBP@5</h2>
-    <div class="sub">20 fresh queries per run; the hairline marks the metric ceiling</div>
-  </div>
-
+  <h2 class="section-title" id="sec-latency">Search latency</h2>
   <div class="grid2">
     <div class="card" id="card-latency-p50">
       <h2>Search latency — p50</h2>
@@ -205,6 +241,20 @@
     </div>
   </div>
 
+  <h2 class="section-title" id="sec-overlap">Engine overlap</h2>
+  <div class="card" id="card-overlap">
+    <h2>Shared result URLs (last 24h)</h2>
+    <div class="sub" id="overlap-sub"></div>
+    <div id="overlap-table"></div>
+  </div>
+
+  <h2 class="section-title" id="sec-freshstream">freshstream</h2>
+  <div class="card" id="card-rbp">
+    <h2>freshstream — RBP@5</h2>
+    <div class="sub">20 fresh queries per run; the hairline marks the metric ceiling</div>
+  </div>
+
+  <h2 class="section-title" id="sec-companyfill">companyfill</h2>
   <div class="grid2">
     <div class="card" id="card-recall">
       <h2>companyfill — answer-recall@5</h2>
@@ -215,19 +265,13 @@
       <div class="sub">same runs as recall</div>
     </div>
   </div>
-
   <div class="card" id="card-fields">
     <h2>companyfill — recall@5 by field (latest run)</h2>
     <div class="sub" id="fields-sub"></div>
     <div id="fields-table"></div>
   </div>
 
-  <div class="card">
-    <h2>scholar — latest run</h2>
-    <div class="sub" id="lb-scholar-sub"></div>
-    <div id="lb-scholar"></div>
-  </div>
-
+  <h2 class="section-title" id="sec-scholar">scholar</h2>
   <div class="grid2">
     <div class="card" id="card-scholar-title">
       <h2>scholar — title-query recall@10</h2>
@@ -237,12 +281,6 @@
       <h2>scholar — body-query recall@10</h2>
       <div class="sub">papers found by a full-text-only detail</div>
     </div>
-  </div>
-
-  <div class="card" id="card-overlap">
-    <h2>Engine overlap — shared result URLs (last 24h)</h2>
-    <div class="sub" id="overlap-sub"></div>
-    <div id="overlap-table"></div>
   </div>
 
   <div class="card" id="card-runs">
