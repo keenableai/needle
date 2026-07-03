@@ -21,17 +21,15 @@ def _time_qual(pcode, time):
 NVDA_CLAIMS = {
     "P169": [_stmt({"id": "Q_CEO"}, qualifiers=_time_qual("P580", "+1993-01-01T00:00:00Z"))],
     "P571": [_stmt({"time": "+1993-04-05T00:00:00Z"})],
-    "P452": [_stmt({"id": "Q_IND"}), _stmt({"id": "Q_JUNK"})],
     "P856": [_stmt("https://www.nvidia.com/")],
     "P1128": [_stmt({"amount": "+36000"}, qualifiers=_time_qual("P585", "+2026-01-26T00:00:00Z"))],
     "P1278": [_stmt("549300MLUDYVRQOOXS22")],
 }
 
 LABELS = {
+    "Q1": ("NVIDIA", ["Nvidia Corporation"]),
     "Q_CEO": ("Jensen Huang", ["Jen-Hsun Huang"]),
     "Q30": ("United States of America", ["USA", "US"]),
-    "Q_IND": ("semiconductor industry", []),
-    "Q_JUNK": ("Standard Industrial Classification", []),
 }
 
 
@@ -93,12 +91,13 @@ async def test_companyfill_rows_fields_and_gold():
         hour_ts=HOUR,
         min_employee_year=2025,
     )
-    by_field = {r["gold"]["field"]: r for r in rows}
+    by_field = {r["gold"]["field"]: r for r in rows if r["query_origin"]["bucket"] == "companyfill"}
     assert set(by_field) == {
         "ceo",
+        "ceo_since",
+        "ceo_company",
         "founded_year",
         "hq_country",
-        "industry",
         "website",
         "employees",
         "lei",
@@ -107,13 +106,32 @@ async def test_companyfill_rows_fields_and_gold():
     assert by_field["ceo"]["query_text"] == "nvidia ceo"
     assert by_field["ceo"]["gold"]["value"] == "Jensen Huang"
     assert by_field["ceo"]["gold"]["aliases"] == ["Jen-Hsun Huang"]
+    assert by_field["ceo_since"]["query_text"] == "when did jensen huang become ceo of nvidia"
+    assert by_field["ceo_since"]["gold"]["value"] == 1993
+    assert by_field["ceo_company"]["query_text"] == "which company is jensen huang the ceo of"
+    assert by_field["ceo_company"]["gold"]["value"] == "NVIDIA"
+    assert by_field["ceo_company"]["gold"]["aliases"] == ["Nvidia Corporation"]
     assert by_field["founded_year"]["gold"]["value"] == 1993
     assert by_field["hq_country"]["gold"]["value"] == "United States of America"
-    assert by_field["industry"]["gold"]["value"] == ["semiconductor"]
     assert by_field["website"]["gold"]["value"] == "nvidia.com"
     assert by_field["employees"]["gold"]["value"] == 36000
     assert by_field["lei"]["gold"]["value"] == "549300MLUDYVRQOOXS22"
     assert by_field["ticker"]["gold"]["value"] == "NVDA"
+    nl_by_field = {
+        r["gold"]["field"]: r for r in rows if r["query_origin"]["bucket"] == "companyfill_nl"
+    }
+    assert set(nl_by_field) == {
+        "ceo",
+        "founded_year",
+        "hq_country",
+        "website",
+        "employees",
+        "lei",
+        "ticker",
+    }
+    assert nl_by_field["ceo"]["query_text"] == "who is the ceo of nvidia"
+    assert nl_by_field["ceo"]["gold"] == by_field["ceo"]["gold"]
+    assert nl_by_field["employees"]["query_text"] == "how many people work at nvidia"
     origin = by_field["ceo"]["query_origin"]
     assert origin["bucket"] == "companyfill"
     assert origin["subcategory"] == "companyfill_ceo"
@@ -199,23 +217,6 @@ async def test_resolve_uses_title_without_state_markers():
     assert rows[0]["query_text"].startswith("applied materials ")
 
 
-async def test_isic_junk_industry_dropped():
-    claims = dict(NVDA_CLAIMS)
-    claims["P452"] = [_stmt({"id": "Q_ISIC"})]
-    LABELS["Q_ISIC"] = ("financial service activities, except insurance and pension funding", [])
-    wd = FakeWikidata(qids={"NVIDIA Corp": "Q1"}, claims={"Q1": claims})
-    rows, _ = await run_generate(
-        [NVDA_SEED],
-        wikidata=wd,
-        sec=None,
-        gleif=None,
-        suites=("companyfill",),
-        hour_ts=HOUR,
-        min_employee_year=2025,
-    )
-    assert "industry" not in {r["gold"]["field"] for r in rows}
-
-
 async def test_gleif_backfills_missing_lei():
     claims = {k: v for k, v in NVDA_CLAIMS.items() if k != "P1278"}
     wd = FakeWikidata(qids={"NVIDIA Corp": "Q1"}, claims={"Q1": claims})
@@ -249,7 +250,11 @@ async def test_seed_deduped_by_title():
         min_employee_year=2025,
     )
     assert stats.companies == 1
-    tickers = [r["gold"]["value"] for r in rows if r["gold"]["field"] == "ticker"]
+    tickers = [
+        r["gold"]["value"]
+        for r in rows
+        if r["gold"]["field"] == "ticker" and r["query_origin"]["bucket"] == "companyfill"
+    ]
     assert tickers == ["GOOGL"]
 
 

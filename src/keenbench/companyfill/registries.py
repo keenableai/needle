@@ -87,7 +87,7 @@ def _qual_year(stmt: dict, pcode: str) -> int | None:
     return None
 
 
-def current_ceo(claims: dict) -> str | None:
+def _current_ceo_stmt(claims: dict) -> dict | None:
     candidates = []
     for stmt in claims.get("P169", []):
         if "P582" in (stmt.get("qualifiers") or {}):
@@ -95,11 +95,22 @@ def current_ceo(claims: dict) -> str | None:
         pid = _entity_id(stmt)
         if not pid:
             continue
-        candidates.append((stmt.get("rank") == "preferred", _qual_year(stmt, "P580") or 0, pid))
+        candidates.append(
+            (stmt.get("rank") == "preferred", _qual_year(stmt, "P580") or 0, pid, stmt)
+        )
     if not candidates:
         return None
-    candidates.sort(reverse=True)
-    return candidates[0][2]
+    return max(candidates, key=lambda c: c[:3])[3]
+
+
+def current_ceo(claims: dict) -> str | None:
+    stmt = _current_ceo_stmt(claims)
+    return _entity_id(stmt) if stmt else None
+
+
+def ceo_start_year(claims: dict) -> int | None:
+    stmt = _current_ceo_stmt(claims)
+    return _qual_year(stmt, "P580") if stmt else None
 
 
 def founded_year(claims: dict) -> int | None:
@@ -116,10 +127,6 @@ def website(claims: dict) -> str | None:
         if url:
             return url
     return None
-
-
-def industry_qids(claims: dict) -> list[str]:
-    return [q for q in (_entity_id(stmt) for stmt in claims.get("P452", [])) if q]
 
 
 def employees(claims: dict) -> tuple[int | None, int | None]:

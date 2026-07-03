@@ -20,6 +20,18 @@ class FieldSpec:
 
 COMPANYFILL_FIELDS = {
     "ceo": FieldSpec("person", "1y", "{name} ceo"),
+    "ceo_since": FieldSpec(
+        "year",
+        "1y",
+        "when did {ceo} become ceo of {name}",
+        ("became", "become", "since", "appointed", "named", "succeeded", "took over"),
+    ),
+    "ceo_company": FieldSpec(
+        "entity",
+        "1y",
+        "which company is {ceo} the ceo of",
+        ("ceo", "chief executive"),
+    ),
     "founded_year": FieldSpec(
         "year",
         "static",
@@ -27,7 +39,6 @@ COMPANYFILL_FIELDS = {
         ("founded", "founding", "established", "incorporated", "began", "started", "since"),
     ),
     "hq_country": FieldSpec("country", "static", "{name} headquarters country"),
-    "industry": FieldSpec("list", "5y", "{name} industry"),
     "website": FieldSpec("domain", "static", "{name} official website"),
     "employees": FieldSpec(
         "numeric_band",
@@ -42,6 +53,16 @@ COMPANYFILL_FIELDS = {
         "{name} stock ticker symbol",
         ("ticker", "symbol", "stock", "nasdaq", "nyse", "shares"),
     ),
+}
+
+NL_TEMPLATES = {
+    "ceo": "who is the ceo of {name}",
+    "founded_year": "when was {name} founded",
+    "hq_country": "in which country is {name} headquartered",
+    "website": "what is the official website of {name}",
+    "employees": "how many people work at {name}",
+    "lei": "what is the lei code of {name}",
+    "ticker": "what is the stock ticker symbol of {name}",
 }
 
 FINANCIALS_FIELDS = {
