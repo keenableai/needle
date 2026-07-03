@@ -1,0 +1,189 @@
+import re
+import urllib.request
+from collections.abc import Callable
+from pathlib import Path
+
+from wordfreq import zipf_frequency
+
+SUBWORD_THRESHOLD = 5
+UNK = "[UNK]"
+LID_URL = "https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.ftz"
+FOREIGN_CONFIDENT = 0.7
+ENGLISH_CONFIDENT = 0.5
+ENGLISH_ZIPF = 3.0
+ENGLISH_WORD_FRACTION = 0.6
+
+NON_LATIN_RE = re.compile("[^\u0020-\u024f\u1e00-\u1eff\u2000-\u206f\u20a0-\u20cf]")
+SEARCH_OPERATOR_RE = re.compile(
+    r"\b(?:site|inurl|intitle|intext|filetype|cache|link|allinurl|allintitle|allintext):\S+",
+    re.IGNORECASE,
+)
+QUOTE_CHARS = "\"'`‘’“”«»"
+HAS_QUOTE_RE = re.compile(f"[{re.escape(QUOTE_CHARS)}]")
+PUNCT_RE = re.compile(r"[^\w\s]")
+VIN_CANDIDATE_RE = re.compile(r"\b[A-HJ-NPR-Z0-9]{17}\b", re.IGNORECASE)
+HEX_HASH_RE = re.compile(r"\b[0-9a-fA-F]{24,}\b")
+HEX_ETH_ADDRESS_RE = re.compile(r"\b0[xX][0-9a-fA-F]{40}\b")
+CRYPTO_BASE58_RE = re.compile(r"\b[1-9A-HJ-NP-Za-km-z]{32,44}\b")
+URLISH_RE = re.compile(r"https?://|www\.|\.(com|org|net|io|de|fr|ru|jp)(\b|/)", re.I)
+
+Tokenize = Callable[[str], list[str]]
+Lid = Callable[[str], tuple[str, float]]
+
+
+def _contains_vin(query: str) -> bool:
+    for match in VIN_CANDIDATE_RE.finditer(query):
+        token = match.group(0)
+        if any(c.isalpha() for c in token) and any(c.isdigit() for c in token):
+            return True
+    return False
+
+
+def _contains_hex_hash(query: str) -> bool:
+    for match in HEX_HASH_RE.finditer(query):
+        if any(c in "abcdefABCDEF" for c in match.group(0)):
+            return True
+    return HEX_ETH_ADDRESS_RE.search(query) is not None
+
+
+def _contains_crypto_address(query: str) -> bool:
+    for match in CRYPTO_BASE58_RE.finditer(query):
+        token = match.group(0)
+        if (
+            any(c.isdigit() for c in token)
+            and any(c.isupper() for c in token)
+            and any(c.islower() for c in token)
+        ):
+            return True
+    return False
+
+
+def is_eligible(query: str) -> bool:
+    return not (
+        NON_LATIN_RE.search(query)
+        or SEARCH_OPERATOR_RE.search(query)
+        or HAS_QUOTE_RE.search(query)
+        or _contains_vin(query)
+        or _contains_hex_hash(query)
+        or _contains_crypto_address(query)
+    )
+
+
+def words_for(query: str) -> list[str]:
+    cleaned = PUNCT_RE.sub(" ", query.lower())
+    return [w for w in cleaned.split() if w]
+
+
+def hard_words_for(query: str, tokenize: Tokenize) -> list[dict]:
+    out = []
+    for w in words_for(query):
+        pieces = tokenize(w)
+        if not pieces:
+            continue
+        if UNK in pieces or len(pieces) >= SUBWORD_THRESHOLD:
+            out.append({"word": w, "subwords": list(pieces)})
+    return out
+
+
+def is_english(query: str, context_words: list[str], lid: Lid) -> bool:
+    lang_full, p_full = lid(query)
+    context = " ".join(context_words)
+    lang_ctx, p_ctx = lid(context) if context else (lang_full, p_full)
+    if lang_full != "en" and p_full >= FOREIGN_CONFIDENT:
+        return False
+    if lang_ctx != "en" and p_ctx >= FOREIGN_CONFIDENT:
+        return False
+    if lang_ctx == "en" and p_ctx >= ENGLISH_CONFIDENT:
+        return True
+    letter_words = [w for w in context_words if w.isalpha()]
+    if not letter_words:
+        return True
+    common = sum(zipf_frequency(w, "en") >= ENGLISH_ZIPF for w in letter_words)
+    return common / len(letter_words) >= ENGLISH_WORD_FRACTION
+
+
+def length_bucket(n_words: int) -> str:
+    if n_words <= 2:
+        return "short"
+    if n_words <= 5:
+        return "medium"
+    return "long"
+
+
+def load_tokenizer(vocab_path: str | None = None) -> Tokenize:
+    from huggingface_hub import hf_hub_download
+    from tokenizers import BertWordPieceTokenizer
+
+    if vocab_path is None:
+        vocab_path = hf_hub_download("bert-base-uncased", "vocab.txt")
+    tokenizer = BertWordPieceTokenizer(vocab_path, lowercase=True)
+    return lambda text: list(tokenizer.encode(text, add_special_tokens=False).tokens)
+
+
+def load_lid(model_path: str | None = None) -> Lid:
+    import fasttext
+
+    if model_path is None:
+        cached = Path.home() / ".cache" / "lid.176.ftz"
+        if not cached.exists():
+            cached.parent.mkdir(parents=True, exist_ok=True)
+            urllib.request.urlretrieve(LID_URL, cached)
+        model_path = str(cached)
+    model = fasttext.load_model(model_path)
+
+    def lid(text: str) -> tuple[str, float]:
+        labels, probs = model.predict(text.lower().replace("\n", " "), k=1)
+        return labels[0].removeprefix("__label__"), probs[0]
+
+    return lid
+
+
+def filter_rows(
+    rows: list[dict],
+    tokenize: Tokenize,
+    lid: Lid | None,
+    min_words: int = 3,
+    max_query_len: int = 200,
+) -> tuple[list[dict], dict[str, int]]:
+    stats: dict[str, int] = {}
+
+    def reject(reason: str) -> None:
+        stats[reason] = stats.get(reason, 0) + 1
+
+    kept = []
+    for row in rows:
+        query = (row.get("query") or "").strip()
+        if not query or len(query) > max_query_len:
+            reject("bad_length")
+            continue
+        if URLISH_RE.search(query):
+            reject("urlish")
+            continue
+        words = words_for(query)
+        if len(words) < min_words:
+            reject("too_few_words")
+            continue
+        if not is_eligible(query):
+            reject("ineligible")
+            continue
+        hard = hard_words_for(query, tokenize)
+        if not hard:
+            reject("no_rare_word")
+            continue
+        if lid is not None:
+            hard_set = {h["word"] for h in hard}
+            context_words = [w for w in words if w not in hard_set]
+            if not is_english(query, context_words, lid):
+                reject("non_english")
+                continue
+        kept.append(
+            {
+                **row,
+                "length_bucket": length_bucket(len(words)),
+                "n_words": len(words),
+                "hard_words": hard,
+                "max_pieces": max(99 if UNK in h["subwords"] else len(h["subwords"]) for h in hard),
+            }
+        )
+    kept.sort(key=lambda r: (r["length_bucket"], -r["max_pieces"]))
+    return kept, stats
