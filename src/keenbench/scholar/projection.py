@@ -74,6 +74,12 @@ _TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9\-]*")
 _LATEX_RE = re.compile(r"\$[^$]*\$|\\[a-zA-Z]+\{[^}]*\}|\\[a-zA-Z]+")
 _PUNCT_RE = re.compile(r"[^a-zA-Z0-9\s\-]")
 _DISTINCTIVE_RE = re.compile(r"\d|[A-Z]{2,}|[a-z][A-Z]|[A-Za-z]{3,}-[A-Za-z]{3,}")
+_BAD_ANCHOR_RE = re.compile(
+    r"\bet al\b"
+    r"|\b(?:table|figure|fig|section|appendix|theorem|lemma|corollary|proposition)\s*\.?\s*\d"
+    r"|\bsupplementary\b",
+    re.IGNORECASE,
+)
 
 
 def _tokens(text: str) -> list[str]:
@@ -112,6 +118,8 @@ def clean_body_query(text: str | None) -> str | None:
 def body_query_ok(query: str, *, title: str, abstract: str) -> bool:
     q_tokens = content_tokens(query)
     if len(query.split()) < MIN_QUERY_WORDS or not q_tokens:
+        return False
+    if _BAD_ANCHOR_RE.search(query):
         return False
     metadata = content_tokens(title) | content_tokens(abstract)
     novel = q_tokens - metadata

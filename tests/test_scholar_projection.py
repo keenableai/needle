@@ -87,3 +87,14 @@ def test_body_query_ok_rejects_metadata_leak():
 def test_body_query_ok_rejects_too_short():
     assert not body_query_ok("cohorts", title="T", abstract="A")
     assert not body_query_ok("the and of", title="T", abstract="A")
+
+
+def test_body_query_ok_rejects_citation_and_structural_anchors():
+    t, a = "Some Paper Title", "an unrelated abstract about widgets"
+    assert not body_query_ok("Johnstone et al coronal temperature", title=t, abstract=a)
+    assert not body_query_ok("Schur complement bisection Theorem 7.2", title=t, abstract=a)
+    assert not body_query_ok("Supplementary Table 3 benchmark properties", title=t, abstract=a)
+    assert not body_query_ok("classification accuracy Figure 2 curves", title=t, abstract=a)
+    # distinctive paper-own anchors with numbers still pass
+    assert body_query_ok("carvacrol 80.43 percent GC-MS", title=t, abstract=a)
+    assert body_query_ok("Ross 308 broilers cohort", title=t, abstract=a)
