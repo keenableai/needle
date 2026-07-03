@@ -76,7 +76,13 @@
   .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
 
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  .section-title {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--text-secondary); margin: 30px 0 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--grid);
+  }
   .card {
     background: var(--surface-1); border: 1px solid var(--border);
     border-radius: 10px; padding: 14px 16px 8px; margin-bottom: 12px;
@@ -173,7 +179,7 @@
 
   <div class="filters" id="filters" role="group" aria-label="Time range"></div>
 
-  <div class="grid2">
+  <div class="grid3">
     <div class="card">
       <h2>freshstream — latest run</h2>
       <div class="sub" id="lb-fresh-sub"></div>
@@ -184,15 +190,16 @@
       <div class="sub" id="lb-company-sub"></div>
       <div id="lb-company"></div>
     </div>
+    <div class="card">
+      <h2>scholar — latest run</h2>
+      <div class="sub" id="lb-scholar-sub"></div>
+      <div id="lb-scholar"></div>
+    </div>
   </div>
 
   <div class="legend" id="legend"></div>
 
-  <div class="card" id="card-rbp">
-    <h2>freshstream — RBP@5</h2>
-    <div class="sub">20 fresh queries per run; the hairline marks the metric ceiling</div>
-  </div>
-
+  <h2 class="section-title">Search latency</h2>
   <div class="grid2">
     <div class="card" id="card-latency-p50">
       <h2>Search latency — p50</h2>
@@ -204,6 +211,20 @@
     </div>
   </div>
 
+  <h2 class="section-title">Engine overlap</h2>
+  <div class="card" id="card-overlap">
+    <h2>Shared result URLs (last 24h)</h2>
+    <div class="sub" id="overlap-sub"></div>
+    <div id="overlap-table"></div>
+  </div>
+
+  <h2 class="section-title">freshstream</h2>
+  <div class="card" id="card-rbp">
+    <h2>freshstream — RBP@5</h2>
+    <div class="sub">20 fresh queries per run; the hairline marks the metric ceiling</div>
+  </div>
+
+  <h2 class="section-title">companyfill</h2>
   <div class="grid2">
     <div class="card" id="card-recall">
       <h2>companyfill — answer-recall@5</h2>
@@ -214,19 +235,13 @@
       <div class="sub">same runs as recall</div>
     </div>
   </div>
-
   <div class="card" id="card-fields">
     <h2>companyfill — recall@5 by field (latest run)</h2>
     <div class="sub" id="fields-sub"></div>
     <div id="fields-table"></div>
   </div>
 
-  <div class="card">
-    <h2>scholar — latest run</h2>
-    <div class="sub" id="lb-scholar-sub"></div>
-    <div id="lb-scholar"></div>
-  </div>
-
+  <h2 class="section-title">scholar</h2>
   <div class="grid2">
     <div class="card" id="card-scholar-title">
       <h2>scholar — title-query recall@10</h2>
@@ -236,12 +251,6 @@
       <h2>scholar — body-query recall@10</h2>
       <div class="sub">papers found by a full-text-only detail</div>
     </div>
-  </div>
-
-  <div class="card" id="card-overlap">
-    <h2>Engine overlap — shared result URLs (last 24h)</h2>
-    <div class="sub" id="overlap-sub"></div>
-    <div id="overlap-table"></div>
   </div>
 
   <div class="card" id="card-runs">
