@@ -16,6 +16,7 @@ keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on t
 | --- | --- | --- |
 | [`freshstream`](#freshstream) | Fresh, time-sensitive queries mined from live RSS and Google Trends | LLM relevance judge → RBP@5 |
 | [`companyfill`](#companyfill) | Company fact-lookups with registry-grounded gold answers | Answer-recall@K and MRR@K, deterministic (optional LLM backstop) |
+| [`scholar`](#scholar) | Known-item paper retrieval — find a specific paper by its title vs. by a full-text-only detail | Recall@K and MRR@K by paper-ID match, deterministic (no judge) |
 
 Everything engine- or judge-related is shared infrastructure in
 [`keenbench.shared`](#shared-infrastructure) — search clients, LLM client,
@@ -43,7 +44,7 @@ Keys are read only from the environment.
 
 | Variable | Needed for | Notes |
 | --- | --- | --- |
-| `OPENROUTER_API_KEY` | `freshstream generate`, `freshstream run`, `companyfill run --judge` | One [OpenRouter](https://openrouter.ai) key reaches Claude, GPT, Gemini, … |
+| `OPENROUTER_API_KEY` | `freshstream generate`, `freshstream run`, `companyfill run --judge`, `scholar generate` | One [OpenRouter](https://openrouter.ai) key reaches Claude, GPT, Gemini, … |
 | `EXA_API_KEY` | the `exa` engine | Required when `--engines` includes `exa` |
 | `KEENABLE_API_KEY` | the `keenable` engine | Optional — without it the keyless (rate-limited) endpoint is used |
 | `SEARCHAPI_API_KEY` | the `google` and `bing` engines | One [SearchAPI](https://www.searchapi.io) key covers both |
@@ -56,7 +57,7 @@ Keys are read only from the environment.
 
 ## Common `run` flags
 
-Both benchmarks' `run` commands share one interface:
+All three benchmarks' `run` commands share one interface:
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
@@ -238,6 +239,82 @@ coverage number — and ceo/employees gold comes from Wikidata, so a stale
 registry entry can mark a correct fresh answer wrong (the `financials` suite
 has no such gap).
 
+## scholar
+
+A **known-item retrieval** benchmark: can an engine surface *one specific
+paper*? Each paper produces two queries, and the gap between how well an engine
+answers them is the point:
+
+- **`title`** — the degraded paper title. Answerable from the metadata every
+  engine indexes.
+- **`body`** — a distinctive detail pulled from the paper's full text (a named
+  method, a precise measured value, a trial ID) that is machine-verified to be
+  *absent* from the title and abstract, so only a full-text index can match it.
+
+Scoring is deterministic identity matching — no LLM judge — so `run` is free.
+
+### Generate
+
+```bash
+keenbench scholar generate --age-buckets 7d,30d,1y --per-cell 10 --out gold.jsonl
+```
+
+Gold is generated on demand from two public, open sources: **arXiv** (CS,
+physics, life, social) and **Europe PMC** (health, full JATS body text). The set
+is **paired and balanced by construction** — sampled over `(domain × age)` cells
+so it comes out even across five domains and the requested age cohorts, with
+exactly one `title` and one `body` query per paper. Age buckets (`7d` / `30d` /
+`1y` / `older`) are sampled from narrow date bands so a paper's true publication
+age matches its bucket. `generate` needs `OPENROUTER_API_KEY` for the body-query
+projection (model via `KEENBENCH_LLM_MODEL` / `--llm-model`); `--per-cell N`
+sets the target paired papers per cell, `--suites` restricts sources. Nothing is
+committed.
+
+Each output line is one gold query row:
+
+```json
+{
+  "query_id": "…", "query_hash": "…",
+  "query_text": "smoothquant activation outliers migration factor",
+  "query_source": "scholar",
+  "query_origin": {"bucket": "body", "suite": "arxiv", "provenance": {"title": "…", "url": "…"}},
+  "gold": {"paper_key": "2506.12345", "ids": {"arxiv": "2506.12345"},
+           "age_bucket": "30d", "domain": "computer science", "published_date": "…"},
+  "hour_ts": "…"
+}
+```
+
+### Run (recall@K / MRR@K)
+
+```bash
+keenbench scholar run --queries gold.jsonl --engines keenable,exa,brave --out report.json
+```
+
+Each result's URL and snippet are scanned for a paper identity — arXiv id, DOI,
+or PMID (PMC ids are resolved to PMIDs via NCBI's converter) — and a query is a
+hit when any extracted id matches the gold paper. The report gives per-engine
+**recall@K** and **MRR@K**, and — since the two query sets measure different
+things — reports the **title** and **body** query sets separately via the
+`by_bucket` breakdown (alongside by suite / age / domain). Title recall is
+metadata-answerable known-item retrieval; body recall needs a full-text index.
+A **misses** split reports `system-specific` (another engine found it →
+ranking/indexing gap) vs `universal` (nobody found it → likely stale/unfindable
+gold). It shares the common `run` flags; the judge flags don't apply (there is
+no judge).
+
+Caveats: this is *known-item* retrieval, so an engine that returns a
+different-but-relevant paper scores a miss — that's correct for "find this
+paper," not a measure of scholarly-search quality. Publisher landing pages that
+carry no inline identifier (ScienceDirect PII, Nature short-form) yield no
+extractable id, making recall a *lower bound*, applied symmetrically across
+engines. The title-specificity gate that drops too-generic titles at generation
+is a *lexical* heuristic (distinctive token — acronym / digit / camelCase /
+hyphenated compound — or enough content words), so a generic-but-acronymed title
+can still slip through and a distinctive short all-lowercase one can be dropped.
+And the keyless `keenable` endpoint returns degraded results under the burst
+load of a full run, so a batch number undercounts it — score it with a
+`KEENABLE_API_KEY`, or pin the raw results, before comparing.
+
 ## Shared infrastructure
 
 ### Search clients
@@ -314,8 +391,9 @@ method satisfies the `LLMClient` protocol. The ranking harness is
 ## Continuous benchmarks
 
 [`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule
-against all registered engines: freshstream hourly (`--limit 20`), companyfill
-daily at 00:17 UTC (fresh gold, `--limit 100`, `--judge` backstop). Each run:
+against all registered engines: freshstream hourly (`--limit 20`), and
+companyfill + scholar daily at 00:17 UTC (fresh gold each — companyfill
+`--limit 100` with `--judge` backstop, scholar `--per-cell 7`). Each run:
 
 - appends summary rows to `data/history.jsonl` and per-engine-pair URL-overlap
   rows (mean Jaccard of normalized top-K URL sets per query) to

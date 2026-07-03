@@ -166,8 +166,8 @@
     <h1>keenbench — search engine benchmarks</h1>
     <p>Hourly search-engine benchmarks from
       <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.
-      freshstream runs hourly (RBP@5, LLM judge); companyfill daily
-      (answer-recall@5, deterministic). All times UTC.
+      freshstream runs hourly (RBP@5, LLM judge); companyfill and scholar
+      daily (deterministic recall). All times UTC.
       <span id="updated"></span></p>
   </header>
 
@@ -219,6 +219,23 @@
     <h2>companyfill — recall@5 by field (latest run)</h2>
     <div class="sub" id="fields-sub"></div>
     <div id="fields-table"></div>
+  </div>
+
+  <div class="card">
+    <h2>scholar — latest run</h2>
+    <div class="sub" id="lb-scholar-sub"></div>
+    <div id="lb-scholar"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card" id="card-scholar-title">
+      <h2>scholar — title-query recall@10</h2>
+      <div class="sub">papers found by their (degraded) title</div>
+    </div>
+    <div class="card" id="card-scholar-body">
+      <h2>scholar — body-query recall@10</h2>
+      <div class="sub">papers found by a full-text-only detail</div>
+    </div>
   </div>
 
   <div class="card" id="card-overlap">
@@ -490,6 +507,11 @@ function renderLeaderboards(rows) {
   renderLeaderboard("lb-company", "lb-company-sub", rows, "companyfill", [
     ["recall", "recall@5"],
     ["mrr", "MRR@5"],
+  ]);
+  renderLeaderboard("lb-scholar", "lb-scholar-sub", rows, "scholar", [
+    ["recall", "recall@10"],
+    ["title_recall", "title"],
+    ["body_recall", "body"],
   ]);
 }
 
@@ -782,6 +804,10 @@ function drawCharts(rows) {
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
+  drawChart(document.getElementById("card-scholar-title"), seriesFor("scholar", "title_recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar title-query recall at 10 over time per engine" });
+  drawChart(document.getElementById("card-scholar-body"), seriesFor("scholar", "body_recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar body-query recall at 10 over time per engine" });
   for (const [metric, name] of [["p50_ms", "p50"], ["p95_ms", "p95"]]) {
     const lat = seriesFor("freshstream", metric, rows);
     const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((p) => p.v))));

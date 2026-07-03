@@ -57,6 +57,24 @@ def companyfill_rows(report: dict, ts: str) -> list[dict]:
     ]
 
 
+def scholar_rows(report: dict, ts: str) -> list[dict]:
+    return [
+        {
+            "ts": ts,
+            "bench": "scholar",
+            "engine": name,
+            "recall": e["recall_at_k"],
+            "mrr": e["mrr_at_k"],
+            "title_recall": e["by_bucket"].get("title", {}).get("recall_at_k"),
+            "body_recall": e["by_bucket"].get("body", {}).get("recall_at_k"),
+            "num_scored": e["num_scored"],
+            "num_queries": report["num_queries"],
+            "search_errors": e["search_errors"],
+        }
+        for name, e in report["engines"].items()
+    ]
+
+
 def slim_report(report: dict) -> dict:
     slim = dict(report)
     slim["engines"] = {
@@ -73,6 +91,8 @@ def publish(
     fresh: str | None = None,
     recall: str | None = None,
     gold: str | None = None,
+    scholar: str | None = None,
+    scholar_queries: str | None = None,
     ts: str | None = None,
 ) -> None:
     ts = ts or datetime.now(UTC).strftime(TS_FMT)
@@ -87,6 +107,7 @@ def publish(
     for path, to_rows, latest, archive_name in (
         (rbp, freshstream_rows, "latest_freshstream.json", "rbp.json"),
         (recall, companyfill_rows, "latest_companyfill.json", "recall.json"),
+        (scholar, scholar_rows, "latest_scholar.json", "scholar.json"),
     ):
         if not path:
             continue
@@ -96,7 +117,11 @@ def publish(
         overlap.extend(overlap_rows(report, ts=ts))
         write_json(slim_report(report), str(data / latest))
         (run_dir / archive_name).write_text(raw, encoding="utf-8")
-    for path, archive_name in ((fresh, "fresh.jsonl"), (gold, "gold.jsonl")):
+    for path, archive_name in (
+        (fresh, "fresh.jsonl"),
+        (gold, "gold.jsonl"),
+        (scholar_queries, "scholar.jsonl"),
+    ):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
 
