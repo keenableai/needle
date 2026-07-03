@@ -121,32 +121,12 @@ jobs:
           git commit -m "bench: $TS" || echo "nothing to publish"
           git push
 
-  # Pages is set to workflow-based deploys: the managed branch deploy has a
-  # fixed 10-min status timeout that this enterprise's slow Pages propagation
-  # routinely exceeds. Deploying ourselves lets us raise it.
-  #
-  # No per-job concurrency group here: the top-level `concurrency: bench`
-  # already serializes whole runs, so deploys never overlap. A separate
-  # `pages-deploy` group with cancel-in-progress cancelled deploys mid-upload,
-  # which left two "github-pages" artifacts in the run and errored the Pages
-  # site ("Multiple artifacts named github-pages ... count is 2").
+  # Deploy through the shared Deploy Pages workflow so there is one deploy
+  # definition (also dispatchable on its own for a frontend-only redeploy).
   deploy-pages:
-    name: Deploy dashboard
     needs: bench
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-
-      - id: deployment
-        uses: actions/deploy-pages@v5
-        with:
-          timeout: 1800000
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy-pages.yaml
