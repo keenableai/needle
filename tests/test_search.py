@@ -11,6 +11,7 @@ from keenbench.shared.search import (
     SearchResult,
     TavilyClient,
     build_search_clients,
+    latency_stats,
 )
 
 
@@ -260,7 +261,7 @@ def test_rejects_zero_max_concurrency():
 
 
 def test_keenable_keyless_defaults_to_low_concurrency():
-    assert KeenableClient()._sem._value == 2
+    assert KeenableClient()._sem._value == 1
     assert KeenableClient(api_key="k")._sem._value == 8
     assert KeenableClient(max_concurrency=5)._sem._value == 5
 
@@ -298,5 +299,41 @@ async def test_real_http_path_errors_as_data_and_reuse_and_close():
     assert r1 is None and e1["error_type"] == "transport"
     assert r2 is None and e2["error_type"] == "transport"
     assert c._client is client_after and c._client is not None
+    assert c.latencies_ms == []
     await c.aclose()
     assert c._client is None
+
+
+async def test_latency_recorded_only_for_ok_responses(monkeypatch):
+    class OkResp:
+        status_code = 200
+
+        def json(self):
+            return {"results": []}
+
+    class BadResp:
+        status_code = 500
+        text = "boom"
+
+    responses = [OkResp(), BadResp(), OkResp()]
+
+    class FakeHttp:
+        async def request(self, method, url, **kwargs):
+            return responses.pop(0)
+
+    c = KeenableClient()
+    monkeypatch.setattr(c, "_http", lambda: FakeHttp())
+    for _ in range(3):
+        await c.search("q")
+    assert len(c.latencies_ms) == 2
+    assert all(v >= 0 for v in c.latencies_ms)
+
+
+def test_latency_stats():
+    assert latency_stats([]) is None
+    assert latency_stats([100.0]) == {"n": 1, "mean_ms": 100.0, "p50_ms": 100.0, "p95_ms": 100.0}
+    stats = latency_stats([float(v) for v in range(1, 101)])
+    assert stats["n"] == 100
+    assert stats["mean_ms"] == 50.5
+    assert stats["p50_ms"] == 50.0
+    assert stats["p95_ms"] == 95.0

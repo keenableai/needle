@@ -44,6 +44,7 @@ class FakeEngine:
     def __init__(self, canned):
         self.canned = canned
         self.closed = False
+        self.latencies_ms = []
 
     async def search(self, query, *, num_results=10):
         return self.canned.get(query, ([], None))
@@ -103,6 +104,19 @@ async def test_run_answers_zero_queries_and_all_errors():
     report = await run_answers([CEO_Q], {"fake": engine})
     e = report["engines"]["fake"]
     assert e["recall_at_k"] == 0.0 and e["mrr_at_k"] == 0.0 and e["num_scored"] == 0
+
+
+async def test_run_answers_reports_latency():
+    timed = FakeEngine({})
+    timed.latencies_ms = [50.0]
+    report = await run_answers([CEO_Q], {"timed": timed, "plain": FakeEngine({})})
+    assert report["engines"]["timed"]["latency"] == {
+        "n": 1,
+        "mean_ms": 50.0,
+        "p50_ms": 50.0,
+        "p95_ms": 50.0,
+    }
+    assert report["engines"]["plain"]["latency"] is None
 
 
 def _write_rows(path, rows):

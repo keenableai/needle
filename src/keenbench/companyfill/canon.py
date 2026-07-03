@@ -165,11 +165,6 @@ def _match_entity(value: Any, aliases: tuple[str, ...], text_norm: str) -> bool:
     return any(_item_in_text(strip_legal(f), stripped_text) for f in _gold_forms(value, aliases))
 
 
-def _match_list(value: Any, aliases: tuple[str, ...], text_norm: str) -> bool:
-    items = list(value) if isinstance(value, list | tuple | set) else [value]
-    return _match_entity(None, tuple(str(i) for i in items) + aliases, text_norm)
-
-
 def _match_year(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool:
     golds = set()
     for f in _gold_forms(value, aliases):
@@ -245,7 +240,7 @@ def _match_amount(value: Any, aliases: tuple[str, ...], raw_text: str, *, rel_to
 
 
 FIELD_TYPES = frozenset(
-    {"person", "entity", "list", "year", "country", "domain", "exact_id", "money", "numeric_band"}
+    {"person", "entity", "year", "country", "domain", "exact_id", "money", "numeric_band"}
 )
 
 
@@ -266,8 +261,6 @@ def gold_in_text(
         return _match_person(value, aliases, norm)
     if field_type == "entity":
         return _match_entity(value, aliases, norm)
-    if field_type == "list":
-        return _match_list(value, aliases, norm)
     if field_type == "year":
         return _match_year(value, aliases, raw)
     if field_type == "country":

@@ -1,4 +1,9 @@
-from keenbench.shared.search.base import HttpSearchClient, SearchClient, SearchResult
+from keenbench.shared.search.base import (
+    HttpSearchClient,
+    SearchClient,
+    SearchResult,
+    latency_stats,
+)
 from keenbench.shared.search.brave import BraveClient
 from keenbench.shared.search.exa import ExaClient
 from keenbench.shared.search.factory import build_search_clients
@@ -18,4 +23,5 @@ __all__ = [
     "SearchResult",
     "TavilyClient",
     "build_search_clients",
+    "latency_stats",
 ]

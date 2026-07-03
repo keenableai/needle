@@ -387,21 +387,24 @@ method satisfies the `LLMClient` protocol. The ranking harness is
 
 ## Continuous benchmarks
 
-[`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule:
-freshstream hourly (`--limit 20`), and companyfill + scholar daily at 00:17 UTC
-(fresh gold each — companyfill `--limit 100`, scholar `--per-cell 7`). Each run:
+[`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule
+against all registered engines: freshstream hourly (`--limit 20`), and
+companyfill + scholar daily at 00:17 UTC (fresh gold each — companyfill
+`--limit 100` with `--judge` backstop, scholar `--per-cell 7`). Each run:
 
-- appends summary rows to `data/history.jsonl` on the `gh-pages` branch —
-  rendered as a dashboard (trends, latest tiles, per-field table, judgement
-  browser) at <https://super-journey-4z52474.pages.github.io/> (the URL becomes
-  `keenableai.github.io/keenbench` when the repo goes public);
+- appends summary rows to `data/history.jsonl` and per-engine-pair URL-overlap
+  rows (mean Jaccard of normalized top-K URL sets per query) to
+  `data/overlap.jsonl` on the `gh-pages` branch — rendered as a dashboard
+  (trends, latest tiles, per-field table, a last-24h engine-overlap matrix,
+  judgement browser) at <https://super-journey-4z52474.pages.github.io/> (the
+  URL becomes `keenableai.github.io/keenbench` when the repo goes public);
 - archives the full artifacts (reports with per-result judge reasoning, the
   generated queries, the gold) to the public HF dataset
   [`keenable-ai/keenbench-results`](https://huggingface.co/datasets/keenable-ai/keenbench-results)
   under `runs/<utc-hour>/`, which the dashboard's judgement browser reads.
 
-Needs repo secrets: `OPENROUTER_API_KEY`, `EXA_API_KEY`, `HF_TOKEN`
-(`KEENABLE_API_KEY` optional).
+Needs repo secrets: `OPENROUTER_API_KEY`, `HF_TOKEN`, and the per-engine keys
+listed under [Configuration](#configuration) (`KEENABLE_API_KEY` optional).
 
 ## Development
 

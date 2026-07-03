@@ -77,7 +77,7 @@ jobs:
           uv run keenbench companyfill generate --max-companies 100 \
             --out site-data/data/gold.jsonl
           uv run keenbench companyfill run --queries site-data/data/gold.jsonl \
-            --limit 100 --engines "$ENGINES" --out recall.json
+            --limit 100 --engines "$ENGINES" --judge --out recall.json
 
       - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
         env:
@@ -95,6 +95,9 @@ jobs:
 
       - name: Publish
         run: |
+          # seeds overlap.jsonl from HF-archived runs; no-op once caught up,
+          # non-fatal so HF availability can't block the publish
+          uv run python scripts/backfill_overlap.py --site site-data || echo "overlap backfill skipped"
           TS=$(date -u +%Y-%m-%dT%H:%MZ)
           args="--site site-data --runs-out staged --ts $TS --rbp rbp.json --fresh fresh.jsonl"
           if [ -s recall.json ]; then

@@ -1,11 +1,29 @@
 import asyncio
 import json
+import math
+import time
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 import httpx
 
 MAX_ERROR_CHARS = 500
+
+
+def latency_stats(latencies_ms: list[float]) -> dict[str, float | int] | None:
+    if not latencies_ms:
+        return None
+    values = sorted(latencies_ms)
+
+    def pct(p: float) -> float:
+        return values[max(0, math.ceil(p * len(values)) - 1)]
+
+    return {
+        "n": len(values),
+        "mean_ms": round(sum(values) / len(values), 1),
+        "p50_ms": round(pct(0.5), 1),
+        "p95_ms": round(pct(0.95), 1),
+    }
 
 
 @dataclass(frozen=True)
@@ -20,6 +38,7 @@ class SearchResult:
 
 class SearchClient(Protocol):
     engine: str
+    latencies_ms: list[float]
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -35,6 +54,7 @@ class HttpSearchClient:
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
         self.timeout_s = timeout_s
+        self.latencies_ms: list[float] = []
         self._client: httpx.AsyncClient | None = None
         self._sem = asyncio.Semaphore(max_concurrency)
 
@@ -53,7 +73,9 @@ class HttpSearchClient:
     ) -> tuple[Any, dict[str, str] | None]:
         try:
             async with self._sem:
+                started = time.perf_counter()
                 resp = await self._http().request(method, url, **kwargs)
+                elapsed_ms = (time.perf_counter() - started) * 1000.0
         except httpx.HTTPError as exc:
             return None, {"error_type": "transport", "error_message": str(exc)[:MAX_ERROR_CHARS]}
         if resp.status_code != 200:
@@ -70,4 +92,5 @@ class HttpSearchClient:
                 "error_type": "api_error",
                 "error_message": str(payload[error_field])[:MAX_ERROR_CHARS],
             }
+        self.latencies_ms.append(elapsed_ms)
         return payload, None

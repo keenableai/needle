@@ -1,5 +1,4 @@
 import asyncio
-import re
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -19,7 +18,6 @@ from keenbench.companyfill.registries import (
     current_ceo,
     employees,
     founded_year,
-    industry_qids,
     latest_annual,
     lei,
     website,
@@ -30,7 +28,6 @@ COMPANYFILL_MIN_FIELDS = 4
 FINANCIALS_MIN_FIELDS = 3
 FINANCIALS_MAX_AGE_YEARS = 2
 COMPANY_CONCURRENCY = 16
-JUNK_INDUSTRY_MARKERS = ("classification", "standard industrial", "except", "n.e.c")
 
 
 def _seed_title(title: str) -> str:
@@ -48,9 +45,10 @@ class GenStats:
 def _grounded_fields(
     claims: dict,
     labels: dict[str, tuple[str, list[str]]],
+    qid: str,
     ceo_qid: str | None,
+    ceo_since: int | None,
     country: str | None,
-    industry_qids: list[str],
     *,
     min_employee_year: int,
 ) -> list[tuple[str, Any, list[str]]]:
@@ -58,20 +56,17 @@ def _grounded_fields(
     if ceo_qid and ceo_qid in labels:
         label, aliases = labels[ceo_qid]
         fields.append(("ceo", label, aliases))
+        if ceo_since is not None:
+            fields.append(("ceo_since", ceo_since, []))
+        if qid in labels:
+            company_label, company_aliases = labels[qid]
+            fields.append(("ceo_company", company_label, company_aliases))
     founded = founded_year(claims)
     if founded is not None:
         fields.append(("founded_year", founded, []))
     if country and country in labels:
         label, aliases = labels[country]
         fields.append(("hq_country", label, aliases))
-    industry_labels = [
-        re.sub(r"\s+industry$", "", labels[q][0], flags=re.IGNORECASE)
-        for q in industry_qids
-        if q in labels
-        and not any(marker in labels[q][0].lower() for marker in JUNK_INDUSTRY_MARKERS)
-    ]
-    if industry_labels:
-        fields.append(("industry", industry_labels, []))
     site = website(claims)
     if site:
         domain = registrable_domain(site)
@@ -94,19 +89,19 @@ async def _companyfill_rows(
     title, ticker, cik = seed_row["title"], seed_row["ticker"], seed_row["cik"]
     qid = await wikidata.resolve(_seed_title(title))
     fields: list[tuple[str, Any, list[str], str, str]] = []
+    ceo_name = ""
     if qid:
         source_url = f"https://www.wikidata.org/wiki/{qid}"
         claims = await wikidata.entity(qid)
-        ceo_qid = current_ceo(claims)
+        ceo_qid, ceo_since = current_ceo(claims)
         country = await wikidata.country_qid(claims)
-        industries = industry_qids(claims)
-        labels = await wikidata.labels_and_aliases(
-            [q for q in [ceo_qid, country, *industries] if q]
-        )
+        labels = await wikidata.labels_and_aliases([q for q in [qid, ceo_qid, country] if q])
         for field, value, aliases in _grounded_fields(
-            claims, labels, ceo_qid, country, industries, min_employee_year=min_employee_year
+            claims, labels, qid, ceo_qid, ceo_since, country, min_employee_year=min_employee_year
         ):
             fields.append((field, value, aliases, "wikidata", source_url))
+        if ceo_qid and ceo_qid in labels:
+            ceo_name = labels[ceo_qid][0].lower()
         lei_val = lei(claims)
         lei_registry = "wikidata"
         if gleif is not None and not lei_val:
@@ -121,21 +116,28 @@ async def _companyfill_rows(
         return []
     name = display_name(title)
     entity_keys = {"entity": title, "ticker": ticker, "cik": cik, "qid": qid}
-    return [
-        build_gold_row(
-            field=field,
-            spec=COMPANYFILL_FIELDS[field],
-            value=value,
-            aliases=aliases,
-            bucket="companyfill",
-            query_text=COMPANYFILL_FIELDS[field].template.format(name=name),
-            entity_keys=entity_keys,
-            registry=registry,
-            source_url=source_url,
-            hour_ts=hour_ts,
-        )
-        for field, value, aliases, registry, source_url in fields
-    ]
+    rows = []
+    for field, value, aliases, registry, source_url in fields:
+        spec = COMPANYFILL_FIELDS[field]
+        variants = [("companyfill", spec.template)]
+        if spec.nl_template:
+            variants.append(("companyfill_nl", spec.nl_template))
+        for bucket, template in variants:
+            rows.append(
+                build_gold_row(
+                    field=field,
+                    spec=spec,
+                    value=value,
+                    aliases=aliases,
+                    bucket=bucket,
+                    query_text=template.format(name=name, ceo=ceo_name),
+                    entity_keys=entity_keys,
+                    registry=registry,
+                    source_url=source_url,
+                    hour_ts=hour_ts,
+                )
+            )
+    return rows
 
 
 async def _financials_rows(seed_row: dict, sec: SecClient, *, hour_ts: datetime) -> list[dict]:
