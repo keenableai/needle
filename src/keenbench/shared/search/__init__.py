@@ -9,6 +9,7 @@ from keenbench.shared.search.exa import ExaClient
 from keenbench.shared.search.factory import build_search_clients
 from keenbench.shared.search.keenable import KeenableClient
 from keenbench.shared.search.parallel import ParallelClient
+from keenbench.shared.search.perplexity import PerplexityClient
 from keenbench.shared.search.searchapi import SearchApiClient
 from keenbench.shared.search.tavily import TavilyClient
 
@@ -18,6 +19,7 @@ __all__ = [
     "HttpSearchClient",
     "KeenableClient",
     "ParallelClient",
+    "PerplexityClient",
     "SearchApiClient",
     "SearchClient",
     "SearchResult",
