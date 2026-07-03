@@ -379,7 +379,13 @@ async def test_latency_recorded_only_for_ok_responses(monkeypatch):
 
 def test_latency_stats():
     assert latency_stats([]) is None
-    assert latency_stats([100.0]) == {"n": 1, "mean_ms": 100.0, "p50_ms": 100.0, "p95_ms": 100.0}
+    assert latency_stats([100.0]) == {
+        "n": 1,
+        "mean_ms": 100.0,
+        "p50_ms": 100.0,
+        "p95_ms": 100.0,
+        "samples_ms": [100.0],
+    }
     stats = latency_stats([float(v) for v in range(1, 101)])
     assert stats["n"] == 100
     assert stats["mean_ms"] == 50.5

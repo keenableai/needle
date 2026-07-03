@@ -146,6 +146,7 @@ async def test_run_rbp_reports_latency():
         "mean_ms": 200.0,
         "p50_ms": 100.0,
         "p95_ms": 300.0,
+        "samples_ms": [100.0, 300.0],
     }
     assert report["engines"]["plain"]["latency"] is None
 

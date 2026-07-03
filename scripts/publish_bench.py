@@ -34,6 +34,7 @@ def freshstream_rows(report: dict, ts: str) -> list[dict]:
             "judge_errors": e["judge_errors"],
             "p50_ms": (e.get("latency") or {}).get("p50_ms"),
             "p95_ms": (e.get("latency") or {}).get("p95_ms"),
+            "lat_ms": (e.get("latency") or {}).get("samples_ms"),
         }
         for name, e in report["engines"].items()
     ]
@@ -52,6 +53,7 @@ def companyfill_rows(report: dict, ts: str) -> list[dict]:
             "search_errors": e["search_errors"],
             "p50_ms": (e.get("latency") or {}).get("p50_ms"),
             "p95_ms": (e.get("latency") or {}).get("p95_ms"),
+            "lat_ms": (e.get("latency") or {}).get("samples_ms"),
         }
         for name, e in report["engines"].items()
     ]
@@ -70,6 +72,9 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
             "num_scored": e["num_scored"],
             "num_queries": report["num_queries"],
             "search_errors": e["search_errors"],
+            "p50_ms": (e.get("latency") or {}).get("p50_ms"),
+            "p95_ms": (e.get("latency") or {}).get("p95_ms"),
+            "lat_ms": (e.get("latency") or {}).get("samples_ms"),
         }
         for name, e in report["engines"].items()
     ]

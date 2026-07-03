@@ -6,7 +6,7 @@ from typing import Any
 from keenbench.scholar.idconv import IdConverter
 from keenbench.scholar.ids import PaperIds, extract_ids
 from keenbench.scholar.models import AGE_BUCKETS
-from keenbench.shared.search import SearchClient, SearchResult
+from keenbench.shared.search import SearchClient, SearchResult, latency_stats
 
 
 @dataclass(frozen=True)
@@ -110,6 +110,7 @@ async def run_papers(
             "mrr_at_k": (sum(1.0 / pq["hit_rank"] for pq in hits) / len(scored) if scored else 0.0),
             "num_scored": len(scored),
             "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
+            "latency": latency_stats(engines[name].latencies_ms),
             "by_bucket": _grouped(scored, "bucket"),
             "by_suite": _grouped(scored, "suite"),
             "by_age": _age_order(_group(scored, lambda pq: pq["age_bucket"])),
