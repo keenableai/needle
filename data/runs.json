@@ -236,5 +236,13 @@
       "scholar.json",
       "scholar.jsonl"
     ]
+  },
+  {
+    "id": "2026-07-03T1556Z",
+    "ts": "2026-07-03T15:56Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
   }
 ]
