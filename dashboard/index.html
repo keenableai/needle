@@ -264,7 +264,7 @@
   <p class="section-desc">Fresh, time-sensitive queries mined hourly from RSS feeds and Google Trends, scored on ranking quality (RBP@5) by an LLM relevance judge.</p>
   <div class="card" id="card-rbp">
     <h2>freshstream — RBP@5</h2>
-    <div class="sub">20 fresh queries per run, 6-hour means; the hairline marks the metric ceiling</div>
+    <div class="sub">20 fresh queries per run, mean RBP over all queries in each 6-hour window; the hairline marks the metric ceiling</div>
   </div>
 
   <h3 class="subsection-title" id="sec-companyfill">companyfill</h3>
@@ -369,17 +369,24 @@ function seriesFor(bench, metric, rows) {
 
 const WINDOW_MS = 6 * 3600e3;
 
-function bucketSeries(series) {
+function rbpSeries(rows) {
   const out = {};
+  const byEngine = new Map();
   for (const e of ENGINES) {
-    const buckets = new Map();
-    for (const p of series[e]) {
-      const b = Math.floor(p.t.getTime() / WINDOW_MS) * WINDOW_MS;
-      const agg = buckets.get(b) || { sum: 0, n: 0 };
-      agg.sum += p.v;
-      agg.n++;
-      buckets.set(b, agg);
-    }
+    out[e] = [];
+    byEngine.set(e, new Map());
+  }
+  for (const r of rows) {
+    const buckets = byEngine.get(r.engine);
+    if (!buckets || r.bench !== "freshstream" || r.rbp == null) continue;
+    const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
+    const agg = buckets.get(b) || { sum: 0, n: 0 };
+    const n = r.num_scored || 1;
+    agg.sum += r.rbp * n;
+    agg.n += n;
+    buckets.set(b, agg);
+  }
+  for (const [e, buckets] of byEngine) {
     out[e] = [...buckets].map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
   }
   return out;
@@ -942,8 +949,8 @@ async function initRunBrowser() {
 
 function drawCharts(rows) {
   const ceiling = rows.filter((r) => r.bench === "freshstream").at(-1)?.rbp_max;
-  drawChart(document.getElementById("card-rbp"), bucketSeries(seriesFor("freshstream", "rbp", rows)),
-    { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine, 6-hour means" });
+  drawChart(document.getElementById("card-rbp"), rbpSeries(rows),
+    { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine, 6-hour windows" });
   drawChart(document.getElementById("card-recall"), seriesFor("companyfill", "recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
