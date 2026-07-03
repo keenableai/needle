@@ -68,7 +68,7 @@ def uniqueness_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
         for i, s in enumerate(sets):
             if s is None:
                 continue
-            others = [o[i] for n2, o in url_sets.items() if n2 != name and o[i] is not None]
+            others = [s2 for n2, o in url_sets.items() if n2 != name and (s2 := o[i]) is not None]
             if not others:
                 continue
             total += len(s)
