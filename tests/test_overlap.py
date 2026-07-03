@@ -1,4 +1,4 @@
-from keenbench.shared.overlap import normalize_url, overlap_rows
+from keenbench.shared.overlap import normalize_url, overlap_rows, uniqueness_rows
 
 
 def test_normalize_url():
@@ -71,3 +71,41 @@ def test_overlap_url_normalization_joins_variants():
     )
     (row,) = overlap_rows(report, ts="t")
     assert row["jaccard_sum"] == 1.0
+
+
+def test_overlap_num_shared3():
+    shared = ["https://a.com", "https://b.com", "https://c.com"]
+    report = _report(
+        {
+            "e1": [_pq(shared + ["https://d.com"]), _pq(["https://a.com", "https://b.com"])],
+            "e2": [_pq(shared + ["https://e.com"]), _pq(["https://a.com", "https://b.com"])],
+        }
+    )
+    (row,) = overlap_rows(report, ts="t")
+    assert row["num_shared3"] == 1
+    assert row["num_queries"] == 2
+
+
+def test_uniqueness_rows():
+    report = _report(
+        {
+            "e1": [_pq(["https://a.com", "https://b.com"]), _pq(["https://x.com"])],
+            "e2": [_pq(["https://www.a.com/"]), _pq(["https://y.com"])],
+            "e3": [_pq(["https://c.com"]), _pq([], error={"error_type": "transport"})],
+        }
+    )
+    by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
+    assert by_engine["e1"] == {"ts": "t", "engine": "e1", "unique_urls": 2, "total_urls": 3}
+    assert by_engine["e2"] == {"ts": "t", "engine": "e2", "unique_urls": 1, "total_urls": 2}
+    assert by_engine["e3"] == {"ts": "t", "engine": "e3", "unique_urls": 1, "total_urls": 1}
+
+
+def test_uniqueness_skips_queries_with_no_other_engine():
+    report = _report(
+        {
+            "e1": [_pq(["https://a.com"])],
+            "e2": [_pq([], error={"error_type": "transport"})],
+        }
+    )
+    by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
+    assert by_engine["e1"] == {"ts": "t", "engine": "e1", "unique_urls": 0, "total_urls": 0}
