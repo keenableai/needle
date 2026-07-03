@@ -7,8 +7,6 @@ from keenbench.scholar.sources import (
     _parse_dt,
     parse_arxiv_atom,
     parse_epmc_result,
-    parse_openalex_work,
-    reconstruct_abstract,
 )
 
 ATOM = """<?xml version="1.0" encoding="UTF-8"?>
@@ -82,57 +80,6 @@ def test_parse_dt():
     assert _parse_dt(None) is None
 
 
-def test_reconstruct_abstract():
-    inverted = {"deep": [1], "We": [0], "nets": [2, 4], "train": [3]}
-    assert reconstruct_abstract(inverted) == "We deep nets train nets"
-    assert reconstruct_abstract({}) == ""
-
-
-def _work(**overrides):
-    work = {
-        "title": "A  Study of\nThings",
-        "doi": "https://doi.org/10.1234/ABC",
-        "ids": {
-            "doi": "https://doi.org/10.1234/ABC",
-            "pmid": "https://pubmed.ncbi.nlm.nih.gov/12345678",
-        },
-        "publication_date": "2026-05-01",
-        "primary_topic": {"domain": {"display_name": "Health Sciences"}},
-        "primary_location": {"landing_page_url": "https://journal.example/paper"},
-        "abstract_inverted_index": {"An": [0], "abstract": [1]},
-    }
-    work.update(overrides)
-    return work
-
-
-def test_parse_openalex_work():
-    paper = parse_openalex_work(_work())
-    assert paper is not None
-    assert paper.title == "A Study of Things"
-    assert paper.abstract == "An abstract"
-    assert paper.doi == "10.1234/abc"
-    assert paper.pmid == "12345678"
-    assert paper.domain == "health sciences"
-    assert paper.url == "https://journal.example/paper"
-    assert paper.published == datetime(2026, 5, 1, tzinfo=UTC)
-    assert paper.ids == {"doi": "10.1234/abc", "pmid": "12345678"}
-
-
-def test_parse_openalex_work_fallbacks():
-    paper = parse_openalex_work(_work(ids={}, primary_location=None, primary_topic=None))
-    assert paper is not None
-    assert paper.pmid is None
-    assert paper.domain == "physical sciences"
-    assert paper.url == "https://doi.org/10.1234/abc"
-
-
-def test_parse_openalex_work_rejects_incomplete():
-    assert parse_openalex_work(_work(abstract_inverted_index={})) is None
-    assert parse_openalex_work(_work(title="")) is None
-    assert parse_openalex_work(_work(doi=None, ids={})) is None
-    assert parse_openalex_work(_work(publication_date=None)) is None
-
-
 def _epmc(**overrides):
     rec = {
         "title": "Survival in  mice.",
@@ -172,16 +119,13 @@ def test_parse_epmc_result_rejects_incomplete():
 
 
 def test_coarse_domain():
-    assert coarse_domain("cs.LG", suite="arxiv") == "computer science"
-    assert coarse_domain("math.AT", suite="arxiv") == "physical sciences"
-    assert coarse_domain("hep-th", suite="arxiv") == "physical sciences"
-    assert coarse_domain("q-bio.NC", suite="arxiv") == "life sciences"
-    assert coarse_domain("econ.EM", suite="arxiv") == "social sciences"
-    assert coarse_domain("q-fin.PR", suite="arxiv") == "social sciences"
-    assert coarse_domain("Health Sciences", suite="openalex") == "health sciences"
-    assert coarse_domain("Social Sciences", suite="openalex") == "social sciences"
-    assert coarse_domain("", suite="openalex") == "physical sciences"
-    assert coarse_domain("anything", suite="europepmc") == "health sciences"
+    assert coarse_domain("cs.LG") == "computer science"
+    assert coarse_domain("math.AT") == "physical sciences"
+    assert coarse_domain("hep-th") == "physical sciences"
+    assert coarse_domain("q-bio.NC") == "life sciences"
+    assert coarse_domain("econ.EM") == "social sciences"
+    assert coarse_domain("q-fin.PR") == "social sciences"
+    assert coarse_domain("") == "physical sciences"
 
 
 def test_age_bucket():

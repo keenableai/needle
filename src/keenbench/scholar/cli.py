@@ -12,7 +12,7 @@ from keenbench.scholar.score import GoldPaper, run_papers
 from keenbench.scholar.sources import ArxivClient, EuropePmcClient
 from keenbench.shared.cli import build_clients_or_exit, parse_csv, sample_or_exit
 from keenbench.shared.io import write_json, write_jsonl
-from keenbench.shared.llm import OpenRouterClient
+from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
 
 KNOWN_SUITES = ("arxiv", "europepmc")
 
@@ -96,7 +96,7 @@ class Scholar:
         key = os.environ.get("OPENROUTER_API_KEY")
         if not key:
             raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for body queries)")
-        model = llm_model or os.environ.get("KEENBENCH_LLM_MODEL") or "google/gemini-3.1-flash-lite"
+        model = resolve_llm_model(llm_model)
         llm = OpenRouterClient(api_key=key, model=model)
 
         async def _go() -> tuple[list[dict], GenStats]:

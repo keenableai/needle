@@ -18,13 +18,11 @@ USER_AGENT = "keenbench/0.1 (contact@keenable.ai)"
 
 ARXIV_API = "https://export.arxiv.org/api/query"
 ARXIV_HTML = "https://arxiv.org/html/{arxiv_id}"
-OPENALEX_WORKS = "https://api.openalex.org/works"
 EUROPEPMC_XML = "https://www.ebi.ac.uk/europepmc/webservices/rest/PMC{pmcid}/fullTextXML"
 EUROPEPMC_SEARCH = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
 ARXIV_NS = {"atom": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas/atom"}
 ARXIV_ID_RE = re.compile(r"arxiv\.org/abs/(.+?)(v\d+)?$")
-PMID_URL_RE = re.compile(r"pubmed\.ncbi\.nlm\.nih\.gov/(\d+)")
 PMCID_URL_RE = re.compile(r"PMC(\d+)", re.IGNORECASE)
 
 ARXIV_DOMAIN_QUERY = {
@@ -32,14 +30,6 @@ ARXIV_DOMAIN_QUERY = {
     "physical sciences": "(cat:physics.* OR cat:math.* OR cat:stat.* OR cat:cond-mat.* OR cat:astro-ph.*)",
     "life sciences": "cat:q-bio.*",
     "social sciences": "(cat:econ.* OR cat:q-fin.*)",
-}
-
-OPENALEX_MAX_SAMPLE = 200
-OPENALEX_DOMAINS = {
-    "physical sciences": 3,
-    "life sciences": 1,
-    "health sciences": 4,
-    "social sciences": 2,
 }
 
 
@@ -100,41 +90,12 @@ def parse_arxiv_atom(text: str) -> list[Paper]:
                 abstract=abstract,
                 published=published,
                 url=f"https://arxiv.org/abs/{arxiv_id}",
-                domain=coarse_domain(category, suite="arxiv"),
+                domain=coarse_domain(category),
                 arxiv_id=arxiv_id,
                 doi=_norm_doi(_el_text(entry.find("arxiv:doi", ARXIV_NS))),
             )
         )
     return papers
-
-
-def reconstruct_abstract(inverted_index: dict[str, list[int]]) -> str:
-    positions = [(i, word) for word, idxs in inverted_index.items() for i in idxs]
-    positions.sort()
-    return " ".join(word for _, word in positions)
-
-
-def parse_openalex_work(work: dict[str, Any]) -> Paper | None:
-    title = " ".join((work.get("title") or "").split())
-    abstract = reconstruct_abstract(work.get("abstract_inverted_index") or {})
-    published = _parse_dt(work.get("publication_date"))
-    ids = work.get("ids") or {}
-    doi = _norm_doi(ids.get("doi") or work.get("doi"))
-    if not title or not abstract or published is None or not doi:
-        return None
-    pmid_m = PMID_URL_RE.search(ids.get("pmid") or "")
-    domain = ((work.get("primary_topic") or {}).get("domain") or {}).get("display_name") or ""
-    url = (work.get("primary_location") or {}).get("landing_page_url") or f"https://doi.org/{doi}"
-    return Paper(
-        suite="openalex",
-        title=title,
-        abstract=abstract,
-        published=published,
-        url=url,
-        domain=coarse_domain(domain, suite="openalex"),
-        doi=doi,
-        pmid=pmid_m.group(1) if pmid_m else None,
-    )
 
 
 def parse_epmc_result(rec: dict[str, Any]) -> Paper | None:
@@ -209,63 +170,6 @@ class ArxivClient(ScholarClient):
         if not html:
             return None
         return html_body_text(html) or None
-
-
-class OpenAlexClient(ScholarClient):
-    def __init__(self, *, mailto: str | None = None, **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-        self.mailto = mailto
-
-    async def sample(
-        self, *, from_date: str, to_date: str, n: int, seed: int, extra_filter: str = ""
-    ) -> list[Paper]:
-        n = min(n, OPENALEX_MAX_SAMPLE)
-        filter_expr = (
-            "type:article,has_doi:true,has_abstract:true,language:en,"
-            f"from_publication_date:{from_date},to_publication_date:{to_date}"
-        )
-        if extra_filter:
-            filter_expr += f",{extra_filter}"
-        params = {
-            "filter": filter_expr,
-            "sample": n,
-            "seed": seed,
-            "per-page": n,
-            "select": (
-                "title,doi,ids,publication_date,primary_topic,"
-                "primary_location,abstract_inverted_index"
-            ),
-        }
-        if self.mailto:
-            params["mailto"] = self.mailto
-        payload, err = await self._request_json(
-            "GET", OPENALEX_WORKS, params=params, headers={"User-Agent": USER_AGENT}
-        )
-        if err is not None or not isinstance(payload, dict):
-            return []
-        papers = []
-        for work in payload.get("results") or []:
-            paper = parse_openalex_work(work)
-            if paper is not None:
-                papers.append(paper)
-        return papers
-
-    async def sample_balanced(
-        self, *, from_date: str, to_date: str, n: int, seed: int
-    ) -> list[Paper]:
-        per_domain = max(1, n // len(OPENALEX_DOMAINS))
-        papers = []
-        for domain_id in OPENALEX_DOMAINS.values():
-            papers.extend(
-                await self.sample(
-                    from_date=from_date,
-                    to_date=to_date,
-                    n=per_domain,
-                    seed=seed,
-                    extra_filter=f"primary_topic.domain.id:{domain_id}",
-                )
-            )
-        return papers
 
 
 class EuropePmcClient(ScholarClient):

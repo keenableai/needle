@@ -11,10 +11,8 @@ from keenbench.freshstream.trends import GoogleTrendsRssProvider, parse_geos
 from keenbench.shared.cli import build_clients_or_exit, sample_or_exit
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.judge import DEFAULT_MAX_CONTENT_CHARS
-from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
+from keenbench.shared.llm import OpenRouterClient, resolve_judge_model, resolve_llm_model
 from keenbench.shared.rankeval import EvalQuery, run_rbp
-
-DEFAULT_MODEL = "google/gemini-3.1-flash-lite"
 
 
 def _read_queries_file(path: str) -> list[str]:
@@ -103,7 +101,7 @@ class Freshstream:
         if not api_key:
             raise SystemExit("error: OPENROUTER_API_KEY is not set")
 
-        model = llm_model or os.environ.get("KEENBENCH_LLM_MODEL") or DEFAULT_MODEL
+        model = resolve_llm_model(llm_model)
         llm = OpenRouterClient(api_key=api_key, model=model)
         hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
         llm_concurrency = max(1, llm_concurrency)

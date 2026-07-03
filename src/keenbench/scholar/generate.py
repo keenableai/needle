@@ -2,7 +2,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from typing import Any
 
-from keenbench.scholar.models import Paper, build_gold_row
+from keenbench.scholar.models import AGE_BANDS, Paper, build_gold_row
 from keenbench.scholar.projection import (
     body_query_ok,
     build_body_prompt,
@@ -22,15 +22,19 @@ ARXIV_DOMAINS = (
 HEALTH_DOMAIN = "health sciences"
 OVERSAMPLE = 3
 
-# Narrow bands at each bucket's target age so a paper's true published-date age
-# lands inside the bucket; a wide window + newest-first source ordering would
-# pile every result at the young edge and mislabel it.
-AGE_BANDS = {
-    "7d": (7, 0),
-    "30d": (30, 23),
-    "1y": (364, 357),
-    "older": (740, 726),
+_DROP_STAT = {
+    "fetch": "body_fetch_fail",
+    "llm_error": "llm_errors",
+    "no_query": "body_no_query",
+    "leak": "body_leak_rejected",
 }
+
+
+@dataclass(frozen=True)
+class Candidate:
+    cell: tuple[str, str]
+    paper: Paper
+    title_query: str
 
 
 @dataclass
@@ -130,45 +134,37 @@ async def run_generate(
 
     stats = GenStats()
     seen_keys: set[str] = set()
-    candidates: list[tuple[tuple[str, str], Paper]] = []
+    candidates: list[Candidate] = []
     for cell, papers in zip(cells, candidate_lists, strict=True):
         for paper in papers:
-            if not degrade_title(paper.title) or paper.paper_key in seen_keys:
+            title_query = degrade_title(paper.title)
+            if not title_query or paper.paper_key in seen_keys:
                 continue
             seen_keys.add(paper.paper_key)
-            candidates.append((cell, replace(paper, domain=cell[0])))
+            candidates.append(Candidate(cell, replace(paper, domain=cell[0]), title_query))
     stats.candidates = len(candidates)
 
-    async def _pair(
-        item: tuple[tuple[str, str], Paper],
-    ) -> tuple[tuple[str, str], Paper, str | None]:
-        _, paper = item
-        body = await _fetch_body(paper, arxiv=arxiv, europepmc=europepmc)
+    async def _pair(cand: Candidate) -> tuple[Candidate, str | None, str | None]:
+        body = await _fetch_body(cand.paper, arxiv=arxiv, europepmc=europepmc)
         if not body:
-            return item[0], paper, None
-        query, err = await _body_query(llm, paper, body)
+            return cand, None, "fetch"
+        query, err = await _body_query(llm, cand.paper, body)
         if err is not None:
-            return item[0], paper, "__llm_error__"
+            return cand, None, "llm_error"
         if query is None:
-            return item[0], paper, "__no_query__"
-        if not body_query_ok(query, title=paper.title, abstract=paper.abstract):
-            return item[0], paper, "__leak__"
-        return item[0], paper, query
+            return cand, None, "no_query"
+        if not body_query_ok(query, title=cand.paper.title, abstract=cand.paper.abstract):
+            return cand, None, "leak"
+        return cand, query, None
 
     paired = await bounded_gather(candidates, _pair, concurrency=body_concurrency)
 
-    by_cell: dict[tuple[str, str], list[tuple[Paper, str]]] = {c: [] for c in cells}
-    for cell, paper, body_query in paired:
-        if body_query is None:
-            stats.body_fetch_fail += 1
-        elif body_query == "__llm_error__":
-            stats.llm_errors += 1
-        elif body_query == "__no_query__":
-            stats.body_no_query += 1
-        elif body_query == "__leak__":
-            stats.body_leak_rejected += 1
-        else:
-            by_cell[cell].append((paper, body_query))
+    by_cell: dict[tuple[str, str], list[tuple[Candidate, str]]] = {c: [] for c in cells}
+    for cand, body_query, drop in paired:
+        if drop is not None:
+            setattr(stats, _DROP_STAT[drop], getattr(stats, _DROP_STAT[drop]) + 1)
+        elif body_query is not None:
+            by_cell[cand.cell].append((cand, body_query))
 
     rows: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
@@ -176,13 +172,10 @@ async def run_generate(
         selected = by_cell[cell][:per_cell]
         if len(selected) < per_cell:
             stats.short_cells += 1
-        for paper, body_query in selected:
-            title_query = degrade_title(paper.title)
-            if not title_query:
-                continue
-            for bucket, text in (("title", title_query), ("body", body_query)):
+        for cand, body_query in selected:
+            for bucket, text in (("title", cand.title_query), ("body", body_query)):
                 row = build_gold_row(
-                    paper, query_text=text, bucket=bucket, hour_ts=hour_ts, now=now
+                    cand.paper, query_text=text, bucket=bucket, hour_ts=hour_ts, now=now
                 )
                 if row["query_id"] in seen_ids:
                     continue

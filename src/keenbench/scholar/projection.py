@@ -71,6 +71,7 @@ STOPWORDS = frozenset(
 
 _TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9\-]*")
 _LATEX_RE = re.compile(r"\$[^$]*\$|\\[a-zA-Z]+\{[^}]*\}|\\[a-zA-Z]+")
+_PUNCT_RE = re.compile(r"[^a-zA-Z0-9\s\-]")
 
 
 def _tokens(text: str) -> list[str]:
@@ -83,7 +84,7 @@ def content_tokens(text: str) -> set[str]:
 
 def degrade_title(title: str) -> str | None:
     text = _LATEX_RE.sub(" ", title)
-    text = re.sub(r"[^a-zA-Z0-9\s\-]", " ", text)
+    text = _PUNCT_RE.sub(" ", text)
     words = text.lower().split()
     if len(words) < MIN_TITLE_WORDS:
         return None

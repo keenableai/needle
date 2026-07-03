@@ -6,12 +6,17 @@ import httpx
 
 MAX_ERROR_CHARS = 500
 DEFAULT_JUDGE_MODEL = "google/gemini-3-flash-preview"
+DEFAULT_LLM_MODEL = "google/gemini-3.1-flash-lite"
 
 NO_REASONING_EFFORTS = frozenset({"", "none", "minimal"})
 
 
 def resolve_judge_model(explicit: str | None) -> str:
     return explicit or os.environ.get("KEENBENCH_JUDGE_MODEL") or DEFAULT_JUDGE_MODEL
+
+
+def resolve_llm_model(explicit: str | None) -> str:
+    return explicit or os.environ.get("KEENBENCH_LLM_MODEL") or DEFAULT_LLM_MODEL
 
 
 class LLMClient(Protocol):

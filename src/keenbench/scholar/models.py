@@ -7,38 +7,26 @@ from keenbench.shared.identity import query_hash, query_id
 
 AGE_BUCKETS = ("7d", "30d", "1y", "older")
 AGE_BUCKET_DAYS = {"7d": 7, "30d": 30, "1y": 365}
+AGE_BANDS = {
+    "7d": (7, 0),
+    "30d": (30, 23),
+    "1y": (364, 357),
+    "older": (740, 726),
+}
 
-QUERY_BUCKETS = ("title", "body")
 SCHOLAR_SOURCE = "scholar"
 
-COARSE_DOMAINS = (
-    "computer science",
-    "physical sciences",
-    "life sciences",
-    "health sciences",
-    "social sciences",
-)
 _ARXIV_CAT_DOMAIN = {
     "cs": "computer science",
     "q-bio": "life sciences",
     "econ": "social sciences",
     "q-fin": "social sciences",
 }
-_OPENALEX_DOMAIN = {
-    "physical sciences": "physical sciences",
-    "life sciences": "life sciences",
-    "health sciences": "health sciences",
-    "social sciences": "social sciences",
-}
 
 
-def coarse_domain(raw: str, *, suite: str) -> str:
-    if suite == "arxiv":
-        prefix = raw.split(".", 1)[0].lower()
-        return _ARXIV_CAT_DOMAIN.get(prefix, "physical sciences")
-    if suite == "openalex":
-        return _OPENALEX_DOMAIN.get(raw.lower(), "physical sciences")
-    return "health sciences"
+def coarse_domain(category: str) -> str:
+    prefix = category.split(".", 1)[0].lower()
+    return _ARXIV_CAT_DOMAIN.get(prefix, "physical sciences")
 
 
 @dataclass(frozen=True)
@@ -53,7 +41,6 @@ class Paper:
     doi: str | None = None
     pmid: str | None = None
     pmcid: str | None = None
-    body: str | None = None
 
     @property
     def ids(self) -> dict[str, str]:

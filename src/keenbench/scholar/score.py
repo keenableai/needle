@@ -36,6 +36,10 @@ def _group(scored: list[dict], key: Callable[[dict], str]) -> dict[str, dict[str
     return out
 
 
+def _grouped(scored: list[dict], field: str) -> dict[str, dict[str, Any]]:
+    return dict(sorted(_group(scored, lambda pq: pq[field]).items()))
+
+
 def _age_order(groups: dict[str, dict]) -> dict[str, dict]:
     def rank(bucket: str) -> int:
         return AGE_BUCKETS.index(bucket) if bucket in AGE_BUCKETS else len(AGE_BUCKETS)
@@ -121,10 +125,10 @@ async def run_papers(
             "mrr_at_k": (sum(1.0 / pq["hit_rank"] for pq in hits) / len(scored) if scored else 0.0),
             "num_scored": len(scored),
             "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
-            "by_bucket": dict(sorted(_group(scored, lambda pq: pq["bucket"]).items())),
-            "by_suite": dict(sorted(_group(scored, lambda pq: pq["suite"]).items())),
+            "by_bucket": _grouped(scored, "bucket"),
+            "by_suite": _grouped(scored, "suite"),
             "by_age": _age_order(_group(scored, lambda pq: pq["age_bucket"])),
-            "by_domain": dict(sorted(_group(scored, lambda pq: pq["domain"]).items())),
+            "by_domain": _grouped(scored, "domain"),
             "shallow_index": _shallow_index(scored),
             "per_query": per_query,
         }
