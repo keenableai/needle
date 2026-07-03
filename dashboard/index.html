@@ -178,16 +178,21 @@
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
-  #overlap-table { overflow-x: auto; }
-  #overlap-table table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; }
-  #overlap-table th, #overlap-table td { border-bottom: none; }
-  #overlap-table td:first-child { white-space: nowrap; }
-  #overlap-table th.col { vertical-align: bottom; text-align: center; padding: 4px 0; font-weight: 500; }
-  #overlap-table th.col span { writing-mode: vertical-rl; rotate: 180deg; }
-  #overlap-table td.overlap-cell {
+  .overlap-matrix { overflow-x: auto; }
+  .overlap-matrix table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; }
+  .overlap-matrix th, .overlap-matrix td { border-bottom: none; }
+  .overlap-matrix td:first-child { white-space: nowrap; }
+  .overlap-matrix th.col { vertical-align: bottom; text-align: center; padding: 4px 0; font-weight: 500; }
+  .overlap-matrix th.col span { writing-mode: vertical-rl; rotate: 180deg; }
+  .overlap-matrix td.overlap-cell {
     width: 44px; min-width: 44px; height: 44px; padding: 0;
     border-radius: 4px; text-align: center; font-variant-numeric: tabular-nums;
   }
+  #uniqueness-table .bar-track {
+    display: inline-block; width: 140px; height: 8px; border-radius: 4px;
+    background: var(--grid); vertical-align: middle; margin-right: 8px;
+  }
+  #uniqueness-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
 </style>
 </head>
 <body>
@@ -252,10 +257,22 @@
   </div>
 
   <h2 class="section-title" id="sec-overlap">Engine overlap</h2>
-  <div class="card" id="card-overlap">
-    <h2>Shared result URLs (last 24h)</h2>
-    <div class="sub" id="overlap-sub"></div>
-    <div id="overlap-table"></div>
+  <div class="grid2">
+    <div class="card" id="card-overlap">
+      <h2>Shared result URLs (last 24h)</h2>
+      <div class="sub" id="overlap-sub"></div>
+      <div class="overlap-matrix" id="overlap-table"></div>
+    </div>
+    <div class="card" id="card-overlap3">
+      <h2>Queries sharing &ge;3 URLs (last 24h)</h2>
+      <div class="sub" id="overlap3-sub"></div>
+      <div class="overlap-matrix" id="overlap3-table"></div>
+    </div>
+  </div>
+  <div class="card" id="card-uniqueness">
+    <h2>Result uniqueness (last 24h)</h2>
+    <div class="sub" id="uniqueness-sub"></div>
+    <div id="uniqueness-table"></div>
   </div>
 
   <h2 class="section-title" id="sec-slices">Slices</h2>
@@ -702,32 +719,13 @@ const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
-const overlapStep = (v) => {
-  const i = OVERLAP_STEPS.findIndex((t) => v < t);
+const SHARED3_STEPS = [0.05, 0.15, 0.3, 0.5];
+const overlapStep = (v, steps) => {
+  const i = steps.findIndex((t) => v < t);
   return i === -1 ? 4 : i;
 };
 
-function renderOverlap(rows) {
-  const holder = document.getElementById("overlap-table");
-  holder.replaceChildren();
-  const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
-  const cutoff = Date.now() - 24 * 3600e3;
-  const recent = rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
-  const pairs = new Map();
-  for (const r of recent) {
-    const agg = pairs.get(pairKey(r.a, r.b)) || { jsum: 0, n: 0 };
-    agg.jsum += r.jaccard_sum;
-    agg.n += r.num_queries;
-    pairs.set(pairKey(r.a, r.b), agg);
-  }
-  const engines = ENGINES.filter((e) => recent.some((r) => r.a === e || r.b === e));
-  if (engines.length < 2) {
-    holder.appendChild(el("div", { class: "empty" }, "No overlap data in the last 24h yet — accumulates from hourly runs."));
-    return;
-  }
-  const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
-  document.getElementById("overlap-sub").textContent =
-    `mean Jaccard overlap of top-K URL sets on the same queries, all benchmarks — up to ${nQueries} queries per pair, last 24h`;
+function overlapMatrix(holder, engines, cellFor) {
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, ""));
@@ -745,21 +743,110 @@ function renderOverlap(rows) {
     nameCell.append(key, document.createTextNode(a));
     tr.appendChild(nameCell);
     for (const b of engines) {
-      if (a === b) {
-        tr.appendChild(el("td", { class: "overlap-cell" }, "–"));
-        continue;
-      }
-      const agg = pairs.get(pairKey(a, b));
-      const v = agg && agg.n ? agg.jsum / agg.n : null;
-      const td = el("td", { class: "overlap-cell" }, v == null ? "–" : v.toFixed(2));
-      if (v != null) {
-        const step = overlapStep(v);
-        td.style.background = OVERLAP_BG[step];
-        td.style.color = OVERLAP_INK[step];
-        td.title = `${a} ∩ ${b}: ${v.toFixed(3)} over ${agg.n} queries`;
+      const cell = a === b ? null : cellFor(a, b);
+      const td = el("td", { class: "overlap-cell" }, cell ? cell.text : "–");
+      if (cell) {
+        td.style.background = OVERLAP_BG[cell.step];
+        td.style.color = OVERLAP_INK[cell.step];
+        td.title = cell.title;
       }
       tr.appendChild(td);
     }
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
+function renderOverlap(rows) {
+  const jaccardHolder = document.getElementById("overlap-table");
+  const shared3Holder = document.getElementById("overlap3-table");
+  jaccardHolder.replaceChildren();
+  shared3Holder.replaceChildren();
+  const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
+  const recent = inRange(rows, 24 * 3600e3);
+  const pairs = new Map();
+  for (const r of recent) {
+    const agg = pairs.get(pairKey(r.a, r.b)) || { jsum: 0, n: 0, s3sum: 0, n3: 0 };
+    agg.jsum += r.jaccard_sum;
+    agg.n += r.num_queries;
+    if (r.num_shared3 != null) {
+      agg.s3sum += r.num_shared3;
+      agg.n3 += r.num_queries;
+    }
+    pairs.set(pairKey(r.a, r.b), agg);
+  }
+  const engines = ENGINES.filter((e) => recent.some((r) => r.a === e || r.b === e));
+  const emptyMsg = "No overlap data in the last 24h yet — accumulates from hourly runs.";
+  if (engines.length < 2) {
+    jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
+    shared3Holder.appendChild(el("div", { class: "empty" }, emptyMsg));
+    return;
+  }
+  const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
+  document.getElementById("overlap-sub").textContent =
+    `mean Jaccard overlap of top-K URL sets on the same queries, all benchmarks — up to ${nQueries} queries per pair, last 24h`;
+  overlapMatrix(jaccardHolder, engines, (a, b) => {
+    const agg = pairs.get(pairKey(a, b));
+    if (!agg || !agg.n) return null;
+    const v = agg.jsum / agg.n;
+    return {
+      text: v.toFixed(2),
+      step: overlapStep(v, OVERLAP_STEPS),
+      title: `${a} ∩ ${b}: ${v.toFixed(3)} over ${agg.n} queries`,
+    };
+  });
+  document.getElementById("overlap3-sub").textContent =
+    "share of queries where both engines return 3+ of the same URLs — near-identical result lists suggest a shared backend";
+  overlapMatrix(shared3Holder, engines, (a, b) => {
+    const agg = pairs.get(pairKey(a, b));
+    if (!agg || !agg.n3) return null;
+    const v = agg.s3sum / agg.n3;
+    return {
+      text: `${Math.round(v * 100)}%`,
+      step: overlapStep(v, SHARED3_STEPS),
+      title: `${a} ∩ ${b}: ${agg.s3sum} of ${agg.n3} queries share ≥3 URLs`,
+    };
+  });
+}
+
+function renderUniqueness(rows) {
+  const holder = document.getElementById("uniqueness-table");
+  holder.replaceChildren();
+  document.getElementById("uniqueness-sub").textContent =
+    "share of an engine's returned URLs that no other engine returned for the same query, all benchmarks, last 24h";
+  const agg = new Map();
+  for (const r of inRange(rows, 24 * 3600e3)) {
+    const e = agg.get(r.engine) || { unique: 0, total: 0 };
+    e.unique += r.unique_urls;
+    e.total += r.total_urls;
+    agg.set(r.engine, e);
+  }
+  const engines = ENGINES.filter((e) => agg.get(e)?.total);
+  if (!engines.length) {
+    holder.appendChild(el("div", { class: "empty" }, "No uniqueness data in the last 24h yet — accumulates from hourly runs."));
+    return;
+  }
+  engines.sort((a, b) => agg.get(b).unique / agg.get(b).total - agg.get(a).unique / agg.get(a).total);
+  const table = el("table");
+  const head = el("tr");
+  for (const h of ["engine", "", "unique", "URLs"]) head.appendChild(el("th", {}, h));
+  table.appendChild(head);
+  for (const e of engines) {
+    const { unique, total } = agg.get(e);
+    const pct = unique / total;
+    const tr = el("tr");
+    const nameCell = el("td");
+    const key = el("span", { class: "key" });
+    key.style.background = colorOf(e);
+    nameCell.append(key, document.createTextNode(e));
+    const barCell = el("td");
+    const track = el("span", { class: "bar-track" });
+    const fill = el("span", { class: "bar-fill" });
+    fill.style.width = `${Math.round(pct * 100)}%`;
+    fill.style.background = colorOf(e);
+    track.appendChild(fill);
+    barCell.appendChild(track);
+    tr.append(nameCell, barCell, el("td", {}, `${Math.round(pct * 100)}%`), el("td", {}, `${unique.toLocaleString()} / ${total.toLocaleString()}`));
     table.appendChild(tr);
   }
   holder.appendChild(table);
@@ -1003,17 +1090,18 @@ function renderLegend() {
 }
 
 async function main() {
-  const fetchLines = (url) =>
+  const fetchRows = (url) =>
     fetch(url, { cache: "no-store" })
       .then((r) => (r.ok ? r.text() : ""))
-      .catch(() => "");
-  const [histText, overlapText, latestCompanyfill] = await Promise.all([
-    fetchLines("data/history.jsonl"),
-    fetchLines("data/overlap.jsonl"),
+      .catch(() => "")
+      .then((text) => text.split("\n").filter(Boolean).map((l) => JSON.parse(l)));
+  const [histRows, overlapRows, uniquenessRows, latestCompanyfill] = await Promise.all([
+    fetchRows("data/history.jsonl"),
+    fetchRows("data/overlap.jsonl"),
+    fetchRows("data/uniqueness.jsonl"),
     fetchJson("data/latest_companyfill.json").catch(() => null),
   ]);
-  history = histText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
-  const overlapRows = overlapText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
+  history = histRows;
   registerEngines(history.map((r) => r.engine));
   registerEngines(Object.keys(latestCompanyfill?.engines || {}));
   renderLegend();
@@ -1038,6 +1126,7 @@ async function main() {
   renderLeaderboards(inRange(history, 7 * 86400e3));
   renderAll(latestCompanyfill);
   renderOverlap(overlapRows);
+  renderUniqueness(uniquenessRows);
   initRunBrowser();
   document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
   let resizeTimer;

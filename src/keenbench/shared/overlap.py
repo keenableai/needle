@@ -19,8 +19,8 @@ def normalize_url(url: str) -> str:
     return f"{host}{path}{query}"
 
 
-def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
-    url_sets = {
+def _url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
+    return {
         name: [
             None
             if pq["search_error"] is not None
@@ -29,18 +29,49 @@ def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
         ]
         for name, e in report["engines"].items()
     }
+
+
+def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
+    url_sets = _url_sets(report)
     names = list(url_sets)
     rows = []
     for i, a in enumerate(names):
         for b in names[i + 1 :]:
             jaccard_sum = 0.0
+            shared3 = 0
             n = 0
             for sa, sb in zip(url_sets[a], url_sets[b], strict=True):
                 if sa is None or sb is None or not (sa or sb):
                     continue
                 jaccard_sum += len(sa & sb) / len(sa | sb)
+                shared3 += len(sa & sb) >= 3
                 n += 1
             rows.append(
-                {"ts": ts, "a": a, "b": b, "jaccard_sum": round(jaccard_sum, 4), "num_queries": n}
+                {
+                    "ts": ts,
+                    "a": a,
+                    "b": b,
+                    "jaccard_sum": round(jaccard_sum, 4),
+                    "num_shared3": shared3,
+                    "num_queries": n,
+                }
             )
+    return rows
+
+
+def uniqueness_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
+    url_sets = _url_sets(report)
+    rows = []
+    for name, sets in url_sets.items():
+        unique = 0
+        total = 0
+        for i, s in enumerate(sets):
+            if s is None:
+                continue
+            others = [s2 for n2, o in url_sets.items() if n2 != name and (s2 := o[i]) is not None]
+            if not others:
+                continue
+            total += len(s)
+            unique += len(s - set().union(*others))
+        rows.append({"ts": ts, "engine": name, "unique_urls": unique, "total_urls": total})
     return rows
