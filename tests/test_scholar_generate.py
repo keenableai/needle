@@ -105,6 +105,23 @@ async def test_leak_and_no_query_drop_the_paper():
     assert stats.body_no_query == 1
 
 
+async def test_paper_without_matchable_ids_dropped():
+    good = _paper(0, "computer science", datetime(2026, 7, 1, tzinfo=UTC))
+    noids = Paper(
+        suite="arxiv",
+        title="A Perfectly Long Enough Title Without Any Identifiers",
+        abstract="abstract text",
+        published=datetime(2026, 7, 1, tzinfo=UTC),
+        url="https://example.org/no-ids",
+        domain="computer science",
+    )
+    arxiv = FakeArxiv({"computer science": [good, noids]}, {good.arxiv_id: f"body {good.arxiv_id}"})
+    llm = FakeLLM({f"body {good.arxiv_id}": "distinct anchor beta gamma"})
+    rows, stats = await _run(arxiv, llm, per_cell=5)
+    assert stats.papers == 1
+    assert all(r["gold"]["ids"] for r in rows)
+
+
 async def test_short_cell_reported():
     papers = [_paper(0, "computer science", datetime(2026, 7, 1, tzinfo=UTC))]
     arxiv = FakeArxiv({"computer science": papers}, {"2607.00000": "body 2607.00000"})

@@ -24,8 +24,9 @@ class IdConverter(HttpSearchClient):
                 params={"ids": ",".join(keys), "format": "json", "tool": "keenbench"},
                 headers={"User-Agent": USER_AGENT},
             )
-            records = (payload or {}).get("records", []) if isinstance(payload, dict) else []
-            for rec in records:
+            if err is not None or not isinstance(payload, dict):
+                continue
+            for rec in payload.get("records", []):
                 pmcid = str(rec.get("pmcid") or "")
                 if pmcid.upper().startswith("PMC"):
                     bare = pmcid[3:]

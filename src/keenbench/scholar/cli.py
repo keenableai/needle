@@ -23,6 +23,7 @@ def _load_gold_rows(path: str) -> list[dict]:
     except OSError as exc:
         raise SystemExit(f"error: could not read --queries {path!r}: {exc}") from exc
     rows = []
+    malformed = 0
     for line in lines:
         line = line.strip()
         if not line:
@@ -30,20 +31,32 @@ def _load_gold_rows(path: str) -> list[dict]:
         try:
             obj = json.loads(line)
         except json.JSONDecodeError:
+            malformed += 1
             continue
         if not isinstance(obj, dict) or not obj.get("query_text"):
             continue
         gold = obj.get("gold")
         if isinstance(gold, str):
-            gold = json.loads(gold)
-        if not isinstance(gold, dict) or not gold.get("ids"):
+            try:
+                gold = json.loads(gold)
+            except json.JSONDecodeError:
+                malformed += 1
+                continue
+        ids = gold.get("ids") if isinstance(gold, dict) else None
+        if not isinstance(ids, dict) or not ids:
+            malformed += 1
             continue
         obj["gold"] = gold
         origin = obj.get("query_origin")
         if isinstance(origin, str):
-            origin = json.loads(origin)
-        obj["query_origin"] = origin or {}
+            try:
+                origin = json.loads(origin)
+            except json.JSONDecodeError:
+                origin = {}
+        obj["query_origin"] = origin if isinstance(origin, dict) else {}
         rows.append(obj)
+    if malformed:
+        print(f"scholar: skipped {malformed} malformed gold rows", file=sys.stderr)
     return rows
 
 

@@ -138,7 +138,7 @@ async def run_generate(
     for cell, papers in zip(cells, candidate_lists, strict=True):
         for paper in papers:
             title_query = degrade_title(paper.title)
-            if not title_query or paper.paper_key in seen_keys:
+            if not title_query or not paper.ids or paper.paper_key in seen_keys:
                 continue
             seen_keys.add(paper.paper_key)
             candidates.append(Candidate(cell, replace(paper, domain=cell[0]), title_query))
