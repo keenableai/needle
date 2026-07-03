@@ -221,17 +221,17 @@
 
   <div class="grid3">
     <div class="card">
-      <h2>freshstream — latest run</h2>
+      <h2>freshstream — 7-day mean</h2>
       <div class="sub" id="lb-fresh-sub"></div>
       <div id="lb-fresh"></div>
     </div>
     <div class="card">
-      <h2>companyfill — latest run</h2>
+      <h2>companyfill — 7-day mean</h2>
       <div class="sub" id="lb-company-sub"></div>
       <div id="lb-company"></div>
     </div>
     <div class="card">
-      <h2>scholar — latest run</h2>
+      <h2>scholar — 7-day mean</h2>
       <div class="sub" id="lb-scholar-sub"></div>
       <div id="lb-scholar"></div>
     </div>
@@ -243,11 +243,11 @@
   <div class="grid2">
     <div class="card" id="card-latency-p50">
       <h2>Search latency — p50</h2>
-      <div class="sub">median duration of successful search API calls, freshstream runs</div>
+      <div class="sub">median duration of successful search API calls, all benchmarks, 6-hour windows</div>
     </div>
     <div class="card" id="card-latency-p95">
       <h2>Search latency — p95</h2>
-      <div class="sub">95th percentile, same runs</div>
+      <div class="sub">95th percentile, same windows</div>
     </div>
   </div>
 
@@ -264,7 +264,7 @@
   <p class="section-desc">Fresh, time-sensitive queries mined hourly from RSS feeds and Google Trends, scored on ranking quality (RBP@5) by an LLM relevance judge.</p>
   <div class="card" id="card-rbp">
     <h2>freshstream — RBP@5</h2>
-    <div class="sub">20 fresh queries per run; the hairline marks the metric ceiling</div>
+    <div class="sub">20 fresh queries per run, mean RBP over all queries in each 6-hour window; the hairline marks the metric ceiling</div>
   </div>
 
   <h3 class="subsection-title" id="sec-companyfill">companyfill</h3>
@@ -359,7 +359,7 @@ function seriesFor(bench, metric, rows) {
   const out = {};
   for (const e of ENGINES) out[e] = [];
   for (const r of rows) {
-    if (r.bench === bench && r[metric] != null && out[r.engine]) {
+    if ((bench == null || r.bench === bench) && r[metric] != null && out[r.engine]) {
       out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
     }
   }
@@ -367,9 +367,62 @@ function seriesFor(bench, metric, rows) {
   return out;
 }
 
-function inRange(rows) {
-  if (rangeMs === Infinity) return rows;
-  const cutoff = Date.now() - rangeMs;
+const WINDOW_MS = 6 * 3600e3;
+
+function rbpSeries(rows) {
+  const out = {};
+  const byEngine = new Map();
+  for (const e of ENGINES) {
+    out[e] = [];
+    byEngine.set(e, new Map());
+  }
+  for (const r of rows) {
+    const buckets = byEngine.get(r.engine);
+    if (!buckets || r.bench !== "freshstream" || r.rbp == null) continue;
+    const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
+    const agg = buckets.get(b) || { sum: 0, n: 0 };
+    const n = r.num_scored || 1;
+    agg.sum += r.rbp * n;
+    agg.n += n;
+    buckets.set(b, agg);
+  }
+  for (const [e, buckets] of byEngine) {
+    out[e] = [...buckets].map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
+  }
+  return out;
+}
+
+function pctl(values, p) {
+  const s = [...values].sort((a, b) => a - b);
+  return s[Math.max(0, Math.ceil(p * s.length) - 1)];
+}
+
+function latencySeries(rows, p, runMetric) {
+  const out = {};
+  const byEngine = new Map();
+  for (const e of ENGINES) {
+    out[e] = [];
+    byEngine.set(e, new Map());
+  }
+  for (const r of rows) {
+    const buckets = byEngine.get(r.engine);
+    if (!buckets || (!r.lat_ms?.length && r[runMetric] == null)) continue;
+    const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
+    const agg = buckets.get(b) || { raw: [], perRun: [] };
+    if (r.lat_ms?.length) agg.raw.push(...r.lat_ms);
+    else agg.perRun.push(r[runMetric]);
+    buckets.set(b, agg);
+  }
+  for (const [e, buckets] of byEngine) {
+    out[e] = [...buckets].map(([t, agg]) =>
+      ({ t: new Date(t), v: pctl(agg.raw.length ? agg.raw : agg.perRun, p) }));
+  }
+  return out;
+}
+
+function inRange(rows, ms = rangeMs) {
+  if (ms === Infinity) return rows;
+  const cutoff = Date.now() - ms;
   return rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
 }
 
@@ -524,18 +577,32 @@ function drawChart(card, series, opts) {
 function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const holder = document.getElementById(holderId);
   holder.replaceChildren();
-  const byMetric = metrics.map(([m]) => seriesFor(bench, m, rows));
+  const wmean = (er, metric) => {
+    let sum = 0, w = 0;
+    for (const r of er) {
+      if (r[metric] == null) continue;
+      sum += r[metric] * (r.num_scored || 1);
+      w += r.num_scored || 1;
+    }
+    return w ? sum / w : null;
+  };
   const entries = ENGINES.map((e) => {
-    const pts = byMetric[0][e] || [];
-    return { e, last: pts.at(-1), extra: byMetric.slice(1).map((s) => (s[e] || []).at(-1)) };
-  }).filter((x) => x.last);
+    const er = rows.filter((r) => r.bench === bench && r.engine === e);
+    const scored = er.filter((r) => r[metrics[0][0]] != null);
+    return { e, v: wmean(er, metrics[0][0]), n: scored.length,
+      lastT: scored.length ? new Date(scored.at(-1).ts) : null,
+      extra: metrics.slice(1).map(([m]) => wmean(er, m)) };
+  }).filter((x) => x.v != null);
   if (!entries.length) {
     document.getElementById(subId).textContent = "";
-    holder.appendChild(el("div", { class: "empty" }, "No data yet."));
+    holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
     return;
   }
-  entries.sort((a, b) => b.last.v - a.last.v);
-  document.getElementById(subId).textContent = `as of ${fmtTime(entries[0].last.t)} UTC`;
+  entries.sort((a, b) => b.v - a.v);
+  const runs = Math.max(...entries.map((x) => x.n));
+  const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
+  document.getElementById(subId).textContent =
+    `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
@@ -549,8 +616,8 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     key.style.background = colorOf(x.e);
     nameCell.append(key, document.createTextNode(x.e));
     tr.appendChild(nameCell);
-    tr.appendChild(el("td", { class: "num" + best }, fmt3(x.last.v)));
-    for (const pt of x.extra) tr.appendChild(el("td", { class: "num" }, pt ? fmt3(pt.v) : "–"));
+    tr.appendChild(el("td", { class: "num" + best }, fmt3(x.v)));
+    for (const v of x.extra) tr.appendChild(el("td", { class: "num" }, v == null ? "–" : fmt3(v)));
     table.appendChild(tr);
   }
   holder.appendChild(table);
@@ -660,7 +727,7 @@ function renderOverlap(rows) {
   }
   const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
   document.getElementById("overlap-sub").textContent =
-    `mean Jaccard overlap of top-K URL sets on the same queries, freshstream + companyfill — up to ${nQueries} queries per pair, last 24h`;
+    `mean Jaccard overlap of top-K URL sets on the same queries, all benchmarks — up to ${nQueries} queries per pair, last 24h`;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, ""));
@@ -891,8 +958,8 @@ async function initRunBrowser() {
 
 function drawCharts(rows) {
   const ceiling = rows.filter((r) => r.bench === "freshstream").at(-1)?.rbp_max;
-  drawChart(document.getElementById("card-rbp"), seriesFor("freshstream", "rbp", rows),
-    { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine" });
+  drawChart(document.getElementById("card-rbp"), rbpSeries(rows),
+    { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine, 6-hour windows" });
   drawChart(document.getElementById("card-recall"), seriesFor("companyfill", "recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
@@ -901,12 +968,12 @@ function drawCharts(rows) {
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar title-query recall at 10 over time per engine" });
   drawChart(document.getElementById("card-scholar-body"), seriesFor("scholar", "body_recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar body-query recall at 10 over time per engine" });
-  for (const [metric, name] of [["p50_ms", "p50"], ["p95_ms", "p95"]]) {
-    const lat = seriesFor("freshstream", metric, rows);
-    const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((p) => p.v))));
+  for (const [p, metric, name] of [[0.5, "p50_ms", "p50"], [0.95, "p95_ms", "p95"]]) {
+    const lat = latencySeries(rows, p, metric);
+    const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((q) => q.v))));
     drawChart(document.getElementById(`card-latency-${name}`), lat,
       { domain: sc.domain, ticks: sc.ticks, fmt: fmtMs, tickFmt: fmtMs, left: 56,
-        label: `${name} search latency over time per engine`,
+        label: `${name} search latency over time per engine, 6-hour windows`,
         empty: "No latency data yet — collected from new runs." });
   }
 }
@@ -919,7 +986,6 @@ function refreshHistoryTable() {
 
 function renderAll(latestCompanyfill) {
   const rows = inRange(history);
-  renderLeaderboards(rows);
   drawCharts(rows);
   refreshHistoryTable();
   renderFields(latestCompanyfill);
@@ -969,6 +1035,7 @@ async function main() {
     filters.appendChild(btn);
   }
 
+  renderLeaderboards(inRange(history, 7 * 86400e3));
   renderAll(latestCompanyfill);
   renderOverlap(overlapRows);
   initRunBrowser();
