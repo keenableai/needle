@@ -81,9 +81,10 @@
   @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
   .section-title {
     font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
-    color: var(--text-secondary); margin: 30px 0 10px; padding-bottom: 6px;
+    color: var(--text-secondary); margin: 30px 0 6px; padding-bottom: 6px;
     border-bottom: 1px solid var(--grid); scroll-margin-top: 16px;
   }
+  .section-desc { color: var(--text-secondary); font-size: 13px; margin: 0 0 12px; max-width: 74ch; }
 
   #toc { display: none; }
   @media (min-width: 1440px) {
@@ -249,12 +250,14 @@
   </div>
 
   <h2 class="section-title" id="sec-freshstream">freshstream</h2>
+  <p class="section-desc">Fresh, time-sensitive queries mined hourly from RSS feeds and Google Trends, scored on ranking quality (RBP@5) by an LLM relevance judge.</p>
   <div class="card" id="card-rbp">
     <h2>freshstream — RBP@5</h2>
     <div class="sub">20 fresh queries per run; the hairline marks the metric ceiling</div>
   </div>
 
   <h2 class="section-title" id="sec-companyfill">companyfill</h2>
+  <p class="section-desc">Company fact-lookups (CEO, revenue, HQ, founding year…) with gold grounded in public registries; deterministic answer-recall@5, no judge.</p>
   <div class="grid2">
     <div class="card" id="card-recall">
       <h2>companyfill — answer-recall@5</h2>
@@ -272,6 +275,7 @@
   </div>
 
   <h2 class="section-title" id="sec-scholar">scholar</h2>
+  <p class="section-desc">Known-item paper retrieval: find a specific paper by its title vs. by a full-text-only detail. Deterministic match on the paper's arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID.</p>
   <div class="grid2">
     <div class="card" id="card-scholar-title">
       <h2>scholar — title-query recall@10</h2>
@@ -287,10 +291,10 @@
     <h2>Judgement browser</h2>
     <div class="sub">Every run is archived in full on the
       <a href="https://huggingface.co/datasets/keenable-ai/keenbench-results">HF dataset</a>
-      — pick one to inspect each query, its results, and the judge's reasoning.</div>
+      — pick a benchmark, then a run, to inspect each query and its results.</div>
     <div class="runbar">
-      <select id="run-select" aria-label="Run"></select>
       <select id="run-bench" aria-label="Benchmark"></select>
+      <select id="run-select" aria-label="Run"></select>
       <select id="run-engine" aria-label="Engine"></select>
     </div>
     <div id="run-detail"></div>
@@ -777,6 +781,34 @@ function renderCompanyfillRun(holder, report, engine) {
   }
 }
 
+function renderScholarRun(holder, report, engine) {
+  const per = report.engines[engine]?.per_query || [];
+  for (const pq of per) {
+    const row = el("details", { class: "qrow" });
+    const summary = el("summary");
+    summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
+    summary.appendChild(el("span", {}, pq.query));
+    if (pq.paper_key) summary.appendChild(el("span", { class: "host" }, `gold: ${pq.paper_key}`));
+    summary.appendChild(el("span", { class: "score" },
+      pq.search_error ? "search error"
+        : pq.hit_rank ? `hit @${pq.hit_rank}` : "miss"));
+    row.appendChild(summary);
+    (pq.results || []).forEach((r, i) => {
+      const rank = i + 1;
+      const mark = rank === pq.hit_rank
+        ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
+        : el("span", { class: "miss-marker" }, `#${rank}`);
+      const block = resultBlock({ url: r.url, title: r.title }, [mark]);
+      const ids = Object.entries(r.ids || {}).map(([k, v]) => `${k}:${v}`).join(" ");
+      if (ids) block.querySelector(".head").appendChild(el("span", { class: "host" }, ids));
+      row.appendChild(block);
+    });
+    holder.appendChild(row);
+  }
+}
+
+const RUN_ARTIFACT = { freshstream: "rbp.json", companyfill: "recall.json", scholar: "scholar.json" };
+
 async function renderRunDetail(runs) {
   const holder = document.getElementById("run-detail");
   const runSel = document.getElementById("run-select");
@@ -788,7 +820,7 @@ async function renderRunDetail(runs) {
     holder.appendChild(el("div", { class: "empty" }, "No archived runs yet."));
     return;
   }
-  const artifact = benchSel.value === "companyfill" ? "recall.json" : "rbp.json";
+  const artifact = RUN_ARTIFACT[benchSel.value];
   if (!run.artifacts.includes(artifact)) {
     holder.appendChild(el("div", { class: "empty" }, `This run has no ${benchSel.value} results.`));
     return;
@@ -805,6 +837,7 @@ async function renderRunDetail(runs) {
     }
     holder.replaceChildren();
     if (benchSel.value === "companyfill") renderCompanyfillRun(holder, report, engineSel.value);
+    else if (benchSel.value === "scholar") renderScholarRun(holder, report, engineSel.value);
     else renderFreshstreamRun(holder, report, engineSel.value);
     if (!holder.children.length) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
@@ -822,17 +855,27 @@ async function initRunBrowser() {
   let runs = [];
   try { runs = await fetchJson("data/runs.json"); } catch {}
   runs = [...runs].reverse();
-  for (const r of runs) {
-    const label = `${fmtTime(new Date(r.ts))}${r.artifacts.includes("recall.json") ? " (fresh + company)" : ""}`;
-    runSel.appendChild(el("option", { value: r.id }, label));
+  for (const b of ["freshstream", "companyfill", "scholar"]) {
+    benchSel.appendChild(el("option", { value: b }, b));
   }
-  for (const b of ["freshstream", "companyfill"]) benchSel.appendChild(el("option", { value: b }, b));
   for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, e));
-  const rerender = () => renderRunDetail(runs);
-  runSel.addEventListener("change", rerender);
-  benchSel.addEventListener("change", rerender);
-  engineSel.addEventListener("change", rerender);
-  rerender();
+
+  // the run list is scoped to the chosen benchmark, latest first, latest selected
+  function populateRuns() {
+    const artifact = RUN_ARTIFACT[benchSel.value];
+    const matching = runs.filter((r) => r.artifacts.includes(artifact));
+    runSel.replaceChildren();
+    for (const r of matching) {
+      runSel.appendChild(el("option", { value: r.id }, `${fmtTime(new Date(r.ts))} UTC`));
+    }
+    runSel.disabled = matching.length === 0;
+  }
+
+  populateRuns();
+  benchSel.addEventListener("change", () => { populateRuns(); renderRunDetail(runs); });
+  runSel.addEventListener("change", () => renderRunDetail(runs));
+  engineSel.addEventListener("change", () => renderRunDetail(runs));
+  renderRunDetail(runs);
 }
 
 function drawCharts(rows) {
