@@ -1,0 +1,519 @@
+{
+  "num_queries": 180,
+  "num_results": 10,
+  "snippet_chars": 500,
+  "engines": {
+    "keenable": {
+      "recall_at_k": 0.6777777777777778,
+      "mrr_at_k": 0.6053615520282187,
+      "num_scored": 180,
+      "search_errors": 0,
+      "by_bucket": {
+        "body": {
+          "n": 90,
+          "recall_at_k": 0.6333333333333333
+        },
+        "title": {
+          "n": 90,
+          "recall_at_k": 0.7222222222222222
+        }
+      },
+      "by_suite": {
+        "arxiv": {
+          "n": 138,
+          "recall_at_k": 0.855072463768116
+        },
+        "europepmc": {
+          "n": 42,
+          "recall_at_k": 0.09523809523809523
+        }
+      },
+      "by_age": {
+        "7d": {
+          "n": 52,
+          "recall_at_k": 0.5192307692307693
+        },
+        "30d": {
+          "n": 68,
+          "recall_at_k": 0.7205882352941176
+        },
+        "1y": {
+          "n": 60,
+          "recall_at_k": 0.7666666666666667
+        }
+      },
+      "by_domain": {
+        "computer science": {
+          "n": 36,
+          "recall_at_k": 0.75
+        },
+        "health sciences": {
+          "n": 42,
+          "recall_at_k": 0.09523809523809523
+        },
+        "life sciences": {
+          "n": 32,
+          "recall_at_k": 0.8125
+        },
+        "physical sciences": {
+          "n": 36,
+          "recall_at_k": 0.9444444444444444
+        },
+        "social sciences": {
+          "n": 34,
+          "recall_at_k": 0.9117647058823529
+        }
+      },
+      "misses_system_specific": 37,
+      "misses_universal": 18
+    },
+    "exa": {
+      "recall_at_k": 0.6833333333333333,
+      "mrr_at_k": 0.6328924162257495,
+      "num_scored": 180,
+      "search_errors": 0,
+      "by_bucket": {
+        "body": {
+          "n": 90,
+          "recall_at_k": 0.5333333333333333
+        },
+        "title": {
+          "n": 90,
+          "recall_at_k": 0.8333333333333334
+        }
+      },
+      "by_suite": {
+        "arxiv": {
+          "n": 138,
+          "recall_at_k": 0.8333333333333334
+        },
+        "europepmc": {
+          "n": 42,
+          "recall_at_k": 0.19047619047619047
+        }
+      },
+      "by_age": {
+        "7d": {
+          "n": 52,
+          "recall_at_k": 0.6923076923076923
+        },
+        "30d": {
+          "n": 68,
+          "recall_at_k": 0.6470588235294118
+        },
+        "1y": {
+          "n": 60,
+          "recall_at_k": 0.7166666666666667
+        }
+      },
+      "by_domain": {
+        "computer science": {
+          "n": 36,
+          "recall_at_k": 0.8333333333333334
+        },
+        "health sciences": {
+          "n": 42,
+          "recall_at_k": 0.19047619047619047
+        },
+        "life sciences": {
+          "n": 32,
+          "recall_at_k": 0.875
+        },
+        "physical sciences": {
+          "n": 36,
+          "recall_at_k": 0.8333333333333334
+        },
+        "social sciences": {
+          "n": 34,
+          "recall_at_k": 0.7941176470588235
+        }
+      },
+      "misses_system_specific": 38,
+      "misses_universal": 19
+    },
+    "google": {
+      "recall_at_k": 0.7831325301204819,
+      "mrr_at_k": 0.7174196787148596,
+      "num_scored": 166,
+      "search_errors": 14,
+      "by_bucket": {
+        "body": {
+          "n": 83,
+          "recall_at_k": 0.6506024096385542
+        },
+        "title": {
+          "n": 83,
+          "recall_at_k": 0.9156626506024096
+        }
+      },
+      "by_suite": {
+        "arxiv": {
+          "n": 126,
+          "recall_at_k": 0.8968253968253969
+        },
+        "europepmc": {
+          "n": 40,
+          "recall_at_k": 0.425
+        }
+      },
+      "by_age": {
+        "7d": {
+          "n": 50,
+          "recall_at_k": 0.76
+        },
+        "30d": {
+          "n": 63,
+          "recall_at_k": 0.7777777777777778
+        },
+        "1y": {
+          "n": 53,
+          "recall_at_k": 0.8113207547169812
+        }
+      },
+      "by_domain": {
+        "computer science": {
+          "n": 33,
+          "recall_at_k": 0.8484848484848485
+        },
+        "health sciences": {
+          "n": 40,
+          "recall_at_k": 0.425
+        },
+        "life sciences": {
+          "n": 31,
+          "recall_at_k": 0.967741935483871
+        },
+        "physical sciences": {
+          "n": 30,
+          "recall_at_k": 0.9
+        },
+        "social sciences": {
+          "n": 32,
+          "recall_at_k": 0.875
+        }
+      },
+      "misses_system_specific": 17,
+      "misses_universal": 18
+    },
+    "bing": {
+      "recall_at_k": 0.7613636363636364,
+      "mrr_at_k": 0.7167207792207793,
+      "num_scored": 176,
+      "search_errors": 4,
+      "by_bucket": {
+        "body": {
+          "n": 86,
+          "recall_at_k": 0.5813953488372093
+        },
+        "title": {
+          "n": 90,
+          "recall_at_k": 0.9333333333333333
+        }
+      },
+      "by_suite": {
+        "arxiv": {
+          "n": 135,
+          "recall_at_k": 0.8518518518518519
+        },
+        "europepmc": {
+          "n": 41,
+          "recall_at_k": 0.4634146341463415
+        }
+      },
+      "by_age": {
+        "7d": {
+          "n": 51,
+          "recall_at_k": 0.7254901960784313
+        },
+        "30d": {
+          "n": 67,
+          "recall_at_k": 0.7611940298507462
+        },
+        "1y": {
+          "n": 58,
+          "recall_at_k": 0.7931034482758621
+        }
+      },
+      "by_domain": {
+        "computer science": {
+          "n": 36,
+          "recall_at_k": 0.8055555555555556
+        },
+        "health sciences": {
+          "n": 41,
+          "recall_at_k": 0.4634146341463415
+        },
+        "life sciences": {
+          "n": 32,
+          "recall_at_k": 0.875
+        },
+        "physical sciences": {
+          "n": 34,
+          "recall_at_k": 0.8529411764705882
+        },
+        "social sciences": {
+          "n": 33,
+          "recall_at_k": 0.8787878787878788
+        }
+      },
+      "misses_system_specific": 24,
+      "misses_universal": 18
+    },
+    "brave": {
+      "recall_at_k": 0.5277777777777778,
+      "mrr_at_k": 0.5175925925925926,
+      "num_scored": 180,
+      "search_errors": 0,
+      "by_bucket": {
+        "body": {
+          "n": 90,
+          "recall_at_k": 0.4
+        },
+        "title": {
+          "n": 90,
+          "recall_at_k": 0.6555555555555556
+        }
+      },
+      "by_suite": {
+        "arxiv": {
+          "n": 138,
+          "recall_at_k": 0.6594202898550725
+        },
+        "europepmc": {
+          "n": 42,
+          "recall_at_k": 0.09523809523809523
+        }
+      },
+      "by_age": {
+        "7d": {
+          "n": 52,
+          "recall_at_k": 0.40384615384615385
+        },
+        "30d": {
+          "n": 68,
+          "recall_at_k": 0.5441176470588235
+        },
+        "1y": {
+          "n": 60,
+          "recall_at_k": 0.6166666666666667
+        }
+      },
+      "by_domain": {
+        "computer science": {
+          "n": 36,
+          "recall_at_k": 0.4166666666666667
+        },
+        "health sciences": {
+          "n": 42,
+          "recall_at_k": 0.09523809523809523
+        },
+        "life sciences": {
+          "n": 32,
+          "recall_at_k": 0.71875
+        },
+        "physical sciences": {
+          "n": 36,
+          "recall_at_k": 0.6944444444444444
+        },
+        "social sciences": {
+          "n": 34,
+          "recall_at_k": 0.8235294117647058
+        }
+      },
+      "misses_system_specific": 48,
+      "misses_universal": 14
+    },
+    "parallel": {
+      "recall_at_k": 0.5833333333333334,
+      "mrr_at_k": 0.5222442680776014,
+      "num_scored": 180,
+      "search_errors": 0,
+      "by_bucket": {
+        "body": {
+          "n": 90,
+          "recall_at_k": 0.4666666666666667
+        },
+        "title": {
+          "n": 90,
+          "recall_at_k": 0.7
+        }
+      },
+      "by_suite": {
+        "arxiv": {
+          "n": 138,
+          "recall_at_k": 0.7028985507246377
+        },
+        "europepmc": {
+          "n": 42,
+          "recall_at_k": 0.19047619047619047
+        }
+      },
+      "by_age": {
+        "7d": {
+          "n": 52,
+          "recall_at_k": 0.46153846153846156
+        },
+        "30d": {
+          "n": 68,
+          "recall_at_k": 0.5441176470588235
+        },
+        "1y": {
+          "n": 60,
+          "recall_at_k": 0.7333333333333333
+        }
+      },
+      "by_domain": {
+        "computer science": {
+          "n": 36,
+          "recall_at_k": 0.5555555555555556
+        },
+        "health sciences": {
+          "n": 42,
+          "recall_at_k": 0.19047619047619047
+        },
+        "life sciences": {
+          "n": 32,
+          "recall_at_k": 0.78125
+        },
+        "physical sciences": {
+          "n": 36,
+          "recall_at_k": 0.6944444444444444
+        },
+        "social sciences": {
+          "n": 34,
+          "recall_at_k": 0.7941176470588235
+        }
+      },
+      "misses_system_specific": 56,
+      "misses_universal": 19
+    },
+    "tavily": {
+      "recall_at_k": 0.6114285714285714,
+      "mrr_at_k": 0.4318095238095238,
+      "num_scored": 175,
+      "search_errors": 5,
+      "by_bucket": {
+        "body": {
+          "n": 87,
+          "recall_at_k": 0.42528735632183906
+        },
+        "title": {
+          "n": 88,
+          "recall_at_k": 0.7954545454545454
+        }
+      },
+      "by_suite": {
+        "arxiv": {
+          "n": 138,
+          "recall_at_k": 0.7028985507246377
+        },
+        "europepmc": {
+          "n": 37,
+          "recall_at_k": 0.2702702702702703
+        }
+      },
+      "by_age": {
+        "7d": {
+          "n": 52,
+          "recall_at_k": 0.5576923076923077
+        },
+        "30d": {
+          "n": 68,
+          "recall_at_k": 0.6029411764705882
+        },
+        "1y": {
+          "n": 55,
+          "recall_at_k": 0.6727272727272727
+        }
+      },
+      "by_domain": {
+        "computer science": {
+          "n": 36,
+          "recall_at_k": 0.6666666666666666
+        },
+        "health sciences": {
+          "n": 37,
+          "recall_at_k": 0.2702702702702703
+        },
+        "life sciences": {
+          "n": 32,
+          "recall_at_k": 0.71875
+        },
+        "physical sciences": {
+          "n": 36,
+          "recall_at_k": 0.75
+        },
+        "social sciences": {
+          "n": 34,
+          "recall_at_k": 0.6764705882352942
+        }
+      },
+      "misses_system_specific": 51,
+      "misses_universal": 17
+    },
+    "perplexity": {
+      "recall_at_k": 0.5777777777777777,
+      "mrr_at_k": 0.4589484126984126,
+      "num_scored": 180,
+      "search_errors": 0,
+      "by_bucket": {
+        "body": {
+          "n": 90,
+          "recall_at_k": 0.37777777777777777
+        },
+        "title": {
+          "n": 90,
+          "recall_at_k": 0.7777777777777778
+        }
+      },
+      "by_suite": {
+        "arxiv": {
+          "n": 138,
+          "recall_at_k": 0.6594202898550725
+        },
+        "europepmc": {
+          "n": 42,
+          "recall_at_k": 0.30952380952380953
+        }
+      },
+      "by_age": {
+        "7d": {
+          "n": 52,
+          "recall_at_k": 0.5576923076923077
+        },
+        "30d": {
+          "n": 68,
+          "recall_at_k": 0.5735294117647058
+        },
+        "1y": {
+          "n": 60,
+          "recall_at_k": 0.6
+        }
+      },
+      "by_domain": {
+        "computer science": {
+          "n": 36,
+          "recall_at_k": 0.5833333333333334
+        },
+        "health sciences": {
+          "n": 42,
+          "recall_at_k": 0.30952380952380953
+        },
+        "life sciences": {
+          "n": 32,
+          "recall_at_k": 0.71875
+        },
+        "physical sciences": {
+          "n": 36,
+          "recall_at_k": 0.6666666666666666
+        },
+        "social sciences": {
+          "n": 34,
+          "recall_at_k": 0.6764705882352942
+        }
+      },
+      "misses_system_specific": 57,
+      "misses_universal": 19
+    }
+  }
+}
