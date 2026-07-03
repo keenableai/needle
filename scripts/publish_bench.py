@@ -70,6 +70,8 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
             "num_scored": e["num_scored"],
             "num_queries": report["num_queries"],
             "search_errors": e["search_errors"],
+            "p50_ms": (e.get("latency") or {}).get("p50_ms"),
+            "p95_ms": (e.get("latency") or {}).get("p95_ms"),
         }
         for name, e in report["engines"].items()
     ]

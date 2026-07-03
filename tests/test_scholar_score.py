@@ -12,6 +12,7 @@ def _r(url, title="", snippet=""):
 class FakeEngine:
     def __init__(self, engine, table):
         self.engine = engine
+        self.latencies_ms = []
         self._table = table
 
     async def search(self, query, *, num_results=10):
@@ -55,12 +56,14 @@ async def test_recall_mrr_and_rank():
             "q2": [_r("https://nope.com")],
         },
     )
+    engine.latencies_ms = [50.0]
     report = await run_papers(queries, {"keenable": engine}, num_results=5)
     e = report["engines"]["keenable"]
     assert e["num_scored"] == 2
     assert e["recall_at_k"] == 0.5
     assert e["mrr_at_k"] == pytest.approx(0.25)
     assert e["by_bucket"]["title"]["recall_at_k"] == 0.5
+    assert e["latency"] == {"n": 1, "mean_ms": 50.0, "p50_ms": 50.0, "p95_ms": 50.0}
 
 
 async def test_search_error_excluded():
