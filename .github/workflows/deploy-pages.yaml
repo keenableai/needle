@@ -2,6 +2,7 @@ name: Deploy Pages
 
 on:
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -9,15 +10,14 @@ permissions:
   id-token: write
 
 jobs:
-  deploy-pages:
-    name: Deploy dashboard
+  # Upload and deploy are separate jobs so re-running a failed deploy
+  # (`gh run rerun --failed`) does not re-run the upload: a second upload adds
+  # another "github-pages" artifact to the run and deploy-pages@v5 then errors
+  # ("Multiple artifacts named github-pages ... count is 2"). Split, the rerun
+  # reuses the artifact build-pages already produced.
+  build-pages:
+    name: Upload dashboard artifact
     runs-on: ubuntu-latest
-    concurrency:
-      group: pages-deploy
-      cancel-in-progress: true
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,6 +27,19 @@ jobs:
         with:
           path: .
 
+  # pages-deploy serializes bench-triggered and manual redeploys so they can't
+  # race the same environment; no cancel-in-progress (cancelling mid-upload once
+  # left two artifacts and errored the site).
+  deploy-pages:
+    name: Deploy dashboard
+    needs: build-pages
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
         with:
