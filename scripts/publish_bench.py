@@ -136,8 +136,6 @@ def publish(
         for row in rows:
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    # the dashboard reads only a trailing window of these, so prune on rewrite
-    # instead of growing forever like history.jsonl (whose full range the charts use)
     cutoff_dt = datetime.strptime(ts, TS_FMT).replace(tzinfo=UTC) - timedelta(hours=WINDOW_HOURS)
     cutoff = cutoff_dt.strftime(TS_FMT)
     for name, new_rows in (("overlap.jsonl", overlap), ("uniqueness.jsonl", uniqueness)):

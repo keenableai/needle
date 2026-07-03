@@ -1,13 +1,3 @@
-"""Seed data/overlap.jsonl and data/uniqueness.jsonl from runs archived on the HF dataset.
-
-publish_bench.py appends rows going forward; this fills the window before
-that started (e.g. runs published between seeding and merge). Runs whose ts
-is already present in an output file are skipped for it, so it composes
-with the hourly appends and is a fetch-free no-op once caught up.
-
-Usage: uv run python scripts/backfill_overlap.py --site <gh-pages checkout> [--hours 24]
-"""
-
 import json
 import os
 from datetime import UTC, datetime, timedelta
