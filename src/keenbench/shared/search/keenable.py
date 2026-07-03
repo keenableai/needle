@@ -15,7 +15,7 @@ class KeenableClient(HttpSearchClient):
         max_concurrency: int | None = None,
     ) -> None:
         if max_concurrency is None:
-            max_concurrency = 8 if api_key else 2
+            max_concurrency = 8 if api_key else 1
         super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
