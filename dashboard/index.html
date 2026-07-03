@@ -85,6 +85,10 @@
     border-bottom: 1px solid var(--grid); scroll-margin-top: 16px;
   }
   .section-desc { color: var(--text-secondary); font-size: 13px; margin: 0 0 12px; max-width: 74ch; }
+  .subsection-title {
+    font-size: 15px; font-weight: 600; color: var(--text-primary);
+    margin: 22px 0 6px; scroll-margin-top: 16px;
+  }
 
   #toc { display: none; }
   @media (min-width: 1440px) {
@@ -98,6 +102,7 @@
       color: var(--text-muted); margin-bottom: 8px;
     }
     #toc ul { list-style: none; margin: 0; padding: 0; }
+    #toc ul ul { margin: 3px 0 3px 12px; }
     #toc li { margin: 5px 0; }
     #toc a { color: var(--text-secondary); text-decoration: none; }
     #toc a:hover { color: var(--text-primary); }
@@ -187,14 +192,18 @@
 </head>
 <body>
 <nav id="toc" aria-label="Contents">
-  <div class="toc-head">On this page</div>
+  <div class="toc-head">Contents</div>
   <ul>
     <li><a href="#top">Overview</a></li>
     <li><a href="#sec-latency">Search latency</a></li>
     <li><a href="#sec-overlap">Engine overlap</a></li>
-    <li><a href="#sec-freshstream">freshstream</a></li>
-    <li><a href="#sec-companyfill">companyfill</a></li>
-    <li><a href="#sec-scholar">scholar</a></li>
+    <li><a href="#sec-slices">Slices</a>
+      <ul>
+        <li><a href="#sec-freshstream">freshstream</a></li>
+        <li><a href="#sec-companyfill">companyfill</a></li>
+        <li><a href="#sec-scholar">scholar</a></li>
+      </ul>
+    </li>
     <li><a href="#card-runs">Judgement browser</a></li>
   </ul>
 </nav>
@@ -249,14 +258,16 @@
     <div id="overlap-table"></div>
   </div>
 
-  <h2 class="section-title" id="sec-freshstream">freshstream</h2>
+  <h2 class="section-title" id="sec-slices">Slices</h2>
+
+  <h3 class="subsection-title" id="sec-freshstream">freshstream</h3>
   <p class="section-desc">Fresh, time-sensitive queries mined hourly from RSS feeds and Google Trends, scored on ranking quality (RBP@5) by an LLM relevance judge.</p>
   <div class="card" id="card-rbp">
     <h2>freshstream — RBP@5</h2>
     <div class="sub">20 fresh queries per run; the hairline marks the metric ceiling</div>
   </div>
 
-  <h2 class="section-title" id="sec-companyfill">companyfill</h2>
+  <h3 class="subsection-title" id="sec-companyfill">companyfill</h3>
   <p class="section-desc">Company fact-lookups (CEO, revenue, HQ, founding year…) with gold grounded in public registries; deterministic answer-recall@5, no judge.</p>
   <div class="grid2">
     <div class="card" id="card-recall">
@@ -274,7 +285,7 @@
     <div id="fields-table"></div>
   </div>
 
-  <h2 class="section-title" id="sec-scholar">scholar</h2>
+  <h3 class="subsection-title" id="sec-scholar">scholar</h3>
   <p class="section-desc">Known-item paper retrieval: find a specific paper by its title vs. by a full-text-only detail. Deterministic match on the paper's arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID.</p>
   <div class="grid2">
     <div class="card" id="card-scholar-title">
