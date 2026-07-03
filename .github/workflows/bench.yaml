@@ -28,11 +28,12 @@ env:
   BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
   PARALLEL_API_KEY: ${{ secrets.PARALLEL_API_KEY }}
   TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+  PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/keenbench-results
   # extend the comparison here once the engine exists in the registry
   # (src/keenbench/shared/search/factory.py) and its key is a secret above
-  ENGINES: keenable,exa,google,bing,brave,parallel,tavily
+  ENGINES: keenable,exa,google,bing,brave,parallel,tavily,perplexity
 
 jobs:
   bench:

@@ -13,6 +13,7 @@ from keenbench.shared.search.brave import BraveClient
 from keenbench.shared.search.exa import ExaClient
 from keenbench.shared.search.keenable import KeenableClient
 from keenbench.shared.search.parallel import ParallelClient
+from keenbench.shared.search.perplexity import PerplexityClient
 from keenbench.shared.search.searchapi import SearchApiClient
 from keenbench.shared.search.tavily import TavilyClient
 
@@ -53,6 +54,12 @@ def _build_parallel(api_key: str | None, snippet_chars: int) -> SearchClient:
     return ParallelClient(api_key=api_key or "", mode=os.environ.get("PARALLEL_MODE", "basic"))
 
 
+def _build_perplexity(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return PerplexityClient(
+        api_key=api_key or "", model=os.environ.get("PERPLEXITY_MODEL", "sonar")
+    )
+
+
 def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:
     return TavilyClient(api_key=api_key or "", search_depth=os.environ.get("TAVILY_DEPTH", "basic"))
 
@@ -68,6 +75,9 @@ ENGINES: dict[str, EngineSpec] = {
     ),
     "brave": EngineSpec(key_env="BRAVE_API_KEY", key_required=True, build=_build_brave),
     "parallel": EngineSpec(key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel),
+    "perplexity": EngineSpec(
+        key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity
+    ),
     "tavily": EngineSpec(key_env="TAVILY_API_KEY", key_required=True, build=_build_tavily),
 }
 
