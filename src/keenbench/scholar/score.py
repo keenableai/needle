@@ -68,9 +68,7 @@ async def run_papers(
 ) -> dict[str, Any]:
     engine_names = list(engines)
 
-    async def eval_engine(
-        query: GoldPaper, results: list[SearchResult] | None, err: Any
-    ) -> dict:
+    async def eval_engine(query: GoldPaper, results: list[SearchResult] | None, err: Any) -> dict:
         pq: dict[str, Any] = {
             "query": query.text,
             "paper_key": query.paper_key,

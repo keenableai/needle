@@ -149,7 +149,9 @@ class Scholar:
             limit,
             seed,
             strategy=sample,
-            key=lambda r: f"{r['query_origin'].get('bucket', '?')}:{r['gold'].get('age_bucket', '?')}",
+            key=lambda r: (
+                f"{r['query_origin'].get('bucket', '?')}:{r['gold'].get('age_bucket', '?')}"
+            ),
         )
         gold_papers = [_gold_paper(r) for r in rows]
 

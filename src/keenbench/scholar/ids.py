@@ -15,7 +15,9 @@ PMID_URL_RES = [
 ]
 PMID_TEXT_RE = re.compile(r"\bPMID[:\s]*(\d{6,9})\b", re.IGNORECASE)
 PMC_URL_RES = [
-    re.compile(r"(?:pmc\.ncbi\.nlm\.nih\.gov|ncbi\.nlm\.nih\.gov/pmc)/articles?/PMC(\d+)", re.IGNORECASE),
+    re.compile(
+        r"(?:pmc\.ncbi\.nlm\.nih\.gov|ncbi\.nlm\.nih\.gov/pmc)/articles?/PMC(\d+)", re.IGNORECASE
+    ),
     re.compile(r"europepmc\.org/article/PMC/PMC(\d+)", re.IGNORECASE),
 ]
 DOI_RE = re.compile(r"(10\.\d{4,9}/[-._;()/:a-z0-9]+)", re.IGNORECASE)

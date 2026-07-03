@@ -70,9 +70,7 @@ async def _cell_candidates(
         return await europepmc.recent(from_date=from_date, to_date=to_date, n=n, seed=seed)
     if arxiv is None:
         return []
-    return await arxiv.search_domain(
-        domain, from_date=from_date, to_date=to_date, max_results=n
-    )
+    return await arxiv.search_domain(domain, from_date=from_date, to_date=to_date, max_results=n)
 
 
 async def _fetch_body(
@@ -119,8 +117,13 @@ async def run_generate(
     candidate_lists = await bounded_gather(
         cells,
         lambda cell: _cell_candidates(
-            cell[0], cell[1], arxiv=arxiv, europepmc=europepmc,
-            n=per_cell * OVERSAMPLE, seed=seed, now=now,
+            cell[0],
+            cell[1],
+            arxiv=arxiv,
+            europepmc=europepmc,
+            n=per_cell * OVERSAMPLE,
+            seed=seed,
+            now=now,
         ),
         concurrency=4,
     )
@@ -136,7 +139,9 @@ async def run_generate(
             candidates.append((cell, replace(paper, domain=cell[0])))
     stats.candidates = len(candidates)
 
-    async def _pair(item: tuple[tuple[str, str], Paper]) -> tuple[tuple[str, str], Paper, str | None]:
+    async def _pair(
+        item: tuple[tuple[str, str], Paper],
+    ) -> tuple[tuple[str, str], Paper, str | None]:
         _, paper = item
         body = await _fetch_body(paper, arxiv=arxiv, europepmc=europepmc)
         if not body:

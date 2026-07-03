@@ -123,7 +123,7 @@ def parse_openalex_work(work: dict[str, Any]) -> Paper | None:
     if not title or not abstract or published is None or not doi:
         return None
     pmid_m = PMID_URL_RE.search(ids.get("pmid") or "")
-    domain = (((work.get("primary_topic") or {}).get("domain") or {}).get("display_name") or "")
+    domain = ((work.get("primary_topic") or {}).get("domain") or {}).get("display_name") or ""
     url = (work.get("primary_location") or {}).get("landing_page_url") or f"https://doi.org/{doi}"
     return Paper(
         suite="openalex",
