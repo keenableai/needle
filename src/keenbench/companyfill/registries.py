@@ -87,7 +87,7 @@ def _qual_year(stmt: dict, pcode: str) -> int | None:
     return None
 
 
-def _current_ceo_stmt(claims: dict) -> dict | None:
+def current_ceo(claims: dict) -> tuple[str | None, int | None]:
     candidates = []
     for stmt in claims.get("P169", []):
         if "P582" in (stmt.get("qualifiers") or {}):
@@ -95,22 +95,11 @@ def _current_ceo_stmt(claims: dict) -> dict | None:
         pid = _entity_id(stmt)
         if not pid:
             continue
-        candidates.append(
-            (stmt.get("rank") == "preferred", _qual_year(stmt, "P580") or 0, pid, stmt)
-        )
+        candidates.append((stmt.get("rank") == "preferred", _qual_year(stmt, "P580") or 0, pid))
     if not candidates:
-        return None
-    return max(candidates, key=lambda c: c[:3])[3]
-
-
-def current_ceo(claims: dict) -> str | None:
-    stmt = _current_ceo_stmt(claims)
-    return _entity_id(stmt) if stmt else None
-
-
-def ceo_start_year(claims: dict) -> int | None:
-    stmt = _current_ceo_stmt(claims)
-    return _qual_year(stmt, "P580") if stmt else None
+        return None, None
+    _, year, pid = max(candidates)
+    return pid, year or None
 
 
 def founded_year(claims: dict) -> int | None:

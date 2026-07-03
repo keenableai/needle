@@ -16,10 +16,11 @@ class FieldSpec:
     freshness_window: str
     template: str
     cues: tuple[str, ...] = ()
+    nl_template: str | None = None
 
 
 COMPANYFILL_FIELDS = {
-    "ceo": FieldSpec("person", "1y", "{name} ceo"),
+    "ceo": FieldSpec("person", "1y", "{name} ceo", nl_template="who is the ceo of {name}"),
     "ceo_since": FieldSpec(
         "year",
         "1y",
@@ -37,32 +38,37 @@ COMPANYFILL_FIELDS = {
         "static",
         "{name} founded year",
         ("founded", "founding", "established", "incorporated", "began", "started", "since"),
+        nl_template="when was {name} founded",
     ),
-    "hq_country": FieldSpec("country", "static", "{name} headquarters country"),
-    "website": FieldSpec("domain", "static", "{name} official website"),
+    "hq_country": FieldSpec(
+        "country",
+        "static",
+        "{name} headquarters country",
+        nl_template="in which country is {name} headquartered",
+    ),
+    "website": FieldSpec(
+        "domain",
+        "static",
+        "{name} official website",
+        nl_template="what is the official website of {name}",
+    ),
     "employees": FieldSpec(
         "numeric_band",
         "1y",
         "{name} number of employees",
         ("employee", "employees", "employs", "headcount", "workforce", "staff"),
+        nl_template="how many people work at {name}",
     ),
-    "lei": FieldSpec("exact_id", "static", "{name} lei code"),
+    "lei": FieldSpec(
+        "exact_id", "static", "{name} lei code", nl_template="what is the lei code of {name}"
+    ),
     "ticker": FieldSpec(
         "exact_id",
         "static",
         "{name} stock ticker symbol",
         ("ticker", "symbol", "stock", "nasdaq", "nyse", "shares"),
+        nl_template="what is the stock ticker symbol of {name}",
     ),
-}
-
-NL_TEMPLATES = {
-    "ceo": "who is the ceo of {name}",
-    "founded_year": "when was {name} founded",
-    "hq_country": "in which country is {name} headquartered",
-    "website": "what is the official website of {name}",
-    "employees": "how many people work at {name}",
-    "lei": "what is the lei code of {name}",
-    "ticker": "what is the stock ticker symbol of {name}",
 }
 
 FINANCIALS_FIELDS = {

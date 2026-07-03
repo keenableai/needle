@@ -2,7 +2,6 @@ from keenbench.companyfill.registries import (
     GleifClient,
     SecClient,
     WikidataClient,
-    ceo_start_year,
     current_ceo,
     employees,
     founded_year,
@@ -32,8 +31,7 @@ def test_current_ceo_skips_ended_and_prefers_latest_start():
             _stmt({"id": "Q_MID"}, qualifiers=_time_qual("P580", "+2019-02-01T00:00:00Z")),
         ]
     }
-    assert current_ceo(claims) == "Q_NEW"
-    assert ceo_start_year(claims) == 2023
+    assert current_ceo(claims) == ("Q_NEW", 2023)
 
 
 def test_current_ceo_preferred_rank_wins():
@@ -43,10 +41,8 @@ def test_current_ceo_preferred_rank_wins():
             _stmt({"id": "Q_B"}, rank="preferred"),
         ]
     }
-    assert current_ceo(claims) == "Q_B"
-    assert ceo_start_year(claims) is None
-    assert current_ceo({}) is None
-    assert ceo_start_year({}) is None
+    assert current_ceo(claims) == ("Q_B", None)
+    assert current_ceo({}) == (None, None)
 
 
 def test_scalar_extractors():

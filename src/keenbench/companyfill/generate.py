@@ -7,7 +7,6 @@ from keenbench.companyfill.canon import registrable_domain
 from keenbench.companyfill.models import (
     COMPANYFILL_FIELDS,
     FINANCIALS_FIELDS,
-    NL_TEMPLATES,
     build_gold_row,
     display_name,
 )
@@ -16,7 +15,6 @@ from keenbench.companyfill.registries import (
     GleifClient,
     SecClient,
     WikidataClient,
-    ceo_start_year,
     current_ceo,
     employees,
     founded_year,
@@ -47,7 +45,9 @@ class GenStats:
 def _grounded_fields(
     claims: dict,
     labels: dict[str, tuple[str, list[str]]],
+    qid: str,
     ceo_qid: str | None,
+    ceo_since: int | None,
     country: str | None,
     *,
     min_employee_year: int,
@@ -56,9 +56,11 @@ def _grounded_fields(
     if ceo_qid and ceo_qid in labels:
         label, aliases = labels[ceo_qid]
         fields.append(("ceo", label, aliases))
-        since = ceo_start_year(claims)
-        if since is not None:
-            fields.append(("ceo_since", since, []))
+        if ceo_since is not None:
+            fields.append(("ceo_since", ceo_since, []))
+        if qid in labels:
+            company_label, company_aliases = labels[qid]
+            fields.append(("ceo_company", company_label, company_aliases))
     founded = founded_year(claims)
     if founded is not None:
         fields.append(("founded_year", founded, []))
@@ -91,20 +93,15 @@ async def _companyfill_rows(
     if qid:
         source_url = f"https://www.wikidata.org/wiki/{qid}"
         claims = await wikidata.entity(qid)
-        ceo_qid = current_ceo(claims)
+        ceo_qid, ceo_since = current_ceo(claims)
         country = await wikidata.country_qid(claims)
         labels = await wikidata.labels_and_aliases([q for q in [qid, ceo_qid, country] if q])
         for field, value, aliases in _grounded_fields(
-            claims, labels, ceo_qid, country, min_employee_year=min_employee_year
+            claims, labels, qid, ceo_qid, ceo_since, country, min_employee_year=min_employee_year
         ):
             fields.append((field, value, aliases, "wikidata", source_url))
         if ceo_qid and ceo_qid in labels:
             ceo_name = labels[ceo_qid][0].lower()
-            if qid in labels:
-                company_label, company_aliases = labels[qid]
-                fields.append(
-                    ("ceo_company", company_label, company_aliases, "wikidata", source_url)
-                )
         lei_val = lei(claims)
         lei_registry = "wikidata"
         if gleif is not None and not lei_val:
@@ -123,8 +120,8 @@ async def _companyfill_rows(
     for field, value, aliases, registry, source_url in fields:
         spec = COMPANYFILL_FIELDS[field]
         variants = [("companyfill", spec.template)]
-        if field in NL_TEMPLATES:
-            variants.append(("companyfill_nl", NL_TEMPLATES[field]))
+        if spec.nl_template:
+            variants.append(("companyfill_nl", spec.nl_template))
         for bucket, template in variants:
             rows.append(
                 build_gold_row(
