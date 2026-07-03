@@ -109,7 +109,11 @@ def clean_body_query(text: str | None) -> str | None:
     text = (text or "").strip()
     if not text:
         return None
-    cleaned = text.splitlines()[0].strip(" \"'")
+    cleaned = text.splitlines()[0].strip().strip("'").strip()
+    if len(cleaned) >= 2 and cleaned[0] == '"' and cleaned[-1] == '"' and '"' not in cleaned[1:-1]:
+        cleaned = cleaned[1:-1].strip()
+    if cleaned.count('"') % 2:
+        cleaned = " ".join(cleaned.replace('"', " ").split())
     if not cleaned or "NO_DISTINCT_QUERY" in cleaned.upper():
         return None
     return cleaned

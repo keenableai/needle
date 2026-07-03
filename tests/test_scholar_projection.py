@@ -51,11 +51,25 @@ def test_clean_body_query():
     assert clean_body_query("smoothquant 8bit activation outliers\nextra line") == (
         "smoothquant 8bit activation outliers"
     )
+    # whole-answer wrapping is unwrapped
     assert clean_body_query('  "quantized llama throughput"  ') == "quantized llama throughput"
     assert clean_body_query("NO_DISTINCT_QUERY") is None
     assert clean_body_query("  no_distinct_query  ") is None
     assert clean_body_query("") is None
     assert clean_body_query(None) is None
+
+
+def test_clean_body_query_preserves_balanced_span_quotes():
+    # a leading quoted span stays balanced (the reported unbalanced-quote bug)
+    q = '"relational database that assists parsing" social hierarchies'
+    assert clean_body_query(q) == q
+    assert clean_body_query('foo "middle span" bar') == 'foo "middle span" bar'
+
+
+def test_clean_body_query_drops_unbalanced_quotes():
+    assert clean_body_query('relational database parsing" social hierarchies') == (
+        "relational database parsing social hierarchies"
+    )
 
 
 def test_content_tokens_drops_stopwords_and_short():
