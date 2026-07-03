@@ -763,8 +763,7 @@ function renderOverlap(rows) {
   jaccardHolder.replaceChildren();
   shared3Holder.replaceChildren();
   const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
-  const cutoff = Date.now() - 24 * 3600e3;
-  const recent = rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
+  const recent = inRange(rows, 24 * 3600e3);
   const pairs = new Map();
   for (const r of recent) {
     const agg = pairs.get(pairKey(r.a, r.b)) || { jsum: 0, n: 0, s3sum: 0, n3: 0 };
@@ -798,10 +797,6 @@ function renderOverlap(rows) {
   });
   document.getElementById("overlap3-sub").textContent =
     "share of queries where both engines return 3+ of the same URLs — near-identical result lists suggest a shared backend";
-  if (![...pairs.values()].some((p) => p.n3)) {
-    shared3Holder.appendChild(el("div", { class: "empty" }, emptyMsg));
-    return;
-  }
   overlapMatrix(shared3Holder, engines, (a, b) => {
     const agg = pairs.get(pairKey(a, b));
     if (!agg || !agg.n3) return null;
@@ -819,10 +814,8 @@ function renderUniqueness(rows) {
   holder.replaceChildren();
   document.getElementById("uniqueness-sub").textContent =
     "share of an engine's returned URLs that no other engine returned for the same query, all benchmarks, last 24h";
-  const cutoff = Date.now() - 24 * 3600e3;
   const agg = new Map();
-  for (const r of rows) {
-    if (new Date(r.ts).getTime() < cutoff) continue;
+  for (const r of inRange(rows, 24 * 3600e3)) {
     const e = agg.get(r.engine) || { unique: 0, total: 0 };
     e.unique += r.unique_urls;
     e.total += r.total_urls;
@@ -1097,19 +1090,18 @@ function renderLegend() {
 }
 
 async function main() {
-  const fetchLines = (url) =>
+  const fetchRows = (url) =>
     fetch(url, { cache: "no-store" })
       .then((r) => (r.ok ? r.text() : ""))
-      .catch(() => "");
-  const [histText, overlapText, uniquenessText, latestCompanyfill] = await Promise.all([
-    fetchLines("data/history.jsonl"),
-    fetchLines("data/overlap.jsonl"),
-    fetchLines("data/uniqueness.jsonl"),
+      .catch(() => "")
+      .then((text) => text.split("\n").filter(Boolean).map((l) => JSON.parse(l)));
+  const [histRows, overlapRows, uniquenessRows, latestCompanyfill] = await Promise.all([
+    fetchRows("data/history.jsonl"),
+    fetchRows("data/overlap.jsonl"),
+    fetchRows("data/uniqueness.jsonl"),
     fetchJson("data/latest_companyfill.json").catch(() => null),
   ]);
-  history = histText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
-  const overlapRows = overlapText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
-  const uniquenessRows = uniquenessText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
+  history = histRows;
   registerEngines(history.map((r) => r.engine));
   registerEngines(Object.keys(latestCompanyfill?.engines || {}));
   renderLegend();
