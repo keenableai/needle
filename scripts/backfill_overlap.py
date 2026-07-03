@@ -34,6 +34,8 @@ def backfill(site: str, hours: int = WINDOW_HOURS, dataset: str | None = None) -
     uniqueness = _load(data / "uniqueness.jsonl")
     overlap_seen = {r["ts"] for r in overlap}
     uniqueness_seen = {r["ts"] for r in uniqueness}
+    # pre-num_shared3 rows are present but stale; reprocess to add the field
+    overlap_stale = {r["ts"] for r in overlap if "num_shared3" not in r}
     cutoff = (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT)
 
     new_overlap: list[dict] = []
@@ -41,7 +43,7 @@ def backfill(site: str, hours: int = WINDOW_HOURS, dataset: str | None = None) -
     n_runs = 0
     with httpx.Client(timeout=60.0, follow_redirects=True) as client:
         for run in runs:
-            want_overlap = run["ts"] not in overlap_seen
+            want_overlap = run["ts"] not in overlap_seen or run["ts"] in overlap_stale
             want_uniqueness = run["ts"] not in uniqueness_seen
             if not (want_overlap or want_uniqueness) or run["ts"] < cutoff:
                 continue
@@ -61,7 +63,9 @@ def backfill(site: str, hours: int = WINDOW_HOURS, dataset: str | None = None) -
         print("nothing to backfill")
         return
     if new_overlap:
-        write_jsonl(overlap + new_overlap, str(data / "overlap.jsonl"))
+        redone = {r["ts"] for r in new_overlap}
+        kept = [r for r in overlap if r["ts"] not in redone]
+        write_jsonl(kept + new_overlap, str(data / "overlap.jsonl"))
     if new_uniqueness:
         write_jsonl(uniqueness + new_uniqueness, str(data / "uniqueness.jsonl"))
     print(f"backfilled {len(new_overlap) + len(new_uniqueness)} rows from {n_runs} runs")
