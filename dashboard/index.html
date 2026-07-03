@@ -577,12 +577,21 @@ function drawChart(card, series, opts) {
 function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const holder = document.getElementById(holderId);
   holder.replaceChildren();
-  const byMetric = metrics.map(([m]) => seriesFor(bench, m, rows));
-  const mean = (pts) => pts.length ? pts.reduce((s, p) => s + p.v, 0) / pts.length : null;
+  const wmean = (er, metric) => {
+    let sum = 0, w = 0;
+    for (const r of er) {
+      if (r[metric] == null) continue;
+      sum += r[metric] * (r.num_scored || 1);
+      w += r.num_scored || 1;
+    }
+    return w ? sum / w : null;
+  };
   const entries = ENGINES.map((e) => {
-    const pts = byMetric[0][e] || [];
-    return { e, v: mean(pts), n: pts.length, lastT: pts.at(-1)?.t,
-      extra: byMetric.slice(1).map((s) => mean(s[e] || [])) };
+    const er = rows.filter((r) => r.bench === bench && r.engine === e);
+    const scored = er.filter((r) => r[metrics[0][0]] != null);
+    return { e, v: wmean(er, metrics[0][0]), n: scored.length,
+      lastT: scored.length ? new Date(scored.at(-1).ts) : null,
+      extra: metrics.slice(1).map(([m]) => wmean(er, m)) };
   }).filter((x) => x.v != null);
   if (!entries.length) {
     document.getElementById(subId).textContent = "";
