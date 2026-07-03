@@ -119,22 +119,35 @@ def parse_epmc_result(rec: dict[str, Any]) -> Paper | None:
     )
 
 
+RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
+MAX_ATTEMPTS = 4
+RETRY_BASE_DELAY = 2.0
+
+
 class ScholarClient(HttpSearchClient):
     async def _request_text(self, url: str, *, params: dict[str, Any] | None = None) -> str | None:
-        try:
-            async with self._sem:
-                resp = await self._http().request(
-                    "GET",
-                    url,
-                    params=params,
-                    headers={"User-Agent": USER_AGENT},
-                    follow_redirects=True,
-                )
-        except httpx.HTTPError:
-            return None
-        if resp.status_code != 200:
-            return None
-        return resp.text
+        delay = RETRY_BASE_DELAY
+        for attempt in range(MAX_ATTEMPTS):
+            retriable = True
+            try:
+                async with self._sem:
+                    resp = await self._http().request(
+                        "GET",
+                        url,
+                        params=params,
+                        headers={"User-Agent": USER_AGENT},
+                        follow_redirects=True,
+                    )
+                if resp.status_code == 200:
+                    return resp.text
+                retriable = resp.status_code in RETRY_STATUSES
+            except httpx.HTTPError:
+                retriable = True
+            if not retriable or attempt == MAX_ATTEMPTS - 1:
+                return None
+            await asyncio.sleep(delay)
+            delay *= 2
+        return None
 
 
 class ArxivClient(ScholarClient):

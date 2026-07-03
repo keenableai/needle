@@ -23,7 +23,7 @@ ARXIV_DOMAINS = (
 )
 HEALTH_DOMAIN = "health sciences"
 OVERSAMPLE = 3
-SUBWINDOWS = {"7d": 1, "30d": 2, "1y": 6, "older": 6}
+MAX_SUBWINDOWS = 24
 
 _DROP_STAT = {
     "fetch": "body_fetch_fail",
@@ -56,12 +56,17 @@ class GenStats:
     short_cells: int = 0
 
 
-def _subwindows(bucket: str, *, now: datetime) -> list[tuple[str, str]]:
+def _subwindow_count(bucket: str, n: int) -> int:
     older, newer = AGE_BANDS[bucket]
-    k = SUBWINDOWS.get(bucket, 1)
-    edges = [newer + (older - newer) * i / k for i in range(k + 1)]
+    span_days = int(older - newer)
+    return max(1, min(n, MAX_SUBWINDOWS, span_days))
+
+
+def _subwindows(bucket: str, *, now: datetime, count: int) -> list[tuple[str, str]]:
+    older, newer = AGE_BANDS[bucket]
+    edges = [newer + (older - newer) * i / count for i in range(count + 1)]
     windows = []
-    for i in range(k):
+    for i in range(count):
         from_date = (now - timedelta(days=edges[i + 1])).date().isoformat()
         to_date = (now - timedelta(days=edges[i])).date().isoformat()
         windows.append((from_date, to_date))
@@ -87,7 +92,7 @@ async def _cell_candidates(
     seed: int,
     now: datetime,
 ) -> list[Paper]:
-    windows = _subwindows(bucket, now=now)
+    windows = _subwindows(bucket, now=now, count=_subwindow_count(bucket, n))
     per = max(1, -(-n // len(windows)))
     lists: list[list[Paper]] = []
     for wi, (from_date, to_date) in enumerate(windows):

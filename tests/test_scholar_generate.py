@@ -2,14 +2,19 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from keenbench.scholar.generate import _subwindows, run_generate
+from keenbench.scholar.generate import _subwindow_count, _subwindows, run_generate
 from keenbench.scholar.models import Paper
+
+
+def test_subwindow_count_scales_with_candidates_and_span():
+    assert _subwindow_count("7d", 21) == 7  # narrow bucket: capped by 7-day span
+    assert _subwindow_count("1y", 21) == 21  # one window per candidate
+    assert _subwindow_count("1y", 40) == 24  # capped at MAX_SUBWINDOWS
 
 
 def test_subwindows_span_the_bucket_range():
     now = datetime(2026, 7, 2, tzinfo=UTC)
-    assert len(_subwindows("7d", now=now)) == 1
-    wins = _subwindows("1y", now=now)
+    wins = _subwindows("1y", now=now, count=6)
     assert len(wins) == 6
     for fr, to in wins:
         assert fr < to
@@ -44,7 +49,7 @@ class FakeArxiv:
         self.body_calls = 0
 
     async def search_domain(self, domain, *, from_date, to_date, max_results):
-        return self._by_domain.get(domain, [])[:max_results]
+        return list(self._by_domain.get(domain, []))
 
     async def body(self, arxiv_id):
         self.body_calls += 1
