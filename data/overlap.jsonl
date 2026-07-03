@@ -1,4 +1,3 @@
-{"ts": "2026-07-02T16:45Z", "bench": "freshstream", "a": "keenable", "b": "exa", "jaccard_sum": 1.0556, "num_queries": 17}
 {"ts": "2026-07-02T16:56Z", "bench": "freshstream", "a": "keenable", "b": "exa", "jaccard_sum": 1.8849, "num_queries": 20}
 {"ts": "2026-07-02T16:59Z", "bench": "freshstream", "a": "keenable", "b": "exa", "jaccard_sum": 2.6468, "num_queries": 20}
 {"ts": "2026-07-02T17:55Z", "bench": "freshstream", "a": "keenable", "b": "exa", "jaccard_sum": 2.125, "num_queries": 20}
@@ -600,3 +599,31 @@
 {"ts": "2026-07-03T16:41Z", "a": "parallel", "b": "tavily", "jaccard_sum": 2.373, "num_queries": 20}
 {"ts": "2026-07-03T16:41Z", "a": "parallel", "b": "perplexity", "jaccard_sum": 2.4563, "num_queries": 20}
 {"ts": "2026-07-03T16:41Z", "a": "tavily", "b": "perplexity", "jaccard_sum": 6.1706, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "keenable", "b": "exa", "jaccard_sum": 1.2778, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "keenable", "b": "google", "jaccard_sum": 0.6389, "num_queries": 19}
+{"ts": "2026-07-03T16:48Z", "a": "keenable", "b": "bing", "jaccard_sum": 1.1944, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "keenable", "b": "brave", "jaccard_sum": 1.2778, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "keenable", "b": "parallel", "jaccard_sum": 1.0556, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "keenable", "b": "tavily", "jaccard_sum": 0.4444, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "keenable", "b": "perplexity", "jaccard_sum": 1.1667, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "exa", "b": "google", "jaccard_sum": 1.9123, "num_queries": 19}
+{"ts": "2026-07-03T16:48Z", "a": "exa", "b": "bing", "jaccard_sum": 2.0556, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "exa", "b": "brave", "jaccard_sum": 2.5099, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "exa", "b": "parallel", "jaccard_sum": 1.7063, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "exa", "b": "tavily", "jaccard_sum": 1.998, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "exa", "b": "perplexity", "jaccard_sum": 2.4306, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "google", "b": "bing", "jaccard_sum": 1.2778, "num_queries": 19}
+{"ts": "2026-07-03T16:48Z", "a": "google", "b": "brave", "jaccard_sum": 2.4754, "num_queries": 19}
+{"ts": "2026-07-03T16:48Z", "a": "google", "b": "parallel", "jaccard_sum": 1.7393, "num_queries": 19}
+{"ts": "2026-07-03T16:48Z", "a": "google", "b": "tavily", "jaccard_sum": 5.1643, "num_queries": 19}
+{"ts": "2026-07-03T16:48Z", "a": "google", "b": "perplexity", "jaccard_sum": 4.6099, "num_queries": 19}
+{"ts": "2026-07-03T16:48Z", "a": "bing", "b": "brave", "jaccard_sum": 2.752, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "bing", "b": "parallel", "jaccard_sum": 1.9901, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "bing", "b": "tavily", "jaccard_sum": 1.5437, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "bing", "b": "perplexity", "jaccard_sum": 1.1944, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "brave", "b": "parallel", "jaccard_sum": 11.381, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "brave", "b": "tavily", "jaccard_sum": 2.9524, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "brave", "b": "perplexity", "jaccard_sum": 3.3571, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "parallel", "b": "tavily", "jaccard_sum": 2.0556, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "parallel", "b": "perplexity", "jaccard_sum": 2.6389, "num_queries": 20}
+{"ts": "2026-07-03T16:48Z", "a": "tavily", "b": "perplexity", "jaccard_sum": 6.8333, "num_queries": 20}
