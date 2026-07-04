@@ -44,18 +44,20 @@ def _contains_vin(query: str) -> bool:
 
 
 def _contains_hex_hash(query: str) -> bool:
-    return _any_token(
-        HEX_HASH_RE, query, lambda t: any(c in "abcdefABCDEF" for c in t)
-    ) or bool(HEX_ETH_ADDRESS_RE.search(query))
+    return _any_token(HEX_HASH_RE, query, lambda t: any(c in "abcdefABCDEF" for c in t)) or bool(
+        HEX_ETH_ADDRESS_RE.search(query)
+    )
 
 
 def _contains_crypto_address(query: str) -> bool:
     return _any_token(
         CRYPTO_BASE58_RE,
         query,
-        lambda t: any(c.isdigit() for c in t)
-        and any(c.isupper() for c in t)
-        and any(c.islower() for c in t),
+        lambda t: (
+            any(c.isdigit() for c in t)
+            and any(c.isupper() for c in t)
+            and any(c.islower() for c in t)
+        ),
     )
 
 
