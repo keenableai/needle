@@ -43,12 +43,12 @@ def fake_lid_unsure(text: str) -> tuple[str, float]:
     return "fr", 0.2
 
 
-def test_is_eligible_rejects_syntax_and_identifiers():
+def test_is_eligible_rejects_non_latin_and_identifiers():
     assert is_eligible("how to fix a sink")
     assert not is_eligible("медаль за боевые заслуги")
     assert not is_eligible("東京 天気")
-    assert not is_eligible("site:example.gov budget report")
-    assert not is_eligible('"exact phrase" search')
+    assert is_eligible("site:example.gov budget report")
+    assert is_eligible('"exact phrase" search')
     assert not is_eligible("carfax 1HGCM82633A004352 history")
     assert not is_eligible("d41d8cd98f00b204e9800998ecf8427e checksum")
     assert not is_eligible("0x742d35Cc6634C0532925a3b844Bc454e4438f44e balance")

@@ -14,12 +14,6 @@ ENGLISH_ZIPF = 3.0
 ENGLISH_WORD_FRACTION = 0.6
 
 NON_LATIN_RE = re.compile("[^\u0020-\u024f\u1e00-\u1eff\u2000-\u206f\u20a0-\u20cf]")
-SEARCH_OPERATOR_RE = re.compile(
-    r"\b(?:site|inurl|intitle|intext|filetype|cache|link|allinurl|allintitle|allintext):\S+",
-    re.IGNORECASE,
-)
-QUOTE_CHARS = "\"'`‘’“”«»"
-HAS_QUOTE_RE = re.compile(f"[{re.escape(QUOTE_CHARS)}]")
 PUNCT_RE = re.compile(r"[^\w\s]")
 VIN_CANDIDATE_RE = re.compile(r"\b[A-HJ-NPR-Z0-9]{17}\b", re.IGNORECASE)
 HEX_HASH_RE = re.compile(r"\b[0-9a-fA-F]{24,}\b")
@@ -61,8 +55,6 @@ def _contains_crypto_address(query: str) -> bool:
 def is_eligible(query: str) -> bool:
     return not (
         NON_LATIN_RE.search(query)
-        or SEARCH_OPERATOR_RE.search(query)
-        or HAS_QUOTE_RE.search(query)
         or _contains_vin(query)
         or _contains_hex_hash(query)
         or _contains_crypto_address(query)
