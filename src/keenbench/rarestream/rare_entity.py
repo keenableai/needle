@@ -134,6 +134,20 @@ def load_lid(model_path: str | None = None) -> Lid:
     return lid
 
 
+def dedup_by_ngrams(rows: list[dict], n: int, max_per_gram: int) -> list[dict]:
+    counts: dict[tuple[str, ...], int] = {}
+    kept = []
+    for row in rows:
+        words = words_for(row["query"])
+        grams = [tuple(words[i : i + n]) for i in range(len(words) - n + 1)] or [tuple(words)]
+        if any(counts.get(g, 0) >= max_per_gram for g in grams):
+            continue
+        for g in grams:
+            counts[g] = counts.get(g, 0) + 1
+        kept.append(row)
+    return kept
+
+
 def filter_rows(
     rows: Iterable[dict],
     tokenize: Tokenize,
@@ -141,6 +155,8 @@ def filter_rows(
     min_words: int = 3,
     max_query_len: int = 200,
     subword_threshold: int = SUBWORD_THRESHOLD,
+    dedup_ngram: int = 3,
+    dedup_max: int = 2,
 ) -> tuple[list[dict], dict[str, int]]:
     stats: dict[str, int] = {}
 
@@ -182,5 +198,10 @@ def filter_rows(
                 "max_pieces": max(99 if UNK in h["subwords"] else len(h["subwords"]) for h in hard),
             }
         )
+    if dedup_ngram:
+        kept.sort(key=lambda r: -r["max_pieces"])
+        before = len(kept)
+        kept = dedup_by_ngrams(kept, dedup_ngram, dedup_max)
+        stats["ngram_dup"] = before - len(kept)
     kept.sort(key=lambda r: (r["length_bucket"], -r["max_pieces"]))
     return kept, stats

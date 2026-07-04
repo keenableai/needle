@@ -99,7 +99,22 @@ def test_filter_rows_end_to_end():
     assert by_query["how to fix kdeplasma"]["length_bucket"] == "medium"
     assert by_query["the best frobnicator tea in zone eight today"]["length_bucket"] == "long"
     assert by_query["how to fix kdeplasma"]["hard_words"][0]["word"] == "kdeplasma"
-    assert stats == {"no_rare_word": 1, "too_few_words": 1, "urlish": 1}
+    assert stats == {"no_rare_word": 1, "too_few_words": 1, "urlish": 1, "ngram_dup": 0}
+
+
+def test_dedup_by_ngrams_collapses_templated_prefixes():
+    from keenbench.rarestream.rare_entity import dedup_by_ngrams
+
+    rows = [
+        {"query": "regional europe united kingdom scotland aaa"},
+        {"query": "regional europe united kingdom scotland bbb"},
+        {"query": "regional europe united kingdom scotland ccc"},
+        {"query": "how to make sourdough bread"},
+    ]
+    kept = dedup_by_ngrams(rows, n=4, max_per_gram=2)
+    templated = [r for r in kept if r["query"].startswith("regional")]
+    assert len(templated) == 2
+    assert any("sourdough" in r["query"] for r in kept)
 
 
 def test_filter_rows_skips_lid_when_disabled():
