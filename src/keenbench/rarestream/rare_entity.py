@@ -154,6 +154,7 @@ def filter_rows(
     lid: Lid | None,
     min_words: int = 3,
     max_query_len: int = 200,
+    max_word_len: int = 40,
     subword_threshold: int = SUBWORD_THRESHOLD,
     dedup_ngram: int = 3,
     dedup_max: int = 2,
@@ -175,6 +176,9 @@ def filter_rows(
         words = words_for(query)
         if len(words) < min_words:
             reject("too_few_words")
+            continue
+        if max((len(w) for w in words), default=0) > max_word_len:
+            reject("long_word")
             continue
         if not is_eligible(query):
             reject("ineligible")

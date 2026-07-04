@@ -117,6 +117,17 @@ def test_dedup_by_ngrams_collapses_templated_prefixes():
     assert any("sourdough" in r["query"] for r in kept)
 
 
+def test_filter_rows_drops_overlong_single_word():
+    long_garbage = "a" + "mansaidwatt" * 6
+    rows = [
+        {"query": f"the {long_garbage} thing", "providers": []},
+        {"query": "the fa507nur part", "providers": []},
+    ]
+    kept, stats = filter_rows(rows, tokenize=fake_tokenize, lid=None, max_word_len=40)
+    assert [r["query"] for r in kept] == ["the fa507nur part"]
+    assert stats["long_word"] == 1
+
+
 def test_filter_rows_skips_lid_when_disabled():
     rows = [{"query": "die optimale kiste kdeplasma", "providers": []}]
     kept, _ = filter_rows(rows, tokenize=fake_tokenize, lid=None)
