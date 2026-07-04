@@ -12,10 +12,11 @@ split in two:
   dataset (`agentic/queries.parquet`); also handles the AQL query stream
   (`aql/queries.jsonl`, from github.com/keenableai/archive-query-log) via
   `--stream-path`/`--query-field`.
-- `keenbench rarestream generate` — like the other benches' `generate`: emits a
-  query sample (default jsonl to stdout) drawn from the already-filtered
-  artifact (`agentic/rare_entity.parquet` by default) via the shared sampling
-  helper. Row jsonl/parquet I/O lives in `keenbench/rarestream/io.py`.
+- `keenbench rarestream generate` / `run` — same interface as the other benches:
+  `generate` emits a query sample (default jsonl to stdout) drawn from the
+  already-filtered artifact (`agentic/rare_entity.parquet` by default) via the
+  shared sampling helper; `run` evaluates that sample with RBP@5 + LLM judge,
+  like freshstream. Row jsonl/parquet I/O lives in `keenbench/rarestream/io.py`.
 
 ## Layout
 
