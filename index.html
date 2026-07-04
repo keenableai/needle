@@ -225,8 +225,6 @@
       <span id="updated"></span></p>
   </header>
 
-  <div class="filters" id="filters" role="group" aria-label="Time range"></div>
-
   <div class="grid3">
     <div class="card">
       <h2>freshstream — 7-day mean</h2>
@@ -1128,18 +1126,6 @@ async function main() {
   if (history.length) {
     const lastTs = history[history.length - 1].ts;
     document.getElementById("updated").textContent = `Last run: ${fmtTime(new Date(lastTs))} UTC.`;
-  }
-
-  const filters = document.getElementById("filters");
-  for (const [name, ms] of RANGES) {
-    const btn = el("button", { "aria-pressed": String(ms === rangeMs) }, name);
-    btn.addEventListener("click", () => {
-      rangeMs = ms;
-      filters.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", "false"));
-      btn.setAttribute("aria-pressed", "true");
-      renderAll(latestCompanyfill);
-    });
-    filters.appendChild(btn);
   }
 
   renderLeaderboards(inRange(history, 7 * 86400e3));
