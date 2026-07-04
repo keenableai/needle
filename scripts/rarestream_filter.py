@@ -13,9 +13,8 @@ Usage: uv run python scripts/rarestream_filter.py --out rare_entity.parquet
 from collections import Counter
 
 import fire
-from huggingface_hub import hf_hub_download
 
-from keenbench.rarestream.io import iter_rows, write_rows
+from keenbench.rarestream.io import iter_rows, resolve_dataset, write_rows
 from keenbench.rarestream.rare_entity import filter_rows, load_lid, load_tokenizer
 
 DEFAULT_DATASET = "keenable-ai/keenbench-results"
@@ -39,12 +38,10 @@ def main(
     vocab: str | None = None,
     lid_model: str | None = None,
 ) -> None:
-    if queries is None:
-        queries = hf_hub_download(dataset, stream_path, repo_type="dataset")
     tokenize = load_tokenizer(vocab)
     lid = None if any_language else load_lid(lid_model)
     kept, stats = filter_rows(
-        iter_rows(queries),
+        iter_rows(resolve_dataset(queries, dataset, stream_path)),
         tokenize=tokenize,
         lid=lid,
         min_words=min_words,

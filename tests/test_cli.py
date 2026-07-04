@@ -4,6 +4,7 @@ import pytest
 
 from keenbench.freshstream import cli as freshstream_cli
 from keenbench.rarestream import cli as rarestream_cli
+from keenbench.shared import cli as shared_cli
 from keenbench.shared.llm import OpenRouterClient, _content_to_text
 from keenbench.shared.search import factory as search_factory
 
@@ -76,7 +77,7 @@ def test_freshstream_run_passes_keenable_api_key(monkeypatch, tmp_path):
         return {"num_queries": len(queries), "num_results": 5, "engines": {}}
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
-    monkeypatch.setattr(freshstream_cli, "run_rbp", fake_run_rbp)
+    monkeypatch.setattr(shared_cli, "run_rbp", fake_run_rbp)
     freshstream_cli.Freshstream().run(
         queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json")
     )
@@ -148,7 +149,7 @@ def test_rarestream_run_evaluates(tmp_path, monkeypatch):
         return {"num_queries": len(eval_queries), "engines": {}}
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
-    monkeypatch.setattr(rarestream_cli, "run_rbp", fake_run_rbp)
+    monkeypatch.setattr(shared_cli, "run_rbp", fake_run_rbp)
     out = tmp_path / "r.json"
     rarestream_cli.Rarestream().run(queries=str(f), engines="keenable", out=str(out))
     assert json.loads(out.read_text())["num_queries"] == 1
