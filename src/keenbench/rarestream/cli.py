@@ -1,3 +1,5 @@
+import sys
+
 from huggingface_hub import hf_hub_download
 
 from keenbench.rarestream.io import iter_rows, write_rows
@@ -8,10 +10,10 @@ DEFAULT_FILTERED_PATH = "agentic/rare_entity.parquet"
 
 
 class Rarestream:
-    def sample(
+    def generate(
         self,
-        n: int = 100,
         out: str = "-",
+        n: int = 100,
         queries: str | None = None,
         dataset: str = DEFAULT_DATASET,
         filtered_path: str = DEFAULT_FILTERED_PATH,
@@ -24,3 +26,7 @@ class Rarestream:
         rows = list(iter_rows(queries))
         picked = sample(rows, n, seed, strategy=strategy, key=by)
         write_rows(picked, out)
+        print(
+            f"rarestream: {len(picked)} queries sampled from {len(rows)} ({strategy})",
+            file=sys.stderr,
+        )
