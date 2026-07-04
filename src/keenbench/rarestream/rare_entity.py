@@ -1,6 +1,6 @@
 import re
 import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
 from wordfreq import zipf_frequency
@@ -131,7 +131,7 @@ def load_lid(model_path: str | None = None) -> Lid:
 
 
 def filter_rows(
-    rows: list[dict],
+    rows: Iterable[dict],
     tokenize: Tokenize,
     lid: Lid | None,
     min_words: int = 3,
