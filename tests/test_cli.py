@@ -1,6 +1,10 @@
+import json
+
 import pytest
 
 from keenbench.freshstream import cli as freshstream_cli
+from keenbench.rarestream import cli as rarestream_cli
+from keenbench.shared import cli as shared_cli
 from keenbench.shared.llm import OpenRouterClient, _content_to_text
 from keenbench.shared.search import factory as search_factory
 
@@ -73,7 +77,7 @@ def test_freshstream_run_passes_keenable_api_key(monkeypatch, tmp_path):
         return {"num_queries": len(queries), "num_results": 5, "engines": {}}
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
-    monkeypatch.setattr(freshstream_cli, "run_rbp", fake_run_rbp)
+    monkeypatch.setattr(shared_cli, "run_rbp", fake_run_rbp)
     freshstream_cli.Freshstream().run(
         queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json")
     )
@@ -106,3 +110,46 @@ def test_freshstream_run_rejects_unknown_sample(tmp_path, monkeypatch):
     f.write_text("a\nb\n")
     with pytest.raises(SystemExit):
         freshstream_cli.Freshstream().run(queries=str(f), limit=1, sample="bogus")
+
+
+def test_rarestream_generate_writes_sample(tmp_path):
+    src = tmp_path / "filtered.jsonl"
+    src.write_text(
+        '{"query_text": "a", "length_bucket": "medium"}\n'
+        '{"query_text": "b", "length_bucket": "long"}\n'
+    )
+    out = tmp_path / "o.jsonl"
+    rarestream_cli.Rarestream().generate(queries=str(src), out=str(out), limit=1, sample="head")
+    lines = [ln for ln in out.read_text().splitlines() if ln.strip()]
+    assert len(lines) == 1
+
+
+def test_rarestream_run_requires_openrouter_key(tmp_path, monkeypatch):
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    f = tmp_path / "q.jsonl"
+    f.write_text('{"query_text": "a"}\n')
+    with pytest.raises(SystemExit):
+        rarestream_cli.Rarestream().run(queries=str(f))
+
+
+def test_rarestream_run_evaluates(tmp_path, monkeypatch):
+    monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
+    monkeypatch.setenv("KEENABLE_API_KEY", "kb-key")
+    f = tmp_path / "q.jsonl"
+    f.write_text('{"query_text": "rare thing", "length_bucket": "medium"}\n')
+
+    class FakeKeenable:
+        def __init__(self, **kwargs):
+            pass
+
+        async def aclose(self):
+            pass
+
+    async def fake_run_rbp(eval_queries, clients, judge, **kwargs):
+        return {"num_queries": len(eval_queries), "engines": {}}
+
+    monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
+    monkeypatch.setattr(shared_cli, "run_rbp", fake_run_rbp)
+    out = tmp_path / "r.json"
+    rarestream_cli.Rarestream().run(queries=str(f), engines="keenable", out=str(out))
+    assert json.loads(out.read_text())["num_queries"] == 1

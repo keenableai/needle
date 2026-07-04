@@ -209,6 +209,7 @@
     <li><a href="#sec-slices">Slices</a>
       <ul>
         <li><a href="#sec-freshstream">freshstream</a></li>
+        <li><a href="#sec-rarestream">rarestream</a></li>
         <li><a href="#sec-companyfill">companyfill</a></li>
         <li><a href="#sec-scholar">scholar</a></li>
       </ul>
@@ -221,8 +222,9 @@
     <h1>keenbench — search engine benchmarks</h1>
     <p>Hourly search-engine benchmarks from
       <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.
-      freshstream runs hourly (RBP@5, LLM judge); companyfill and scholar
-      daily (deterministic recall). All times UTC.
+      freshstream runs hourly (RBP@5, LLM judge); rarestream daily
+      (rare-entity RBP@5, LLM judge); companyfill and scholar daily
+      (deterministic recall). All times UTC.
       <span id="updated"></span></p>
   </header>
 
@@ -241,6 +243,11 @@
       <h2>scholar — 7-day mean</h2>
       <div class="sub" id="lb-scholar-sub"></div>
       <div id="lb-scholar"></div>
+    </div>
+    <div class="card">
+      <h2>rarestream — 7-day mean</h2>
+      <div class="sub" id="lb-rare-sub"></div>
+      <div id="lb-rare"></div>
     </div>
   </div>
 
@@ -284,6 +291,13 @@
   <div class="card" id="card-rbp">
     <h2>freshstream — RBP@5</h2>
     <div class="sub">20 fresh queries per run, mean RBP over all queries in each 6-hour window; the hairline marks the metric ceiling</div>
+  </div>
+
+  <h3 class="subsection-title" id="sec-rarestream">rarestream</h3>
+  <p class="section-desc">Rare-entity queries mined from real search logs — obscure names, technical terms, and long compounds selected by tokenizer difficulty. Scored on ranking quality (RBP@5) by the same LLM relevance judge as freshstream.</p>
+  <div class="card" id="card-rbp-rare">
+    <h2>rarestream — RBP@5</h2>
+    <div class="sub">100 rare-entity queries per daily run; the hairline marks the metric ceiling</div>
   </div>
 
   <h3 class="subsection-title" id="sec-companyfill">companyfill</h3>
@@ -659,6 +673,7 @@ function renderLeaderboards(rows) {
     ["title_recall", "title"],
     ["body_recall", "body"],
   ]);
+  renderLeaderboard("lb-rare", "lb-rare-sub", rows, "rarestream", [["rbp", "RBP@5"]]);
 }
 
 function renderFields(latest) {
@@ -709,7 +724,7 @@ function renderHistoryTable(rows) {
   }
   table.appendChild(head);
   for (const r of [...rows].reverse()) {
-    const metrics = r.bench === "freshstream" ? [["RBP@5", r.rbp]] : [["recall@5", r.recall], ["MRR@5", r.mrr]];
+    const metrics = ["freshstream", "rarestream"].includes(r.bench) ? [["RBP@5", r.rbp]] : [["recall@5", r.recall], ["MRR@5", r.mrr]];
     for (const [name, v] of metrics) {
       const tr = el("tr");
       markHome(tr, r.engine);
@@ -989,7 +1004,7 @@ function renderScholarRun(holder, report, engine) {
   }
 }
 
-const RUN_ARTIFACT = { freshstream: "rbp.json", companyfill: "recall.json", scholar: "scholar.json" };
+const RUN_ARTIFACT = { freshstream: "rbp.json", rarestream: "rarestream.json", companyfill: "recall.json", scholar: "scholar.json" };
 
 async function renderRunDetail(runs) {
   const holder = document.getElementById("run-detail");
@@ -1020,7 +1035,7 @@ async function renderRunDetail(runs) {
     holder.replaceChildren();
     if (benchSel.value === "companyfill") renderCompanyfillRun(holder, report, engineSel.value);
     else if (benchSel.value === "scholar") renderScholarRun(holder, report, engineSel.value);
-    else renderFreshstreamRun(holder, report, engineSel.value);
+    else renderFreshstreamRun(holder, report, engineSel.value); // freshstream + rarestream share the RBP shape
     if (!holder.children.length) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
     }
@@ -1037,7 +1052,7 @@ async function initRunBrowser() {
   let runs = [];
   try { runs = await fetchJson("data/runs.json"); } catch {}
   runs = [...runs].reverse();
-  for (const b of ["freshstream", "companyfill", "scholar"]) {
+  for (const b of ["freshstream", "rarestream", "companyfill", "scholar"]) {
     benchSel.appendChild(el("option", { value: b }, b));
   }
   for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, e));
@@ -1064,6 +1079,11 @@ function drawCharts(rows) {
   const ceiling = rows.filter((r) => r.bench === "freshstream").at(-1)?.rbp_max;
   drawChart(document.getElementById("card-rbp"), rbpSeries(rows),
     { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine, 6-hour windows" });
+  const rareCeiling = rows.filter((r) => r.bench === "rarestream").at(-1)?.rbp_max;
+  drawChart(document.getElementById("card-rbp-rare"), seriesFor("rarestream", "rbp", rows),
+    { domain: [0, (rareCeiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling: rareCeiling,
+      label: "rare-entity RBP over time per engine",
+      empty: "No rarestream run yet — collected daily." });
   drawChart(document.getElementById("card-recall"), seriesFor("companyfill", "recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),

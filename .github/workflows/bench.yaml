@@ -2,12 +2,16 @@ name: Bench
 
 on:
   schedule:
-    - cron: "17 0 * * *" # daily: freshstream + companyfill with fresh gold
+    - cron: "17 0 * * *" # daily: freshstream + companyfill (fresh gold) + rarestream
     - cron: "17 1-23 * * *" # hourly: freshstream only
   workflow_dispatch:
     inputs:
       companyfill:
         description: "Also run companyfill (regenerates gold)"
+        type: boolean
+        default: false
+      rarestream:
+        description: "Also run rarestream (rare-entity RBP eval)"
         type: boolean
         default: false
       scholar:
@@ -80,6 +84,17 @@ jobs:
           uv run keenbench companyfill run --queries site-data/data/gold.jsonl \
             --limit 100 --engines "$ENGINES" --judge --out recall.json
 
+      - name: rarestream (daily schedule or dispatch opt-in)
+        env:
+          RUN_RARESTREAM: ${{ github.event.schedule == '17 0 * * *' || inputs.rarestream == true }}
+        run: |
+          if [ "$RUN_RARESTREAM" != "true" ]; then
+            echo "skipping rarestream"
+            exit 0
+          fi
+          uv run keenbench rarestream run --limit 100 \
+            --engines "$ENGINES" --out rarestream.json
+
       - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
         env:
           RUN_SCHOLAR: ${{ github.event.schedule == '17 0 * * *' || inputs.scholar == true }}
@@ -103,6 +118,9 @@ jobs:
           args="--site site-data --runs-out staged --ts $TS --rbp rbp.json --fresh fresh.jsonl"
           if [ -s recall.json ]; then
             args="$args --recall recall.json --gold site-data/data/gold.jsonl"
+          fi
+          if [ -s rarestream.json ]; then
+            args="$args --rarestream rarestream.json"
           fi
           if [ -s scholar.json ]; then
             args="$args --scholar scholar.json --scholar-queries site-data/data/scholar.jsonl"
