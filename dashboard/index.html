@@ -781,9 +781,8 @@ function renderOverlap(rows) {
   jaccardHolder.replaceChildren();
   shared3Holder.replaceChildren();
   const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
-  const recent = inRange(rows, 24 * 3600e3);
   const pairs = new Map();
-  for (const r of recent) {
+  for (const r of rows) {
     const agg = pairs.get(pairKey(r.a, r.b)) || { jsum: 0, n: 0, s3sum: 0, n3: 0 };
     agg.jsum += r.jaccard_sum;
     agg.n += r.num_queries;
@@ -793,8 +792,8 @@ function renderOverlap(rows) {
     }
     pairs.set(pairKey(r.a, r.b), agg);
   }
-  const engines = ENGINES.filter((e) => recent.some((r) => r.a === e || r.b === e));
-  const emptyMsg = "No overlap data in the last 24h yet — accumulates from hourly runs.";
+  const engines = ENGINES.filter((e) => rows.some((r) => r.a === e || r.b === e));
+  const emptyMsg = "No overlap data yet — accumulates from hourly runs.";
   if (engines.length < 2) {
     jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     shared3Holder.appendChild(el("div", { class: "empty" }, emptyMsg));
@@ -802,7 +801,7 @@ function renderOverlap(rows) {
   }
   const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
   document.getElementById("overlap-sub").textContent =
-    `mean Jaccard overlap of top-K URL sets on the same queries, all benchmarks — up to ${nQueries} queries per pair, last 24h`;
+    `mean Jaccard overlap of top-K URL sets on the same queries, all benchmarks — up to ${nQueries} queries per pair, all runs`;
   overlapMatrix(jaccardHolder, engines, (a, b) => {
     const agg = pairs.get(pairKey(a, b));
     if (!agg || !agg.n) return null;
@@ -831,9 +830,9 @@ function renderUniqueness(rows) {
   const holder = document.getElementById("uniqueness-table");
   holder.replaceChildren();
   document.getElementById("uniqueness-sub").textContent =
-    "share of an engine's returned URLs that no other engine returned for the same query, all benchmarks, last 24h";
+    "share of an engine's returned URLs that no other engine returned for the same query, all benchmarks, all runs";
   const agg = new Map();
-  for (const r of inRange(rows, 24 * 3600e3)) {
+  for (const r of rows) {
     const e = agg.get(r.engine) || { unique: 0, total: 0 };
     e.unique += r.unique_urls;
     e.total += r.total_urls;
@@ -841,7 +840,7 @@ function renderUniqueness(rows) {
   }
   const engines = ENGINES.filter((e) => agg.get(e)?.total);
   if (!engines.length) {
-    holder.appendChild(el("div", { class: "empty" }, "No uniqueness data in the last 24h yet — accumulates from hourly runs."));
+    holder.appendChild(el("div", { class: "empty" }, "No uniqueness data yet — accumulates from hourly runs."));
     return;
   }
   engines.sort((a, b) => agg.get(b).unique / agg.get(b).total - agg.get(a).unique / agg.get(a).total);
