@@ -5,6 +5,7 @@ from keenbench import __version__
 from keenbench.companyfill.cli import Companyfill
 from keenbench.freshstream.cli import Freshstream
 from keenbench.rarestream.cli import Rarestream
+from keenbench.scholar.cli import Scholar
 
 
 class Keenbench:
@@ -12,6 +13,7 @@ class Keenbench:
         self.companyfill = Companyfill()
         self.freshstream = Freshstream()
         self.rarestream = Rarestream()
+        self.scholar = Scholar()
 
     def version(self) -> str:
         return f"keenbench {__version__}"

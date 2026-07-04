@@ -18,7 +18,7 @@ from pathlib import Path
 import fire
 
 from keenbench.shared.io import write_json, write_jsonl
-from keenbench.shared.overlap import TS_FMT, WINDOW_HOURS, overlap_rows
+from keenbench.shared.overlap import TS_FMT, WINDOW_HOURS, overlap_rows, uniqueness_rows
 
 
 def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
@@ -35,6 +35,7 @@ def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
             "judge_errors": e["judge_errors"],
             "p50_ms": (e.get("latency") or {}).get("p50_ms"),
             "p95_ms": (e.get("latency") or {}).get("p95_ms"),
+            "lat_ms": (e.get("latency") or {}).get("samples_ms"),
         }
         for name, e in report["engines"].items()
     ]
@@ -61,6 +62,28 @@ def companyfill_rows(report: dict, ts: str) -> list[dict]:
             "search_errors": e["search_errors"],
             "p50_ms": (e.get("latency") or {}).get("p50_ms"),
             "p95_ms": (e.get("latency") or {}).get("p95_ms"),
+            "lat_ms": (e.get("latency") or {}).get("samples_ms"),
+        }
+        for name, e in report["engines"].items()
+    ]
+
+
+def scholar_rows(report: dict, ts: str) -> list[dict]:
+    return [
+        {
+            "ts": ts,
+            "bench": "scholar",
+            "engine": name,
+            "recall": e["recall_at_k"],
+            "mrr": e["mrr_at_k"],
+            "title_recall": e["by_bucket"].get("title", {}).get("recall_at_k"),
+            "body_recall": e["by_bucket"].get("body", {}).get("recall_at_k"),
+            "num_scored": e["num_scored"],
+            "num_queries": report["num_queries"],
+            "search_errors": e["search_errors"],
+            "p50_ms": (e.get("latency") or {}).get("p50_ms"),
+            "p95_ms": (e.get("latency") or {}).get("p95_ms"),
+            "lat_ms": (e.get("latency") or {}).get("samples_ms"),
         }
         for name, e in report["engines"].items()
     ]
@@ -83,6 +106,8 @@ def publish(
     recall: str | None = None,
     gold: str | None = None,
     rarestream: str | None = None,
+    scholar: str | None = None,
+    scholar_queries: str | None = None,
     ts: str | None = None,
 ) -> None:
     ts = ts or datetime.now(UTC).strftime(TS_FMT)
@@ -94,10 +119,12 @@ def publish(
 
     rows = []
     overlap = []
+    uniqueness = []
     for path, to_rows, latest, archive_name in (
         (rbp, freshstream_rows, "latest_freshstream.json", "rbp.json"),
         (recall, companyfill_rows, "latest_companyfill.json", "recall.json"),
         (rarestream, rarestream_rows, "latest_rarestream.json", "rarestream.json"),
+        (scholar, scholar_rows, "latest_scholar.json", "scholar.json"),
     ):
         if not path:
             continue
@@ -105,9 +132,14 @@ def publish(
         report = json.loads(raw)
         rows.extend(to_rows(report, ts))
         overlap.extend(overlap_rows(report, ts=ts))
+        uniqueness.extend(uniqueness_rows(report, ts=ts))
         write_json(slim_report(report), str(data / latest))
         (run_dir / archive_name).write_text(raw, encoding="utf-8")
-    for path, archive_name in ((fresh, "fresh.jsonl"), (gold, "gold.jsonl")):
+    for path, archive_name in (
+        (fresh, "fresh.jsonl"),
+        (gold, "gold.jsonl"),
+        (scholar_queries, "scholar.jsonl"),
+    ):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
 
@@ -115,21 +147,18 @@ def publish(
         for row in rows:
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    # the dashboard reads only a trailing window of overlap, so prune on rewrite
-    # instead of growing forever like history.jsonl (whose full range the charts use)
-    overlap_path = data / "overlap.jsonl"
-    kept = []
-    if overlap_path.exists():
-        cutoff_dt = datetime.strptime(ts, TS_FMT).replace(tzinfo=UTC) - timedelta(
-            hours=WINDOW_HOURS
-        )
-        cutoff = cutoff_dt.strftime(TS_FMT)
-        kept = [
-            row
-            for line in overlap_path.read_text(encoding="utf-8").splitlines()
-            if line and (row := json.loads(line))["ts"] >= cutoff
-        ]
-    write_jsonl(kept + overlap, str(overlap_path))
+    cutoff_dt = datetime.strptime(ts, TS_FMT).replace(tzinfo=UTC) - timedelta(hours=WINDOW_HOURS)
+    cutoff = cutoff_dt.strftime(TS_FMT)
+    for name, new_rows in (("overlap.jsonl", overlap), ("uniqueness.jsonl", uniqueness)):
+        path = data / name
+        kept = []
+        if path.exists():
+            kept = [
+                row
+                for line in path.read_text(encoding="utf-8").splitlines()
+                if line and (row := json.loads(line))["ts"] >= cutoff
+            ]
+        write_jsonl(kept + new_rows, str(path))
 
     index_path = data / "runs.json"
     runs = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []

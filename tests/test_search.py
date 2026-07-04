@@ -7,6 +7,7 @@ from keenbench.shared.search import (
     ExaClient,
     KeenableClient,
     ParallelClient,
+    PerplexityClient,
     SearchApiClient,
     SearchResult,
     TavilyClient,
@@ -223,18 +224,65 @@ async def test_tavily_maps_fields_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_perplexity_maps_search_results_and_builds_body(monkeypatch):
+    payload = {
+        "choices": [{"message": {"content": "the answer"}}],
+        "search_results": [
+            {"url": "https://a", "title": "A", "snippet": "sa", "date": "2026-07-01"},
+            {"url": "https://b", "title": "B", "text": "tb"},
+            {"title": "no url"},
+        ],
+    }
+    c = PerplexityClient(api_key="k", model="sonar-pro")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=1)
+    assert err is None
+    assert len(results) == 1
+    assert results[0].url == "https://a"
+    assert results[0].snippet == "sa"
+    assert results[0].published_date == "2026-07-01"
+    assert calls["url"] == "https://api.perplexity.ai/chat/completions"
+    assert calls["json"] == {
+        "model": "sonar-pro",
+        "messages": [{"role": "user", "content": "hi"}],
+    }
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_perplexity_falls_back_to_citations_with_answer_snippet(monkeypatch):
+    payload = {
+        "choices": [{"message": {"content": "the answer"}}],
+        "citations": ["https://a", {"url": "https://b", "title": "B"}, {"no": "url"}],
+    }
+    c = PerplexityClient(api_key="k")
+    fake, _ = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].snippet == results[1].snippet == "the answer"
+    assert results[1].title == "B"
+
+
 def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("SEARCHAPI_API_KEY", "sk")
     monkeypatch.setenv("BRAVE_API_KEY", "bk")
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
     monkeypatch.setenv("TAVILY_API_KEY", "tk")
-    clients = build_search_clients(["google", "bing", "brave", "parallel", "tavily"])
+    monkeypatch.setenv("PERPLEXITY_API_KEY", "xk")
+    monkeypatch.setenv("PERPLEXITY_MODEL", "sonar-pro")
+    clients = build_search_clients(["google", "bing", "brave", "parallel", "tavily", "perplexity"])
     assert clients["google"].engine == "google"
     assert clients["bing"].engine == "bing"
     assert clients["google"].api_key == clients["bing"].api_key == "sk"
     assert isinstance(clients["brave"], BraveClient)
     assert isinstance(clients["parallel"], ParallelClient)
     assert isinstance(clients["tavily"], TavilyClient)
+    assert isinstance(clients["perplexity"], PerplexityClient)
+    assert clients["perplexity"].model == "sonar-pro"
 
 
 def test_factory_requires_key(monkeypatch):
@@ -331,7 +379,13 @@ async def test_latency_recorded_only_for_ok_responses(monkeypatch):
 
 def test_latency_stats():
     assert latency_stats([]) is None
-    assert latency_stats([100.0]) == {"n": 1, "mean_ms": 100.0, "p50_ms": 100.0, "p95_ms": 100.0}
+    assert latency_stats([100.0]) == {
+        "n": 1,
+        "mean_ms": 100.0,
+        "p50_ms": 100.0,
+        "p95_ms": 100.0,
+        "samples_ms": [100.0],
+    }
     stats = latency_stats([float(v) for v in range(1, 101)])
     assert stats["n"] == 100
     assert stats["mean_ms"] == 50.5
