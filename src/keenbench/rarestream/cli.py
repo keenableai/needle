@@ -1,79 +1,26 @@
-import json
-from collections import Counter
-from collections.abc import Iterator
-
-import pyarrow as pa
-import pyarrow.parquet as pq
 from huggingface_hub import hf_hub_download
 
-from keenbench.rarestream.rare_entity import filter_rows, load_lid, load_tokenizer
-from keenbench.shared.io import write_jsonl
+from keenbench.rarestream.io import iter_rows, write_rows
+from keenbench.shared.sampling import sample
 
 DEFAULT_DATASET = "keenable-ai/keenbench-results"
-DEFAULT_STREAM_PATH = "agentic/queries.parquet"
-DEFAULT_QUERY_FIELD = "query_text"
-
-
-def _iter_rows(path: str) -> Iterator[dict]:
-    if path.endswith(".parquet"):
-        yield from pq.read_table(path).to_pylist()
-        return
-    with open(path, encoding="utf-8") as fh:
-        for line in fh:
-            line = line.strip()
-            if line:
-                yield json.loads(line)
-
-
-def _write_rows(rows: list[dict], out: str) -> None:
-    if not out.endswith(".parquet"):
-        write_jsonl(rows, out)
-        return
-    keys = list(rows[0].keys()) if rows else []
-    columns: dict[str, list] = {k: [] for k in keys}
-    for r in rows:
-        for k in keys:
-            v = r.get(k)
-            columns[k].append(json.dumps(v, ensure_ascii=False) if k == "hard_words" else v)
-    pq.write_table(pa.table(columns), out, compression="zstd")
+DEFAULT_FILTERED_PATH = "agentic/rare_entity.parquet"
 
 
 class Rarestream:
-    def filter(
+    def sample(
         self,
-        out: str = "rare_entity.parquet",
+        n: int = 100,
+        out: str = "-",
         queries: str | None = None,
         dataset: str = DEFAULT_DATASET,
-        stream_path: str = DEFAULT_STREAM_PATH,
-        query_field: str = DEFAULT_QUERY_FIELD,
-        min_words: int = 3,
-        max_query_len: int = 200,
-        max_word_len: int = 40,
-        subword_threshold: int = 5,
-        dedup_ngram: int = 3,
-        dedup_max: int = 2,
-        any_language: bool = False,
-        vocab: str | None = None,
-        lid_model: str | None = None,
+        filtered_path: str = DEFAULT_FILTERED_PATH,
+        seed: int = 0,
+        strategy: str = "uniform",
+        by: str = "length_bucket",
     ) -> None:
         if queries is None:
-            queries = hf_hub_download(dataset, stream_path, repo_type="dataset")
-        tokenize = load_tokenizer(vocab)
-        lid = None if any_language else load_lid(lid_model)
-        kept, stats = filter_rows(
-            _iter_rows(queries),
-            tokenize=tokenize,
-            lid=lid,
-            min_words=min_words,
-            max_query_len=max_query_len,
-            max_word_len=max_word_len,
-            subword_threshold=subword_threshold,
-            dedup_ngram=dedup_ngram,
-            dedup_max=dedup_max,
-            query_field=query_field,
-        )
-        _write_rows(kept, out)
-        buckets = Counter(r["length_bucket"] for r in kept)
-        print(f"input: {sum(stats.values()) + len(kept)} queries")
-        print(f"rejected: {dict(stats)}")
-        print(f"kept: {len(kept)} {dict(buckets)} -> {out}")
+            queries = hf_hub_download(dataset, filtered_path, repo_type="dataset")
+        rows = list(iter_rows(queries))
+        picked = sample(rows, n, seed, strategy=strategy, key=by)
+        write_rows(picked, out)
