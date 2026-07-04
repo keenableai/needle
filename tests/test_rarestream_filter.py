@@ -60,13 +60,13 @@ def test_words_for_strips_punctuation_and_lowercases():
 
 
 def test_hard_words_flags_unk_and_long_splits():
-    hard = hard_words_for("how to fix kdeplasma", fake_tokenize)
+    hard = hard_words_for(words_for("how to fix kdeplasma"), fake_tokenize)
     assert [h["word"] for h in hard] == ["kdeplasma"]
     assert hard[0]["subwords"] == ["[UNK]"]
-    assert hard_words_for("how to fix red", fake_tokenize) == []
-    assert hard_words_for("number 123456", fake_tokenize) == []
-    assert hard_words_for("51.504444,0.426876", fake_tokenize) == []
-    hard = hard_words_for("the fa507nur", fake_tokenize)
+    assert hard_words_for(words_for("how to fix red"), fake_tokenize) == []
+    assert hard_words_for(words_for("number 123456"), fake_tokenize) == []
+    assert hard_words_for(words_for("51.504444,0.426876"), fake_tokenize) == []
+    hard = hard_words_for(words_for("the fa507nur"), fake_tokenize)
     assert [h["word"] for h in hard] == ["fa507nur"]
 
 

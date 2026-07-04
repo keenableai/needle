@@ -28,11 +28,13 @@ def _write_rows(rows: list[dict], out: str) -> None:
     if not out.endswith(".parquet"):
         write_jsonl(rows, out)
         return
+    keys = list(rows[0].keys()) if rows else []
+    columns: dict[str, list] = {k: [] for k in keys}
     for r in rows:
-        r["hard_words"] = json.dumps(r["hard_words"], ensure_ascii=False)
-    columns = list(rows[0].keys()) if rows else []
-    table = pa.table({c: [r.get(c) for r in rows] for c in columns})
-    pq.write_table(table, out, compression="zstd")
+        for k in keys:
+            v = r.get(k)
+            columns[k].append(json.dumps(v, ensure_ascii=False) if k == "hard_words" else v)
+    pq.write_table(pa.table(columns), out, compression="zstd")
 
 
 class Rarestream:

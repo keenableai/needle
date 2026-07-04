@@ -1,6 +1,8 @@
 import re
 import urllib.request
+from collections import Counter
 from collections.abc import Callable, Iterable
+from functools import lru_cache
 from pathlib import Path
 
 import fasttext
@@ -10,6 +12,7 @@ from wordfreq import zipf_frequency
 
 SUBWORD_THRESHOLD = 5
 UNK = "[UNK]"
+UNK_PIECES = 99
 LID_URL = "https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.176.ftz"
 FOREIGN_CONFIDENT = 0.7
 ENGLISH_CONFIDENT = 0.5
@@ -28,31 +31,32 @@ Tokenize = Callable[[str], list[str]]
 Lid = Callable[[str], tuple[str, float]]
 
 
+def _any_token(regex: re.Pattern, query: str, ok: Callable[[str], bool]) -> bool:
+    return any(ok(m.group(0)) for m in regex.finditer(query))
+
+
 def _contains_vin(query: str) -> bool:
-    for match in VIN_CANDIDATE_RE.finditer(query):
-        token = match.group(0)
-        if any(c.isalpha() for c in token) and any(c.isdigit() for c in token):
-            return True
-    return False
+    return _any_token(
+        VIN_CANDIDATE_RE,
+        query,
+        lambda t: any(c.isalpha() for c in t) and any(c.isdigit() for c in t),
+    )
 
 
 def _contains_hex_hash(query: str) -> bool:
-    for match in HEX_HASH_RE.finditer(query):
-        if any(c in "abcdefABCDEF" for c in match.group(0)):
-            return True
-    return HEX_ETH_ADDRESS_RE.search(query) is not None
+    return _any_token(
+        HEX_HASH_RE, query, lambda t: any(c in "abcdefABCDEF" for c in t)
+    ) or bool(HEX_ETH_ADDRESS_RE.search(query))
 
 
 def _contains_crypto_address(query: str) -> bool:
-    for match in CRYPTO_BASE58_RE.finditer(query):
-        token = match.group(0)
-        if (
-            any(c.isdigit() for c in token)
-            and any(c.isupper() for c in token)
-            and any(c.islower() for c in token)
-        ):
-            return True
-    return False
+    return _any_token(
+        CRYPTO_BASE58_RE,
+        query,
+        lambda t: any(c.isdigit() for c in t)
+        and any(c.isupper() for c in t)
+        and any(c.islower() for c in t),
+    )
 
 
 def is_eligible(query: str) -> bool:
@@ -70,10 +74,10 @@ def words_for(query: str) -> list[str]:
 
 
 def hard_words_for(
-    query: str, tokenize: Tokenize, subword_threshold: int = SUBWORD_THRESHOLD
+    words: list[str], tokenize: Tokenize, subword_threshold: int = SUBWORD_THRESHOLD
 ) -> list[dict]:
     out = []
-    for w in words_for(query):
+    for w in words:
         if not any(c.isalpha() for c in w):
             continue
         pieces = tokenize(w)
@@ -113,7 +117,12 @@ def load_tokenizer(vocab_path: str | None = None) -> Tokenize:
     if vocab_path is None:
         vocab_path = hf_hub_download("bert-base-uncased", "vocab.txt")
     tokenizer = BertWordPieceTokenizer(vocab_path, lowercase=True)
-    return lambda text: list(tokenizer.encode(text, add_special_tokens=False).tokens)
+
+    @lru_cache(maxsize=200_000)
+    def encode(word: str) -> list[str]:
+        return list(tokenizer.encode(word, add_special_tokens=False).tokens)
+
+    return encode
 
 
 def load_lid(model_path: str | None = None) -> Lid:
@@ -160,39 +169,36 @@ def filter_rows(
     dedup_max: int = 2,
     query_field: str = "query",
 ) -> tuple[list[dict], dict[str, int]]:
-    stats: dict[str, int] = {}
-
-    def reject(reason: str) -> None:
-        stats[reason] = stats.get(reason, 0) + 1
+    stats: Counter[str] = Counter()
 
     kept = []
     for row in rows:
         query = (row.get(query_field) or "").strip()
         if not query or len(query) > max_query_len:
-            reject("bad_length")
+            stats["bad_length"] += 1
             continue
         if URLISH_RE.search(query):
-            reject("urlish")
+            stats["urlish"] += 1
             continue
         words = words_for(query)
         if len(words) < min_words:
-            reject("too_few_words")
+            stats["too_few_words"] += 1
             continue
         if max((len(w) for w in words), default=0) > max_word_len:
-            reject("long_word")
+            stats["long_word"] += 1
             continue
         if not is_eligible(query):
-            reject("ineligible")
+            stats["ineligible"] += 1
             continue
-        hard = hard_words_for(query, tokenize, subword_threshold)
+        hard = hard_words_for(words, tokenize, subword_threshold)
         if not hard:
-            reject("no_rare_word")
+            stats["no_rare_word"] += 1
             continue
         if lid is not None:
             hard_set = {h["word"] for h in hard}
             context_words = [w for w in words if w not in hard_set]
             if not is_english(query, context_words, lid):
-                reject("non_english")
+                stats["non_english"] += 1
                 continue
         kept.append(
             {
@@ -200,7 +206,9 @@ def filter_rows(
                 "length_bucket": length_bucket(len(words)),
                 "n_words": len(words),
                 "hard_words": hard,
-                "max_pieces": max(99 if UNK in h["subwords"] else len(h["subwords"]) for h in hard),
+                "max_pieces": max(
+                    UNK_PIECES if UNK in h["subwords"] else len(h["subwords"]) for h in hard
+                ),
             }
         )
     if dedup_ngram:
