@@ -128,6 +128,17 @@ def test_filter_rows_drops_overlong_single_word():
     assert stats["long_word"] == 1
 
 
+def test_filter_rows_honors_custom_query_field():
+    rows = [
+        {"query_text": "how to fix kdeplasma", "source": "x"},
+        {"query_text": "red dead redemption", "source": "x"},
+    ]
+    kept, _ = filter_rows(rows, tokenize=fake_tokenize, lid=None, query_field="query_text")
+    assert [r["query_text"] for r in kept] == ["how to fix kdeplasma"]
+    assert kept[0]["source"] == "x"
+    assert kept[0]["hard_words"][0]["word"] == "kdeplasma"
+
+
 def test_filter_rows_skips_lid_when_disabled():
     rows = [{"query": "die optimale kiste kdeplasma", "providers": []}]
     kept, _ = filter_rows(rows, tokenize=fake_tokenize, lid=None)

@@ -3,6 +3,9 @@ import urllib.request
 from collections.abc import Callable, Iterable
 from pathlib import Path
 
+import fasttext
+from huggingface_hub import hf_hub_download
+from tokenizers import BertWordPieceTokenizer
 from wordfreq import zipf_frequency
 
 SUBWORD_THRESHOLD = 5
@@ -107,9 +110,6 @@ def length_bucket(n_words: int) -> str:
 
 
 def load_tokenizer(vocab_path: str | None = None) -> Tokenize:
-    from huggingface_hub import hf_hub_download
-    from tokenizers import BertWordPieceTokenizer
-
     if vocab_path is None:
         vocab_path = hf_hub_download("bert-base-uncased", "vocab.txt")
     tokenizer = BertWordPieceTokenizer(vocab_path, lowercase=True)
@@ -117,8 +117,6 @@ def load_tokenizer(vocab_path: str | None = None) -> Tokenize:
 
 
 def load_lid(model_path: str | None = None) -> Lid:
-    import fasttext
-
     if model_path is None:
         cached = Path.home() / ".cache" / "lid.176.ftz"
         if not cached.exists():
@@ -134,11 +132,13 @@ def load_lid(model_path: str | None = None) -> Lid:
     return lid
 
 
-def dedup_by_ngrams(rows: list[dict], n: int, max_per_gram: int) -> list[dict]:
+def dedup_by_ngrams(
+    rows: list[dict], n: int, max_per_gram: int, query_field: str = "query"
+) -> list[dict]:
     counts: dict[tuple[str, ...], int] = {}
     kept = []
     for row in rows:
-        words = words_for(row["query"])
+        words = words_for(row[query_field])
         grams = [tuple(words[i : i + n]) for i in range(len(words) - n + 1)] or [tuple(words)]
         if any(counts.get(g, 0) >= max_per_gram for g in grams):
             continue
@@ -158,6 +158,7 @@ def filter_rows(
     subword_threshold: int = SUBWORD_THRESHOLD,
     dedup_ngram: int = 3,
     dedup_max: int = 2,
+    query_field: str = "query",
 ) -> tuple[list[dict], dict[str, int]]:
     stats: dict[str, int] = {}
 
@@ -166,7 +167,7 @@ def filter_rows(
 
     kept = []
     for row in rows:
-        query = (row.get("query") or "").strip()
+        query = (row.get(query_field) or "").strip()
         if not query or len(query) > max_query_len:
             reject("bad_length")
             continue
@@ -205,7 +206,7 @@ def filter_rows(
     if dedup_ngram:
         kept.sort(key=lambda r: -r["max_pieces"])
         before = len(kept)
-        kept = dedup_by_ngrams(kept, dedup_ngram, dedup_max)
+        kept = dedup_by_ngrams(kept, dedup_ngram, dedup_max, query_field)
         stats["ngram_dup"] = before - len(kept)
     kept.sort(key=lambda r: (r["length_bucket"], -r["max_pieces"]))
     return kept, stats

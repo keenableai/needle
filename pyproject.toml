@@ -20,6 +20,7 @@ dependencies = [
     "fasttext-predict>=0.9.2.4",
     "wordfreq>=3.1.1",
     "huggingface-hub>=1.22.0",
+    "pyarrow>=24.0.0",
 ]
 
 [project.scripts]
