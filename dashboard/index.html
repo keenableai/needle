@@ -79,9 +79,7 @@
 
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  @media (max-width: 980px) { .grid4 { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 720px) { .grid2, .grid3, .grid4 { grid-template-columns: 1fr; } }
+  @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
   .section-title {
     font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
     color: var(--text-secondary); margin: 30px 0 6px; padding-bottom: 6px;
@@ -230,7 +228,7 @@
       <span id="updated"></span></p>
   </header>
 
-  <div class="grid4">
+  <div class="grid2">
     <div class="card">
       <h2>freshstream — 7-day mean</h2>
       <div class="sub" id="lb-fresh-sub"></div>
