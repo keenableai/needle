@@ -66,13 +66,17 @@ def words_for(query: str) -> list[str]:
     return [w for w in cleaned.split() if w]
 
 
-def hard_words_for(query: str, tokenize: Tokenize) -> list[dict]:
+def hard_words_for(
+    query: str, tokenize: Tokenize, subword_threshold: int = SUBWORD_THRESHOLD
+) -> list[dict]:
     out = []
     for w in words_for(query):
+        if not any(c.isalpha() for c in w):
+            continue
         pieces = tokenize(w)
         if not pieces:
             continue
-        if UNK in pieces or len(pieces) >= SUBWORD_THRESHOLD:
+        if UNK in pieces or len(pieces) >= subword_threshold:
             out.append({"word": w, "subwords": list(pieces)})
     return out
 
@@ -136,6 +140,7 @@ def filter_rows(
     lid: Lid | None,
     min_words: int = 3,
     max_query_len: int = 200,
+    subword_threshold: int = SUBWORD_THRESHOLD,
 ) -> tuple[list[dict], dict[str, int]]:
     stats: dict[str, int] = {}
 
@@ -158,7 +163,7 @@ def filter_rows(
         if not is_eligible(query):
             reject("ineligible")
             continue
-        hard = hard_words_for(query, tokenize)
+        hard = hard_words_for(query, tokenize, subword_threshold)
         if not hard:
             reject("no_rare_word")
             continue

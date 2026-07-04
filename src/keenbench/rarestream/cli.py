@@ -26,6 +26,7 @@ class Rarestream:
         stream_path: str = DEFAULT_STREAM_PATH,
         min_words: int = 3,
         max_query_len: int = 200,
+        subword_threshold: int = 4,
         any_language: bool = False,
         vocab: str | None = None,
         lid_model: str | None = None,
@@ -42,6 +43,7 @@ class Rarestream:
             lid=lid,
             min_words=min_words,
             max_query_len=max_query_len,
+            subword_threshold=subword_threshold,
         )
         write_jsonl(kept, out)
         buckets = Counter(r["length_bucket"] for r in kept)

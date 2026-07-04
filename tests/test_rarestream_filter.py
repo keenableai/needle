@@ -64,8 +64,10 @@ def test_hard_words_flags_unk_and_long_splits():
     assert [h["word"] for h in hard] == ["kdeplasma"]
     assert hard[0]["subwords"] == ["[UNK]"]
     assert hard_words_for("how to fix red", fake_tokenize) == []
-    hard = hard_words_for("number 123456", fake_tokenize)
-    assert [h["word"] for h in hard] == ["123456"]
+    assert hard_words_for("number 123456", fake_tokenize) == []
+    assert hard_words_for("51.504444,0.426876", fake_tokenize) == []
+    hard = hard_words_for("the fa507nur", fake_tokenize)
+    assert [h["word"] for h in hard] == ["fa507nur"]
 
 
 def test_is_english_tiers():
