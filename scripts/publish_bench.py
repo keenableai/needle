@@ -7,7 +7,8 @@ written to --runs-out/<run_id>/ for upload to the public HF dataset
 
 Usage: uv run python scripts/publish_bench.py --site <gh-pages checkout>
            --runs-out <staging dir> [--rbp rbp.json] [--fresh fresh.jsonl]
-           [--recall recall.json] [--gold gold.jsonl] [--ts 2026-07-02T14:17Z]
+           [--recall recall.json] [--gold gold.jsonl] [--rarestream rarestream.json]
+           [--ts 2026-07-02T14:17Z]
 """
 
 import json
@@ -20,11 +21,11 @@ from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.overlap import TS_FMT, WINDOW_HOURS, overlap_rows
 
 
-def freshstream_rows(report: dict, ts: str) -> list[dict]:
+def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
     return [
         {
             "ts": ts,
-            "bench": "freshstream",
+            "bench": bench,
             "engine": name,
             "rbp": e["mean_rbp"],
             "rbp_max": e["rbp_max"],
@@ -37,6 +38,14 @@ def freshstream_rows(report: dict, ts: str) -> list[dict]:
         }
         for name, e in report["engines"].items()
     ]
+
+
+def freshstream_rows(report: dict, ts: str) -> list[dict]:
+    return _rbp_rows(report, ts, "freshstream")
+
+
+def rarestream_rows(report: dict, ts: str) -> list[dict]:
+    return _rbp_rows(report, ts, "rarestream")
 
 
 def companyfill_rows(report: dict, ts: str) -> list[dict]:
@@ -73,6 +82,7 @@ def publish(
     fresh: str | None = None,
     recall: str | None = None,
     gold: str | None = None,
+    rarestream: str | None = None,
     ts: str | None = None,
 ) -> None:
     ts = ts or datetime.now(UTC).strftime(TS_FMT)
@@ -87,6 +97,7 @@ def publish(
     for path, to_rows, latest, archive_name in (
         (rbp, freshstream_rows, "latest_freshstream.json", "rbp.json"),
         (recall, companyfill_rows, "latest_companyfill.json", "recall.json"),
+        (rarestream, rarestream_rows, "latest_rarestream.json", "rarestream.json"),
     ):
         if not path:
             continue

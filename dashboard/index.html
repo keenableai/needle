@@ -166,8 +166,8 @@
     <h1>keenbench — search engine benchmarks</h1>
     <p>Hourly search-engine benchmarks from
       <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.
-      freshstream runs hourly (RBP@5, LLM judge); companyfill daily
-      (answer-recall@5, deterministic). All times UTC.
+      freshstream runs hourly (RBP@5, LLM judge); companyfill and rarestream
+      run daily (answer-recall@5 deterministic; rare-entity RBP@5). All times UTC.
       <span id="updated"></span></p>
   </header>
 
@@ -184,6 +184,11 @@
       <div class="sub" id="lb-company-sub"></div>
       <div id="lb-company"></div>
     </div>
+    <div class="card">
+      <h2>rarestream — latest run</h2>
+      <div class="sub" id="lb-rare-sub"></div>
+      <div id="lb-rare"></div>
+    </div>
   </div>
 
   <div class="legend" id="legend"></div>
@@ -191,6 +196,11 @@
   <div class="card" id="card-rbp">
     <h2>freshstream — RBP@5</h2>
     <div class="sub">20 fresh queries per run; the hairline marks the metric ceiling</div>
+  </div>
+
+  <div class="card" id="card-rbp-rare">
+    <h2>rarestream — RBP@5</h2>
+    <div class="sub">100 rare-entity queries per daily run; the hairline marks the metric ceiling</div>
   </div>
 
   <div class="grid2">
@@ -491,6 +501,7 @@ function renderLeaderboards(rows) {
     ["recall", "recall@5"],
     ["mrr", "MRR@5"],
   ]);
+  renderLeaderboard("lb-rare", "lb-rare-sub", rows, "rarestream", [["rbp", "RBP@5"]]);
 }
 
 function renderFields(latest) {
@@ -535,7 +546,7 @@ function renderHistoryTable(rows) {
   }
   table.appendChild(head);
   for (const r of [...rows].reverse()) {
-    const metrics = r.bench === "freshstream" ? [["RBP@5", r.rbp]] : [["recall@5", r.recall], ["MRR@5", r.mrr]];
+    const metrics = r.bench === "companyfill" ? [["recall@5", r.recall], ["MRR@5", r.mrr]] : [["RBP@5", r.rbp]];
     for (const [name, v] of metrics) {
       const tr = el("tr");
       tr.appendChild(el("td", {}, fmtTime(new Date(r.ts))));
@@ -584,7 +595,7 @@ function renderOverlap(rows) {
   }
   const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
   document.getElementById("overlap-sub").textContent =
-    `mean Jaccard overlap of top-K URL sets on the same queries, freshstream + companyfill — up to ${nQueries} queries per pair, last 24h`;
+    `mean Jaccard overlap of top-K URL sets on the same queries, freshstream + companyfill + rarestream — up to ${nQueries} queries per pair, last 24h`;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, ""));
@@ -727,7 +738,7 @@ async function renderRunDetail(runs) {
     holder.appendChild(el("div", { class: "empty" }, "No archived runs yet."));
     return;
   }
-  const artifact = benchSel.value === "companyfill" ? "recall.json" : "rbp.json";
+  const artifact = { companyfill: "recall.json", rarestream: "rarestream.json" }[benchSel.value] || "rbp.json";
   if (!run.artifacts.includes(artifact)) {
     holder.appendChild(el("div", { class: "empty" }, `This run has no ${benchSel.value} results.`));
     return;
@@ -762,10 +773,13 @@ async function initRunBrowser() {
   try { runs = await fetchJson("data/runs.json"); } catch {}
   runs = [...runs].reverse();
   for (const r of runs) {
-    const label = `${fmtTime(new Date(r.ts))}${r.artifacts.includes("recall.json") ? " (fresh + company)" : ""}`;
+    const daily = [];
+    if (r.artifacts.includes("recall.json")) daily.push("company");
+    if (r.artifacts.includes("rarestream.json")) daily.push("rare");
+    const label = `${fmtTime(new Date(r.ts))}${daily.length ? ` (fresh + ${daily.join(" + ")})` : ""}`;
     runSel.appendChild(el("option", { value: r.id }, label));
   }
-  for (const b of ["freshstream", "companyfill"]) benchSel.appendChild(el("option", { value: b }, b));
+  for (const b of ["freshstream", "companyfill", "rarestream"]) benchSel.appendChild(el("option", { value: b }, b));
   for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, e));
   const rerender = () => renderRunDetail(runs);
   runSel.addEventListener("change", rerender);
@@ -778,6 +792,11 @@ function drawCharts(rows) {
   const ceiling = rows.filter((r) => r.bench === "freshstream").at(-1)?.rbp_max;
   drawChart(document.getElementById("card-rbp"), seriesFor("freshstream", "rbp", rows),
     { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine" });
+  const rareCeiling = rows.filter((r) => r.bench === "rarestream").at(-1)?.rbp_max;
+  drawChart(document.getElementById("card-rbp-rare"), seriesFor("rarestream", "rbp", rows),
+    { domain: [0, (rareCeiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling: rareCeiling,
+      label: "rare-entity RBP over time per engine",
+      empty: "No rarestream run yet — collected daily." });
   drawChart(document.getElementById("card-recall"), seriesFor("companyfill", "recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
