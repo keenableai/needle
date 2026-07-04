@@ -23,6 +23,18 @@ jobs:
         with:
           ref: gh-pages
 
+      # gh-pages holds the published data files; the dashboard HTML lives on the
+      # default branch. Overlay it here so every deploy serves the current
+      # dashboard/index.html rather than whatever copy is committed on gh-pages.
+      - uses: actions/checkout@v4
+        with:
+          path: _src
+          sparse-checkout: dashboard/index.html
+          sparse-checkout-cone-mode: false
+      - run: |
+          cp _src/dashboard/index.html index.html
+          rm -rf _src
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
