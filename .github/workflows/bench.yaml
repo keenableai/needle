@@ -130,8 +130,7 @@ jobs:
           # (publish_bench.py); upload before the gh-pages push so runs.json never dangles
           uvx --from huggingface_hub hf upload "$HF_DATASET" staged runs \
             --repo-type dataset --commit-message "bench: $TS"
-          # index.html is overlaid from the default branch at deploy time
-          # (deploy-pages.yaml), so gh-pages only carries the data files.
+          cp dashboard/index.html site-data/index.html
           touch site-data/.nojekyll
           cd site-data
           git config user.name "github-actions[bot]"
