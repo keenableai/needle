@@ -3,10 +3,13 @@
 Hourly search-engine benchmarks. Two benches: freshstream (hourly, RBP@5, LLM
 judge) and companyfill (daily, answer-recall@5 + MRR@5, deterministic matcher
 with an LLM judge backstop on misses). rarestream is a query producer, not a
-bench: it filters the AQL query-stream artifact (`aql/queries.jsonl` on the HF
-dataset, produced by github.com/keenableai/archive-query-log) down to English
-medium/long queries with rare words, using the same BERT-wordpiece rarity
-definition as keenable-eval's rare-entity producer.
+bench: it filters a query dataset down to English medium/long queries with rare
+words, using the same BERT-wordpiece rarity definition as keenable-eval's
+rare-entity producer. It defaults to the agentic search-log dataset
+(`agentic/queries.parquet` on the HF dataset) and also handles the AQL
+query-stream artifact (`aql/queries.jsonl`, produced by
+github.com/keenableai/archive-query-log) via `--stream-path`/`--query-field`.
+Reads/writes jsonl or parquet.
 
 ## Layout
 

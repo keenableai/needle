@@ -10,7 +10,8 @@ from keenbench.rarestream.rare_entity import filter_rows, load_lid, load_tokeniz
 from keenbench.shared.io import write_jsonl
 
 DEFAULT_DATASET = "keenable-ai/keenbench-results"
-DEFAULT_STREAM_PATH = "aql/queries.jsonl"
+DEFAULT_STREAM_PATH = "agentic/queries.parquet"
+DEFAULT_QUERY_FIELD = "query_text"
 
 
 def _iter_rows(path: str) -> Iterator[dict]:
@@ -40,11 +41,11 @@ def _write_rows(rows: list[dict], out: str) -> None:
 class Rarestream:
     def filter(
         self,
-        out: str = "aql_rare_entity.jsonl",
+        out: str = "rare_entity.parquet",
         queries: str | None = None,
         dataset: str = DEFAULT_DATASET,
         stream_path: str = DEFAULT_STREAM_PATH,
-        query_field: str = "query",
+        query_field: str = DEFAULT_QUERY_FIELD,
         min_words: int = 3,
         max_query_len: int = 200,
         max_word_len: int = 40,
