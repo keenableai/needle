@@ -167,7 +167,8 @@ async def run_findall(
             pq["score"] = detail["recall"]
         else:
             detail = score_stat(answer, value=task.stat_value, rel_tol=task.stat_rel_tol)
-            pq["score"] = 1.0 if detail["within_tol"] else 0.0
+            rel_err = detail["rel_err"]
+            pq["score"] = max(0.0, 1.0 - rel_err) if rel_err is not None else 0.0
         pq["detail"] = detail
         if answer is None and run["error"] is None:
             pq["error"] = {"error_type": "unparseable_answer", "error_message": ""}
@@ -187,7 +188,10 @@ async def run_findall(
             "set_recall": _mean([pq["detail"]["recall"] for pq in sets]),
             "set_precision": _mean([pq["detail"]["precision"] for pq in sets]),
             "set_f1": _mean([pq["detail"]["f1"] for pq in sets]),
-            "stat_within_tol": _mean([pq["score"] for pq in stats]),
+            "stat_score": _mean([pq["score"] for pq in stats]),
+            "stat_within_tol": _mean(
+                [1.0 if pq["detail"].get("within_tol") else 0.0 for pq in stats]
+            ),
             "num_scored": len(scored),
             "errors": len(per_query) - len(scored),
             "mean_spent_usd": round(_mean([pq["spent_usd"] for pq in per_query]), 4),

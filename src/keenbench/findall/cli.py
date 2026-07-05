@@ -172,7 +172,7 @@ class Findall:
             print(
                 f"  {name:10s} score = {b['mean_score']:.4f}  "
                 f"(set recall = {b['set_recall']:.3f}, precision = {b['set_precision']:.3f}; "
-                f"stat within-tol = {b['stat_within_tol']:.3f}; "
+                f"stat score = {b['stat_score']:.3f}; "
                 f"${b['mean_spent_usd']:.3f}/task, {b['mean_tool_calls']:.1f} tool calls; "
                 f"{b['num_scored']} scored, {b['errors']} errors)",
                 file=sys.stderr,

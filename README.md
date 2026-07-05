@@ -375,8 +375,9 @@ is crossed (overshoot is bounded by one turn and reported in `spent_usd`).
 
 Scoring is deterministic: enumerate answers are matched to gold entities by
 normalized name (legal suffixes and "Show HN:" stripped) or URL domain →
-recall/precision/F1; stat answers score within a per-task relative tolerance.
-The report gives per-backend `mean_score`, `set_recall`/`set_precision`,
+recall/precision/F1; stat answers score `max(0, 1 - relative error)`, with a
+per-task tolerance flag (`within_tol`) reported alongside. The report gives
+per-backend `mean_score`, `set_recall`/`set_precision`, `stat_score`,
 `stat_within_tol`, `mean_spent_usd`, `mean_tool_calls`, and `by_suite` /
 `by_bucket` breakdowns. Caveats: agent runs are nondeterministic and paid —
 run with small task counts and compare means over repeats; entity matching is
