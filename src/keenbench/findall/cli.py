@@ -115,7 +115,7 @@ class Findall:
         queries: str,
         out: str = "-",
         backends: str | tuple[str, ...] = "keenable,webql",
-        budget_usd: float = 0.25,
+        budget_usd: float | str | tuple[float, ...] = 0.25,
         agent_model: str | None = None,
         max_turns: int = 20,
         concurrency: int = 2,
@@ -142,6 +142,21 @@ class Findall:
         except ValueError as exc:
             raise SystemExit(f"error: {exc}") from exc
 
+        if isinstance(budget_usd, int | float):
+            budgets = [float(budget_usd)]
+        else:
+            raw_budgets = (
+                budget_usd if isinstance(budget_usd, str) else ",".join(map(str, budget_usd))
+            )
+            try:
+                budgets = [float(b) for b in parse_csv(raw_budgets)]
+            except ValueError:
+                raise SystemExit(
+                    f"error: --budget-usd must be numbers, got {budget_usd!r}"
+                ) from None
+        if not budgets or any(b <= 0 for b in budgets):
+            raise SystemExit(f"error: --budget-usd must be positive, got {budget_usd!r}")
+
         key = os.environ.get("OPENROUTER_API_KEY")
         if not key:
             raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for the agent)")
@@ -154,7 +169,7 @@ class Findall:
                     tasks,
                     specs,
                     llm,
-                    budget_usd=budget_usd,
+                    budgets_usd=budgets,
                     max_turns=max_turns,
                     concurrency=concurrency,
                 )
@@ -164,16 +179,18 @@ class Findall:
         report = asyncio.run(_go())
         write_json(report, out)
 
+        budgets_str = ", ".join(f"${b:.2f}" for b in budgets)
         print(
-            f"\nfindall: {report['num_queries']} tasks, budget ${budget_usd:.2f}, agent {model}",
+            f"\nfindall: {report['num_queries']} tasks, budgets {budgets_str}, agent {model}",
             file=sys.stderr,
         )
         for name, b in report["backends"].items():
-            print(
-                f"  {name:10s} score = {b['mean_score']:.4f}  "
-                f"(set recall = {b['set_recall']:.3f}, precision = {b['set_precision']:.3f}; "
-                f"stat score = {b['stat_score']:.3f}; "
-                f"${b['mean_spent_usd']:.3f}/task, {b['mean_tool_calls']:.1f} tool calls; "
-                f"{b['num_scored']} scored, {b['errors']} errors)",
-                file=sys.stderr,
-            )
+            for budget_key, s in b["by_budget"].items():
+                print(
+                    f"  {name:10s} @${budget_key} score = {s['mean_score']:.4f}  "
+                    f"(set recall = {s['set_recall']:.3f}, precision = {s['set_precision']:.3f}; "
+                    f"stat score = {s['stat_score']:.3f}; "
+                    f"${s['mean_spent_usd']:.3f}/task, {s['mean_tool_calls']:.1f} tool calls; "
+                    f"{s['num_scored']} scored, {s['errors']} errors)",
+                    file=sys.stderr,
+                )

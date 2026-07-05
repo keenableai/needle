@@ -134,23 +134,42 @@ def _group(scored: list[dict], key: Callable[[dict], str], metric: str) -> dict[
     }
 
 
+def _summary(per_query: list[dict]) -> dict[str, Any]:
+    scored = [pq for pq in per_query if pq["error"] is None]
+    sets = [pq for pq in scored if pq["bucket"] == "enumerate"]
+    stats = [pq for pq in scored if pq["bucket"] == "stat"]
+    return {
+        "mean_score": _mean([pq["score"] for pq in scored]),
+        "set_recall": _mean([pq["detail"]["recall"] for pq in sets]),
+        "set_precision": _mean([pq["detail"]["precision"] for pq in sets]),
+        "set_f1": _mean([pq["detail"]["f1"] for pq in sets]),
+        "stat_score": _mean([pq["score"] for pq in stats]),
+        "stat_within_tol": _mean([1.0 if pq["detail"].get("within_tol") else 0.0 for pq in stats]),
+        "num_scored": len(scored),
+        "errors": len(per_query) - len(scored),
+        "mean_spent_usd": round(_mean([pq["spent_usd"] for pq in per_query]), 4),
+        "mean_tool_calls": _mean([float(sum(pq["tool_calls"].values())) for pq in per_query]),
+    }
+
+
 async def run_findall(
     tasks: list[GoldTask],
     backends: list[BackendSpec],
     llm: AgentLLM,
     *,
-    budget_usd: float,
+    budgets_usd: list[float],
     max_turns: int = 20,
     concurrency: int = 2,
 ) -> dict[str, Any]:
-    async def one(pair: tuple[BackendSpec, GoldTask]) -> dict:
-        spec, task = pair
+    async def one(pair: tuple[BackendSpec, float, GoldTask]) -> dict:
+        spec, budget_usd, task = pair
         run = await run_task(
             spec, llm, prompt=task.text, budget_usd=budget_usd, max_turns=max_turns
         )
         answer = parse_answer(run.get("answer_text"))
         pq: dict[str, Any] = {
             "backend": spec.name,
+            "budget_usd": budget_usd,
             "query": task.text,
             "suite": task.suite,
             "bucket": task.bucket,
@@ -177,28 +196,19 @@ async def run_findall(
             pq["error"] = {"error_type": "unparseable_answer", "error_message": raw}
         return pq
 
-    pairs = [(spec, task) for spec in backends for task in tasks]
+    pairs = [(spec, budget, task) for spec in backends for budget in budgets_usd for task in tasks]
     results = await bounded_gather(pairs, one, concurrency=concurrency)
 
     backends_out: dict[str, dict[str, Any]] = {}
     for spec in backends:
         per_query = [pq for pq in results if pq["backend"] == spec.name]
         scored = [pq for pq in per_query if pq["error"] is None]
-        sets = [pq for pq in scored if pq["bucket"] == "enumerate"]
-        stats = [pq for pq in scored if pq["bucket"] == "stat"]
         backends_out[spec.name] = {
-            "mean_score": _mean([pq["score"] for pq in scored]),
-            "set_recall": _mean([pq["detail"]["recall"] for pq in sets]),
-            "set_precision": _mean([pq["detail"]["precision"] for pq in sets]),
-            "set_f1": _mean([pq["detail"]["f1"] for pq in sets]),
-            "stat_score": _mean([pq["score"] for pq in stats]),
-            "stat_within_tol": _mean(
-                [1.0 if pq["detail"].get("within_tol") else 0.0 for pq in stats]
-            ),
-            "num_scored": len(scored),
-            "errors": len(per_query) - len(scored),
-            "mean_spent_usd": round(_mean([pq["spent_usd"] for pq in per_query]), 4),
-            "mean_tool_calls": _mean([float(sum(pq["tool_calls"].values())) for pq in per_query]),
+            **_summary(per_query),
+            "by_budget": {
+                f"{budget:.2f}": _summary([pq for pq in per_query if pq["budget_usd"] == budget])
+                for budget in budgets_usd
+            },
             "by_suite": _group(scored, lambda pq: pq["suite"], "mean_score"),
             "by_bucket": _group(scored, lambda pq: pq["bucket"], "mean_score"),
             "per_query": per_query,
@@ -206,7 +216,7 @@ async def run_findall(
 
     return {
         "num_queries": len(tasks),
-        "budget_usd": budget_usd,
+        "budgets_usd": budgets_usd,
         "agent_model": llm.model,
         "backends": backends_out,
     }
