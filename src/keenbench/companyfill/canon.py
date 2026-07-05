@@ -207,10 +207,10 @@ def _match_domain(value: Any, aliases: tuple[str, ...], raw_text: str, url: str)
     return False
 
 
-def _match_exact_id(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool:
+def _match_exact_id(value: Any, aliases: tuple[str, ...], raw_text: str, url: str) -> bool:
     compact = None
     for form in _gold_forms(value, aliases):
-        norm = re.sub(r"[\s.]", "", str(form)).upper()
+        norm = re.sub(r"[\s.\-]", "", str(form)).upper()
         if len(norm) < 2:
             continue
         if len(norm) <= 6:
@@ -218,7 +218,7 @@ def _match_exact_id(value: Any, aliases: tuple[str, ...], raw_text: str) -> bool
                 return True
         else:
             if compact is None:
-                compact = re.sub(r"[^A-Z0-9]", "", raw_text.upper())
+                compact = re.sub(r"[^A-Z0-9]", "", f"{raw_text} {url}".upper())
             if norm in compact:
                 return True
     return False
@@ -268,7 +268,7 @@ def gold_in_text(
     if field_type == "domain":
         return _match_domain(value, aliases, raw, url)
     if field_type == "exact_id":
-        return _match_exact_id(value, aliases, raw)
+        return _match_exact_id(value, aliases, raw, url)
     if field_type == "money":
         return _match_amount(value, aliases, raw, rel_tol=0.02)
     if field_type == "numeric_band":

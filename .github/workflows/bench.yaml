@@ -18,6 +18,10 @@ on:
         description: "Also run scholar (regenerates gold)"
         type: boolean
         default: false
+      legal:
+        description: "Also run legal (regenerates gold)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -79,10 +83,10 @@ jobs:
             exit 0
           fi
           mkdir -p site-data/data
-          uv run keenbench companyfill generate --max-companies 100 \
-            --out site-data/data/gold.jsonl
+          uv run keenbench companyfill generate --max-companies 100 --per-company 1 \
+            --filingdoc-target 40 --out site-data/data/gold.jsonl
           uv run keenbench companyfill run --queries site-data/data/gold.jsonl \
-            --limit 100 --engines "$ENGINES" --judge --out recall.json
+            --limit 120 --engines "$ENGINES" --judge --out recall.json
 
       - name: rarestream (daily schedule or dispatch opt-in)
         env:
@@ -109,6 +113,20 @@ jobs:
           uv run keenbench scholar run --queries site-data/data/scholar.jsonl \
             --engines "$ENGINES" --num-results 10 --out scholar.json
 
+      - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
+        env:
+          RUN_LEGAL: ${{ github.event.schedule == '17 0 * * *' || inputs.legal == true }}
+        run: |
+          if [ "$RUN_LEGAL" != "true" ] && [ -s site-data/data/legal.jsonl ]; then
+            echo "skipping legal"
+            exit 0
+          fi
+          mkdir -p site-data/data
+          uv run keenbench legal generate --per-court 4 --per-title 4 \
+            --out site-data/data/legal.jsonl
+          uv run keenbench legal run --queries site-data/data/legal.jsonl \
+            --engines "$ENGINES" --out legal.json
+
       - name: Publish
         run: |
           # seeds overlap.jsonl from HF-archived runs; no-op once caught up,
@@ -124,6 +142,9 @@ jobs:
           fi
           if [ -s scholar.json ]; then
             args="$args --scholar scholar.json --scholar-queries site-data/data/scholar.jsonl"
+          fi
+          if [ -s legal.json ]; then
+            args="$args --legal legal.json --legal-queries site-data/data/legal.jsonl"
           fi
           uv run python scripts/publish_bench.py $args
           # staged/ holds exactly this run's <id>/ dir, so the run id has one owner

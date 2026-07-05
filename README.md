@@ -15,8 +15,9 @@ keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on t
 | Benchmark | Queries | Metric |
 | --- | --- | --- |
 | [`freshstream`](#freshstream) | Fresh, time-sensitive queries mined from live RSS and Google Trends | LLM relevance judge → RBP@5 |
-| [`companyfill`](#companyfill) | Company fact-lookups with registry-grounded gold answers | Answer-recall@K and MRR@K, deterministic (optional LLM backstop) |
+| [`companyfill`](#companyfill) | Company & financial fact-lookups: registry-grounded facts, quarterly SEC-XBRL facts (`filings`), and known-item SEC-filing retrieval (`filingdoc`); ~50% of `filings`/`filingdoc` queries use operator syntax | Answer-recall@K and MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | Known-item paper retrieval — find a specific paper by its title vs. by a full-text-only detail | Recall@K and MRR@K by paper-ID match, deterministic (no judge) |
+| [`legal`](#legal) | Legal known-item retrieval — find a specific court opinion (caption) or CFR section (substance); ~50% of queries use operator syntax | Recall@K and MRR@K by citation/docket/URL identity, deterministic (no judge) |
 
 Everything engine- or judge-related is shared infrastructure in
 [`keenbench.shared`](#shared-infrastructure) — search clients, LLM client,
@@ -44,7 +45,7 @@ Keys are read only from the environment.
 
 | Variable | Needed for | Notes |
 | --- | --- | --- |
-| `OPENROUTER_API_KEY` | `freshstream generate`, `freshstream run`, `companyfill run --judge`, `scholar generate` | One [OpenRouter](https://openrouter.ai) key reaches Claude, GPT, Gemini, … |
+| `OPENROUTER_API_KEY` | `freshstream generate`, `freshstream run`, `companyfill generate` (filingdoc suite) + `run --judge`, `scholar generate`, `legal generate` (code suite) | One [OpenRouter](https://openrouter.ai) key reaches Claude, GPT, Gemini, … |
 | `EXA_API_KEY` | the `exa` engine | Required when `--engines` includes `exa` |
 | `KEENABLE_API_KEY` | the `keenable` engine | Optional — without it the keyless (rate-limited) endpoint is used |
 | `SEARCHAPI_API_KEY` | the `google` and `bing` engines | One [SearchAPI](https://www.searchapi.io) key covers both |
@@ -175,20 +176,23 @@ directional, not a headline metric.
 ## companyfill
 
 An enrichment-style benchmark: keyword queries about public companies
-(`"nvidia ceo"`, `"apple revenue fiscal year 2025"`) whose gold answers come
-from public registries, scored by whether an engine's top-K results *contain
-the answer* — not whether they hit one pinned gold URL, so any page that
-actually answers gets credit. Gold is generated on demand from public APIs
-(Wikidata CC0, SEC public domain, GLEIF CC0); nothing is committed. Adapted
-from the public-registry core of Keenable's internal enrichment bench.
+(`"nvidia ceo"`, `"nvidia q1 fiscal 2026 net income"`) whose gold answers come
+from public registries and SEC filings, scored by whether an engine's top-K
+results *contain the answer* — not whether they hit one pinned gold URL, so any
+page that actually answers gets credit. Gold is generated on demand from public
+APIs (Wikidata CC0, SEC public domain, GLEIF CC0); nothing is committed. Adapted
+from the public-registry core of Keenable's internal enrichment bench, extended
+with a WebQL survey of the published finance retrieval benchmarks (FinanceBench,
+FinQA, FinSearchComp).
 
 ### Generate
 
 ```bash
-keenbench companyfill generate --max-companies 200 --out gold.jsonl
+keenbench companyfill generate --max-companies 100 --per-company 1 \
+  --filingdoc-target 40 --out gold.jsonl
 ```
 
-Two suites (`--suites`, default both), one query row per grounded field:
+Three suites (`--suites`, default all), one query row per grounded field:
 
 - **`companyfill`** — SEC `company_tickers.json` seeds the companies; each is
   resolved to Wikidata (gated on company-class or LEI/exchange signals) and
@@ -197,9 +201,19 @@ Two suites (`--suites`, default both), one query row per grounded field:
   Wikidata's latest figure is stale), lei (P1278, or GLEIF with
   `--use-gleif`), ticker. Companies with fewer than 4 grounded fields are
   dropped as likely mis-resolutions.
-- **`financials`** — SEC XBRL companyfacts (authoritative and fresh): latest
-  annual revenue, net income, total assets, stockholders' equity, with the
-  fiscal year pinned in the query text so the gold is unambiguous.
+- **`filings`** — SEC XBRL companyfacts, *single-quarter* 10-Q spans (net
+  income, operating income, diluted EPS; revenue off by default — republished
+  everywhere, calibrated ~1.0). Companies are stratified mega/large/mid cap and
+  the fiscal quarter is pinned in the query text (`"acme" q1 fiscal 2026 net
+  income`). FY-annual facts were dropped as too easy.
+- **`filingdoc`** — known-item *filing* retrieval. Recent 10-K/10-Q/8-K filings
+  come from the SEC submissions API; an LLM projects the filing text into a
+  keyword query with one verbatim quoted span, accession-leak-checked. Gold is
+  the accession number, matched as an `exact_id` (see below).
+
+~50% of `filings`/`filingdoc` queries carry search-operator syntax (`"quoted"`,
+`site:`, `after:`/`before:`), cycled deterministically and tagged in
+`query_origin.syntax`.
 
 ### Run (answer-recall@K)
 
@@ -216,8 +230,10 @@ per-field-type matchers:
 - money matches within a 2% band (`$416.16 billion` ≈ `416161000000`),
   employee counts within 15%
 - countries match alias surface forms (`US`, `U.S.`, `United States of America`)
-- websites match the result URL's registrable domain; tickers/LEIs match
-  case-sensitively on word boundaries
+- websites match the result URL's registrable domain; short exact ids
+  (tickers) match case-sensitively on word boundaries, while long exact ids
+  (LEIs, `filingdoc` accession numbers) match as a normalized substring of the
+  result text *and URL* — SEC result URLs embed the accession
 - low-entropy fields (founded_year, employees, ticker) additionally require a
   cue word (`founded`, `employees`, `ticker`, …) in the text so a stray
   number can't score
@@ -231,13 +247,16 @@ The report tracks `judge_upgrades` and `judge_errors`; a query whose miss
 might be a judge failure is excluded from `num_scored` rather than counted as
 a miss.
 
-The report gives per-engine **answer-recall@K** and **MRR@K**, plus breakdowns
-by field, by suite, and by freshness cadence (`1y` fields like ceo/revenue vs
-`static` ones like founded_year). Caveats: snippet-only checking is a *lower
-bound* on true answer presence — comparable across engines, not an absolute
-coverage number — and ceo/employees gold comes from Wikidata, so a stale
-registry entry can mark a correct fresh answer wrong (the `financials` suite
-has no such gap).
+Every suite — registry facts, quarterly `filings`, and `filingdoc` identity —
+is scored through this one path (`run_answers`): `filingdoc` is just an
+`exact_id` field, so there is no separate scorer. The report gives per-engine
+**answer-recall@K** and **MRR@K**, plus breakdowns by field, by suite
+(`by_bucket`), by operator syntax (`by_syntax`), by cap tier (`by_tier`), and by
+freshness cadence, along with a system-specific vs. universal miss split.
+Caveats: snippet-only checking is a *lower bound* on true answer presence —
+comparable across engines, not an absolute coverage number — and ceo/employees
+gold comes from Wikidata, so a stale registry entry can mark a correct fresh
+answer wrong (the SEC-sourced `filings`/`filingdoc` suites have no such gap).
 
 ## scholar
 
@@ -314,6 +333,59 @@ can still slip through and a distinctive short all-lowercase one can be dropped.
 And the keyless `keenable` endpoint returns degraded results under the burst
 load of a full run, so a batch number undercounts it — score it with a
 `KEENABLE_API_KEY`, or pin the raw results, before comparing.
+
+## legal
+
+Legal search across two task suites, adapted from the citation-gold methodology
+of the public legal-IR benchmarks (CLERC, LePaRD, BSARD): gold is a *document
+identity* derived from the citation graph, so no expert annotation is needed
+and `run` is free (no judge). A deliberate design point — shared with the
+[`companyfill`](#companyfill) `filings`/`filingdoc` suites — is **operator
+syntax coverage**: roughly half the
+queries carry a search operator (`"quoted phrase"`, `site:`,
+`after:`/`before:` date filters), tagged per row in `query_origin.syntax`, so
+the report separates how engines handle advanced query language (`by_syntax`)
+from plain keyword retrieval.
+
+### Generate
+
+```bash
+keenbench legal generate --per-court 4 --per-title 4 --out legal.jsonl
+```
+
+Two suites (`--suites`, default both):
+
+- **`caselaw`** — known-item *case* retrieval. Recent published opinions are
+  sampled from the CourtListener search API (public domain, keyless; set
+  `COURTLISTENER_API_TOKEN` to raise rate limits) across 14 federal courts
+  (`--courts`) and the last `--months-back` months, spread over monthly
+  windows. Each case yields one caption-style query (party names with legal
+  suffixes and docket-annotation noise stripped, plus a court phrase). Gold
+  identity is the case's reporter citations, docket number + party tokens, and
+  CourtListener cluster id.
+- **`code`** — known-item *regulation* retrieval. Sections are sampled from
+  the eCFR API across 10 CFR titles (`--titles`), and an LLM projects each
+  section's full text into a keyword query about the section's *substance*
+  with exactly one distinctive span quoted verbatim — rejected if it leaks the
+  citation (section/part/title number, "CFR", "§") or if the quoted span is
+  not actually verbatim. Needs `OPENROUTER_API_KEY`. Gold identity is the
+  `title CFR section` citation.
+
+### Run (recall@K / MRR@K)
+
+```bash
+keenbench legal run --queries legal.jsonl --engines keenable,exa --out legal.json
+```
+
+Each result's URL and snippet are scanned for legal identities — reporter
+citations (`89 F.4th 1188`), docket numbers (scored only alongside a gold
+party token, so a bare `25-2462` can't false-positive), CourtListener/Justia
+URL patterns, and CFR citations in text or cornell/ecfr URLs. The report
+gives per-engine recall@K and MRR@K with `by_bucket` (suite), `by_syntax`,
+and `by_court` breakdowns plus the system-specific vs universal misses split.
+Identity extraction is pattern-based, so a page that discusses the case
+without citing it doesn't count — recall is a lower bound, applied
+symmetrically across engines.
 
 ## Shared infrastructure
 
@@ -392,8 +464,9 @@ method satisfies the `LLMClient` protocol. The ranking harness is
 
 [`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule
 against all registered engines: freshstream hourly (`--limit 20`), and
-companyfill + scholar daily at 00:17 UTC (fresh gold each — companyfill
-`--limit 100` with `--judge` backstop, scholar `--per-cell 7`). Each run:
+companyfill + scholar + rarestream + legal daily at 00:17 UTC (fresh gold each
+— companyfill regenerates all three suites and runs `--limit 120` with the
+`--judge` backstop, scholar `--per-cell 7`). Each run:
 
 - appends summary rows to `data/history.jsonl` and per-engine-pair URL-overlap
   rows (mean Jaccard of normalized top-K URL sets per query) to

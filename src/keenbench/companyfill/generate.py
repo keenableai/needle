@@ -1,37 +1,63 @@
-import asyncio
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 from keenbench.companyfill.canon import registrable_domain
 from keenbench.companyfill.models import (
     COMPANYFILL_FIELDS,
-    FINANCIALS_FIELDS,
+    FILINGDOC_FIELD,
+    FILINGDOC_SPEC,
+    FILINGDOC_SYNTAX_CYCLE,
+    FILINGS_SYNTAX_CYCLE,
+    QUARTERLY_FIELDS,
+    Filing,
+    QuarterFact,
     build_gold_row,
     display_name,
 )
+from keenbench.companyfill.projection import (
+    MIN_DOC_CHARS,
+    build_filingdoc_prompt,
+    clean_filingdoc_query,
+    filingdoc_query_ok,
+    filingdoc_syntax_query,
+    filings_query,
+)
 from keenbench.companyfill.registries import (
-    FINANCIAL_CONCEPTS,
     GleifClient,
     SecClient,
     WikidataClient,
     current_ceo,
     employees,
     founded_year,
-    latest_annual,
     lei,
     website,
 )
+from keenbench.companyfill.sources import EdgarClient, quarterly_facts
 from keenbench.shared.concurrency import bounded_gather
+from keenbench.shared.llm import LLMClient
+from keenbench.shared.sampling import shuffle_indices
 
 COMPANYFILL_MIN_FIELDS = 4
-FINANCIALS_MIN_FIELDS = 3
-FINANCIALS_MAX_AGE_YEARS = 2
 COMPANY_CONCURRENCY = 16
+FILINGS_CONCURRENCY = 8
+DOC_OVERSAMPLE = 3
+DOC_FORMS = frozenset({"10-K", "10-Q", "8-K"})
+TIER_BOUNDS = (("mega", 0, 100), ("large", 100, 500), ("mid", 500, 2500))
 
 
 def _seed_title(title: str) -> str:
     return " ".join(t for t in title.split() if not t.startswith("/"))
+
+
+def tiered_companies(all_rows: list[dict], per_tier: int, seed: int) -> list[dict]:
+    out = []
+    for name, lo, hi in TIER_BOUNDS:
+        pool = all_rows[lo:hi]
+        perm = shuffle_indices(len(pool), seed ^ lo)
+        for i in perm[:per_tier]:
+            out.append({**pool[i], "tier": name})
+    return out
 
 
 @dataclass
@@ -39,6 +65,15 @@ class GenStats:
     companies: int = 0
     resolved: int = 0
     rows: int = 0
+    filings_rows: int = 0
+    filingdoc_rows: int = 0
+    facts_missing: int = 0
+    doc_candidates: int = 0
+    doc_fetch_fail: int = 0
+    doc_thin: int = 0
+    doc_no_query: int = 0
+    doc_rejected: int = 0
+    llm_errors: int = 0
     errors: int = 0
 
 
@@ -140,45 +175,189 @@ async def _companyfill_rows(
     return rows
 
 
-async def _financials_rows(seed_row: dict, sec: SecClient, *, hour_ts: datetime) -> list[dict]:
-    title, ticker, cik = seed_row["title"], seed_row["ticker"], seed_row["cik"]
-    facts = await sec.companyfacts(cik)
-    if not facts:
-        return []
-    fields = []
-    for field, concepts in FINANCIAL_CONCEPTS.items():
-        val, end, fy = latest_annual(facts, concepts)
-        if val is None or not fy or not end:
-            continue
-        if int(end[:4]) < hour_ts.year - FINANCIALS_MAX_AGE_YEARS:
-            continue
-        fields.append((field, int(val), fy))
-    if len(fields) < FINANCIALS_MIN_FIELDS:
-        return []
-    name = display_name(title)
-    source_url = (
-        f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={cik:010d}&type=10-K"
+def _age_days(end: str, now: datetime) -> int | None:
+    try:
+        return (now - datetime.fromisoformat(end).replace(tzinfo=UTC)).days
+    except ValueError:
+        return None
+
+
+async def _filings_rows(
+    seed_rows: list[dict],
+    sec: SecClient,
+    *,
+    fields: tuple[str, ...],
+    per_company: int,
+    quarters_back: int,
+    seed: int,
+    hour_ts: datetime,
+    now: datetime,
+    stats: GenStats,
+) -> list[dict]:
+    async def company_facts(row: dict) -> list[tuple[dict, QuarterFact]]:
+        try:
+            facts = await sec.companyfacts(row["cik"])
+        except Exception:
+            stats.errors += 1
+            return []
+        if not facts:
+            return []
+        candidates: list[tuple[dict, QuarterFact]] = []
+        for field in fields:
+            for fact in quarterly_facts(facts, field)[:quarters_back]:
+                candidates.append((row, fact))
+        if not candidates:
+            return []
+        perm = shuffle_indices(len(candidates), seed ^ row["cik"])
+        return [candidates[i] for i in perm[:per_company]]
+
+    per_company_lists = await bounded_gather(
+        seed_rows, company_facts, concurrency=FILINGS_CONCURRENCY
     )
-    entity_keys = {"entity": title, "ticker": ticker, "cik": cik}
-    return [
-        build_gold_row(
-            field=field,
-            spec=FINANCIALS_FIELDS[field],
-            value=value,
-            aliases=[],
-            bucket="financials",
-            query_text=FINANCIALS_FIELDS[field].template.format(name=name, fy=fy),
-            entity_keys=entity_keys,
-            registry="sec_xbrl",
-            source_url=source_url,
-            hour_ts=hour_ts,
+
+    rows: list[dict] = []
+    syntax_idx = 0
+    for company_list in per_company_lists:
+        if not company_list:
+            stats.facts_missing += 1
+        for row, fact in company_list:
+            syntax = FILINGS_SYNTAX_CYCLE[syntax_idx % len(FILINGS_SYNTAX_CYCLE)]
+            syntax_idx += 1
+            age_days = _age_days(fact.end, now)
+            entity_keys = {
+                "entity": row["title"],
+                "ticker": row["ticker"],
+                "cik": row["cik"],
+                "fy": fact.fy,
+                "fp": fact.fp,
+                "period_end": fact.end,
+                "age_bucket": "recent" if age_days is not None and age_days <= 200 else "older",
+            }
+            rows.append(
+                build_gold_row(
+                    field=fact.field,
+                    spec=QUARTERLY_FIELDS[fact.field],
+                    value=fact.value,
+                    aliases=[],
+                    bucket="filings",
+                    query_text=filings_query(row["title"], fact, syntax),
+                    entity_keys=entity_keys,
+                    registry="sec_xbrl",
+                    source_url=(
+                        f"https://data.sec.gov/api/xbrl/companyfacts/CIK{row['cik']:010d}.json"
+                    ),
+                    hour_ts=hour_ts,
+                    syntax=syntax,
+                    tier=row.get("tier") or "",
+                )
+            )
+    stats.filings_rows = len(rows)
+    return rows
+
+
+async def _filingdoc_rows(
+    seed_rows: list[dict],
+    edgar: EdgarClient,
+    llm: LLMClient,
+    *,
+    target: int,
+    seed: int,
+    hour_ts: datetime,
+    doc_concurrency: int,
+    stats: GenStats,
+) -> list[dict]:
+    perm = shuffle_indices(len(seed_rows), seed ^ 0xF111)
+    companies = [seed_rows[i] for i in perm[: target * DOC_OVERSAMPLE]]
+    stats.doc_candidates = len(companies)
+
+    async def project(row: dict) -> tuple[Filing, str] | str:
+        filings = await edgar.filings(row["cik"], forms=DOC_FORMS, limit=20)
+        if not filings:
+            return "fetch"
+        pick = filings[(seed ^ row["cik"]) % len(filings)]
+        filing = Filing(
+            cik=row["cik"],
+            company=row["title"],
+            ticker=row["ticker"],
+            form=pick["form"],
+            adsh=pick["adsh"],
+            filed=pick["filed"],
+            primary_doc=pick["primary_doc"],
+            tier=row.get("tier") or "",
         )
-        for field, value, fy in fields
-    ]
+        text = await edgar.document_text(filing)
+        if not text:
+            return "fetch"
+        if len(text) < MIN_DOC_CHARS:
+            return "thin"
+        try:
+            reply, err = await llm.complete(
+                build_filingdoc_prompt(filing, text), max_tokens=256, reasoning_effort="minimal"
+            )
+        except Exception:
+            return "llm_error"
+        if err is not None:
+            return "llm_error"
+        query = clean_filingdoc_query(reply)
+        if query is None:
+            return "no_query"
+        if not filingdoc_query_ok(query, filing=filing, text=text):
+            return "rejected"
+        return filing, query
+
+    projected = await bounded_gather(companies, project, concurrency=doc_concurrency)
+
+    drop_stat = {
+        "fetch": "doc_fetch_fail",
+        "thin": "doc_thin",
+        "llm_error": "llm_errors",
+        "no_query": "doc_no_query",
+        "rejected": "doc_rejected",
+    }
+    rows: list[dict] = []
+    syntax_idx = 0
+    for outcome in projected:
+        if isinstance(outcome, str):
+            setattr(stats, drop_stat[outcome], getattr(stats, drop_stat[outcome]) + 1)
+            continue
+        if len(rows) >= target:
+            continue
+        filing, query = outcome
+        syntax = FILINGDOC_SYNTAX_CYCLE[syntax_idx % len(FILINGDOC_SYNTAX_CYCLE)]
+        syntax_idx += 1
+        entity_keys = {
+            "entity": filing.company,
+            "ticker": filing.ticker,
+            "cik": filing.cik,
+            "form": filing.form,
+            "filed": filing.filed,
+        }
+        source_url = (
+            f"https://www.sec.gov/Archives/edgar/data/{filing.cik}"
+            f"/{filing.adsh_nodash}/{filing.primary_doc}"
+        )
+        rows.append(
+            build_gold_row(
+                field=FILINGDOC_FIELD,
+                spec=FILINGDOC_SPEC,
+                value=filing.adsh_nodash,
+                aliases=[filing.adsh],
+                bucket="filingdoc",
+                query_text=filingdoc_syntax_query(query, syntax, filed=filing.filed),
+                entity_keys=entity_keys,
+                registry="sec_submissions",
+                source_url=source_url,
+                hour_ts=hour_ts,
+                syntax=syntax,
+                tier=filing.tier,
+            )
+        )
+    stats.filingdoc_rows = len(rows)
+    return rows
 
 
 async def run_generate(
-    seed_rows: list[dict],
+    all_rows: list[dict],
     *,
     wikidata: WikidataClient | None,
     sec: SecClient | None,
@@ -186,39 +365,84 @@ async def run_generate(
     suites: tuple[str, ...],
     hour_ts: datetime,
     min_employee_year: int,
+    edgar: EdgarClient | None = None,
+    llm: LLMClient | None = None,
+    now: datetime | None = None,
+    max_companies: int = 1_000_000,
+    fields: tuple[str, ...] = ("net_income", "operating_income", "eps_diluted"),
+    per_company: int = 2,
+    quarters_back: int = 6,
+    filingdoc_target: int = 40,
+    seed: int = 0,
+    doc_concurrency: int = 8,
 ) -> tuple[list[dict], GenStats]:
+    now = now or hour_ts
     stats = GenStats()
     seen_titles: set[str] = set()
-    companies = []
-    for row in seed_rows:
+    cf_seed = []
+    for row in all_rows:
         key = row["title"].strip().lower()
         if key in seen_titles:
             continue
         seen_titles.add(key)
-        companies.append(row)
-    stats.companies = len(companies)
+        cf_seed.append(row)
+        if len(cf_seed) >= max_companies:
+            break
+    stats.companies = len(cf_seed)
 
-    async def company_rows(row: dict) -> list[dict]:
-        tasks = []
-        if "companyfill" in suites and wikidata is not None:
-            tasks.append(
-                _companyfill_rows(
+    rows: list[dict] = []
+    if "companyfill" in suites and wikidata is not None:
+
+        async def company_rows(row: dict) -> list[dict]:
+            try:
+                out = await _companyfill_rows(
                     row, wikidata, gleif, min_employee_year=min_employee_year, hour_ts=hour_ts
                 )
-            )
-        if "financials" in suites and sec is not None:
-            tasks.append(_financials_rows(row, sec, hour_ts=hour_ts))
-        try:
-            batches = await asyncio.gather(*tasks)
-        except Exception:
-            stats.errors += 1
-            return []
-        out = [r for batch in batches for r in batch]
-        if any(r["query_origin"]["provenance"].get("qid") for r in out):
-            stats.resolved += 1
-        return out
+            except Exception:
+                stats.errors += 1
+                return []
+            if any(r["query_origin"]["provenance"].get("qid") for r in out):
+                stats.resolved += 1
+            return out
 
-    results = await bounded_gather(companies, company_rows, concurrency=COMPANY_CONCURRENCY)
-    rows = [r for batch in results for r in batch]
-    stats.rows = len(rows)
-    return rows, stats
+        batches = await bounded_gather(cf_seed, company_rows, concurrency=COMPANY_CONCURRENCY)
+        rows.extend(r for batch in batches for r in batch)
+
+    fin_seed = tiered_companies(all_rows, max(1, max_companies // 3), seed)
+    if "filings" in suites and sec is not None:
+        rows.extend(
+            await _filings_rows(
+                fin_seed,
+                sec,
+                fields=fields,
+                per_company=per_company,
+                quarters_back=quarters_back,
+                seed=seed,
+                hour_ts=hour_ts,
+                now=now,
+                stats=stats,
+            )
+        )
+    if "filingdoc" in suites and edgar is not None and llm is not None:
+        rows.extend(
+            await _filingdoc_rows(
+                fin_seed,
+                edgar,
+                llm,
+                target=filingdoc_target,
+                seed=seed,
+                hour_ts=hour_ts,
+                doc_concurrency=doc_concurrency,
+                stats=stats,
+            )
+        )
+
+    seen_ids: set[str] = set()
+    unique = []
+    for row in rows:
+        if row["query_id"] in seen_ids:
+            continue
+        seen_ids.add(row["query_id"])
+        unique.append(row)
+    stats.rows = len(unique)
+    return unique, stats

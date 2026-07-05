@@ -124,6 +124,14 @@ def test_exact_id_lei_substring():
     assert not gold_in_text("exact_id", lei, text="LEI: 549300MLUDYVRQOOXS99")
 
 
+def test_exact_id_accession_matches_in_url_and_dashed_text():
+    adsh = "000000497725000067"
+    url = "https://www.sec.gov/Archives/edgar/data/497/000000497725000067/x.htm"
+    assert gold_in_text("exact_id", adsh, text="no accession here", url=url)
+    assert gold_in_text("exact_id", adsh, text="Accession No. 0000004977-25-000067", url="")
+    assert not gold_in_text("exact_id", adsh, text="unrelated filing", url="https://example.com")
+
+
 def test_entity_token_boundaries():
     assert gold_in_text("entity", "Apple Inc.", text="Apple company overview")
     assert not gold_in_text("entity", "Cook Industries", text="cooking supplies wholesale")

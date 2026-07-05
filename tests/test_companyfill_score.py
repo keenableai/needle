@@ -26,13 +26,26 @@ EMP_Q = GoldQuery(
     freshness_window="1y",
 )
 REV_Q = GoldQuery(
-    text="nvidia revenue fiscal year 2026",
+    text="nvidia q1 fiscal 2026 revenue",
     field="revenue",
     field_type="money",
     value=130497000000,
     aliases=(),
-    bucket="financials",
+    bucket="filings",
     freshness_window="1y",
+    syntax="plain",
+    tier="mega",
+)
+FILINGDOC_Q = GoldQuery(
+    text='aflac "video presentation" 8-K',
+    field="filing",
+    field_type="exact_id",
+    value="000000497725000067",
+    aliases=("0000004977-25-000067",),
+    bucket="filingdoc",
+    freshness_window="static",
+    syntax="quoted",
+    tier="mega",
 )
 
 
@@ -94,9 +107,22 @@ async def test_run_answers_metrics_and_breakdowns():
     assert e["mrr_at_k"] == pytest.approx((1 / 2 + 1 / 1) / 2)
     assert e["by_field"]["ceo"] == {"n": 1, "recall_at_k": 1.0}
     assert "employees" not in e["by_field"]
-    assert e["by_bucket"]["financials"]["recall_at_k"] == 1.0
+    assert e["by_bucket"]["filings"]["recall_at_k"] == 1.0
     assert e["by_freshness"]["1y"]["n"] == 2
     assert report["num_queries"] == 3
+
+
+async def test_run_answers_scores_filingdoc_by_accession_in_url():
+    hit = _r("https://www.sec.gov/Archives/edgar/data/497/000000497725000067/x.htm")
+    engine = FakeEngine({FILINGDOC_Q.text: ([hit], None)})
+    bad = FakeEngine({FILINGDOC_Q.text: ([_r("https://example.com")], None)})
+    report = await run_answers([FILINGDOC_Q], {"good": engine, "bad": bad})
+    good = report["engines"]["good"]
+    assert good["recall_at_k"] == 1.0
+    assert good["by_bucket"]["filingdoc"]["recall_at_k"] == 1.0
+    assert good["by_syntax"]["quoted"]["recall_at_k"] == 1.0
+    assert good["by_tier"]["mega"]["recall_at_k"] == 1.0
+    assert report["engines"]["bad"]["misses_system_specific"] == 1
 
 
 async def test_run_answers_zero_queries_and_all_errors():

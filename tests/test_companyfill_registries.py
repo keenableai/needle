@@ -5,7 +5,6 @@ from keenbench.companyfill.registries import (
     current_ceo,
     employees,
     founded_year,
-    latest_annual,
     lei,
     website,
 )
@@ -59,23 +58,6 @@ def test_scalar_extractors():
     assert website(claims) == "https://www.nvidia.com/"
     assert lei(claims) == "549300MLUDYVRQOOXS22"
     assert employees(claims) == (36000, 2026)
-
-
-def test_latest_annual_picks_latest_fy_10k_with_concept_fallback():
-    facts = {
-        "Revenues": {
-            "units": {
-                "USD": [
-                    {"form": "10-K", "fp": "FY", "end": "2024-12-31", "val": 100, "fy": 2024},
-                    {"form": "10-Q", "fp": "Q1", "end": "2026-03-31", "val": 999, "fy": 2026},
-                    {"form": "10-K", "fp": "FY", "end": "2025-12-31", "val": 130, "fy": 2025},
-                ]
-            }
-        }
-    }
-    val, end, fy = latest_annual(facts, ["MissingConcept", "Revenues"])
-    assert (val, end, fy) == (130, "2025-12-31", 2025)
-    assert latest_annual({}, ["Revenues"]) == (None, None, None)
 
 
 def _canned(payloads):

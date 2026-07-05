@@ -19,6 +19,8 @@ class GoldQuery:
     aliases: tuple[str, ...]
     bucket: str
     freshness_window: str
+    syntax: str = "plain"
+    tier: str = ""
 
 
 def _capped_snippet(result: SearchResult, snippet_chars: int) -> str:
@@ -100,6 +102,8 @@ async def run_answers(
             "field": query.field,
             "value": query.value,
             "bucket": query.bucket,
+            "syntax": query.syntax,
+            "tier": query.tier,
             "freshness_window": query.freshness_window,
             "hit_rank": None,
             "det_rank": None,
@@ -163,9 +167,15 @@ async def run_answers(
             "latency": latency_stats(engines[name].latencies_ms),
             "by_field": dict(sorted(_group(scored, lambda pq: pq["field"]).items())),
             "by_bucket": dict(sorted(_group(scored, lambda pq: pq["bucket"]).items())),
+            "by_syntax": dict(sorted(_group(scored, lambda pq: pq["syntax"]).items())),
+            "by_tier": dict(
+                sorted(_group([pq for pq in scored if pq["tier"]], lambda pq: pq["tier"]).items())
+            ),
             "by_freshness": _ladder_order(_group(scored, lambda pq: pq["freshness_window"])),
             "per_query": per_query,
         }
+
+    _classify_misses(query_outs, engine_names, engines_out)
 
     return {
         "num_queries": len(queries),
@@ -174,3 +184,23 @@ async def run_answers(
         "judged": judge is not None,
         "engines": engines_out,
     }
+
+
+def _classify_misses(
+    query_outs: list[list[dict]],
+    engine_names: list[str],
+    engines_out: dict[str, dict[str, Any]],
+) -> None:
+    any_hit = [any(pq["hit_rank"] is not None for pq in entries) for entries in query_outs]
+    for idx, name in enumerate(engine_names):
+        system_specific = universal = 0
+        for entries, others_found in zip(query_outs, any_hit, strict=True):
+            pq = entries[idx]
+            if pq["search_error"] is not None or pq["hit_rank"] is not None or pq["n_results"] == 0:
+                continue
+            if others_found:
+                system_specific += 1
+            else:
+                universal += 1
+        engines_out[name]["misses_system_specific"] = system_specific
+        engines_out[name]["misses_universal"] = universal
