@@ -3,7 +3,9 @@ from dotenv import load_dotenv
 
 from keenbench import __version__
 from keenbench.companyfill.cli import Companyfill
+from keenbench.finance.cli import Finance
 from keenbench.freshstream.cli import Freshstream
+from keenbench.legal.cli import Legal
 from keenbench.rarestream.cli import Rarestream
 from keenbench.scholar.cli import Scholar
 
@@ -11,7 +13,9 @@ from keenbench.scholar.cli import Scholar
 class Keenbench:
     def __init__(self) -> None:
         self.companyfill = Companyfill()
+        self.finance = Finance()
         self.freshstream = Freshstream()
+        self.legal = Legal()
         self.rarestream = Rarestream()
         self.scholar = Scholar()
 

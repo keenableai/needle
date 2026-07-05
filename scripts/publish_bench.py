@@ -89,6 +89,49 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
     ]
 
 
+def _syntax_split(e: dict) -> tuple[float | None, float | None]:
+    groups = e.get("by_syntax") or {}
+    plain = groups.get("plain", {}).get("recall_at_k")
+    ops = [(g["n"], g["recall_at_k"]) for name, g in groups.items() if name != "plain"]
+    total = sum(n for n, _ in ops)
+    op = sum(n * r for n, r in ops) / total if total else None
+    return plain, op
+
+
+def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> list[dict]:
+    rows = []
+    for name, e in report["engines"].items():
+        plain_recall, op_recall = _syntax_split(e)
+        rows.append(
+            {
+                "ts": ts,
+                "bench": bench,
+                "engine": name,
+                "recall": e["recall_at_k"],
+                "mrr": e["mrr_at_k"],
+                f"{suites[0]}_recall": e["by_bucket"].get(suites[0], {}).get("recall_at_k"),
+                f"{suites[1]}_recall": e["by_bucket"].get(suites[1], {}).get("recall_at_k"),
+                "plain_recall": plain_recall,
+                "op_recall": op_recall,
+                "num_scored": e["num_scored"],
+                "num_queries": report["num_queries"],
+                "search_errors": e["search_errors"],
+                "p50_ms": (e.get("latency") or {}).get("p50_ms"),
+                "p95_ms": (e.get("latency") or {}).get("p95_ms"),
+                "lat_ms": (e.get("latency") or {}).get("samples_ms"),
+            }
+        )
+    return rows
+
+
+def legal_rows(report: dict, ts: str) -> list[dict]:
+    return _suite_rows(report, ts, "legal", ("caselaw", "code"))
+
+
+def finance_rows(report: dict, ts: str) -> list[dict]:
+    return _suite_rows(report, ts, "finance", ("filings", "filingdoc"))
+
+
 def slim_report(report: dict) -> dict:
     slim = dict(report)
     slim["engines"] = {
@@ -108,6 +151,10 @@ def publish(
     rarestream: str | None = None,
     scholar: str | None = None,
     scholar_queries: str | None = None,
+    legal: str | None = None,
+    legal_queries: str | None = None,
+    finance: str | None = None,
+    finance_queries: str | None = None,
     ts: str | None = None,
 ) -> None:
     ts = ts or datetime.now(UTC).strftime(TS_FMT)
@@ -125,6 +172,8 @@ def publish(
         (recall, companyfill_rows, "latest_companyfill.json", "recall.json"),
         (rarestream, rarestream_rows, "latest_rarestream.json", "rarestream.json"),
         (scholar, scholar_rows, "latest_scholar.json", "scholar.json"),
+        (legal, legal_rows, "latest_legal.json", "legal.json"),
+        (finance, finance_rows, "latest_finance.json", "finance.json"),
     ):
         if not path:
             continue
@@ -139,6 +188,8 @@ def publish(
         (fresh, "fresh.jsonl"),
         (gold, "gold.jsonl"),
         (scholar_queries, "scholar.jsonl"),
+        (legal_queries, "legal.jsonl"),
+        (finance_queries, "finance.jsonl"),
     ):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())

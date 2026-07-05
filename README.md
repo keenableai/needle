@@ -17,6 +17,8 @@ keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on t
 | [`freshstream`](#freshstream) | Fresh, time-sensitive queries mined from live RSS and Google Trends | LLM relevance judge → RBP@5 |
 | [`companyfill`](#companyfill) | Company fact-lookups with registry-grounded gold answers | Answer-recall@K and MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | Known-item paper retrieval — find a specific paper by its title vs. by a full-text-only detail | Recall@K and MRR@K by paper-ID match, deterministic (no judge) |
+| [`legal`](#legal) | Legal known-item retrieval — find a specific court opinion (caption) or CFR section (substance); ~50% of queries use operator syntax | Recall@K and MRR@K by citation/docket/URL identity, deterministic (no judge) |
+| [`finance`](#finance) | Finance retrieval — quarterly SEC-XBRL fact lookups and known-item SEC-filing retrieval; ~50% of queries use operator syntax | Answer-recall@K / recall@K and MRR@K, deterministic (no judge) |
 
 Everything engine- or judge-related is shared infrastructure in
 [`keenbench.shared`](#shared-infrastructure) — search clients, LLM client,
@@ -314,6 +316,105 @@ can still slip through and a distinctive short all-lowercase one can be dropped.
 And the keyless `keenable` endpoint returns degraded results under the burst
 load of a full run, so a batch number undercounts it — score it with a
 `KEENABLE_API_KEY`, or pin the raw results, before comparing.
+
+## legal
+
+Legal search across two task suites, adapted from the citation-gold methodology
+of the public legal-IR benchmarks (CLERC, LePaRD, BSARD): gold is a *document
+identity* derived from the citation graph, so no expert annotation is needed
+and `run` is free (no judge). A deliberate design point — shared with
+[`finance`](#finance) — is **operator syntax coverage**: roughly half the
+queries carry a search operator (`"quoted phrase"`, `site:`,
+`after:`/`before:` date filters), tagged per row in `query_origin.syntax`, so
+the report separates how engines handle advanced query language (`by_syntax`)
+from plain keyword retrieval.
+
+### Generate
+
+```bash
+keenbench legal generate --per-court 4 --per-title 4 --out legal.jsonl
+```
+
+Two suites (`--suites`, default both):
+
+- **`caselaw`** — known-item *case* retrieval. Recent published opinions are
+  sampled from the CourtListener search API (public domain, keyless; set
+  `COURTLISTENER_API_TOKEN` to raise rate limits) across 14 federal courts
+  (`--courts`) and the last `--months-back` months, spread over monthly
+  windows. Each case yields one caption-style query (party names with legal
+  suffixes and docket-annotation noise stripped, plus a court phrase). Gold
+  identity is the case's reporter citations, docket number + party tokens, and
+  CourtListener cluster id.
+- **`code`** — known-item *regulation* retrieval. Sections are sampled from
+  the eCFR API across 10 CFR titles (`--titles`), and an LLM projects each
+  section's full text into a keyword query about the section's *substance*
+  with exactly one distinctive span quoted verbatim — rejected if it leaks the
+  citation (section/part/title number, "CFR", "§") or if the quoted span is
+  not actually verbatim. Needs `OPENROUTER_API_KEY`. Gold identity is the
+  `title CFR section` citation.
+
+### Run (recall@K / MRR@K)
+
+```bash
+keenbench legal run --queries legal.jsonl --engines keenable,exa --out legal.json
+```
+
+Each result's URL and snippet are scanned for legal identities — reporter
+citations (`89 F.4th 1188`), docket numbers (scored only alongside a gold
+party token, so a bare `25-2462` can't false-positive), CourtListener/Justia
+URL patterns, and CFR citations in text or cornell/ecfr URLs. The report
+gives per-engine recall@K and MRR@K with `by_bucket` (suite), `by_syntax`,
+and `by_court` breakdowns plus the system-specific vs universal misses split.
+Identity extraction is pattern-based, so a page that discusses the case
+without citing it doesn't count — recall is a lower bound, applied
+symmetrically across engines.
+
+## finance
+
+Analyst-style financial search, mirroring the construction of the public
+finance QA benchmarks (FinanceBench, FinQA, FinSearchComp): questions grounded
+in SEC filings with deterministically verifiable answers. Same operator-syntax
+design as [`legal`](#legal) (~50% of queries carry `"quoted"`, `site:`, or
+date operators, reported under `by_syntax`).
+
+### Generate
+
+```bash
+keenbench finance generate --max-companies 90 --per-company 1 \
+  --filingdoc-target 40 --out finance.jsonl
+```
+
+Companies are drawn from the SEC ticker registry in three cap tiers (top-100
+"mega", 100-500 "large", 500-2500 "mid" — `by_tier` in the report), sampled
+per tier by seed. Two suites (`--suites`, default both):
+
+- **`filings`** — answer-recall on *quarterly* XBRL facts (SEC companyfacts,
+  10-Q only, single-quarter spans): net income, operating income, diluted EPS
+  by default (`--fields`; `revenue` exists but is excluded by default — it
+  scored ~1.0 in calibration because quarterly revenue is republished
+  everywhere). The fiscal quarter is pinned in the query text
+  (`"acme" q1 fiscal 2026 net income`) and the last `--quarters-back` quarters
+  are eligible, so older quarters keep the task from collapsing into news
+  lookup.
+- **`filingdoc`** — known-item *filing* retrieval. Recent 10-K/10-Q/8-K
+  filings come from the SEC submissions API; an LLM projects the filing text
+  into a keyword query with one verbatim quoted span (accession numbers and
+  boilerplate banned). Needs `OPENROUTER_API_KEY`. Gold identity is the
+  accession number, matched in result URLs or text.
+
+### Run (answer-recall@K / recall@K)
+
+```bash
+keenbench finance run --queries finance.jsonl --engines keenable,exa --out finance.json
+```
+
+`filings` rows are scored by answer containment in each result's
+title+snippet, reusing companyfill's matchers (money within a 2% band; EPS
+additionally requires a per-share cue so a stray decimal can't score);
+`filingdoc` rows by accession-number identity. One report, with `by_bucket`,
+`by_syntax`, `by_field`, and `by_tier` breakdowns. The same caveat as
+companyfill applies: snippet-only checking is a lower bound, comparable
+across engines.
 
 ## Shared infrastructure
 

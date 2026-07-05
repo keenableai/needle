@@ -1,0 +1,18 @@
+You generate a search query for a legal-search benchmark. The query must lead a web search engine to ONE specific section of the US Code of Federal Regulations — without ever naming that section.
+
+You are given the section's heading and its full text. Produce ONE keyword-style search query built from the section's SUBSTANCE: the specific obligation, prohibition, threshold, exemption, or defined term it establishes.
+
+Requirements:
+- Keyword-style, 4-10 words total. Not a natural-language question. Do not start with what/why/how.
+- Wrap EXACTLY ONE distinctive span of 2-6 consecutive words in double quotes, copied CHARACTER-FOR-CHARACTER from the section text (not the heading). Pick a span whose wording is regulatory and specific — a defined term, an operative phrase, an unusual threshold — not boilerplate that appears across the entire CFR (e.g. not "it shall be unlawful", "for purposes of this", "any person who").
+- The rest of the query (outside the quotes) adds context words naming the subject matter, so the query works even on engines that ignore quotes.
+- Do NOT include the section number, part number, title number, "CFR", "USC", "§", or the word "section" followed by a number. The task is to find the section from its content, not its citation.
+- Do NOT copy the heading verbatim as the whole query.
+- Always respond in English.
+- If the section text is too generic or administrative to single it out (cross-references, addresses, OMB control numbers, severability boilerplate), respond with exactly NO_DISTINCT_QUERY.
+
+Heading: {{ heading }}
+Section text:
+{{ text }}
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.
