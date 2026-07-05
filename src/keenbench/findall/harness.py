@@ -191,8 +191,8 @@ async def run_task(
                 out["turns"] += 1
                 message, usage, err = await llm.chat(messages, tools)
                 charge_llm(usage)
-                if err is not None:
-                    out["error"] = err
+                if err is not None or message is None:
+                    out["error"] = err or {"error_type": "no_message", "error_message": ""}
                     return out
                 messages.append(message)
                 tool_calls = message.get("tool_calls") or []
@@ -232,8 +232,8 @@ async def run_task(
                     )
                     message, usage, err = await llm.chat(messages, [])
                     charge_llm(usage)
-                    if err is not None:
-                        out["error"] = err
+                    if err is not None or message is None:
+                        out["error"] = err or {"error_type": "no_message", "error_message": ""}
                         return out
                     out["answer_text"] = message.get("content") or ""
                     return out

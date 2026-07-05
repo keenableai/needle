@@ -105,6 +105,8 @@ def score_set(answer: dict[str, Any] | None, entities: tuple[dict[str, Any], ...
 
 def score_stat(answer: dict[str, Any] | None, *, value: float, rel_tol: float) -> dict:
     raw = (answer or {}).get("value")
+    if raw is None or isinstance(raw, bool):
+        return {"value": None, "gold_value": value, "rel_err": None, "within_tol": False}
     try:
         got = float(raw)
     except (TypeError, ValueError):
