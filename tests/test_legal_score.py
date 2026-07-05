@@ -131,9 +131,7 @@ async def test_run_legal_scores_hits_and_breakdowns():
 async def test_run_legal_classifies_misses():
     hit = _r("https://www.courtlistener.com/opinion/10865557/fresh-mix/")
     other = _r("https://example.com/nothing", snippet="irrelevant")
-    report = await run_legal(
-        [GOLD[0]], {"good": FakeEngine([hit]), "bad": FakeEngine([other])}
-    )
+    report = await run_legal([GOLD[0]], {"good": FakeEngine([hit]), "bad": FakeEngine([other])})
     assert report["engines"]["bad"]["misses_system_specific"] == 1
     errored = await run_legal([GOLD[0]], {"err": FakeEngine([], error={"error_type": "http"})})
     assert errored["engines"]["err"]["num_scored"] == 0
