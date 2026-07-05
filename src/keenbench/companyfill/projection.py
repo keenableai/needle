@@ -1,8 +1,13 @@
 import re
 from datetime import date, timedelta
 
-from keenbench.companyfill.models import display_name
-from keenbench.finance.models import QUARTERLY_FIELDS, Filing, QuarterFact, quarter_phrase
+from keenbench.companyfill.models import (
+    QUARTERLY_FIELDS,
+    Filing,
+    QuarterFact,
+    display_name,
+    quarter_phrase,
+)
 from keenbench.shared.prompts import render_prompt
 
 FILING_QUERY_TEMPLATE = "filing_query.jinja"
@@ -33,7 +38,7 @@ def doc_excerpt(text: str) -> str:
 
 def build_filingdoc_prompt(filing: Filing, text: str) -> str:
     return render_prompt(
-        __package__,
+        "keenbench.companyfill",
         FILING_QUERY_TEMPLATE,
         company=filing.company,
         form=filing.form,

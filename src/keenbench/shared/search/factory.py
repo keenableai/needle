@@ -34,7 +34,7 @@ def _build_keenable(api_key: str | None, snippet_chars: int) -> SearchClient:
 def _build_exa(api_key: str | None, snippet_chars: int) -> SearchClient:
     return ExaClient(
         api_key=api_key or "",
-        max_concurrency=int(os.environ.get("EXA_CONCURRENCY", "4")),
+        max_concurrency=int(os.environ.get("EXA_CONCURRENCY", "1")),
         highlight_chars=snippet_chars,
     )
 

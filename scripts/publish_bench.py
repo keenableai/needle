@@ -49,25 +49,6 @@ def rarestream_rows(report: dict, ts: str) -> list[dict]:
     return _rbp_rows(report, ts, "rarestream")
 
 
-def companyfill_rows(report: dict, ts: str) -> list[dict]:
-    return [
-        {
-            "ts": ts,
-            "bench": "companyfill",
-            "engine": name,
-            "recall": e["recall_at_k"],
-            "mrr": e["mrr_at_k"],
-            "num_scored": e["num_scored"],
-            "num_queries": report["num_queries"],
-            "search_errors": e["search_errors"],
-            "p50_ms": (e.get("latency") or {}).get("p50_ms"),
-            "p95_ms": (e.get("latency") or {}).get("p95_ms"),
-            "lat_ms": (e.get("latency") or {}).get("samples_ms"),
-        }
-        for name, e in report["engines"].items()
-    ]
-
-
 def scholar_rows(report: dict, ts: str) -> list[dict]:
     return [
         {
@@ -124,12 +105,12 @@ def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> l
     return rows
 
 
+def companyfill_rows(report: dict, ts: str) -> list[dict]:
+    return _suite_rows(report, ts, "companyfill", ("filings", "filingdoc"))
+
+
 def legal_rows(report: dict, ts: str) -> list[dict]:
     return _suite_rows(report, ts, "legal", ("caselaw", "code"))
-
-
-def finance_rows(report: dict, ts: str) -> list[dict]:
-    return _suite_rows(report, ts, "finance", ("filings", "filingdoc"))
 
 
 def slim_report(report: dict) -> dict:
@@ -153,8 +134,6 @@ def publish(
     scholar_queries: str | None = None,
     legal: str | None = None,
     legal_queries: str | None = None,
-    finance: str | None = None,
-    finance_queries: str | None = None,
     ts: str | None = None,
 ) -> None:
     ts = ts or datetime.now(UTC).strftime(TS_FMT)
@@ -173,7 +152,6 @@ def publish(
         (rarestream, rarestream_rows, "latest_rarestream.json", "rarestream.json"),
         (scholar, scholar_rows, "latest_scholar.json", "scholar.json"),
         (legal, legal_rows, "latest_legal.json", "legal.json"),
-        (finance, finance_rows, "latest_finance.json", "finance.json"),
     ):
         if not path:
             continue
@@ -189,7 +167,6 @@ def publish(
         (gold, "gold.jsonl"),
         (scholar_queries, "scholar.jsonl"),
         (legal_queries, "legal.jsonl"),
-        (finance_queries, "finance.jsonl"),
     ):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())

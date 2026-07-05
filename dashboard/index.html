@@ -213,7 +213,6 @@
         <li><a href="#sec-companyfill">companyfill</a></li>
         <li><a href="#sec-scholar">scholar</a></li>
         <li><a href="#sec-legal">legal</a></li>
-        <li><a href="#sec-finance">finance</a></li>
       </ul>
     </li>
     <li><a href="#card-runs">Judgement browser</a></li>
@@ -225,7 +224,7 @@
     <p>Hourly search-engine benchmarks from
       <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.
       freshstream runs hourly (RBP@5, LLM judge); rarestream daily
-      (rare-entity RBP@5, LLM judge); companyfill, scholar, legal, and finance
+      (rare-entity RBP@5, LLM judge); companyfill, scholar, and legal
       daily (deterministic recall). All times UTC.
       <span id="updated"></span></p>
   </header>
@@ -255,11 +254,6 @@
       <h2>legal — 7-day mean</h2>
       <div class="sub" id="lb-legal-sub"></div>
       <div id="lb-legal"></div>
-    </div>
-    <div class="card">
-      <h2>finance — 7-day mean</h2>
-      <div class="sub" id="lb-finance-sub"></div>
-      <div id="lb-finance"></div>
     </div>
   </div>
 
@@ -313,15 +307,25 @@
   </div>
 
   <h3 class="subsection-title" id="sec-companyfill">companyfill</h3>
-  <p class="section-desc">Company fact-lookups (CEO, revenue, HQ, founding year…) with gold grounded in public registries; deterministic answer-recall@5, no judge.</p>
+  <p class="section-desc">Company &amp; financial fact-lookups: registry-grounded facts (CEO, HQ, founding year…), quarterly SEC-XBRL facts (filings), and known-item SEC-filing retrieval by accession identity (filingdoc). Companies mixed across cap tiers; ~half the filings/filingdoc queries carry operator syntax ("quoted", site:, date filters). Uniform deterministic answer-recall@5 with an LLM-judge backstop.</p>
   <div class="grid2">
     <div class="card" id="card-recall">
       <h2>companyfill — answer-recall@5</h2>
-      <div class="sub">100 gold queries per run</div>
+      <div class="sub">gold queries per run across all suites</div>
     </div>
     <div class="card" id="card-mrr">
       <h2>companyfill — MRR@5</h2>
       <div class="sub">same runs as recall</div>
+    </div>
+  </div>
+  <div class="grid2">
+    <div class="card" id="card-companyfill-filings">
+      <h2>companyfill — filings recall@5</h2>
+      <div class="sub">quarterly facts (net income, operating income, diluted EPS) in top-5 snippets</div>
+    </div>
+    <div class="card" id="card-companyfill-filingdoc">
+      <h2>companyfill — filingdoc recall@5</h2>
+      <div class="sub">SEC filings found by a distinctive detail (accession identity)</div>
     </div>
   </div>
   <div class="card" id="card-fields">
@@ -353,19 +357,6 @@
     <div class="card" id="card-legal-code">
       <h2>legal — code recall@5</h2>
       <div class="sub">CFR sections found from their regulatory substance</div>
-    </div>
-  </div>
-
-  <h3 class="subsection-title" id="sec-finance">finance</h3>
-  <p class="section-desc">Analyst-style financial search: quarterly SEC-XBRL fact lookups (answer-recall) and known-item SEC-filing retrieval by accession identity, companies mixed across cap tiers. Roughly half the queries carry operator syntax.</p>
-  <div class="grid2">
-    <div class="card" id="card-finance-filings">
-      <h2>finance — filings answer-recall@5</h2>
-      <div class="sub">quarterly facts (net income, operating income, diluted EPS) in top-5 snippets</div>
-    </div>
-    <div class="card" id="card-finance-filingdoc">
-      <h2>finance — filingdoc recall@5</h2>
-      <div class="sub">SEC filings found by a distinctive detail</div>
     </div>
   </div>
 
@@ -704,7 +695,8 @@ function renderLeaderboards(rows) {
   renderLeaderboard("lb-fresh", "lb-fresh-sub", rows, "freshstream", [["rbp", "RBP@5"]]);
   renderLeaderboard("lb-company", "lb-company-sub", rows, "companyfill", [
     ["recall", "recall@5"],
-    ["mrr", "MRR@5"],
+    ["filings_recall", "filings"],
+    ["filingdoc_recall", "filingdoc"],
   ]);
   renderLeaderboard("lb-scholar", "lb-scholar-sub", rows, "scholar", [
     ["recall", "recall@10"],
@@ -716,11 +708,6 @@ function renderLeaderboards(rows) {
     ["recall", "recall@5"],
     ["caselaw_recall", "caselaw"],
     ["code_recall", "code"],
-  ]);
-  renderLeaderboard("lb-finance", "lb-finance-sub", rows, "finance", [
-    ["recall", "recall@5"],
-    ["filings_recall", "filings"],
-    ["filingdoc_recall", "filingdoc"],
   ]);
 }
 
@@ -1009,6 +996,9 @@ function renderCompanyfillRun(holder, report, engine) {
   for (const pq of per) {
     const row = el("details", { class: "qrow" });
     const summary = el("summary");
+    summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
+    if (pq.syntax && pq.syntax !== "plain") summary.appendChild(el("span", { class: "chip" }, pq.syntax));
+    if (pq.tier) summary.appendChild(el("span", { class: "chip" }, pq.tier));
     summary.appendChild(el("span", {}, pq.query));
     summary.appendChild(el("span", { class: "host" }, `gold: ${pq.value ?? "–"}`));
     summary.appendChild(el("span", { class: "score" },
@@ -1079,31 +1069,7 @@ function renderLegalRun(holder, report, engine) {
   }
 }
 
-function renderFinanceRun(holder, report, engine) {
-  const per = report.engines[engine]?.per_query || [];
-  for (const pq of per) {
-    const row = el("details", { class: "qrow" });
-    const summary = el("summary");
-    summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
-    if (pq.syntax && pq.syntax !== "plain") summary.appendChild(el("span", { class: "chip" }, pq.syntax));
-    summary.appendChild(el("span", {}, pq.query));
-    if (pq.value != null) summary.appendChild(el("span", { class: "host" }, `gold: ${pq.value}`));
-    summary.appendChild(el("span", { class: "score" },
-      pq.search_error ? "search error"
-        : pq.hit_rank ? `hit @${pq.hit_rank}` : "miss"));
-    row.appendChild(summary);
-    (pq.results || []).forEach((r, i) => {
-      const rank = i + 1;
-      const mark = rank === pq.hit_rank
-        ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
-        : el("span", { class: "miss-marker" }, `#${rank}`);
-      row.appendChild(resultBlock(r, [mark]));
-    });
-    holder.appendChild(row);
-  }
-}
-
-const RUN_ARTIFACT = { freshstream: "rbp.json", rarestream: "rarestream.json", companyfill: "recall.json", scholar: "scholar.json", legal: "legal.json", finance: "finance.json" };
+const RUN_ARTIFACT = { freshstream: "rbp.json", rarestream: "rarestream.json", companyfill: "recall.json", scholar: "scholar.json", legal: "legal.json" };
 
 async function renderRunDetail(runs) {
   const holder = document.getElementById("run-detail");
@@ -1135,7 +1101,6 @@ async function renderRunDetail(runs) {
     if (benchSel.value === "companyfill") renderCompanyfillRun(holder, report, engineSel.value);
     else if (benchSel.value === "scholar") renderScholarRun(holder, report, engineSel.value);
     else if (benchSel.value === "legal") renderLegalRun(holder, report, engineSel.value);
-    else if (benchSel.value === "finance") renderFinanceRun(holder, report, engineSel.value);
     else renderFreshstreamRun(holder, report, engineSel.value); // freshstream + rarestream share the RBP shape
     if (!holder.children.length) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
@@ -1153,7 +1118,7 @@ async function initRunBrowser() {
   let runs = [];
   try { runs = await fetchJson("data/runs.json"); } catch {}
   runs = [...runs].reverse();
-  for (const b of ["freshstream", "rarestream", "companyfill", "scholar", "legal", "finance"]) {
+  for (const b of ["freshstream", "rarestream", "companyfill", "scholar", "legal"]) {
     benchSel.appendChild(el("option", { value: b }, b));
   }
   for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, e));
@@ -1189,6 +1154,12 @@ function drawCharts(rows) {
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
   drawChart(document.getElementById("card-mrr"), seriesFor("companyfill", "mrr", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
+  drawChart(document.getElementById("card-companyfill-filings"), seriesFor("companyfill", "filings_recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "companyfill filings answer-recall at 5 over time per engine",
+      empty: "No filings data yet — collected daily." });
+  drawChart(document.getElementById("card-companyfill-filingdoc"), seriesFor("companyfill", "filingdoc_recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "companyfill filingdoc recall at 5 over time per engine",
+      empty: "No filingdoc data yet — collected daily." });
   drawChart(document.getElementById("card-scholar-title"), seriesFor("scholar", "title_recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar title-query recall at 10 over time per engine" });
   drawChart(document.getElementById("card-scholar-body"), seriesFor("scholar", "body_recall", rows),
@@ -1199,12 +1170,6 @@ function drawCharts(rows) {
   drawChart(document.getElementById("card-legal-code"), seriesFor("legal", "code_recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "legal code recall at 5 over time per engine",
       empty: "No legal run yet — collected daily." });
-  drawChart(document.getElementById("card-finance-filings"), seriesFor("finance", "filings_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "finance filings answer-recall at 5 over time per engine",
-      empty: "No finance run yet — collected daily." });
-  drawChart(document.getElementById("card-finance-filingdoc"), seriesFor("finance", "filingdoc_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "finance filingdoc recall at 5 over time per engine",
-      empty: "No finance run yet — collected daily." });
   for (const [p, metric, name] of [[0.5, "p50_ms", "p50"], [0.95, "p95_ms", "p95"]]) {
     const lat = latencySeries(rows, p, metric);
     const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((q) => q.v))));

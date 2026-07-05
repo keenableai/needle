@@ -258,25 +258,32 @@ async def test_seed_deduped_by_title():
     assert tickers == ["GOOGL"]
 
 
-def _fin_facts(concepts):
-    units = {
+def _q_facts(concepts):
+    return {
         name: {
             "units": {
-                "USD": [{"form": "10-K", "fp": "FY", "end": "2026-01-25", "val": val, "fy": 2026}]
+                unit: [
+                    {
+                        "form": "10-Q",
+                        "fp": "Q1",
+                        "start": "2026-01-01",
+                        "end": "2026-03-31",
+                        "val": val,
+                        "fy": 2026,
+                    }
+                ]
             }
         }
-        for name, val in concepts.items()
+        for name, (unit, val) in concepts.items()
     }
-    return units
 
 
-async def test_financials_rows_pin_fiscal_year():
-    facts = _fin_facts(
+async def test_filings_rows_quarterly_facts_and_syntax():
+    facts = _q_facts(
         {
-            "Revenues": 130497000000,
-            "NetIncomeLoss": 72880000000,
-            "Assets": 111601000000,
-            "StockholdersEquity": 79327000000,
+            "NetIncomeLoss": ("USD", 16599000000),
+            "OperatingIncomeLoss": ("USD", 18000000000),
+            "EarningsPerShareDiluted": ("USD/shares", 1.05),
         }
     )
     sec = FakeSec(facts={1045810: facts})
@@ -285,73 +292,96 @@ async def test_financials_rows_pin_fiscal_year():
         wikidata=None,
         sec=sec,
         gleif=None,
-        suites=("financials",),
+        suites=("filings",),
         hour_ts=HOUR,
+        now=HOUR,
         min_employee_year=2025,
+        max_companies=3,
+        fields=("net_income", "operating_income", "eps_diluted"),
+        per_company=6,
     )
-    by_field = {r["gold"]["field"]: r for r in rows}
-    assert set(by_field) == {"revenue", "net_income", "total_assets", "stockholders_equity"}
-    assert by_field["revenue"]["query_text"] == "nvidia revenue fiscal year 2026"
-    assert by_field["revenue"]["gold"]["value"] == 130497000000
-    assert by_field["revenue"]["query_origin"]["bucket"] == "financials"
-    assert stats.rows == 4
-
-
-async def test_financials_stale_concept_falls_back_and_recency_gated():
-    facts = _fin_facts(
-        {
-            "Revenues": 67589000000,
-            "Assets": 98585000000,
-            "StockholdersEquity": 21318000000,
-        }
-    )
-    facts["NetIncomeLoss"] = {
-        "units": {"USD": [{"form": "10-K", "fp": "FY", "end": "2010-12-31", "val": 27, "fy": 2010}]}
+    assert stats.filings_rows == len(rows) >= 1
+    r = rows[0]
+    assert r["query_origin"]["bucket"] == "filings"
+    assert r["query_origin"]["syntax"] in ("plain", "quoted")
+    assert r["gold"]["tier"] == "mega"
+    assert "q1 fiscal 2026" in r["query_text"]
+    assert {row["gold"]["field"] for row in rows} <= {
+        "net_income",
+        "operating_income",
+        "eps_diluted",
     }
-    facts["ProfitLoss"] = {
-        "units": {
-            "USD": [{"form": "10-K", "fp": "FY", "end": "2026-01-25", "val": 11000000, "fy": 2026}]
-        }
-    }
-    sec = FakeSec(facts={1045810: facts})
-    rows, _ = await run_generate(
-        [NVDA_SEED],
-        wikidata=None,
-        sec=sec,
-        gleif=None,
-        suites=("financials",),
-        hour_ts=HOUR,
-        min_employee_year=2025,
-    )
-    net = [r for r in rows if r["gold"]["field"] == "net_income"]
-    assert net[0]["gold"]["value"] == 11000000
-    assert net[0]["query_text"].endswith("fiscal year 2026")
-
-    del facts["ProfitLoss"]
-    rows, _ = await run_generate(
-        [NVDA_SEED],
-        wikidata=None,
-        sec=FakeSec(facts={1045810: facts}),
-        gleif=None,
-        suites=("financials",),
-        hour_ts=HOUR,
-        min_employee_year=2025,
-    )
-    assert "net_income" not in {r["gold"]["field"] for r in rows}
 
 
-async def test_financials_below_min_fields_dropped():
-    sec = FakeSec(facts={1045810: _fin_facts({"Revenues": 1, "Assets": 2})})
-    rows, _ = await run_generate(
+async def test_filings_missing_facts_counted():
+    rows, stats = await run_generate(
         [NVDA_SEED],
         wikidata=None,
-        sec=sec,
+        sec=FakeSec(facts={}),
         gleif=None,
-        suites=("financials",),
+        suites=("filings",),
         hour_ts=HOUR,
+        now=HOUR,
         min_employee_year=2025,
+        max_companies=3,
     )
-    assert rows == []
+    assert rows == [] and stats.facts_missing >= 1
+
+
+class FakeEdgar:
+    def __init__(self, filings, text):
+        self._filings = filings
+        self._text = text
+
+    async def filings(self, cik, *, forms, limit=40):
+        return self._filings
+
+    async def document_text(self, filing):
+        return self._text
+
+
+class FakeLLM:
+    def __init__(self, reply):
+        self._reply = reply
+
+    async def complete(self, prompt, **kwargs):
+        return self._reply, None
+
+
+async def test_filingdoc_rows_exact_id_gold():
+    edgar = FakeEdgar(
+        [
+            {
+                "adsh": "0000004977-25-000067",
+                "form": "8-K",
+                "filed": "2026-02-01",
+                "primary_doc": "x.htm",
+            }
+        ],
+        "x" * 4000 + " video presentation of results",
+    )
+    llm = FakeLLM('aflac "video presentation" 8-K')
+    rows, stats = await run_generate(
+        [NVDA_SEED],
+        wikidata=None,
+        sec=None,
+        gleif=None,
+        edgar=edgar,
+        llm=llm,
+        suites=("filingdoc",),
+        hour_ts=HOUR,
+        now=HOUR,
+        min_employee_year=2025,
+        max_companies=3,
+        filingdoc_target=1,
+    )
+    assert stats.filingdoc_rows == 1
+    r = rows[0]
+    assert r["query_origin"]["bucket"] == "filingdoc"
+    assert r["gold"]["field"] == "filing"
+    assert r["gold"]["field_type"] == "exact_id"
+    assert r["gold"]["value"] == "000000497725000067"
+    assert r["gold"]["aliases"] == ["0000004977-25-000067"]
 
 
 async def test_company_exception_counted_not_raised():

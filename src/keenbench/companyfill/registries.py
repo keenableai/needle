@@ -21,25 +21,6 @@ COMPANY_CLASSES = {
     "Q161726",
 }
 
-FINANCIAL_CONCEPTS = {
-    "revenue": [
-        "RevenueFromContractWithCustomerExcludingAssessedTax",
-        "Revenues",
-        "RevenueFromContractWithCustomerIncludingAssessedTax",
-        "SalesRevenueNet",
-    ],
-    "net_income": [
-        "NetIncomeLoss",
-        "ProfitLoss",
-        "NetIncomeLossAvailableToCommonStockholdersBasic",
-    ],
-    "total_assets": ["Assets"],
-    "stockholders_equity": [
-        "StockholdersEquity",
-        "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
-    ],
-}
-
 TIME_YEAR_RE = re.compile(r"([+-]?\d{1,4})-")
 
 
@@ -136,20 +117,6 @@ def lei(claims: dict) -> str | None:
         if value:
             return value
     return None
-
-
-def latest_annual(
-    facts: dict, concepts: list[str], unit: str = "USD"
-) -> tuple[int | None, str | None, int | None]:
-    best: tuple[int, str, int | None] | None = None
-    for concept in concepts:
-        for fact in ((facts.get(concept, {}) or {}).get("units", {}) or {}).get(unit, []):
-            if fact.get("form") == "10-K" and fact.get("fp") == "FY" and fact.get("end"):
-                if fact.get("val") is None:
-                    continue
-                if best is None or fact["end"] > best[1]:
-                    best = (fact["val"], fact["end"], fact.get("fy"))
-    return best if best else (None, None, None)
 
 
 class RegistryClient(HttpSearchClient):
