@@ -1,8 +1,10 @@
+import asyncio
 import json
 import os
 import time
 from contextlib import AsyncExitStack
 from dataclasses import dataclass, field
+from datetime import timedelta
 from typing import Any
 
 import httpx
@@ -154,6 +156,9 @@ def _tool_result_text(result: Any) -> str:
     return joined
 
 
+TOOL_CALL_TIMEOUT_S = 180.0
+
+
 async def run_task(
     spec: BackendSpec,
     llm: AgentLLM,
@@ -161,6 +166,7 @@ async def run_task(
     prompt: str,
     budget_usd: float,
     max_turns: int = 20,
+    deadline_s: float = 900.0,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     out: dict[str, Any] = {
@@ -173,6 +179,32 @@ async def run_task(
         "budget_exhausted": False,
         "error": None,
     }
+    try:
+        await asyncio.wait_for(
+            _run_task_inner(
+                spec, llm, out, prompt=prompt, budget_usd=budget_usd, max_turns=max_turns
+            ),
+            timeout=deadline_s,
+        )
+    except TimeoutError:
+        out["error"] = {
+            "error_type": "cell_timeout",
+            "error_message": f"exceeded {deadline_s:.0f}s wall clock",
+        }
+    finally:
+        out["elapsed_s"] = round(time.perf_counter() - started, 1)
+    return out
+
+
+async def _run_task_inner(
+    spec: BackendSpec,
+    llm: AgentLLM,
+    out: dict[str, Any],
+    *,
+    prompt: str,
+    budget_usd: float,
+    max_turns: int,
+) -> None:
     in_price, out_price = model_price(llm.model)
 
     def charge_llm(usage: dict[str, int]) -> None:
@@ -210,12 +242,12 @@ async def run_task(
                 charge_llm(usage)
                 if err is not None or message is None:
                     out["error"] = err or {"error_type": "no_message", "error_message": ""}
-                    return out
+                    return
                 messages.append(message)
                 tool_calls = message.get("tool_calls") or []
                 if not tool_calls:
                     out["answer_text"] = message.get("content") or ""
-                    return out
+                    return
                 for call in tool_calls:
                     fn = call.get("function") or {}
                     name = fn.get("name") or ""
@@ -228,7 +260,11 @@ async def run_task(
                     out["spent_usd"] += price
                     out["tool_calls"][name] = out["tool_calls"].get(name, 0) + 1
                     try:
-                        result = await session.call_tool(name, args)
+                        result = await session.call_tool(
+                            name,
+                            args,
+                            read_timeout_seconds=timedelta(seconds=TOOL_CALL_TIMEOUT_S),
+                        )
                         text = _tool_result_text(result)
                     except Exception as exc:
                         text = f"Tool error: {str(exc)[:MAX_ERROR_CHARS]}"
@@ -251,13 +287,9 @@ async def run_task(
                     charge_llm(usage)
                     if err is not None or message is None:
                         out["error"] = err or {"error_type": "no_message", "error_message": ""}
-                        return out
+                        return
                     out["answer_text"] = message.get("content") or ""
-                    return out
+                    return
             out["error"] = {"error_type": "max_turns", "error_message": f"{max_turns} turns"}
-            return out
     except Exception as exc:
         out["error"] = {"error_type": "backend_crash", "error_message": str(exc)[:MAX_ERROR_CHARS]}
-        return out
-    finally:
-        out["elapsed_s"] = round(time.perf_counter() - started, 1)
