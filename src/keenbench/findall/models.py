@@ -22,6 +22,11 @@ DEFAULT_MODEL_PRICE = (3.0, 15.0)
 TOOL_PRICES_USD = {
     "search_web_pages": 0.005,
     "fetch_page_content": 0.002,
+    "web_search_exa": 0.005,
+    "web_fetch_exa": 0.002,
+    "crawling_exa": 0.002,
+    "web_search": 0.004,
+    "web_fetch": 0.002,
     "map_result_set_with_llm": 0.02,
     "map_result_set_with_regex": 0.002,
     "map_result_set_with_codegen": 0.01,

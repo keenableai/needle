@@ -33,6 +33,7 @@ class BackendSpec:
     command: tuple[str, ...] = ()
     url: str = ""
     env: dict[str, str] = field(default_factory=dict)
+    headers: dict[str, str] = field(default_factory=dict)
 
 
 def resolve_backend(name: str) -> BackendSpec:
@@ -52,7 +53,21 @@ def resolve_backend(name: str) -> BackendSpec:
                 )
             url = f"https://webql.keenable.ai/mcp?token={token}"
         return BackendSpec(name=name, kind="http", url=url)
-    raise ValueError(f"unknown backend {name!r} (known: keenable, webql)")
+    if name == "exa":
+        url = os.environ.get("KEENBENCH_EXA_MCP_URL")
+        if not url:
+            key = os.environ.get("EXA_API_KEY")
+            if not key:
+                raise ValueError("backend 'exa' needs KEENBENCH_EXA_MCP_URL or EXA_API_KEY")
+            url = f"https://mcp.exa.ai/mcp?exaApiKey={key}"
+        return BackendSpec(name=name, kind="http", url=url)
+    if name == "parallel":
+        url = os.environ.get("KEENBENCH_PARALLEL_MCP_URL") or "https://search.parallel.ai/mcp"
+        headers = {}
+        if os.environ.get("PARALLEL_API_KEY"):
+            headers["x-api-key"] = os.environ["PARALLEL_API_KEY"]
+        return BackendSpec(name=name, kind="http", url=url, headers=headers)
+    raise ValueError(f"unknown backend {name!r} (known: keenable, webql, exa, parallel)")
 
 
 class AgentLLM:
@@ -177,7 +192,9 @@ async def run_task(
                 )
                 read, write = await stack.enter_async_context(stdio_client(params))
             else:
-                read, write, _ = await stack.enter_async_context(streamablehttp_client(spec.url))
+                read, write, _ = await stack.enter_async_context(
+                    streamablehttp_client(spec.url, headers=spec.headers or None)
+                )
             session = await stack.enter_async_context(ClientSession(read, write))
             await session.initialize()
             listed = await session.list_tools()

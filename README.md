@@ -366,6 +366,12 @@ Backends are MCP servers:
   streamable HTTP, token from `KEENABLE_API_KEY`;
   `KEENBENCH_WEBQL_MCP_URL` overrides): search plus
   map/reduce/view over result sets — the distribution tools.
+- **`exa`** — Exa's hosted MCP (`https://mcp.exa.ai/mcp`, key from
+  `EXA_API_KEY`; `KEENBENCH_EXA_MCP_URL` overrides): `web_search_exa` +
+  `web_fetch_exa`.
+- **`parallel`** — Parallel's hosted Search MCP
+  (`https://search.parallel.ai/mcp`, `x-api-key` from `PARALLEL_API_KEY`;
+  `KEENBENCH_PARALLEL_MCP_URL` overrides): `web_search` + `web_fetch`.
 
 The budget is charged in dollars: LLM tokens at list prices plus a per-call
 price table for each tool (`models.py`; `map_result_set_with_llm` costs 10×

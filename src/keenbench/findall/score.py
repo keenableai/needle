@@ -173,7 +173,8 @@ async def run_findall(
             pq["score"] = max(0.0, 1.0 - rel_err) if rel_err is not None else 0.0
         pq["detail"] = detail
         if answer is None and run["error"] is None:
-            pq["error"] = {"error_type": "unparseable_answer", "error_message": ""}
+            raw = (run.get("answer_text") or "")[:500]
+            pq["error"] = {"error_type": "unparseable_answer", "error_message": raw}
         return pq
 
     pairs = [(spec, task) for spec in backends for task in tasks]
