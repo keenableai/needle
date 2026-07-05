@@ -1,5 +1,6 @@
 import json
 import re
+import sys
 from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
@@ -161,7 +162,11 @@ async def run_findall(
     max_turns: int = 20,
     concurrency: int = 2,
 ) -> dict[str, Any]:
+    done = 0
+    total = len(tasks) * len(backends) * len(budgets_usd)
+
     async def one(pair: tuple[BackendSpec, float, GoldTask]) -> dict:
+        nonlocal done
         spec, budget_usd, task = pair
         run = await run_task(
             spec, llm, prompt=task.text, budget_usd=budget_usd, max_turns=max_turns
@@ -194,6 +199,13 @@ async def run_findall(
         if answer is None and run["error"] is None:
             raw = (run.get("answer_text") or "")[:500]
             pq["error"] = {"error_type": "unparseable_answer", "error_message": raw}
+        done += 1
+        status = (pq["error"] or {}).get("error_type") or f"score={pq['score']:.2f}"
+        print(
+            f"findall: [{done}/{total}] {spec.name} @${budget_usd:.2f} "
+            f"{task.suite}/{task.bucket} {status} spent=${pq['spent_usd']:.2f}",
+            file=sys.stderr,
+        )
         return pq
 
     pairs = [(spec, budget, task) for spec in backends for budget in budgets_usd for task in tasks]
