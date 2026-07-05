@@ -17,6 +17,7 @@ keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on t
 | [`freshstream`](#freshstream) | Fresh, time-sensitive queries mined from live RSS and Google Trends | LLM relevance judge → RBP@5 |
 | [`companyfill`](#companyfill) | Company fact-lookups with registry-grounded gold answers | Answer-recall@K and MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | Known-item paper retrieval — find a specific paper by its title vs. by a full-text-only detail | Recall@K and MRR@K by paper-ID match, deterministic (no judge) |
+| [`findall`](#findall) | Distribution questions ("find all X", "what fraction of X") answered by an agent under a dollar budget, comparing MCP search backends | Set recall/precision and stat accuracy vs registry gold, deterministic |
 
 Everything engine- or judge-related is shared infrastructure in
 [`keenbench.shared`](#shared-infrastructure) — search clients, LLM client,
@@ -314,6 +315,73 @@ can still slip through and a distinctive short all-lowercase one can be dropped.
 And the keyless `keenable` endpoint returns degraded results under the burst
 load of a full run, so a batch number undercounts it — score it with a
 `KEENABLE_API_KEY`, or pin the raw results, before comparing.
+
+## findall
+
+Measures the thesis of
+[The Minimum Experiment](https://keenable.ai/blog/the-minimum-experiment): a
+model hands you the *mode*, a search API hands you *documents*, and the wins
+live in the *distribution*. Every task asks for a distribution — an exhaustive
+enumeration ("find all X") or a population statistic ("what fraction of X") —
+whose ground truth is computed from a structured public registry, so an agent
+that reasons from priors or from a few top documents scores measurably worse
+than one that actually holds the population.
+
+Unlike the other benches this one is **agentic**: `run` drives an LLM agent
+(default `anthropic/claude-sonnet-4.5` via OpenRouter, `--agent-model` /
+`KEENBENCH_AGENT_MODEL` to override) with the tools of one MCP search backend
+at a time, under a hard **dollar budget** per task, and compares backends on
+what they let the same agent find per dollar.
+
+### Generate
+
+```bash
+keenbench findall generate --out findall.jsonl
+```
+
+Two suites, gold computed at generate time from the registry that scores the
+task:
+
+- **`hn`** — Show HN launches via the keyless Algolia API: one enumerate task
+  (all launches over a point threshold auto-picked so the gold set lands at
+  8–40 entries) and two stat tasks (population count, fraction of titles
+  containing a digit).
+- **`edgar`** — SEC full-text search: enumerate tasks over curated 8-K phrases
+  ("material cybersecurity incident", "reverse stock split", …) that yield
+  8–40 distinct filers, plus an S-1 filer-count stat task.
+
+### Run (set recall / stat accuracy per dollar)
+
+```bash
+keenbench findall run --queries findall.jsonl --backends keenable,webql \
+  --budget-usd 0.25 --out findall.json
+```
+
+Backends are MCP servers:
+
+- **`keenable`** — the classic search MCP (`npx -y @keenable/mcp-server`,
+  stdio; `KEENBENCH_KEENABLE_MCP_CMD` overrides the command):
+  `search_web_pages` + `fetch_page_content`.
+- **`webql`** — the hosted WebQL MCP (`https://webql.keenable.ai/mcp`,
+  streamable HTTP, token from `KEENABLE_API_KEY`;
+  `KEENBENCH_WEBQL_MCP_URL` overrides): search plus
+  map/reduce/view over result sets — the distribution tools.
+
+The budget is charged in dollars: LLM tokens at list prices plus a per-call
+price table for each tool (`models.py`; `map_result_set_with_llm` costs 10×
+a plain search, so WebQL's heavier tools aren't free). The agent sees its
+running spend after every tool result and is forced to answer once the budget
+is crossed (overshoot is bounded by one turn and reported in `spent_usd`).
+
+Scoring is deterministic: enumerate answers are matched to gold entities by
+normalized name (legal suffixes and "Show HN:" stripped) or URL domain →
+recall/precision/F1; stat answers score within a per-task relative tolerance.
+The report gives per-backend `mean_score`, `set_recall`/`set_precision`,
+`stat_within_tol`, `mean_spent_usd`, `mean_tool_calls`, and `by_suite` /
+`by_bucket` breakdowns. Caveats: agent runs are nondeterministic and paid —
+run with small task counts and compare means over repeats; entity matching is
+lexical, so an agent naming a company by an unusual alias can be undercounted
+(applied symmetrically across backends).
 
 ## Shared infrastructure
 

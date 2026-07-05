@@ -1,0 +1,56 @@
+- generic [ref=e1]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e6]:
+        - generic [ref=e7]: Loading
+        - progressbar [ref=e8]
+      - main [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e19]:
+            - img [ref=e21]
+            - generic [ref=e26]: Sign in with Google
+          - generic [ref=e27]:
+            - heading "Sign in" [level=1] [ref=e28]
+            - generic [ref=e30]:
+              - text: to continue to
+              - button "Google Cloud" [ref=e31] [cursor=pointer]
+        - generic [ref=e34]:
+          - generic [ref=e39]:
+            - generic [ref=e44]:
+              - textbox "Email or phone" [active] [ref=e45]
+              - generic: Email or phone
+            - button "Forgot email?" [ref=e49] [cursor=pointer]
+          - generic [ref=e52]:
+            - text: Before using this app, you can review Google Cloud’s
+            - link "Privacy Policy" [ref=e53] [cursor=pointer]:
+              - /url: https://cloud.google.com/terms/cloud-privacy-notice
+            - text: and
+            - link "Terms of Service" [ref=e54] [cursor=pointer]:
+              - /url: https://cloud.google.com/terms
+            - text: .
+        - generic [ref=e56]:
+          - button "Next" [ref=e60]:
+            - generic [ref=e63]: Next
+          - button "Create account" [ref=e68]:
+            - generic [ref=e71]: Create account
+    - contentinfo [ref=e75]:
+      - combobox "Change language English (United States)" [ref=e79] [cursor=pointer]:
+        - generic:
+          - generic: English (United States)
+        - generic:
+          - img
+      - list [ref=e81]:
+        - listitem [ref=e82]:
+          - link "Open Google Account Help Center (external, opens in a new window)" [ref=e83] [cursor=pointer]:
+            - /url: https://support.google.com/accounts?hl=en-US&p=account_iph
+            - text: Help
+        - listitem [ref=e84]:
+          - link "Privacy Policy (external, opens in a new window)" [ref=e85] [cursor=pointer]:
+            - /url: https://accounts.google.com/TOS?loc=US&hl=en-US&privacy=true
+            - text: Privacy
+        - listitem [ref=e86]:
+          - link "Google Terms of Service (external, opens in a new window)" [ref=e87] [cursor=pointer]:
+            - /url: https://accounts.google.com/TOS?loc=US&hl=en-US
+            - text: Terms
+  - iframe [ref=e88]:
+    
