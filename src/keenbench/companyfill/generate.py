@@ -408,37 +408,34 @@ async def run_generate(
         batches = await bounded_gather(cf_seed, company_rows, concurrency=COMPANY_CONCURRENCY)
         rows.extend(r for batch in batches for r in batch)
 
-    wants_filings = "filings" in suites and sec is not None
-    wants_filingdoc = "filingdoc" in suites and edgar is not None and llm is not None
-    if wants_filings or wants_filingdoc:
-        fin_seed = tiered_companies(all_rows, max(1, max_companies // 3), seed)
-        if "filings" in suites and sec is not None:
-            rows.extend(
-                await _filings_rows(
-                    fin_seed,
-                    sec,
-                    fields=fields,
-                    per_company=per_company,
-                    quarters_back=quarters_back,
-                    seed=seed,
-                    hour_ts=hour_ts,
-                    now=now,
-                    stats=stats,
-                )
+    fin_seed = tiered_companies(all_rows, max(1, max_companies // 3), seed)
+    if "filings" in suites and sec is not None:
+        rows.extend(
+            await _filings_rows(
+                fin_seed,
+                sec,
+                fields=fields,
+                per_company=per_company,
+                quarters_back=quarters_back,
+                seed=seed,
+                hour_ts=hour_ts,
+                now=now,
+                stats=stats,
             )
-        if "filingdoc" in suites and edgar is not None and llm is not None:
-            rows.extend(
-                await _filingdoc_rows(
-                    fin_seed,
-                    edgar,
-                    llm,
-                    target=filingdoc_target,
-                    seed=seed,
-                    hour_ts=hour_ts,
-                    doc_concurrency=doc_concurrency,
-                    stats=stats,
-                )
+        )
+    if "filingdoc" in suites and edgar is not None and llm is not None:
+        rows.extend(
+            await _filingdoc_rows(
+                fin_seed,
+                edgar,
+                llm,
+                target=filingdoc_target,
+                seed=seed,
+                hour_ts=hour_ts,
+                doc_concurrency=doc_concurrency,
+                stats=stats,
             )
+        )
 
     seen_ids: set[str] = set()
     unique = []
