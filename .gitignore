@@ -213,3 +213,5 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+.playwright-mcp/
