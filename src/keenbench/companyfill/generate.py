@@ -412,7 +412,7 @@ async def run_generate(
     wants_filingdoc = "filingdoc" in suites and edgar is not None and llm is not None
     if wants_filings or wants_filingdoc:
         fin_seed = tiered_companies(all_rows, max(1, max_companies // 3), seed)
-        if wants_filings:
+        if "filings" in suites and sec is not None:
             rows.extend(
                 await _filings_rows(
                     fin_seed,
@@ -426,7 +426,7 @@ async def run_generate(
                     stats=stats,
                 )
             )
-        if wants_filingdoc:
+        if "filingdoc" in suites and edgar is not None and llm is not None:
             rows.extend(
                 await _filingdoc_rows(
                     fin_seed,
