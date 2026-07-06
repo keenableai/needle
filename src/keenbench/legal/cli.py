@@ -11,6 +11,7 @@ from keenbench.shared.cli import (
     build_clients_or_exit,
     load_gold_rows,
     parse_csv,
+    resolve_seed,
     sample_or_exit,
 )
 from keenbench.shared.io import write_json, write_jsonl
@@ -53,7 +54,7 @@ class Legal:
         months_back: int = 18,
         titles: str | tuple[str, ...] = DEFAULT_TITLES,
         per_title: int = 6,
-        seed: int = 0,
+        seed: int | None = None,
         llm_model: str | None = None,
         code_concurrency: int = 8,
     ) -> None:
@@ -71,6 +72,7 @@ class Legal:
 
         now = datetime.now(UTC)
         hour_ts = now.replace(minute=0, second=0, microsecond=0)
+        seed = resolve_seed(seed, hour_ts)
 
         courtlistener = CourtListenerClient() if "caselaw" in suite_names else None
         ecfr = EcfrClient() if "code" in suite_names else None
@@ -124,7 +126,7 @@ class Legal:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
     ) -> None:
         rows = load_gold_rows(queries, bench="legal", gold_ok=_gold_ok)
         if not rows:

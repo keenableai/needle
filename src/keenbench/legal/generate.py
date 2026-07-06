@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -51,6 +52,7 @@ async def _caselaw_rows(
     courts: tuple[str, ...],
     per_court: int,
     months_back: int,
+    seed: int,
     hour_ts: datetime,
     now: datetime,
     stats: GenStats,
@@ -66,6 +68,8 @@ async def _caselaw_rows(
             lambda w: courtlistener.opinions(court, filed_after=w[0], filed_before=w[1]),
             concurrency=2,
         )
+        for wi, cases in enumerate(lists):
+            random.Random(seed + wi).shuffle(cases)
         return _interleave(lists)
 
     court_cases = await bounded_gather(list(courts), fetch_court, concurrency=2)
@@ -203,6 +207,7 @@ async def run_generate(
                 courts=courts,
                 per_court=per_court,
                 months_back=months_back,
+                seed=seed,
                 hour_ts=hour_ts,
                 now=now,
                 stats=stats,

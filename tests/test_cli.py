@@ -1,4 +1,5 @@
 import json
+from datetime import UTC, datetime
 
 import pytest
 
@@ -29,6 +30,20 @@ def test_run_rejects_bad_feeds_file(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     with pytest.raises(SystemExit):
         freshstream_cli.Freshstream().generate(feeds=str(tmp_path / "does-not-exist.toml"))
+
+
+def test_resolve_seed_explicit_passthrough_and_time_varying():
+    ts1 = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
+    ts2 = datetime(2026, 7, 2, 14, 0, tzinfo=UTC)
+    assert shared_cli.resolve_seed(42, ts1) == 42
+    assert shared_cli.resolve_seed(0, ts1) == 0
+    assert shared_cli.resolve_seed(None, ts1) == shared_cli.resolve_seed(None, ts1)
+    assert shared_cli.resolve_seed(None, ts1) != shared_cli.resolve_seed(None, ts2)
+
+
+def test_sample_or_exit_accepts_none_seed():
+    rows = [{"query_text": str(i), "topical_domain": "t"} for i in range(30)]
+    assert len(shared_cli.sample_or_exit(rows, 5, None, strategy="stratified")) == 5
 
 
 def test_openrouter_default_temperature_is_deterministic():

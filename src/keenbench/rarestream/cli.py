@@ -27,7 +27,7 @@ class Rarestream:
         filtered_path: str = DEFAULT_FILTERED_PATH,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
     ) -> None:
         rows = _load_rows(queries, dataset, filtered_path)
         rows = sample_or_exit(rows, limit, seed, strategy=sample, key=STRATIFY_KEY)
@@ -45,7 +45,7 @@ class Rarestream:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
         judge_model: str | None = None,
         judge_concurrency: int = 8,
     ) -> None:

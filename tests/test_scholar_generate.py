@@ -69,7 +69,7 @@ class FakeLLM:
         return "NO_DISTINCT_QUERY", None
 
 
-async def _run(fake_arxiv, llm, *, age_buckets=("7d",), per_cell=2):
+async def _run(fake_arxiv, llm, *, age_buckets=("7d",), per_cell=2, seed=0):
     return await run_generate(
         arxiv=fake_arxiv,
         europepmc=None,
@@ -78,7 +78,7 @@ async def _run(fake_arxiv, llm, *, age_buckets=("7d",), per_cell=2):
         now=NOW,
         age_buckets=age_buckets,
         per_cell=per_cell,
-        seed=0,
+        seed=seed,
     )
 
 
@@ -140,6 +140,19 @@ async def test_paper_without_matchable_ids_dropped():
     rows, stats = await _run(arxiv, llm, per_cell=5)
     assert stats.papers == 1
     assert all(r["gold"]["ids"] for r in rows)
+
+
+async def test_window_selection_varies_with_seed():
+    papers = [_paper(i, "computer science", datetime(2026, 7, 1, tzinfo=UTC)) for i in range(40)]
+    bodies = {p.arxiv_id: f"body {p.arxiv_id}" for p in papers}
+    llm = FakeLLM({p.arxiv_id: f"distinct anchor beta {p.arxiv_id}" for p in papers})
+
+    async def keys(seed):
+        arxiv = FakeArxiv({"computer science": papers}, bodies)
+        rows, _ = await _run(arxiv, llm, per_cell=2, seed=seed)
+        return {r["gold"]["paper_key"] for r in rows}
+
+    assert await keys(1) != await keys(2)
 
 
 async def test_short_cell_reported():

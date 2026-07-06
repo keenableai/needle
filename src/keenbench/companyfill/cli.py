@@ -16,6 +16,7 @@ from keenbench.shared.cli import (
     build_clients_or_exit,
     load_gold_rows,
     parse_csv,
+    resolve_seed,
     sample_or_exit,
 )
 from keenbench.shared.io import write_json, write_jsonl
@@ -65,7 +66,7 @@ class Companyfill:
         per_company: int = 2,
         quarters_back: int = 6,
         filingdoc_target: int = 40,
-        seed: int = 0,
+        seed: int | None = None,
         llm_model: str | None = None,
         doc_concurrency: int = 8,
         registry_concurrency: int = 4,
@@ -88,6 +89,7 @@ class Companyfill:
             min_employee_year = datetime.now(UTC).year - 1
         now = datetime.now(UTC)
         hour_ts = now.replace(minute=0, second=0, microsecond=0)
+        seed = resolve_seed(seed, hour_ts)
 
         concurrency = max(1, registry_concurrency)
         sec = SecClient(max_concurrency=concurrency)
@@ -172,7 +174,7 @@ class Companyfill:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
         judge: bool = False,
         judge_model: str | None = None,
         judge_concurrency: int = 8,
