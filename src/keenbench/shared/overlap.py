@@ -58,7 +58,7 @@ def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
         for b in names[i + 1 :]:
             jaccard_sum = 0.0
             shared3 = 0
-            lowshared2 = 0
+            suspect = 0
             low_shared_urls = 0
             n = 0
             for qi, (sa, sb) in enumerate(zip(url_sets[a], url_sets[b], strict=True)):
@@ -68,7 +68,7 @@ def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
                 shared3 += len(sa & sb) >= 3
                 low = (low_sets[a][qi] or set()) & (low_sets[b][qi] or set())
                 low_shared_urls += len(low)
-                lowshared2 += len(low) >= 2
+                suspect += len(low) >= 1 or len(sa & sb) >= 3
                 n += 1
             rows.append(
                 {
@@ -77,7 +77,7 @@ def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
                     "b": b,
                     "jaccard_sum": round(jaccard_sum, 4),
                     "num_shared3": shared3,
-                    "num_lowshared2": lowshared2,
+                    "num_suspect": suspect,
                     "low_shared_urls": low_shared_urls,
                     "num_queries": n,
                 }

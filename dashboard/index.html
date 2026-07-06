@@ -285,7 +285,7 @@
     </div>
   </div>
   <div class="card" id="card-lowshared">
-    <h2>Queries sharing &gt;1 low-relevance URL (last 24h)</h2>
+    <h2>Suspicious sharing (last 24h)</h2>
     <div class="sub" id="lowshared-sub"></div>
     <div class="overlap-matrix" id="lowshared-table"></div>
   </div>
@@ -790,7 +790,7 @@ const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
 const SHARED3_STEPS = [0.05, 0.15, 0.3, 0.5];
-const LOWSHARED_STEPS = [0.02, 0.05, 0.1, 0.2];
+const LOWSHARED_STEPS = [0.05, 0.12, 0.25, 0.5];
 const overlapStep = (v, steps) => {
   const i = steps.findIndex((t) => v < t);
   return i === -1 ? 4 : i;
@@ -848,8 +848,8 @@ function renderOverlap(rows) {
       agg.s3sum += r.num_shared3;
       agg.n3 += r.num_queries;
     }
-    if (r.num_lowshared2 != null) {
-      agg.low2 += r.num_lowshared2;
+    if (r.num_suspect != null) {
+      agg.low2 += r.num_suspect;
       agg.lowUrls += r.low_shared_urls || 0;
       agg.nLow += r.num_queries;
     }
@@ -889,7 +889,7 @@ function renderOverlap(rows) {
     };
   });
   document.getElementById("lowshared-sub").textContent =
-    "share of judged queries where both engines return 2+ of the same URLs rated below Highly Meets — sharing good URLs is expected, sharing the same junk suggests a common upstream index";
+    "share of queries where the pair shares a below-HM URL or 3+ URLs of any rating — sharing good URLs is expected, sharing junk or near-identical lists suggests a common upstream index";
   overlapMatrix(lowHolder, engines, (a, b) => {
     const agg = pairs.get(pairKey(a, b));
     if (!agg || !agg.nLow) return null;
@@ -897,7 +897,7 @@ function renderOverlap(rows) {
     return {
       text: `${Math.round(v * 100)}%`,
       step: overlapStep(v, LOWSHARED_STEPS),
-      title: `${a} ∩ ${b}: ${agg.low2} of ${agg.nLow} judged queries share 2+ low-relevance URLs (${agg.lowUrls} junk URLs total)`,
+      title: `${a} ∩ ${b}: ${agg.low2} of ${agg.nLow} queries share a low-relevance URL or 3+ URLs (${agg.lowUrls} junk URLs total)`,
     };
   });
 }
