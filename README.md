@@ -439,10 +439,10 @@ is three steps:
 
 ### Tool-calling agent
 
-`keenbench.shared.agent` is a self-contained port of keenable-eval's
-`CustomAgent` for agentic benches: an `Agent` loop (tool-calling turns,
-optional planning step, context compaction, best-effort summary on max
-steps) over the shared `OpenRouterClient`'s `chat()` (OpenAI-style tools +
+`keenbench.shared.agent` is a self-contained tool-calling agent for agentic
+benches: an `Agent` loop (tool-calling turns, optional planning step,
+context compaction, best-effort summary on max steps) over the shared
+`OpenRouterClient`'s `chat()` (OpenAI-style tools +
 token usage). `mcp_tools_from_session` bridges an MCP session's tools into
 the agent's `Tool` registry. An optional `RunBudget` enforces a hard dollar
 budget per run — LLM tokens at caller-supplied prices plus a per-tool price
@@ -460,9 +460,6 @@ budget = RunBudget(limit_usd=0.25, in_price_per_mtok=3.0, out_price_per_mtok=15.
                    tool_cost=lambda name: 0.005)
 result = await agent.run(task_prompt, budget=budget)
 ```
-
-The Redis cache, metrics, rate limiter, and Azure/Gemini backends of the
-original are deliberately not ported — keenbench has none of that infra.
 
 ### Pipelines as a library
 
