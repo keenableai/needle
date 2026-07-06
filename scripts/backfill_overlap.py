@@ -7,7 +7,7 @@ import fire
 import httpx
 
 from keenbench.shared.io import write_jsonl
-from keenbench.shared.overlap import TS_FMT, WINDOW_HOURS, overlap_rows, uniqueness_rows
+from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
 DEFAULT_DATASET = "keenable-ai/keenbench-results"
 ARTIFACTS = ("rbp.json", "recall.json", "scholar.json")
@@ -19,7 +19,7 @@ def _load(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
-def backfill(site: str, hours: int = WINDOW_HOURS, dataset: str | None = None) -> None:
+def backfill(site: str, hours: int | None = None, dataset: str | None = None) -> None:
     data = Path(site) / "data"
     index_path = data / "runs.json"
     if not index_path.exists():
@@ -36,7 +36,11 @@ def backfill(site: str, hours: int = WINDOW_HOURS, dataset: str | None = None) -
     uniqueness_seen = {r["ts"] for r in uniqueness}
     # pre-num_shared3 rows are present but stale; reprocess to add the field
     overlap_stale = {r["ts"] for r in overlap if "num_shared3" not in r}
-    cutoff = (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT)
+    cutoff = (
+        (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT)
+        if hours is not None
+        else ""
+    )
 
     new_overlap: list[dict] = []
     new_uniqueness: list[dict] = []
