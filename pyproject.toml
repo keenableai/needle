@@ -22,6 +22,7 @@ dependencies = [
     "huggingface-hub>=1.22.0",
     "pyarrow>=24.0.0",
     "mcp>=1.15",
+    "tenacity>=9.0",
 ]
 
 [project.scripts]

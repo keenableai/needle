@@ -405,6 +405,16 @@ Unlike the other benches this one is **agentic**: `run` drives an LLM agent
 at a time, under a hard **dollar budget** per task, and compares backends on
 what they let the same agent find per dollar.
 
+The agent is a self-contained port of keenable-eval's `CustomAgent` +
+`LLMClient` under `findall/agent/`: a tool-calling loop with planning and
+context compaction over a multi-backend chat client (`OpenRouterClient` +
+Azure OpenAI/Anthropic; `KEENBENCH_AGENT_BACKEND` selects, default
+`openrouter`). The Redis cache, metrics, distributed rate limiter, and native
+Gemini path from the source are dropped — keenbench has none of that infra.
+The dollar budget is layered onto the loop (`RunBudget`): it charges LLM
+tokens + per-tool prices, injects running spend after each tool result, and
+forces a final answer when the budget crosses.
+
 ### Generate
 
 ```bash

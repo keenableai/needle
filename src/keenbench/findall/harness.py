@@ -1,17 +1,15 @@
 import asyncio
-import json
 import os
 import time
 from contextlib import AsyncExitStack
 from dataclasses import dataclass, field
-from datetime import timedelta
 from typing import Any
 
-import httpx
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamablehttp_client
 
+from keenbench.findall.agent import Agent, LLMClient, RunBudget, mcp_tools_from_session
 from keenbench.findall.models import model_price, tool_price
 
 MAX_ERROR_CHARS = 500
@@ -72,96 +70,33 @@ def resolve_backend(name: str) -> BackendSpec:
     raise ValueError(f"unknown backend {name!r} (known: keenable, webql, exa, parallel)")
 
 
-class AgentLLM:
-    def __init__(self, *, api_key: str, model: str, timeout_s: float = 180.0) -> None:
-        self.model = model
-        self._headers = {"Authorization": f"Bearer {api_key}"}
-        self._client = httpx.AsyncClient(timeout=timeout_s)
+def format_exception(exc: BaseException) -> str:
+    if isinstance(exc, BaseExceptionGroup):
+        leaves = "; ".join(format_exception(sub) for sub in exc.exceptions)
+        return f"{exc.message} [{leaves}]"
+    return f"{type(exc).__name__}: {exc}"
 
-    async def chat(
-        self, messages: list[dict], tools: list[dict]
-    ) -> tuple[dict | None, dict[str, int], dict | None]:
-        body: dict[str, Any] = {
-            "model": self.model,
-            "messages": messages,
-            "temperature": 0.0,
-        }
-        if tools:
-            body["tools"] = tools
-        try:
-            resp = await self._client.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers=self._headers,
-                json=body,
-            )
-        except httpx.HTTPError as exc:
-            return (
-                None,
-                {},
-                {"error_type": "transport", "error_message": str(exc)[:MAX_ERROR_CHARS]},
-            )
-        if resp.status_code != 200:
-            return (
-                None,
-                {},
-                {
-                    "error_type": "http_error",
-                    "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
-                },
-            )
-        try:
-            payload = resp.json()
-            message = payload["choices"][0]["message"]
-        except (ValueError, KeyError, IndexError) as exc:
-            return None, {}, {"error_type": "bad_json", "error_message": str(exc)[:MAX_ERROR_CHARS]}
-        usage = payload.get("usage") or {}
-        return (
-            message,
-            {
-                "prompt_tokens": int(usage.get("prompt_tokens") or 0),
-                "completion_tokens": int(usage.get("completion_tokens") or 0),
-            },
-            None,
+
+async def _connect(stack: AsyncExitStack, spec: BackendSpec) -> ClientSession:
+    if spec.kind == "stdio":
+        params = StdioServerParameters(
+            command=spec.command[0],
+            args=list(spec.command[1:]),
+            env={**os.environ, **spec.env},
         )
-
-    async def aclose(self) -> None:
-        await self._client.aclose()
-
-
-def _mcp_tools_to_openai(tools: list[Any]) -> list[dict]:
-    out = []
-    for t in tools:
-        out.append(
-            {
-                "type": "function",
-                "function": {
-                    "name": t.name,
-                    "description": (t.description or "")[:1024],
-                    "parameters": t.inputSchema or {"type": "object", "properties": {}},
-                },
-            }
+        read, write = await stack.enter_async_context(stdio_client(params))
+    else:
+        read, write, _ = await stack.enter_async_context(
+            streamablehttp_client(spec.url, headers=spec.headers or None)
         )
-    return out
-
-
-def _tool_result_text(result: Any) -> str:
-    parts = []
-    for block in getattr(result, "content", None) or []:
-        text = getattr(block, "text", None)
-        if text:
-            parts.append(text)
-    joined = "\n".join(parts) or "(empty result)"
-    if len(joined) > TOOL_RESULT_CHARS:
-        joined = joined[:TOOL_RESULT_CHARS] + "\n...[truncated]"
-    return joined
-
-
-TOOL_CALL_TIMEOUT_S = 180.0
+    session = await stack.enter_async_context(ClientSession(read, write))
+    await session.initialize()
+    return session
 
 
 async def run_task(
     spec: BackendSpec,
-    llm: AgentLLM,
+    llm: LLMClient,
     *,
     prompt: str,
     budget_usd: float,
@@ -169,6 +104,13 @@ async def run_task(
     deadline_s: float = 900.0,
 ) -> dict[str, Any]:
     started = time.perf_counter()
+    in_price, out_price = model_price(llm.model)
+    budget = RunBudget(
+        limit_usd=budget_usd,
+        in_price_per_mtok=in_price,
+        out_price_per_mtok=out_price,
+        tool_cost=tool_price,
+    )
     out: dict[str, Any] = {
         "answer_text": None,
         "spent_usd": 0.0,
@@ -181,9 +123,7 @@ async def run_task(
     }
     try:
         await asyncio.wait_for(
-            _run_task_inner(
-                spec, llm, out, prompt=prompt, budget_usd=budget_usd, max_turns=max_turns
-            ),
+            _run_task_inner(spec, llm, out, budget, prompt=prompt, max_turns=max_turns),
             timeout=deadline_s,
         )
     except TimeoutError:
@@ -191,105 +131,43 @@ async def run_task(
             "error_type": "cell_timeout",
             "error_message": f"exceeded {deadline_s:.0f}s wall clock",
         }
+    except Exception as exc:
+        out["error"] = {"error_type": "backend_crash", "error_message": format_exception(exc)}
     finally:
+        out["spent_usd"] = budget.spent
+        out["llm_usd"] = budget.llm_usd
+        out["tool_usd"] = budget.tool_usd
+        out["tool_calls"] = dict(budget.tool_calls)
+        out["budget_exhausted"] = budget.exhausted
         out["elapsed_s"] = round(time.perf_counter() - started, 1)
     return out
 
 
 async def _run_task_inner(
     spec: BackendSpec,
-    llm: AgentLLM,
+    llm: LLMClient,
     out: dict[str, Any],
+    budget: RunBudget,
     *,
     prompt: str,
-    budget_usd: float,
     max_turns: int,
 ) -> None:
-    in_price, out_price = model_price(llm.model)
-
-    def charge_llm(usage: dict[str, int]) -> None:
-        cost = (
-            usage.get("prompt_tokens", 0) * in_price + usage.get("completion_tokens", 0) * out_price
-        ) / 1_000_000
-        out["llm_usd"] += cost
-        out["spent_usd"] += cost
-
-    try:
-        async with AsyncExitStack() as stack:
-            if spec.kind == "stdio":
-                params = StdioServerParameters(
-                    command=spec.command[0],
-                    args=list(spec.command[1:]),
-                    env={**os.environ, **spec.env},
-                )
-                read, write = await stack.enter_async_context(stdio_client(params))
-            else:
-                read, write, _ = await stack.enter_async_context(
-                    streamablehttp_client(spec.url, headers=spec.headers or None)
-                )
-            session = await stack.enter_async_context(ClientSession(read, write))
-            await session.initialize()
-            listed = await session.list_tools()
-            tools = _mcp_tools_to_openai(listed.tools)
-
-            messages: list[dict] = [
-                {"role": "system", "content": SYSTEM_PROMPT.format(budget=budget_usd)},
-                {"role": "user", "content": prompt},
-            ]
-            while out["turns"] < max_turns:
-                out["turns"] += 1
-                message, usage, err = await llm.chat(messages, tools)
-                charge_llm(usage)
-                if err is not None or message is None:
-                    out["error"] = err or {"error_type": "no_message", "error_message": ""}
-                    return
-                messages.append(message)
-                tool_calls = message.get("tool_calls") or []
-                if not tool_calls:
-                    out["answer_text"] = message.get("content") or ""
-                    return
-                for call in tool_calls:
-                    fn = call.get("function") or {}
-                    name = fn.get("name") or ""
-                    try:
-                        args = json.loads(fn.get("arguments") or "{}")
-                    except json.JSONDecodeError:
-                        args = {}
-                    price = tool_price(name)
-                    out["tool_usd"] += price
-                    out["spent_usd"] += price
-                    out["tool_calls"][name] = out["tool_calls"].get(name, 0) + 1
-                    try:
-                        result = await session.call_tool(
-                            name,
-                            args,
-                            read_timeout_seconds=timedelta(seconds=TOOL_CALL_TIMEOUT_S),
-                        )
-                        text = _tool_result_text(result)
-                    except Exception as exc:
-                        text = f"Tool error: {str(exc)[:MAX_ERROR_CHARS]}"
-                    text += f"\n\n[spend so far: ${out['spent_usd']:.3f} of ${budget_usd:.2f}]"
-                    messages.append(
-                        {"role": "tool", "tool_call_id": call.get("id") or "", "content": text}
-                    )
-                if out["spent_usd"] >= budget_usd:
-                    out["budget_exhausted"] = True
-                    messages.append(
-                        {
-                            "role": "user",
-                            "content": (
-                                "The budget is exhausted. Respond now with ONLY the final "
-                                "JSON answer to the original task."
-                            ),
-                        }
-                    )
-                    message, usage, err = await llm.chat(messages, [])
-                    charge_llm(usage)
-                    if err is not None or message is None:
-                        out["error"] = err or {"error_type": "no_message", "error_message": ""}
-                        return
-                    out["answer_text"] = message.get("content") or ""
-                    return
-            out["error"] = {"error_type": "max_turns", "error_message": f"{max_turns} turns"}
-    except Exception as exc:
-        out["error"] = {"error_type": "backend_crash", "error_message": str(exc)[:MAX_ERROR_CHARS]}
+    async with AsyncExitStack() as stack:
+        session = await _connect(stack, spec)
+        listed = await session.list_tools()
+        tools = mcp_tools_from_session(session, listed.tools)
+        agent = Agent(
+            llm,
+            tools,
+            SYSTEM_PROMPT.format(budget=budget.limit_usd),
+            max_steps=max_turns,
+            max_tool_content_chars=TOOL_RESULT_CHARS,
+        )
+        result = await agent.run(prompt, budget=budget)
+    out["answer_text"] = result.content
+    out["turns"] = result.steps
+    if not result.success:
+        out["error"] = {
+            "error_type": "agent_error",
+            "error_message": (result.error or "")[:MAX_ERROR_CHARS],
+        }

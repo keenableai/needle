@@ -5,7 +5,8 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from keenbench.findall.harness import AgentLLM, resolve_backend
+from keenbench.findall.agent import LLMClientError, create_llm_client
+from keenbench.findall.harness import resolve_backend
 from keenbench.findall.models import (
     AGENT_MODEL_ENV,
     DEFAULT_AGENT_MODEL,
@@ -157,11 +158,14 @@ class Findall:
         if not budgets or any(b <= 0 for b in budgets):
             raise SystemExit(f"error: --budget-usd must be positive, got {budget_usd!r}")
 
-        key = os.environ.get("OPENROUTER_API_KEY")
-        if not key:
-            raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for the agent)")
         model = agent_model or os.environ.get(AGENT_MODEL_ENV) or DEFAULT_AGENT_MODEL
-        llm = AgentLLM(api_key=key, model=model)
+        backend = (os.environ.get("KEENBENCH_AGENT_BACKEND") or "openrouter").lower()
+        if backend == "openrouter" and not os.environ.get("OPENROUTER_API_KEY"):
+            raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for the agent)")
+        try:
+            llm = create_llm_client(model=model, backend=backend)
+        except (LLMClientError, ValueError) as exc:
+            raise SystemExit(f"error: {exc}") from exc
 
         async def _go() -> dict:
             try:
