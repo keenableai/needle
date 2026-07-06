@@ -437,6 +437,32 @@ is three steps:
    `--engines` / the workflow's `ENGINES` env. The dashboard picks the new
    engine up from the data and assigns it a stable color slot automatically.
 
+### Tool-calling agent
+
+`keenbench.shared.agent` is a self-contained port of keenable-eval's
+`CustomAgent` for agentic benches: an `Agent` loop (tool-calling turns,
+optional planning step, context compaction, best-effort summary on max
+steps) over the shared `OpenRouterClient`'s `chat()` (OpenAI-style tools +
+token usage). `mcp_tools_from_session` bridges an MCP session's tools into
+the agent's `Tool` registry. An optional `RunBudget` enforces a hard dollar
+budget per run — LLM tokens at caller-supplied prices plus a per-tool price
+callable, running spend injected after every tool result, and a forced final
+answer once the budget crosses:
+
+```python
+from keenbench.shared.agent import Agent, RunBudget, Tool
+from keenbench.shared.llm import OpenRouterClient
+
+llm = OpenRouterClient(api_key="sk-or-...", model="anthropic/claude-sonnet-4.5", timeout_s=180.0)
+agent = Agent(llm, tools, system_prompt, max_steps=20)
+budget = RunBudget(limit_usd=0.25, in_price_per_mtok=3.0, out_price_per_mtok=15.0,
+                   tool_cost=lambda name: 0.005)
+result = await agent.run(task_prompt, budget=budget)
+```
+
+The Redis cache, metrics, rate limiter, and Azure/Gemini backends of the
+original are deliberately not ported — keenbench has none of that infra.
+
 ### Pipelines as a library
 
 The pipelines are pure — inputs + clients in, rows/reports out — so they drive

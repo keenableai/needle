@@ -1,5 +1,6 @@
 import json
 import os
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 import httpx
@@ -19,10 +20,41 @@ def resolve_llm_model(explicit: str | None) -> str:
     return explicit or os.environ.get("KEENBENCH_LLM_MODEL") or DEFAULT_LLM_MODEL
 
 
+class LLMClientError(Exception):
+    pass
+
+
+@dataclass
+class ChatUsage:
+    prompt_tokens: int = 0
+    completion_tokens: int = 0
+
+
+@dataclass
+class ChatResult:
+    content: str
+    tool_calls: list[dict[str, Any]] | None = None
+    finish_reason: str = "stop"
+    usage: ChatUsage = field(default_factory=ChatUsage)
+
+
 class LLMClient(Protocol):
     async def complete(
         self, prompt: str, *, max_tokens: int, reasoning_effort: str
     ) -> tuple[str | None, dict[str, str] | None]: ...
+
+
+class ChatLLMClient(Protocol):
+    model: str
+
+    async def chat(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = ...,
+        *,
+        max_tokens: int,
+        temperature: float | None = ...,
+    ) -> ChatResult: ...
 
 
 def _content_to_text(content: Any) -> str | None:
@@ -112,3 +144,51 @@ class OpenRouterClient:
         if not text:
             return None, {"error_type": "no_content", "error_message": "empty content in response"}
         return text, None
+
+    async def chat(
+        self,
+        messages: list[dict[str, Any]],
+        tools: list[dict[str, Any]] | None = None,
+        *,
+        max_tokens: int,
+        temperature: float | None = None,
+    ) -> ChatResult:
+        body: dict[str, Any] = {
+            "model": self.model,
+            "messages": messages,
+            "max_tokens": max_tokens,
+            "temperature": self.temperature if temperature is None else temperature,
+        }
+        if tools:
+            body["tools"] = tools
+        try:
+            resp = await self._http().post(
+                f"{self.base_url}/chat/completions",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                json=body,
+            )
+        except httpx.HTTPError as exc:
+            raise LLMClientError(f"transport: {exc}"[:MAX_ERROR_CHARS]) from exc
+        if resp.status_code != 200:
+            raise LLMClientError(f"http {resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}")
+        try:
+            payload = resp.json()
+        except (json.JSONDecodeError, ValueError) as exc:
+            raise LLMClientError(f"bad json: {exc}") from exc
+        if isinstance(payload, dict) and payload.get("error"):
+            raise LLMClientError(f"api error: {str(payload['error'])[:MAX_ERROR_CHARS]}")
+        try:
+            choice = payload["choices"][0]
+            message = choice["message"]
+        except (KeyError, IndexError, TypeError) as exc:
+            raise LLMClientError("no choices in response") from exc
+        usage = payload.get("usage") or {}
+        return ChatResult(
+            content=_content_to_text(message.get("content")) or "",
+            tool_calls=message.get("tool_calls") or None,
+            finish_reason=choice.get("finish_reason") or "stop",
+            usage=ChatUsage(
+                prompt_tokens=int(usage.get("prompt_tokens") or 0),
+                completion_tokens=int(usage.get("completion_tokens") or 0),
+            ),
+        )
