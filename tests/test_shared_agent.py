@@ -197,6 +197,31 @@ async def test_spend_line_once_per_turn():
     assert "[spend so far:" in tool_msgs[1]["content"]
 
 
+async def test_sync_tool_result_is_awaited_correctly():
+    def add(a: int, b: int) -> int:
+        return a + b
+
+    tool = Tool(
+        name="add",
+        description="add two numbers",
+        function=add,
+        parameters_schema={
+            "type": "object",
+            "properties": {"a": {"type": "integer"}, "b": {"type": "integer"}},
+        },
+    )
+    llm = ScriptedLLM(
+        [
+            ChatResult(content="", tool_calls=[_tool_call("add", '{"a": 2, "b": 3}')]),
+            ChatResult(content='{"sum": 5}'),
+        ]
+    )
+    agent = Agent(llm, [tool], "sys", max_steps=5)
+    result = await agent.run("q")
+    assert result.tool_calls[0].error is None
+    assert result.tool_calls[0].result == "5"
+
+
 def test_truncate_content_keeps_head_and_tail():
     text = "a" * 50 + "b" * 50
     out = truncate_content(text, 20)

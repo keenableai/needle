@@ -1,4 +1,5 @@
 import asyncio
+import inspect
 import json
 import logging
 from collections.abc import Callable
@@ -39,7 +40,6 @@ class Tool:
     description: str
     function: Callable[..., Any]
     parameters_schema: dict[str, Any]
-    is_async: bool = True
 
     def to_openai_schema(self) -> dict[str, Any]:
         return {
@@ -78,11 +78,14 @@ class RunBudget:
     llm_usd: float = 0.0
     tool_usd: float = 0.0
     tool_calls: dict[str, int] = field(default_factory=dict)
-    exhausted: bool = False
 
     @property
     def spent(self) -> float:
         return self.llm_usd + self.tool_usd
+
+    @property
+    def exhausted(self) -> bool:
+        return self.spent >= self.limit_usd
 
     def charge_llm(self, usage: ChatUsage) -> None:
         self.llm_usd += (
@@ -159,7 +162,7 @@ class Agent:
             messages.extend(await self._run_planning_step(user_message, usage, budget))
 
         for step in range(1, self.max_steps + 1):
-            if budget is not None and budget.spent >= budget.limit_usd:
+            if budget is not None and budget.exhausted:
                 return await self._handle_budget_exhausted(
                     messages, usage, records, budget, step - 1
                 )
@@ -248,7 +251,6 @@ class Agent:
         budget: RunBudget,
         steps: int,
     ) -> AgentResult:
-        budget.exhausted = True
         messages.append({"role": "user", "content": BUDGET_EXHAUSTED_PROMPT})
         try:
             final = await self.llm_client.chat(
@@ -297,7 +299,7 @@ class Agent:
             budget.charge_tool(name)
         try:
             result = tool.function(**arguments)
-            if tool.is_async:
+            if inspect.isawaitable(result):
                 result = await result
             return ToolCallRecord(name=name, arguments=arguments, result=str(result))
         except Exception as e:
