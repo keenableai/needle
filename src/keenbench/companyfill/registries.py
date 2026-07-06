@@ -71,7 +71,7 @@ def _qual_year(stmt: dict, pcode: str) -> int | None:
 def current_ceo(claims: dict) -> tuple[str | None, int | None]:
     candidates = []
     for stmt in claims.get("P169", []):
-        if "P582" in (stmt.get("qualifiers") or {}):
+        if stmt.get("rank") == "deprecated" or "P582" in (stmt.get("qualifiers") or {}):
             continue
         pid = _entity_id(stmt)
         if not pid:

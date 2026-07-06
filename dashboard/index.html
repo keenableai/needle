@@ -59,16 +59,6 @@
   header { margin-bottom: 20px; }
   header a { color: inherit; }
 
-  .filters { display: flex; gap: 6px; margin: 20px 0 16px; }
-  .filters button {
-    font: inherit; color: var(--text-secondary);
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 6px; padding: 4px 12px; cursor: pointer;
-  }
-  .filters button[aria-pressed="true"] {
-    color: var(--text-primary); font-weight: 600; border-color: var(--baseline);
-  }
-
   td .key {
     display: inline-block; width: 14px; height: 3px; border-radius: 2px;
     vertical-align: middle; margin-right: 6px;
@@ -77,9 +67,9 @@
   .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
   .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
 
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } }
   .section-title {
     font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
     color: var(--text-secondary); margin: 30px 0 6px; padding-bottom: 6px;
@@ -182,7 +172,8 @@
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
-  .overlap-matrix { overflow-x: auto; }
+  .overlap-matrix, #fields-table, #history-table, #uniqueness-table,
+  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal { overflow-x: auto; }
   .overlap-matrix table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; }
   .overlap-matrix th, .overlap-matrix td { border-bottom: none; }
   .overlap-matrix td:first-child { white-space: nowrap; }
@@ -274,18 +265,23 @@
   <h2 class="section-title" id="sec-overlap">Engine overlap</h2>
   <div class="grid2">
     <div class="card" id="card-overlap">
-      <h2>Shared result URLs (last 24h)</h2>
+      <h2>Shared result URLs (all time)</h2>
       <div class="sub" id="overlap-sub"></div>
       <div class="overlap-matrix" id="overlap-table"></div>
     </div>
     <div class="card" id="card-overlap3">
-      <h2>Queries sharing &ge;3 URLs (last 24h)</h2>
+      <h2>Queries sharing &ge;3 URLs (all time)</h2>
       <div class="sub" id="overlap3-sub"></div>
       <div class="overlap-matrix" id="overlap3-table"></div>
     </div>
   </div>
+  <div class="card" id="card-lowshared">
+    <h2>Suspicious sharing (all time)</h2>
+    <div class="sub" id="lowshared-sub"></div>
+    <div class="overlap-matrix" id="lowshared-table"></div>
+  </div>
   <div class="card" id="card-uniqueness">
-    <h2>Result uniqueness (last 24h)</h2>
+    <h2>Result uniqueness (all time)</h2>
     <div class="sub" id="uniqueness-sub"></div>
     <div id="uniqueness-table"></div>
   </div>
@@ -404,8 +400,6 @@ const HOME_ENGINE = "keenable";
 function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
-const RANGES = [["24h", 24 * 3600e3], ["7d", 7 * 86400e3], ["30d", 30 * 86400e3], ["All", Infinity]];
-let rangeMs = Infinity;
 let history = [];
 
 const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
@@ -487,8 +481,7 @@ function latencySeries(rows, p, runMetric) {
   return out;
 }
 
-function inRange(rows, ms = rangeMs) {
-  if (ms === Infinity) return rows;
+function inRange(rows, ms) {
   const cutoff = Date.now() - ms;
   return rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
 }
@@ -648,8 +641,8 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     let sum = 0, w = 0;
     for (const r of er) {
       if (r[metric] == null) continue;
-      sum += r[metric] * (r.num_scored || 1);
-      w += r.num_scored || 1;
+      sum += r[metric] * (r.num_scored || 0);
+      w += r.num_scored || 0;
     }
     return w ? sum / w : null;
   };
@@ -657,6 +650,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     const er = rows.filter((r) => r.bench === bench && r.engine === e);
     const scored = er.filter((r) => r[metrics[0][0]] != null);
     return { e, v: wmean(er, metrics[0][0]), n: scored.length,
+      q: scored.reduce((s, r) => s + (r.num_scored || 0), 0),
       lastT: scored.length ? new Date(scored.at(-1).ts) : null,
       extra: metrics.slice(1).map(([m]) => wmean(er, m)) };
   }).filter((x) => x.v != null);
@@ -674,6 +668,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
   for (const [, label] of metrics) head.appendChild(el("th", { class: "num" }, label));
+  head.appendChild(el("th", { class: "num" }, "n"));
   table.appendChild(head);
   for (const [i, x] of entries.entries()) {
     const tr = el("tr");
@@ -686,6 +681,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     tr.appendChild(nameCell);
     tr.appendChild(el("td", { class: "num" + best }, fmt3(x.v)));
     for (const v of x.extra) tr.appendChild(el("td", { class: "num" }, v == null ? "–" : fmt3(v)));
+    tr.appendChild(el("td", { class: "num" }, String(x.q)));
     table.appendChild(tr);
   }
   holder.appendChild(table);
@@ -759,7 +755,8 @@ function renderHistoryTable(rows) {
   }
   table.appendChild(head);
   for (const r of [...rows].reverse()) {
-    const metrics = ["freshstream", "rarestream"].includes(r.bench) ? [["RBP@5", r.rbp]] : [["recall@5", r.recall], ["MRR@5", r.mrr]];
+    const k = r.bench === "scholar" ? 10 : 5;
+    const metrics = ["freshstream", "rarestream"].includes(r.bench) ? [["RBP@5", r.rbp]] : [[`recall@${k}`, r.recall], [`MRR@${k}`, r.mrr]];
     for (const [name, v] of metrics) {
       const tr = el("tr");
       markHome(tr, r.engine);
@@ -785,6 +782,7 @@ const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
 const SHARED3_STEPS = [0.05, 0.15, 0.3, 0.5];
+const LOWSHARED_STEPS = [0.05, 0.12, 0.25, 0.5];
 const overlapStep = (v, steps) => {
   const i = steps.findIndex((t) => v < t);
   return i === -1 ? 4 : i;
@@ -827,17 +825,25 @@ function overlapMatrix(holder, engines, cellFor) {
 function renderOverlap(rows) {
   const jaccardHolder = document.getElementById("overlap-table");
   const shared3Holder = document.getElementById("overlap3-table");
+  const lowHolder = document.getElementById("lowshared-table");
   jaccardHolder.replaceChildren();
   shared3Holder.replaceChildren();
+  lowHolder.replaceChildren();
   const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
   const pairs = new Map();
   for (const r of rows) {
-    const agg = pairs.get(pairKey(r.a, r.b)) || { jsum: 0, n: 0, s3sum: 0, n3: 0 };
+    const agg = pairs.get(pairKey(r.a, r.b)) ||
+      { jsum: 0, n: 0, s3sum: 0, n3: 0, low2: 0, lowUrls: 0, nLow: 0 };
     agg.jsum += r.jaccard_sum;
     agg.n += r.num_queries;
     if (r.num_shared3 != null) {
       agg.s3sum += r.num_shared3;
       agg.n3 += r.num_queries;
+    }
+    if (r.num_suspect != null) {
+      agg.low2 += r.num_suspect;
+      agg.lowUrls += r.low_shared_urls || 0;
+      agg.nLow += r.num_queries;
     }
     pairs.set(pairKey(r.a, r.b), agg);
   }
@@ -846,6 +852,7 @@ function renderOverlap(rows) {
   if (engines.length < 2) {
     jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     shared3Holder.appendChild(el("div", { class: "empty" }, emptyMsg));
+    lowHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     return;
   }
   const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
@@ -871,6 +878,18 @@ function renderOverlap(rows) {
       text: `${Math.round(v * 100)}%`,
       step: overlapStep(v, SHARED3_STEPS),
       title: `${a} ∩ ${b}: ${agg.s3sum} of ${agg.n3} queries share ≥3 URLs`,
+    };
+  });
+  document.getElementById("lowshared-sub").textContent =
+    "share of queries where the pair shares a below-HM URL or 3+ URLs of any rating — sharing good URLs is expected, sharing junk or near-identical lists suggests a common upstream index";
+  overlapMatrix(lowHolder, engines, (a, b) => {
+    const agg = pairs.get(pairKey(a, b));
+    if (!agg || !agg.nLow) return null;
+    const v = agg.low2 / agg.nLow;
+    return {
+      text: `${Math.round(v * 100)}%`,
+      step: overlapStep(v, LOWSHARED_STEPS),
+      title: `${a} ∩ ${b}: ${agg.low2} of ${agg.nLow} queries share a low-relevance URL or 3+ URLs (${agg.lowUrls} junk URLs total)`,
     };
   });
 }
@@ -1071,7 +1090,10 @@ function renderLegalRun(holder, report, engine) {
 
 const RUN_ARTIFACT = { freshstream: "rbp.json", rarestream: "rarestream.json", companyfill: "recall.json", scholar: "scholar.json", legal: "legal.json" };
 
+let runDetailSeq = 0;
+
 async function renderRunDetail(runs) {
+  const seq = ++runDetailSeq;
   const holder = document.getElementById("run-detail");
   const runSel = document.getElementById("run-select");
   const benchSel = document.getElementById("run-bench");
@@ -1090,6 +1112,7 @@ async function renderRunDetail(runs) {
   holder.appendChild(el("div", { class: "empty" }, "Loading…"));
   try {
     const report = await fetchJson(`${RUNS_BASE}/${run.id}/${artifact}`);
+    if (seq !== runDetailSeq) return;
     const available = Object.keys(report.engines || {});
     if (!available.includes(engineSel.value)) {
       const current = engineSel.value;
@@ -1106,6 +1129,7 @@ async function renderRunDetail(runs) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
     }
   } catch (err) {
+    if (seq !== runDetailSeq) return;
     holder.replaceChildren();
     holder.appendChild(el("div", { class: "empty" }, `Could not load run: ${err.message}`));
   }
@@ -1182,13 +1206,12 @@ function drawCharts(rows) {
 
 function refreshHistoryTable() {
   if (document.getElementById("history-details").open) {
-    renderHistoryTable(inRange(history));
+    renderHistoryTable(history);
   }
 }
 
 function renderAll(latestCompanyfill) {
-  const rows = inRange(history);
-  drawCharts(rows);
+  drawCharts(history);
   refreshHistoryTable();
   renderFields(latestCompanyfill);
 }
@@ -1236,7 +1259,7 @@ async function main() {
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => drawCharts(inRange(history)), 150);
+    resizeTimer = setTimeout(() => drawCharts(history), 150);
   });
 }
 main();

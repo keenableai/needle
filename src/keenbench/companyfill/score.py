@@ -1,5 +1,4 @@
 import asyncio
-from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -7,6 +6,7 @@ from keenbench.companyfill.canon import gold_in_text
 from keenbench.companyfill.judge import judge_answer
 from keenbench.companyfill.models import FRESHNESS_LADDER, cues_for
 from keenbench.shared.llm import LLMClient
+from keenbench.shared.recall import classify_misses, group_recall
 from keenbench.shared.search import SearchClient, SearchResult, latency_stats
 
 
@@ -47,17 +47,6 @@ def first_hit_rank(
         if result_answers(query, result, snippet_chars=snippet_chars):
             return rank
     return None
-
-
-def _group(scored: list[dict], key: Callable[[dict], str]) -> dict[str, dict[str, Any]]:
-    groups: dict[str, list[dict]] = {}
-    for pq in scored:
-        groups.setdefault(key(pq), []).append(pq)
-    out = {}
-    for name, pqs in groups.items():
-        hits = [pq for pq in pqs if pq["hit_rank"] is not None]
-        out[name] = {"n": len(pqs), "recall_at_k": len(hits) / len(pqs)}
-    return out
 
 
 def _ladder_order(groups: dict[str, dict]) -> dict[str, dict]:
@@ -165,17 +154,15 @@ async def run_answers(
                 if pq["hit_rank"] is not None and pq["hit_rank"] != pq["det_rank"]
             ),
             "latency": latency_stats(engines[name].latencies_ms),
-            "by_field": dict(sorted(_group(scored, lambda pq: pq["field"]).items())),
-            "by_bucket": dict(sorted(_group(scored, lambda pq: pq["bucket"]).items())),
-            "by_syntax": dict(sorted(_group(scored, lambda pq: pq["syntax"]).items())),
-            "by_tier": dict(
-                sorted(_group([pq for pq in scored if pq["tier"]], lambda pq: pq["tier"]).items())
-            ),
-            "by_freshness": _ladder_order(_group(scored, lambda pq: pq["freshness_window"])),
+            "by_field": group_recall(scored, lambda pq: pq["field"]),
+            "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
+            "by_syntax": group_recall(scored, lambda pq: pq["syntax"]),
+            "by_tier": group_recall([pq for pq in scored if pq["tier"]], lambda pq: pq["tier"]),
+            "by_freshness": _ladder_order(group_recall(scored, lambda pq: pq["freshness_window"])),
             "per_query": per_query,
         }
 
-    _classify_misses(query_outs, engine_names, engines_out)
+    classify_misses(query_outs, engine_names, engines_out)
 
     return {
         "num_queries": len(queries),
@@ -184,23 +171,3 @@ async def run_answers(
         "judged": judge is not None,
         "engines": engines_out,
     }
-
-
-def _classify_misses(
-    query_outs: list[list[dict]],
-    engine_names: list[str],
-    engines_out: dict[str, dict[str, Any]],
-) -> None:
-    any_hit = [any(pq["hit_rank"] is not None for pq in entries) for entries in query_outs]
-    for idx, name in enumerate(engine_names):
-        system_specific = universal = 0
-        for entries, others_found in zip(query_outs, any_hit, strict=True):
-            pq = entries[idx]
-            if pq["search_error"] is not None or pq["hit_rank"] is not None or pq["n_results"] == 0:
-                continue
-            if others_found:
-                system_specific += 1
-            else:
-                universal += 1
-        engines_out[name]["misses_system_specific"] = system_specific
-        engines_out[name]["misses_universal"] = universal

@@ -44,6 +44,20 @@ def test_current_ceo_preferred_rank_wins():
     assert current_ceo({}) == (None, None)
 
 
+def test_current_ceo_skips_deprecated_rank():
+    claims = {
+        "P169": [
+            _stmt(
+                {"id": "Q_WRONG"},
+                qualifiers=_time_qual("P580", "+2025-01-01T00:00:00Z"),
+                rank="deprecated",
+            ),
+            _stmt({"id": "Q_RIGHT"}, qualifiers=_time_qual("P580", "+2020-01-01T00:00:00Z")),
+        ]
+    }
+    assert current_ceo(claims) == ("Q_RIGHT", 2020)
+
+
 def test_scalar_extractors():
     claims = {
         "P571": [_stmt({"time": "+1993-04-05T00:00:00Z"})],

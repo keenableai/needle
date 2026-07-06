@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -31,7 +31,6 @@ class RunStats:
     llm_errors: int = 0
     duplicates: int = 0
     fetch_errors: int = 0
-    feed_health: list[dict[str, Any]] = field(default_factory=list)
 
 
 def _fetch_anchor(items: list[dict[str, Any]]) -> datetime:
@@ -114,7 +113,7 @@ async def run_rss(
     llm_concurrency: int = 8,
     max_rows_per_source: int = 50,
 ) -> tuple[list[QueryRow], RunStats]:
-    items, health = await fetch_all_sources(
+    items, _health = await fetch_all_sources(
         sources, max_rows_per_source=max_rows_per_source, concurrency=fetch_concurrency
     )
     anchor = now if now is not None else _fetch_anchor(items)
@@ -136,7 +135,6 @@ async def run_rss(
         no_news_event=no_news_event,
         llm_errors=llm_errors,
         duplicates=duplicates,
-        feed_health=health,
     )
 
 

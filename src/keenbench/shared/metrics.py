@@ -1,3 +1,4 @@
+import re
 from collections.abc import Sequence
 from urllib.parse import urlsplit
 
@@ -11,6 +12,8 @@ RBP_MAX = 1.0 - RBP_P**RBP_K
 DUPLICATE_URL_PENALTY = 4
 PARTIAL_DOMAIN_PENALTY = 1
 FULL_DOMAIN_PENALTY = 2
+
+SITE_OPERATOR_RE = re.compile(r"\bsite:")
 
 
 def gain(rating: int) -> float:
@@ -27,7 +30,7 @@ def url_domain(url: str) -> str:
 def apply_redundancy_penalties(
     urls: Sequence[str], ratings: Sequence[int], *, query_text: str = ""
 ) -> list[int]:
-    if "site:" in query_text.lower():
+    if SITE_OPERATOR_RE.search(query_text.lower()):
         return list(ratings)
     seen_urls: set[str] = set()
     domain_counts: dict[str, int] = {}

@@ -59,7 +59,7 @@ Keys are read only from the environment.
 
 ## Common `run` flags
 
-All three benchmarks' `run` commands share one interface:
+All benchmarks' `run` commands share one interface:
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
@@ -72,7 +72,7 @@ All three benchmarks' `run` commands share one interface:
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
 Per-engine tuning is env-based so the flag set stays flat as engines are
-added: `KEENABLE_MODE` (default `pro`), `EXA_CONCURRENCY` (default `4`),
+added: `KEENABLE_MODE` (default `pro`), `EXA_CONCURRENCY` (default `1`),
 `PARALLEL_MODE` (default `basic`), `TAVILY_DEPTH` (default `basic`),
 `PERPLEXITY_MODEL` (default `sonar`, use `sonar-pro` for the advanced model).
 
@@ -198,7 +198,7 @@ Three suites (`--suites`, default all), one query row per grounded field:
 - **`companyfill`** — SEC `company_tickers.json` seeds the companies; each is
   resolved to Wikidata (gated on company-class or LEI/exchange signals) and
   every grounded field becomes a query: ceo (P169 with no end date),
-  founded_year, hq_country, industry, website, employees (omitted when
+  founded_year, hq_country, website, employees (omitted when
   Wikidata's latest figure is stale), lei (P1278, or GLEIF with
   `--use-gleif`), ticker. Companies with fewer than 4 grounded fields are
   dropped as likely mis-resolutions.
@@ -512,6 +512,30 @@ is three steps:
    `--engines` / the workflow's `ENGINES` env. The dashboard picks the new
    engine up from the data and assigns it a stable color slot automatically.
 
+### Tool-calling agent
+
+`keenbench.shared.agent` is a self-contained tool-calling agent for agentic
+benches: an `Agent` loop (tool-calling turns, optional planning step,
+context compaction, best-effort summary on max steps) over the shared
+`OpenRouterClient`'s `chat()` (OpenAI-style tools +
+token usage). `mcp_tools_from_session` bridges an MCP session's tools into
+the agent's `Tool` registry. An optional `RunBudget` enforces a hard dollar
+budget per run — LLM tokens at caller-supplied prices plus a per-tool price
+callable, running spend injected after every tool turn, and a forced final
+answer once the budget crosses. `chat()` retries transient OpenRouter
+failures (429/5xx/transport) with exponential backoff:
+
+```python
+from keenbench.shared.agent import Agent, RunBudget, Tool
+from keenbench.shared.llm import OpenRouterClient
+
+llm = OpenRouterClient(api_key="sk-or-...", model="anthropic/claude-sonnet-4.5", timeout_s=180.0)
+agent = Agent(llm, tools, system_prompt, max_steps=20)
+budget = RunBudget(limit_usd=0.25, in_price_per_mtok=3.0, out_price_per_mtok=15.0,
+                   tool_cost=lambda name: 0.005)
+result = await agent.run(task_prompt, budget=budget)
+```
+
 ### Pipelines as a library
 
 The pipelines are pure — inputs + clients in, rows/reports out — so they drive
@@ -546,7 +570,7 @@ companyfill + scholar + rarestream + legal daily at 00:17 UTC (fresh gold each
 - appends summary rows to `data/history.jsonl` and per-engine-pair URL-overlap
   rows (mean Jaccard of normalized top-K URL sets per query) to
   `data/overlap.jsonl` on the `gh-pages` branch — rendered as a dashboard
-  (trends, latest tiles, per-field table, a last-24h engine-overlap matrix,
+  (trends, latest tiles, per-field table, an all-time engine-overlap matrix,
   judgement browser) at <https://super-journey-4z52474.pages.github.io/> (the
   URL becomes `keenableai.github.io/keenbench` when the repo goes public);
 - archives the full artifacts (reports with per-result judge reasoning, the

@@ -4,7 +4,6 @@ import os
 import sys
 from collections import Counter
 from datetime import UTC, datetime
-from pathlib import Path
 
 from keenbench.companyfill.canon import FIELD_TYPES
 from keenbench.companyfill.generate import GenStats, run_generate
@@ -12,53 +11,33 @@ from keenbench.companyfill.models import QUARTERLY_FIELDS
 from keenbench.companyfill.registries import GleifClient, SecClient, WikidataClient
 from keenbench.companyfill.score import GoldQuery, run_answers
 from keenbench.companyfill.sources import EdgarClient
-from keenbench.shared.cli import build_clients_or_exit, parse_csv, sample_or_exit
+from keenbench.shared.cli import (
+    as_obj,
+    build_clients_or_exit,
+    load_gold_rows,
+    parse_csv,
+    sample_or_exit,
+)
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_judge_model, resolve_llm_model
 
 KNOWN_SUITES = ("companyfill", "filings", "filingdoc")
 
 
-def _as_obj(value: object) -> object:
-    if isinstance(value, str):
-        try:
-            return json.loads(value)
-        except json.JSONDecodeError:
-            return None
-    return value
-
-
-def _load_gold_rows(path: str) -> list[dict]:
-    try:
-        lines = Path(path).read_text(encoding="utf-8").splitlines()
-    except OSError as exc:
-        raise SystemExit(f"error: could not read --queries {path!r}: {exc}") from exc
-    rows = []
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        obj = _as_obj(line)
-        if not isinstance(obj, dict) or not obj.get("query_text"):
-            continue
-        gold = _as_obj(obj.get("gold"))
-        if not isinstance(gold, dict) or not gold.get("field") or not gold.get("field_type"):
-            continue
-        field_type = str(gold["field_type"])
-        if field_type not in FIELD_TYPES:
-            raise SystemExit(
-                f"error: unsupported gold.field_type {field_type!r} for query "
-                f"{str(obj['query_text'])!r} (known: {', '.join(sorted(FIELD_TYPES))})"
-            )
-        obj["gold"] = gold
-        origin = _as_obj(obj.get("query_origin"))
-        obj["query_origin"] = origin if isinstance(origin, dict) else {}
-        rows.append(obj)
-    return rows
+def _gold_ok(gold: dict) -> bool:
+    if not gold.get("field") or not gold.get("field_type"):
+        return False
+    field_type = str(gold["field_type"])
+    if field_type not in FIELD_TYPES:
+        raise SystemExit(
+            f"error: unsupported gold.field_type {field_type!r} "
+            f"(known: {', '.join(sorted(FIELD_TYPES))})"
+        )
+    return True
 
 
 def _gold_query(row: dict) -> GoldQuery:
-    origin = _as_obj(row.get("query_origin"))
+    origin = as_obj(row.get("query_origin"))
     origin = origin if isinstance(origin, dict) else {}
     gold = row["gold"]
     return GoldQuery(
@@ -159,7 +138,10 @@ class Companyfill:
                     if client is not None:
                         await client.aclose()
 
-        rows, stats = asyncio.run(_go())
+        try:
+            rows, stats = asyncio.run(_go())
+        except ValueError as exc:
+            raise SystemExit(f"error: {exc}") from exc
         records = []
         for row in rows:
             record = dict(row)
@@ -176,7 +158,8 @@ class Companyfill:
             f"filingdoc={stats.filingdoc_rows} of {stats.doc_candidates} candidates "
             f"(fetch={stats.doc_fetch_fail}, thin={stats.doc_thin}, "
             f"no_query={stats.doc_no_query}, rejected={stats.doc_rejected}, "
-            f"llm_err={stats.llm_errors}); {stats.errors} errors)",
+            f"surplus={stats.doc_surplus}, llm_err={stats.llm_errors}); "
+            f"{stats.errors} errors)",
             file=sys.stderr,
         )
 
@@ -194,7 +177,7 @@ class Companyfill:
         judge_model: str | None = None,
         judge_concurrency: int = 8,
     ) -> None:
-        rows = _load_gold_rows(queries)
+        rows = load_gold_rows(queries, bench="companyfill", gold_ok=_gold_ok)
         if not rows:
             raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
         rows = sample_or_exit(

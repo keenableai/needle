@@ -109,3 +109,82 @@ def test_uniqueness_skips_queries_with_no_other_engine():
     )
     by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
     assert by_engine["e1"] == {"ts": "t", "engine": "e1", "unique_urls": 0, "total_urls": 0}
+
+
+def _pq_labeled(url_labels, error=None):
+    return {
+        "search_error": error,
+        "results": [{"url": u, "label": lab} for u, lab in url_labels],
+    }
+
+
+def test_overlap_rows_low_relevance_sharing():
+    report = _report(
+        {
+            "e1": [
+                _pq_labeled(
+                    [
+                        ("https://junk1.com", "SM"),
+                        ("https://junk2.com", "FailsM"),
+                        ("https://good.com", "FullyM"),
+                    ]
+                )
+            ],
+            "e2": [
+                _pq_labeled(
+                    [
+                        ("https://junk1.com", "MM"),
+                        ("https://junk2.com", "SM"),
+                        ("https://good.com", "HM"),
+                    ]
+                )
+            ],
+            "e3": [_pq_labeled([("https://good.com", "FullyM"), ("https://junk1.com", "HM")])],
+        }
+    )
+    rows = overlap_rows(report, ts="t")
+    by_pair = {(r["a"], r["b"]): r for r in rows}
+    r12 = by_pair[("e1", "e2")]
+    assert r12["low_shared_urls"] == 2
+    assert r12["num_suspect"] == 1
+    r13 = by_pair[("e1", "e3")]
+    assert r13["low_shared_urls"] == 0
+    assert r13["num_suspect"] == 0
+
+
+def test_overlap_rows_low_relevance_ignores_unjudged():
+    report = _report(
+        {
+            "e1": [_pq(["https://a.com", "https://b.com"])],
+            "e2": [_pq(["https://a.com", "https://b.com"])],
+        }
+    )
+    (row,) = overlap_rows(report, ts="t")
+    assert row["low_shared_urls"] == 0
+    assert row["num_suspect"] == 0
+    assert row["num_shared3"] == 0
+
+
+def test_overlap_rows_suspect_counts_shared3_without_judgements():
+    report = _report(
+        {
+            "e1": [_pq(["https://a.com", "https://b.com", "https://c.com"])],
+            "e2": [_pq(["https://a.com", "https://b.com", "https://c.com"])],
+        }
+    )
+    (row,) = overlap_rows(report, ts="t")
+    assert row["num_shared3"] == 1
+    assert row["num_suspect"] == 1
+    assert row["low_shared_urls"] == 0
+
+
+def test_overlap_rows_suspect_counts_single_shared_low_url():
+    report = _report(
+        {
+            "e1": [_pq_labeled([("https://junk.com", "SM"), ("https://good.com", "FullyM")])],
+            "e2": [_pq_labeled([("https://junk.com", "FailsM"), ("https://other.com", "HM")])],
+        }
+    )
+    (row,) = overlap_rows(report, ts="t")
+    assert row["num_suspect"] == 1
+    assert row["low_shared_urls"] == 1

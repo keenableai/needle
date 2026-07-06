@@ -115,14 +115,7 @@ class EdgarClient(RegistryClient):
         url = SEC_DOC_URL.format(
             cik=filing.cik, adsh_nodash=filing.adsh_nodash, doc=filing.primary_doc
         )
-        try:
-            async with self._sem:
-                resp = await self._http().request(
-                    "GET", url, headers={"User-Agent": self.user_agent}, follow_redirects=True
-                )
-        except Exception:
+        html = await self._get_text(url, headers={"User-Agent": self.user_agent})
+        if html is None:
             return None
-        if resp.status_code != 200:
-            return None
-        text = html_text(resp.text)
-        return text or None
+        return html_text(html) or None

@@ -62,3 +62,8 @@ def test_penalties_site_queries_exempt():
     urls = ["https://a.com/1", "https://a.com/2", "https://a.com/1"]
     ratings = [4, 4, 4]
     assert apply_redundancy_penalties(urls, ratings, query_text="site:a.com docs") == ratings
+
+
+def test_penalties_website_word_not_exempt():
+    urls = ["https://a.com/1", "https://a.com/1"]
+    assert apply_redundancy_penalties(urls, [4, 4], query_text="acme website: details") == [4, 0]

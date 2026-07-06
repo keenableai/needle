@@ -137,22 +137,61 @@ async def test_searchapi_maps_kg_answer_box_and_organic(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
-async def test_request_json_error_field(monkeypatch):
+def _no_results_http(message):
     class FakeResp:
         status_code = 200
 
         def json(self):
-            return {"error": "invalid key"}
+            return {"error": message}
 
     class FakeHttp:
         async def request(self, method, url, **kwargs):
             return FakeResp()
 
+    return FakeHttp()
+
+
+async def test_request_json_error_field(monkeypatch):
     c = SearchApiClient(api_key="k", engine="bing")
-    monkeypatch.setattr(c, "_http", lambda: FakeHttp())
+    monkeypatch.setattr(c, "_http", lambda: _no_results_http("invalid key"))
     results, err = await c.search("q")
     assert results is None
     assert err == {"error_type": "api_error", "error_message": "invalid key"}
+    assert c.latencies_ms == []
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        "acme site:sec.gov",
+        'acme "annual report"',
+        "acme “annual report” comments",
+        "acme after:2026-01-01 before:2026-04-01",
+    ],
+)
+async def test_searchapi_empty_results_exempt_for_operator_queries(monkeypatch, query):
+    c = SearchApiClient(api_key="k", engine="google")
+    monkeypatch.setattr(c, "_http", lambda: _no_results_http("Google didn't return any results."))
+    results, err = await c.search(query)
+    assert err is None
+    assert results == []
+    assert c.latencies_ms == []
+
+
+async def test_searchapi_empty_results_still_error_for_plain_query(monkeypatch):
+    c = SearchApiClient(api_key="k", engine="bing")
+    monkeypatch.setattr(c, "_http", lambda: _no_results_http("Bing didn't return any results."))
+    results, err = await c.search("acme annual report")
+    assert results is None
+    assert err == {"error_type": "api_error", "error_message": "Bing didn't return any results."}
+
+
+async def test_searchapi_real_error_not_masked_by_operator(monkeypatch):
+    c = SearchApiClient(api_key="k", engine="google")
+    monkeypatch.setattr(c, "_http", lambda: _no_results_http("invalid api key"))
+    results, err = await c.search("acme site:sec.gov")
+    assert results is None
+    assert err == {"error_type": "api_error", "error_message": "invalid api key"}
 
 
 async def test_brave_maps_fields(monkeypatch):
@@ -251,7 +290,7 @@ async def test_perplexity_maps_search_results_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
-async def test_perplexity_falls_back_to_citations_with_answer_snippet(monkeypatch):
+async def test_perplexity_falls_back_to_citation_urls_without_snippets(monkeypatch):
     payload = {
         "choices": [{"message": {"content": "the answer"}}],
         "citations": ["https://a", {"url": "https://b", "title": "B"}, {"no": "url"}],
@@ -263,7 +302,7 @@ async def test_perplexity_falls_back_to_citations_with_answer_snippet(monkeypatc
     results, err = await c.search("hi", num_results=5)
     assert err is None
     assert [r.url for r in results] == ["https://a", "https://b"]
-    assert results[0].snippet == results[1].snippet == "the answer"
+    assert results[0].snippet is None and results[1].snippet is None
     assert results[1].title == "B"
 
 

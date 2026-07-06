@@ -44,6 +44,7 @@ FILINGS_CONCURRENCY = 8
 DOC_OVERSAMPLE = 3
 DOC_FORMS = frozenset({"10-K", "10-Q", "8-K"})
 TIER_BOUNDS = (("mega", 0, 100), ("large", 100, 500), ("mid", 500, 2500))
+MEGA_CAP_TICKERS = frozenset({"AAPL", "MSFT", "NVDA", "GOOG", "GOOGL", "AMZN"})
 
 
 def _seed_title(title: str) -> str:
@@ -51,6 +52,11 @@ def _seed_title(title: str) -> str:
 
 
 def tiered_companies(all_rows: list[dict], per_tier: int, seed: int) -> list[dict]:
+    if len(all_rows) > 100 and not MEGA_CAP_TICKERS & {r["ticker"] for r in all_rows[:100]}:
+        raise ValueError(
+            "no mega-cap ticker in the first 100 company_tickers.json rows; "
+            "the market-cap ordering that cap tiers rely on looks broken"
+        )
     out = []
     for name, lo, hi in TIER_BOUNDS:
         pool = all_rows[lo:hi]
@@ -73,6 +79,7 @@ class GenStats:
     doc_thin: int = 0
     doc_no_query: int = 0
     doc_rejected: int = 0
+    doc_surplus: int = 0
     llm_errors: int = 0
     errors: int = 0
 
@@ -321,6 +328,7 @@ async def _filingdoc_rows(
             setattr(stats, drop_stat[outcome], getattr(stats, drop_stat[outcome]) + 1)
             continue
         if len(rows) >= target:
+            stats.doc_surplus += 1
             continue
         filing, query = outcome
         syntax = FILINGDOC_SYNTAX_CYCLE[syntax_idx % len(FILINGDOC_SYNTAX_CYCLE)]
@@ -408,7 +416,11 @@ async def run_generate(
         batches = await bounded_gather(cf_seed, company_rows, concurrency=COMPANY_CONCURRENCY)
         rows.extend(r for batch in batches for r in batch)
 
-    fin_seed = tiered_companies(all_rows, max(1, max_companies // 3), seed)
+    fin_seed = []
+    if ("filings" in suites and sec is not None) or (
+        "filingdoc" in suites and edgar is not None and llm is not None
+    ):
+        fin_seed = tiered_companies(all_rows, max(1, max_companies // 3), seed)
     if "filings" in suites and sec is not None:
         rows.extend(
             await _filings_rows(
