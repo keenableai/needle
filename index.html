@@ -653,8 +653,8 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     let sum = 0, w = 0;
     for (const r of er) {
       if (r[metric] == null) continue;
-      sum += r[metric] * (r.num_scored || 1);
-      w += r.num_scored || 1;
+      sum += r[metric] * (r.num_scored || 0);
+      w += r.num_scored || 0;
     }
     return w ? sum / w : null;
   };
@@ -662,6 +662,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     const er = rows.filter((r) => r.bench === bench && r.engine === e);
     const scored = er.filter((r) => r[metrics[0][0]] != null);
     return { e, v: wmean(er, metrics[0][0]), n: scored.length,
+      q: scored.reduce((s, r) => s + (r.num_scored || 0), 0),
       lastT: scored.length ? new Date(scored.at(-1).ts) : null,
       extra: metrics.slice(1).map(([m]) => wmean(er, m)) };
   }).filter((x) => x.v != null);
@@ -679,6 +680,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
   for (const [, label] of metrics) head.appendChild(el("th", { class: "num" }, label));
+  head.appendChild(el("th", { class: "num" }, "n"));
   table.appendChild(head);
   for (const [i, x] of entries.entries()) {
     const tr = el("tr");
@@ -691,6 +693,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     tr.appendChild(nameCell);
     tr.appendChild(el("td", { class: "num" + best }, fmt3(x.v)));
     for (const v of x.extra) tr.appendChild(el("td", { class: "num" }, v == null ? "–" : fmt3(v)));
+    tr.appendChild(el("td", { class: "num" }, String(x.q)));
     table.appendChild(tr);
   }
   holder.appendChild(table);
