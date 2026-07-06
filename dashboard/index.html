@@ -67,9 +67,9 @@
   .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
   .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
 
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-  @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } }
   .section-title {
     font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
     color: var(--text-secondary); margin: 30px 0 6px; padding-bottom: 6px;
@@ -172,7 +172,8 @@
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
-  .overlap-matrix { overflow-x: auto; }
+  .overlap-matrix, #fields-table, #history-table, #uniqueness-table,
+  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal { overflow-x: auto; }
   .overlap-matrix table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; }
   .overlap-matrix th, .overlap-matrix td { border-bottom: none; }
   .overlap-matrix td:first-child { white-space: nowrap; }
