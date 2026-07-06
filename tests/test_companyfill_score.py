@@ -4,8 +4,14 @@ import pytest
 
 from keenbench.companyfill import cli as companyfill_cli
 from keenbench.companyfill.score import GoldQuery, first_hit_rank, run_answers
+from keenbench.shared.cli import load_gold_rows
 from keenbench.shared.search import SearchResult
 from keenbench.shared.search import factory as search_factory
+
+
+def _load_gold_rows(path):
+    return load_gold_rows(path, bench="companyfill", gold_ok=companyfill_cli._gold_ok)
+
 
 CEO_Q = GoldQuery(
     text="nvidia ceo",
@@ -168,7 +174,7 @@ def _gold_row(field="ceo", field_type="person", value="Jensen Huang", origin_as_
 def test_load_gold_rows_skips_rows_without_gold(tmp_path):
     f = tmp_path / "q.jsonl"
     _write_rows(f, [_gold_row(), {"query_text": "no gold"}, {"gold": {"field": "x"}}])
-    rows = companyfill_cli._load_gold_rows(str(f))
+    rows = _load_gold_rows(str(f))
     assert len(rows) == 1
 
 
@@ -176,7 +182,7 @@ def test_load_gold_rows_rejects_unknown_field_type(tmp_path):
     f = tmp_path / "q.jsonl"
     _write_rows(f, [_gold_row(field_type="bogus")])
     with pytest.raises(SystemExit, match="unsupported gold.field_type 'bogus'"):
-        companyfill_cli._load_gold_rows(str(f))
+        _load_gold_rows(str(f))
 
 
 def test_gold_query_parses_stringified_origin():

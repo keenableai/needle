@@ -2,7 +2,7 @@ name: Bench
 
 on:
   schedule:
-    - cron: "17 0 * * *" # daily: freshstream + companyfill (fresh gold) + rarestream
+    - cron: "17 0 * * *" # daily: freshstream + companyfill/scholar/legal (fresh gold) + rarestream
     - cron: "17 1-23 * * *" # hourly: freshstream only
   workflow_dispatch:
     inputs:

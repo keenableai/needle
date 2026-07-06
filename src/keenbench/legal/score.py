@@ -1,9 +1,9 @@
 import asyncio
 import re
-from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Any
 
+from keenbench.shared.recall import classify_misses, group_recall
 from keenbench.shared.search import SearchClient, SearchResult, latency_stats
 
 CLUSTER_URL_RE = re.compile(r"courtlistener\.com/opinion/(\d+)/", re.IGNORECASE)
@@ -132,17 +132,6 @@ def ids_match(gold: GoldLegal, found: LegalIds, *, result_text: str) -> bool:
     return False
 
 
-def _group(scored: list[dict], key: Callable[[dict], str]) -> dict[str, dict[str, Any]]:
-    groups: dict[str, list[dict]] = {}
-    for pq in scored:
-        groups.setdefault(key(pq), []).append(pq)
-    out = {}
-    for name, pqs in sorted(groups.items()):
-        hits = [pq for pq in pqs if pq["hit_rank"] is not None]
-        out[name] = {"n": len(pqs), "recall_at_k": len(hits) / len(pqs)}
-    return out
-
-
 async def run_legal(
     queries: list[GoldLegal],
     engines: dict[str, SearchClient],
@@ -198,13 +187,13 @@ async def run_legal(
             "num_scored": len(scored),
             "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
             "latency": latency_stats(engines[name].latencies_ms),
-            "by_bucket": _group(scored, lambda pq: pq["bucket"]),
-            "by_syntax": _group(scored, lambda pq: pq["syntax"]),
-            "by_court": _group([pq for pq in scored if pq["court"]], lambda pq: pq["court"]),
+            "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
+            "by_syntax": group_recall(scored, lambda pq: pq["syntax"]),
+            "by_court": group_recall([pq for pq in scored if pq["court"]], lambda pq: pq["court"]),
             "per_query": per_query,
         }
 
-    _classify_misses(query_outs, engine_names, engines_out)
+    classify_misses(query_outs, engine_names, engines_out)
 
     return {
         "num_queries": len(queries),
@@ -212,25 +201,3 @@ async def run_legal(
         "snippet_chars": snippet_chars,
         "engines": engines_out,
     }
-
-
-def _classify_misses(
-    query_outs: list[list[dict]],
-    engine_names: list[str],
-    engines_out: dict[str, dict[str, Any]],
-) -> None:
-    any_hit = [any(pq["hit_rank"] is not None for pq in entries) for entries in query_outs]
-    for idx, name in enumerate(engine_names):
-        system_specific = universal = 0
-        for entries, others_found in zip(query_outs, any_hit, strict=True):
-            pq = entries[idx]
-            if pq["search_error"] is not None or pq["hit_rank"] is not None:
-                continue
-            if pq["n_results"] == 0:
-                continue
-            if others_found:
-                system_specific += 1
-            else:
-                universal += 1
-        engines_out[name]["misses_system_specific"] = system_specific
-        engines_out[name]["misses_universal"] = universal

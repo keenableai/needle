@@ -1,57 +1,28 @@
 import asyncio
-import json
 import os
 import sys
 from datetime import UTC, datetime
-from pathlib import Path
 
 from keenbench.scholar.generate import GenStats, run_generate
 from keenbench.scholar.idconv import IdConverter
 from keenbench.scholar.models import AGE_BUCKETS, serialize_row
 from keenbench.scholar.score import GoldPaper, run_papers
 from keenbench.scholar.sources import ArxivClient, EuropePmcClient
-from keenbench.shared.cli import build_clients_or_exit, parse_csv, sample_or_exit
+from keenbench.shared.cli import (
+    build_clients_or_exit,
+    load_gold_rows,
+    parse_csv,
+    sample_or_exit,
+)
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
 
 KNOWN_SUITES = ("arxiv", "europepmc")
 
 
-def _as_obj(value: object) -> object:
-    if isinstance(value, str):
-        try:
-            return json.loads(value)
-        except json.JSONDecodeError:
-            return None
-    return value
-
-
-def _load_gold_rows(path: str) -> list[dict]:
-    try:
-        lines = Path(path).read_text(encoding="utf-8").splitlines()
-    except OSError as exc:
-        raise SystemExit(f"error: could not read --queries {path!r}: {exc}") from exc
-    rows = []
-    malformed = 0
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        obj = _as_obj(line)
-        if not isinstance(obj, dict) or not obj.get("query_text"):
-            continue
-        gold = _as_obj(obj.get("gold"))
-        ids = gold.get("ids") if isinstance(gold, dict) else None
-        if not isinstance(ids, dict) or not ids:
-            malformed += 1
-            continue
-        obj["gold"] = gold
-        origin = _as_obj(obj.get("query_origin"))
-        obj["query_origin"] = origin if isinstance(origin, dict) else {}
-        rows.append(obj)
-    if malformed:
-        print(f"scholar: skipped {malformed} malformed gold rows", file=sys.stderr)
-    return rows
+def _gold_ok(gold: dict) -> bool:
+    ids = gold.get("ids")
+    return isinstance(ids, dict) and bool(ids)
 
 
 def _gold_paper(row: dict) -> GoldPaper:
@@ -149,7 +120,7 @@ class Scholar:
         seed: int = 0,
         resolve_pmcids: bool = True,
     ) -> None:
-        rows = _load_gold_rows(queries)
+        rows = load_gold_rows(queries, bench="scholar", gold_ok=_gold_ok)
         if not rows:
             raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
         rows = sample_or_exit(

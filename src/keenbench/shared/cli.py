@@ -1,9 +1,11 @@
 """Scaffolding shared by the benchmark CLIs (flag parsing, errors-to-SystemExit)."""
 
 import asyncio
+import json
 import os
 import sys
 from collections.abc import Callable
+from pathlib import Path
 from typing import Any
 
 from keenbench.shared.io import write_json
@@ -18,6 +20,42 @@ def parse_csv(value: str | tuple[str, ...]) -> list[str]:
     if isinstance(value, str):
         return [v.strip() for v in value.split(",") if v.strip()]
     return [str(v).strip() for v in value]
+
+
+def as_obj(value: object) -> object:
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return None
+    return value
+
+
+def load_gold_rows(path: str, *, bench: str, gold_ok: Callable[[dict], bool]) -> list[dict]:
+    try:
+        lines = Path(path).read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise SystemExit(f"error: could not read --queries {path!r}: {exc}") from exc
+    rows = []
+    malformed = 0
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        obj = as_obj(line)
+        if not isinstance(obj, dict) or not obj.get("query_text"):
+            continue
+        gold = as_obj(obj.get("gold"))
+        if not isinstance(gold, dict) or not gold_ok(gold):
+            malformed += 1
+            continue
+        obj["gold"] = gold
+        origin = as_obj(obj.get("query_origin"))
+        obj["query_origin"] = origin if isinstance(origin, dict) else {}
+        rows.append(obj)
+    if malformed:
+        print(f"{bench}: skipped {malformed} malformed gold rows", file=sys.stderr)
+    return rows
 
 
 def sample_or_exit(

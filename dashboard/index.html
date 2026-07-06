@@ -59,16 +59,6 @@
   header { margin-bottom: 20px; }
   header a { color: inherit; }
 
-  .filters { display: flex; gap: 6px; margin: 20px 0 16px; }
-  .filters button {
-    font: inherit; color: var(--text-secondary);
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 6px; padding: 4px 12px; cursor: pointer;
-  }
-  .filters button[aria-pressed="true"] {
-    color: var(--text-primary); font-weight: 600; border-color: var(--baseline);
-  }
-
   td .key {
     display: inline-block; width: 14px; height: 3px; border-radius: 2px;
     vertical-align: middle; margin-right: 6px;
@@ -409,8 +399,6 @@ const HOME_ENGINE = "keenable";
 function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
-const RANGES = [["24h", 24 * 3600e3], ["7d", 7 * 86400e3], ["30d", 30 * 86400e3], ["All", Infinity]];
-let rangeMs = Infinity;
 let history = [];
 
 const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
@@ -492,8 +480,7 @@ function latencySeries(rows, p, runMetric) {
   return out;
 }
 
-function inRange(rows, ms = rangeMs) {
-  if (ms === Infinity) return rows;
+function inRange(rows, ms) {
   const cutoff = Date.now() - ms;
   return rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
 }
@@ -767,7 +754,8 @@ function renderHistoryTable(rows) {
   }
   table.appendChild(head);
   for (const r of [...rows].reverse()) {
-    const metrics = ["freshstream", "rarestream"].includes(r.bench) ? [["RBP@5", r.rbp]] : [["recall@5", r.recall], ["MRR@5", r.mrr]];
+    const k = r.bench === "scholar" ? 10 : 5;
+    const metrics = ["freshstream", "rarestream"].includes(r.bench) ? [["RBP@5", r.rbp]] : [[`recall@${k}`, r.recall], [`MRR@${k}`, r.mrr]];
     for (const [name, v] of metrics) {
       const tr = el("tr");
       markHome(tr, r.engine);
@@ -1101,7 +1089,10 @@ function renderLegalRun(holder, report, engine) {
 
 const RUN_ARTIFACT = { freshstream: "rbp.json", rarestream: "rarestream.json", companyfill: "recall.json", scholar: "scholar.json", legal: "legal.json" };
 
+let runDetailSeq = 0;
+
 async function renderRunDetail(runs) {
+  const seq = ++runDetailSeq;
   const holder = document.getElementById("run-detail");
   const runSel = document.getElementById("run-select");
   const benchSel = document.getElementById("run-bench");
@@ -1120,6 +1111,7 @@ async function renderRunDetail(runs) {
   holder.appendChild(el("div", { class: "empty" }, "Loading…"));
   try {
     const report = await fetchJson(`${RUNS_BASE}/${run.id}/${artifact}`);
+    if (seq !== runDetailSeq) return;
     const available = Object.keys(report.engines || {});
     if (!available.includes(engineSel.value)) {
       const current = engineSel.value;
@@ -1136,6 +1128,7 @@ async function renderRunDetail(runs) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
     }
   } catch (err) {
+    if (seq !== runDetailSeq) return;
     holder.replaceChildren();
     holder.appendChild(el("div", { class: "empty" }, `Could not load run: ${err.message}`));
   }
@@ -1212,13 +1205,12 @@ function drawCharts(rows) {
 
 function refreshHistoryTable() {
   if (document.getElementById("history-details").open) {
-    renderHistoryTable(inRange(history));
+    renderHistoryTable(history);
   }
 }
 
 function renderAll(latestCompanyfill) {
-  const rows = inRange(history);
-  drawCharts(rows);
+  drawCharts(history);
   refreshHistoryTable();
   renderFields(latestCompanyfill);
 }
@@ -1266,7 +1258,7 @@ async function main() {
   let resizeTimer;
   window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => drawCharts(inRange(history)), 150);
+    resizeTimer = setTimeout(() => drawCharts(history), 150);
   });
 }
 main();

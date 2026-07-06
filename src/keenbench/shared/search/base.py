@@ -88,10 +88,28 @@ class HttpSearchClient:
             payload = resp.json()
         except (json.JSONDecodeError, ValueError) as exc:
             return None, {"error_type": "bad_json", "error_message": str(exc)[:MAX_ERROR_CHARS]}
-        self.latencies_ms.append(elapsed_ms)
         if error_field and isinstance(payload, dict) and payload.get(error_field):
             return None, {
                 "error_type": "api_error",
                 "error_message": str(payload[error_field])[:MAX_ERROR_CHARS],
             }
+        self.latencies_ms.append(elapsed_ms)
         return payload, None
+
+    async def _get_text(
+        self,
+        url: str,
+        *,
+        params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+    ) -> str | None:
+        try:
+            async with self._sem:
+                resp = await self._http().request(
+                    "GET", url, params=params, headers=headers, follow_redirects=True
+                )
+        except httpx.HTTPError:
+            return None
+        if resp.status_code != 200:
+            return None
+        return resp.text

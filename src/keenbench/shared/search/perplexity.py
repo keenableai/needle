@@ -46,15 +46,9 @@ class PerplexityClient(HttpSearchClient):
             if isinstance(r, dict) and r.get("url")
         ]
         if not results:
-            answer = None
-            choices = payload.get("choices") or []
-            if choices:
-                answer = (choices[0].get("message") or {}).get("content")
             for c in payload.get("citations") or []:
                 if isinstance(c, str) and c:
-                    results.append(SearchResult(url=c, snippet=answer, raw={"url": c}))
+                    results.append(SearchResult(url=c, raw={"url": c}))
                 elif isinstance(c, dict) and c.get("url"):
-                    results.append(
-                        SearchResult(url=c["url"], title=c.get("title"), snippet=answer, raw=c)
-                    )
+                    results.append(SearchResult(url=c["url"], title=c.get("title"), raw=c))
         return results[:num_results], None
