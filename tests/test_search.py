@@ -161,7 +161,12 @@ async def test_request_json_error_field(monkeypatch):
 
 @pytest.mark.parametrize(
     "query",
-    ["acme site:sec.gov", 'acme "annual report"', "acme after:2026-01-01 before:2026-04-01"],
+    [
+        "acme site:sec.gov",
+        'acme "annual report"',
+        "acme “annual report” comments",
+        "acme after:2026-01-01 before:2026-04-01",
+    ],
 )
 async def test_searchapi_empty_results_exempt_for_operator_queries(monkeypatch, query):
     c = SearchApiClient(api_key="k", engine="google")
@@ -169,6 +174,7 @@ async def test_searchapi_empty_results_exempt_for_operator_queries(monkeypatch, 
     results, err = await c.search(query)
     assert err is None
     assert results == []
+    assert len(c.latencies_ms) == 1
 
 
 async def test_searchapi_empty_results_still_error_for_plain_query(monkeypatch):

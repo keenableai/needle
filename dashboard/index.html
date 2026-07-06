@@ -648,8 +648,8 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     let sum = 0, w = 0;
     for (const r of er) {
       if (r[metric] == null) continue;
-      sum += r[metric] * (r.num_scored || 1);
-      w += r.num_scored || 1;
+      sum += r[metric] * (r.num_scored || 0);
+      w += r.num_scored || 0;
     }
     return w ? sum / w : null;
   };

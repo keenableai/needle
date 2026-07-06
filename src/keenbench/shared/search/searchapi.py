@@ -10,9 +10,8 @@ def _is_empty_results_error(err: dict[str, str]) -> bool:
 
 def _has_restrictive_operator(query: str) -> bool:
     lowered = query.lower()
-    return (
-        "site:" in lowered or "after:" in lowered or "before:" in lowered or query.count('"') >= 2
-    )
+    quotes = sum(query.count(c) for c in ('"', "“", "”"))
+    return "site:" in lowered or "after:" in lowered or "before:" in lowered or quotes >= 2
 
 
 class SearchApiClient(HttpSearchClient):
