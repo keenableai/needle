@@ -730,5 +730,20 @@
       "fresh.jsonl",
       "rbp.json"
     ]
+  },
+  {
+    "id": "2026-07-06T0151Z",
+    "ts": "2026-07-06T01:51Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "rarestream.json",
+      "rbp.json",
+      "recall.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
   }
 ]
