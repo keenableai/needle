@@ -657,6 +657,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     const er = rows.filter((r) => r.bench === bench && r.engine === e);
     const scored = er.filter((r) => r[metrics[0][0]] != null);
     return { e, v: wmean(er, metrics[0][0]), n: scored.length,
+      q: scored.reduce((s, r) => s + (r.num_scored || 0), 0),
       lastT: scored.length ? new Date(scored.at(-1).ts) : null,
       extra: metrics.slice(1).map(([m]) => wmean(er, m)) };
   }).filter((x) => x.v != null);
@@ -668,14 +669,13 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   entries.sort((a, b) => b.v - a.v);
   const runs = Math.max(...entries.map((x) => x.n));
   const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
-  const latestQ = rows.filter((r) => r.bench === bench && r.num_queries != null).at(-1)?.num_queries ?? null;
-  const qtext = latestQ != null ? `, ${latestQ} queries` : "";
   document.getElementById(subId).textContent =
-    `mean of ${runs} run${runs === 1 ? "" : "s"}${qtext}, last 7 days — latest ${fmtTime(lastT)} UTC`;
+    `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
   for (const [, label] of metrics) head.appendChild(el("th", { class: "num" }, label));
+  head.appendChild(el("th", { class: "num" }, "queries"));
   table.appendChild(head);
   for (const [i, x] of entries.entries()) {
     const tr = el("tr");
@@ -688,6 +688,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     tr.appendChild(nameCell);
     tr.appendChild(el("td", { class: "num" + best }, fmt3(x.v)));
     for (const v of x.extra) tr.appendChild(el("td", { class: "num" }, v == null ? "–" : fmt3(v)));
+    tr.appendChild(el("td", { class: "num" }, String(x.q)));
     table.appendChild(tr);
   }
   holder.appendChild(table);
