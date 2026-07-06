@@ -12,13 +12,13 @@ Usage: uv run python scripts/publish_bench.py --site <gh-pages checkout>
 """
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
 import fire
 
-from keenbench.shared.io import write_json, write_jsonl
-from keenbench.shared.overlap import TS_FMT, WINDOW_HOURS, overlap_rows, uniqueness_rows
+from keenbench.shared.io import write_json
+from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
 
 def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
@@ -147,18 +147,10 @@ def publish(
         for row in rows:
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
 
-    cutoff_dt = datetime.strptime(ts, TS_FMT).replace(tzinfo=UTC) - timedelta(hours=WINDOW_HOURS)
-    cutoff = cutoff_dt.strftime(TS_FMT)
     for name, new_rows in (("overlap.jsonl", overlap), ("uniqueness.jsonl", uniqueness)):
-        path = data / name
-        kept = []
-        if path.exists():
-            kept = [
-                row
-                for line in path.read_text(encoding="utf-8").splitlines()
-                if line and (row := json.loads(line))["ts"] >= cutoff
-            ]
-        write_jsonl(kept + new_rows, str(path))
+        with open(data / name, "a", encoding="utf-8") as fh:
+            for row in new_rows:
+                fh.write(json.dumps(row, ensure_ascii=False) + "\n")
 
     index_path = data / "runs.json"
     runs = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []

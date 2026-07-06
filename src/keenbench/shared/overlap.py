@@ -2,7 +2,6 @@ from typing import Any
 from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
 
 TS_FMT = "%Y-%m-%dT%H:%MZ"
-WINDOW_HOURS = 24
 TRACKING_PARAMS = {"gclid", "fbclid", "msclkid", "yclid", "igshid", "mc_cid", "mc_eid"}
 
 
