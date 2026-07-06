@@ -15,6 +15,7 @@ from keenbench.shared.search.keenable import KeenableClient
 from keenbench.shared.search.parallel import ParallelClient
 from keenbench.shared.search.perplexity import PerplexityClient
 from keenbench.shared.search.searchapi import SearchApiClient
+from keenbench.shared.search.serper import SerperClient
 from keenbench.shared.search.tavily import TavilyClient
 
 
@@ -46,6 +47,10 @@ def _build_searchapi(engine: str) -> Callable[[str | None, int], SearchClient]:
     return build
 
 
+def _build_serper(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return SerperClient(api_key=api_key or "")
+
+
 def _build_brave(api_key: str | None, snippet_chars: int) -> SearchClient:
     return BraveClient(api_key=api_key or "")
 
@@ -67,9 +72,7 @@ def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:
 ENGINES: dict[str, EngineSpec] = {
     "keenable": EngineSpec(key_env="KEENABLE_API_KEY", key_required=False, build=_build_keenable),
     "exa": EngineSpec(key_env="EXA_API_KEY", key_required=True, build=_build_exa),
-    "google": EngineSpec(
-        key_env="SEARCHAPI_API_KEY", key_required=True, build=_build_searchapi("google")
-    ),
+    "google": EngineSpec(key_env="SERPER_API_KEY", key_required=True, build=_build_serper),
     "bing": EngineSpec(
         key_env="SEARCHAPI_API_KEY", key_required=True, build=_build_searchapi("bing")
     ),

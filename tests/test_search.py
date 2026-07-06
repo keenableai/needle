@@ -10,6 +10,7 @@ from keenbench.shared.search import (
     PerplexityClient,
     SearchApiClient,
     SearchResult,
+    SerperClient,
     TavilyClient,
     build_search_clients,
     latency_stats,
@@ -194,6 +195,38 @@ async def test_searchapi_real_error_not_masked_by_operator(monkeypatch):
     assert err == {"error_type": "api_error", "error_message": "invalid api key"}
 
 
+async def test_serper_maps_kg_answer_box_and_organic(monkeypatch):
+    payload = {
+        "knowledgeGraph": {"website": "https://kg", "title": "KG", "description": "dk"},
+        "answerBox": {"link": "https://ab", "title": "AB", "snippet": "sa"},
+        "organic": [
+            {"link": "https://a", "title": "A", "snippet": "so", "date": "Mar 3, 2026"},
+            {"title": "no link"},
+        ],
+    }
+    c = SerperClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=3)
+    assert err is None
+    assert [r.url for r in results] == ["https://kg", "https://ab", "https://a"]
+    assert results[2].published_date == "Mar 3, 2026"
+    assert calls["method"] == "POST"
+    assert calls["url"] == "https://google.serper.dev/search"
+    assert calls["json"] == {"q": "hi", "num": 3, "gl": "us", "hl": "en"}
+    assert calls["headers"] == {"X-API-KEY": "k", "Content-Type": "application/json"}
+
+
+async def test_serper_empty_results_not_an_error(monkeypatch):
+    c = SerperClient(api_key="k")
+    fake, _ = _canned({"organic": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("acme annual report")
+    assert err is None
+    assert results == []
+
+
 async def test_brave_maps_fields(monkeypatch):
     payload = {
         "web": {
@@ -307,6 +340,7 @@ async def test_perplexity_falls_back_to_citation_urls_without_snippets(monkeypat
 
 
 def test_factory_builds_new_engines(monkeypatch):
+    monkeypatch.setenv("SERPER_API_KEY", "gk")
     monkeypatch.setenv("SEARCHAPI_API_KEY", "sk")
     monkeypatch.setenv("BRAVE_API_KEY", "bk")
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
@@ -314,9 +348,11 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("PERPLEXITY_API_KEY", "xk")
     monkeypatch.setenv("PERPLEXITY_MODEL", "sonar-pro")
     clients = build_search_clients(["google", "bing", "brave", "parallel", "tavily", "perplexity"])
+    assert isinstance(clients["google"], SerperClient)
     assert clients["google"].engine == "google"
+    assert clients["google"].api_key == "gk"
     assert clients["bing"].engine == "bing"
-    assert clients["google"].api_key == clients["bing"].api_key == "sk"
+    assert clients["bing"].api_key == "sk"
     assert isinstance(clients["brave"], BraveClient)
     assert isinstance(clients["parallel"], ParallelClient)
     assert isinstance(clients["tavily"], TavilyClient)
