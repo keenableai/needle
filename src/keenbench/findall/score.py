@@ -162,6 +162,7 @@ async def run_findall(
     budgets_usd: list[float],
     max_turns: int = 20,
     concurrency: int = 2,
+    trace: bool = False,
 ) -> dict[str, Any]:
     done = 0
     total = len(tasks) * len(backends) * len(budgets_usd)
@@ -170,7 +171,7 @@ async def run_findall(
         nonlocal done
         spec, budget_usd, task = pair
         run = await run_task(
-            spec, llm, prompt=task.text, budget_usd=budget_usd, max_turns=max_turns
+            spec, llm, prompt=task.text, budget_usd=budget_usd, max_turns=max_turns, trace=trace
         )
         answer = parse_answer(run.get("answer_text"))
         pq: dict[str, Any] = {
@@ -189,6 +190,8 @@ async def run_findall(
             "elapsed_s": run.get("elapsed_s"),
             "error": run["error"],
         }
+        if "trace" in run:
+            pq["trace"] = run["trace"]
         if task.kind == "set":
             detail = score_set(answer, task.entities)
             pq["score"] = detail["recall"]

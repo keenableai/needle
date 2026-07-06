@@ -123,6 +123,7 @@ class Findall:
         limit: int = 0,
         sample: str = "stratified",
         seed: int = 0,
+        trace: bool = False,
     ) -> None:
         rows = _load_gold_rows(queries)
         if not rows:
@@ -173,6 +174,7 @@ class Findall:
                     budgets_usd=budgets,
                     max_turns=max_turns,
                     concurrency=concurrency,
+                    trace=trace,
                 )
             finally:
                 await llm.aclose()

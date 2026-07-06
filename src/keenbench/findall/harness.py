@@ -11,6 +11,7 @@ from mcp.client.streamable_http import streamablehttp_client
 
 from keenbench.findall.models import model_price, tool_price
 from keenbench.shared.agent import Agent, RunBudget, mcp_tools_from_session
+from keenbench.shared.agent.core import truncate_content
 from keenbench.shared.llm import OpenRouterClient
 
 MAX_ERROR_CHARS = 500
@@ -78,6 +79,7 @@ async def run_task(
     budget_usd: float,
     max_turns: int = 20,
     deadline_s: float = 900.0,
+    trace: bool = False,
 ) -> dict[str, Any]:
     started = time.perf_counter()
     in_price, out_price = model_price(llm.model)
@@ -90,7 +92,9 @@ async def run_task(
     out: dict[str, Any] = {"answer_text": None, "turns": 0, "error": None}
     try:
         await asyncio.wait_for(
-            _run_task_inner(spec, llm, out, budget, prompt=prompt, max_turns=max_turns),
+            _run_task_inner(
+                spec, llm, out, budget, prompt=prompt, max_turns=max_turns, trace=trace
+            ),
             timeout=deadline_s,
         )
     except TimeoutError:
@@ -115,6 +119,7 @@ async def _run_task_inner(
     *,
     prompt: str,
     max_turns: int,
+    trace: bool,
 ) -> None:
     try:
         async with AsyncExitStack() as stack:
@@ -140,6 +145,19 @@ async def _run_task_inner(
             )
             result = await agent.run(prompt, budget=budget)
             out["turns"] = result.steps
+            if trace:
+                out["trace"] = [
+                    {
+                        "name": r.name,
+                        "arguments": r.arguments,
+                        **(
+                            {"error": r.error}
+                            if r.error is not None
+                            else {"result": truncate_content(r.result or "", 4000)}
+                        ),
+                    }
+                    for r in result.tool_calls
+                ]
             if result.error is not None:
                 out["error"] = {
                     "error_type": "agent_error",
