@@ -675,7 +675,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
   for (const [, label] of metrics) head.appendChild(el("th", { class: "num" }, label));
-  head.appendChild(el("th", { class: "num" }, "queries"));
+  head.appendChild(el("th", { class: "num" }, "n"));
   table.appendChild(head);
   for (const [i, x] of entries.entries()) {
     const tr = el("tr");
