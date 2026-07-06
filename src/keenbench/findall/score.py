@@ -6,8 +6,9 @@ from dataclasses import dataclass
 from typing import Any
 
 from keenbench.companyfill.canon import registrable_domain, strip_legal
-from keenbench.findall.harness import AgentLLM, BackendSpec, run_task
+from keenbench.findall.harness import BackendSpec, run_task
 from keenbench.shared.concurrency import bounded_gather
+from keenbench.shared.llm import OpenRouterClient
 
 _JSON_RE = re.compile(r"\{.*\}", re.DOTALL)
 _SHOW_HN_RE = re.compile(r"^show hn[:\s]*", re.IGNORECASE)
@@ -156,7 +157,7 @@ def _summary(per_query: list[dict]) -> dict[str, Any]:
 async def run_findall(
     tasks: list[GoldTask],
     backends: list[BackendSpec],
-    llm: AgentLLM,
+    llm: OpenRouterClient,
     *,
     budgets_usd: list[float],
     max_turns: int = 20,

@@ -445,11 +445,15 @@ Backends are MCP servers:
   (`https://search.parallel.ai/mcp`, `x-api-key` from `PARALLEL_API_KEY`;
   `KEENBENCH_PARALLEL_MCP_URL` overrides): `web_search` + `web_fetch`.
 
-The budget is charged in dollars: LLM tokens at list prices plus a per-call
-price table for each tool (`models.py`; `map_result_set_with_llm` costs 10×
-a plain search, so WebQL's heavier tools aren't free). The agent sees its
-running spend after every tool result and is forced to answer once the budget
-is crossed (overshoot is bounded by one turn and reported in `spent_usd`).
+The harness runs on the shared
+[tool-calling agent](#tool-calling-agent) (`keenbench.shared.agent`), with
+each backend's MCP session bridged into the agent's tool registry per task.
+The budget is charged in dollars via its `RunBudget`: LLM tokens at list
+prices plus a per-call price table for each tool (`models.py`;
+`map_result_set_with_llm` costs 10× a plain search, so WebQL's heavier tools
+aren't free). The agent sees its running spend after every tool result and is
+forced to answer once the budget is crossed (overshoot is bounded by one turn
+and reported in `spent_usd`).
 
 Scoring is deterministic: enumerate answers are matched to gold entities by
 normalized name (legal suffixes and "Show HN:" stripped) or URL domain →

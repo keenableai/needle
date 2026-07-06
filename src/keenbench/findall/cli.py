@@ -5,7 +5,7 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from keenbench.findall.harness import AgentLLM, resolve_backend
+from keenbench.findall.harness import resolve_backend
 from keenbench.findall.models import (
     AGENT_MODEL_ENV,
     DEFAULT_AGENT_MODEL,
@@ -17,6 +17,7 @@ from keenbench.findall.score import GoldTask, run_findall
 from keenbench.findall.sources import EdgarFtsClient, HnClient, edgar_tasks, hn_tasks
 from keenbench.shared.cli import parse_csv, sample_or_exit
 from keenbench.shared.io import write_json, write_jsonl
+from keenbench.shared.llm import OpenRouterClient
 
 
 def _as_obj(value: object) -> object:
@@ -161,7 +162,7 @@ class Findall:
         if not key:
             raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for the agent)")
         model = agent_model or os.environ.get(AGENT_MODEL_ENV) or DEFAULT_AGENT_MODEL
-        llm = AgentLLM(api_key=key, model=model)
+        llm = OpenRouterClient(api_key=key, model=model, timeout_s=180.0)
 
         async def _go() -> dict:
             try:
