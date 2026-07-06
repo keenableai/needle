@@ -157,6 +157,7 @@ async def test_request_json_error_field(monkeypatch):
     results, err = await c.search("q")
     assert results is None
     assert err == {"error_type": "api_error", "error_message": "invalid key"}
+    assert c.latencies_ms == []
 
 
 @pytest.mark.parametrize(
@@ -174,7 +175,7 @@ async def test_searchapi_empty_results_exempt_for_operator_queries(monkeypatch, 
     results, err = await c.search(query)
     assert err is None
     assert results == []
-    assert len(c.latencies_ms) == 1
+    assert c.latencies_ms == []
 
 
 async def test_searchapi_empty_results_still_error_for_plain_query(monkeypatch):
@@ -289,7 +290,7 @@ async def test_perplexity_maps_search_results_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
-async def test_perplexity_falls_back_to_citations_with_answer_snippet(monkeypatch):
+async def test_perplexity_falls_back_to_citation_urls_without_snippets(monkeypatch):
     payload = {
         "choices": [{"message": {"content": "the answer"}}],
         "citations": ["https://a", {"url": "https://b", "title": "B"}, {"no": "url"}],
@@ -301,7 +302,7 @@ async def test_perplexity_falls_back_to_citations_with_answer_snippet(monkeypatc
     results, err = await c.search("hi", num_results=5)
     assert err is None
     assert [r.url for r in results] == ["https://a", "https://b"]
-    assert results[0].snippet == results[1].snippet == "the answer"
+    assert results[0].snippet is None and results[1].snippet is None
     assert results[1].title == "B"
 
 

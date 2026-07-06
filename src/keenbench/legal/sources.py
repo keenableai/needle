@@ -180,20 +180,15 @@ class EcfrClient(HttpSearchClient):
         issue = await self.issue_date(title_num)
         if not issue:
             return None
-        try:
-            async with self._sem:
-                resp = await self._http().request(
-                    "GET",
-                    ECFR_SECTION.format(issue_date=issue, title=title_num),
-                    params={"part": part, "section": identifier},
-                    headers={"User-Agent": USER_AGENT},
-                )
-        except Exception:
-            return None
-        if resp.status_code != 200:
+        xml_text = await self._get_text(
+            ECFR_SECTION.format(issue_date=issue, title=title_num),
+            params={"part": part, "section": identifier},
+            headers={"User-Agent": USER_AGENT},
+        )
+        if xml_text is None:
             return None
         return parse_section_xml(
-            resp.text, title_num=title_num, part=part, section=identifier, heading=heading
+            xml_text, title_num=title_num, part=part, section=identifier, heading=heading
         )
 
 

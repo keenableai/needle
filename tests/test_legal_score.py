@@ -124,7 +124,7 @@ async def test_run_legal_scores_hits_and_breakdowns():
     assert good["by_court"]["ca9"]["n"] == 1
     empty = report["engines"]["empty"]
     assert empty["recall_at_k"] == 0.0
-    assert empty["misses_system_specific"] == 0
+    assert empty["misses_system_specific"] == 2
     assert empty["misses_universal"] == 0
 
 

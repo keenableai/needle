@@ -1,11 +1,11 @@
 import asyncio
-from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
 from keenbench.scholar.idconv import IdConverter
 from keenbench.scholar.ids import PaperIds, extract_ids
 from keenbench.scholar.models import AGE_BUCKETS
+from keenbench.shared.recall import classify_misses, group_recall
 from keenbench.shared.search import SearchClient, SearchResult, latency_stats
 
 
@@ -25,19 +25,8 @@ def ids_match(gold: dict[str, str], found: PaperIds) -> bool:
     return any(found_ids.get(k) == v for k, v in gold.items())
 
 
-def _group(scored: list[dict], key: Callable[[dict], str]) -> dict[str, dict[str, Any]]:
-    groups: dict[str, list[dict]] = {}
-    for pq in scored:
-        groups.setdefault(key(pq), []).append(pq)
-    out = {}
-    for name, pqs in groups.items():
-        hits = [pq for pq in pqs if pq["hit_rank"] is not None]
-        out[name] = {"n": len(pqs), "recall_at_k": len(hits) / len(pqs)}
-    return out
-
-
 def _grouped(scored: list[dict], field: str) -> dict[str, dict[str, Any]]:
-    return dict(sorted(_group(scored, lambda pq: pq[field]).items()))
+    return group_recall(scored, lambda pq: pq[field])
 
 
 def _age_order(groups: dict[str, dict]) -> dict[str, dict]:
@@ -113,12 +102,12 @@ async def run_papers(
             "latency": latency_stats(engines[name].latencies_ms),
             "by_bucket": _grouped(scored, "bucket"),
             "by_suite": _grouped(scored, "suite"),
-            "by_age": _age_order(_group(scored, lambda pq: pq["age_bucket"])),
+            "by_age": _age_order(_grouped(scored, "age_bucket")),
             "by_domain": _grouped(scored, "domain"),
             "per_query": per_query,
         }
 
-    _classify_misses(query_outs, engine_names, engines_out)
+    classify_misses(query_outs, engine_names, engines_out)
 
     return {
         "num_queries": len(queries),
@@ -126,25 +115,3 @@ async def run_papers(
         "snippet_chars": snippet_chars,
         "engines": engines_out,
     }
-
-
-def _classify_misses(
-    query_outs: list[list[dict]],
-    engine_names: list[str],
-    engines_out: dict[str, dict[str, Any]],
-) -> None:
-    any_hit = [any(pq["hit_rank"] is not None for pq in entries) for entries in query_outs]
-    for idx, name in enumerate(engine_names):
-        system_specific = universal = 0
-        for entries, others_found in zip(query_outs, any_hit, strict=True):
-            pq = entries[idx]
-            if pq["search_error"] is not None or pq["hit_rank"] is not None:
-                continue
-            if pq["n_results"] == 0:
-                continue
-            if others_found:
-                system_specific += 1
-            else:
-                universal += 1
-        engines_out[name]["misses_system_specific"] = system_specific
-        engines_out[name]["misses_universal"] = universal

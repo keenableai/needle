@@ -1,15 +1,18 @@
 import asyncio
-import json
 import os
 import sys
 from datetime import UTC, datetime
-from pathlib import Path
 
 from keenbench.legal.generate import GenStats, run_generate
 from keenbench.legal.models import SUITES, serialize_row
 from keenbench.legal.score import GoldLegal, run_legal
 from keenbench.legal.sources import CourtListenerClient, EcfrClient
-from keenbench.shared.cli import build_clients_or_exit, parse_csv, sample_or_exit
+from keenbench.shared.cli import (
+    build_clients_or_exit,
+    load_gold_rows,
+    parse_csv,
+    sample_or_exit,
+)
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
 
@@ -17,41 +20,9 @@ DEFAULT_COURTS = "scotus,ca1,ca2,ca3,ca4,ca5,ca6,ca7,ca8,ca9,ca10,ca11,cadc,cafc
 DEFAULT_TITLES = "7,12,14,17,21,26,29,40,47,49"
 
 
-def _as_obj(value: object) -> object:
-    if isinstance(value, str):
-        try:
-            return json.loads(value)
-        except json.JSONDecodeError:
-            return None
-    return value
-
-
-def _load_gold_rows(path: str) -> list[dict]:
-    try:
-        lines = Path(path).read_text(encoding="utf-8").splitlines()
-    except OSError as exc:
-        raise SystemExit(f"error: could not read --queries {path!r}: {exc}") from exc
-    rows = []
-    malformed = 0
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-        obj = _as_obj(line)
-        if not isinstance(obj, dict) or not obj.get("query_text"):
-            continue
-        gold = _as_obj(obj.get("gold"))
-        ids = gold.get("ids") if isinstance(gold, dict) else None
-        if not isinstance(ids, dict) or not ids:
-            malformed += 1
-            continue
-        obj["gold"] = gold
-        origin = _as_obj(obj.get("query_origin"))
-        obj["query_origin"] = origin if isinstance(origin, dict) else {}
-        rows.append(obj)
-    if malformed:
-        print(f"legal: skipped {malformed} malformed gold rows", file=sys.stderr)
-    return rows
+def _gold_ok(gold: dict) -> bool:
+    ids = gold.get("ids")
+    return isinstance(ids, dict) and bool(ids)
 
 
 def _gold_legal(row: dict) -> GoldLegal:
@@ -155,7 +126,7 @@ class Legal:
         sample: str = "stratified",
         seed: int = 0,
     ) -> None:
-        rows = _load_gold_rows(queries)
+        rows = load_gold_rows(queries, bench="legal", gold_ok=_gold_ok)
         if not rows:
             raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
         rows = sample_or_exit(

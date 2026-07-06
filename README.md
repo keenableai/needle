@@ -58,7 +58,7 @@ Keys are read only from the environment.
 
 ## Common `run` flags
 
-All three benchmarks' `run` commands share one interface:
+All benchmarks' `run` commands share one interface:
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
@@ -71,7 +71,7 @@ All three benchmarks' `run` commands share one interface:
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
 Per-engine tuning is env-based so the flag set stays flat as engines are
-added: `KEENABLE_MODE` (default `pro`), `EXA_CONCURRENCY` (default `4`),
+added: `KEENABLE_MODE` (default `pro`), `EXA_CONCURRENCY` (default `1`),
 `PARALLEL_MODE` (default `basic`), `TAVILY_DEPTH` (default `basic`),
 `PERPLEXITY_MODEL` (default `sonar`, use `sonar-pro` for the advanced model).
 
@@ -197,7 +197,7 @@ Three suites (`--suites`, default all), one query row per grounded field:
 - **`companyfill`** — SEC `company_tickers.json` seeds the companies; each is
   resolved to Wikidata (gated on company-class or LEI/exchange signals) and
   every grounded field becomes a query: ceo (P169 with no end date),
-  founded_year, hq_country, industry, website, employees (omitted when
+  founded_year, hq_country, website, employees (omitted when
   Wikidata's latest figure is stale), lei (P1278, or GLEIF with
   `--use-gleif`), ticker. Companies with fewer than 4 grounded fields are
   dropped as likely mis-resolutions.
