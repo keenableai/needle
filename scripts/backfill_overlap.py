@@ -34,8 +34,11 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
     uniqueness = _load(data / "uniqueness.jsonl")
     overlap_seen = {r["ts"] for r in overlap}
     uniqueness_seen = {r["ts"] for r in uniqueness}
-    # pre-num_shared3 rows are present but stale; reprocess to add the field
-    overlap_stale = {r["ts"] for r in overlap if "num_shared3" not in r}
+    # rows predating a later-added field are stale; reprocess to add it
+    overlap_fields = ("num_shared3", "num_suspect", "low_shared_urls")
+    overlap_stale = {
+        r["ts"] for r in overlap if any(f not in r for f in overlap_fields)
+    }
     cutoff = (
         (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT)
         if hours is not None
