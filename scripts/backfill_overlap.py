@@ -36,7 +36,11 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
     uniqueness_seen = {r["ts"] for r in uniqueness}
     # pre-num_shared3 rows are present but stale; reprocess to add the field
     overlap_stale = {r["ts"] for r in overlap if "num_shared3" not in r}
-    cutoff = (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT) if hours else ""
+    cutoff = (
+        (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT)
+        if hours is not None
+        else ""
+    )
 
     new_overlap: list[dict] = []
     new_uniqueness: list[dict] = []
