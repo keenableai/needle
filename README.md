@@ -48,7 +48,8 @@ Keys are read only from the environment.
 | `OPENROUTER_API_KEY` | `freshstream generate`, `freshstream run`, `companyfill generate` (filingdoc suite) + `run --judge`, `scholar generate`, `legal generate` (code suite) | One [OpenRouter](https://openrouter.ai) key reaches Claude, GPT, Gemini, … |
 | `EXA_API_KEY` | the `exa` engine | Required when `--engines` includes `exa` |
 | `KEENABLE_API_KEY` | the `keenable` engine | Optional — without it the keyless (rate-limited) endpoint is used |
-| `SEARCHAPI_API_KEY` | the `google` and `bing` engines | One [SearchAPI](https://www.searchapi.io) key covers both |
+| `SERPER_API_KEY` | the `google` engine | [Serper](https://serper.dev) Google SERP API |
+| `SEARCHAPI_API_KEY` | the `bing` engine | [SearchAPI](https://www.searchapi.io) |
 | `BRAVE_API_KEY` | the `brave` engine | [Brave Search API](https://brave.com/search/api/) |
 | `PARALLEL_API_KEY` | the `parallel` engine | [Parallel](https://parallel.ai) v1 search |
 | `TAVILY_API_KEY` | the `tavily` engine | [Tavily](https://tavily.com) search |
@@ -401,7 +402,8 @@ never raises). Shipped engines:
 | --- | --- | --- |
 | `KeenableClient` | `POST /v1/search/public` when keyless, `POST /v1/search` with a key | `X-API-Key` (optional — the keyless endpoint is burst-rate-limited, so the client defaults to low concurrency without one) |
 | `ExaClient` | `POST https://api.exa.ai/search` | `x-api-key` (required) |
-| `SearchApiClient` | `GET https://www.searchapi.io/api/v1/search` — wraps Google and Bing (the `google` / `bing` engines) | `Authorization: Bearer` (required) |
+| `SerperClient` | `POST https://google.serper.dev/search` (the `google` engine) | `X-API-KEY` (required) |
+| `SearchApiClient` | `GET https://www.searchapi.io/api/v1/search` — wraps Bing (the `bing` engine) | `Authorization: Bearer` (required) |
 | `BraveClient` | `GET https://api.search.brave.com/res/v1/web/search` | `X-Subscription-Token` (required) |
 | `ParallelClient` | `POST https://api.parallel.ai/v1/search` | `x-api-key` (required) |
 | `TavilyClient` | `POST https://api.tavily.com/search` | `Authorization: Bearer` (required) |
