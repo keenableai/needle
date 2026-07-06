@@ -218,6 +218,26 @@ async def test_serper_maps_kg_answer_box_and_organic(monkeypatch):
     assert calls["headers"] == {"X-API-KEY": "k", "Content-Type": "application/json"}
 
 
+async def test_serper_tolerates_malformed_payload(monkeypatch):
+    payload = {
+        "knowledgeGraph": "not a dict",
+        "answerBox": ["not", "a", "dict"],
+        "organic": [None, "junk", {"link": "https://a", "title": "A"}, 7],
+    }
+    c = SerperClient(api_key="k")
+    fake, _ = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi")
+    assert err is None
+    assert [r.url for r in results] == ["https://a"]
+
+    fake, _ = _canned({"organic": "not a list"})
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi")
+    assert err is None
+    assert results == []
+
+
 async def test_serper_empty_results_not_an_error(monkeypatch):
     c = SerperClient(api_key="k")
     fake, _ = _canned({"organic": []})

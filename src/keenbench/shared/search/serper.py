@@ -48,8 +48,9 @@ class SerperClient(HttpSearchClient):
                     url=ab["link"], title=ab.get("title"), snippet=ab.get("snippet"), raw=ab
                 )
             )
-        for r in payload.get("organic") or []:
-            if not r.get("link"):
+        organic = payload.get("organic")
+        for r in organic if isinstance(organic, list) else []:
+            if not isinstance(r, dict) or not r.get("link"):
                 continue
             results.append(
                 SearchResult(
