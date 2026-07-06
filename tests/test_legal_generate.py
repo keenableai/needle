@@ -90,6 +90,28 @@ async def test_caselaw_rows_cycle_syntaxes_and_dedupe():
     assert all(g["party_tokens"] for g in golds)
 
 
+async def test_caselaw_selection_varies_with_seed():
+    cases = [_case(n) for n in range(1, 13)]
+
+    async def picked(seed):
+        rows, _ = await run_generate(
+            courtlistener=FakeCourtListener({"ca9": cases}),
+            ecfr=None,
+            llm=None,
+            hour_ts=HOUR,
+            now=NOW,
+            courts=("ca9",),
+            per_court=4,
+            months_back=1,
+            titles=(),
+            per_title=0,
+            seed=seed,
+        )
+        return {r["gold"]["case_key"] for r in rows}
+
+    assert await picked(1) != await picked(2)
+
+
 async def test_code_rows_project_and_gate():
     from keenbench.legal.models import CodeSection
 

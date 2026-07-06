@@ -5,6 +5,7 @@ import json
 import os
 import sys
 from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +14,7 @@ from keenbench.shared.judge import DEFAULT_MAX_CONTENT_CHARS
 from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
 from keenbench.shared.rankeval import EvalQuery, run_rbp
 from keenbench.shared.sampling import sample as sample_rows
+from keenbench.shared.sampling import seed_from_hour_ts
 from keenbench.shared.search import SearchClient, build_search_clients
 
 
@@ -58,10 +60,17 @@ def load_gold_rows(path: str, *, bench: str, gold_ok: Callable[[dict], bool]) ->
     return rows
 
 
+def resolve_seed(seed: int | None, hour_ts: datetime | None = None) -> int:
+    if seed is not None:
+        return seed
+    ts = hour_ts or datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
+    return seed_from_hour_ts(ts)
+
+
 def sample_or_exit(
     rows: list[dict[str, Any]],
     limit: int,
-    seed: int,
+    seed: int | None,
     *,
     strategy: str,
     key: str | Callable[[dict[str, Any]], str] = "topical_domain",
@@ -69,7 +78,7 @@ def sample_or_exit(
     if limit <= 0 or len(rows) <= limit:
         return rows
     try:
-        return sample_rows(rows, limit, seed, strategy=strategy, key=key)
+        return sample_rows(rows, limit, resolve_seed(seed), strategy=strategy, key=key)
     except ValueError as exc:
         raise SystemExit(f"error: --sample: {exc}") from exc
 

@@ -12,6 +12,7 @@ from keenbench.shared.cli import (
     build_clients_or_exit,
     load_gold_rows,
     parse_csv,
+    resolve_seed,
     sample_or_exit,
 )
 from keenbench.shared.io import write_json, write_jsonl
@@ -46,7 +47,7 @@ class Scholar:
         suites: str | tuple[str, ...] = "arxiv,europepmc",
         age_buckets: str | tuple[str, ...] = "7d,30d,1y",
         per_cell: int = 10,
-        seed: int = 0,
+        seed: int | None = None,
         llm_model: str | None = None,
         body_concurrency: int = 8,
     ) -> None:
@@ -67,6 +68,7 @@ class Scholar:
 
         now = datetime.now(UTC)
         hour_ts = now.replace(minute=0, second=0, microsecond=0)
+        seed = resolve_seed(seed, hour_ts)
 
         arxiv = ArxivClient() if "arxiv" in suite_names else None
         europepmc = EuropePmcClient() if "europepmc" in suite_names else None
@@ -117,7 +119,7 @@ class Scholar:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
         resolve_pmcids: bool = True,
     ) -> None:
         rows = load_gold_rows(queries, bench="scholar", gold_ok=_gold_ok)

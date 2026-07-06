@@ -180,7 +180,7 @@ class Freshstream:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
         judge_model: str | None = None,
         judge_concurrency: int = 8,
     ) -> None:

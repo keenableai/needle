@@ -1,3 +1,4 @@
+import random
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 from typing import Any
@@ -24,6 +25,8 @@ ARXIV_DOMAINS = (
 HEALTH_DOMAIN = "health sciences"
 OVERSAMPLE = 3
 MAX_SUBWINDOWS = 24
+ARXIV_WINDOW_POOL = 20
+ARXIV_MAX_RESULTS = 1000
 
 _DROP_STAT = {
     "fetch": "body_fetch_fail",
@@ -104,11 +107,15 @@ async def _cell_candidates(
                     )
                 )
         elif arxiv is not None:
-            lists.append(
-                await arxiv.search_domain(
-                    domain, from_date=from_date, to_date=to_date, max_results=per
-                )
+            papers = await arxiv.search_domain(
+                domain,
+                from_date=from_date,
+                to_date=to_date,
+                max_results=min(per * ARXIV_WINDOW_POOL, ARXIV_MAX_RESULTS),
             )
+            if len(papers) > per:
+                papers = random.Random(seed + wi).sample(papers, per)
+            lists.append(papers)
     return _interleave(lists)
 
 
