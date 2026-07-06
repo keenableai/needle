@@ -17,7 +17,7 @@ from pathlib import Path
 
 import fire
 
-from keenbench.shared.io import append_jsonl, write_json
+from keenbench.shared.io import append_jsonl, write_json, write_jsonl
 from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
 
@@ -98,6 +98,18 @@ def slim_report(report: dict) -> dict:
     return slim
 
 
+def _publish_rows(path: Path, new_rows: list[dict], ts: str, republish: bool) -> None:
+    if republish and path.exists():
+        kept = [
+            row
+            for line in path.read_text(encoding="utf-8").splitlines()
+            if line and (row := json.loads(line))["ts"] != ts
+        ]
+        write_jsonl(kept + new_rows, str(path))
+    else:
+        append_jsonl(new_rows, str(path))
+
+
 def publish(
     site: str,
     runs_out: str,
@@ -143,12 +155,15 @@ def publish(
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
 
-    append_jsonl(rows, str(data / "history.jsonl"))
-    for name, new_rows in (("overlap.jsonl", overlap), ("uniqueness.jsonl", uniqueness)):
-        append_jsonl(new_rows, str(data / name))
-
     index_path = data / "runs.json"
     runs = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []
+    republish = any(r.get("id") == run_id for r in runs)
+
+    _publish_rows(data / "history.jsonl", rows, ts, republish)
+    for name, new_rows in (("overlap.jsonl", overlap), ("uniqueness.jsonl", uniqueness)):
+        _publish_rows(data / name, new_rows, ts, republish)
+
+    runs = [r for r in runs if r.get("id") != run_id]
     runs.append({"id": run_id, "ts": ts, "artifacts": sorted(p.name for p in run_dir.iterdir())})
     write_json(runs, str(index_path))
     print(f"appended {len(rows)} rows at {ts}; staged {run_id}")
