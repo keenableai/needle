@@ -1,6 +1,22 @@
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
 
 
+def _is_empty_results_error(err: dict[str, str]) -> bool:
+    return err.get("error_type") == "api_error" and "return any results" in err.get(
+        "error_message", ""
+    ).lower()
+
+
+def _has_restrictive_operator(query: str) -> bool:
+    lowered = query.lower()
+    return (
+        "site:" in lowered
+        or "after:" in lowered
+        or "before:" in lowered
+        or query.count('"') >= 2
+    )
+
+
 class SearchApiClient(HttpSearchClient):
     def __init__(
         self,
@@ -33,6 +49,8 @@ class SearchApiClient(HttpSearchClient):
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
         if err is not None:
+            if _is_empty_results_error(err) and _has_restrictive_operator(query):
+                return [], None
             return None, err
         if not isinstance(payload, dict):
             payload = {}

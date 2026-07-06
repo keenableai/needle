@@ -668,8 +668,13 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   entries.sort((a, b) => b.v - a.v);
   const runs = Math.max(...entries.map((x) => x.n));
   const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
+  const benchRows = rows.filter((r) => r.bench === bench && r.num_queries != null);
+  const latestQ = benchRows.length
+    ? benchRows.reduce((a, b) => (new Date(b.ts) > new Date(a.ts) ? b : a)).num_queries
+    : null;
+  const qtext = latestQ != null ? `, ${latestQ} queries` : "";
   document.getElementById(subId).textContent =
-    `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
+    `mean of ${runs} run${runs === 1 ? "" : "s"}${qtext}, last 7 days — latest ${fmtTime(lastT)} UTC`;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
