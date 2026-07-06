@@ -20,6 +20,11 @@ def write_jsonl(records: Iterable[Record], out: str) -> None:
         _write(records, fh)
 
 
+def append_jsonl(records: Iterable[Record], out: str) -> None:
+    with open(out, "a", encoding="utf-8") as fh:
+        _write(records, fh)
+
+
 def write_json(obj: Any, out: str) -> None:
     text = json.dumps(obj, ensure_ascii=False, indent=2)
     if out == "-":

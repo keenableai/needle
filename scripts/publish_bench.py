@@ -17,7 +17,7 @@ from pathlib import Path
 
 import fire
 
-from keenbench.shared.io import write_json
+from keenbench.shared.io import append_jsonl, write_json
 from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
 
@@ -143,14 +143,9 @@ def publish(
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
 
-    with open(data / "history.jsonl", "a", encoding="utf-8") as fh:
-        for row in rows:
-            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
-
+    append_jsonl(rows, str(data / "history.jsonl"))
     for name, new_rows in (("overlap.jsonl", overlap), ("uniqueness.jsonl", uniqueness)):
-        with open(data / name, "a", encoding="utf-8") as fh:
-            for row in new_rows:
-                fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+        append_jsonl(new_rows, str(data / name))
 
     index_path = data / "runs.json"
     runs = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []

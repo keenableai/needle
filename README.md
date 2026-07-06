@@ -398,7 +398,7 @@ companyfill + scholar daily at 00:17 UTC (fresh gold each — companyfill
 - appends summary rows to `data/history.jsonl` and per-engine-pair URL-overlap
   rows (mean Jaccard of normalized top-K URL sets per query) to
   `data/overlap.jsonl` on the `gh-pages` branch — rendered as a dashboard
-  (trends, latest tiles, per-field table, a last-24h engine-overlap matrix,
+  (trends, latest tiles, per-field table, an all-time engine-overlap matrix,
   judgement browser) at <https://super-journey-4z52474.pages.github.io/> (the
   URL becomes `keenableai.github.io/keenbench` when the repo goes public);
 - archives the full artifacts (reports with per-result judge reasoning, the
