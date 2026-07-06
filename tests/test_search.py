@@ -137,24 +137,6 @@ async def test_searchapi_maps_kg_answer_box_and_organic(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
-async def test_request_json_error_field(monkeypatch):
-    class FakeResp:
-        status_code = 200
-
-        def json(self):
-            return {"error": "invalid key"}
-
-    class FakeHttp:
-        async def request(self, method, url, **kwargs):
-            return FakeResp()
-
-    c = SearchApiClient(api_key="k", engine="bing")
-    monkeypatch.setattr(c, "_http", lambda: FakeHttp())
-    results, err = await c.search("q")
-    assert results is None
-    assert err == {"error_type": "api_error", "error_message": "invalid key"}
-
-
 def _no_results_http(message):
     class FakeResp:
         status_code = 200
@@ -167,6 +149,14 @@ def _no_results_http(message):
             return FakeResp()
 
     return FakeHttp()
+
+
+async def test_request_json_error_field(monkeypatch):
+    c = SearchApiClient(api_key="k", engine="bing")
+    monkeypatch.setattr(c, "_http", lambda: _no_results_http("invalid key"))
+    results, err = await c.search("q")
+    assert results is None
+    assert err == {"error_type": "api_error", "error_message": "invalid key"}
 
 
 @pytest.mark.parametrize(
