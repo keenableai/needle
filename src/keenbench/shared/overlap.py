@@ -18,6 +18,9 @@ def normalize_url(url: str) -> str:
     return f"{host}{path}{query}"
 
 
+GOOD_LABELS = frozenset({"HM", "FullyM"})
+
+
 def _url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
     return {
         name: [
@@ -30,20 +33,42 @@ def _url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
     }
 
 
+def _low_url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
+    return {
+        name: [
+            None
+            if pq["search_error"] is not None
+            else {
+                normalize_url(r["url"])
+                for r in pq["results"]
+                if r.get("label") and r["label"] not in GOOD_LABELS
+            }
+            for pq in e["per_query"]
+        ]
+        for name, e in report["engines"].items()
+    }
+
+
 def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
     url_sets = _url_sets(report)
+    low_sets = _low_url_sets(report)
     names = list(url_sets)
     rows = []
     for i, a in enumerate(names):
         for b in names[i + 1 :]:
             jaccard_sum = 0.0
             shared3 = 0
+            suspect = 0
+            low_shared_urls = 0
             n = 0
-            for sa, sb in zip(url_sets[a], url_sets[b], strict=True):
+            for qi, (sa, sb) in enumerate(zip(url_sets[a], url_sets[b], strict=True)):
                 if sa is None or sb is None or not (sa or sb):
                     continue
                 jaccard_sum += len(sa & sb) / len(sa | sb)
                 shared3 += len(sa & sb) >= 3
+                low = (low_sets[a][qi] or set()) & (low_sets[b][qi] or set())
+                low_shared_urls += len(low)
+                suspect += len(low) >= 1 or len(sa & sb) >= 3
                 n += 1
             rows.append(
                 {
@@ -52,6 +77,8 @@ def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
                     "b": b,
                     "jaccard_sum": round(jaccard_sum, 4),
                     "num_shared3": shared3,
+                    "num_suspect": suspect,
+                    "low_shared_urls": low_shared_urls,
                     "num_queries": n,
                 }
             )

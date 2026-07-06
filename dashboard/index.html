@@ -284,6 +284,11 @@
       <div class="overlap-matrix" id="overlap3-table"></div>
     </div>
   </div>
+  <div class="card" id="card-lowshared">
+    <h2>Suspicious sharing (all time)</h2>
+    <div class="sub" id="lowshared-sub"></div>
+    <div class="overlap-matrix" id="lowshared-table"></div>
+  </div>
   <div class="card" id="card-uniqueness">
     <h2>Result uniqueness (all time)</h2>
     <div class="sub" id="uniqueness-sub"></div>
@@ -785,6 +790,7 @@ const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
 const SHARED3_STEPS = [0.05, 0.15, 0.3, 0.5];
+const LOWSHARED_STEPS = [0.05, 0.12, 0.25, 0.5];
 const overlapStep = (v, steps) => {
   const i = steps.findIndex((t) => v < t);
   return i === -1 ? 4 : i;
@@ -827,17 +833,25 @@ function overlapMatrix(holder, engines, cellFor) {
 function renderOverlap(rows) {
   const jaccardHolder = document.getElementById("overlap-table");
   const shared3Holder = document.getElementById("overlap3-table");
+  const lowHolder = document.getElementById("lowshared-table");
   jaccardHolder.replaceChildren();
   shared3Holder.replaceChildren();
+  lowHolder.replaceChildren();
   const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
   const pairs = new Map();
   for (const r of rows) {
-    const agg = pairs.get(pairKey(r.a, r.b)) || { jsum: 0, n: 0, s3sum: 0, n3: 0 };
+    const agg = pairs.get(pairKey(r.a, r.b)) ||
+      { jsum: 0, n: 0, s3sum: 0, n3: 0, low2: 0, lowUrls: 0, nLow: 0 };
     agg.jsum += r.jaccard_sum;
     agg.n += r.num_queries;
     if (r.num_shared3 != null) {
       agg.s3sum += r.num_shared3;
       agg.n3 += r.num_queries;
+    }
+    if (r.num_suspect != null) {
+      agg.low2 += r.num_suspect;
+      agg.lowUrls += r.low_shared_urls || 0;
+      agg.nLow += r.num_queries;
     }
     pairs.set(pairKey(r.a, r.b), agg);
   }
@@ -846,6 +860,7 @@ function renderOverlap(rows) {
   if (engines.length < 2) {
     jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     shared3Holder.appendChild(el("div", { class: "empty" }, emptyMsg));
+    lowHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     return;
   }
   const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
@@ -871,6 +886,18 @@ function renderOverlap(rows) {
       text: `${Math.round(v * 100)}%`,
       step: overlapStep(v, SHARED3_STEPS),
       title: `${a} ∩ ${b}: ${agg.s3sum} of ${agg.n3} queries share ≥3 URLs`,
+    };
+  });
+  document.getElementById("lowshared-sub").textContent =
+    "share of queries where the pair shares a below-HM URL or 3+ URLs of any rating — sharing good URLs is expected, sharing junk or near-identical lists suggests a common upstream index";
+  overlapMatrix(lowHolder, engines, (a, b) => {
+    const agg = pairs.get(pairKey(a, b));
+    if (!agg || !agg.nLow) return null;
+    const v = agg.low2 / agg.nLow;
+    return {
+      text: `${Math.round(v * 100)}%`,
+      step: overlapStep(v, LOWSHARED_STEPS),
+      title: `${a} ∩ ${b}: ${agg.low2} of ${agg.nLow} queries share a low-relevance URL or 3+ URLs (${agg.lowUrls} junk URLs total)`,
     };
   });
 }
