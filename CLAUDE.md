@@ -6,8 +6,8 @@ with an LLM judge backstop on misses), scholar (daily, known-item paper
 retrieval, recall@10 + MRR@10 by deterministic arXiv/DOI/PMID match), and
 legal (daily, known-item caselaw/CFR retrieval, recall@5 + MRR@5 by
 deterministic citation/docket/URL match). rarestream is a query producer, not
-a bench: it selects English medium/long queries with rare words (same
-BERT-wordpiece rarity definition as keenable-eval's rare-entity producer). It's
+a bench: it selects English medium/long queries with rare words (rarity
+defined over BERT WordPiece tokenization). It's
 split in two:
 - `scripts/rarestream_filter.py` — the heavy filter step (BERT WordPiece +
   fastText language ID). Reads a jsonl/parquet dataset and writes the filtered
