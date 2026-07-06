@@ -2,8 +2,13 @@ name: Bench
 
 on:
   schedule:
-    - cron: "17 0 * * *" # daily: freshstream + companyfill/scholar/legal (fresh gold) + rarestream
-    - cron: "17 1-23 * * *" # hourly: freshstream only
+    # daily benches get one hour each so their public-API load (SEC, arXiv,
+    # EuropePMC, CourtListener, eCFR) and search quotas never stack in one run
+    - cron: "17 0 * * *" # freshstream + companyfill (fresh gold)
+    - cron: "17 6 * * *" # freshstream + rarestream
+    - cron: "17 12 * * *" # freshstream + scholar (fresh gold)
+    - cron: "17 18 * * *" # freshstream + legal (fresh gold)
+    - cron: "17 1-5,7-11,13-17,19-23 * * *" # hourly: freshstream only
   workflow_dispatch:
     inputs:
       companyfill:
@@ -90,7 +95,7 @@ jobs:
 
       - name: rarestream (daily schedule or dispatch opt-in)
         env:
-          RUN_RARESTREAM: ${{ github.event.schedule == '17 0 * * *' || inputs.rarestream == true }}
+          RUN_RARESTREAM: ${{ github.event.schedule == '17 6 * * *' || inputs.rarestream == true }}
         run: |
           if [ "$RUN_RARESTREAM" != "true" ]; then
             echo "skipping rarestream"
@@ -101,7 +106,7 @@ jobs:
 
       - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
         env:
-          RUN_SCHOLAR: ${{ github.event.schedule == '17 0 * * *' || inputs.scholar == true }}
+          RUN_SCHOLAR: ${{ github.event.schedule == '17 12 * * *' || inputs.scholar == true }}
         run: |
           if [ "$RUN_SCHOLAR" != "true" ] && [ -s site-data/data/scholar.jsonl ]; then
             echo "skipping scholar"
@@ -115,7 +120,7 @@ jobs:
 
       - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
         env:
-          RUN_LEGAL: ${{ github.event.schedule == '17 0 * * *' || inputs.legal == true }}
+          RUN_LEGAL: ${{ github.event.schedule == '17 18 * * *' || inputs.legal == true }}
         run: |
           if [ "$RUN_LEGAL" != "true" ] && [ -s site-data/data/legal.jsonl ]; then
             echo "skipping legal"
