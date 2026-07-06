@@ -8,13 +8,24 @@ from pathlib import Path
 
 from keenbench.companyfill.canon import FIELD_TYPES
 from keenbench.companyfill.generate import GenStats, run_generate
+from keenbench.companyfill.models import QUARTERLY_FIELDS
 from keenbench.companyfill.registries import GleifClient, SecClient, WikidataClient
 from keenbench.companyfill.score import GoldQuery, run_answers
+from keenbench.companyfill.sources import EdgarClient
 from keenbench.shared.cli import build_clients_or_exit, parse_csv, sample_or_exit
 from keenbench.shared.io import write_json, write_jsonl
-from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
+from keenbench.shared.llm import OpenRouterClient, resolve_judge_model, resolve_llm_model
 
-KNOWN_SUITES = ("companyfill", "financials")
+KNOWN_SUITES = ("companyfill", "filings", "filingdoc")
+
+
+def _as_obj(value: object) -> object:
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            return None
+    return value
 
 
 def _load_gold_rows(path: str) -> list[dict]:
@@ -27,13 +38,10 @@ def _load_gold_rows(path: str) -> list[dict]:
         line = line.strip()
         if not line:
             continue
-        try:
-            obj = json.loads(line)
-        except json.JSONDecodeError:
-            continue
+        obj = _as_obj(line)
         if not isinstance(obj, dict) or not obj.get("query_text"):
             continue
-        gold = obj.get("gold")
+        gold = _as_obj(obj.get("gold"))
         if not isinstance(gold, dict) or not gold.get("field") or not gold.get("field_type"):
             continue
         field_type = str(gold["field_type"])
@@ -42,17 +50,16 @@ def _load_gold_rows(path: str) -> list[dict]:
                 f"error: unsupported gold.field_type {field_type!r} for query "
                 f"{str(obj['query_text'])!r} (known: {', '.join(sorted(FIELD_TYPES))})"
             )
+        obj["gold"] = gold
+        origin = _as_obj(obj.get("query_origin"))
+        obj["query_origin"] = origin if isinstance(origin, dict) else {}
         rows.append(obj)
     return rows
 
 
 def _gold_query(row: dict) -> GoldQuery:
-    origin = row.get("query_origin")
-    if isinstance(origin, str):
-        try:
-            origin = json.loads(origin)
-        except json.JSONDecodeError:
-            origin = {}
+    origin = _as_obj(row.get("query_origin"))
+    origin = origin if isinstance(origin, dict) else {}
     gold = row["gold"]
     return GoldQuery(
         text=str(row["query_text"]),
@@ -60,19 +67,28 @@ def _gold_query(row: dict) -> GoldQuery:
         field_type=str(gold["field_type"]),
         value=gold.get("value"),
         aliases=tuple(str(a) for a in gold.get("aliases") or []),
-        bucket=str((origin or {}).get("bucket") or "unknown"),
+        bucket=str(origin.get("bucket") or "unknown"),
         freshness_window=str(gold.get("freshness_window") or "static"),
+        syntax=str(origin.get("syntax") or "plain"),
+        tier=str(gold.get("tier") or ""),
     )
 
 
 class Companyfill:
     def generate(
         self,
-        suites: str | tuple[str, ...] = "companyfill,financials",
+        suites: str | tuple[str, ...] = "companyfill,filings,filingdoc",
         out: str = "-",
         max_companies: int = 100,
         use_gleif: bool = False,
         min_employee_year: int = 0,
+        fields: str | tuple[str, ...] = "net_income,operating_income,eps_diluted",
+        per_company: int = 2,
+        quarters_back: int = 6,
+        filingdoc_target: int = 40,
+        seed: int = 0,
+        llm_model: str | None = None,
+        doc_concurrency: int = 8,
         registry_concurrency: int = 4,
     ) -> None:
         suite_names = tuple(parse_csv(suites))
@@ -82,9 +98,17 @@ class Companyfill:
                 f"error: unknown --suites {','.join(unknown) or suites!r} "
                 f"(known: {', '.join(KNOWN_SUITES)})"
             )
+        field_names = tuple(parse_csv(fields))
+        bad_fields = [f for f in field_names if f not in QUARTERLY_FIELDS]
+        if "filings" in suite_names and (bad_fields or not field_names):
+            raise SystemExit(
+                f"error: unknown --fields {','.join(bad_fields) or fields!r} "
+                f"(known: {', '.join(QUARTERLY_FIELDS)})"
+            )
         if min_employee_year <= 0:
             min_employee_year = datetime.now(UTC).year - 1
-        hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
+        now = datetime.now(UTC)
+        hour_ts = now.replace(minute=0, second=0, microsecond=0)
 
         concurrency = max(1, registry_concurrency)
         sec = SecClient(max_concurrency=concurrency)
@@ -96,23 +120,42 @@ class Companyfill:
             if use_gleif and "companyfill" in suite_names
             else None
         )
+        edgar = EdgarClient(max_concurrency=concurrency) if "filingdoc" in suite_names else None
+        llm = None
+        if "filingdoc" in suite_names:
+            key = os.environ.get("OPENROUTER_API_KEY")
+            if not key:
+                raise SystemExit(
+                    "error: OPENROUTER_API_KEY is not set (needed for the filingdoc suite)"
+                )
+            llm = OpenRouterClient(api_key=key, model=resolve_llm_model(llm_model))
 
         async def _go() -> tuple[list[dict], GenStats]:
             try:
-                seed = await sec.tickers(max_companies)
-                if not seed:
+                all_rows = await sec.tickers(0)
+                if not all_rows:
                     raise SystemExit("error: could not load the SEC company_tickers seed")
                 return await run_generate(
-                    seed,
+                    all_rows,
                     wikidata=wikidata,
-                    sec=sec if "financials" in suite_names else None,
+                    sec=sec if "filings" in suite_names else None,
                     gleif=gleif,
+                    edgar=edgar,
+                    llm=llm,
                     suites=suite_names,
                     hour_ts=hour_ts,
+                    now=now,
                     min_employee_year=min_employee_year,
+                    max_companies=max_companies,
+                    fields=field_names,
+                    per_company=per_company,
+                    quarters_back=quarters_back,
+                    filingdoc_target=filingdoc_target,
+                    seed=seed,
+                    doc_concurrency=doc_concurrency,
                 )
             finally:
-                for client in (sec, wikidata, gleif):
+                for client in (sec, wikidata, gleif, edgar, llm):
                     if client is not None:
                         await client.aclose()
 
@@ -128,7 +171,12 @@ class Companyfill:
         buckets = ", ".join(f"{b}={n}" for b, n in sorted(by_bucket.items())) or "none"
         print(
             f"companyfill: {stats.rows} queries from {stats.companies} companies "
-            f"({buckets}; {stats.resolved} resolved in wikidata, {stats.errors} errors)",
+            f"({buckets}; {stats.resolved} resolved in wikidata; "
+            f"filings={stats.filings_rows} (facts_missing={stats.facts_missing}); "
+            f"filingdoc={stats.filingdoc_rows} of {stats.doc_candidates} candidates "
+            f"(fetch={stats.doc_fetch_fail}, thin={stats.doc_thin}, "
+            f"no_query={stats.doc_no_query}, rejected={stats.doc_rejected}, "
+            f"llm_err={stats.llm_errors}); {stats.errors} errors)",
             file=sys.stderr,
         )
 
@@ -149,7 +197,16 @@ class Companyfill:
         rows = _load_gold_rows(queries)
         if not rows:
             raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
-        rows = sample_or_exit(rows, limit, seed, strategy=sample, key=lambda r: r["gold"]["field"])
+        rows = sample_or_exit(
+            rows,
+            limit,
+            seed,
+            strategy=sample,
+            key=lambda r: (
+                f"{r['query_origin'].get('bucket', '?')}:"
+                f"{r['query_origin'].get('syntax', '?')}:{r['gold'].get('field', '?')}"
+            ),
+        )
         gold_queries = [_gold_query(r) for r in rows]
 
         clients = build_clients_or_exit(engines, snippet_chars=snippet_chars)
@@ -190,12 +247,17 @@ class Companyfill:
             file=sys.stderr,
         )
         for name, e in report["engines"].items():
+            filings = e["by_bucket"].get("filings", {}).get("recall_at_k")
+            filingdoc = e["by_bucket"].get("filingdoc", {}).get("recall_at_k")
+            filings_str = f"{filings:.3f}" if filings is not None else "n/a"
+            filingdoc_str = f"{filingdoc:.3f}" if filingdoc is not None else "n/a"
             extras = f"{e['search_errors']} search errs"
             if model:
                 extras += f"; {e['judge_upgrades']} judge upgrades, {e['judge_errors']} judge errs"
             print(
                 f"  {name:10s} answer-recall@{num_results} = {e['recall_at_k']:.4f}  "
                 f"MRR = {e['mrr_at_k']:.4f}  "
-                f"({e['num_scored']}/{report['num_queries']} scored; {extras})",
+                f"(filings = {filings_str}, filingdoc = {filingdoc_str}; "
+                f"{e['num_scored']}/{report['num_queries']} scored; {extras})",
                 file=sys.stderr,
             )

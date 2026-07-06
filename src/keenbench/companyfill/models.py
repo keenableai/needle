@@ -71,14 +71,51 @@ COMPANYFILL_FIELDS = {
     ),
 }
 
-FINANCIALS_FIELDS = {
-    "revenue": FieldSpec("money", "1y", "{name} revenue fiscal year {fy}"),
-    "net_income": FieldSpec("money", "1y", "{name} net income fiscal year {fy}"),
-    "total_assets": FieldSpec("money", "1y", "{name} total assets fiscal year {fy}"),
-    "stockholders_equity": FieldSpec("money", "1y", "{name} stockholders equity fiscal year {fy}"),
+QUARTERLY_FIELDS = {
+    "revenue": FieldSpec("money", "1y", "{name} {quarter} revenue"),
+    "net_income": FieldSpec("money", "1y", "{name} {quarter} net income"),
+    "operating_income": FieldSpec("money", "1y", "{name} {quarter} operating income"),
+    "eps_diluted": FieldSpec(
+        "money", "1y", "{name} {quarter} diluted eps", ("eps", "per share", "earnings per")
+    ),
 }
 
-FIELD_SPECS = {**COMPANYFILL_FIELDS, **FINANCIALS_FIELDS}
+FILINGDOC_FIELD = "filing"
+FILINGDOC_SPEC = FieldSpec("exact_id", "static", "")
+
+FIELD_SPECS = {**COMPANYFILL_FIELDS, **QUARTERLY_FIELDS, FILINGDOC_FIELD: FILINGDOC_SPEC}
+
+FILINGS_SYNTAX_CYCLE = ("plain", "quoted")
+FILINGDOC_SYNTAX_CYCLE = ("plain", "site", "plain", "quoted", "plain", "date")
+
+
+@dataclass(frozen=True)
+class QuarterFact:
+    field: str
+    value: float
+    fy: int
+    fp: str
+    end: str
+
+
+@dataclass(frozen=True)
+class Filing:
+    cik: int
+    company: str
+    ticker: str
+    form: str
+    adsh: str
+    filed: str
+    primary_doc: str
+    tier: str = ""
+
+    @property
+    def adsh_nodash(self) -> str:
+        return self.adsh.replace("-", "")
+
+
+def quarter_phrase(fact: QuarterFact) -> str:
+    return f"{fact.fp.lower()} fiscal {fact.fy}"
 
 
 def display_name(title: str) -> str:
@@ -106,6 +143,8 @@ def build_gold_row(
     registry: str,
     source_url: str,
     hour_ts: datetime,
+    syntax: str = "plain",
+    tier: str = "",
 ) -> dict[str, Any]:
     ts = hour_ts.isoformat()
     return {
@@ -115,6 +154,7 @@ def build_gold_row(
         "query_source": COMPANYFILL_PRODUCER_ID,
         "query_origin": {
             "bucket": bucket,
+            "syntax": syntax,
             "topical_domain": "finance",
             "subcategory": f"{bucket}_{field}",
             "provenance": {
@@ -133,5 +173,6 @@ def build_gold_row(
             "value": value,
             "aliases": aliases,
             "freshness_window": spec.freshness_window,
+            "tier": tier,
         },
     }
