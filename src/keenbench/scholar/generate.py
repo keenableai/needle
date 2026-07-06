@@ -26,6 +26,7 @@ HEALTH_DOMAIN = "health sciences"
 OVERSAMPLE = 3
 MAX_SUBWINDOWS = 24
 ARXIV_WINDOW_POOL = 20
+ARXIV_MAX_RESULTS = 1000
 
 _DROP_STAT = {
     "fetch": "body_fetch_fail",
@@ -110,7 +111,7 @@ async def _cell_candidates(
                 domain,
                 from_date=from_date,
                 to_date=to_date,
-                max_results=per * ARXIV_WINDOW_POOL,
+                max_results=min(per * ARXIV_WINDOW_POOL, ARXIV_MAX_RESULTS),
             )
             if len(papers) > per:
                 papers = random.Random(seed + wi).sample(papers, per)

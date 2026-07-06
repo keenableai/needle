@@ -47,8 +47,10 @@ class FakeArxiv:
         self._by_domain = by_domain
         self._bodies = bodies
         self.body_calls = 0
+        self.max_results_seen = []
 
     async def search_domain(self, domain, *, from_date, to_date, max_results):
+        self.max_results_seen.append(max_results)
         return list(self._by_domain.get(domain, []))
 
     async def body(self, arxiv_id):
@@ -153,6 +155,14 @@ async def test_window_selection_varies_with_seed():
         return {r["gold"]["paper_key"] for r in rows}
 
     assert await keys(1) != await keys(2)
+
+
+async def test_arxiv_fetch_size_is_clamped():
+    arxiv = FakeArxiv({}, {})
+    llm = FakeLLM({})
+    await _run(arxiv, llm, per_cell=200)
+    assert arxiv.max_results_seen
+    assert max(arxiv.max_results_seen) == 1000
 
 
 async def test_short_cell_reported():
