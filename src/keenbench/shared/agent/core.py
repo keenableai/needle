@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from keenbench.shared.agent.prompts import (
+    BUDGET_EXHAUSTED_PROMPT,
     COMPACTION_PROMPT,
     END_PLAN_TOKEN,
     MAX_STEPS_EXCEEDED_PROMPT,
@@ -17,11 +18,8 @@ from keenbench.shared.llm import ChatLLMClient, ChatResult, ChatUsage, LLMClient
 
 logger = logging.getLogger(__name__)
 
-MAX_TOOL_CONTENT_CHARS = 6000
-DEFAULT_MAX_OUTPUT_TOKENS = 4096
-BUDGET_EXHAUSTED_PROMPT = (
-    "The budget is exhausted. Respond now with only your final answer to the original task."
-)
+MAX_TOOL_CONTENT_CHARS = 20_000
+DEFAULT_MAX_OUTPUT_TOKENS = 65_535
 
 
 class AgentError(Exception):
@@ -31,7 +29,8 @@ class AgentError(Exception):
 def truncate_content(content: str, max_chars: int) -> str:
     if len(content) <= max_chars:
         return content
-    return content[:max_chars] + "\n...[truncated]"
+    half = max_chars // 2
+    return content[:half] + "\n...[truncated]...\n" + content[-half:]
 
 
 @dataclass
@@ -137,22 +136,16 @@ class Agent:
                 raise AgentError(f"Duplicate tool name: {t.name!r}")
             self._tool_registry[t.name] = t
         self._openai_tools = [t.to_openai_schema() for t in tools]
-        self._budget: RunBudget | None = None
 
-    @property
-    def openai_tools(self) -> list[dict[str, Any]]:
-        return self._openai_tools
-
-    def _account(self, usage: AgentUsage, response: ChatResult) -> None:
+    def _account(self, usage: AgentUsage, response: ChatResult, budget: RunBudget | None) -> None:
         usage.prompt_tokens += response.usage.prompt_tokens
         usage.completion_tokens += response.usage.completion_tokens
         usage.total_tokens += response.usage.prompt_tokens + response.usage.completion_tokens
         usage.llm_calls += 1
-        if self._budget is not None:
-            self._budget.charge_llm(response.usage)
+        if budget is not None:
+            budget.charge_llm(response.usage)
 
     async def run(self, user_message: str, *, budget: RunBudget | None = None) -> AgentResult:
-        self._budget = budget
         usage = AgentUsage()
         records: list[ToolCallRecord] = []
         continuation_chunks: list[str] = []
@@ -163,9 +156,13 @@ class Agent:
         openai_tools = self._openai_tools or None
 
         if self.planning_enabled:
-            messages.extend(await self._run_planning_step(user_message, usage))
+            messages.extend(await self._run_planning_step(user_message, usage, budget))
 
         for step in range(1, self.max_steps + 1):
+            if budget is not None and budget.spent >= budget.limit_usd:
+                return await self._handle_budget_exhausted(
+                    messages, usage, records, budget, step - 1
+                )
             try:
                 response = await self.llm_client.chat(
                     messages, tools=openai_tools, max_tokens=self.max_output_tokens
@@ -181,7 +178,7 @@ class Agent:
                     finish_reason="error",
                     budget=budget,
                 )
-            self._account(usage, response)
+            self._account(usage, response, budget)
 
             if not response.tool_calls:
                 messages.append({"role": "assistant", "content": response.content})
@@ -212,63 +209,76 @@ class Agent:
                     "tool_calls": response.tool_calls,
                 }
             )
-            parsed = [
-                (tc.get("id", ""), tc.get("function", {}).get("name", ""), tc.get("function", {}))
-                for tc in response.tool_calls
-            ]
             executed = await asyncio.gather(
                 *(
-                    self._execute_tool(fn.get("name", ""), fn.get("arguments", "{}"))
-                    for _, _, fn in parsed
+                    self._execute_tool(
+                        tc.get("function", {}).get("name", ""),
+                        tc.get("function", {}).get("arguments", "{}"),
+                        budget,
+                    )
+                    for tc in response.tool_calls
                 )
             )
-            for (tc_id, name, _), record in zip(parsed, executed, strict=True):
+            for tc, record in zip(response.tool_calls, executed, strict=True):
                 records.append(record)
-                if budget is not None:
-                    budget.charge_tool(name)
                 content = truncate_content(
                     (record.result if record.error is None else record.error) or "",
                     self.max_tool_content_chars,
                 )
-                if budget is not None:
-                    content += f"\n\n[spend so far: ${budget.spent:.3f} of ${budget.limit_usd:.2f}]"
-                messages.append({"role": "tool", "tool_call_id": tc_id, "content": content})
-
-            if budget is not None and budget.spent >= budget.limit_usd:
-                budget.exhausted = True
-                messages.append({"role": "user", "content": BUDGET_EXHAUSTED_PROMPT})
-                try:
-                    final = await self.llm_client.chat(
-                        messages, tools=None, max_tokens=self.max_output_tokens
-                    )
-                except LLMClientError as e:
-                    return AgentResult(
-                        content="",
-                        success=False,
-                        usage=usage,
-                        tool_calls=records,
-                        steps=step,
-                        error=str(e),
-                        finish_reason="error",
-                        budget=budget,
-                    )
-                self._account(usage, final)
-                return AgentResult(
-                    content=final.content or "",
-                    success=True,
-                    usage=usage,
-                    tool_calls=records,
-                    steps=step,
-                    finish_reason="budget",
-                    budget=budget,
+                messages.append(
+                    {"role": "tool", "tool_call_id": tc.get("id", ""), "content": content}
+                )
+            if budget is not None:
+                messages[-1]["content"] += (
+                    f"\n\n[spend so far: ${budget.spent:.3f} of ${budget.limit_usd:.2f}]"
                 )
 
             if response.usage.prompt_tokens > self._compaction_token_limit:
-                messages = await self._compact_history(messages, usage)
+                messages = await self._compact_history(messages, usage, budget)
 
-        return await self._handle_max_steps_exceeded(messages, usage, records, continuation_chunks)
+        return await self._handle_max_steps_exceeded(
+            messages, usage, records, continuation_chunks, budget
+        )
 
-    async def _execute_tool(self, name: str, raw_arguments: str) -> ToolCallRecord:
+    async def _handle_budget_exhausted(
+        self,
+        messages: list[dict[str, Any]],
+        usage: AgentUsage,
+        records: list[ToolCallRecord],
+        budget: RunBudget,
+        steps: int,
+    ) -> AgentResult:
+        budget.exhausted = True
+        messages.append({"role": "user", "content": BUDGET_EXHAUSTED_PROMPT})
+        try:
+            final = await self.llm_client.chat(
+                messages, tools=None, max_tokens=self.max_output_tokens
+            )
+        except LLMClientError as e:
+            return AgentResult(
+                content="",
+                success=False,
+                usage=usage,
+                tool_calls=records,
+                steps=steps,
+                error=str(e),
+                finish_reason="error",
+                budget=budget,
+            )
+        self._account(usage, final, budget)
+        return AgentResult(
+            content=final.content or "",
+            success=True,
+            usage=usage,
+            tool_calls=records,
+            steps=steps,
+            finish_reason="budget",
+            budget=budget,
+        )
+
+    async def _execute_tool(
+        self, name: str, raw_arguments: str, budget: RunBudget | None
+    ) -> ToolCallRecord:
         try:
             arguments = json.loads(raw_arguments) if raw_arguments else {}
         except json.JSONDecodeError as e:
@@ -283,6 +293,8 @@ class Agent:
                 arguments=arguments,
                 error=f"Unknown tool {name!r}. Available tools: {available}",
             )
+        if budget is not None:
+            budget.charge_tool(name)
         try:
             result = tool.function(**arguments)
             if tool.is_async:
@@ -297,7 +309,7 @@ class Agent:
             )
 
     async def _run_planning_step(
-        self, user_message: str, usage: AgentUsage
+        self, user_message: str, usage: AgentUsage, budget: RunBudget | None
     ) -> list[dict[str, Any]]:
         tool_lines = [f"- {t.name}: {t.description}" for t in self._tool_registry.values()]
         try:
@@ -306,7 +318,7 @@ class Agent:
                 tools=None,
                 max_tokens=self.max_output_tokens,
             )
-            self._account(usage, response)
+            self._account(usage, response, budget)
         except LLMClientError as e:
             logger.warning("Planning step failed, skipping: %s", e)
             return []
@@ -320,7 +332,7 @@ class Agent:
         ]
 
     async def _compact_history(
-        self, messages: list[dict[str, Any]], usage: AgentUsage
+        self, messages: list[dict[str, Any]], usage: AgentUsage, budget: RunBudget | None
     ) -> list[dict[str, Any]]:
         tail_start = len(messages)
         for i in range(len(messages) - 1, 1, -1):
@@ -340,7 +352,7 @@ class Agent:
                 tools=None,
                 max_tokens=self.max_output_tokens,
             )
-            self._account(usage, response)
+            self._account(usage, response, budget)
             summary = response.content
         except LLMClientError:
             logger.warning("Compaction failed, falling back to truncation")
@@ -358,6 +370,7 @@ class Agent:
         usage: AgentUsage,
         records: list[ToolCallRecord],
         continuation_chunks: list[str],
+        budget: RunBudget | None,
     ) -> AgentResult:
         prefix = "".join(continuation_chunks)
         try:
@@ -366,7 +379,7 @@ class Agent:
                 tools=None,
                 max_tokens=self.max_output_tokens,
             )
-            self._account(usage, response)
+            self._account(usage, response, budget)
             return AgentResult(
                 content=prefix + response.content,
                 success=True,
@@ -375,7 +388,7 @@ class Agent:
                 steps=self.max_steps,
                 finish_reason=response.finish_reason,
                 max_steps_exceeded=True,
-                budget=self._budget,
+                budget=budget,
             )
         except LLMClientError as e:
             return AgentResult(
@@ -387,5 +400,5 @@ class Agent:
                 error=f"Max steps exceeded and summarization failed: {e}",
                 finish_reason="error",
                 max_steps_exceeded=True,
-                budget=self._budget,
+                budget=budget,
             )

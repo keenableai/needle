@@ -16,7 +16,10 @@ def _dispatch(session: ClientSession, name: str) -> Callable[..., Any]:
             name, kwargs, read_timeout_seconds=timedelta(seconds=TOOL_CALL_TIMEOUT_S)
         )
         parts = [text for block in result.content if (text := getattr(block, "text", None))]
-        return "\n".join(parts) or "(empty result)"
+        joined = "\n".join(parts)
+        if result.isError:
+            raise RuntimeError(joined or "MCP tool call failed")
+        return joined or "(empty result)"
 
     return call
 

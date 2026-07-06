@@ -18,6 +18,10 @@ COMPACTION_PROMPT = """Summarize the following conversation history. Use this ex
 
 Be exhaustive in the Queries and URLs sections — the assistant must not repeat searches or re-visit pages already seen."""
 
+BUDGET_EXHAUSTED_PROMPT = (
+    "The budget is exhausted. Respond now with only your final answer to the original task."
+)
+
 MAX_STEPS_EXCEEDED_PROMPT = (
     "You have used all available steps. Based on the conversation and tool results so "
     "far, provide your best answer to the user's original question. Synthesize what "

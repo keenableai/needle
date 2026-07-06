@@ -1,12 +1,14 @@
 import pytest
+from mcp.types import CallToolResult, TextContent
 
 from keenbench.shared.agent import Agent, RunBudget, Tool
+from keenbench.shared.agent.core import truncate_content
+from keenbench.shared.agent.mcp import _dispatch
 from keenbench.shared.llm import ChatResult, ChatUsage
 
 
 class ScriptedLLM:
-    def __init__(self, responses: list[ChatResult], model: str = "test/model") -> None:
-        self.model = model
+    def __init__(self, responses: list[ChatResult]) -> None:
         self._responses = list(responses)
         self.calls: list[dict] = []
 
@@ -110,17 +112,20 @@ async def test_spend_line_injected_into_tool_result():
     assert "[spend so far:" in tool_msg["content"]
 
 
-async def test_unknown_tool_reports_error_and_continues():
+async def test_unknown_tool_reports_error_and_is_not_charged():
     llm = ScriptedLLM(
         [
             ChatResult(content="", tool_calls=[_tool_call("missing", "{}")]),
             ChatResult(content='{"done": 1}'),
         ]
     )
+    budget = _budget()
     agent = Agent(llm, [_search_tool([])], "sys", max_steps=5)
-    result = await agent.run("q", budget=_budget())
+    result = await agent.run("q", budget=budget)
     assert result.success and result.content == '{"done": 1}'
     assert "Unknown tool" in (result.tool_calls[0].error or "")
+    assert budget.tool_calls == {}
+    assert budget.tool_usd == 0.0
 
 
 async def test_max_steps_falls_back_to_summary():
@@ -149,3 +154,62 @@ async def test_planning_step_prepends_plan():
     plan_msg = exec_messages[2]["content"]
     assert plan_msg.startswith("Here is my plan")
     assert "trailing" not in plan_msg
+
+
+async def test_llm_only_spend_exhausts_budget():
+    llm = ScriptedLLM(
+        [
+            ChatResult(
+                content="part ",
+                finish_reason="length",
+                usage=ChatUsage(prompt_tokens=1_000_000, completion_tokens=10),
+            ),
+            ChatResult(content='{"final": 1}'),
+        ]
+    )
+    budget = _budget(limit=1.0)
+    agent = Agent(llm, [], "sys", max_steps=5)
+    result = await agent.run("q", budget=budget)
+    assert budget.exhausted
+    assert result.finish_reason == "budget"
+    assert result.content == '{"final": 1}'
+    assert result.steps == 1
+
+
+async def test_spend_line_once_per_turn():
+    llm = ScriptedLLM(
+        [
+            ChatResult(
+                content="",
+                tool_calls=[
+                    _tool_call("search", '{"query": "a"}', "c1"),
+                    _tool_call("search", '{"query": "b"}', "c2"),
+                ],
+            ),
+            ChatResult(content='{"ok": 1}'),
+        ]
+    )
+    agent = Agent(llm, [_search_tool([])], "sys", max_steps=5)
+    await agent.run("q", budget=_budget())
+    tool_msgs = [m for m in llm.calls[-1]["messages"] if m.get("role") == "tool"]
+    assert len(tool_msgs) == 2
+    assert "[spend so far:" not in tool_msgs[0]["content"]
+    assert "[spend so far:" in tool_msgs[1]["content"]
+
+
+def test_truncate_content_keeps_head_and_tail():
+    text = "a" * 50 + "b" * 50
+    out = truncate_content(text, 20)
+    assert out.startswith("a" * 10)
+    assert out.endswith("b" * 10)
+    assert "...[truncated]..." in out
+
+
+async def test_mcp_dispatch_raises_on_error_result():
+    class FakeSession:
+        async def call_tool(self, name, kwargs, read_timeout_seconds=None):
+            return CallToolResult(content=[TextContent(type="text", text="boom")], isError=True)
+
+    call = _dispatch(FakeSession(), "t")
+    with pytest.raises(RuntimeError, match="boom"):
+        await call()

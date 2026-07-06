@@ -446,8 +446,9 @@ steps) over the shared `OpenRouterClient`'s `chat()` (OpenAI-style tools +
 token usage). `mcp_tools_from_session` bridges an MCP session's tools into
 the agent's `Tool` registry. An optional `RunBudget` enforces a hard dollar
 budget per run — LLM tokens at caller-supplied prices plus a per-tool price
-callable, running spend injected after every tool result, and a forced final
-answer once the budget crosses:
+callable, running spend injected after every tool turn, and a forced final
+answer once the budget crosses. `chat()` retries transient OpenRouter
+failures (429/5xx/transport) with exponential backoff:
 
 ```python
 from keenbench.shared.agent import Agent, RunBudget, Tool
