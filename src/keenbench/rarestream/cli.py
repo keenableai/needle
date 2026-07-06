@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from keenbench.rarestream.io import iter_rows, resolve_dataset, write_rows
 from keenbench.shared.cli import run_rbp_eval, sample_or_exit
 from keenbench.shared.rankeval import EvalQuery
+from keenbench.shared.sampling import resolve_seed
 
 DEFAULT_DATASET = "keenable-ai/keenbench-results"
 DEFAULT_FILTERED_PATH = "agentic/rare_entity.parquet"
@@ -27,10 +28,10 @@ class Rarestream:
         filtered_path: str = DEFAULT_FILTERED_PATH,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
     ) -> None:
         rows = _load_rows(queries, dataset, filtered_path)
-        rows = sample_or_exit(rows, limit, seed, strategy=sample, key=STRATIFY_KEY)
+        rows = sample_or_exit(rows, limit, resolve_seed(seed), strategy=sample, key=STRATIFY_KEY)
         write_rows(rows, out)
         print(f"rarestream: {len(rows)} queries ({sample})", file=sys.stderr)
 
@@ -45,12 +46,12 @@ class Rarestream:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
         judge_model: str | None = None,
         judge_concurrency: int = 8,
     ) -> None:
         rows = _load_rows(queries, dataset, filtered_path)
-        rows = sample_or_exit(rows, limit, seed, strategy=sample, key=STRATIFY_KEY)
+        rows = sample_or_exit(rows, limit, resolve_seed(seed), strategy=sample, key=STRATIFY_KEY)
         if not rows:
             raise SystemExit("error: no queries loaded")
 

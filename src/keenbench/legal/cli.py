@@ -15,6 +15,7 @@ from keenbench.shared.cli import (
 )
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
+from keenbench.shared.sampling import resolve_seed
 
 DEFAULT_COURTS = "scotus,ca1,ca2,ca3,ca4,ca5,ca6,ca7,ca8,ca9,ca10,ca11,cadc,cafc"
 DEFAULT_TITLES = "7,12,14,17,21,26,29,40,47,49"
@@ -53,7 +54,7 @@ class Legal:
         months_back: int = 18,
         titles: str | tuple[str, ...] = DEFAULT_TITLES,
         per_title: int = 6,
-        seed: int = 0,
+        seed: int | None = None,
         llm_model: str | None = None,
         code_concurrency: int = 8,
     ) -> None:
@@ -94,7 +95,7 @@ class Legal:
                     months_back=months_back,
                     titles=title_nums,
                     per_title=per_title,
-                    seed=seed,
+                    seed=resolve_seed(seed, hour_ts),
                     code_concurrency=code_concurrency,
                 )
             finally:
@@ -124,7 +125,7 @@ class Legal:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
     ) -> None:
         rows = load_gold_rows(queries, bench="legal", gold_ok=_gold_ok)
         if not rows:
@@ -132,7 +133,7 @@ class Legal:
         rows = sample_or_exit(
             rows,
             limit,
-            seed,
+            resolve_seed(seed),
             strategy=sample,
             key=lambda r: (
                 f"{r['query_origin'].get('bucket', '?')}:{r['query_origin'].get('syntax', '?')}"

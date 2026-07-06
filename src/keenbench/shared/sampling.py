@@ -1,6 +1,6 @@
 import hashlib
 from collections.abc import Callable
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any
 
 MASK64 = (1 << 64) - 1
@@ -87,3 +87,11 @@ def sample(
 def seed_from_hour_ts(hour_ts: datetime) -> int:
     digest = hashlib.sha256(hour_ts.isoformat().encode()).digest()
     return int.from_bytes(digest[:8], "big")
+
+
+def resolve_seed(seed: int | None, hour_ts: datetime | None = None) -> int:
+    if seed is not None:
+        return seed
+    if hour_ts is None:
+        hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
+    return seed_from_hour_ts(hour_ts)

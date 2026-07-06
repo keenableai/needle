@@ -16,6 +16,7 @@ from keenbench.shared.cli import (
 )
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
+from keenbench.shared.sampling import resolve_seed
 
 KNOWN_SUITES = ("arxiv", "europepmc")
 
@@ -46,7 +47,7 @@ class Scholar:
         suites: str | tuple[str, ...] = "arxiv,europepmc",
         age_buckets: str | tuple[str, ...] = "7d,30d,1y",
         per_cell: int = 10,
-        seed: int = 0,
+        seed: int | None = None,
         llm_model: str | None = None,
         body_concurrency: int = 8,
     ) -> None:
@@ -87,7 +88,7 @@ class Scholar:
                     now=now,
                     age_buckets=age_names,
                     per_cell=per_cell,
-                    seed=seed,
+                    seed=resolve_seed(seed, hour_ts),
                     body_concurrency=body_concurrency,
                 )
             finally:
@@ -117,7 +118,7 @@ class Scholar:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
         resolve_pmcids: bool = True,
     ) -> None:
         rows = load_gold_rows(queries, bench="scholar", gold_ok=_gold_ok)
@@ -126,7 +127,7 @@ class Scholar:
         rows = sample_or_exit(
             rows,
             limit,
-            seed,
+            resolve_seed(seed),
             strategy=sample,
             key=lambda r: (
                 f"{r['query_origin'].get('bucket', '?')}:{r['gold'].get('age_bucket', '?')}"

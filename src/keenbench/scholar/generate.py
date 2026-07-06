@@ -14,6 +14,7 @@ from keenbench.scholar.projection import (
 from keenbench.scholar.sources import ArxivClient, EuropePmcClient
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import LLMClient
+from keenbench.shared.sampling import shuffle_indices
 
 ARXIV_DOMAINS = (
     "computer science",
@@ -23,6 +24,7 @@ ARXIV_DOMAINS = (
 )
 HEALTH_DOMAIN = "health sciences"
 OVERSAMPLE = 3
+ARXIV_POOL_FACTOR = 5
 MAX_SUBWINDOWS = 24
 
 _DROP_STAT = {
@@ -104,11 +106,16 @@ async def _cell_candidates(
                     )
                 )
         elif arxiv is not None:
-            lists.append(
-                await arxiv.search_domain(
-                    domain, from_date=from_date, to_date=to_date, max_results=per
-                )
+            papers = await arxiv.search_domain(
+                domain,
+                from_date=from_date,
+                to_date=to_date,
+                max_results=per * ARXIV_POOL_FACTOR,
             )
+            if len(papers) > per:
+                perm = shuffle_indices(len(papers), seed + wi)
+                papers = [papers[i] for i in perm[:per]]
+            lists.append(papers)
     return _interleave(lists)
 
 

@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 from keenbench.shared.sampling import (
+    resolve_seed,
     sample_stratified,
     sample_uniform,
     seed_from_hour_ts,
@@ -50,3 +51,12 @@ def test_sample_stratified_tolerates_missing_key():
 def test_seed_from_hour_ts_deterministic():
     ts = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
     assert seed_from_hour_ts(ts) == seed_from_hour_ts(ts)
+
+
+def test_resolve_seed():
+    ts = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
+    assert resolve_seed(5, ts) == 5
+    assert resolve_seed(0, ts) == 0
+    assert resolve_seed(None, ts) == seed_from_hour_ts(ts)
+    assert resolve_seed(None, ts) != seed_from_hour_ts(ts.replace(day=2))
+    assert isinstance(resolve_seed(None), int)

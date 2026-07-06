@@ -12,6 +12,7 @@ from keenbench.shared.cli import run_rbp_eval, sample_or_exit
 from keenbench.shared.io import write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
 from keenbench.shared.rankeval import EvalQuery
+from keenbench.shared.sampling import resolve_seed
 
 
 def _read_queries_file(path: str) -> list[str]:
@@ -180,12 +181,12 @@ class Freshstream:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
         judge_model: str | None = None,
         judge_concurrency: int = 8,
     ) -> None:
         rows = _load_query_rows(queries)
-        rows = sample_or_exit(rows, limit, seed, strategy=sample)
+        rows = sample_or_exit(rows, limit, resolve_seed(seed), strategy=sample)
         if not rows:
             raise SystemExit(f"error: no queries loaded from {queries!r}")
 

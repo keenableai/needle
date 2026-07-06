@@ -20,6 +20,7 @@ from keenbench.shared.cli import (
 )
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_judge_model, resolve_llm_model
+from keenbench.shared.sampling import resolve_seed
 
 KNOWN_SUITES = ("companyfill", "filings", "filingdoc")
 
@@ -65,7 +66,7 @@ class Companyfill:
         per_company: int = 2,
         quarters_back: int = 6,
         filingdoc_target: int = 40,
-        seed: int = 0,
+        seed: int | None = None,
         llm_model: str | None = None,
         doc_concurrency: int = 8,
         registry_concurrency: int = 4,
@@ -130,7 +131,7 @@ class Companyfill:
                     per_company=per_company,
                     quarters_back=quarters_back,
                     filingdoc_target=filingdoc_target,
-                    seed=seed,
+                    seed=resolve_seed(seed, hour_ts),
                     doc_concurrency=doc_concurrency,
                 )
             finally:
@@ -172,7 +173,7 @@ class Companyfill:
         snippet_chars: int = 500,
         limit: int = 0,
         sample: str = "stratified",
-        seed: int = 0,
+        seed: int | None = None,
         judge: bool = False,
         judge_model: str | None = None,
         judge_concurrency: int = 8,
@@ -183,7 +184,7 @@ class Companyfill:
         rows = sample_or_exit(
             rows,
             limit,
-            seed,
+            resolve_seed(seed),
             strategy=sample,
             key=lambda r: (
                 f"{r['query_origin'].get('bucket', '?')}:"
