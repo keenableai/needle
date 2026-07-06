@@ -5,7 +5,8 @@ import pytest
 from keenbench.freshstream import cli as freshstream_cli
 from keenbench.rarestream import cli as rarestream_cli
 from keenbench.shared import cli as shared_cli
-from keenbench.shared.llm import OpenRouterClient, _content_to_text
+from keenbench.shared import llm as llm_module
+from keenbench.shared.llm import LLMClientError, OpenRouterClient, _content_to_text
 from keenbench.shared.search import factory as search_factory
 
 
@@ -56,6 +57,73 @@ async def test_openrouter_reports_truncation(monkeypatch):
     monkeypatch.setattr(c, "_http", lambda: FakeHttp())
     text, err = await c.complete("p", max_tokens=5, reasoning_effort="none")
     assert text is None and err["error_type"] == "truncated"
+
+
+async def test_chat_retries_transient_errors(monkeypatch):
+    class FailResp:
+        status_code = 503
+        text = "unavailable"
+
+    class OkResp:
+        status_code = 200
+
+        def json(self):
+            return {
+                "choices": [{"message": {"content": "hi"}, "finish_reason": "stop"}],
+                "usage": {"prompt_tokens": 1, "completion_tokens": 1},
+            }
+
+    calls = {"n": 0}
+
+    class FakeHttp:
+        async def post(self, url, **kwargs):
+            calls["n"] += 1
+            return FailResp() if calls["n"] < 3 else OkResp()
+
+    monkeypatch.setattr(llm_module, "RETRY_DELAY_S", 0.0)
+    c = OpenRouterClient(api_key="x", model="m")
+    monkeypatch.setattr(c, "_http", lambda: FakeHttp())
+    result = await c.chat([{"role": "user", "content": "q"}], max_tokens=5)
+    assert result.content == "hi"
+    assert calls["n"] == 3
+
+
+async def test_chat_does_not_retry_client_errors(monkeypatch):
+    class FailResp:
+        status_code = 400
+        text = "bad request"
+
+    calls = {"n": 0}
+
+    class FakeHttp:
+        async def post(self, url, **kwargs):
+            calls["n"] += 1
+            return FailResp()
+
+    c = OpenRouterClient(api_key="x", model="m")
+    monkeypatch.setattr(c, "_http", lambda: FakeHttp())
+    with pytest.raises(LLMClientError) as exc_info:
+        await c.chat([{"role": "user", "content": "q"}], max_tokens=5)
+    assert exc_info.value.error_type == "http_error"
+    assert calls["n"] == 1
+
+
+async def test_chat_raises_on_empty_response(monkeypatch):
+    class FakeResp:
+        status_code = 200
+
+        def json(self):
+            return {"choices": [{"message": {"content": None}, "finish_reason": "stop"}]}
+
+    class FakeHttp:
+        async def post(self, url, **kwargs):
+            return FakeResp()
+
+    c = OpenRouterClient(api_key="x", model="m")
+    monkeypatch.setattr(c, "_http", lambda: FakeHttp())
+    with pytest.raises(LLMClientError) as exc_info:
+        await c.chat([{"role": "user", "content": "q"}], max_tokens=5)
+    assert exc_info.value.error_type == "empty_response"
 
 
 def test_freshstream_run_passes_keenable_api_key(monkeypatch, tmp_path):
