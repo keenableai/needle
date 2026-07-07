@@ -60,9 +60,7 @@ def _build_parallel(api_key: str | None, snippet_chars: int) -> SearchClient:
 
 
 def _build_perplexity(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return PerplexityClient(
-        api_key=api_key or "", model=os.environ.get("PERPLEXITY_MODEL", "sonar")
-    )
+    return PerplexityClient(api_key=api_key or "")
 
 
 def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:

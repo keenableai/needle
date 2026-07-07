@@ -53,7 +53,7 @@ Keys are read only from the environment.
 | `BRAVE_API_KEY` | the `brave` engine | [Brave Search API](https://brave.com/search/api/) |
 | `PARALLEL_API_KEY` | the `parallel` engine | [Parallel](https://parallel.ai) v1 search |
 | `TAVILY_API_KEY` | the `tavily` engine | [Tavily](https://tavily.com) search |
-| `PERPLEXITY_API_KEY` | the `perplexity` engine | [Perplexity](https://docs.perplexity.ai) Sonar |
+| `PERPLEXITY_API_KEY` | the `perplexity` engine | [Perplexity](https://docs.perplexity.ai) Search API |
 | `KEENBENCH_LLM_MODEL` | query projection | Default `google/gemini-3.1-flash-lite`; `--llm-model` overrides |
 | `KEENBENCH_JUDGE_MODEL` | judging | Default `google/gemini-3-flash-preview`; `--judge-model` overrides |
 
@@ -73,8 +73,7 @@ All benchmarks' `run` commands share one interface:
 
 Per-engine tuning is env-based so the flag set stays flat as engines are
 added: `KEENABLE_MODE` (default `pro`), `EXA_CONCURRENCY` (default `1`),
-`PARALLEL_MODE` (default `basic`), `TAVILY_DEPTH` (default `basic`),
-`PERPLEXITY_MODEL` (default `sonar`, use `sonar-pro` for the advanced model).
+`PARALLEL_MODE` (default `basic`), `TAVILY_DEPTH` (default `basic`).
 
 Error accounting is shared too: queries whose search or judging failed are
 excluded from the mean via `num_scored` (with `search_errors` /
@@ -407,7 +406,7 @@ never raises). Shipped engines:
 | `BraveClient` | `GET https://api.search.brave.com/res/v1/web/search` | `X-Subscription-Token` (required) |
 | `ParallelClient` | `POST https://api.parallel.ai/v1/search` | `x-api-key` (required) |
 | `TavilyClient` | `POST https://api.tavily.com/search` | `Authorization: Bearer` (required) |
-| `PerplexityClient` | `POST https://api.perplexity.ai/chat/completions` — takes the model's `search_results` (citations as fallback) | `Authorization: Bearer` (required) |
+| `PerplexityClient` | `POST https://api.perplexity.ai/search` | `Authorization: Bearer` (required) |
 
 ```python
 import asyncio
