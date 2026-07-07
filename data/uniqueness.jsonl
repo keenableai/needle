@@ -1029,3 +1029,11 @@
 {"ts": "2026-07-07T13:33Z", "engine": "parallel", "unique_urls": 930, "total_urls": 1803}
 {"ts": "2026-07-07T13:33Z", "engine": "tavily", "unique_urls": 480, "total_urls": 1782}
 {"ts": "2026-07-07T13:33Z", "engine": "perplexity", "unique_urls": 567, "total_urls": 1525}
+{"ts": "2026-07-07T14:01Z", "engine": "keenable", "unique_urls": 75, "total_urls": 100}
+{"ts": "2026-07-07T14:01Z", "engine": "exa", "unique_urls": 48, "total_urls": 99}
+{"ts": "2026-07-07T14:01Z", "engine": "google", "unique_urls": 25, "total_urls": 100}
+{"ts": "2026-07-07T14:01Z", "engine": "bing", "unique_urls": 60, "total_urls": 100}
+{"ts": "2026-07-07T14:01Z", "engine": "brave", "unique_urls": 13, "total_urls": 100}
+{"ts": "2026-07-07T14:01Z", "engine": "parallel", "unique_urls": 25, "total_urls": 100}
+{"ts": "2026-07-07T14:01Z", "engine": "tavily", "unique_urls": 37, "total_urls": 100}
+{"ts": "2026-07-07T14:01Z", "engine": "perplexity", "unique_urls": 33, "total_urls": 100}
