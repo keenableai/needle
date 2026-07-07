@@ -910,16 +910,16 @@ function renderOverlap(rows, uniqAgg) {
       title: `${a} ∩ ${b}: ${agg.low2} of ${agg.nLow} queries share a low-relevance URL or 3+ URLs (${agg.lowUrls} junk URLs total)`,
     };
   });
-  renderSharingGraph(graphHolder, pairs, uniqAgg);
+  renderSharingGraph(graphHolder, engines, pairs, uniqAgg);
 }
 
 const GRAPH_MIN_SHARE = 0.25;
 const GRAPH_TIE_GAP = 0.05;
 
-function renderSharingGraph(holder, pairs, uniqAgg) {
+function renderSharingGraph(holder, engines, pairs, uniqAgg) {
   const fmtPct = (v) => `${Math.round(v * 100)}%`;
   document.getElementById("sharegraph-sub").textContent =
-    `pairs from the suspicious-sharing matrix at ${fmtPct(GRAPH_MIN_SHARE)}+ of queries; the arrow points at the likely source — the engine whose results are less unique overall; double-headed when uniqueness is too close to call; edge width tracks the share`;
+    `pairs from the suspicious-sharing matrix at ${fmtPct(GRAPH_MIN_SHARE)}+ of queries; the arrow points from the likely source — the engine whose results are less unique overall — to the engine borrowing from it; double-headed when uniqueness is too close to call; edge width tracks the share`;
   const uniqPct = (e) => {
     const u = uniqAgg.get(e);
     return u?.total ? u.unique / u.total : null;
@@ -954,10 +954,17 @@ function renderSharingGraph(holder, pairs, uniqAgg) {
     for (const [n] of [...adj.get(e)].sort((x, y) => y[1] - x[1])) visit(n);
   };
   for (const e of [...adj.keys()].sort((a, b) => adj.get(b).length - adj.get(a).length)) visit(e);
+  const isolated = engines.filter((e) => !seen.has(e));
+  const total = nodes.length + isolated.length;
+  const ring = [];
+  for (let s = 0, ci = 0, ii = 0; s < total; s++) {
+    if (Math.floor(((s + 1) * isolated.length) / total) > ii) ring.push(isolated[ii++]);
+    else ring.push(nodes[ci++]);
+  }
   const W = 460, H = 330, cx = W / 2, cy = H / 2;
   const R = H / 2 - 50;
-  const pos = new Map(nodes.map((e, i) => {
-    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / nodes.length;
+  const pos = new Map(ring.map((e, i) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / ring.length;
     return [e, { x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang), ang }];
   }));
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
@@ -969,7 +976,7 @@ function renderSharingGraph(holder, pairs, uniqAgg) {
     });
   };
   for (const d of edges) {
-    const p1 = pos.get(d.borrower), p2 = pos.get(d.source);
+    const p1 = pos.get(d.source), p2 = pos.get(d.borrower);
     const ux = (p2.x - p1.x) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
     const uy = (p2.y - p1.y) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
     const trim = 11, back = trim + 10;
@@ -977,23 +984,26 @@ function renderSharingGraph(holder, pairs, uniqAgg) {
       x1: p1.x + ux * (d.tie ? back : trim), y1: p1.y + uy * (d.tie ? back : trim),
       x2: p2.x - ux * back, y2: p2.y - uy * back,
       class: "sg-edge",
-      "stroke-width": (1.5 + (d.share - GRAPH_MIN_SHARE) * 6).toFixed(1),
+      "stroke-width": (1.5 + (d.share - GRAPH_MIN_SHARE) * 3).toFixed(1),
     });
     const g = el("g");
     g.appendChild(arrowAt(p2.x - ux * trim, p2.y - uy * trim, ux, uy));
     if (d.tie) g.appendChild(arrowAt(p1.x + ux * trim, p1.y + uy * trim, -ux, -uy));
-    g.appendChild(el("title", {}, `${d.borrower} → ${d.source}: suspicious sharing on ${fmtPct(d.share)} of queries; uniqueness ${d.borrower} ${fmtPct(uniqPct(d.borrower))} vs ${d.source} ${fmtPct(uniqPct(d.source))}${d.tie ? " — direction unclear" : ""}`));
+    g.appendChild(el("title", {}, `${d.source} → ${d.borrower}: suspicious sharing on ${fmtPct(d.share)} of queries; uniqueness ${d.source} ${fmtPct(uniqPct(d.source))} vs ${d.borrower} ${fmtPct(uniqPct(d.borrower))}${d.tie ? " — direction unclear" : ""}`));
     g.appendChild(line);
+    const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+    const sgn = (cx - mx) * -uy + (cy - my) * ux >= 0 ? 1 : -1;
     g.appendChild(el("text", {
-      x: (p1.x + p2.x) / 2 - uy * 11, y: (p1.y + p2.y) / 2 + ux * 11 + 4,
+      x: mx - uy * 11 * sgn, y: my + ux * 11 * sgn + 4,
       class: "sg-label",
     }, fmtPct(d.share)));
     svg.appendChild(g);
   }
-  for (const e of nodes) {
+  for (const e of ring) {
     const p = pos.get(e);
     const g = el("g");
-    g.appendChild(el("title", {}, `${e}: ${fmtPct(uniqPct(e))} unique URLs`));
+    const u = uniqPct(e);
+    g.appendChild(el("title", {}, u == null ? e : `${e}: ${fmtPct(u)} unique URLs`));
     g.appendChild(el("circle", { cx: p.x, cy: p.y, r: 7, fill: colorOf(e) }));
     const c = Math.cos(p.ang);
     g.appendChild(el("text", {
