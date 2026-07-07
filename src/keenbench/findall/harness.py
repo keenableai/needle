@@ -39,7 +39,7 @@ class BackendSpec:
 
 def resolve_backend(name: str) -> BackendSpec:
     if name == "keenable":
-        cmd = os.environ.get("KEENBENCH_KEENABLE_MCP_CMD") or "npx -y @keenable/mcp-server"
+        cmd = os.environ.get("KEENBENCH_KEENABLE_MCP_CMD") or "npx -y @keenable/mcp"
         env = {}
         if os.environ.get("KEENABLE_API_KEY"):
             env["KEENABLE_API_KEY"] = os.environ["KEENABLE_API_KEY"]

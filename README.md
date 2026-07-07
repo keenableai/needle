@@ -431,7 +431,7 @@ keenbench findall run --queries findall.jsonl --backends keenable,webql \
 
 Backends are MCP servers:
 
-- **`keenable`** — the classic search MCP (`npx -y @keenable/mcp-server`,
+- **`keenable`** — the classic search MCP (`npx -y @keenable/mcp`,
   stdio; `KEENBENCH_KEENABLE_MCP_CMD` overrides the command):
   `search_web_pages` + `fetch_page_content`.
 - **`webql`** — the hosted WebQL MCP (`https://webql.keenable.ai/mcp`,
