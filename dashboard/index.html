@@ -190,7 +190,7 @@
   #uniqueness-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
   #sharegraph svg { max-width: 460px; margin: 0 auto; }
   #sharegraph .sg-edge { stroke: var(--text-muted); }
-  #sharegraph .sg-arrow { fill: var(--text-muted); }
+  #sharegraph .sg-arrow { fill: var(--text-primary); }
   #sharegraph .sg-label {
     fill: var(--text-secondary); font-size: 11px; font-variant-numeric: tabular-nums;
     text-anchor: middle; paint-order: stroke; stroke: var(--surface-1); stroke-width: 3px;
@@ -503,7 +503,7 @@ function inRange(rows, ms) {
 
 function el(tag, attrs, text) {
   const ns = "http://www.w3.org/2000/svg";
-  const node = ["svg", "path", "line", "circle", "text", "g", "defs", "marker", "title"].includes(tag)
+  const node = ["svg", "path", "line", "circle", "text", "g", "title"].includes(tag)
     ? document.createElementNS(ns, tag) : document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
   if (text != null) node.textContent = text;
@@ -961,28 +961,27 @@ function renderSharingGraph(holder, pairs, uniqAgg) {
     return [e, { x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang), ang }];
   }));
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
-  const marker = el("marker", {
-    id: "sg-arrow", markerWidth: 9, markerHeight: 9, refX: 8, refY: 4.5,
-    orient: "auto-start-reverse", markerUnits: "userSpaceOnUse",
-  });
-  marker.appendChild(el("path", { d: "M0,0 L9,4.5 L0,9 Z", class: "sg-arrow" }));
-  const defs = el("defs");
-  defs.appendChild(marker);
-  svg.appendChild(defs);
+  const arrowAt = (tipX, tipY, ux, uy) => {
+    const bx = tipX - ux * 13, by = tipY - uy * 13;
+    return el("path", {
+      d: `M${tipX},${tipY} L${bx - uy * 5.5},${by + ux * 5.5} L${bx + ux * 3.5},${by + uy * 3.5} L${bx + uy * 5.5},${by - ux * 5.5} Z`,
+      class: "sg-arrow",
+    });
+  };
   for (const d of edges) {
     const p1 = pos.get(d.borrower), p2 = pos.get(d.source);
     const ux = (p2.x - p1.x) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
     const uy = (p2.y - p1.y) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
-    const trim = 13;
+    const trim = 11, back = trim + 10;
     const line = el("line", {
-      x1: p1.x + ux * trim, y1: p1.y + uy * trim,
-      x2: p2.x - ux * trim, y2: p2.y - uy * trim,
+      x1: p1.x + ux * (d.tie ? back : trim), y1: p1.y + uy * (d.tie ? back : trim),
+      x2: p2.x - ux * back, y2: p2.y - uy * back,
       class: "sg-edge",
       "stroke-width": (1.5 + (d.share - GRAPH_MIN_SHARE) * 6).toFixed(1),
-      "marker-end": "url(#sg-arrow)",
     });
-    if (d.tie) line.setAttribute("marker-start", "url(#sg-arrow)");
     const g = el("g");
+    g.appendChild(arrowAt(p2.x - ux * trim, p2.y - uy * trim, ux, uy));
+    if (d.tie) g.appendChild(arrowAt(p1.x + ux * trim, p1.y + uy * trim, -ux, -uy));
     g.appendChild(el("title", {}, `${d.borrower} → ${d.source}: suspicious sharing on ${fmtPct(d.share)} of queries; uniqueness ${d.borrower} ${fmtPct(uniqPct(d.borrower))} vs ${d.source} ${fmtPct(uniqPct(d.source))}${d.tie ? " — direction unclear" : ""}`));
     g.appendChild(line);
     g.appendChild(el("text", {
