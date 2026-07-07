@@ -46,14 +46,15 @@ def resolve_backend(name: str) -> BackendSpec:
         return BackendSpec(name=name, kind="stdio", command=tuple(cmd.split()), env=env)
     if name == "webql":
         url = os.environ.get("KEENBENCH_WEBQL_MCP_URL")
+        token = os.environ.get("KEENABLE_API_KEY")
         if not url:
-            token = os.environ.get("KEENABLE_API_KEY")
             if not token:
                 raise ValueError(
                     "backend 'webql' needs KEENBENCH_WEBQL_MCP_URL or KEENABLE_API_KEY"
                 )
-            url = f"https://webql.keenable.ai/mcp?token={token}"
-        return BackendSpec(name=name, kind="http", url=url)
+            url = "https://webql.keenable.ai/mcp"
+        headers = {"X-API-Key": token} if token else {}
+        return BackendSpec(name=name, kind="http", url=url, headers=headers)
     if name == "exa":
         url = os.environ.get("KEENBENCH_EXA_MCP_URL")
         if not url:

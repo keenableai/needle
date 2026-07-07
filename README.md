@@ -435,7 +435,7 @@ Backends are MCP servers:
   stdio; `KEENBENCH_KEENABLE_MCP_CMD` overrides the command):
   `search_web_pages` + `fetch_page_content`.
 - **`webql`** — the hosted WebQL MCP (`https://webql.keenable.ai/mcp`,
-  streamable HTTP, token from `KEENABLE_API_KEY`;
+  streamable HTTP, `X-API-Key` from `KEENABLE_API_KEY`;
   `KEENBENCH_WEBQL_MCP_URL` overrides): search plus
   map/reduce/view over result sets — the distribution tools.
 - **`exa`** — Exa's hosted MCP (`https://mcp.exa.ai/mcp`, key from
