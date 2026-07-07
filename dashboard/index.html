@@ -188,6 +188,14 @@
     background: var(--grid); vertical-align: middle; margin-right: 8px;
   }
   #uniqueness-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
+  #sharegraph svg { max-width: 460px; margin: 0 auto; }
+  #sharegraph .sg-edge { stroke: var(--text-muted); }
+  #sharegraph .sg-arrow { fill: var(--text-muted); }
+  #sharegraph .sg-label {
+    fill: var(--text-secondary); font-size: 11px; font-variant-numeric: tabular-nums;
+    text-anchor: middle; paint-order: stroke; stroke: var(--surface-1); stroke-width: 3px;
+  }
+  #sharegraph .sg-name { fill: var(--text-primary); font-size: 12px; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -275,10 +283,17 @@
       <div class="overlap-matrix" id="overlap3-table"></div>
     </div>
   </div>
-  <div class="card" id="card-lowshared">
-    <h2>Suspicious sharing (all time)</h2>
-    <div class="sub" id="lowshared-sub"></div>
-    <div class="overlap-matrix" id="lowshared-table"></div>
+  <div class="grid2">
+    <div class="card" id="card-lowshared">
+      <h2>Suspicious sharing (all time)</h2>
+      <div class="sub" id="lowshared-sub"></div>
+      <div class="overlap-matrix" id="lowshared-table"></div>
+    </div>
+    <div class="card" id="card-sharegraph">
+      <h2>Borrowing graph (all time)</h2>
+      <div class="sub" id="sharegraph-sub"></div>
+      <div id="sharegraph"></div>
+    </div>
   </div>
   <div class="card" id="card-uniqueness">
     <h2>Result uniqueness (all time)</h2>
@@ -488,7 +503,7 @@ function inRange(rows, ms) {
 
 function el(tag, attrs, text) {
   const ns = "http://www.w3.org/2000/svg";
-  const node = ["svg", "path", "line", "circle", "text"].includes(tag)
+  const node = ["svg", "path", "line", "circle", "text", "g", "defs", "marker", "title"].includes(tag)
     ? document.createElementNS(ns, tag) : document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
   if (text != null) node.textContent = text;
@@ -822,13 +837,15 @@ function overlapMatrix(holder, engines, cellFor) {
   holder.appendChild(table);
 }
 
-function renderOverlap(rows) {
+function renderOverlap(rows, uniqAgg) {
   const jaccardHolder = document.getElementById("overlap-table");
   const shared3Holder = document.getElementById("overlap3-table");
   const lowHolder = document.getElementById("lowshared-table");
+  const graphHolder = document.getElementById("sharegraph");
   jaccardHolder.replaceChildren();
   shared3Holder.replaceChildren();
   lowHolder.replaceChildren();
+  graphHolder.replaceChildren();
   const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
   const pairs = new Map();
   for (const r of rows) {
@@ -853,6 +870,7 @@ function renderOverlap(rows) {
     jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     shared3Holder.appendChild(el("div", { class: "empty" }, emptyMsg));
     lowHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
+    graphHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     return;
   }
   const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
@@ -892,13 +910,104 @@ function renderOverlap(rows) {
       title: `${a} ∩ ${b}: ${agg.low2} of ${agg.nLow} queries share a low-relevance URL or 3+ URLs (${agg.lowUrls} junk URLs total)`,
     };
   });
+  renderSharingGraph(graphHolder, pairs, uniqAgg);
 }
 
-function renderUniqueness(rows) {
-  const holder = document.getElementById("uniqueness-table");
-  holder.replaceChildren();
-  document.getElementById("uniqueness-sub").textContent =
-    "share of an engine's returned URLs that no other engine returned for the same query, all benchmarks, all runs";
+const GRAPH_MIN_SHARE = 0.25;
+const GRAPH_TIE_GAP = 0.05;
+
+function renderSharingGraph(holder, pairs, uniqAgg) {
+  const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  document.getElementById("sharegraph-sub").textContent =
+    `pairs from the suspicious-sharing matrix at ${fmtPct(GRAPH_MIN_SHARE)}+ of queries; the arrow points at the likely source — the engine whose results are less unique overall; double-headed when uniqueness is too close to call; edge width tracks the share`;
+  const uniqPct = (e) => {
+    const u = uniqAgg.get(e);
+    return u?.total ? u.unique / u.total : null;
+  };
+  const edges = [];
+  for (const [key, agg] of pairs) {
+    if (!agg.nLow) continue;
+    const share = agg.low2 / agg.nLow;
+    if (share < GRAPH_MIN_SHARE) continue;
+    const [a, b] = key.split("|");
+    const ua = uniqPct(a), ub = uniqPct(b);
+    if (ua == null || ub == null) continue;
+    const [borrower, source] = ua >= ub ? [a, b] : [b, a];
+    edges.push({ borrower, source, share, tie: Math.abs(ua - ub) < GRAPH_TIE_GAP });
+  }
+  if (!edges.length) {
+    holder.appendChild(el("div", { class: "empty" }, `No pairs above ${fmtPct(GRAPH_MIN_SHARE)} yet.`));
+    return;
+  }
+  const adj = new Map();
+  for (const d of edges) {
+    for (const [x, y] of [[d.borrower, d.source], [d.source, d.borrower]]) {
+      adj.set(x, [...(adj.get(x) || []), [y, d.share]]);
+    }
+  }
+  const nodes = [];
+  const seen = new Set();
+  const visit = (e) => {
+    if (seen.has(e)) return;
+    seen.add(e);
+    nodes.push(e);
+    for (const [n] of [...adj.get(e)].sort((x, y) => y[1] - x[1])) visit(n);
+  };
+  for (const e of [...adj.keys()].sort((a, b) => adj.get(b).length - adj.get(a).length)) visit(e);
+  const W = 460, H = 330, cx = W / 2, cy = H / 2;
+  const R = H / 2 - 50;
+  const pos = new Map(nodes.map((e, i) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / nodes.length;
+    return [e, { x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang), ang }];
+  }));
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  const marker = el("marker", {
+    id: "sg-arrow", markerWidth: 9, markerHeight: 9, refX: 8, refY: 4.5,
+    orient: "auto-start-reverse", markerUnits: "userSpaceOnUse",
+  });
+  marker.appendChild(el("path", { d: "M0,0 L9,4.5 L0,9 Z", class: "sg-arrow" }));
+  const defs = el("defs");
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+  for (const d of edges) {
+    const p1 = pos.get(d.borrower), p2 = pos.get(d.source);
+    const ux = (p2.x - p1.x) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    const uy = (p2.y - p1.y) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    const trim = 13;
+    const line = el("line", {
+      x1: p1.x + ux * trim, y1: p1.y + uy * trim,
+      x2: p2.x - ux * trim, y2: p2.y - uy * trim,
+      class: "sg-edge",
+      "stroke-width": (1.5 + (d.share - GRAPH_MIN_SHARE) * 6).toFixed(1),
+      "marker-end": "url(#sg-arrow)",
+    });
+    if (d.tie) line.setAttribute("marker-start", "url(#sg-arrow)");
+    const g = el("g");
+    g.appendChild(el("title", {}, `${d.borrower} → ${d.source}: suspicious sharing on ${fmtPct(d.share)} of queries; uniqueness ${d.borrower} ${fmtPct(uniqPct(d.borrower))} vs ${d.source} ${fmtPct(uniqPct(d.source))}${d.tie ? " — direction unclear" : ""}`));
+    g.appendChild(line);
+    g.appendChild(el("text", {
+      x: (p1.x + p2.x) / 2 - uy * 11, y: (p1.y + p2.y) / 2 + ux * 11 + 4,
+      class: "sg-label",
+    }, fmtPct(d.share)));
+    svg.appendChild(g);
+  }
+  for (const e of nodes) {
+    const p = pos.get(e);
+    const g = el("g");
+    g.appendChild(el("title", {}, `${e}: ${fmtPct(uniqPct(e))} unique URLs`));
+    g.appendChild(el("circle", { cx: p.x, cy: p.y, r: 7, fill: colorOf(e) }));
+    const c = Math.cos(p.ang);
+    g.appendChild(el("text", {
+      x: cx + (R + 15) * Math.cos(p.ang), y: cy + (R + 15) * Math.sin(p.ang) + 4,
+      "text-anchor": c > 0.35 ? "start" : c < -0.35 ? "end" : "middle",
+      class: "sg-name",
+    }, e));
+    svg.appendChild(g);
+  }
+  holder.appendChild(svg);
+}
+
+function uniquenessAgg(rows) {
   const agg = new Map();
   for (const r of rows) {
     const e = agg.get(r.engine) || { unique: 0, total: 0 };
@@ -906,6 +1015,14 @@ function renderUniqueness(rows) {
     e.total += r.total_urls;
     agg.set(r.engine, e);
   }
+  return agg;
+}
+
+function renderUniqueness(agg) {
+  const holder = document.getElementById("uniqueness-table");
+  holder.replaceChildren();
+  document.getElementById("uniqueness-sub").textContent =
+    "share of an engine's returned URLs that no other engine returned for the same query, all benchmarks, all runs";
   const engines = ENGINES.filter((e) => agg.get(e)?.total);
   if (!engines.length) {
     holder.appendChild(el("div", { class: "empty" }, "No uniqueness data yet — accumulates from hourly runs."));
@@ -1252,8 +1369,9 @@ async function main() {
 
   renderLeaderboards(inRange(history, 7 * 86400e3));
   renderAll(latestCompanyfill);
-  renderOverlap(overlapRows);
-  renderUniqueness(uniquenessRows);
+  const uniqAgg = uniquenessAgg(uniquenessRows);
+  renderOverlap(overlapRows, uniqAgg);
+  renderUniqueness(uniqAgg);
   initRunBrowser();
   document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
   let resizeTimer;
