@@ -18,7 +18,7 @@ keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on t
 | [`companyfill`](#companyfill) | Company & financial fact-lookups: registry-grounded facts, quarterly SEC-XBRL facts (`filings`), and known-item SEC-filing retrieval (`filingdoc`); ~50% of `filings`/`filingdoc` queries use operator syntax | Answer-recall@K and MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | Known-item paper retrieval — find a specific paper by its title vs. by a full-text-only detail | Recall@K and MRR@K by paper-ID match, deterministic (no judge) |
 | [`legal`](#legal) | Legal known-item retrieval — find a specific court opinion (caption) or CFR section (substance); ~50% of queries use operator syntax | Recall@K and MRR@K by citation/docket/URL identity, deterministic (no judge) |
-| [`findall`](#findall) | Distribution questions ("find all X", "what fraction of X") answered by an agent under a dollar budget, comparing MCP search backends | Set recall/precision and stat accuracy vs registry gold, deterministic |
+| [`findallmcp`](#findallmcp) | Distribution questions ("find all X", "what fraction of X") answered by an agent under a dollar budget, comparing MCP search backends | Set recall/precision and stat accuracy vs registry gold, deterministic |
 
 Everything engine- or judge-related is shared infrastructure in
 [`keenbench.shared`](#shared-infrastructure) — search clients, LLM client,
@@ -388,7 +388,7 @@ Identity extraction is pattern-based, so a page that discusses the case
 without citing it doesn't count — recall is a lower bound, applied
 symmetrically across engines.
 
-## findall
+## findallmcp
 
 Measures the thesis of
 [The Minimum Experiment](https://keenable.ai/blog/the-minimum-experiment): a
@@ -408,7 +408,7 @@ what they let the same agent find per dollar.
 ### Generate
 
 ```bash
-keenbench findall generate --out findall.jsonl
+keenbench findallmcp generate --out findallmcp.jsonl
 ```
 
 Two suites, gold computed at generate time from the registry that scores the
@@ -425,8 +425,8 @@ task:
 ### Run (set recall / stat accuracy per dollar)
 
 ```bash
-keenbench findall run --queries findall.jsonl --backends keenable,webql \
-  --budget-usd 0.25 --out findall.json
+keenbench findallmcp run --queries findallmcp.jsonl --backends keenable,webql \
+  --budget-usd 0.25 --out findallmcp.json
 ```
 
 Backends are MCP servers:

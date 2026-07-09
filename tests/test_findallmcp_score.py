@@ -1,4 +1,4 @@
-from keenbench.findall.score import (
+from keenbench.findallmcp.score import (
     names_match,
     norm_name,
     parse_answer,

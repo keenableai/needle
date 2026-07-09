@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from keenbench.companyfill.canon import registrable_domain, strip_legal
-from keenbench.findall.harness import BackendSpec, run_task
+from keenbench.findallmcp.harness import BackendSpec, run_task
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import OpenRouterClient
 
@@ -154,7 +154,7 @@ def _summary(per_query: list[dict]) -> dict[str, Any]:
     }
 
 
-async def run_findall(
+async def run_findallmcp(
     tasks: list[GoldTask],
     backends: list[BackendSpec],
     llm: OpenRouterClient,
@@ -206,7 +206,7 @@ async def run_findall(
         done += 1
         status = (pq["error"] or {}).get("error_type") or f"score={pq['score']:.2f}"
         print(
-            f"findall: [{done}/{total}] {spec.name} @${budget_usd:.2f} "
+            f"findallmcp: [{done}/{total}] {spec.name} @${budget_usd:.2f} "
             f"{task.suite}/{task.bucket} {status} spent=${pq['spent_usd']:.2f}",
             file=sys.stderr,
         )

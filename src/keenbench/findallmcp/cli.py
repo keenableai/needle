@@ -5,16 +5,16 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from keenbench.findall.harness import resolve_backend
-from keenbench.findall.models import (
+from keenbench.findallmcp.harness import resolve_backend
+from keenbench.findallmcp.models import (
     AGENT_MODEL_ENV,
     DEFAULT_AGENT_MODEL,
     SUITES,
     build_task_row,
     serialize_row,
 )
-from keenbench.findall.score import GoldTask, run_findall
-from keenbench.findall.sources import EdgarFtsClient, HnClient, edgar_tasks, hn_tasks
+from keenbench.findallmcp.score import GoldTask, run_findallmcp
+from keenbench.findallmcp.sources import EdgarFtsClient, HnClient, edgar_tasks, hn_tasks
 from keenbench.shared.cli import parse_csv, sample_or_exit
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient
@@ -52,7 +52,7 @@ def _load_gold_rows(path: str) -> list[dict]:
         obj["query_origin"] = origin if isinstance(origin, dict) else {}
         rows.append(obj)
     if malformed:
-        print(f"findall: skipped {malformed} malformed gold rows", file=sys.stderr)
+        print(f"findallmcp: skipped {malformed} malformed gold rows", file=sys.stderr)
     return rows
 
 
@@ -70,7 +70,7 @@ def _gold_task(row: dict) -> GoldTask:
     )
 
 
-class Findall:
+class FindallMcp:
     def generate(
         self,
         out: str = "-",
@@ -107,7 +107,7 @@ class Findall:
         write_jsonl([serialize_row(r) for r in rows], out)
         sets = sum(1 for t in tasks if t.stat_value is None)
         print(
-            f"findall: {len(rows)} tasks (enumerate={sets}, stat={len(rows) - sets})",
+            f"findallmcp: {len(rows)} tasks (enumerate={sets}, stat={len(rows) - sets})",
             file=sys.stderr,
         )
 
@@ -167,7 +167,7 @@ class Findall:
 
         async def _go() -> dict:
             try:
-                return await run_findall(
+                return await run_findallmcp(
                     tasks,
                     specs,
                     llm,
@@ -184,7 +184,7 @@ class Findall:
 
         budgets_str = ", ".join(f"${b:.2f}" for b in budgets)
         print(
-            f"\nfindall: {report['num_queries']} tasks, budgets {budgets_str}, agent {model}",
+            f"\nfindallmcp: {report['num_queries']} tasks, budgets {budgets_str}, agent {model}",
             file=sys.stderr,
         )
         for name, b in report["backends"].items():

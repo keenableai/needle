@@ -9,7 +9,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamablehttp_client
 
-from keenbench.findall.models import model_price, tool_price
+from keenbench.findallmcp.models import model_price, tool_price
 from keenbench.shared.agent import Agent, RunBudget, mcp_tools_from_session
 from keenbench.shared.agent.core import truncate_content
 from keenbench.shared.llm import OpenRouterClient

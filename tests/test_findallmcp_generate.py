@@ -1,8 +1,8 @@
 import json
 from datetime import UTC, datetime
 
-from keenbench.findall.models import Entity, Task, build_task_row, serialize_row
-from keenbench.findall.sources import hn_tasks
+from keenbench.findallmcp.models import Entity, Task, build_task_row, serialize_row
+from keenbench.findallmcp.sources import hn_tasks
 
 NOW = datetime(2026, 7, 4, 12, 0, tzinfo=UTC)
 HOUR = NOW.replace(minute=0)

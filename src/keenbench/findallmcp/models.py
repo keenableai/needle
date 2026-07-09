@@ -5,7 +5,7 @@ from typing import Any
 
 from keenbench.shared.identity import query_hash, query_id
 
-FINDALL_SOURCE = "findall"
+FINDALLMCP_SOURCE = "findallmcp"
 SUITES = ("hn", "edgar")
 BUCKETS = ("enumerate", "stat")
 
@@ -81,7 +81,7 @@ def build_task_row(task: Task, *, hour_ts: datetime) -> dict[str, Any]:
         "query_id": query_id(task.prompt, hour_ts=hour_ts),
         "query_hash": query_hash(task.prompt),
         "query_text": task.prompt,
-        "query_source": FINDALL_SOURCE,
+        "query_source": FINDALLMCP_SOURCE,
         "query_origin": {
             "bucket": task.bucket,
             "suite": task.suite,
