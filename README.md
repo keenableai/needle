@@ -18,6 +18,7 @@ keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on t
 | [`companyfill`](#companyfill) | Company & financial fact-lookups: registry-grounded facts, quarterly SEC-XBRL facts (`filings`), and known-item SEC-filing retrieval (`filingdoc`); ~50% of `filings`/`filingdoc` queries use operator syntax | Answer-recall@K and MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | Known-item paper retrieval — find a specific paper by its title vs. by a full-text-only detail | Recall@K and MRR@K by paper-ID match, deterministic (no judge) |
 | [`legal`](#legal) | Legal known-item retrieval — find a specific court opinion (caption) or CFR section (substance); ~50% of queries use operator syntax | Recall@K and MRR@K by citation/docket/URL identity, deterministic (no judge) |
+| [`findallmcp`](#findallmcp) | Distribution questions ("find all X", "what fraction of X") answered by an agent under a dollar budget, comparing MCP search backends | Set recall/precision and stat accuracy vs registry gold, deterministic |
 
 Everything engine- or judge-related is shared infrastructure in
 [`keenbench.shared`](#shared-infrastructure) — search clients, LLM client,
@@ -386,6 +387,84 @@ and `by_court` breakdowns plus the system-specific vs universal misses split.
 Identity extraction is pattern-based, so a page that discusses the case
 without citing it doesn't count — recall is a lower bound, applied
 symmetrically across engines.
+
+## findallmcp
+
+Measures the thesis of
+[The Minimum Experiment](https://keenable.ai/blog/the-minimum-experiment): a
+model hands you the *mode*, a search API hands you *documents*, and the wins
+live in the *distribution*. Every task asks for a distribution — an exhaustive
+enumeration ("find all X") or a population statistic ("what fraction of X") —
+whose ground truth is computed from a structured public registry, so an agent
+that reasons from priors or from a few top documents scores measurably worse
+than one that actually holds the population.
+
+Unlike the other benches this one is **agentic**: `run` drives an LLM agent
+(default `anthropic/claude-sonnet-4.5` via OpenRouter, `--agent-model` /
+`KEENBENCH_AGENT_MODEL` to override) with the tools of one MCP search backend
+at a time, under a hard **dollar budget** per task, and compares backends on
+what they let the same agent find per dollar.
+
+### Generate
+
+```bash
+keenbench findallmcp generate --out findallmcp.jsonl
+```
+
+Two suites, gold computed at generate time from the registry that scores the
+task:
+
+- **`hn`** — Show HN launches via the keyless Algolia API: one enumerate task
+  (all launches over a point threshold auto-picked so the gold set lands at
+  8–40 entries) and two stat tasks (population count, fraction of titles
+  containing a digit).
+- **`edgar`** — SEC full-text search: enumerate tasks over curated 8-K phrases
+  ("material cybersecurity incident", "reverse stock split", …) that yield
+  8–40 distinct filers, plus an S-1 filer-count stat task.
+
+### Run (set recall / stat accuracy per dollar)
+
+```bash
+keenbench findallmcp run --queries findallmcp.jsonl --backends keenable,webql \
+  --budget-usd 0.25 --out findallmcp.json
+```
+
+Backends are MCP servers:
+
+- **`keenable`** — the classic search MCP (`npx -y @keenable/mcp`,
+  stdio; `KEENBENCH_KEENABLE_MCP_CMD` overrides the command):
+  `search_web_pages` + `fetch_page_content`.
+- **`webql`** — the hosted WebQL MCP (`https://webql.keenable.ai/mcp`,
+  streamable HTTP, `X-API-Key` from `KEENABLE_API_KEY`;
+  `KEENBENCH_WEBQL_MCP_URL` overrides): search plus
+  map/reduce/view over result sets — the distribution tools.
+- **`exa`** — Exa's hosted MCP (`https://mcp.exa.ai/mcp`, key from
+  `EXA_API_KEY`; `KEENBENCH_EXA_MCP_URL` overrides): `web_search_exa` +
+  `web_fetch_exa`.
+- **`parallel`** — Parallel's hosted Search MCP
+  (`https://search.parallel.ai/mcp`, `x-api-key` from `PARALLEL_API_KEY`;
+  `KEENBENCH_PARALLEL_MCP_URL` overrides): `web_search` + `web_fetch`.
+
+The harness runs on the shared
+[tool-calling agent](#tool-calling-agent) (`keenbench.shared.agent`), with
+each backend's MCP session bridged into the agent's tool registry per task.
+The budget is charged in dollars via its `RunBudget`: LLM tokens at list
+prices plus a per-call price table for each tool (`models.py`;
+`map_result_set_with_llm` costs 10× a plain search, so WebQL's heavier tools
+aren't free). The agent sees its running spend after every tool result and is
+forced to answer once the budget is crossed (overshoot is bounded by one turn
+and reported in `spent_usd`).
+
+Scoring is deterministic: enumerate answers are matched to gold entities by
+normalized name (legal suffixes and "Show HN:" stripped) or URL domain →
+recall/precision/F1; stat answers score `max(0, 1 - relative error)`, with a
+per-task tolerance flag (`within_tol`) reported alongside. The report gives
+per-backend `mean_score`, `set_recall`/`set_precision`, `stat_score`,
+`stat_within_tol`, `mean_spent_usd`, `mean_tool_calls`, and `by_suite` /
+`by_bucket` breakdowns. Caveats: agent runs are nondeterministic and paid —
+run with small task counts and compare means over repeats; entity matching is
+lexical, so an agent naming a company by an unusual alias can be undercounted
+(applied symmetrically across backends).
 
 ## Shared infrastructure
 
