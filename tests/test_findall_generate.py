@@ -9,11 +9,11 @@ HOUR = NOW.replace(minute=0)
 
 
 class FakeHn:
-    def __init__(self, by_points):
-        self._by_points = by_points
+    def __init__(self, posts):
+        self._posts = posts
 
-    async def show_hn(self, *, since, until, min_points):
-        return [h for h in self._by_points if h["points"] >= min_points]
+    async def show_hn(self, *, since, until):
+        return self._posts
 
 
 def _hit(n, points, title=None):

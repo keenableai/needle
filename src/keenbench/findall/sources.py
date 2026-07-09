@@ -26,35 +26,40 @@ _DISPLAY_RE = re.compile(r"^(.*?)\s*(?:\(([^)]*)\))?\s*\(CIK (\d+)\)\s*$")
 
 
 class HnClient(HttpSearchClient):
-    async def show_hn(self, *, since: date, until: date, min_points: int) -> list[dict[str, Any]]:
-        params = {
-            "tags": "show_hn",
-            "numericFilters": (
-                f"created_at_i>{int(datetime(since.year, since.month, since.day).timestamp())},"
-                f"created_at_i<{int(datetime(until.year, until.month, until.day).timestamp())},"
-                f"points>={min_points}"
-            ),
-            "hitsPerPage": 1000,
-        }
-        payload, err = await self._request_json(
-            "GET", HN_SEARCH, params=params, headers={"User-Agent": USER_AGENT}
-        )
-        if err is not None or not isinstance(payload, dict):
-            return []
-        hits = []
-        for h in payload.get("hits") or []:
-            title = " ".join((h.get("title") or "").split())
-            if title and h.get("objectID"):
-                hits.append(
-                    {
-                        "id": str(h["objectID"]),
-                        "title": title,
-                        "url": h.get("url")
-                        or f"https://news.ycombinator.com/item?id={h['objectID']}",
-                        "points": int(h.get("points") or 0),
-                    }
-                )
-        return hits
+    async def show_hn(self, *, since: date, until: date) -> list[dict[str, Any]]:
+        lower = int(datetime(since.year, since.month, since.day).timestamp())
+        upper = int(datetime(until.year, until.month, until.day).timestamp())
+        hits: list[dict[str, Any]] = []
+        seen: set[str] = set()
+        while True:
+            params = {
+                "tags": "show_hn",
+                "numericFilters": f"created_at_i>{lower},created_at_i<{upper}",
+                "hitsPerPage": 1000,
+            }
+            payload, err = await self._request_json(
+                "GET", HN_SEARCH, params=params, headers={"User-Agent": USER_AGENT}
+            )
+            if err is not None or not isinstance(payload, dict):
+                return []
+            page = payload.get("hits") or []
+            for h in page:
+                title = " ".join((h.get("title") or "").split())
+                if title and h.get("objectID") and str(h["objectID"]) not in seen:
+                    seen.add(str(h["objectID"]))
+                    hits.append(
+                        {
+                            "id": str(h["objectID"]),
+                            "title": title,
+                            "url": h.get("url")
+                            or f"https://news.ycombinator.com/item?id={h['objectID']}",
+                            "points": int(h.get("points") or 0),
+                        }
+                    )
+            stamps = [int(h.get("created_at_i") or 0) for h in page]
+            if len(page) < 1000 or not stamps or min(stamps) <= lower:
+                return hits
+            upper = min(stamps)
 
 
 class EdgarFtsClient(HttpSearchClient):
@@ -110,10 +115,12 @@ async def hn_tasks(client: HnClient, *, now: datetime) -> list[Task]:
     window = f"between {since.isoformat()} and {until.isoformat()} (UTC)"
     tasks: list[Task] = []
 
+    posts = await client.show_hn(since=since, until=until)
+
     chosen: list[dict[str, Any]] | None = None
     chosen_points = None
     for min_points in HN_POINT_LADDER:
-        hits = await client.show_hn(since=since, until=until, min_points=min_points)
+        hits = [h for h in posts if h["points"] >= min_points]
         if GOLD_MIN <= len(hits) <= GOLD_MAX:
             chosen, chosen_points = hits, min_points
             break
@@ -135,7 +142,7 @@ async def hn_tasks(client: HnClient, *, now: datetime) -> list[Task]:
             )
         )
 
-    base = await client.show_hn(since=since, until=until, min_points=100)
+    base = [h for h in posts if h["points"] >= 100]
     if len(base) >= 30:
         with_digit = sum(1 for h in base if _DIGIT_RE.search(h["title"]))
         tasks.append(
