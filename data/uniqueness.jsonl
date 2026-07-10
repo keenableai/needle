@@ -1589,3 +1589,11 @@
 {"ts": "2026-07-10T08:27Z", "engine": "parallel", "unique_urls": 17, "total_urls": 65}
 {"ts": "2026-07-10T08:27Z", "engine": "tavily", "unique_urls": 22, "total_urls": 65}
 {"ts": "2026-07-10T08:27Z", "engine": "perplexity", "unique_urls": 23, "total_urls": 51}
+{"ts": "2026-07-10T10:27Z", "engine": "keenable", "unique_urls": 78, "total_urls": 100}
+{"ts": "2026-07-10T10:27Z", "engine": "exa", "unique_urls": 54, "total_urls": 97}
+{"ts": "2026-07-10T10:27Z", "engine": "google", "unique_urls": 33, "total_urls": 95}
+{"ts": "2026-07-10T10:27Z", "engine": "bing", "unique_urls": 52, "total_urls": 100}
+{"ts": "2026-07-10T10:27Z", "engine": "brave", "unique_urls": 18, "total_urls": 100}
+{"ts": "2026-07-10T10:27Z", "engine": "parallel", "unique_urls": 22, "total_urls": 100}
+{"ts": "2026-07-10T10:27Z", "engine": "tavily", "unique_urls": 41, "total_urls": 100}
+{"ts": "2026-07-10T10:27Z", "engine": "perplexity", "unique_urls": 40, "total_urls": 78}
