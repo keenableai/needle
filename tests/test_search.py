@@ -6,6 +6,7 @@ from keenbench.shared.search import (
     BraveClient,
     ExaClient,
     KeenableClient,
+    OctenClient,
     ParallelClient,
     PerplexityClient,
     SearchApiClient,
@@ -316,6 +317,45 @@ async def test_tavily_maps_fields_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_octen_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "data": {
+            "query": "hi",
+            "results": [
+                {
+                    "url": "https://a",
+                    "title": "A",
+                    "highlight": "ha",
+                    "time_published": "2026-07-01T00:00:00Z",
+                },
+                {"url": "https://b", "title": "", "highlight": "", "time_published": ""},
+                {"title": "no url"},
+            ],
+        },
+        "code": 0,
+        "msg": "success",
+    }
+    c = OctenClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].snippet == "ha"
+    assert results[0].published_date == "2026-07-01T00:00:00Z"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert results[1].published_date is None
+    assert calls["url"] == "https://api.octen.ai/search"
+    assert calls["json"] == {
+        "query": "hi",
+        "count": 5,
+        "highlight": {"enable": True, "max_tokens": 512},
+    }
+    assert calls["headers"] == {"X-Api-Key": "k"}
+
+
 async def test_perplexity_maps_results_and_builds_body(monkeypatch):
     payload = {
         "results": [
@@ -350,7 +390,10 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
     monkeypatch.setenv("TAVILY_API_KEY", "tk")
     monkeypatch.setenv("PERPLEXITY_API_KEY", "xk")
-    clients = build_search_clients(["google", "bing", "brave", "parallel", "tavily", "perplexity"])
+    monkeypatch.setenv("OCTEN_API_KEY", "ok")
+    clients = build_search_clients(
+        ["google", "bing", "brave", "parallel", "tavily", "perplexity", "octen"]
+    )
     assert isinstance(clients["google"], SerperClient)
     assert clients["google"].engine == "google"
     assert clients["google"].api_key == "gk"
@@ -361,6 +404,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert isinstance(clients["tavily"], TavilyClient)
     assert isinstance(clients["perplexity"], PerplexityClient)
     assert clients["perplexity"].api_key == "xk"
+    assert isinstance(clients["octen"], OctenClient)
+    assert clients["octen"].api_key == "ok"
 
 
 def test_factory_requires_key(monkeypatch):

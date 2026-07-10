@@ -55,6 +55,7 @@ Keys are read only from the environment.
 | `PARALLEL_API_KEY` | the `parallel` engine | [Parallel](https://parallel.ai) v1 search |
 | `TAVILY_API_KEY` | the `tavily` engine | [Tavily](https://tavily.com) search |
 | `PERPLEXITY_API_KEY` | the `perplexity` engine | [Perplexity](https://docs.perplexity.ai) Search API |
+| `OCTEN_API_KEY` | the `octen` engine | [Octen](https://octen.ai) search |
 | `KEENBENCH_LLM_MODEL` | query projection | Default `google/gemini-3.1-flash-lite`; `--llm-model` overrides |
 | `KEENBENCH_JUDGE_MODEL` | judging | Default `google/gemini-3-flash-preview`; `--judge-model` overrides |
 
@@ -486,6 +487,7 @@ never raises). Shipped engines:
 | `ParallelClient` | `POST https://api.parallel.ai/v1/search` | `x-api-key` (required) |
 | `TavilyClient` | `POST https://api.tavily.com/search` | `Authorization: Bearer` (required) |
 | `PerplexityClient` | `POST https://api.perplexity.ai/search` | `Authorization: Bearer` (required) |
+| `OctenClient` | `POST https://api.octen.ai/search` | `X-Api-Key` (required) |
 
 ```python
 import asyncio

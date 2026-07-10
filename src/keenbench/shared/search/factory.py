@@ -12,6 +12,7 @@ from keenbench.shared.search.base import SearchClient
 from keenbench.shared.search.brave import BraveClient
 from keenbench.shared.search.exa import ExaClient
 from keenbench.shared.search.keenable import KeenableClient
+from keenbench.shared.search.octen import OctenClient
 from keenbench.shared.search.parallel import ParallelClient
 from keenbench.shared.search.perplexity import PerplexityClient
 from keenbench.shared.search.searchapi import SearchApiClient
@@ -63,6 +64,10 @@ def _build_perplexity(api_key: str | None, snippet_chars: int) -> SearchClient:
     return PerplexityClient(api_key=api_key or "")
 
 
+def _build_octen(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return OctenClient(api_key=api_key or "")
+
+
 def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:
     return TavilyClient(api_key=api_key or "", search_depth=os.environ.get("TAVILY_DEPTH", "basic"))
 
@@ -80,6 +85,7 @@ ENGINES: dict[str, EngineSpec] = {
         key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity
     ),
     "tavily": EngineSpec(key_env="TAVILY_API_KEY", key_required=True, build=_build_tavily),
+    "octen": EngineSpec(key_env="OCTEN_API_KEY", key_required=True, build=_build_octen),
 }
 
 
