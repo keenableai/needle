@@ -27,6 +27,10 @@ on:
         description: "Also run legal (regenerates gold)"
         type: boolean
         default: false
+      findallmcp:
+        description: "Also run findallmcp (agentic MCP-backend eval, spends LLM budget)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -136,6 +140,17 @@ jobs:
           uv run keenbench legal run --queries site-data/data/legal.jsonl \
             --engines "$ENGINES" --out legal.json
 
+      - name: findallmcp (dispatch opt-in)
+        env:
+          RUN_FINDALLMCP: ${{ inputs.findallmcp == true }}
+        run: |
+          if [ "$RUN_FINDALLMCP" != "true" ]; then
+            echo "skipping findallmcp"
+            exit 0
+          fi
+          uv run keenbench findallmcp generate --out findallmcp.jsonl
+          uv run keenbench findallmcp run findallmcp.jsonl --out findallmcp.json
+
       - name: Publish
         run: |
           # backfills recent HF-archived runs into overlap.jsonl; 24h lookback
@@ -155,6 +170,9 @@ jobs:
           fi
           if [ -s legal.json ]; then
             args="$args --legal legal.json --legal-queries site-data/data/legal.jsonl"
+          fi
+          if [ -s findallmcp.json ]; then
+            args="$args --findallmcp findallmcp.json --findallmcp-queries findallmcp.jsonl"
           fi
           uv run python scripts/publish_bench.py $args
           # staged/ holds exactly this run's <id>/ dir, so the run id has one owner
