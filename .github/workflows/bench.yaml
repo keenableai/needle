@@ -149,7 +149,8 @@ jobs:
             exit 0
           fi
           uv run keenbench findallmcp generate --out findallmcp.jsonl
-          uv run keenbench findallmcp run findallmcp.jsonl --out findallmcp.json
+          uv run keenbench findallmcp run findallmcp.jsonl \
+            --backends keenable,webql,exa,parallel --out findallmcp.json
 
       - name: Publish
         run: |
