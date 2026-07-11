@@ -1,4 +1,5 @@
 import asyncio
+from datetime import date
 
 import pytest
 
@@ -6,6 +7,7 @@ from keenbench.shared.search import (
     BraveClient,
     ExaClient,
     KeenableClient,
+    OctenClient,
     ParallelClient,
     PerplexityClient,
     SearchApiClient,
@@ -15,6 +17,9 @@ from keenbench.shared.search import (
     build_search_clients,
     latency_stats,
 )
+from keenbench.shared.search.queryops import parse_ops
+
+OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
 
 
 def _canned(payload):
@@ -316,6 +321,45 @@ async def test_tavily_maps_fields_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_octen_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "data": {
+            "query": "hi",
+            "results": [
+                {
+                    "url": "https://a",
+                    "title": "A",
+                    "highlight": "ha",
+                    "time_published": "2026-07-01T00:00:00Z",
+                },
+                {"url": "https://b", "title": "", "highlight": "", "time_published": ""},
+                {"title": "no url"},
+            ],
+        },
+        "code": 0,
+        "msg": "success",
+    }
+    c = OctenClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].snippet == "ha"
+    assert results[0].published_date == "2026-07-01T00:00:00Z"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert results[1].published_date is None
+    assert calls["url"] == "https://api.octen.ai/search"
+    assert calls["json"] == {
+        "query": "hi",
+        "count": 5,
+        "highlight": {"enable": True, "max_tokens": 512},
+    }
+    assert calls["headers"] == {"X-Api-Key": "k"}
+
+
 async def test_perplexity_maps_results_and_builds_body(monkeypatch):
     payload = {
         "results": [
@@ -350,7 +394,10 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
     monkeypatch.setenv("TAVILY_API_KEY", "tk")
     monkeypatch.setenv("PERPLEXITY_API_KEY", "xk")
-    clients = build_search_clients(["google", "bing", "brave", "parallel", "tavily", "perplexity"])
+    monkeypatch.setenv("OCTEN_API_KEY", "ok")
+    clients = build_search_clients(
+        ["google", "bing", "brave", "parallel", "tavily", "perplexity", "octen"]
+    )
     assert isinstance(clients["google"], SerperClient)
     assert clients["google"].engine == "google"
     assert clients["google"].api_key == "gk"
@@ -361,6 +408,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert isinstance(clients["tavily"], TavilyClient)
     assert isinstance(clients["perplexity"], PerplexityClient)
     assert clients["perplexity"].api_key == "xk"
+    assert isinstance(clients["octen"], OctenClient)
+    assert clients["octen"].api_key == "ok"
 
 
 def test_factory_requires_key(monkeypatch):
@@ -469,3 +518,137 @@ def test_latency_stats():
     assert stats["mean_ms"] == 50.5
     assert stats["p50_ms"] == 50.0
     assert stats["p95_ms"] == 95.0
+
+
+def test_parse_ops_extracts_operators():
+    ops = parse_ops(OPS_QUERY)
+    assert ops.text == "acme filing"
+    assert ops.sites == ("sec.gov",)
+    assert ops.after == date(2026, 6, 1)
+    assert ops.before == date(2026, 6, 30)
+    assert ops.text_with_sites() == "acme filing site:sec.gov"
+
+
+def test_parse_ops_plain_query_is_identity():
+    ops = parse_ops("federal reserve rate decision")
+    assert ops.text == "federal reserve rate decision"
+    assert ops.sites == ()
+    assert ops.after is None and ops.before is None
+
+
+def test_parse_ops_malformed_operators_stay_text():
+    ops = parse_ops("after:yesterday site: report site:nodot before:2026-13-01")
+    assert ops.text == "after:yesterday site: report site:nodot before:2026-13-01"
+    assert ops.sites == ()
+    assert ops.after is None and ops.before is None
+
+
+def test_parse_ops_normalizes_and_dedups_hosts():
+    ops = parse_ops("x site:https://SEC.gov/filings site:sec.gov")
+    assert ops.sites == ("sec.gov",)
+
+
+def test_parse_ops_last_date_wins():
+    ops = parse_ops("x after:2026-01-01 after:2026-02-01")
+    assert ops.after == date(2026, 2, 1)
+
+
+async def test_brave_freshness_fills_open_ends(monkeypatch):
+    c = BraveClient(api_key="k")
+    fake, calls = _canned({"web": {"results": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search("x after:2026-06-01")
+    assert calls["params"]["freshness"].startswith("2026-06-01to")
+    await c.search("x before:2026-06-30")
+    assert calls["params"]["freshness"] == "1970-01-01to2026-06-30"
+    await c.search("x")
+    assert "freshness" not in calls["params"]
+
+
+@pytest.mark.parametrize(
+    "make_client,payload,field,expected",
+    [
+        (
+            lambda: KeenableClient(),
+            {"results": []},
+            "json",
+            {
+                "query": (
+                    "acme filing site:sec.gov"
+                    " published_after:2026-06-01 published_before:2026-06-30"
+                )
+            },
+        ),
+        (
+            lambda: BraveClient(api_key="k"),
+            {"web": {"results": []}},
+            "params",
+            {"q": "acme filing site:sec.gov", "freshness": "2026-06-01to2026-06-30"},
+        ),
+        (
+            lambda: ExaClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "query": "acme filing",
+                "includeDomains": ["sec.gov"],
+                "startPublishedDate": "2026-06-01T00:00:00.000Z",
+                "endPublishedDate": "2026-06-30T23:59:59.999Z",
+            },
+        ),
+        (
+            lambda: TavilyClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "query": "acme filing",
+                "include_domains": ["sec.gov"],
+                "start_date": "2026-06-01",
+                "end_date": "2026-06-30",
+            },
+        ),
+        (
+            lambda: PerplexityClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "query": "acme filing",
+                "search_domain_filter": ["sec.gov"],
+                "search_after_date_filter": "06/01/2026",
+                "search_before_date_filter": "06/30/2026",
+            },
+        ),
+        (
+            lambda: ParallelClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "search_queries": ["acme filing"],
+                "advanced_settings": {
+                    "max_results": 10,
+                    "source_policy": {"include_domains": ["sec.gov"]},
+                },
+            },
+        ),
+        (
+            lambda: OctenClient(api_key="k"),
+            {"data": {"results": []}},
+            "json",
+            {
+                "query": "acme filing",
+                "include_domains": ["sec.gov"],
+                "start_time": "2026-06-01T00:00:00Z",
+                "end_time": "2026-06-30T23:59:59Z",
+            },
+        ),
+        (lambda: SerperClient(api_key="k"), {"organic": []}, "json", {"q": OPS_QUERY}),
+    ],
+)
+async def test_clients_translate_operators(monkeypatch, make_client, payload, field, expected):
+    c = make_client()
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search(OPS_QUERY)
+    assert expected.items() <= calls[field].items()

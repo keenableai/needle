@@ -55,6 +55,7 @@ Keys are read only from the environment.
 | `PARALLEL_API_KEY` | the `parallel` engine | [Parallel](https://parallel.ai) v1 search |
 | `TAVILY_API_KEY` | the `tavily` engine | [Tavily](https://tavily.com) search |
 | `PERPLEXITY_API_KEY` | the `perplexity` engine | [Perplexity](https://docs.perplexity.ai) Search API |
+| `OCTEN_API_KEY` | the `octen` engine | [Octen](https://octen.ai) search |
 | `KEENBENCH_LLM_MODEL` | query projection | Default `google/gemini-3.1-flash-lite`; `--llm-model` overrides |
 | `KEENBENCH_JUDGE_MODEL` | judging | Default `google/gemini-3-flash-preview`; `--judge-model` overrides |
 
@@ -486,6 +487,7 @@ never raises). Shipped engines:
 | `ParallelClient` | `POST https://api.parallel.ai/v1/search` | `x-api-key` (required) |
 | `TavilyClient` | `POST https://api.tavily.com/search` | `Authorization: Bearer` (required) |
 | `PerplexityClient` | `POST https://api.perplexity.ai/search` | `Authorization: Bearer` (required) |
+| `OctenClient` | `POST https://api.octen.ai/search` | `X-Api-Key` (required) |
 
 ```python
 import asyncio
@@ -502,6 +504,32 @@ asyncio.run(go())
 
 Each client caps in-flight requests via a per-client `max_concurrency`
 semaphore (default 8).
+
+### Query operators
+
+Bench queries carry Google-style operators (`site:host`,
+`after:YYYY-MM-DD`, `before:YYYY-MM-DD`). Mirroring keenable's
+orchestrator, `queryops.parse_ops` extracts them and each client
+translates to its engine's best native mechanism — operators the engine
+parses natively stay in the query text, translated ones are stripped from
+it, and unsupported date bounds are dropped rather than sent as literal
+tokens:
+
+| Engine | `site:` | `after:` / `before:` |
+| --- | --- | --- |
+| `google`, `bing` | in query text (native) | in query text (native) |
+| `keenable` | in query text (native) | rewritten to `published_after:` / `published_before:` (native) |
+| `brave` | in query text (native) | `freshness=YYYY-MM-DDtoYYYY-MM-DD` (open ends filled with epoch/today) |
+| `exa` | `includeDomains` | `startPublishedDate` / `endPublishedDate` |
+| `tavily` | `include_domains` | `start_date` / `end_date` |
+| `perplexity` | `search_domain_filter` | `search_after_date_filter` / `search_before_date_filter` |
+| `parallel` | `source_policy.include_domains` | dropped (no API support) |
+| `octen` | `include_domains` | `start_time` / `end_time` |
+
+Malformed operator values (`after:yesterday`, `site:` with no host) stay
+in the query text untouched. The judge still rates results against the
+original operator-bearing query, so an engine whose native filter is weak
+is penalized the same as before.
 
 Everything downstream — the pipelines, reports, scheduled runs, and the
 dashboard — is engine-count-agnostic, so adding an engine to the comparison

@@ -1,4 +1,5 @@
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.queryops import parse_ops
 
 
 class KeenableClient(HttpSearchClient):
@@ -25,6 +26,13 @@ class KeenableClient(HttpSearchClient):
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
+        ops = parse_ops(query)
+        parts = [ops.text_with_sites()]
+        if ops.after:
+            parts.append(f"published_after:{ops.after.isoformat()}")
+        if ops.before:
+            parts.append(f"published_before:{ops.before.isoformat()}")
+        query = " ".join(p for p in parts if p)
         headers = {"X-Keenable-Title": self.app_title}
         if self.api_key:
             path = "/v1/search"

@@ -1,4 +1,7 @@
+from typing import Any
+
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.queryops import parse_ops
 
 
 class PerplexityClient(HttpSearchClient):
@@ -19,14 +22,22 @@ class PerplexityClient(HttpSearchClient):
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
+        ops = parse_ops(query)
+        body: dict[str, Any] = {
+            "query": ops.text,
+            "max_results": min(num_results, 20),
+            "search_context_size": "low",
+        }
+        if ops.sites:
+            body["search_domain_filter"] = list(ops.sites)
+        if ops.after:
+            body["search_after_date_filter"] = ops.after.strftime("%m/%d/%Y")
+        if ops.before:
+            body["search_before_date_filter"] = ops.before.strftime("%m/%d/%Y")
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/search",
-            json={
-                "query": query,
-                "max_results": min(num_results, 20),
-                "search_context_size": "low",
-            },
+            json=body,
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
         if err is not None:

@@ -1,4 +1,7 @@
+from typing import Any
+
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.queryops import parse_ops
 
 
 class ParallelClient(HttpSearchClient):
@@ -21,14 +24,18 @@ class ParallelClient(HttpSearchClient):
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
+        ops = parse_ops(query)
+        advanced: dict[str, Any] = {"max_results": num_results}
+        if ops.sites:
+            advanced["source_policy"] = {"include_domains": list(ops.sites)}
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/v1/search",
             error_field="error",
             json={
-                "search_queries": [query],
+                "search_queries": [ops.text],
                 "mode": self.mode,
-                "advanced_settings": {"max_results": num_results},
+                "advanced_settings": advanced,
             },
             headers={"x-api-key": self.api_key},
         )
