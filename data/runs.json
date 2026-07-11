@@ -1700,5 +1700,14 @@
       "scholar.json",
       "scholar.jsonl"
     ]
+  },
+  {
+    "id": "2026-07-11T1340Z",
+    "ts": "2026-07-11T13:40Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rarestream.json",
+      "rbp.json"
+    ]
   }
 ]
