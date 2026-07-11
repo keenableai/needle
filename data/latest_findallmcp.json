@@ -1,0 +1,101 @@
+{
+  "num_queries": 6,
+  "budgets_usd": [
+    0.25
+  ],
+  "agent_model": "anthropic/claude-sonnet-4.5",
+  "backends": {
+    "keenable": {
+      "mean_score": 0.3344880314849954,
+      "set_recall": 0.26775599128540306,
+      "set_precision": 0.5555555555555556,
+      "set_f1": 0.33969440619056984,
+      "stat_score": 0.4012200716845878,
+      "stat_within_tol": 0.3333333333333333,
+      "num_scored": 6,
+      "errors": 0,
+      "mean_spent_usd": 0.3751,
+      "mean_tool_calls": 11.833333333333334,
+      "by_budget": {
+        "0.25": {
+          "mean_score": 0.3344880314849954,
+          "set_recall": 0.26775599128540306,
+          "set_precision": 0.5555555555555556,
+          "set_f1": 0.33969440619056984,
+          "stat_score": 0.4012200716845878,
+          "stat_within_tol": 0.3333333333333333,
+          "num_scored": 6,
+          "errors": 0,
+          "mean_spent_usd": 0.3751,
+          "mean_tool_calls": 11.833333333333334
+        }
+      },
+      "by_suite": {
+        "edgar": {
+          "n": 3,
+          "mean_score": 0.16775599128540306
+        },
+        "hn": {
+          "n": 3,
+          "mean_score": 0.5012200716845878
+        }
+      },
+      "by_bucket": {
+        "enumerate": {
+          "n": 3,
+          "mean_score": 0.26775599128540306
+        },
+        "stat": {
+          "n": 3,
+          "mean_score": 0.4012200716845878
+        }
+      }
+    },
+    "webql": {
+      "mean_score": 0.25858511415318813,
+      "set_recall": 0.4954248366013072,
+      "set_precision": 0.652046783625731,
+      "set_f1": 0.549116424116424,
+      "stat_score": 0.021745391705069134,
+      "stat_within_tol": 0.0,
+      "num_scored": 6,
+      "errors": 0,
+      "mean_spent_usd": 0.2962,
+      "mean_tool_calls": 7.666666666666667,
+      "by_budget": {
+        "0.25": {
+          "mean_score": 0.25858511415318813,
+          "set_recall": 0.4954248366013072,
+          "set_precision": 0.652046783625731,
+          "set_f1": 0.549116424116424,
+          "stat_score": 0.021745391705069134,
+          "stat_within_tol": 0.0,
+          "num_scored": 6,
+          "errors": 0,
+          "mean_spent_usd": 0.2962,
+          "mean_tool_calls": 7.666666666666667
+        }
+      },
+      "by_suite": {
+        "edgar": {
+          "n": 3,
+          "mean_score": 0.41179388422035484
+        },
+        "hn": {
+          "n": 3,
+          "mean_score": 0.10537634408602149
+        }
+      },
+      "by_bucket": {
+        "enumerate": {
+          "n": 3,
+          "mean_score": 0.4954248366013072
+        },
+        "stat": {
+          "n": 3,
+          "mean_score": 0.021745391705069134
+        }
+      }
+    }
+  }
+}
