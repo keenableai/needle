@@ -403,7 +403,7 @@ that reasons from priors or from a few top documents scores measurably worse
 than one that actually holds the population.
 
 Unlike the other benches this one is **agentic**: `run` drives an LLM agent
-(default `anthropic/claude-sonnet-4.5` via OpenRouter, `--agent-model` /
+(default `anthropic/claude-sonnet-5` via OpenRouter, `--agent-model` /
 `KEENBENCH_AGENT_MODEL` to override) with the tools of one MCP search backend
 at a time, under a hard **dollar budget** per task, and compares backends on
 what they let the same agent find per dollar.
@@ -572,7 +572,7 @@ failures (429/5xx/transport) with exponential backoff:
 from keenbench.shared.agent import Agent, RunBudget, Tool
 from keenbench.shared.llm import OpenRouterClient
 
-llm = OpenRouterClient(api_key="sk-or-...", model="anthropic/claude-sonnet-4.5", timeout_s=180.0)
+llm = OpenRouterClient(api_key="sk-or-...", model="anthropic/claude-sonnet-5", timeout_s=180.0)
 agent = Agent(llm, tools, system_prompt, max_steps=20)
 budget = RunBudget(limit_usd=0.25, in_price_per_mtok=3.0, out_price_per_mtok=15.0,
                    tool_cost=lambda name: 0.005)

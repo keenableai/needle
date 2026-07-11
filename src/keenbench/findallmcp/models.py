@@ -10,7 +10,7 @@ SUITES = ("hn", "edgar")
 BUCKETS = ("enumerate", "stat")
 
 AGENT_MODEL_ENV = "KEENBENCH_AGENT_MODEL"
-DEFAULT_AGENT_MODEL = "anthropic/claude-sonnet-4.5"
+DEFAULT_AGENT_MODEL = "anthropic/claude-sonnet-5"
 
 MODEL_PRICES_PER_MTOK = {
     "anthropic/claude-sonnet-4.5": (3.0, 15.0),
