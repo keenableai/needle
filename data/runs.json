@@ -1607,5 +1607,15 @@
       "fresh.jsonl",
       "rbp.json"
     ]
+  },
+  {
+    "id": "2026-07-11T0058Z",
+    "ts": "2026-07-11T00:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "rbp.json",
+      "recall.json"
+    ]
   }
 ]
