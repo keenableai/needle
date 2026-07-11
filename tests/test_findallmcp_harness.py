@@ -29,6 +29,32 @@ def test_blocked_registry_walks_nested_args():
     assert _blocked_registry(args) is None
 
 
+def test_blocked_registry_covers_new_suites():
+    blocked = [
+        "https://api.fda.gov/food/enforcement.json?search=report_date:[20260611+TO+20260711]",
+        "https://clinicaltrials.gov/api/v2/studies?query.term=AREA[Phase]PHASE3",
+        "https://classic.clinicaltrials.gov/api/query/study_fields?expr=cancer",
+        "https://api.github.com/search/repositories?q=created:2026-06-11..2026-07-11",
+        "https://github.com/search?q=stars%3A%3E3000&type=repositories",
+        "https://services.nvd.nist.gov/rest/json/cves/2.0?hasKev",
+        "https://nvd.nist.gov/vuln/search/results?form_type=Advanced",
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+    ]
+    for url in blocked:
+        assert _blocked_registry({"urls": [url]}) is not None, url
+    allowed = [
+        "https://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts/some-recall",
+        "https://clinicaltrials.gov/study/NCT06712345",
+        "https://api.github.com/repos/langchain-ai/openwiki",
+        "https://github.com/langchain-ai/openwiki",
+        "https://nvd.nist.gov/vuln/detail/CVE-2026-34908",
+        "https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-190a",
+    ]
+    for url in allowed:
+        assert _blocked_registry({"urls": [url]}) is None, url
+
+
 def test_guard_registry_blocks_and_passes_through():
     async def fn(**kwargs):
         return "ok"

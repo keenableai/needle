@@ -23,6 +23,15 @@ BLOCKED_REGISTRIES = (
     "sec.gov/cgi-bin",
     "sec.gov/cgi-srv",
     "sec.gov/edgar/search",
+    "api.fda.gov",
+    "datadashboard.fda.gov",
+    "clinicaltrials.gov/api",
+    "clinicaltrials.gov/search",
+    "github.com/search",
+    "services.nvd.nist.gov",
+    "nvd.nist.gov/vuln/search",
+    "cisa.gov/known-exploited-vulnerabilities",
+    "known_exploited_vulnerabilities",
 )
 SYSTEM_PROMPT = (
     "You are a research agent with access to web-search tools. Answer the user's "
