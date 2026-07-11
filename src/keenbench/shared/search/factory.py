@@ -19,6 +19,7 @@ from keenbench.shared.search.perplexity import PerplexityClient
 from keenbench.shared.search.searchapi import SearchApiClient
 from keenbench.shared.search.serper import SerperClient
 from keenbench.shared.search.tavily import TavilyClient
+from keenbench.shared.search.you import YouClient
 
 
 @dataclass(frozen=True)
@@ -77,6 +78,10 @@ def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:
     return TavilyClient(api_key=api_key or "", search_depth=os.environ.get("TAVILY_DEPTH", "basic"))
 
 
+def _build_you(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return YouClient(api_key=api_key or "")
+
+
 ENGINES: dict[str, EngineSpec] = {
     "keenable": EngineSpec(key_env="KEENABLE_API_KEY", key_required=False, build=_build_keenable),
     "exa": EngineSpec(key_env="EXA_API_KEY", key_required=True, build=_build_exa),
@@ -92,6 +97,7 @@ ENGINES: dict[str, EngineSpec] = {
     "tavily": EngineSpec(key_env="TAVILY_API_KEY", key_required=True, build=_build_tavily),
     "octen": EngineSpec(key_env="OCTEN_API_KEY", key_required=True, build=_build_octen),
     "ceramic": EngineSpec(key_env="CERAMIC_API_KEY", key_required=True, build=_build_ceramic),
+    "you": EngineSpec(key_env="YOU_API_KEY", key_required=True, build=_build_you),
 }
 
 

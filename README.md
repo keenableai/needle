@@ -57,6 +57,7 @@ Keys are read only from the environment.
 | `PERPLEXITY_API_KEY` | the `perplexity` engine | [Perplexity](https://docs.perplexity.ai) Search API |
 | `OCTEN_API_KEY` | the `octen` engine | [Octen](https://octen.ai) search |
 | `CERAMIC_API_KEY` | the `ceramic` engine | [Ceramic](https://docs.ceramic.ai) search |
+| `YOU_API_KEY` | the `you` engine | [You.com](https://you.com/docs) Web Search API |
 | `KEENBENCH_LLM_MODEL` | query projection | Default `google/gemini-3.1-flash-lite`; `--llm-model` overrides |
 | `KEENBENCH_JUDGE_MODEL` | judging | Default `google/gemini-3-flash-preview`; `--judge-model` overrides |
 
@@ -490,6 +491,7 @@ never raises). Shipped engines:
 | `PerplexityClient` | `POST https://api.perplexity.ai/search` | `Authorization: Bearer` (required) |
 | `OctenClient` | `POST https://api.octen.ai/search` | `X-Api-Key` (required) |
 | `CeramicClient` | `POST https://api.ceramic.ai/search` | `Authorization: Bearer` (required) |
+| `YouClient` | `GET https://ydc-index.io/v1/search` | `X-API-Key` (required) |
 
 ```python
 import asyncio
@@ -507,7 +509,9 @@ asyncio.run(go())
 Each client caps in-flight requests via a per-client `max_concurrency`
 semaphore (default 8). `CeramicClient` additionally truncates queries to
 the API's 50-word limit and clamps `--snippet-chars` into its
-`maxDescriptionLength` range of `[1000, 8000]`.
+`maxDescriptionLength` range of `[1000, 8000]`. `YouClient` merges both
+response sections — `results.web` first, then `results.news` — deduplicating
+by URL before truncating to `num_results`.
 
 ### Query operators
 
@@ -530,6 +534,7 @@ tokens:
 | `parallel` | `source_policy.include_domains` | dropped (no API support) |
 | `octen` | `include_domains` | `start_time` / `end_time` |
 | `ceramic` | dropped (no API support; a literal `site:` token returns zero results) | dropped (no API support) |
+| `you` | `include_domains` (comma-separated) | `freshness=YYYY-MM-DDtoYYYY-MM-DD` (open ends filled with epoch/today) |
 
 Malformed operator values (`after:yesterday`, `site:` with no host) stay
 in the query text untouched. The judge still rates results against the

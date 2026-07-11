@@ -15,6 +15,7 @@ from keenbench.shared.search import (
     SearchResult,
     SerperClient,
     TavilyClient,
+    YouClient,
     build_search_clients,
     latency_stats,
 )
@@ -405,6 +406,84 @@ async def test_ceramic_clamps_query_words_and_description_chars(monkeypatch):
     assert calls["json"]["maxDescriptionLength"] == 8000
 
 
+async def test_you_merges_web_and_news_and_builds_params(monkeypatch):
+    payload = {
+        "results": {
+            "web": [
+                {
+                    "url": "https://a",
+                    "title": "A",
+                    "description": "da",
+                    "snippets": ["one", "two"],
+                    "page_age": "2026-07-01T00:00:00",
+                },
+                {"url": "https://b", "title": "", "description": "db"},
+                {"title": "no url"},
+            ],
+            "news": [
+                {"url": "https://a", "title": "dup of web"},
+                {
+                    "url": "https://n",
+                    "title": "N",
+                    "description": "dn",
+                    "page_age": "2026-07-02T00:00:00",
+                },
+            ],
+        },
+        "metadata": {"search_uuid": "u", "query": "hi", "latency": 0.1},
+    }
+    c = YouClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b", "https://n"]
+    assert results[0].snippet == "one\ntwo"
+    assert results[0].published_date == "2026-07-01T00:00:00"
+    assert results[1].title is None
+    assert results[1].snippet == "db"
+    assert results[2].snippet == "dn"
+    assert calls["method"] == "GET"
+    assert calls["url"] == "https://ydc-index.io/v1/search"
+    assert calls["params"] == {"query": "hi", "count": 5}
+    assert calls["headers"] == {"X-API-Key": "k"}
+
+
+async def test_you_truncates_across_sections_and_tolerates_empty_results(monkeypatch):
+    payload = {
+        "results": {
+            "web": [{"url": f"https://w{i}"} for i in range(3)],
+            "news": [{"url": f"https://n{i}"} for i in range(3)],
+        }
+    }
+    c = YouClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, _ = await c.search("hi", num_results=4)
+    assert [r.url for r in results] == ["https://w0", "https://w1", "https://w2", "https://n0"]
+
+    fake, calls = _canned({"results": {}, "metadata": {}})
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi", num_results=200)
+    assert err is None
+    assert results == []
+    assert calls["params"]["count"] == 100
+
+
+async def test_you_freshness_fills_open_ends(monkeypatch):
+    c = YouClient(api_key="k")
+    fake, calls = _canned({"results": {"web": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search("x after:2026-06-01")
+    assert calls["params"]["freshness"].startswith("2026-06-01to")
+    await c.search("x before:2026-06-30")
+    assert calls["params"]["freshness"] == "1970-01-01to2026-06-30"
+    await c.search("x")
+    assert "freshness" not in calls["params"]
+
+
 async def test_perplexity_maps_results_and_builds_body(monkeypatch):
     payload = {
         "results": [
@@ -441,8 +520,9 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("PERPLEXITY_API_KEY", "xk")
     monkeypatch.setenv("OCTEN_API_KEY", "ok")
     monkeypatch.setenv("CERAMIC_API_KEY", "ck")
+    monkeypatch.setenv("YOU_API_KEY", "yk")
     clients = build_search_clients(
-        ["google", "bing", "brave", "parallel", "tavily", "perplexity", "octen", "ceramic"]
+        ["google", "bing", "brave", "parallel", "tavily", "perplexity", "octen", "ceramic", "you"]
     )
     assert isinstance(clients["google"], SerperClient)
     assert clients["google"].engine == "google"
@@ -458,6 +538,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["octen"].api_key == "ok"
     assert isinstance(clients["ceramic"], CeramicClient)
     assert clients["ceramic"].api_key == "ck"
+    assert isinstance(clients["you"], YouClient)
+    assert clients["you"].api_key == "yk"
 
 
 def test_factory_requires_key(monkeypatch):
@@ -695,6 +777,16 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             {"result": {"results": []}},
             "json",
             {"query": "acme filing"},
+        ),
+        (
+            lambda: YouClient(api_key="k"),
+            {"results": {"web": []}},
+            "params",
+            {
+                "query": "acme filing",
+                "include_domains": "sec.gov",
+                "freshness": "2026-06-01to2026-06-30",
+            },
         ),
         (lambda: SerperClient(api_key="k"), {"organic": []}, "json", {"q": OPS_QUERY}),
     ],

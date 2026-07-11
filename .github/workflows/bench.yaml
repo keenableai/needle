@@ -49,11 +49,12 @@ env:
   PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
   OCTEN_API_KEY: ${{ secrets.OCTEN_API_KEY }}
   CERAMIC_API_KEY: ${{ secrets.CERAMIC_API_KEY }}
+  YOU_API_KEY: ${{ secrets.YOU_API_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/keenbench-results
   # extend the comparison here once the engine exists in the registry
   # (src/keenbench/shared/search/factory.py) and its key is a secret above
-  ENGINES: keenable,exa,google,bing,brave,parallel,tavily,perplexity,octen,ceramic
+  ENGINES: keenable,exa,google,bing,brave,parallel,tavily,perplexity,octen,ceramic,you
 
 jobs:
   bench:
