@@ -26,8 +26,13 @@ class ParallelClient(HttpSearchClient):
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
         ops = parse_ops(query)
         advanced: dict[str, Any] = {"max_results": num_results}
+        policy: dict[str, Any] = {}
         if ops.sites:
-            advanced["source_policy"] = {"include_domains": list(ops.sites)}
+            policy["include_domains"] = list(ops.sites)
+        if ops.after:
+            policy["after_date"] = ops.after.isoformat()
+        if policy:
+            advanced["source_policy"] = policy
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/v1/search",

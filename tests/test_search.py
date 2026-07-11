@@ -1,6 +1,7 @@
 import asyncio
 from datetime import date
 
+import httpx
 import pytest
 
 from keenbench.shared.search import (
@@ -19,6 +20,7 @@ from keenbench.shared.search import (
     build_search_clients,
     latency_stats,
 )
+from keenbench.shared.search import base as search_base
 from keenbench.shared.search.queryops import parse_ops
 
 OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
@@ -141,8 +143,16 @@ async def test_searchapi_maps_kg_answer_box_and_organic(monkeypatch):
     assert [r.url for r in results] == ["https://kg", "https://ab", "https://a"]
     assert results[2].published_date == "Mar 3, 2026"
     assert calls["method"] == "GET"
-    assert calls["params"] == {"q": "hi", "num": 3, "engine": "google", "gl": "us", "hl": "en"}
+    assert calls["params"] == {"q": "hi", "num": 3, "engine": "google"}
     assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_searchapi_clamps_num(monkeypatch):
+    c = SearchApiClient(api_key="k", engine="bing")
+    fake, calls = _canned({"organic_results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+    await c.search("hi", num_results=100)
+    assert calls["params"]["num"] == 50
 
 
 def _no_results_http(message):
@@ -390,6 +400,38 @@ async def test_ceramic_maps_fields_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_octen_clips_query_chars(monkeypatch):
+    c = OctenClient(api_key="k")
+    fake, calls = _canned({"data": {"results": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    long_query = " ".join(f"word{i}" for i in range(100))
+    await c.search(long_query)
+    sent = calls["json"]["query"]
+    assert len(sent) <= 500
+    assert long_query.startswith(sent)
+    assert not sent.endswith(" ")
+
+    await c.search("hi")
+    assert calls["json"]["query"] == "hi"
+
+
+async def test_brave_clips_query_and_keeps_sites(monkeypatch):
+    c = BraveClient(api_key="k")
+    fake, calls = _canned({"web": {"results": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search(" ".join(f"w{i}" for i in range(60)) + " site:sec.gov")
+    q = calls["params"]["q"]
+    assert q.endswith("site:sec.gov")
+    assert len(q.split()) <= 50
+
+    await c.search(" ".join(f"word{i:06d}" for i in range(45)) + " site:sec.gov")
+    q = calls["params"]["q"]
+    assert q.endswith("site:sec.gov")
+    assert len(q) <= 400
+
+
 async def test_ceramic_clamps_query_words_and_description_chars(monkeypatch):
     c = CeramicClient(api_key="k", description_chars=500)
     fake, calls = _canned({"result": {"results": []}})
@@ -444,9 +486,9 @@ async def test_you_merges_web_and_news_and_builds_params(monkeypatch):
     assert results[1].title is None
     assert results[1].snippet == "db"
     assert results[2].snippet == "dn"
-    assert calls["method"] == "GET"
+    assert calls["method"] == "POST"
     assert calls["url"] == "https://ydc-index.io/v1/search"
-    assert calls["params"] == {"query": "hi", "count": 5}
+    assert calls["json"] == {"query": "hi", "count": 5}
     assert calls["headers"] == {"X-API-Key": "k"}
 
 
@@ -468,7 +510,7 @@ async def test_you_truncates_across_sections_and_tolerates_empty_results(monkeyp
     results, err = await c.search("hi", num_results=200)
     assert err is None
     assert results == []
-    assert calls["params"]["count"] == 100
+    assert calls["json"]["count"] == 100
 
 
 async def test_you_freshness_fills_open_ends(monkeypatch):
@@ -477,11 +519,11 @@ async def test_you_freshness_fills_open_ends(monkeypatch):
     monkeypatch.setattr(c, "_request_json", fake)
 
     await c.search("x after:2026-06-01")
-    assert calls["params"]["freshness"].startswith("2026-06-01to")
+    assert calls["json"]["freshness"].startswith("2026-06-01to")
     await c.search("x before:2026-06-30")
-    assert calls["params"]["freshness"] == "1970-01-01to2026-06-30"
+    assert calls["json"]["freshness"] == "1970-01-01to2026-06-30"
     await c.search("x")
-    assert "freshness" not in calls["params"]
+    assert "freshness" not in calls["json"]
 
 
 async def test_perplexity_maps_results_and_builds_body(monkeypatch):
@@ -512,6 +554,8 @@ async def test_perplexity_maps_results_and_builds_body(monkeypatch):
 
 
 def test_factory_builds_new_engines(monkeypatch):
+    monkeypatch.delenv("OCTEN_CONCURRENCY", raising=False)
+    monkeypatch.delenv("CERAMIC_CONCURRENCY", raising=False)
     monkeypatch.setenv("SERPER_API_KEY", "gk")
     monkeypatch.setenv("SEARCHAPI_API_KEY", "sk")
     monkeypatch.setenv("BRAVE_API_KEY", "bk")
@@ -536,10 +580,22 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["perplexity"].api_key == "xk"
     assert isinstance(clients["octen"], OctenClient)
     assert clients["octen"].api_key == "ok"
+    assert clients["octen"]._sem._value == 1
     assert isinstance(clients["ceramic"], CeramicClient)
     assert clients["ceramic"].api_key == "ck"
+    assert clients["ceramic"]._sem._value == 1
     assert isinstance(clients["you"], YouClient)
     assert clients["you"].api_key == "yk"
+
+
+def test_factory_concurrency_env_overrides(monkeypatch):
+    monkeypatch.setenv("OCTEN_API_KEY", "ok")
+    monkeypatch.setenv("CERAMIC_API_KEY", "ck")
+    monkeypatch.setenv("OCTEN_CONCURRENCY", "4")
+    monkeypatch.setenv("CERAMIC_CONCURRENCY", "2")
+    clients = build_search_clients(["octen", "ceramic"])
+    assert clients["octen"]._sem._value == 4
+    assert clients["ceramic"]._sem._value == 2
 
 
 def test_factory_requires_key(monkeypatch):
@@ -596,7 +652,8 @@ async def test_max_concurrency_caps_in_flight(monkeypatch):
     assert peak <= 2
 
 
-async def test_real_http_path_errors_as_data_and_reuse_and_close():
+async def test_real_http_path_errors_as_data_and_reuse_and_close(monkeypatch):
+    monkeypatch.setattr(search_base, "RETRY_BASE_S", 0.0)
     c = KeenableClient(base_url="http://127.0.0.1:1", timeout_s=2.0)
     r1, e1 = await c.search("q")
     client_after = c._client
@@ -609,6 +666,81 @@ async def test_real_http_path_errors_as_data_and_reuse_and_close():
     assert c._client is None
 
 
+class _SeqHttp:
+    def __init__(self, responses):
+        self.responses = list(responses)
+        self.requests = 0
+
+    async def request(self, method, url, **kwargs):
+        self.requests += 1
+        return self.responses.pop(0)
+
+
+class _Resp:
+    def __init__(self, status_code, payload=None, headers=None):
+        self.status_code = status_code
+        self.text = "boom"
+        self.headers = headers or {}
+        self._payload = payload
+
+    def json(self):
+        return self._payload
+
+
+async def test_retries_429_then_succeeds(monkeypatch):
+    monkeypatch.setattr(search_base, "RETRY_BASE_S", 0.0)
+    http = _SeqHttp(
+        [
+            _Resp(429, headers={"retry-after": "0"}),
+            _Resp(503),
+            _Resp(200, {"results": [{"url": "https://a"}]}),
+        ]
+    )
+    c = KeenableClient()
+    monkeypatch.setattr(c, "_http", lambda: http)
+    results, err = await c.search("q")
+    assert err is None
+    assert [r.url for r in results] == ["https://a"]
+    assert http.requests == 3
+    assert len(c.latencies_ms) == 1
+
+
+async def test_retries_exhausted_returns_last_error(monkeypatch):
+    monkeypatch.setattr(search_base, "RETRY_BASE_S", 0.0)
+    http = _SeqHttp([_Resp(429), _Resp(429), _Resp(429)])
+    c = KeenableClient()
+    monkeypatch.setattr(c, "_http", lambda: http)
+    results, err = await c.search("q")
+    assert results is None
+    assert err == {"error_type": "http_error", "error_message": "429: boom"}
+    assert http.requests == 3
+    assert c.latencies_ms == []
+
+
+async def test_non_retryable_status_fails_fast(monkeypatch):
+    http = _SeqHttp([_Resp(401)])
+    c = KeenableClient()
+    monkeypatch.setattr(c, "_http", lambda: http)
+    results, err = await c.search("q")
+    assert results is None
+    assert err == {"error_type": "http_error", "error_message": "401: boom"}
+    assert http.requests == 1
+
+
+async def test_transport_error_names_exception(monkeypatch):
+    monkeypatch.setattr(search_base, "RETRY_BASE_S", 0.0)
+
+    class FailHttp:
+        async def request(self, method, url, **kwargs):
+            raise httpx.ReadTimeout("")
+
+    c = KeenableClient()
+    monkeypatch.setattr(c, "_http", lambda: FailHttp())
+    results, err = await c.search("q")
+    assert results is None
+    assert err == {"error_type": "transport", "error_message": "ReadTimeout"}
+
+
 async def test_latency_recorded_only_for_ok_responses(monkeypatch):
     class OkResp:
         status_code = 200
@@ -617,7 +749,7 @@ async def test_latency_recorded_only_for_ok_responses(monkeypatch):
             return {"results": []}
 
     class BadResp:
-        status_code = 500
+        status_code = 404
         text = "boom"
 
     responses = [OkResp(), BadResp(), OkResp()]
@@ -757,7 +889,10 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
                 "search_queries": ["acme filing"],
                 "advanced_settings": {
                     "max_results": 10,
-                    "source_policy": {"include_domains": ["sec.gov"]},
+                    "source_policy": {
+                        "include_domains": ["sec.gov"],
+                        "after_date": "2026-06-01",
+                    },
                 },
             },
         ),
@@ -781,10 +916,10 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
         (
             lambda: YouClient(api_key="k"),
             {"results": {"web": []}},
-            "params",
+            "json",
             {
                 "query": "acme filing",
-                "include_domains": "sec.gov",
+                "include_domains": ["sec.gov"],
                 "freshness": "2026-06-01to2026-06-30",
             },
         ),
