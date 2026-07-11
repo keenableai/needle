@@ -2,7 +2,7 @@ import asyncio
 import os
 import time
 from contextlib import AsyncExitStack
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from mcp import ClientSession, StdioServerParameters
@@ -10,11 +10,20 @@ from mcp.client.stdio import stdio_client
 from mcp.client.streamable_http import streamablehttp_client
 
 from keenbench.findallmcp.models import model_price, tool_price
-from keenbench.shared.agent import Agent, RunBudget, mcp_tools_from_session
+from keenbench.shared.agent import Agent, RunBudget, Tool, mcp_tools_from_session
 from keenbench.shared.agent.core import truncate_content
 from keenbench.shared.llm import OpenRouterClient
 
 MAX_ERROR_CHARS = 500
+BLOCKED_REGISTRIES = (
+    "hn.algolia.com",
+    "hacker-news.firebaseio.com",
+    "efts.sec.gov",
+    "data.sec.gov",
+    "sec.gov/cgi-bin",
+    "sec.gov/cgi-srv",
+    "sec.gov/edgar/search",
+)
 SYSTEM_PROMPT = (
     "You are a research agent with access to web-search tools. Answer the user's "
     "question using evidence gathered with the tools, not your prior knowledge alone.\n"
@@ -42,6 +51,35 @@ class BackendSpec:
     url: str = ""
     env: dict[str, str] = field(default_factory=dict)
     headers: dict[str, str] = field(default_factory=dict)
+
+
+def _blocked_registry(value: Any) -> str | None:
+    if isinstance(value, str):
+        low = value.lower()
+        return next((h for h in BLOCKED_REGISTRIES if h in low), None)
+    if isinstance(value, dict):
+        value = list(value.values())
+    if isinstance(value, list | tuple):
+        for item in value:
+            hit = _blocked_registry(item)
+            if hit is not None:
+                return hit
+    return None
+
+
+def _guard_registry(tool: Tool) -> Tool:
+    inner = tool.function
+
+    async def call(**kwargs: Any) -> Any:
+        hit = _blocked_registry(kwargs)
+        if hit is not None:
+            raise RuntimeError(
+                f"'{hit}' is a gold-source registry for this benchmark and is blocked; "
+                "gather evidence through the search tools instead"
+            )
+        return await inner(**kwargs)
+
+    return replace(tool, function=call)
 
 
 def resolve_backend(name: str) -> BackendSpec:
@@ -147,7 +185,7 @@ async def _run_task_inner(
             listed = await session.list_tools()
             agent = Agent(
                 llm,
-                mcp_tools_from_session(session, listed.tools),
+                [_guard_registry(t) for t in mcp_tools_from_session(session, listed.tools)],
                 SYSTEM_PROMPT.format(budget=budget.limit_usd),
                 max_steps=max_turns,
             )
