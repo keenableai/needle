@@ -52,7 +52,7 @@ env:
   HF_DATASET: keenable-ai/keenbench-results
   # extend the comparison here once the engine exists in the registry
   # (src/keenbench/shared/search/factory.py) and its key is a secret above
-  ENGINES: keenable,exa,google,bing,brave,parallel,tavily,perplexity
+  ENGINES: keenable,exa,google,bing,brave,parallel,tavily,perplexity,octen
 
 jobs:
   bench:
