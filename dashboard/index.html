@@ -29,6 +29,9 @@ document.documentElement.dataset.theme = localStorage.theme ||
     --series-6: #e34948;
     --series-7: #e87ba4;
     --series-8: #eb6834;
+    --series-9: #0898bd;
+    --series-10: #9a5c14;
+    --series-11: #a256c9;
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
@@ -49,6 +52,9 @@ document.documentElement.dataset.theme = localStorage.theme ||
     --series-6: #e66767;
     --series-7: #d55181;
     --series-8: #d95926;
+    --series-9: #1a9fbe;
+    --series-10: #b0752c;
+    --series-11: #b06fd4;
   }
   * { box-sizing: border-box; }
   body {
@@ -427,7 +433,7 @@ function registerEngines(names) {
 
 function colorOf(engine) {
   const slot = ENGINE_SLOT.get(engine);
-  return slot == null || slot >= 8 ? "var(--text-muted)" : `var(--series-${slot + 1})`;
+  return slot == null || slot >= 11 ? "var(--text-muted)" : `var(--series-${slot + 1})`;
 }
 
 const HOME_ENGINE = "keenable";
