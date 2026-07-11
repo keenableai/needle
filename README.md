@@ -56,6 +56,7 @@ Keys are read only from the environment.
 | `TAVILY_API_KEY` | the `tavily` engine | [Tavily](https://tavily.com) search |
 | `PERPLEXITY_API_KEY` | the `perplexity` engine | [Perplexity](https://docs.perplexity.ai) Search API |
 | `OCTEN_API_KEY` | the `octen` engine | [Octen](https://octen.ai) search |
+| `CERAMIC_API_KEY` | the `ceramic` engine | [Ceramic](https://docs.ceramic.ai) search |
 | `KEENBENCH_LLM_MODEL` | query projection | Default `google/gemini-3.1-flash-lite`; `--llm-model` overrides |
 | `KEENBENCH_JUDGE_MODEL` | judging | Default `google/gemini-3-flash-preview`; `--judge-model` overrides |
 
@@ -488,6 +489,7 @@ never raises). Shipped engines:
 | `TavilyClient` | `POST https://api.tavily.com/search` | `Authorization: Bearer` (required) |
 | `PerplexityClient` | `POST https://api.perplexity.ai/search` | `Authorization: Bearer` (required) |
 | `OctenClient` | `POST https://api.octen.ai/search` | `X-Api-Key` (required) |
+| `CeramicClient` | `POST https://api.ceramic.ai/search` | `Authorization: Bearer` (required) |
 
 ```python
 import asyncio
@@ -525,6 +527,7 @@ tokens:
 | `perplexity` | `search_domain_filter` | `search_after_date_filter` / `search_before_date_filter` |
 | `parallel` | `source_policy.include_domains` | dropped (no API support) |
 | `octen` | `include_domains` | `start_time` / `end_time` |
+| `ceramic` | dropped (no API support; a literal `site:` token returns zero results) | dropped (no API support) |
 
 Malformed operator values (`after:yesterday`, `site:` with no host) stay
 in the query text untouched. The judge still rates results against the
