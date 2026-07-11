@@ -8,7 +8,7 @@ written to --runs-out/<run_id>/ for upload to the public HF dataset
 Usage: uv run python scripts/publish_bench.py --site <gh-pages checkout>
            --runs-out <staging dir> [--rbp rbp.json] [--fresh fresh.jsonl]
            [--recall recall.json] [--gold gold.jsonl] [--rarestream rarestream.json]
-           [--ts 2026-07-02T14:17Z]
+           [--findallmcp findallmcp.json] [--ts 2026-07-02T14:17Z]
 """
 
 import json
@@ -113,11 +113,30 @@ def legal_rows(report: dict, ts: str) -> list[dict]:
     return _suite_rows(report, ts, "legal", ("caselaw", "code"))
 
 
-def slim_report(report: dict) -> dict:
+def findallmcp_rows(report: dict, ts: str) -> list[dict]:
+    return [
+        {
+            "ts": ts,
+            "bench": "findallmcp",
+            "engine": name,
+            "score": e["mean_score"],
+            "set_recall": e["set_recall"],
+            "set_precision": e["set_precision"],
+            "stat_score": e["stat_score"],
+            "spent_usd": e["mean_spent_usd"],
+            "tool_calls": e["mean_tool_calls"],
+            "num_scored": e["num_scored"],
+            "num_queries": report["num_queries"],
+            "search_errors": e["errors"],
+        }
+        for name, e in report["backends"].items()
+    ]
+
+
+def slim_report(report: dict, key: str = "engines") -> dict:
     slim = dict(report)
-    slim["engines"] = {
-        name: {k: v for k, v in e.items() if k != "per_query"}
-        for name, e in report["engines"].items()
+    slim[key] = {
+        name: {k: v for k, v in e.items() if k != "per_query"} for name, e in report[key].items()
     }
     return slim
 
@@ -146,6 +165,8 @@ def publish(
     scholar_queries: str | None = None,
     legal: str | None = None,
     legal_queries: str | None = None,
+    findallmcp: str | None = None,
+    findallmcp_queries: str | None = None,
     ts: str | None = None,
 ) -> None:
     ts = ts or datetime.now(UTC).strftime(TS_FMT)
@@ -174,11 +195,18 @@ def publish(
         uniqueness.extend(uniqueness_rows(report, ts=ts))
         write_json(slim_report(report), str(data / latest))
         (run_dir / archive_name).write_text(raw, encoding="utf-8")
+    if findallmcp:
+        raw = Path(findallmcp).read_text(encoding="utf-8")
+        report = json.loads(raw)
+        rows.extend(findallmcp_rows(report, ts))
+        write_json(slim_report(report, key="backends"), str(data / "latest_findallmcp.json"))
+        (run_dir / "findallmcp.json").write_text(raw, encoding="utf-8")
     for path, archive_name in (
         (fresh, "fresh.jsonl"),
         (gold, "gold.jsonl"),
         (scholar_queries, "scholar.jsonl"),
         (legal_queries, "legal.jsonl"),
+        (findallmcp_queries, "findallmcp.jsonl"),
     ):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
