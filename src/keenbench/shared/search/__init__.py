@@ -15,6 +15,7 @@ from keenbench.shared.search.perplexity import PerplexityClient
 from keenbench.shared.search.searchapi import SearchApiClient
 from keenbench.shared.search.serper import SerperClient
 from keenbench.shared.search.tavily import TavilyClient
+from keenbench.shared.search.you import YouClient
 
 __all__ = [
     "BraveClient",
@@ -30,6 +31,7 @@ __all__ = [
     "SearchResult",
     "SerperClient",
     "TavilyClient",
+    "YouClient",
     "build_search_clients",
     "latency_stats",
 ]
