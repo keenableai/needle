@@ -5,6 +5,7 @@ import pytest
 
 from keenbench.shared.search import (
     BraveClient,
+    CeramicClient,
     ExaClient,
     KeenableClient,
     OctenClient,
@@ -360,6 +361,50 @@ async def test_octen_maps_fields_and_builds_body(monkeypatch):
     assert calls["headers"] == {"X-Api-Key": "k"}
 
 
+async def test_ceramic_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "requestId": "req-1",
+        "result": {
+            "results": [
+                {"url": "https://a", "title": "A", "description": "da"},
+                {"url": "https://b", "title": "", "description": ""},
+                {"title": "no url"},
+            ],
+            "searchMetadata": {"executionTime": 0.1},
+            "totalResults": 3,
+        },
+    }
+    c = CeramicClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].snippet == "da"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert calls["url"] == "https://api.ceramic.ai/search"
+    assert calls["json"] == {"query": "hi"}
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_ceramic_clamps_query_words_and_description_chars(monkeypatch):
+    c = CeramicClient(api_key="k", description_chars=500)
+    fake, calls = _canned({"result": {"results": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search(" ".join(f"w{i}" for i in range(60)))
+    assert calls["json"]["query"] == " ".join(f"w{i}" for i in range(50))
+    assert calls["json"]["maxDescriptionLength"] == 1000
+
+    c = CeramicClient(api_key="k", description_chars=9000)
+    fake, calls = _canned({"result": {"results": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+    await c.search("hi")
+    assert calls["json"]["maxDescriptionLength"] == 8000
+
+
 async def test_perplexity_maps_results_and_builds_body(monkeypatch):
     payload = {
         "results": [
@@ -395,8 +440,9 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("TAVILY_API_KEY", "tk")
     monkeypatch.setenv("PERPLEXITY_API_KEY", "xk")
     monkeypatch.setenv("OCTEN_API_KEY", "ok")
+    monkeypatch.setenv("CERAMIC_API_KEY", "ck")
     clients = build_search_clients(
-        ["google", "bing", "brave", "parallel", "tavily", "perplexity", "octen"]
+        ["google", "bing", "brave", "parallel", "tavily", "perplexity", "octen", "ceramic"]
     )
     assert isinstance(clients["google"], SerperClient)
     assert clients["google"].engine == "google"
@@ -410,6 +456,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["perplexity"].api_key == "xk"
     assert isinstance(clients["octen"], OctenClient)
     assert clients["octen"].api_key == "ok"
+    assert isinstance(clients["ceramic"], CeramicClient)
+    assert clients["ceramic"].api_key == "ck"
 
 
 def test_factory_requires_key(monkeypatch):
@@ -641,6 +689,12 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
                 "start_time": "2026-06-01T00:00:00Z",
                 "end_time": "2026-06-30T23:59:59Z",
             },
+        ),
+        (
+            lambda: CeramicClient(api_key="k"),
+            {"result": {"results": []}},
+            "json",
+            {"query": "acme filing"},
         ),
         (lambda: SerperClient(api_key="k"), {"organic": []}, "json", {"q": OPS_QUERY}),
     ],

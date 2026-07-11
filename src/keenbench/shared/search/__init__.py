@@ -5,6 +5,7 @@ from keenbench.shared.search.base import (
     latency_stats,
 )
 from keenbench.shared.search.brave import BraveClient
+from keenbench.shared.search.ceramic import CeramicClient
 from keenbench.shared.search.exa import ExaClient
 from keenbench.shared.search.factory import build_search_clients
 from keenbench.shared.search.keenable import KeenableClient
@@ -17,6 +18,7 @@ from keenbench.shared.search.tavily import TavilyClient
 
 __all__ = [
     "BraveClient",
+    "CeramicClient",
     "ExaClient",
     "HttpSearchClient",
     "KeenableClient",

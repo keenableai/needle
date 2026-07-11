@@ -10,6 +10,7 @@ from dataclasses import dataclass
 
 from keenbench.shared.search.base import SearchClient
 from keenbench.shared.search.brave import BraveClient
+from keenbench.shared.search.ceramic import CeramicClient
 from keenbench.shared.search.exa import ExaClient
 from keenbench.shared.search.keenable import KeenableClient
 from keenbench.shared.search.octen import OctenClient
@@ -68,6 +69,10 @@ def _build_octen(api_key: str | None, snippet_chars: int) -> SearchClient:
     return OctenClient(api_key=api_key or "")
 
 
+def _build_ceramic(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return CeramicClient(api_key=api_key or "", description_chars=snippet_chars)
+
+
 def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:
     return TavilyClient(api_key=api_key or "", search_depth=os.environ.get("TAVILY_DEPTH", "basic"))
 
@@ -86,6 +91,7 @@ ENGINES: dict[str, EngineSpec] = {
     ),
     "tavily": EngineSpec(key_env="TAVILY_API_KEY", key_required=True, build=_build_tavily),
     "octen": EngineSpec(key_env="OCTEN_API_KEY", key_required=True, build=_build_octen),
+    "ceramic": EngineSpec(key_env="CERAMIC_API_KEY", key_required=True, build=_build_ceramic),
 }
 
 
