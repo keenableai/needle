@@ -285,7 +285,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <div id="lb-legal"></div>
     </div>
     <div class="card">
-      <h2>findallmcp — 7-day mean</h2>
+      <h2>findallmcp — latest run</h2>
       <div class="sub" id="lb-findall-sub"></div>
       <div id="lb-findall"></div>
     </div>
@@ -697,7 +697,7 @@ function drawChart(card, series, opts) {
   card.appendChild(svg);
 }
 
-function renderLeaderboard(holderId, subId, rows, bench, metrics) {
+function renderLeaderboard(holderId, subId, rows, bench, metrics, lastRunOnly = false) {
   const holder = document.getElementById(holderId);
   holder.replaceChildren();
   const wmean = (er, metric) => {
@@ -709,8 +709,13 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
     }
     return w ? sum / w : null;
   };
+  let benchRows = rows.filter((r) => r.bench === bench);
+  if (lastRunOnly && benchRows.length) {
+    const last = benchRows.reduce((m, r) => (r.ts > m ? r.ts : m), "");
+    benchRows = benchRows.filter((r) => r.ts === last);
+  }
   const entries = ENGINES.map((e) => {
-    const er = rows.filter((r) => r.bench === bench && r.engine === e);
+    const er = benchRows.filter((r) => r.engine === e);
     const scored = er.filter((r) => r[metrics[0][0]] != null);
     return { e, v: wmean(er, metrics[0][0]), n: scored.length,
       q: scored.reduce((s, r) => s + (r.num_scored || 0), 0),
@@ -719,14 +724,16 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   }).filter((x) => x.v != null);
   if (!entries.length) {
     document.getElementById(subId).textContent = "";
-    holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
+    holder.appendChild(el("div", { class: "empty" },
+      lastRunOnly ? "No run yet." : "No data in the last 7 days."));
     return;
   }
   entries.sort((a, b) => b.v - a.v);
   const runs = Math.max(...entries.map((x) => x.n));
   const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
-  document.getElementById(subId).textContent =
-    `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
+  document.getElementById(subId).textContent = lastRunOnly
+    ? `run of ${fmtTime(lastT)} UTC`
+    : `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
@@ -751,19 +758,20 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
 }
 
 function renderLeaderboards(rows) {
-  renderLeaderboard("lb-fresh", "lb-fresh-sub", rows, "freshstream", [["rbp", "RBP@5"]]);
-  renderLeaderboard("lb-company", "lb-company-sub", rows, "companyfill", [
+  const week = inRange(rows, 7 * 86400e3);
+  renderLeaderboard("lb-fresh", "lb-fresh-sub", week, "freshstream", [["rbp", "RBP@5"]]);
+  renderLeaderboard("lb-company", "lb-company-sub", week, "companyfill", [
     ["recall", "recall@5"],
     ["filings_recall", "filings"],
     ["filingdoc_recall", "filingdoc"],
   ]);
-  renderLeaderboard("lb-scholar", "lb-scholar-sub", rows, "scholar", [
+  renderLeaderboard("lb-scholar", "lb-scholar-sub", week, "scholar", [
     ["recall", "recall@10"],
     ["title_recall", "title"],
     ["body_recall", "body"],
   ]);
-  renderLeaderboard("lb-rare", "lb-rare-sub", rows, "rarestream", [["rbp", "RBP@5"]]);
-  renderLeaderboard("lb-legal", "lb-legal-sub", rows, "legal", [
+  renderLeaderboard("lb-rare", "lb-rare-sub", week, "rarestream", [["rbp", "RBP@5"]]);
+  renderLeaderboard("lb-legal", "lb-legal-sub", week, "legal", [
     ["recall", "recall@5"],
     ["caselaw_recall", "caselaw"],
     ["code_recall", "code"],
@@ -772,7 +780,7 @@ function renderLeaderboards(rows) {
     ["score", "score"],
     ["set_recall", "set recall"],
     ["stat_score", "stat"],
-  ]);
+  ], true);
 }
 
 function renderFields(latest) {
@@ -1485,7 +1493,7 @@ async function main() {
     document.getElementById("updated").textContent = `Last run: ${fmtTime(new Date(lastTs))} UTC.`;
   }
 
-  renderLeaderboards(inRange(history, 7 * 86400e3));
+  renderLeaderboards(history);
   renderAll(latestCompanyfill);
   const uniqAgg = uniquenessAgg(uniquenessRows);
   renderOverlap(overlapRows, uniqAgg);

@@ -6,38 +6,38 @@
   "agent_model": "anthropic/claude-sonnet-4.5",
   "backends": {
     "keenable": {
-      "mean_score": 0.3344880314849954,
+      "mean_score": 0.3727536356836641,
       "set_recall": 0.26775599128540306,
-      "set_precision": 0.5555555555555556,
-      "set_f1": 0.33969440619056984,
-      "stat_score": 0.4012200716845878,
+      "set_precision": 0.6666666666666666,
+      "set_f1": 0.34579661824243874,
+      "stat_score": 0.47775128008192524,
       "stat_within_tol": 0.3333333333333333,
       "num_scored": 6,
       "errors": 0,
-      "mean_spent_usd": 0.3751,
-      "mean_tool_calls": 11.833333333333334,
+      "mean_spent_usd": 0.3845,
+      "mean_tool_calls": 12.0,
       "by_budget": {
         "0.25": {
-          "mean_score": 0.3344880314849954,
+          "mean_score": 0.3727536356836641,
           "set_recall": 0.26775599128540306,
-          "set_precision": 0.5555555555555556,
-          "set_f1": 0.33969440619056984,
-          "stat_score": 0.4012200716845878,
+          "set_precision": 0.6666666666666666,
+          "set_f1": 0.34579661824243874,
+          "stat_score": 0.47775128008192524,
           "stat_within_tol": 0.3333333333333333,
           "num_scored": 6,
           "errors": 0,
-          "mean_spent_usd": 0.3751,
-          "mean_tool_calls": 11.833333333333334
+          "mean_spent_usd": 0.3845,
+          "mean_tool_calls": 12.0
         }
       },
       "by_suite": {
         "edgar": {
           "n": 3,
-          "mean_score": 0.16775599128540306
+          "mean_score": 0.18114884842826018
         },
         "hn": {
           "n": 3,
-          "mean_score": 0.5012200716845878
+          "mean_score": 0.5643584229390681
         }
       },
       "by_bucket": {
@@ -47,53 +47,145 @@
         },
         "stat": {
           "n": 3,
-          "mean_score": 0.4012200716845878
+          "mean_score": 0.47775128008192524
         }
       }
     },
     "webql": {
-      "mean_score": 0.25858511415318813,
-      "set_recall": 0.4954248366013072,
-      "set_precision": 0.652046783625731,
-      "set_f1": 0.549116424116424,
-      "stat_score": 0.021745391705069134,
-      "stat_within_tol": 0.0,
+      "mean_score": 0.35099752266497997,
+      "set_recall": 0.4150326797385621,
+      "set_precision": 0.5,
+      "set_f1": 0.45356793743890517,
+      "stat_score": 0.2869623655913978,
+      "stat_within_tol": 0.3333333333333333,
       "num_scored": 6,
       "errors": 0,
-      "mean_spent_usd": 0.2962,
+      "mean_spent_usd": 0.2945,
       "mean_tool_calls": 7.666666666666667,
       "by_budget": {
         "0.25": {
-          "mean_score": 0.25858511415318813,
-          "set_recall": 0.4954248366013072,
-          "set_precision": 0.652046783625731,
-          "set_f1": 0.549116424116424,
-          "stat_score": 0.021745391705069134,
-          "stat_within_tol": 0.0,
+          "mean_score": 0.35099752266497997,
+          "set_recall": 0.4150326797385621,
+          "set_precision": 0.5,
+          "set_f1": 0.45356793743890517,
+          "stat_score": 0.2869623655913978,
+          "stat_within_tol": 0.3333333333333333,
           "num_scored": 6,
           "errors": 0,
-          "mean_spent_usd": 0.2962,
+          "mean_spent_usd": 0.2945,
           "mean_tool_calls": 7.666666666666667
         }
       },
       "by_suite": {
         "edgar": {
           "n": 3,
-          "mean_score": 0.41179388422035484
+          "mean_score": 0.6858660130718954
         },
         "hn": {
           "n": 3,
-          "mean_score": 0.10537634408602149
+          "mean_score": 0.016129032258064502
         }
       },
       "by_bucket": {
         "enumerate": {
           "n": 3,
-          "mean_score": 0.4954248366013072
+          "mean_score": 0.4150326797385621
         },
         "stat": {
           "n": 3,
-          "mean_score": 0.021745391705069134
+          "mean_score": 0.2869623655913978
+        }
+      }
+    },
+    "exa": {
+      "mean_score": 0.21270823920966236,
+      "set_recall": 0.16514161220043574,
+      "set_precision": 0.3333333333333333,
+      "set_f1": 0.1966081871345029,
+      "stat_score": 0.28405817972350234,
+      "stat_within_tol": 0.0,
+      "num_scored": 5,
+      "errors": 1,
+      "mean_spent_usd": 0.399,
+      "mean_tool_calls": 8.0,
+      "by_budget": {
+        "0.25": {
+          "mean_score": 0.21270823920966236,
+          "set_recall": 0.16514161220043574,
+          "set_precision": 0.3333333333333333,
+          "set_f1": 0.1966081871345029,
+          "stat_score": 0.28405817972350234,
+          "stat_within_tol": 0.0,
+          "num_scored": 5,
+          "errors": 1,
+          "mean_spent_usd": 0.399,
+          "mean_tool_calls": 8.0
+        }
+      },
+      "by_suite": {
+        "edgar": {
+          "n": 3,
+          "mean_score": 0.2136535169623405
+        },
+        "hn": {
+          "n": 2,
+          "mean_score": 0.21129032258064517
+        }
+      },
+      "by_bucket": {
+        "enumerate": {
+          "n": 3,
+          "mean_score": 0.16514161220043574
+        },
+        "stat": {
+          "n": 2,
+          "mean_score": 0.28405817972350234
+        }
+      }
+    },
+    "parallel": {
+      "mean_score": 0.2850657108721625,
+      "set_recall": 0.2851851851851852,
+      "set_precision": 0.6666666666666666,
+      "set_f1": 0.33138401559454195,
+      "stat_score": 0.2849462365591398,
+      "stat_within_tol": 0.3333333333333333,
+      "num_scored": 6,
+      "errors": 0,
+      "mean_spent_usd": 0.3775,
+      "mean_tool_calls": 5.666666666666667,
+      "by_budget": {
+        "0.25": {
+          "mean_score": 0.2850657108721625,
+          "set_recall": 0.2851851851851852,
+          "set_precision": 0.6666666666666666,
+          "set_f1": 0.33138401559454195,
+          "stat_score": 0.2849462365591398,
+          "stat_within_tol": 0.3333333333333333,
+          "num_scored": 6,
+          "errors": 0,
+          "mean_spent_usd": 0.3775,
+          "mean_tool_calls": 5.666666666666667
+        }
+      },
+      "by_suite": {
+        "edgar": {
+          "n": 3,
+          "mean_score": 0.018518518518518517
+        },
+        "hn": {
+          "n": 3,
+          "mean_score": 0.5516129032258065
+        }
+      },
+      "by_bucket": {
+        "enumerate": {
+          "n": 3,
+          "mean_score": 0.2851851851851852
+        },
+        "stat": {
+          "n": 3,
+          "mean_score": 0.2849462365591398
         }
       }
     }
