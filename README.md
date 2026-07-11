@@ -505,7 +505,9 @@ asyncio.run(go())
 ```
 
 Each client caps in-flight requests via a per-client `max_concurrency`
-semaphore (default 8).
+semaphore (default 8). `CeramicClient` additionally truncates queries to
+the API's 50-word limit and clamps `--snippet-chars` into its
+`maxDescriptionLength` range of `[1000, 8000]`.
 
 ### Query operators
 

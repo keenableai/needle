@@ -398,7 +398,9 @@ async def test_ceramic_clamps_query_words_and_description_chars(monkeypatch):
     assert calls["json"]["query"] == " ".join(f"w{i}" for i in range(50))
     assert calls["json"]["maxDescriptionLength"] == 1000
 
-    c.description_chars = 9000
+    c = CeramicClient(api_key="k", description_chars=9000)
+    fake, calls = _canned({"result": {"results": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
     await c.search("hi")
     assert calls["json"]["maxDescriptionLength"] == 8000
 
