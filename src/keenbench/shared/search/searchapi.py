@@ -38,10 +38,8 @@ class SearchApiClient(HttpSearchClient):
             error_field="error",
             params={
                 "q": query,
-                "num": min(num_results, 100),
+                "num": min(num_results, 50),
                 "engine": self.engine,
-                "gl": "us",
-                "hl": "en",
             },
             headers={"Authorization": f"Bearer {self.api_key}"},
         )

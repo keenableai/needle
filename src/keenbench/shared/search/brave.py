@@ -5,6 +5,18 @@ from keenbench.shared.search.base import HttpSearchClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 EPOCH = date(1970, 1, 1)
+MAX_QUERY_WORDS = 50
+MAX_QUERY_CHARS = 400
+
+
+def _clip_query(text: str, sites: tuple[str, ...]) -> str:
+    site_terms = [f"site:{s}" for s in sites]
+    words = text.split()[: max(MAX_QUERY_WORDS - len(site_terms), 0)]
+    q = " ".join(words + site_terms)
+    while words and len(q) > MAX_QUERY_CHARS:
+        words.pop()
+        q = " ".join(words + site_terms)
+    return q
 
 
 class BraveClient(HttpSearchClient):
@@ -27,7 +39,7 @@ class BraveClient(HttpSearchClient):
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
         ops = parse_ops(query)
         params: dict[str, Any] = {
-            "q": ops.text_with_sites(),
+            "q": _clip_query(ops.text, ops.sites),
             "count": min(num_results, 20),
             "country": "us",
             "search_lang": "en",

@@ -27,17 +27,17 @@ class YouClient(HttpSearchClient):
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
         ops = parse_ops(query)
-        params: dict[str, Any] = {"query": ops.text, "count": min(num_results, MAX_COUNT)}
+        body: dict[str, Any] = {"query": ops.text, "count": min(num_results, MAX_COUNT)}
         if ops.sites:
-            params["include_domains"] = ",".join(ops.sites)
+            body["include_domains"] = list(ops.sites)
         if ops.after or ops.before:
             lo = ops.after or EPOCH
             hi = ops.before or datetime.now(UTC).date()
-            params["freshness"] = f"{lo.isoformat()}to{hi.isoformat()}"
+            body["freshness"] = f"{lo.isoformat()}to{hi.isoformat()}"
         payload, err = await self._request_json(
-            "GET",
+            "POST",
             f"{self.base_url}/v1/search",
-            params=params,
+            json=body,
             headers={"X-API-Key": self.api_key},
         )
         if err is not None:

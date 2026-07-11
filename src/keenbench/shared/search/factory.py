@@ -67,11 +67,18 @@ def _build_perplexity(api_key: str | None, snippet_chars: int) -> SearchClient:
 
 
 def _build_octen(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return OctenClient(api_key=api_key or "")
+    return OctenClient(
+        api_key=api_key or "",
+        max_concurrency=int(os.environ.get("OCTEN_CONCURRENCY", "1")),
+    )
 
 
 def _build_ceramic(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return CeramicClient(api_key=api_key or "", description_chars=snippet_chars)
+    return CeramicClient(
+        api_key=api_key or "",
+        description_chars=snippet_chars,
+        max_concurrency=int(os.environ.get("CERAMIC_CONCURRENCY", "1")),
+    )
 
 
 def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:

@@ -8,6 +8,10 @@ from typing import Any, Protocol
 import httpx
 
 MAX_ERROR_CHARS = 500
+RETRY_ATTEMPTS = 3
+RETRY_BASE_S = 1.0
+RETRY_MAX_S = 30.0
+RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
 
 
 def latency_stats(latencies_ms: list[float]) -> dict[str, float | int | list[float]] | None:
@@ -72,29 +76,54 @@ class HttpSearchClient:
     async def _request_json(
         self, method: str, url: str, *, error_field: str | None = None, **kwargs: Any
     ) -> tuple[Any, dict[str, str] | None]:
-        try:
-            async with self._sem:
-                started = time.perf_counter()
-                resp = await self._http().request(method, url, **kwargs)
-                elapsed_ms = (time.perf_counter() - started) * 1000.0
-        except httpx.HTTPError as exc:
-            return None, {"error_type": "transport", "error_message": str(exc)[:MAX_ERROR_CHARS]}
-        if resp.status_code != 200:
-            return None, {
-                "error_type": "http_error",
-                "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
-            }
-        try:
-            payload = resp.json()
-        except (json.JSONDecodeError, ValueError) as exc:
-            return None, {"error_type": "bad_json", "error_message": str(exc)[:MAX_ERROR_CHARS]}
-        if error_field and isinstance(payload, dict) and payload.get(error_field):
-            return None, {
-                "error_type": "api_error",
-                "error_message": str(payload[error_field])[:MAX_ERROR_CHARS],
-            }
-        self.latencies_ms.append(elapsed_ms)
-        return payload, None
+        err: dict[str, str] | None = None
+        delay = RETRY_BASE_S
+        for attempt in range(RETRY_ATTEMPTS):
+            if attempt:
+                await asyncio.sleep(delay)
+                delay = min(delay * 2, RETRY_MAX_S)
+            try:
+                async with self._sem:
+                    started = time.perf_counter()
+                    resp = await self._http().request(method, url, **kwargs)
+                    elapsed_ms = (time.perf_counter() - started) * 1000.0
+            except httpx.HTTPError as exc:
+                detail = str(exc)[:MAX_ERROR_CHARS]
+                message = f"{type(exc).__name__}: {detail}" if detail else type(exc).__name__
+                err = {"error_type": "transport", "error_message": message}
+                continue
+            if resp.status_code in RETRYABLE_STATUSES:
+                err = {
+                    "error_type": "http_error",
+                    "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
+                }
+                retry_after = resp.headers.get("retry-after")
+                if retry_after is not None:
+                    try:
+                        delay = min(max(float(retry_after), 0.0), RETRY_MAX_S)
+                    except ValueError:
+                        pass
+                continue
+            if resp.status_code != 200:
+                return None, {
+                    "error_type": "http_error",
+                    "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
+                }
+            try:
+                payload = resp.json()
+            except (json.JSONDecodeError, ValueError) as exc:
+                return None, {
+                    "error_type": "bad_json",
+                    "error_message": str(exc)[:MAX_ERROR_CHARS],
+                }
+            if error_field and isinstance(payload, dict) and payload.get(error_field):
+                return None, {
+                    "error_type": "api_error",
+                    "error_message": str(payload[error_field])[:MAX_ERROR_CHARS],
+                }
+            self.latencies_ms.append(elapsed_ms)
+            return payload, None
+        return None, err
 
     async def _get_text(
         self,
