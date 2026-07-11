@@ -1,4 +1,8 @@
+from datetime import UTC, datetime
+from typing import Any
+
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.queryops import parse_ops
 
 
 class BraveClient(HttpSearchClient):
@@ -19,16 +23,21 @@ class BraveClient(HttpSearchClient):
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
+        ops = parse_ops(query)
+        params: dict[str, Any] = {
+            "q": ops.text_with_sites(),
+            "count": min(num_results, 20),
+            "country": "us",
+            "search_lang": "en",
+            "result_filter": "web",
+        }
+        freshness = ops.brave_freshness(datetime.now(UTC).date())
+        if freshness:
+            params["freshness"] = freshness
         payload, err = await self._request_json(
             "GET",
             f"{self.base_url}/web/search",
-            params={
-                "q": query,
-                "count": min(num_results, 20),
-                "country": "us",
-                "search_lang": "en",
-                "result_filter": "web",
-            },
+            params=params,
             headers={"Accept": "application/json", "X-Subscription-Token": self.api_key},
         )
         if err is not None:

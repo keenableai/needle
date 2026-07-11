@@ -1,6 +1,7 @@
 from typing import Any
 
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.queryops import parse_ops
 
 
 class ExaClient(HttpSearchClient):
@@ -27,11 +28,18 @@ class ExaClient(HttpSearchClient):
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
+        ops = parse_ops(query)
         body: dict[str, Any] = {
-            "query": query,
+            "query": ops.text,
             "numResults": num_results,
             "type": self.search_type,
         }
+        if ops.sites:
+            body["includeDomains"] = list(ops.sites)
+        if ops.after:
+            body["startPublishedDate"] = ops.after_iso8601_start()
+        if ops.before:
+            body["endPublishedDate"] = ops.before_iso8601_end()
         if self.highlight_chars > 0:
             body["contents"] = {"highlights": {"maxCharacters": self.highlight_chars}}
         elif self.include_text:

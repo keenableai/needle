@@ -1,4 +1,7 @@
+from typing import Any
+
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.queryops import parse_ops
 
 
 class OctenClient(HttpSearchClient):
@@ -21,14 +24,22 @@ class OctenClient(HttpSearchClient):
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
+        ops = parse_ops(query)
+        body: dict[str, Any] = {
+            "query": ops.text,
+            "count": num_results,
+            "highlight": {"enable": True, "max_tokens": self.highlight_max_tokens},
+        }
+        if ops.sites:
+            body["include_domains"] = list(ops.sites)
+        if ops.after:
+            body["start_time"] = f"{ops.after.isoformat()}T00:00:00Z"
+        if ops.before:
+            body["end_time"] = f"{ops.before.isoformat()}T23:59:59Z"
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/search",
-            json={
-                "query": query,
-                "count": num_results,
-                "highlight": {"enable": True, "max_tokens": self.highlight_max_tokens},
-            },
+            json=body,
             headers={"X-Api-Key": self.api_key},
         )
         if err is not None:

@@ -1,4 +1,7 @@
+from typing import Any
+
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.queryops import parse_ops
 
 
 class TavilyClient(HttpSearchClient):
@@ -21,14 +24,22 @@ class TavilyClient(HttpSearchClient):
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
+        ops = parse_ops(query)
+        body: dict[str, Any] = {
+            "query": ops.text,
+            "max_results": min(num_results, 20),
+            "search_depth": self.search_depth,
+        }
+        if ops.sites:
+            body["include_domains"] = list(ops.sites)
+        if ops.after:
+            body["start_date"] = ops.after_ymd()
+        if ops.before:
+            body["end_date"] = ops.before_ymd()
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/search",
-            json={
-                "query": query,
-                "max_results": min(num_results, 20),
-                "search_depth": self.search_depth,
-            },
+            json=body,
             headers={"Authorization": f"Bearer {self.api_key}"},
         )
         if err is not None:
