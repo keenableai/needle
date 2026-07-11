@@ -33,9 +33,9 @@ class TavilyClient(HttpSearchClient):
         if ops.sites:
             body["include_domains"] = list(ops.sites)
         if ops.after:
-            body["start_date"] = ops.after_ymd()
+            body["start_date"] = ops.after.isoformat()
         if ops.before:
-            body["end_date"] = ops.before_ymd()
+            body["end_date"] = ops.before.isoformat()
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/search",

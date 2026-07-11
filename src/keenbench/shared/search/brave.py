@@ -1,8 +1,10 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Any
 
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
+
+EPOCH = date(1970, 1, 1)
 
 
 class BraveClient(HttpSearchClient):
@@ -31,9 +33,10 @@ class BraveClient(HttpSearchClient):
             "search_lang": "en",
             "result_filter": "web",
         }
-        freshness = ops.brave_freshness(datetime.now(UTC).date())
-        if freshness:
-            params["freshness"] = freshness
+        if ops.after or ops.before:
+            lo = ops.after or EPOCH
+            hi = ops.before or datetime.now(UTC).date()
+            params["freshness"] = f"{lo.isoformat()}to{hi.isoformat()}"
         payload, err = await self._request_json(
             "GET",
             f"{self.base_url}/web/search",

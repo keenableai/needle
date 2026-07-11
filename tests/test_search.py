@@ -553,110 +553,102 @@ def test_parse_ops_last_date_wins():
     assert ops.after == date(2026, 2, 1)
 
 
-def test_parse_ops_date_format_helpers():
-    ops = parse_ops(OPS_QUERY)
-    assert ops.after_ymd() == "2026-06-01"
-    assert ops.before_ymd() == "2026-06-30"
-    assert ops.after_iso8601_start() == "2026-06-01T00:00:00.000Z"
-    assert ops.before_iso8601_end() == "2026-06-30T23:59:59.999Z"
-    assert ops.after_mdy() == "06/01/2026"
-    assert ops.before_mdy() == "06/30/2026"
-    assert ops.brave_freshness(date(2026, 7, 11)) == "2026-06-01to2026-06-30"
-
-
-def test_parse_ops_brave_freshness_fills_open_ends():
-    assert parse_ops("x after:2026-06-01").brave_freshness(date(2026, 7, 11)) == (
-        "2026-06-01to2026-07-11"
-    )
-    assert parse_ops("x before:2026-06-30").brave_freshness(date(2026, 7, 11)) == (
-        "1970-01-01to2026-06-30"
-    )
-    assert parse_ops("x").brave_freshness(date(2026, 7, 11)) is None
-
-
-async def test_keenable_rewrites_operators_to_native_spelling(monkeypatch):
-    c = KeenableClient()
-    fake, calls = _canned({"results": []})
-    monkeypatch.setattr(c, "_request_json", fake)
-
-    await c.search(OPS_QUERY)
-    assert calls["json"]["query"] == (
-        "acme filing site:sec.gov published_after:2026-06-01 published_before:2026-06-30"
-    )
-
-
-async def test_brave_translates_operators(monkeypatch):
+async def test_brave_freshness_fills_open_ends(monkeypatch):
     c = BraveClient(api_key="k")
     fake, calls = _canned({"web": {"results": []}})
     monkeypatch.setattr(c, "_request_json", fake)
 
-    await c.search(OPS_QUERY)
-    assert calls["params"]["q"] == "acme filing site:sec.gov"
-    assert calls["params"]["freshness"] == "2026-06-01to2026-06-30"
+    await c.search("x after:2026-06-01")
+    assert calls["params"]["freshness"].startswith("2026-06-01to")
+    await c.search("x before:2026-06-30")
+    assert calls["params"]["freshness"] == "1970-01-01to2026-06-30"
+    await c.search("x")
+    assert "freshness" not in calls["params"]
 
 
-async def test_exa_translates_operators(monkeypatch):
-    c = ExaClient(api_key="k")
-    fake, calls = _canned({"results": []})
+@pytest.mark.parametrize(
+    "make_client,payload,field,expected",
+    [
+        (
+            lambda: KeenableClient(),
+            {"results": []},
+            "json",
+            {
+                "query": (
+                    "acme filing site:sec.gov"
+                    " published_after:2026-06-01 published_before:2026-06-30"
+                )
+            },
+        ),
+        (
+            lambda: BraveClient(api_key="k"),
+            {"web": {"results": []}},
+            "params",
+            {"q": "acme filing site:sec.gov", "freshness": "2026-06-01to2026-06-30"},
+        ),
+        (
+            lambda: ExaClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "query": "acme filing",
+                "includeDomains": ["sec.gov"],
+                "startPublishedDate": "2026-06-01T00:00:00.000Z",
+                "endPublishedDate": "2026-06-30T23:59:59.999Z",
+            },
+        ),
+        (
+            lambda: TavilyClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "query": "acme filing",
+                "include_domains": ["sec.gov"],
+                "start_date": "2026-06-01",
+                "end_date": "2026-06-30",
+            },
+        ),
+        (
+            lambda: PerplexityClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "query": "acme filing",
+                "search_domain_filter": ["sec.gov"],
+                "search_after_date_filter": "06/01/2026",
+                "search_before_date_filter": "06/30/2026",
+            },
+        ),
+        (
+            lambda: ParallelClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "search_queries": ["acme filing"],
+                "advanced_settings": {
+                    "max_results": 10,
+                    "source_policy": {"include_domains": ["sec.gov"]},
+                },
+            },
+        ),
+        (
+            lambda: OctenClient(api_key="k"),
+            {"data": {"results": []}},
+            "json",
+            {
+                "query": "acme filing",
+                "include_domains": ["sec.gov"],
+                "start_time": "2026-06-01T00:00:00Z",
+                "end_time": "2026-06-30T23:59:59Z",
+            },
+        ),
+        (lambda: SerperClient(api_key="k"), {"organic": []}, "json", {"q": OPS_QUERY}),
+    ],
+)
+async def test_clients_translate_operators(monkeypatch, make_client, payload, field, expected):
+    c = make_client()
+    fake, calls = _canned(payload)
     monkeypatch.setattr(c, "_request_json", fake)
 
     await c.search(OPS_QUERY)
-    assert calls["json"]["query"] == "acme filing"
-    assert calls["json"]["includeDomains"] == ["sec.gov"]
-    assert calls["json"]["startPublishedDate"] == "2026-06-01T00:00:00.000Z"
-    assert calls["json"]["endPublishedDate"] == "2026-06-30T23:59:59.999Z"
-
-
-async def test_tavily_translates_operators(monkeypatch):
-    c = TavilyClient(api_key="k")
-    fake, calls = _canned({"results": []})
-    monkeypatch.setattr(c, "_request_json", fake)
-
-    await c.search(OPS_QUERY)
-    assert calls["json"]["query"] == "acme filing"
-    assert calls["json"]["include_domains"] == ["sec.gov"]
-    assert calls["json"]["start_date"] == "2026-06-01"
-    assert calls["json"]["end_date"] == "2026-06-30"
-
-
-async def test_perplexity_translates_operators(monkeypatch):
-    c = PerplexityClient(api_key="k")
-    fake, calls = _canned({"results": []})
-    monkeypatch.setattr(c, "_request_json", fake)
-
-    await c.search(OPS_QUERY)
-    assert calls["json"]["query"] == "acme filing"
-    assert calls["json"]["search_domain_filter"] == ["sec.gov"]
-    assert calls["json"]["search_after_date_filter"] == "06/01/2026"
-    assert calls["json"]["search_before_date_filter"] == "06/30/2026"
-
-
-async def test_parallel_translates_sites_and_drops_dates(monkeypatch):
-    c = ParallelClient(api_key="k")
-    fake, calls = _canned({"results": []})
-    monkeypatch.setattr(c, "_request_json", fake)
-
-    await c.search(OPS_QUERY)
-    assert calls["json"]["search_queries"] == ["acme filing"]
-    assert calls["json"]["advanced_settings"]["source_policy"] == {"include_domains": ["sec.gov"]}
-
-
-async def test_octen_translates_operators(monkeypatch):
-    c = OctenClient(api_key="k")
-    fake, calls = _canned({"data": {"results": []}})
-    monkeypatch.setattr(c, "_request_json", fake)
-
-    await c.search(OPS_QUERY)
-    assert calls["json"]["query"] == "acme filing"
-    assert calls["json"]["include_domains"] == ["sec.gov"]
-    assert calls["json"]["start_time"] == "2026-06-01T00:00:00Z"
-    assert calls["json"]["end_time"] == "2026-06-30T23:59:59Z"
-
-
-async def test_serper_passes_operators_through(monkeypatch):
-    c = SerperClient(api_key="k")
-    fake, calls = _canned({"organic": []})
-    monkeypatch.setattr(c, "_request_json", fake)
-
-    await c.search(OPS_QUERY)
-    assert calls["json"]["q"] == OPS_QUERY
+    assert expected.items() <= calls[field].items()

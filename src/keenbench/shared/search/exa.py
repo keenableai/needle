@@ -37,9 +37,9 @@ class ExaClient(HttpSearchClient):
         if ops.sites:
             body["includeDomains"] = list(ops.sites)
         if ops.after:
-            body["startPublishedDate"] = ops.after_iso8601_start()
+            body["startPublishedDate"] = f"{ops.after.isoformat()}T00:00:00.000Z"
         if ops.before:
-            body["endPublishedDate"] = ops.before_iso8601_end()
+            body["endPublishedDate"] = f"{ops.before.isoformat()}T23:59:59.999Z"
         if self.highlight_chars > 0:
             body["contents"] = {"highlights": {"maxCharacters": self.highlight_chars}}
         elif self.include_text:

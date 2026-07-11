@@ -31,9 +31,9 @@ class PerplexityClient(HttpSearchClient):
         if ops.sites:
             body["search_domain_filter"] = list(ops.sites)
         if ops.after:
-            body["search_after_date_filter"] = ops.after_mdy()
+            body["search_after_date_filter"] = ops.after.strftime("%m/%d/%Y")
         if ops.before:
-            body["search_before_date_filter"] = ops.before_mdy()
+            body["search_before_date_filter"] = ops.before.strftime("%m/%d/%Y")
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/search",
