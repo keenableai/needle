@@ -225,4 +225,20 @@ async def _run_task_inner(
             else:
                 out["answer_text"] = result.content
     except Exception as exc:
-        out["error"] = {"error_type": "backend_crash", "error_message": str(exc)[:MAX_ERROR_CHARS]}
+        out["error"] = {"error_type": "backend_crash", "error_message": _describe(exc)}
+
+
+def _describe(exc: BaseException) -> str:
+    parts: list[str] = []
+
+    def walk(e: BaseException, depth: int = 0) -> None:
+        if isinstance(e, BaseExceptionGroup):
+            for sub in e.exceptions:
+                walk(sub, depth + 1)
+        else:
+            parts.append(f"{type(e).__name__}: {e}")
+            if e.__cause__ is not None and depth < 5:
+                walk(e.__cause__, depth + 1)
+
+    walk(exc)
+    return " | ".join(parts)[:MAX_ERROR_CHARS] or type(exc).__name__
