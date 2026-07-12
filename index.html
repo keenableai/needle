@@ -1352,7 +1352,7 @@ async function renderRunDetail(runs) {
     else if (benchSel.value === "scholar") renderScholarRun(holder, report, engineSel.value);
     else if (benchSel.value === "legal") renderLegalRun(holder, report, engineSel.value);
     else if (benchSel.value === "findallmcp") renderFindallmcpRun(holder, report, engineSel.value);
-    else renderFreshstreamRun(holder, report, engineSel.value); // freshstream + rarestream share the RBP shape
+    else renderFreshstreamRun(holder, report, engineSel.value);
     if (!holder.children.length) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
     }
@@ -1375,7 +1375,6 @@ async function initRunBrowser() {
   }
   for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, e));
 
-  // the run list is scoped to the chosen benchmark, latest first, latest selected
   function populateRuns() {
     const artifact = RUN_ARTIFACT[benchSel.value];
     const matching = runs.filter((r) => r.artifacts.includes(artifact));
