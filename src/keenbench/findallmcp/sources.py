@@ -444,10 +444,11 @@ async def awards_tasks(client: UsaspendingClient, *, now: datetime) -> list[Task
                 suite="awards",
                 bucket="enumerate",
                 prompt=(
-                    f"Find ALL companies that were awarded a US federal contract worth "
-                    f"at least {label} (total contract value) signed {window}. "
-                    "Be exhaustive - completeness is scored. Respond with JSON only: "
-                    '{"items": [{"name": "<company name>"}, ...]}'
+                    f"Find ALL companies that were awarded a US federal contract with "
+                    f"at least {label} actually obligated (funds committed on the "
+                    f"contract, NOT the ceiling or potential total value) signed "
+                    f"{window}. Be exhaustive - completeness is scored. "
+                    'Respond with JSON only: {"items": [{"name": "<company name>"}, ...]}'
                 ),
                 entities=tuple(
                     Entity(key=r["id"] or r["name"], name=r["name"])
@@ -464,8 +465,9 @@ async def awards_tasks(client: UsaspendingClient, *, now: datetime) -> list[Task
                 suite="awards",
                 bucket="stat",
                 prompt=(
-                    f"How many US federal contracts worth at least $100 million "
-                    f"(total contract value) were signed {window}? "
+                    f"How many US federal contracts with at least $100 million actually "
+                    f"obligated (funds committed on the contract, NOT the ceiling or "
+                    f"potential total value) were signed {window}? "
                     'Respond with JSON only: {"value": <integer>}'
                 ),
                 stat_value=float(count),

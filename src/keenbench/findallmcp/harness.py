@@ -34,7 +34,7 @@ BLOCKED_REGISTRIES = (
     "federalregister.gov/api",
     "federalregister.gov/documents/search",
     "saferproducts.gov",
-    "cpsc.gov/recalls",
+    "cpsc.gov",
     "usaspending.gov",
 )
 SYSTEM_PROMPT = (
