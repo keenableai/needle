@@ -1,15 +1,3 @@
-"""Filter a query dataset down to English medium/long rare-entity queries.
-
-Heavy producer step (bert-base-uncased WordPiece + fastText lid.176): reads a
-jsonl or parquet dataset, keeps queries with at least one rare word, and writes
-the filtered subset for publishing to the HF dataset. The keenbench CLI then
-samples from that filtered artifact.
-
-Usage: uv run python scripts/rarestream_filter.py --out rare_entity.parquet
-           [--queries <local file>] [--stream-path agentic/queries.parquet]
-           [--query-field query_text] [--subword-threshold 5] [--any-language]
-"""
-
 from collections import Counter
 
 import fire

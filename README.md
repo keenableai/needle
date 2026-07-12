@@ -2,656 +2,243 @@
 
 [![CI](https://github.com/keenableai/keenbench/actions/workflows/ci.yaml/badge.svg)](https://github.com/keenableai/keenbench/actions/workflows/ci.yaml)
 
-Search/retrieval benchmarks from [Keenable.ai](https://keenable.ai).
-
-A benchmark is a query set plus a scoring method. Each one is a self-contained
-module under the `keenbench` package with the same two subcommands:
+Search/retrieval benchmarks from [Keenable.ai](https://keenable.ai). A
+benchmark is a query set plus a scoring method; each is a module under
+`keenbench` with the same two subcommands:
 
 ```bash
 keenbench <benchmark> generate ... --out queries.jsonl   # produce query rows (JSONL)
 keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on them (JSON report)
 ```
 
-| Benchmark | Queries | Metric |
+| Benchmark | Queries | Scoring |
 | --- | --- | --- |
-| [`freshstream`](#freshstream) | Fresh, time-sensitive queries mined from live RSS and Google Trends | LLM relevance judge → RBP@5 |
-| [`companyfill`](#companyfill) | Company & financial fact-lookups: registry-grounded facts, quarterly SEC-XBRL facts (`filings`), and known-item SEC-filing retrieval (`filingdoc`); ~50% of `filings`/`filingdoc` queries use operator syntax | Answer-recall@K and MRR@K, deterministic (optional LLM backstop) |
-| [`scholar`](#scholar) | Known-item paper retrieval — find a specific paper by its title vs. by a full-text-only detail | Recall@K and MRR@K by paper-ID match, deterministic (no judge) |
-| [`legal`](#legal) | Legal known-item retrieval — find a specific court opinion (caption) or CFR section (substance); ~50% of queries use operator syntax | Recall@K and MRR@K by citation/docket/URL identity, deterministic (no judge) |
-| [`findallmcp`](#findallmcp) | Distribution questions ("find all X", "what fraction of X") answered by an agent under a dollar budget, comparing MCP search backends | Set recall/precision and stat accuracy vs registry gold, deterministic |
+| [`freshstream`](#freshstream) | fresh, time-sensitive queries from live RSS + Google Trends | LLM relevance judge → RBP@5 |
+| [`companyfill`](#companyfill) | company & financial fact lookups grounded in public registries and SEC filings | answer-recall@K + MRR@K, deterministic (optional LLM backstop) |
+| [`scholar`](#scholar) | known-item paper retrieval: by title vs. by a full-text-only detail | recall@K + MRR@K by paper-id match |
+| [`legal`](#legal) | known-item caselaw / CFR retrieval | recall@K + MRR@K by citation/docket/URL identity |
+| [`findallmcp`](#findallmcp) | distribution questions answered by an agent under a dollar budget, comparing MCP search backends | set recall/precision + stat accuracy vs registry gold |
 
-Everything engine- or judge-related is shared infrastructure in
-[`keenbench.shared`](#shared-infrastructure) — search clients, LLM client,
-relevance judge, metrics, sampling, and the RBP ranking pipeline — not a
-benchmark of its own.
+Gold is generated on demand from public sources; nothing is committed.
+`rarestream` is a query producer, not a bench: it samples English rare-word
+queries from a pre-filtered HF artifact and evaluates them like freshstream.
 
 ## Install
 
-Uses [uv](https://docs.astral.sh/uv/):
-
-```bash
-uv sync
-```
-
-This installs the `keenbench` command into the project venv — invoke it as
-`uv run keenbench ...` (or activate the venv first and drop the prefix; the
-examples below assume one of the two). To get a global `keenbench` on your
-PATH instead: `uv tool install --editable .`
+Uses [uv](https://docs.astral.sh/uv/): `uv sync`, then `uv run keenbench ...`
+(or `uv tool install --editable .` for a global `keenbench`).
 
 ## Configuration
 
-The CLI auto-loads a `.env` from the working directory (copy
-[`.env.example`](.env.example)); a real exported variable takes precedence.
-Keys are read only from the environment.
+The CLI auto-loads `.env` from the working directory (copy
+[`.env.example`](.env.example)); real exported variables take precedence.
 
-| Variable | Needed for | Notes |
-| --- | --- | --- |
-| `OPENROUTER_API_KEY` | `freshstream generate`, `freshstream run`, `companyfill generate` (filingdoc suite) + `run --judge`, `scholar generate`, `legal generate` (code suite) | One [OpenRouter](https://openrouter.ai) key reaches Claude, GPT, Gemini, … |
-| `EXA_API_KEY` | the `exa` engine | Required when `--engines` includes `exa` |
-| `KEENABLE_API_KEY` | the `keenable` engine | Optional — without it the keyless (rate-limited) endpoint is used |
-| `SERPER_API_KEY` | the `google` engine | [Serper](https://serper.dev) Google SERP API |
-| `SEARCHAPI_API_KEY` | the `bing` engine | [SearchAPI](https://www.searchapi.io) |
-| `BRAVE_API_KEY` | the `brave` engine | [Brave Search API](https://brave.com/search/api/) |
-| `PARALLEL_API_KEY` | the `parallel` engine | [Parallel](https://parallel.ai) v1 search |
-| `TAVILY_API_KEY` | the `tavily` engine | [Tavily](https://tavily.com) search |
-| `PERPLEXITY_API_KEY` | the `perplexity` engine | [Perplexity](https://docs.perplexity.ai) Search API |
-| `OCTEN_API_KEY` | the `octen` engine | [Octen](https://octen.ai) search |
-| `CERAMIC_API_KEY` | the `ceramic` engine | [Ceramic](https://docs.ceramic.ai) search |
-| `YOU_API_KEY` | the `you` engine | [You.com](https://you.com/docs) Web Search API |
-| `KEENBENCH_LLM_MODEL` | query projection | Default `google/gemini-3.1-flash-lite`; `--llm-model` overrides |
-| `KEENBENCH_JUDGE_MODEL` | judging | Default `google/gemini-3-flash-preview`; `--judge-model` overrides |
+| Variable | Purpose |
+| --- | --- |
+| `OPENROUTER_API_KEY` | all LLM work — query projection (freshstream, companyfill `filingdoc`, scholar, legal `code`) and judging |
+| `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY` | one per engine, required when that engine is in `--engines` |
+| `KEENABLE_API_KEY` | optional — without it the keyless, rate-limited endpoint is used |
+| `KEENBENCH_LLM_MODEL`, `KEENBENCH_JUDGE_MODEL` | defaults `google/gemini-3.1-flash-lite`, `google/gemini-3-flash-preview`; `--llm-model` / `--judge-model` override |
 
-## Common `run` flags
-
-All benchmarks' `run` commands share one interface:
+All `run` commands share one interface:
 
 | Flag | Default | Meaning |
 | --- | --- | --- |
-| `--queries` | (required) | JSONL of query rows, typically from `generate` |
-| `--out` | `-` | Report path; `-` prints to stdout |
-| `--engines` | `keenable,exa` | Comma-separated engine list |
-| `--num-results` | `5` | Top-K results fetched and scored per engine |
-| `--snippet-chars` | `500` | Uniform cap on per-result evidence text, so engines returning fatter content don't get free evidence; `0` = uncapped |
-| `--limit` / `--sample` / `--seed` | `0` / `stratified` / `0` | `--limit N` takes a deterministic stratified sample (`--sample uniform\|head` for alternatives, `--seed` to vary it) |
+| `--queries` | (required) | JSONL query rows, typically from `generate` |
+| `--out` | `-` | report path; `-` = stdout |
+| `--engines` | `keenable,exa` | comma-separated engine list |
+| `--num-results` | `5` | top-K fetched and scored per engine |
+| `--snippet-chars` | `500` | uniform cap on per-result evidence text (`0` = uncapped), so engines returning fatter content don't get free evidence |
+| `--limit` / `--sample` / `--seed` | `0` / `stratified` / `0` | deterministic sample of N queries |
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
-Per-engine tuning is env-based so the flag set stays flat as engines are
-added: `KEENABLE_MODE` (default `pro`), `EXA_CONCURRENCY` (default `1`),
-`PARALLEL_MODE` (default `basic`), `TAVILY_DEPTH` (default `basic`).
-
-Error accounting is shared too: queries whose search or judging failed are
+Per-engine tuning is env-based: `KEENABLE_MODE`, `EXA_CONCURRENCY`,
+`PARALLEL_MODE`, `TAVILY_DEPTH`. Queries whose search or judging failed are
 excluded from the mean via `num_scored` (with `search_errors` /
-`judge_errors` reported) rather than scored as zero, so transient API
-failures don't skew the engine comparison.
+`judge_errors` reported) rather than scored as zero.
 
 ## freshstream
 
-Mines what's trending *right now* and turns it into keyword-style search
-queries — the kind of fast-decaying queries a search engine has to keep fresh.
-Engines are then scored on how well they *rank* results for those queries.
-
-### Generate
-
-Two independent real-time streams feed one cohort, both tagged
-`query_source = "fresh-queries"`:
-
-- **RSS firehose** (`query_origin.bucket = "rss"`) — fetch ~124 curated public
-  feeds, keep the newest item per feed inside a freshness window (1h for most
-  feeds, 168h for academic papers), and project each survivor into a query via
-  an LLM. Evergreen content (explainers, how-tos, reviews, opinion) is refused
-  with a `NO_NEWS_EVENT` sentinel and dropped.
-- **Google Trends** (`query_origin.bucket = "trending"`) — fan out over the
-  keyless Google Trends RSS feed for all 52 US geos (`--geos` to override),
-  merge topics across geos, collapse fuzzy near-duplicates (highest volume
-  wins), drop non-ASCII topics, cap by approximate traffic, project each
-  survivor into a query (same `NO_NEWS_EVENT` refusal), and fuzzy-dedup the
-  results. Keyless — no API key beyond the LLM. (A `TrendsProvider` protocol
-  leaves room for a SearchAPI adapter for those with a key.)
+Mines what's trending right now into keyword queries; engines are scored on
+how well they rank results for them.
 
 ```bash
-keenbench freshstream generate --source rss --out queries.jsonl
-keenbench freshstream generate --source trending --out trending.jsonl   # --geos US,US-CA to narrow
+keenbench freshstream generate --source rss --out queries.jsonl    # or --source trending
+keenbench freshstream run --queries queries.jsonl --limit 20 --out rbp.json
 ```
 
-Each output line is one canonical query row:
+`generate` feeds one cohort from two streams: **RSS** — ~124 curated public
+feeds, the newest item per feed within a freshness window (1h for most feeds,
+168h for papers), backfilled with the least-stale items when too few survive —
+and **Google Trends** — the keyless Trends RSS across all 52 US geos, merged,
+fuzzy-deduped, capped by traffic. An LLM projects each item into a query and
+refuses evergreen content. `query_id` is deterministic from
+`(query_text, hour_ts)`. The feed list lives in
+[`feeds.default.toml`](src/keenbench/freshstream/configs/feeds.default.toml)
+(override with `--feeds`; honor each publisher's ToS and rate limits).
 
-```json
-{
-  "query_id": "a3f2b9c1e8d04f7a_2026-07-01T14",
-  "query_hash": "a3f2b9c1e8d04f7a",
-  "query_text": "acme thing launch",
-  "query_source": "fresh-queries",
-  "query_origin": {
-    "bucket": "rss",
-    "topical_domain": "tech",
-    "subcategory": "rss_tech",
-    "provenance": {"producer": "rss_queries", "source_kind": "rss_news", "url": "...", "title": "..."}
-  },
-  "hour_ts": "2026-07-01T14:00:00+00:00",
-  "query_produced_at": "2026-07-01T14:00:00+00:00"
-}
-```
-
-`query_id` is deterministic from `(query_text, hour_ts)`, so re-running the
-same hour produces byte-identical rows.
-
-The built-in feed list lives in
-[`src/keenbench/freshstream/configs/feeds.default.toml`](src/keenbench/freshstream/configs/feeds.default.toml)
-(the single source of truth — `SEED_SOURCES` loads it at import). Copy it,
-edit, and pass your version with `--feeds`:
-
-```bash
-keenbench freshstream generate --feeds my-feeds.toml --out queries.jsonl
-```
-
-### Run (RBP@5)
-
-```bash
-keenbench freshstream run --queries queries.jsonl --limit 20 --engines keenable,exa --out rbp.json
-```
-
-- **Judge** — an LLM relevance judge (Google "Needs Met" 0–4 framework, ported
-  from the internal eval) that infers intent straight from the query text. The
-  judge's "Today's date" comes from each row's `hour_ts` when present, and each
-  unique `(query, url)` pair is judged once across all engines (`judged_pairs`
-  in the report).
-- **RBP@5** — Rank-Biased Precision (`p=0.8`), gain `{4:1.0, 3:0.667, 2:0.117}`,
-  ceiling `1 - p^5 ≈ 0.672`, with the internal SQL kernel's redundancy
-  penalties applied per query: duplicate URL −4, third-plus result from a
-  domain −2, second −1 (floored at 0; `site:` queries exempt).
-
-`--snippet-chars` matters here for fairness: Exa returns full page text while
-Keenable returns short snippets, which would hand the judge asymmetric
-evidence (the Needs-Met rubric caps thin-content documents at 2/SM). The cap
-is applied both to Exa's highlights request and to the evidence the judge
-sees, uniformly across engines. `--snippet-chars 0` restores Exa's full page
-text, but the judge's evidence keeps a 50,000-char safety cap so one huge
-page can't blow the judge's context window.
-
-`--queries` also accepts plain text (one query per line), so the harness works
-on any query stream, not just freshstream output.
-
-**First numbers** (20 fresh RSS-derived queries, top-5, snippet-only judging,
-judge `gemini-3-flash-preview`): **Exa 0.578** vs **Keenable 0.503** (ceiling
-0.672; both engines 0 search/judge errors). Small sample, snippet-only, and
-measured before redundancy penalties and cross-engine judging landed —
-directional, not a headline metric.
+`run` judges each unique `(query, url)` once across engines with an LLM
+relevance judge (Google "Needs Met" 0–4) and scores RBP@5 (`p=0.8`, ceiling
+≈ 0.672) with redundancy penalties for duplicate URLs and repeated domains.
+`--snippet-chars` keeps judge evidence uniform across engines. `--queries`
+also accepts plain text, one query per line.
 
 ## companyfill
 
-An enrichment-style benchmark: keyword queries about public companies
-(`"nvidia ceo"`, `"nvidia q1 fiscal 2026 net income"`) whose gold answers come
-from public registries and SEC filings, scored by whether an engine's top-K
-results *contain the answer* — not whether they hit one pinned gold URL, so any
-page that actually answers gets credit. Gold is generated on demand from public
-APIs (Wikidata CC0, SEC public domain, GLEIF CC0); nothing is committed. Adapted
-from the public-registry core of Keenable's internal enrichment bench, extended
-with a WebQL survey of the published finance retrieval benchmarks (FinanceBench,
-FinQA, FinSearchComp).
-
-### Generate
+Keyword queries about public companies (`"nvidia ceo"`, `"nvidia q1 fiscal
+2026 net income"`) with gold answers from Wikidata, GLEIF, and SEC filings —
+scored on whether top-K results *contain the answer*, not whether they hit
+one pinned URL.
 
 ```bash
-keenbench companyfill generate --max-companies 100 --per-company 1 \
-  --filingdoc-target 40 --out gold.jsonl
+keenbench companyfill generate --max-companies 100 --per-company 1 --out gold.jsonl
+keenbench companyfill run --queries gold.jsonl --judge --out report.json
 ```
 
-Three suites (`--suites`, default all), one query row per grounded field:
+Three suites (`--suites`): **`companyfill`** — registry facts per company
+(ceo, founded_year, hq_country, website, employees, lei, ticker);
+**`filings`** — single-quarter 10-Q facts (net income, operating income,
+diluted EPS) from SEC XBRL, stratified by market cap; **`filingdoc`** —
+known-item filing retrieval, gold = the accession number. ~50% of
+`filings`/`filingdoc` queries carry operator syntax (`"quoted"`, `site:`,
+`after:`/`before:`), tagged in `query_origin.syntax`.
 
-- **`companyfill`** — SEC `company_tickers.json` seeds the companies; each is
-  resolved to Wikidata (gated on company-class or LEI/exchange signals) and
-  every grounded field becomes a query: ceo (P169 with no end date),
-  founded_year, hq_country, website, employees (omitted when
-  Wikidata's latest figure is stale), lei (P1278, or GLEIF with
-  `--use-gleif`), ticker. Companies with fewer than 4 grounded fields are
-  dropped as likely mis-resolutions.
-- **`filings`** — SEC XBRL companyfacts, *single-quarter* 10-Q spans (net
-  income, operating income, diluted EPS; revenue off by default — republished
-  everywhere, calibrated ~1.0). Companies are stratified mega/large/mid cap and
-  the fiscal quarter is pinned in the query text (`"acme" q1 fiscal 2026 net
-  income`). FY-annual facts were dropped as too easy.
-- **`filingdoc`** — known-item *filing* retrieval. Recent 10-K/10-Q/8-K filings
-  come from the SEC submissions API; an LLM projects the filing text into a
-  keyword query with one verbatim quoted span, accession-leak-checked. Gold is
-  the accession number, matched as an `exact_id` (see below).
-
-~50% of `filings`/`filingdoc` queries carry search-operator syntax (`"quoted"`,
-`site:`, `after:`/`before:`), cycled deterministically and tagged in
-`query_origin.syntax`.
-
-### Run (answer-recall@K)
-
-```bash
-keenbench companyfill run --queries gold.jsonl --engines keenable,exa --out report.json
-```
-
-Scoring is deterministic by default — no LLM judge. Each result's title +
-snippet (capped at `--snippet-chars`) is checked for the gold value with
-per-field-type matchers:
-
-- person names tolerate nicknames (Tim ~ Timothy) via surname +
-  given-name-prefix matching
-- money matches within a 2% band (`$416.16 billion` ≈ `416161000000`),
-  employee counts within 15%
-- countries match alias surface forms (`US`, `U.S.`, `United States of America`)
-- websites match the result URL's registrable domain; short exact ids
-  (tickers) match case-sensitively on word boundaries, while long exact ids
-  (LEIs, `filingdoc` accession numbers) match as a normalized substring of the
-  result text *and URL* — SEC result URLs embed the accession
-- low-entropy fields (founded_year, employees, ticker) additionally require a
-  cue word (`founded`, `employees`, `ticker`, …) in the text so a stray
-  number can't score
-
-`--judge` adds an LLM backstop for the deterministic matcher's blind spots —
-paraphrases, odd formatting, cue words the snippet skipped. It is only
-consulted for results the containment check rejected *ranked ahead of the
-first deterministic hit*, so it can upgrade a miss (or improve a rank) but
-never revoke a deterministic hit, and most results cost no LLM calls at all.
-The report tracks `judge_upgrades` and `judge_errors`; a query whose miss
-might be a judge failure is excluded from `num_scored` rather than counted as
-a miss.
-
-Every suite — registry facts, quarterly `filings`, and `filingdoc` identity —
-is scored through this one path (`run_answers`): `filingdoc` is just an
-`exact_id` field, so there is no separate scorer. The report gives per-engine
-**answer-recall@K** and **MRR@K**, plus breakdowns by field, by suite
-(`by_bucket`), by operator syntax (`by_syntax`), by cap tier (`by_tier`), and by
-freshness cadence, along with a system-specific vs. universal miss split.
-Caveats: snippet-only checking is a *lower bound* on true answer presence —
-comparable across engines, not an absolute coverage number — and ceo/employees
-gold comes from Wikidata, so a stale registry entry can mark a correct fresh
-answer wrong (the SEC-sourced `filings`/`filingdoc` suites have no such gap).
+Scoring is deterministic with per-field matchers: nickname-tolerant person
+names, 2% band for money, 15% for employee counts, country aliases,
+registrable-domain match for websites, and required cue words for
+low-entropy fields so a stray number can't score. `--judge` adds an LLM
+backstop consulted only for rejected results ranked ahead of the first
+deterministic hit — it can upgrade a miss but never revoke a hit. The report
+breaks down by field, suite, syntax, cap tier, and freshness, and splits
+misses into system-specific vs universal. Snippet-only checking is a lower
+bound, applied symmetrically across engines.
 
 ## scholar
 
-A **known-item retrieval** benchmark: can an engine surface *one specific
-paper*? Each paper produces two queries, and the gap between how well an engine
-answers them is the point:
-
-- **`title`** — the degraded paper title. Answerable from the metadata every
-  engine indexes.
-- **`body`** — a distinctive detail pulled from the paper's full text (a named
-  method, a precise measured value, a trial ID) that is machine-verified to be
-  *absent* from the title and abstract, so only a full-text index can match it.
-
-Scoring is deterministic identity matching — no LLM judge — so `run` is free.
-
-### Generate
+Known-item paper retrieval. Each paper yields a **`title`** query (degraded
+title, answerable from metadata) and a **`body`** query (a full-text-only
+detail, machine-verified absent from title and abstract) — the gap between
+the two is the point.
 
 ```bash
 keenbench scholar generate --age-buckets 7d,30d,1y --per-cell 10 --out gold.jsonl
+keenbench scholar run --queries gold.jsonl --num-results 10 --out report.json
 ```
 
-Gold is generated on demand from two public, open sources: **arXiv** (CS,
-physics, life, social) and **Europe PMC** (health, full JATS body text). The set
-is **paired and balanced by construction** — sampled over `(domain × age)` cells
-so it comes out even across five domains and the requested age cohorts, with
-exactly one `title` and one `body` query per paper. Age buckets (`7d` / `30d` /
-`1y` / `older`) are sampled from narrow date bands so a paper's true publication
-age matches its bucket. `generate` needs `OPENROUTER_API_KEY` for the body-query
-projection (model via `KEENBENCH_LLM_MODEL` / `--llm-model`); `--per-cell N`
-sets the target paired papers per cell, `--suites` restricts sources. Nothing is
-committed.
-
-Each output line is one gold query row:
-
-```json
-{
-  "query_id": "…", "query_hash": "…",
-  "query_text": "smoothquant activation outliers migration factor",
-  "query_source": "scholar",
-  "query_origin": {"bucket": "body", "suite": "arxiv", "provenance": {"title": "…", "url": "…"}},
-  "gold": {"paper_key": "2506.12345", "ids": {"arxiv": "2506.12345"},
-           "age_bucket": "30d", "domain": "computer science", "published_date": "…"},
-  "hour_ts": "…"
-}
-```
-
-### Run (recall@K / MRR@K)
-
-```bash
-keenbench scholar run --queries gold.jsonl --engines keenable,exa,brave --out report.json
-```
-
-Each result's URL and snippet are scanned for a paper identity — arXiv id, DOI,
-or PMID (PMC ids are resolved to PMIDs via NCBI's converter) — and a query is a
-hit when any extracted id matches the gold paper. The report gives per-engine
-**recall@K** and **MRR@K**, and — since the two query sets measure different
-things — reports the **title** and **body** query sets separately via the
-`by_bucket` breakdown (alongside by suite / age / domain). Title recall is
-metadata-answerable known-item retrieval; body recall needs a full-text index.
-A **misses** split reports `system-specific` (another engine found it →
-ranking/indexing gap) vs `universal` (nobody found it → likely stale/unfindable
-gold). It shares the common `run` flags; the judge flags don't apply (there is
-no judge).
-
-Caveats: this is *known-item* retrieval, so an engine that returns a
-different-but-relevant paper scores a miss — that's correct for "find this
-paper," not a measure of scholarly-search quality. Publisher landing pages that
-carry no inline identifier (ScienceDirect PII, Nature short-form) yield no
-extractable id, making recall a *lower bound*, applied symmetrically across
-engines. The title-specificity gate that drops too-generic titles at generation
-is a *lexical* heuristic (distinctive token — acronym / digit / camelCase /
-hyphenated compound — or enough content words), so a generic-but-acronymed title
-can still slip through and a distinctive short all-lowercase one can be dropped.
-And the keyless `keenable` endpoint returns degraded results under the burst
-load of a full run, so a batch number undercounts it — score it with a
-`KEENABLE_API_KEY`, or pin the raw results, before comparing.
+Gold comes from arXiv and Europe PMC, paired and balanced over
+`(domain × age)` cells. Scoring is deterministic: result URLs and snippets
+are scanned for arXiv ids, DOIs, and PMIDs; a query is a hit when an id
+matches the gold paper. The report separates title vs body recall
+(`by_bucket`) and splits misses into system-specific vs universal. Pages
+with no inline identifier can't match, so recall is a lower bound, applied
+symmetrically.
 
 ## legal
 
-Legal search across two task suites, adapted from the citation-gold methodology
-of the public legal-IR benchmarks (CLERC, LePaRD, BSARD): gold is a *document
-identity* derived from the citation graph, so no expert annotation is needed
-and `run` is free (no judge). A deliberate design point — shared with the
-[`companyfill`](#companyfill) `filings`/`filingdoc` suites — is **operator
-syntax coverage**: roughly half the
-queries carry a search operator (`"quoted phrase"`, `site:`,
-`after:`/`before:` date filters), tagged per row in `query_origin.syntax`, so
-the report separates how engines handle advanced query language (`by_syntax`)
-from plain keyword retrieval.
-
-### Generate
+Known-item legal retrieval; gold is a document identity from the citation
+graph, so no expert annotation is needed. ~50% of queries carry operator
+syntax.
 
 ```bash
 keenbench legal generate --per-court 4 --per-title 4 --out legal.jsonl
+keenbench legal run --queries legal.jsonl --out legal.json
 ```
 
-Two suites (`--suites`, default both):
-
-- **`caselaw`** — known-item *case* retrieval. Recent published opinions are
-  sampled from the CourtListener search API (public domain, keyless; set
-  `COURTLISTENER_API_TOKEN` to raise rate limits) across 14 federal courts
-  (`--courts`) and the last `--months-back` months, spread over monthly
-  windows. Each case yields one caption-style query (party names with legal
-  suffixes and docket-annotation noise stripped, plus a court phrase). Gold
-  identity is the case's reporter citations, docket number + party tokens, and
-  CourtListener cluster id.
-- **`code`** — known-item *regulation* retrieval. Sections are sampled from
-  the eCFR API across 10 CFR titles (`--titles`), and an LLM projects each
-  section's full text into a keyword query about the section's *substance*
-  with exactly one distinctive span quoted verbatim — rejected if it leaks the
-  citation (section/part/title number, "CFR", "§") or if the quoted span is
-  not actually verbatim. Needs `OPENROUTER_API_KEY`. Gold identity is the
-  `title CFR section` citation.
-
-### Run (recall@K / MRR@K)
-
-```bash
-keenbench legal run --queries legal.jsonl --engines keenable,exa --out legal.json
-```
-
-Each result's URL and snippet are scanned for legal identities — reporter
-citations (`89 F.4th 1188`), docket numbers (scored only alongside a gold
-party token, so a bare `25-2462` can't false-positive), CourtListener/Justia
-URL patterns, and CFR citations in text or cornell/ecfr URLs. The report
-gives per-engine recall@K and MRR@K with `by_bucket` (suite), `by_syntax`,
-and `by_court` breakdowns plus the system-specific vs universal misses split.
-Identity extraction is pattern-based, so a page that discusses the case
-without citing it doesn't count — recall is a lower bound, applied
-symmetrically across engines.
+Two suites (`--suites`): **`caselaw`** — recent published opinions from the
+CourtListener API across 14 federal courts, one caption-style query per case
+(gold: reporter citations, docket + party tokens, cluster id); **`code`** —
+eCFR sections projected by an LLM into a query about the section's substance
+with one verbatim quoted span, rejected if it leaks the citation (gold: the
+`title CFR section` citation). `run` scans result URLs and snippets for
+reporter citations, docket numbers (scored only alongside a gold party
+token), CourtListener/Justia URLs, and CFR citations; breakdowns by suite,
+syntax, and court.
 
 ## findallmcp
 
-Measures the thesis of
-[The Minimum Experiment](https://keenable.ai/blog/the-minimum-experiment): a
-model hands you the *mode*, a search API hands you *documents*, and the wins
-live in the *distribution*. Every task asks for a distribution — an exhaustive
-enumeration ("find all X") or a population statistic ("what fraction of X") —
-whose ground truth is computed from a structured public registry, so an agent
-that reasons from priors or from a few top documents scores measurably worse
-than one that actually holds the population.
-
-Unlike the other benches this one is **agentic**: `run` drives an LLM agent
-(default `anthropic/claude-sonnet-5` via OpenRouter, `--agent-model` /
-`KEENBENCH_AGENT_MODEL` to override) with the tools of one MCP search backend
-at a time, under a hard **dollar budget** per task, and compares backends on
-what they let the same agent find per dollar.
-
-### Generate
+Agentic — measures the thesis of
+[The Minimum Experiment](https://keenable.ai/blog/the-minimum-experiment):
+every task asks for a distribution ("find all X", "what fraction of X") whose
+ground truth comes from a structured public registry, so an agent reasoning
+from priors or a few top documents scores measurably worse than one that
+actually holds the population.
 
 ```bash
 keenbench findallmcp generate --out findallmcp.jsonl
-```
-
-Seven suites, gold computed at generate time from the registry that scores the
-task (`--suites` picks a subset). Enumerate gold sets are kept at 8–40
-entries, thresholded suites auto-pick the threshold that lands there:
-
-- **`hn`** — Show HN launches via the keyless Algolia API: one enumerate task
-  (all launches over an auto-picked point threshold) and two stat tasks
-  (population count, fraction of titles containing a digit).
-- **`edgar`** — SEC full-text search: enumerate tasks over curated 8-K phrases
-  ("material cybersecurity incident", "reverse stock split", …) that yield
-  8–40 distinct filers, plus an S-1 filer-count stat task.
-- **`launches`** — orbital launch attempts in the last 30 days via the keyless
-  Launch Library 2 API: enumerate all attempts, plus count and
-  Falcon 9-fraction stat tasks.
-- **`fedreg`** — the Federal Register API: enumerate executive orders
-  published in the last 45 days, plus an EPA final-rule count stat task.
-- **`wikidata`** — deaths in the last 30 days via the Wikidata SPARQL
-  endpoint: enumerate people over an auto-picked sitelink threshold.
-- **`github`** — repositories created in the last 30 days via the GitHub
-  search API: enumerate repos over an auto-picked star threshold, plus a
-  ≥300-star count stat task.
-- **`nvd`** — the NVD CVE API: a critical-CVE count stat task over the last
-  30 days.
-
-Each suite's registry endpoints are blocked in the agent's tool path
-(`BLOCKED_REGISTRIES` in `harness.py`) so answers must come from open-web
-search, not from re-querying the gold source.
-
-### Run (set recall / stat accuracy per dollar)
-
-```bash
 keenbench findallmcp run --queries findallmcp.jsonl --backends keenable,webql \
   --budget-usd 1.0 --out findallmcp.json
 ```
 
-Backends are MCP servers:
+Seven suites (`--suites` picks a subset), gold computed at generate time from
+the registry that scores the task; enumerate gold sets land at 8–40 entries
+via auto-picked thresholds: **`hn`** (Show HN launches via the keyless
+Algolia API: enumerate plus count and digit-fraction stats), **`edgar`** (SEC
+full-text search over curated 8-K phrases, plus an S-1 count), **`launches`**
+(orbital launch attempts over 30 days via Launch Library 2: enumerate plus
+count and Falcon 9-fraction stats), **`fedreg`** (executive orders over 45
+days via the Federal Register API, plus an EPA final-rule count),
+**`wikidata`** (deaths over 30 days via SPARQL, sitelink-thresholded),
+**`github`** (repos created over 30 days, star-thresholded, plus a ≥300-star
+count), and **`nvd`** (published-CVE count over 30 days). Each suite's
+registry endpoints are blocked in the agent's tool path (`BLOCKED_REGISTRIES`
+in `harness.py`) so answers must come from open-web search, not from
+re-querying the gold source.
 
-- **`keenable`** — the classic search MCP (`npx -y @keenable/mcp`,
-  stdio; `KEENBENCH_KEENABLE_MCP_CMD` overrides the command):
-  `search_web_pages` + `fetch_page_content`.
-- **`webql`** — the hosted WebQL MCP (`https://webql.keenable.ai/mcp`,
-  streamable HTTP, `X-API-Key` from `KEENABLE_API_KEY`;
-  `KEENBENCH_WEBQL_MCP_URL` overrides): search plus
-  map/reduce/view over result sets — the distribution tools.
-- **`exa`** — Exa's hosted MCP (`https://mcp.exa.ai/mcp`, key from
-  `EXA_API_KEY`; `KEENBENCH_EXA_MCP_URL` overrides): `web_search_exa` +
-  `web_fetch_exa`.
-- **`parallel`** — Parallel's hosted Search MCP
-  (`https://search.parallel.ai/mcp`, `x-api-key` from `PARALLEL_API_KEY`;
-  `KEENBENCH_PARALLEL_MCP_URL` overrides): `web_search` + `web_fetch`.
-
-The harness runs on the shared
-[tool-calling agent](#tool-calling-agent) (`keenbench.shared.agent`), with
-each backend's MCP session bridged into the agent's tool registry per task.
-The budget is charged in dollars via its `RunBudget`: LLM tokens at list
-prices plus a per-call price table for each tool (`models.py`;
-`map_result_set_with_llm` costs 10× a plain search, so WebQL's heavier tools
-aren't free). The agent sees its running spend after every tool result and is
-forced to answer once the budget is crossed (overshoot is bounded by one turn
-and reported in `spent_usd`).
-
-Scoring is deterministic: enumerate answers are matched to gold entities by
-normalized name (legal suffixes and "Show HN:" stripped) or URL domain →
-recall/precision/F1; stat answers score `max(0, 1 - relative error)`, with a
-per-task tolerance flag (`within_tol`) reported alongside. The report gives
-per-backend `mean_score`, `set_recall`/`set_precision`, `stat_score`,
-`stat_within_tol`, `mean_spent_usd`, `mean_tool_calls`, and `by_suite` /
-`by_bucket` breakdowns. Caveats: agent runs are nondeterministic and paid —
-run with small task counts and compare means over repeats; entity matching is
-lexical, so an agent naming a company by an unusual alias can be undercounted
-(applied symmetrically across backends).
+`run` drives an LLM agent (default `anthropic/claude-sonnet-5`;
+`--agent-model` / `KEENBENCH_AGENT_MODEL`) with the tools of one MCP backend
+at a time — `keenable` (stdio, `npx -y @keenable/mcp`), `webql` (hosted, adds
+map/reduce/view distribution tools), `exa`, `parallel` — under a hard dollar
+budget per task: LLM tokens at list prices plus a per-tool price table, spend
+shown to the agent after every tool result, a forced answer once the budget
+crosses. Scoring is deterministic: enumerations match gold entities by
+normalized name (aliases included) or URL domain (recall/precision/F1);
+stats score `max(0, 1 − relative error)`. `--budget-usd` accepts a comma
+list, nesting
+summaries under `by_budget`. Agent runs are nondeterministic and paid —
+compare means over repeats.
 
 ## Shared infrastructure
 
-### Search clients
+`keenbench.shared.search` — a `SearchClient` protocol (errors-as-data
+`async search(query, *, num_results) -> (results, error)`) with clients for
+every engine above. Google-style operators (`site:`, `after:`, `before:`)
+are parsed out and translated per engine to its best native mechanism;
+unsupported ones are dropped rather than sent as literal tokens. Adding an
+engine: subclass `HttpSearchClient`, map its response to `SearchResult`, add
+an `EngineSpec` to `ENGINES` in
+[`factory.py`](src/keenbench/shared/search/factory.py), set the key env var —
+reports and the dashboard pick it up automatically.
 
-`keenbench.shared.search` provides a common client interface — a
-`SearchResult` (`url`, `title`, `snippet`, `published_date`, `score`, `raw`)
-and a `SearchClient` protocol
-(`async search(query, *, num_results) -> (results, error)`, errors-as-data,
-never raises). Shipped engines:
+`keenbench.shared.agent` — the self-contained tool-calling agent behind
+findallmcp: an `Agent` loop with optional planning and context compaction,
+`mcp_tools_from_session` to bridge MCP tools, `RunBudget` for hard dollar
+budgets.
 
-| Client | Endpoint | Key |
-| --- | --- | --- |
-| `KeenableClient` | `POST /v1/search/public` when keyless, `POST /v1/search` with a key | `X-API-Key` (optional — the keyless endpoint is burst-rate-limited, so the client defaults to low concurrency without one) |
-| `ExaClient` | `POST https://api.exa.ai/search` | `x-api-key` (required) |
-| `SerperClient` | `POST https://google.serper.dev/search` (the `google` engine) | `X-API-KEY` (required) |
-| `SearchApiClient` | `GET https://www.searchapi.io/api/v1/search` — wraps Bing (the `bing` engine) | `Authorization: Bearer` (required) |
-| `BraveClient` | `GET https://api.search.brave.com/res/v1/web/search` | `X-Subscription-Token` (required) |
-| `ParallelClient` | `POST https://api.parallel.ai/v1/search` | `x-api-key` (required) |
-| `TavilyClient` | `POST https://api.tavily.com/search` | `Authorization: Bearer` (required) |
-| `PerplexityClient` | `POST https://api.perplexity.ai/search` | `Authorization: Bearer` (required) |
-| `OctenClient` | `POST https://api.octen.ai/search` | `X-Api-Key` (required) |
-| `CeramicClient` | `POST https://api.ceramic.ai/search` | `Authorization: Bearer` (required) |
-| `YouClient` | `GET https://ydc-index.io/v1/search` | `X-API-Key` (required) |
-
-```python
-import asyncio
-from keenbench.shared.search import KeenableClient
-
-async def go():
-    kb = KeenableClient()                    # or KeenableClient(api_key=...)
-    results, err = await kb.search("who is the mayor of austin", num_results=10)
-    await kb.aclose()
-    return results
-
-asyncio.run(go())
-```
-
-Each client caps in-flight requests via a per-client `max_concurrency`
-semaphore (default 8). `CeramicClient` additionally truncates queries to
-the API's 50-word limit and clamps `--snippet-chars` into its
-`maxDescriptionLength` range of `[1000, 8000]`. `YouClient` merges both
-response sections — `results.web` first, then `results.news` — deduplicating
-by URL before truncating to `num_results`.
-
-### Query operators
-
-Bench queries carry Google-style operators (`site:host`,
-`after:YYYY-MM-DD`, `before:YYYY-MM-DD`). Mirroring keenable's
-orchestrator, `queryops.parse_ops` extracts them and each client
-translates to its engine's best native mechanism — operators the engine
-parses natively stay in the query text, translated ones are stripped from
-it, and unsupported date bounds are dropped rather than sent as literal
-tokens:
-
-| Engine | `site:` | `after:` / `before:` |
-| --- | --- | --- |
-| `google`, `bing` | in query text (native) | in query text (native) |
-| `keenable` | in query text (native) | rewritten to `published_after:` / `published_before:` (native) |
-| `brave` | in query text (native) | `freshness=YYYY-MM-DDtoYYYY-MM-DD` (open ends filled with epoch/today) |
-| `exa` | `includeDomains` | `startPublishedDate` / `endPublishedDate` |
-| `tavily` | `include_domains` | `start_date` / `end_date` |
-| `perplexity` | `search_domain_filter` | `search_after_date_filter` / `search_before_date_filter` |
-| `parallel` | `source_policy.include_domains` | dropped (no API support) |
-| `octen` | `include_domains` | `start_time` / `end_time` |
-| `ceramic` | dropped (no API support; a literal `site:` token returns zero results) | dropped (no API support) |
-| `you` | `include_domains` (comma-separated) | `freshness=YYYY-MM-DDtoYYYY-MM-DD` (open ends filled with epoch/today) |
-
-Malformed operator values (`after:yesterday`, `site:` with no host) stay
-in the query text untouched. The judge still rates results against the
-original operator-bearing query, so an engine whose native filter is weak
-is penalized the same as before.
-
-Everything downstream — the pipelines, reports, scheduled runs, and the
-dashboard — is engine-count-agnostic, so adding an engine to the comparison
-is three steps:
-
-1. subclass `HttpSearchClient` (lazy connection reuse + `aclose` +
-   concurrency limiter + JSON error mapping) and map its response to
-   `SearchResult`;
-2. add an `EngineSpec` to `ENGINES` in
-   [`shared/search/factory.py`](src/keenbench/shared/search/factory.py)
-   (name, API-key env var, build function);
-3. put the key in the environment (a repo secret for CI) and add the name to
-   `--engines` / the workflow's `ENGINES` env. The dashboard picks the new
-   engine up from the data and assigns it a stable color slot automatically.
-
-### Tool-calling agent
-
-`keenbench.shared.agent` is a self-contained tool-calling agent for agentic
-benches: an `Agent` loop (tool-calling turns, optional planning step,
-context compaction, best-effort summary on max steps) over the shared
-`OpenRouterClient`'s `chat()` (OpenAI-style tools +
-token usage). `mcp_tools_from_session` bridges an MCP session's tools into
-the agent's `Tool` registry. An optional `RunBudget` enforces a hard dollar
-budget per run — LLM tokens at caller-supplied prices plus a per-tool price
-callable, running spend injected after every tool turn, and a forced final
-answer once the budget crosses. `chat()` retries transient OpenRouter
-failures (429/5xx/transport) with exponential backoff:
-
-```python
-from keenbench.shared.agent import Agent, RunBudget, Tool
-from keenbench.shared.llm import OpenRouterClient
-
-llm = OpenRouterClient(api_key="sk-or-...", model="anthropic/claude-sonnet-5", timeout_s=180.0)
-agent = Agent(llm, tools, system_prompt, max_steps=20)
-budget = RunBudget(limit_usd=1.0, in_price_per_mtok=3.0, out_price_per_mtok=15.0,
-                   tool_cost=lambda name: 0.005)
-result = await agent.run(task_prompt, budget=budget)
-```
-
-### Pipelines as a library
-
-The pipelines are pure — inputs + clients in, rows/reports out — so they drive
-from a notebook or scheduler too:
-
-```python
-import asyncio
-from datetime import UTC, datetime
-from keenbench.freshstream import run_rss
-from keenbench.freshstream.feeds import SEED_SOURCES
-from keenbench.shared.llm import OpenRouterClient
-
-llm = OpenRouterClient(api_key="sk-or-...", model="google/gemini-3.1-flash-lite")
-hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
-rows, stats = asyncio.run(run_rss(SEED_SOURCES, llm, hour_ts=hour_ts))
-```
-
-Any object with an errors-as-data
-`async complete(prompt, *, max_tokens, reasoning_effort) -> (text, error)`
-method satisfies the `LLMClient` protocol. The ranking harness is
-`keenbench.shared.rankeval.run_rbp`, the recall scorer is
+Pipelines are pure (inputs + clients in, rows/reports out), so they also
+drive from a notebook or scheduler: the ranking harness is
+`keenbench.shared.rankeval.run_rbp`, the recall scorer
 `keenbench.companyfill.score.run_answers`.
 
 ## Continuous benchmarks
 
-[`bench.yaml`](.github/workflows/bench.yaml) runs the benchmarks on a schedule
-against all registered engines: freshstream hourly (`--limit 20`), and
-companyfill + scholar + rarestream + legal daily at 00:17 UTC (fresh gold each
-— companyfill regenerates all three suites and runs `--limit 120` with the
-`--judge` backstop, scholar `--per-cell 7`). Each run:
-
-- appends summary rows to `data/history.jsonl` and per-engine-pair URL-overlap
-  rows (mean Jaccard of normalized top-K URL sets per query) to
-  `data/overlap.jsonl` on the `gh-pages` branch — rendered as a dashboard
-  (trends, latest tiles, per-field table, an all-time engine-overlap matrix,
-  judgement browser) at <https://super-journey-4z52474.pages.github.io/> (the
-  URL becomes `keenableai.github.io/keenbench` when the repo goes public);
-- archives the full artifacts (reports with per-result judge reasoning, the
-  generated queries, the gold) to the public HF dataset
-  [`keenable-ai/keenbench-results`](https://huggingface.co/datasets/keenable-ai/keenbench-results)
-  under `runs/<utc-hour>/`, which the dashboard's judgement browser reads.
-
-Needs repo secrets: `OPENROUTER_API_KEY`, `HF_TOKEN`, and the per-engine keys
-listed under [Configuration](#configuration) (`KEENABLE_API_KEY` optional).
+[`bench.yaml`](.github/workflows/bench.yaml) runs against all registered
+engines: freshstream hourly (`--limit 20`); daily with fresh gold —
+companyfill 00:17 UTC (`--limit 120 --judge`), rarestream 06:17
+(`--limit 100`), scholar 12:17 (`--per-cell 7`), legal 18:17. findallmcp is
+manual dispatch only (it spends agent budget). Each run appends summary rows
+(`history.jsonl`), engine-pair URL overlap (`overlap.jsonl`), and per-engine
+unique-URL counts (`uniqueness.jsonl`) to `gh-pages`, rendered as a dashboard
+at <https://super-journey-4z52474.pages.github.io/>, and archives full
+artifacts to the HF dataset
+[`keenable-ai/keenbench-results`](https://huggingface.co/datasets/keenable-ai/keenbench-results).
+Needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, and the per-engine keys.
 
 ## Development
 
 ```bash
 uv sync
-uv run pytest              # unit tests are deterministic and need no network
+uv run pytest   # deterministic, no network
 ```
-
-## Notes
-
-- Publishing a list of public feed URLs is fine, but honor each publisher's
-  ToS, `robots.txt`, and rate limits. The seed list is user-overridable and
-  implies no endorsement.
 
 ## License
 

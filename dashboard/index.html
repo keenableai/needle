@@ -68,16 +68,18 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 56px; }
   header h1 { font-size: 20px; font-weight: 600; margin: 0; }
   header p { margin: 4px 0 0; color: var(--text-secondary); }
-  header { margin-bottom: 20px; position: relative; padding-right: 40px; }
+  header { margin-bottom: 20px; position: relative; padding-right: 140px; }
   header a { color: inherit; }
-  #theme-toggle {
-    position: absolute; top: 0; right: 0;
+  .header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 6px; }
+  .header-actions button {
     display: flex; align-items: center; justify-content: center;
-    width: 30px; height: 30px; padding: 0;
+    height: 30px; padding: 0 9px;
     background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
     color: var(--text-secondary); cursor: pointer;
+    font: 600 11px system-ui, -apple-system, "Segoe UI", sans-serif;
   }
-  #theme-toggle:hover { color: var(--text-primary); }
+  .header-actions button:hover { color: var(--text-primary); }
+  #theme-toggle { width: 30px; padding: 0; }
   #theme-toggle .sun { display: none; }
   :root[data-theme="dark"] #theme-toggle .sun { display: block; }
   :root[data-theme="dark"] #theme-toggle .moon { display: none; }
@@ -195,8 +197,10 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
-  .overlap-matrix, #fields-table, #history-table, #uniqueness-table,
+  .overlap-matrix, #fields-table, #history-table, #uniqueness-table, #latency-summary,
   #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal, #lb-findall { overflow-x: auto; }
+  .prose { color: var(--text-secondary); font-size: 13px; }
+  .prose p { margin: 0 0 10px; max-width: 90ch; }
   .overlap-matrix { padding: 10px 0 14px; }
   .overlap-matrix table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; font-size: 11px; }
   .overlap-matrix th, .overlap-matrix td { border-bottom: none; }
@@ -220,6 +224,12 @@ document.documentElement.dataset.theme = localStorage.theme ||
     text-anchor: middle; paint-order: stroke; stroke: var(--surface-1); stroke-width: 3px;
   }
   #sharegraph .sg-name { fill: var(--text-primary); font-size: 12px; font-weight: 500; }
+
+  @media print {
+    .header-actions, #toc, .runbar, #card-runs, #history-details { display: none; }
+    .card { break-inside: avoid; }
+    .card svg { max-width: 100%; height: auto; }
+  }
 </style>
 </head>
 <body>
@@ -240,14 +250,19 @@ document.documentElement.dataset.theme = localStorage.theme ||
       </ul>
     </li>
     <li><a href="#card-runs">Judgement browser</a></li>
+    <li><a href="#sec-appendix">Appendix</a></li>
   </ul>
 </nav>
 <div class="wrap">
   <header id="top">
-    <button id="theme-toggle" aria-label="Toggle color theme">
-      <svg class="sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-      <svg class="moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-    </button>
+    <div class="header-actions">
+      <button id="export-md" title="Open the current tables as Markdown">MD</button>
+      <button id="export-pdf" title="Print / save as PDF">PDF</button>
+      <button id="theme-toggle" aria-label="Toggle color theme">
+        <svg class="sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </div>
     <h1>keenbench — search engine benchmarks</h1>
     <p>Hourly search-engine benchmarks from
       <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.
@@ -287,6 +302,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <div class="card">
       <h2>findallmcp — latest run</h2>
       <div class="sub" id="lb-findall-sub"></div>
+      <div class="sub">score = per-query mean of gold-set recall (enumerate) and 1 − relative error, floored at 0 (stat)</div>
       <div id="lb-findall"></div>
     </div>
   </div>
@@ -303,6 +319,11 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <h2>Search latency — p95</h2>
       <div class="sub">95th percentile, same windows</div>
     </div>
+  </div>
+  <div class="card" id="card-latency-summary">
+    <h2>Search latency — 7-day summary</h2>
+    <div class="sub">successful search API calls, all benchmarks, last 7 days — per-call samples pooled; runs without samples contribute their per-run percentiles; error rate = errored searches / queries issued</div>
+    <div id="latency-summary"></div>
   </div>
 
   <h2 class="section-title" id="sec-overlap">Engine overlap</h2>
@@ -407,7 +428,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   </div>
 
   <h3 class="subsection-title" id="sec-findallmcp">findallmcp</h3>
-  <p class="section-desc">Distribution questions — exhaustive enumerations ("find all X") and population statistics ("what fraction of X") — answered by an LLM agent driving one MCP search backend at a time under a hard dollar budget. Gold is computed from structured public registries (Show HN via Algolia, SEC EDGAR full-text search), so an agent reasoning from priors or a few top documents scores measurably worse than one that holds the population.</p>
+  <p class="section-desc">Distribution questions — exhaustive enumerations ("find all X") and population statistics ("what fraction of X") — answered by an LLM agent driving one MCP search backend at a time under a hard dollar budget. Gold is computed from structured public registries (Show HN via Algolia, SEC EDGAR full-text search), so an agent reasoning from priors or a few top documents scores measurably worse than one that holds the population. A backend's score is the mean per-query score across both buckets: an enumerate query scores the share of the gold set it covers, a stat query scores 1&nbsp;−&nbsp;relative error, floored at&nbsp;0.</p>
   <div class="grid2">
     <div class="card" id="card-findall-recall">
       <h2>findallmcp — enumerate set recall</h2>
@@ -436,6 +457,84 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <summary>Table view — all runs in range</summary>
     <div class="card" id="history-table" style="margin-top:8px"></div>
   </details>
+
+  <h2 class="section-title" id="sec-appendix">Appendix — methodology &amp; configuration</h2>
+  <p class="section-desc">Everything below is pinned in
+    <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>; the dashboard
+    only aggregates published run data, and every number on this page can be recomputed from
+    the archived artifacts (A4).</p>
+
+  <div class="card" id="app-metrics">
+    <h2>A1 — metric definitions</h2>
+    <div class="sub">how every number on this page is computed (src/keenbench/shared/metrics.py and per-bench score.py)</div>
+    <table>
+      <tr><th>metric</th><th>benches</th><th>definition</th></tr>
+      <tr><td>RBP@5</td><td>freshstream, rarestream</td>
+        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672 (the hairline on RBP charts); scores are not normalized by it. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
+      <tr><td>redundancy penalty</td><td>freshstream, rarestream</td>
+        <td>applied to ratings before RBP: a duplicate URL −4 rating steps, the 2nd result from the same domain −1, the 3rd and later −2, all floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
+      <tr><td>answer-recall@5, MRR@5</td><td>companyfill</td>
+        <td>a query is a hit when the gold answer appears in a top-5 title or snippet — deterministic matcher, with an LLM-judge backstop for paraphrased answers. MRR is the mean reciprocal rank of the first hit.</td></tr>
+      <tr><td>recall@10, MRR@10</td><td>scholar</td>
+        <td>known-item: the gold paper identified in the top 10 by arXiv&nbsp;ID / DOI / PMID match.</td></tr>
+      <tr><td>recall@5, MRR@5</td><td>legal</td>
+        <td>known-item: the gold opinion or CFR section identified by citation / docket / URL match.</td></tr>
+      <tr><td>score</td><td>findallmcp</td>
+        <td>per query: an enumerate task scores recall of the gold entity set (name / alias / registrable-domain matching); a stat task scores max(0, 1 − |answer − gold| / |gold|). The reported score is the mean over all non-errored queries of both kinds; errored agent runs are excluded from the mean and reported as errors.</td></tr>
+      <tr><td>latency p50 / p95</td><td>all</td>
+        <td>percentiles over per-call durations of successful search API calls, pooled across queries in the window; runs published without per-call samples contribute their per-run percentiles instead. Failed calls carry no latency sample and show up in the error rate.</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="app-judge">
+    <h2>A2 — LLM judge</h2>
+    <div class="sub">rates freshstream and rarestream results; companyfill uses it only as a fallback answer matcher — scholar, legal, and findallmcp are judged deterministically</div>
+    <div class="prose">
+      <p>Model: <code>google/gemini-3-flash-preview</code> via OpenRouter, temperature 0, one pointwise call per document. The exact model a run used is recorded as <code>judge_model</code> in its archived report and shown when you pick a run in the judgement browser, so judge swaps are visible in the history.</p>
+      <p>Blind to engine identity: the prompt contains the query, document title, URL, published date, and snippet — never the engine name. Results with the same URL from different engines are pooled and judged once per query (longest available snippet, first non-empty title and date), and that single judgement is reused for every engine that returned the URL, so an engine cannot gain from formatting the same page differently. Snippet quality still matters across distinct URLs — a judge preference for a snippet style would be a shared bias across engines; the per-result reasoning published with every run exists so this can be audited.</p>
+      <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard gates for wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/keenbench/shared/prompts/judgement.jinja.</p>
+      <p>Known limitation: keenbench is operated by Keenable and there is no systematic human-agreement audit of the judge yet. What makes the numbers checkable in the meantime: the judge is blind and shared across engines, every rating ships with its reasoning, and queries, prompts, and raw results are all published — any rating can be independently re-scored.</p>
+    </div>
+  </div>
+
+  <div class="card" id="app-engines">
+    <h2>A3 — engine configuration</h2>
+    <div class="sub">request shape pinned in git (src/keenbench/shared/search/); all benches request 5 results per query except scholar (10), and the requested top-k is recorded per run as num_results. Engines are live, unversioned APIs — provider-side changes surface as trend shifts and can be audited against the archived raw runs.</div>
+    <table>
+      <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
+      <tr><td>keenable</td><td>Keenable search</td><td>query verbatim (operators included), mode=pro</td></tr>
+      <tr><td>google</td><td>Serper.dev (Google SERP)</td><td>query verbatim, num=min(k,100), gl=us, hl=en; knowledge-graph and answer-box entries fold into the ranking</td></tr>
+      <tr><td>bing</td><td>SearchApi.io, engine=bing</td><td>query verbatim, num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
+      <tr><td>brave</td><td>Brave Web Search</td><td>count=min(k,20), country=us, search_lang=en, result_filter=web; site: kept in the query text, after:/before: → freshness window</td></tr>
+      <tr><td>exa</td><td>Exa /search</td><td>type=auto, numResults=k, highlights ≤500 chars; site: → includeDomains, after:/before: → published-date window</td></tr>
+      <tr><td>parallel</td><td>Parallel /v1/search</td><td>mode=basic, max_results=k; site: → include_domains, after: → after_date</td></tr>
+      <tr><td>perplexity</td><td>Perplexity /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → date filters</td></tr>
+      <tr><td>tavily</td><td>Tavily /search</td><td>search_depth=basic, max_results=min(k,20); site: → include_domains, after:/before: → start/end_date</td></tr>
+      <tr><td>octen</td><td>Octen /search</td><td>count=k, highlights ≤512 tokens; site: → include_domains, after:/before: → start/end_time</td></tr>
+      <tr><td>ceramic</td><td>Ceramic /search</td><td>query truncated to 50 words, maxDescriptionLength=1000; site:/after:/before: are stripped, not forwarded (unsupported upstream)</td></tr>
+      <tr><td>you</td><td>You.com /v1/search</td><td>count=min(k,100); site: → include_domains, after:/before: → freshness window</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="app-data">
+    <h2>A4 — raw artifacts</h2>
+    <div class="sub">everything needed to re-score a run from scratch</div>
+    <table>
+      <tr><th>artifact</th><th>contents</th><th>where</th></tr>
+      <tr><td>per-run reports</td>
+        <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results, agent_model, budgets)</td>
+        <td><a href="https://huggingface.co/datasets/keenable-ai/keenbench-results">HF: keenable-ai/keenbench-results</a>, runs/&lt;run-id&gt;/</td></tr>
+      <tr><td>query files</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, findallmcp.jsonl)</td>
+        <td>same run folder</td></tr>
+      <tr><td>dashboard aggregates</td>
+        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, runs.json</td>
+        <td>data/ on this site (gh-pages)</td></tr>
+      <tr><td>prompts &amp; scoring code</td>
+        <td>judge prompt (shared/prompts/judgement.jinja), metric implementations, engine clients</td>
+        <td><a href="https://github.com/keenableai/keenbench">GitHub: keenableai/keenbench</a></td></tr>
+    </table>
+  </div>
 </div>
 
 <script>
@@ -462,6 +561,14 @@ function colorOf(engine) {
 const HOME_ENGINE = "keenable";
 function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
+}
+
+function engineCell(engine, cls = "") {
+  const td = el("td", { class: cls });
+  const key = el("span", { class: "key" });
+  key.style.background = colorOf(engine);
+  td.append(key, document.createTextNode(engine));
+  return td;
 }
 let history = [];
 
@@ -561,11 +668,24 @@ function el(tag, attrs, text) {
 function drawChart(card, series, opts) {
   card.querySelectorAll("svg, .tooltip, .empty").forEach((n) => n.remove());
   const points = ENGINES.flatMap((e) => series[e]);
+  card._mdRows = null;
   if (!points.length) {
     card.appendChild(el("div", { class: "empty" }, opts.empty || "No data yet — first scheduled run pending."));
     return;
   }
   const fmt = opts.fmt || fmt3;
+  card._mdRows = () => {
+    const engines = ENGINES.filter((e) => series[e].length);
+    const stamps = [...new Set(points.map((p) => p.t.getTime()))].sort((a, b) => a - b);
+    const rows = [["time (UTC)", ...engines]];
+    for (const t of stamps) {
+      rows.push([fmtTime(new Date(t)), ...engines.map((e) => {
+        const p = series[e].find((q) => q.t.getTime() === t);
+        return p ? fmt(p.v) : "–";
+      })]);
+    }
+    return rows;
+  };
   const tickFmt = opts.tickFmt || ((v) => v.toFixed(1));
   const W = Math.max(card.clientWidth - 32, 280), H = 200;
   const M = { top: 12, right: 76, bottom: 26, left: opts.left || 40 };
@@ -594,12 +714,20 @@ function drawChart(card, series, opts) {
     svg.appendChild(el("text", { x: x(t), y: H - 8, "text-anchor": i === 0 ? "start" : i === nTicks - 1 ? "end" : "middle", class: "axis-text" }, fmtTime(new Date(t))));
   }
 
+  const active = ENGINES.filter((e) => series[e].length);
+  const byLast = [...active].sort((a, b) => {
+    const va = series[a].at(-1).v, vb = series[b].at(-1).v;
+    return opts.lowerIsBetter ? va - vb : vb - va;
+  });
+  const highlight = new Set(byLast.slice(0, 3));
+  if (series[HOME_ENGINE]?.length) highlight.add(HOME_ENGINE);
   const endLabels = [];
-  for (const e of ENGINES) {
+  for (const e of [...active].sort((a, b) => highlight.has(a) - highlight.has(b))) {
     const pts = series[e];
-    if (!pts.length) continue;
+    const hot = highlight.has(e);
     const d = pts.map((p, i) => `${i ? "L" : "M"}${x(p.t.getTime()).toFixed(1)},${y(p.v).toFixed(1)}`).join("");
-    svg.appendChild(el("path", { d, fill: "none", stroke: colorOf(e), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    svg.appendChild(el("path", { d, fill: "none", stroke: hot ? colorOf(e) : "var(--baseline)", "stroke-width": hot ? 2 : 1.25, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    if (!hot) continue;
     const last = pts[pts.length - 1];
     svg.appendChild(el("circle", { cx: x(last.t.getTime()), cy: y(last.v), r: 4, fill: colorOf(e), stroke: "var(--surface-1)", "stroke-width": 2 }));
     endLabels.push({ e, yPos: y(last.v), xPos: x(last.t.getTime()) });
@@ -648,7 +776,7 @@ function drawChart(card, series, opts) {
       hoverDots[e].setAttribute("cx", x(t)); hoverDots[e].setAttribute("cy", y(p.v));
       atT.push({ e, v: p.v });
     }
-    atT.sort((a, b) => b.v - a.v);
+    atT.sort((a, b) => (opts.lowerIsBetter ? a.v - b.v : b.v - a.v));
     for (const { e, v } of atT) {
       const row = el("div", { class: "row" });
       const key = el("span", { class: "key" }); key.style.background = colorOf(e);
@@ -744,11 +872,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics, lastRunOnly = 
     const tr = el("tr");
     markHome(tr, x.e);
     const best = i === 0 && entries.length > 1 ? " best" : "";
-    const nameCell = el("td", { class: best });
-    const key = el("span", { class: "key" });
-    key.style.background = colorOf(x.e);
-    nameCell.append(key, document.createTextNode(x.e));
-    tr.appendChild(nameCell);
+    tr.appendChild(engineCell(x.e, best));
     tr.appendChild(el("td", { class: "num" + best }, fmt3(x.v)));
     for (const v of x.extra) tr.appendChild(el("td", { class: "num" }, v == null ? "–" : fmt3(v)));
     tr.appendChild(el("td", { class: "num" }, String(x.q)));
@@ -781,6 +905,50 @@ function renderLeaderboards(rows) {
     ["set_recall", "set recall"],
     ["stat_score", "stat"],
   ], true);
+}
+
+function renderLatencySummary(rows) {
+  const holder = document.getElementById("latency-summary");
+  holder.replaceChildren();
+  const week = inRange(rows, 7 * 86400e3).filter((r) => r.bench !== "findallmcp");
+  const stats = ENGINES.map((e) => {
+    const er = week.filter((r) => r.engine === e);
+    const raw = er.flatMap((r) => r.lat_ms || []);
+    const p50s = er.map((r) => r.p50_ms).filter((v) => v != null);
+    const p95s = er.map((r) => r.p95_ms).filter((v) => v != null);
+    const errors = er.reduce((s, r) => s + (r.search_errors || 0), 0);
+    const queries = er.reduce((s, r) => s + (r.num_queries || 0), 0);
+    if (!raw.length && !p50s.length) return null;
+    return {
+      e,
+      p50: raw.length ? pctl(raw, 0.5) : pctl(p50s, 0.5),
+      p95: raw.length ? pctl(raw, 0.95) : p95s.length ? pctl(p95s, 0.95) : null,
+      err: queries ? errors / queries : null,
+      n: raw.length,
+    };
+  }).filter(Boolean);
+  if (!stats.length) {
+    holder.appendChild(el("div", { class: "empty" }, "No latency data yet — collected from new runs."));
+    return;
+  }
+  stats.sort((a, b) => a.p50 - b.p50);
+  const table = el("table");
+  const head = el("tr");
+  head.appendChild(el("th", {}, "engine"));
+  for (const h of ["p50", "p95", "error rate", "calls"]) head.appendChild(el("th", { class: "num" }, h));
+  table.appendChild(head);
+  const bestP50 = stats[0].p50;
+  for (const x of stats) {
+    const tr = el("tr");
+    markHome(tr, x.e);
+    tr.appendChild(engineCell(x.e));
+    tr.appendChild(el("td", { class: "num" + (x.p50 === bestP50 && stats.length > 1 ? " best" : "") }, fmtMs(x.p50)));
+    tr.appendChild(el("td", { class: "num" }, fmtMs(x.p95)));
+    tr.appendChild(el("td", { class: "num" }, x.err == null ? "–" : `${(x.err * 100).toFixed(1)}%`));
+    tr.appendChild(el("td", { class: "num" }, x.n ? String(x.n) : "–"));
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
 }
 
 function renderFields(latest) {
@@ -879,11 +1047,8 @@ function overlapMatrix(holder, engines, cellFor) {
   table.appendChild(head);
   for (const a of engines) {
     const tr = el("tr");
-    const nameCell = el("td");
+    const nameCell = engineCell(a);
     markHome(nameCell, a);
-    const key = el("span", { class: "key" });
-    key.style.background = colorOf(a);
-    nameCell.append(key, document.createTextNode(a));
     tr.appendChild(nameCell);
     for (const b of engines) {
       const cell = a === b ? null : cellFor(a, b);
@@ -998,10 +1163,17 @@ function renderSharingGraph(holder, engines, pairs, uniqAgg) {
     const [borrower, source] = ua >= ub ? [a, b] : [b, a];
     edges.push({ borrower, source, share, tie: Math.abs(ua - ub) < GRAPH_TIE_GAP });
   }
+  const card = holder.closest(".card");
+  card._mdRows = null;
   if (!edges.length) {
     holder.appendChild(el("div", { class: "empty" }, `No pairs above ${fmtPct(GRAPH_MIN_SHARE)} yet.`));
     return;
   }
+  card._mdRows = () => [
+    ["source", "dir", "borrower", "share of queries", "source uniqueness", "borrower uniqueness"],
+    ...edges.map((d) => [d.source, d.tie ? "↔" : "→", d.borrower, fmtPct(d.share),
+      fmtPct(uniqPct(d.source)), fmtPct(uniqPct(d.borrower))]),
+  ];
   const adj = new Map();
   for (const d of edges) {
     for (const [x, y] of [[d.borrower, d.source], [d.source, d.borrower]]) {
@@ -1110,10 +1282,7 @@ function renderUniqueness(agg) {
     const pct = unique / total;
     const tr = el("tr");
     markHome(tr, e);
-    const nameCell = el("td");
-    const key = el("span", { class: "key" });
-    key.style.background = colorOf(e);
-    nameCell.append(key, document.createTextNode(e));
+    const nameCell = engineCell(e);
     const barCell = el("td");
     const track = el("span", { class: "bar-track" });
     const fill = el("span", { class: "bar-fill" });
@@ -1352,9 +1521,16 @@ async function renderRunDetail(runs) {
     else if (benchSel.value === "scholar") renderScholarRun(holder, report, engineSel.value);
     else if (benchSel.value === "legal") renderLegalRun(holder, report, engineSel.value);
     else if (benchSel.value === "findallmcp") renderFindallmcpRun(holder, report, engineSel.value);
-    else renderFreshstreamRun(holder, report, engineSel.value); // freshstream + rarestream share the RBP shape
+    else renderFreshstreamRun(holder, report, engineSel.value);
     if (!holder.children.length) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
+    } else {
+      const cfg = [];
+      if (report.judge_model) cfg.push(`judge ${report.judge_model}`);
+      if (report.agent_model) cfg.push(`agent ${report.agent_model}`);
+      if (report.num_results) cfg.push(`top-${report.num_results} requested`);
+      if (report.budgets_usd?.length) cfg.push(`budgets ${report.budgets_usd.map((b) => `$${b.toFixed(2)}`).join(" ")}`);
+      if (cfg.length) holder.prepend(el("div", { class: "sub" }, cfg.join(" · ")));
     }
   } catch (err) {
     if (seq !== runDetailSeq) return;
@@ -1375,7 +1551,6 @@ async function initRunBrowser() {
   }
   for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, e));
 
-  // the run list is scoped to the chosen benchmark, latest first, latest selected
   function populateRuns() {
     const artifact = RUN_ARTIFACT[benchSel.value];
     const matching = runs.filter((r) => r.artifacts.includes(artifact));
@@ -1432,7 +1607,7 @@ function drawCharts(rows) {
     const lat = latencySeries(rows, p, metric);
     const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((q) => q.v))));
     drawChart(document.getElementById(`card-latency-${name}`), lat,
-      { domain: sc.domain, ticks: sc.ticks, fmt: fmtMs, tickFmt: fmtMs, left: 56,
+      { domain: sc.domain, ticks: sc.ticks, fmt: fmtMs, tickFmt: fmtMs, left: 56, lowerIsBetter: true,
         label: `${name} search latency over time per engine, 6-hour windows`,
         empty: "No latency data yet — collected from new runs." });
   }
@@ -1459,7 +1634,55 @@ function renderLegend() {
     item.append(key, document.createTextNode(e));
     legend.appendChild(item);
   }
+  if (ENGINES.length > 4) {
+    const note = el("span", {}, "charts color the top 3 engines + keenable; the rest are dimmed (hover for values)");
+    note.style.color = "var(--text-muted)";
+    legend.appendChild(note);
+  }
 }
+
+function rowsToMarkdown(rows) {
+  const esc = (c) => String(c).replace(/\s+/g, " ").trim().replace(/\|/g, "\\|");
+  const lines = [`| ${rows[0].map(esc).join(" | ")} |`, `| ${rows[0].map(() => "---").join(" | ")} |`];
+  for (const r of rows.slice(1)) lines.push(`| ${r.map(esc).join(" | ")} |`);
+  return lines.join("\n");
+}
+
+function buildMarkdown() {
+  const clean = (s) => s.replace(/\s+/g, " ").trim();
+  const lines = ["# keenbench — search engine benchmarks"];
+  const updated = document.getElementById("updated").textContent;
+  if (updated) lines.push("", updated);
+  for (const card of document.querySelectorAll(".wrap .card")) {
+    if (card.closest("#card-runs")) continue;
+    const table = card.querySelector("table");
+    const rows = table
+      ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
+      : card._mdRows?.();
+    const prose = rows ? [] : [...card.querySelectorAll(".prose p")];
+    if (!rows && !prose.length) continue;
+    lines.push("", `## ${card.querySelector("h2").textContent}`);
+    const sub = clean(card.querySelector(".sub")?.textContent || "");
+    if (sub) lines.push("", sub);
+    if (rows) lines.push("", rowsToMarkdown(rows));
+    else for (const p of prose) lines.push("", clean(p.textContent));
+  }
+  return lines.join("\n") + "\n";
+}
+
+document.getElementById("export-md").addEventListener("click", () => {
+  const blob = new Blob([buildMarkdown()], { type: "text/plain;charset=utf-8" });
+  window.open(URL.createObjectURL(blob));
+});
+document.getElementById("export-pdf").addEventListener("click", () => window.print());
+let themeBeforePrint = null;
+window.addEventListener("beforeprint", () => {
+  themeBeforePrint = document.documentElement.dataset.theme;
+  document.documentElement.dataset.theme = "light";
+});
+window.addEventListener("afterprint", () => {
+  document.documentElement.dataset.theme = themeBeforePrint;
+});
 
 document.getElementById("theme-toggle").addEventListener("click", () => {
   const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
@@ -1494,6 +1717,7 @@ async function main() {
   }
 
   renderLeaderboards(history);
+  renderLatencySummary(history);
   renderAll(latestCompanyfill);
   const uniqAgg = uniquenessAgg(uniquenessRows);
   renderOverlap(overlapRows, uniqAgg);
