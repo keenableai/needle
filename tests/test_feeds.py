@@ -143,6 +143,47 @@ def test_pick_per_feed_paper_window_is_wider():
     assert len(pick_per_feed(items, now=now)) == 1
 
 
+def _feed_item(feed, age_minutes, *, now, title):
+    return {
+        "parent_site": feed,
+        "source_kind": "rss_news",
+        "lastmod_or_pub_at": _rfc822(now - timedelta(minutes=age_minutes)),
+        "title": title,
+    }
+
+
+def test_pick_per_feed_backfills_youngest_stale_up_to_min_candidates():
+    now = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
+    items = [
+        _feed_item("https://a/feed", 10, now=now, title="fresh"),
+        _feed_item("https://b/feed", 180, now=now, title="stale-3h"),
+        _feed_item("https://c/feed", 90, now=now, title="stale-90m"),
+        _feed_item("https://d/feed", 300, now=now, title="stale-5h"),
+    ]
+    picked = pick_per_feed(items, now=now, min_candidates=3)
+    assert [r["title"] for r in picked] == ["fresh", "stale-90m", "stale-3h"]
+
+
+def test_pick_per_feed_no_backfill_when_window_is_enough():
+    now = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
+    items = [
+        _feed_item("https://a/feed", 10, now=now, title="fresh"),
+        _feed_item("https://b/feed", 90, now=now, title="stale"),
+    ]
+    picked = pick_per_feed(items, now=now, min_candidates=1)
+    assert [r["title"] for r in picked] == ["fresh"]
+
+
+def test_pick_per_feed_backfill_keeps_one_per_feed():
+    now = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
+    items = [
+        _feed_item("https://a/feed", 90, now=now, title="younger-stale"),
+        _feed_item("https://a/feed", 120, now=now, title="older-stale"),
+    ]
+    picked = pick_per_feed(items, now=now, min_candidates=5)
+    assert [r["title"] for r in picked] == ["younger-stale"]
+
+
 def test_pick_per_feed_drops_unparseable_dates():
     now = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
     items = [

@@ -70,6 +70,7 @@ class Freshstream:
         max_rows_per_source: int = 50,
         fetch_concurrency: int = 15,
         llm_concurrency: int = 8,
+        min_candidates: int = 30,
     ) -> None:
         if source not in ("rss", "trending"):
             raise SystemExit(f"error: unsupported --source {source!r} (known: rss, trending)")
@@ -81,6 +82,7 @@ class Freshstream:
                     ("--feeds", feeds is not None),
                     ("--fetch-concurrency", fetch_concurrency != 15),
                     ("--max-rows-per-source", max_rows_per_source != 50),
+                    ("--min-candidates", min_candidates != 30),
                 )
                 if used
             ]
@@ -139,6 +141,7 @@ class Freshstream:
                     fetch_concurrency=max(1, fetch_concurrency),
                     llm_concurrency=llm_concurrency,
                     max_rows_per_source=max_rows_per_source,
+                    min_candidates=max(0, min_candidates),
                 )
 
         async def _go():

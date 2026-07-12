@@ -299,17 +299,30 @@ async def fetch_all_sources(
     return items, healths
 
 
-def pick_per_feed(items: list[dict[str, Any]], *, now: datetime) -> list[dict[str, Any]]:
+def pick_per_feed(
+    items: list[dict[str, Any]], *, now: datetime, min_candidates: int = 0
+) -> list[dict[str, Any]]:
     by_feed: dict[str, tuple[float, dict[str, Any]]] = {}
     for r in items:
         source_kind = str(r.get("source_kind") or "")
         if source_kind not in RSS_KINDS:
             continue
         age = published_age_seconds(r.get("lastmod_or_pub_at"), now=now)
-        if age is None or age > _query_max_age_for_kind(source_kind).total_seconds():
+        if age is None:
             continue
         parent = str(r.get("parent_site") or "")
         prev = by_feed.get(parent)
         if prev is None or age < prev[0]:
             by_feed[parent] = (age, r)
-    return [r for _, r in by_feed.values()]
+
+    fresh: list[dict[str, Any]] = []
+    stale: list[tuple[float, dict[str, Any]]] = []
+    for age, r in by_feed.values():
+        if age <= _query_max_age_for_kind(str(r["source_kind"])).total_seconds():
+            fresh.append(r)
+        else:
+            stale.append((age, r))
+    if len(fresh) < min_candidates:
+        stale.sort(key=lambda t: t[0])
+        fresh.extend(r for _, r in stale[: min_candidates - len(fresh)])
+    return fresh
