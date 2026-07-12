@@ -573,11 +573,24 @@ function el(tag, attrs, text) {
 function drawChart(card, series, opts) {
   card.querySelectorAll("svg, .tooltip, .empty").forEach((n) => n.remove());
   const points = ENGINES.flatMap((e) => series[e]);
+  card._mdRows = null;
   if (!points.length) {
     card.appendChild(el("div", { class: "empty" }, opts.empty || "No data yet — first scheduled run pending."));
     return;
   }
   const fmt = opts.fmt || fmt3;
+  card._mdRows = () => {
+    const engines = ENGINES.filter((e) => series[e].length);
+    const stamps = [...new Set(points.map((p) => p.t.getTime()))].sort((a, b) => a - b);
+    const rows = [["time (UTC)", ...engines]];
+    for (const t of stamps) {
+      rows.push([fmtTime(new Date(t)), ...engines.map((e) => {
+        const p = series[e].find((q) => q.t.getTime() === t);
+        return p ? fmt(p.v) : "–";
+      })]);
+    }
+    return rows;
+  };
   const tickFmt = opts.tickFmt || ((v) => v.toFixed(1));
   const W = Math.max(card.clientWidth - 32, 280), H = 200;
   const M = { top: 12, right: 76, bottom: 26, left: opts.left || 40 };
@@ -1010,10 +1023,17 @@ function renderSharingGraph(holder, engines, pairs, uniqAgg) {
     const [borrower, source] = ua >= ub ? [a, b] : [b, a];
     edges.push({ borrower, source, share, tie: Math.abs(ua - ub) < GRAPH_TIE_GAP });
   }
+  const card = holder.closest(".card");
+  card._mdRows = null;
   if (!edges.length) {
     holder.appendChild(el("div", { class: "empty" }, `No pairs above ${fmtPct(GRAPH_MIN_SHARE)} yet.`));
     return;
   }
+  card._mdRows = () => [
+    ["source", "dir", "borrower", "share of queries", "source uniqueness", "borrower uniqueness"],
+    ...edges.map((d) => [d.source, d.tie ? "↔" : "→", d.borrower, fmtPct(d.share),
+      fmtPct(uniqPct(d.source)), fmtPct(uniqPct(d.borrower))]),
+  ];
   const adj = new Map();
   for (const d of edges) {
     for (const [x, y] of [[d.borrower, d.source], [d.source, d.borrower]]) {
@@ -1472,11 +1492,10 @@ function renderLegend() {
   }
 }
 
-function tableToMarkdown(table) {
-  const rows = [...table.querySelectorAll("tr")].map((tr) =>
-    [...tr.children].map((c) => c.textContent.replace(/\s+/g, " ").trim().replace(/\|/g, "\\|")));
-  const lines = [`| ${rows[0].join(" | ")} |`, `| ${rows[0].map(() => "---").join(" | ")} |`];
-  for (const r of rows.slice(1)) lines.push(`| ${r.join(" | ")} |`);
+function rowsToMarkdown(rows) {
+  const esc = (c) => String(c).replace(/\s+/g, " ").trim().replace(/\|/g, "\\|");
+  const lines = [`| ${rows[0].map(esc).join(" | ")} |`, `| ${rows[0].map(() => "---").join(" | ")} |`];
+  for (const r of rows.slice(1)) lines.push(`| ${r.map(esc).join(" | ")} |`);
   return lines.join("\n");
 }
 
@@ -1485,12 +1504,16 @@ function buildMarkdown() {
   const updated = document.getElementById("updated").textContent;
   if (updated) lines.push("", updated);
   for (const card of document.querySelectorAll(".wrap .card")) {
+    if (card.closest("#card-runs")) continue;
     const table = card.querySelector("table");
-    if (!table || card.closest("#card-runs")) continue;
+    const rows = table
+      ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
+      : card._mdRows?.();
+    if (!rows) continue;
     lines.push("", `## ${card.querySelector("h2").textContent}`);
     const sub = card.querySelector(".sub")?.textContent.replace(/\s+/g, " ").trim();
     if (sub) lines.push("", sub);
-    lines.push("", tableToMarkdown(table));
+    lines.push("", rowsToMarkdown(rows));
   }
   return lines.join("\n") + "\n";
 }
