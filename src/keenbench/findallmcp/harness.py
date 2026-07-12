@@ -188,12 +188,15 @@ async def _run_task_inner(
                     streamablehttp_client(spec.url, headers=spec.headers or None)
                 )
             session = await stack.enter_async_context(ClientSession(read, write))
-            await session.initialize()
+            init = await session.initialize()
             listed = await session.list_tools()
+            system_prompt = SYSTEM_PROMPT.format(budget=budget.limit_usd)
+            if init.instructions:
+                system_prompt = f"{init.instructions.strip()}\n\n{system_prompt}"
             agent = Agent(
                 llm,
                 [_guard_registry(t) for t in mcp_tools_from_session(session, listed.tools)],
-                SYSTEM_PROMPT.format(budget=budget.limit_usd),
+                system_prompt,
                 max_steps=max_turns,
             )
             result = await agent.run(prompt, budget=budget)
