@@ -136,7 +136,7 @@ class FindallMcp:
         queries: str,
         out: str = "-",
         backends: str | tuple[str, ...] = "keenable,webql",
-        budget_usd: float | str | tuple[float, ...] = 0.25,
+        budget_usd: float | str | tuple[float, ...] = 1.0,
         agent_model: str | None = None,
         max_turns: int = 20,
         concurrency: int = 2,

@@ -445,7 +445,7 @@ search, not from re-querying the gold source.
 
 ```bash
 keenbench findallmcp run --queries findallmcp.jsonl --backends keenable,webql \
-  --budget-usd 0.25 --out findallmcp.json
+  --budget-usd 1.0 --out findallmcp.json
 ```
 
 Backends are MCP servers:
@@ -590,7 +590,7 @@ from keenbench.shared.llm import OpenRouterClient
 
 llm = OpenRouterClient(api_key="sk-or-...", model="anthropic/claude-sonnet-5", timeout_s=180.0)
 agent = Agent(llm, tools, system_prompt, max_steps=20)
-budget = RunBudget(limit_usd=0.25, in_price_per_mtok=3.0, out_price_per_mtok=15.0,
+budget = RunBudget(limit_usd=1.0, in_price_per_mtok=3.0, out_price_per_mtok=15.0,
                    tool_cost=lambda name: 0.005)
 result = await agent.run(task_prompt, budget=budget)
 ```
