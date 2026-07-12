@@ -1,9 +1,13 @@
 from typing import Any
 
+from keenbench.shared.judge import complete_parsed
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.prompts import render_prompt
 
 ANSWER_TEMPLATE = "answer_match.jinja"
+VERDICT_RETRY_SUFFIX = (
+    "\n\nYour previous reply could not be parsed. Answer with a single word: yes or no."
+)
 
 
 def build_answer_prompt(
@@ -58,10 +62,6 @@ async def judge_answer(
         url=url,
         snippet=snippet,
     )
-    text, err = await llm.complete(prompt, max_tokens=8192, reasoning_effort="minimal")
-    if err is not None:
-        return None, err
-    verdict = parse_verdict(text)
-    if verdict is None:
-        return None, {"error_type": "judge_parse_error", "error_message": (text or "")[:500]}
-    return verdict, None
+    return await complete_parsed(
+        llm, prompt, parse_verdict, retry_suffix=VERDICT_RETRY_SUFFIX, max_tokens=8192
+    )
