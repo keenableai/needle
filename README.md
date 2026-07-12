@@ -178,8 +178,8 @@ full-text search over curated 8-K phrases, plus an S-1 count), **`fedreg`**
 **`github`** (repos created over 30 days, star-thresholded, plus a ≥300-star
 count), **`cpsc`** (consumer product recalls via the keyless saferproducts.gov
 API, window-thresholded, plus a count), and **`awards`** (US federal contract
-recipients over an auto-picked dollar threshold via the keyless USAspending
-API, plus a ≥$100M count). Suites are chosen so no single open-web page
+recipients over an auto-picked obligated-dollar threshold via the keyless
+USAspending API). Suites are chosen so no single open-web page
 enumerates the population — the answer must be assembled from scattered
 coverage. Each suite's registry endpoints are blocked in the agent's tool
 path (`BLOCKED_REGISTRIES` in `harness.py`) so answers must come from

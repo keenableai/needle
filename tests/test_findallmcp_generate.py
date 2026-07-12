@@ -58,15 +58,11 @@ class FakeCpsc:
 
 
 class FakeUsaspending:
-    def __init__(self, awards, count):
+    def __init__(self, awards):
         self._awards = awards
-        self._count = count
 
     async def awards(self, *, since, until, min_amount, limit=100):
         return [a for a in self._awards if a["amount"] >= min_amount][:limit]
-
-    async def award_count(self, *, since, until, min_amount):
-        return self._count
 
 
 class FakeGithub:
@@ -112,19 +108,10 @@ async def test_awards_tasks_descend_amount_ladder_and_dedupe_recipients():
         {"id": f"A{i}", "name": "Mega Contractor LLC" if i < 2 else f"Vendor {i} Inc", "amount": 2_500_000_000}
         for i in range(3)
     ] + [{"id": f"B{i}", "name": f"Builder {i} Corp", "amount": 600_000_000} for i in range(9)]
-    tasks = await awards_tasks(FakeUsaspending(awards, count=25), now=NOW)
-    enum = [t for t in tasks if t.bucket == "enumerate"]
-    assert len(enum) == 1
-    assert "at least $500 million" in enum[0].prompt
-    assert len(enum[0].entities) == 11
-    stat = next(t for t in tasks if t.bucket == "stat")
-    assert stat.stat_value == 25.0
-
-
-async def test_awards_tasks_skip_stat_when_count_too_small():
-    awards = [{"id": f"B{i}", "name": f"Builder {i} Corp", "amount": 600_000_000} for i in range(9)]
-    tasks = await awards_tasks(FakeUsaspending(awards, count=5), now=NOW)
+    tasks = await awards_tasks(FakeUsaspending(awards), now=NOW)
     assert [t.bucket for t in tasks] == ["enumerate"]
+    assert "at least $500 million" in tasks[0].prompt
+    assert len(tasks[0].entities) == 11
 
 
 async def test_github_tasks_descend_past_underfilled_thresholds():

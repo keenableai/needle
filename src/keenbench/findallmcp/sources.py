@@ -13,7 +13,6 @@ FEDREG_DOCS = "https://www.federalregister.gov/api/v1/documents.json"
 GITHUB_SEARCH = "https://api.github.com/search/repositories"
 CPSC_RECALLS = "https://www.saferproducts.gov/RestWebServices/Recall"
 USASPENDING_SEARCH = "https://api.usaspending.gov/api/v2/search/spending_by_award/"
-USASPENDING_COUNT = "https://api.usaspending.gov/api/v2/search/spending_by_award_count/"
 
 HN_POINT_LADDER = (500, 400, 300, 250, 200, 150)
 STAR_LADDER = (5000, 3000, 2000, 1000, 500)
@@ -194,17 +193,6 @@ class UsaspendingClient(HttpSearchClient):
             if name:
                 out.append({"id": str(r.get("Award ID") or ""), "name": name})
         return out
-
-    async def award_count(self, *, since: date, until: date, min_amount: int) -> int | None:
-        body = {"filters": self._filters(since, until, min_amount)}
-        payload, err = await self._request_json(
-            "POST", USASPENDING_COUNT, json=body, headers={"User-Agent": USER_AGENT}
-        )
-        if err is not None or not isinstance(payload, dict):
-            return None
-        count = (payload.get("results") or {}).get("contracts")
-        return int(count) if isinstance(count, int) else None
-
 
 class FedRegClient(HttpSearchClient):
     async def rule_count(self, *, agency: str, start: date, end: date) -> int | None:
@@ -458,23 +446,6 @@ async def awards_tasks(client: UsaspendingClient, *, now: datetime) -> list[Task
             )
         )
         break
-    count = await client.award_count(since=since, until=until, min_amount=100_000_000)
-    if count is not None and count >= 10:
-        tasks.append(
-            Task(
-                suite="awards",
-                bucket="stat",
-                prompt=(
-                    f"How many US federal contracts with at least $100 million actually "
-                    f"obligated (funds committed on the contract, NOT the ceiling or "
-                    f"potential total value) were signed {window}? "
-                    'Respond with JSON only: {"value": <integer>}'
-                ),
-                stat_value=float(count),
-                stat_rel_tol=0.25,
-                provenance={"since": since.isoformat(), "min_amount": 100_000_000},
-            )
-        )
     return tasks
 
 
