@@ -2,13 +2,11 @@ name: Bench
 
 on:
   schedule:
-    # daily benches get one hour each so their public-API load (SEC, arXiv,
-    # EuropePMC, CourtListener, eCFR) and search quotas never stack in one run
-    - cron: "17 0 * * *" # freshstream + companyfill (fresh gold)
-    - cron: "17 6 * * *" # freshstream + rarestream
-    - cron: "17 12 * * *" # freshstream + scholar (fresh gold)
-    - cron: "17 18 * * *" # freshstream + legal (fresh gold)
-    - cron: "17 1-5,7-11,13-17,19-23 * * *" # hourly: freshstream only
+    - cron: "17 0 * * *"
+    - cron: "17 6 * * *"
+    - cron: "17 12 * * *"
+    - cron: "17 18 * * *"
+    - cron: "17 1-5,7-11,13-17,19-23 * * *"
   workflow_dispatch:
     inputs:
       companyfill:
@@ -56,8 +54,6 @@ env:
   YOU_API_KEY: ${{ secrets.YOU_API_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/keenbench-results
-  # extend the comparison here once the engine exists in the registry
-  # (src/keenbench/shared/search/factory.py) and its key is a secret above
   ENGINES: keenable,exa,google,bing,brave,parallel,tavily,perplexity,octen,ceramic,you
 
 jobs:
@@ -88,7 +84,6 @@ jobs:
 
       - name: companyfill (daily schedule, dispatch opt-in, or gold bootstrap)
         env:
-          # gate on why the run fired, not the runner's clock — cron fire times drift
           RUN_COMPANYFILL: ${{ github.event.schedule == '17 0 * * *' || inputs.companyfill == true }}
         run: |
           if [ "$RUN_COMPANYFILL" != "true" ] && [ -s site-data/data/gold.jsonl ]; then
@@ -154,9 +149,6 @@ jobs:
 
       - name: Publish
         run: |
-          # backfills recent HF-archived runs into overlap.jsonl; 24h lookback
-          # keeps this hourly step cheap (run without --hours once to seed all
-          # history). No-op once caught up; non-fatal so HF can't block publish.
           uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
           TS=$(date -u +%Y-%m-%dT%H:%MZ)
           args="--site site-data --runs-out staged --ts $TS --rbp rbp.json --fresh fresh.jsonl"
@@ -176,8 +168,6 @@ jobs:
             args="$args --findallmcp findallmcp.json --findallmcp-queries findallmcp.jsonl"
           fi
           uv run python scripts/publish_bench.py $args
-          # staged/ holds exactly this run's <id>/ dir, so the run id has one owner
-          # (publish_bench.py); upload before the gh-pages push so runs.json never dangles
           uvx --from huggingface_hub hf upload "$HF_DATASET" staged runs \
             --repo-type dataset --commit-message "bench: $TS"
           cp dashboard/index.html site-data/index.html
@@ -189,8 +179,6 @@ jobs:
           git commit -m "bench: $TS" || echo "nothing to publish"
           git push
 
-  # Deploy through the shared Deploy Pages workflow so there is one deploy
-  # definition (also dispatchable on its own for a frontend-only redeploy).
   deploy-pages:
     needs: bench
     permissions:

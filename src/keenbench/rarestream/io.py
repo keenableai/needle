@@ -9,7 +9,6 @@ from keenbench.shared.io import write_jsonl
 
 
 def resolve_dataset(queries: str | None, dataset: str, path: str) -> str:
-    """A local --queries path if given, else the dataset file downloaded from HF."""
     if queries is not None:
         return queries
     return hf_hub_download(dataset, path, repo_type="dataset")
@@ -17,7 +16,6 @@ def resolve_dataset(queries: str | None, dataset: str, path: str) -> str:
 
 def iter_rows(path: str) -> Iterator[dict]:
     if path.endswith(".parquet"):
-        # stream in batches so a multi-million-row source isn't fully materialized
         for batch in pq.ParquetFile(path).iter_batches():
             yield from batch.to_pylist()
         return
@@ -29,7 +27,6 @@ def iter_rows(path: str) -> Iterator[dict]:
 
 
 def _cell(v: object) -> object:
-    # parquet can't infer list/dict columns cleanly, so serialize non-scalars
     if v is None or isinstance(v, str | int | float | bool):
         return v
     return json.dumps(v, ensure_ascii=False)

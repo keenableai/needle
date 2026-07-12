@@ -43,7 +43,6 @@ def _load_query_rows(path: str) -> list[dict]:
         elif isinstance(obj, str):
             rows.append({"query_text": obj, "topical_domain": "other"})
         else:
-            # plain-text query that happens to parse as a JSON scalar (e.g. "1984")
             rows.append({"query_text": line, "topical_domain": "other"})
     return rows
 

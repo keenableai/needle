@@ -1,5 +1,3 @@
-"""Scaffolding shared by the benchmark CLIs (flag parsing, errors-to-SystemExit)."""
-
 import asyncio
 import json
 import os
@@ -105,11 +103,6 @@ def run_rbp_eval(
     judge_model: str | None = None,
     judge_concurrency: int = 8,
 ) -> None:
-    """Score each engine with RBP@k via the LLM judge, write the report, print a summary.
-
-    Shared by the RBP-based benches (freshstream, rarestream); the caller builds the
-    EvalQuery list (each bench derives ``today`` differently) and passes it in.
-    """
     openrouter_key = os.environ.get("OPENROUTER_API_KEY")
     if not openrouter_key:
         raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for the judge)")

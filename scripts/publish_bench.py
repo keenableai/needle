@@ -1,16 +1,3 @@
-"""Publish a bench run: summaries to gh-pages, full artifacts staged for the HF dataset.
-
-gh-pages gets the small, append-only files the dashboard reads directly
-(history.jsonl, latest_*.json, runs.json); the full per-run reports are
-written to --runs-out/<run_id>/ for upload to the public HF dataset
-(keenable-ai/keenbench-results), which the judgement browser fetches.
-
-Usage: uv run python scripts/publish_bench.py --site <gh-pages checkout>
-           --runs-out <staging dir> [--rbp rbp.json] [--fresh fresh.jsonl]
-           [--recall recall.json] [--gold gold.jsonl] [--rarestream rarestream.json]
-           [--findallmcp findallmcp.json] [--ts 2026-07-02T14:17Z]
-"""
-
 import json
 from datetime import UTC, datetime
 from pathlib import Path

@@ -1,9 +1,3 @@
-"""Engine registry: adding an engine = one client class + one EngineSpec entry.
-
-Per-engine tuning comes from env vars (not CLI flags), so the CLIs stay at a
-single `--engines a,b,c` flag no matter how many engines exist.
-"""
-
 import os
 from collections.abc import Callable, Iterable
 from dataclasses import dataclass
@@ -26,8 +20,6 @@ from keenbench.shared.search.you import YouClient
 class EngineSpec:
     key_env: str
     key_required: bool
-    # (api_key, snippet_chars) -> client; snippet_chars caps retrieval-side
-    # evidence for engines that support it (0 = engine default)
     build: Callable[[str | None, int], SearchClient]
 
 

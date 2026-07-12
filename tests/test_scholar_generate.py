@@ -2,14 +2,26 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from keenbench.scholar.generate import _subwindow_count, _subwindows, run_generate
+from keenbench.scholar.generate import (
+    ARXIV_DOMAINS,
+    MAX_SUBWINDOWS,
+    _subwindow_count,
+    _subwindows,
+    run_generate,
+)
 from keenbench.scholar.models import Paper
 
 
-def test_subwindow_count_scales_with_candidates_and_span():
-    assert _subwindow_count("7d", 21) == 7  # narrow bucket: capped by 7-day span
-    assert _subwindow_count("1y", 21) == 21  # one window per candidate
-    assert _subwindow_count("1y", 40) == 24  # capped at MAX_SUBWINDOWS
+def test_subwindow_count_capped_by_bucket_span_days():
+    assert _subwindow_count("7d", 21) == 7
+
+
+def test_subwindow_count_one_window_per_candidate():
+    assert _subwindow_count("1y", 21) == 21
+
+
+def test_subwindow_count_capped_at_max_subwindows():
+    assert _subwindow_count("1y", 40) == MAX_SUBWINDOWS
 
 
 def test_subwindows_span_the_bucket_range():
@@ -18,11 +30,14 @@ def test_subwindows_span_the_bucket_range():
     assert len(wins) == 6
     for fr, to in wins:
         assert fr < to
-    # contiguous (windows ordered newest-first: each from_date meets the next to_date)
-    for i in range(len(wins) - 1):
-        assert wins[i][0] == wins[i + 1][1]
     assert min(w[0] for w in wins) == (now - timedelta(days=364)).date().isoformat()
     assert max(w[1] for w in wins) == (now - timedelta(days=31)).date().isoformat()
+
+
+def test_subwindows_contiguous_newest_first():
+    wins = _subwindows("1y", now=datetime(2026, 7, 2, tzinfo=UTC), count=6)
+    for newer, older in zip(wins, wins[1:], strict=False):
+        assert newer[0] == older[1]
 
 
 NOW = datetime(2026, 7, 2, 12, 0, tzinfo=UTC)
@@ -101,7 +116,7 @@ async def test_paired_rows_are_50_50():
 
 async def test_paper_dropped_when_body_fails():
     papers = [_paper(i, "computer science", datetime(2026, 7, 1, tzinfo=UTC)) for i in range(3)]
-    bodies = {"2607.00000": "body 2607.00000", "2607.00001": "body 2607.00001"}  # third: no body
+    bodies = {p.arxiv_id: f"body {p.arxiv_id}" for p in papers[:2]}
     arxiv = FakeArxiv({"computer science": papers}, bodies)
     llm = FakeLLM({p.arxiv_id: f"distinct anchor beta {p.arxiv_id}" for p in papers})
     rows, stats = await _run(arxiv, llm, per_cell=5)
@@ -114,10 +129,11 @@ async def test_leak_and_no_query_drop_the_paper():
     papers = [_paper(i, "computer science", datetime(2026, 7, 1, tzinfo=UTC)) for i in range(3)]
     bodies = {p.arxiv_id: f"body {p.arxiv_id}" for p in papers}
     arxiv = FakeArxiv({"computer science": papers}, bodies)
+    query_of_title_tokens_only = "sparse quantization transformer"
     llm = FakeLLM(
         {
             "body 2607.00000": "distinct anchor beta gamma",
-            "body 2607.00001": "sparse quantization transformer",  # all metadata tokens -> leak
+            "body 2607.00001": query_of_title_tokens_only,
             "body 2607.00002": "NO_DISTINCT_QUERY",
         }
     )
@@ -171,8 +187,7 @@ async def test_short_cell_reported():
     llm = FakeLLM({"body 2607.00000": "distinct anchor beta gamma"})
     _, stats = await _run(arxiv, llm, per_cell=5)
     assert stats.papers == 1
-    # 4 arxiv domain cells; only computer science has a (single, under-target) paper
-    assert stats.short_cells == 4
+    assert stats.short_cells == len(ARXIV_DOMAINS)
 
 
 if __name__ == "__main__":
