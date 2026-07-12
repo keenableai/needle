@@ -1,4 +1,5 @@
 from keenbench.shared.judge import (
+    PARSE_RETRY_SUFFIX,
     build_judge_prompt,
     build_user_message,
     judge_one,
@@ -13,7 +14,7 @@ class FakeLLM:
 
     async def complete(self, prompt, *, max_tokens, reasoning_effort):
         self.prompts.append(prompt)
-        return self.replies.pop(0) if len(self.replies) > 1 else self.replies[0]
+        return self.replies.pop(0)
 
 
 def test_parse_plain_yaml():
@@ -94,14 +95,10 @@ def test_build_judge_prompt_includes_system_rules():
     assert "**Query**: q" in prompt
 
 
-async def test_judge_one_success_and_parse_error():
+async def test_judge_one_success_and_llm_error():
     ok = FakeLLM(("rating: 3\nlabel: HM\nreasoning: r", None))
     j, err = await judge_one(ok, "q", url="https://e", today="2026-07-01")
     assert err is None and j.rating == 3
-
-    bad = FakeLLM(("i refuse to answer", None))
-    j, err = await judge_one(bad, "q", url="https://e", today="2026-07-01")
-    assert j is None and err["error_type"] == "judge_parse_error"
 
     errored = FakeLLM((None, {"error_type": "http_error", "error_message": "500"}))
     j, err = await judge_one(errored, "q", url="https://e", today="2026-07-01")
@@ -113,13 +110,12 @@ async def test_judge_one_retries_parse_error_with_format_reminder():
     llm = FakeLLM(("i refuse to answer", None), ("rating: 2\nlabel: SM\nreasoning: r", None))
     j, err = await judge_one(llm, "q", url="https://e", today="2026-07-01")
     assert err is None and j.rating == 2
-    assert len(llm.prompts) == 2
-    assert llm.prompts[1].startswith(llm.prompts[0])
-    assert llm.prompts[1] != llm.prompts[0]
+    assert llm.prompts[1] == llm.prompts[0] + PARSE_RETRY_SUFFIX
 
 
 async def test_judge_one_gives_up_after_one_parse_retry():
-    llm = FakeLLM(("i refuse to answer", None))
+    llm = FakeLLM(("i refuse to answer", None), ("still not yaml", None))
     j, err = await judge_one(llm, "q", url="https://e", today="2026-07-01")
     assert j is None and err["error_type"] == "judge_parse_error"
+    assert err["error_message"] == "still not yaml"
     assert len(llm.prompts) == 2

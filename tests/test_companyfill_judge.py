@@ -90,8 +90,9 @@ async def test_judge_answer_verdicts_and_errors():
     )
     assert verdict is True and err is None
 
+    llm = FakeJudgeLLM(["gibberish"])
     verdict, err = await judge_answer(
-        FakeJudgeLLM(["gibberish"]),
+        llm,
         query_text="q",
         field="ceo",
         value="x",
@@ -101,6 +102,23 @@ async def test_judge_answer_verdicts_and_errors():
         snippet="s",
     )
     assert verdict is None and err["error_type"] == "judge_parse_error"
+    assert len(llm.prompts) == 2
+
+
+async def test_judge_answer_retries_parse_error():
+    llm = FakeJudgeLLM(["gibberish", "no"])
+    verdict, err = await judge_answer(
+        llm,
+        query_text="q",
+        field="ceo",
+        value="x",
+        aliases=(),
+        title=None,
+        url="https://a.com",
+        snippet="s",
+    )
+    assert verdict is False and err is None
+    assert len(llm.prompts) == 2
 
 
 async def test_judge_upgrades_deterministic_miss():
