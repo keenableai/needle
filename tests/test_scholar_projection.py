@@ -8,19 +8,24 @@ from keenbench.scholar.projection import (
 )
 
 
-def test_title_is_specific():
-    # generic short titles: no distinctive token, too few content words
+def test_title_is_specific_rejects_generic_short_titles():
     assert not title_is_specific("Temperature Measurement in Agent Systems")
     assert not title_is_specific("A Study of Neural Networks")
-    # acronyms / coined names / digits / camelcase keep it
+
+
+def test_title_is_specific_keeps_acronyms_coinages_digits_camelcase():
     assert title_is_specific("VT-WAM: Visual-Tactile World Action Model")
     assert title_is_specific("WorldDirector Building Controllable World Simulators")
     assert title_is_specific("DNABERT-2 for 5500 bp Sequences")
     assert title_is_specific("PointDiT Pixel-Space Diffusion")
-    # hyphenated compound coinages are distinctive even in title case
+
+
+def test_title_is_specific_keeps_hyphenated_coinages_in_title_case():
     assert title_is_specific("A Cap-Axis Integral Diagnostic of Factor Models")
     assert title_is_specific("Mixture-Preserving Interpolation for Volatility Models")
-    # long descriptive titles pass on content-word count alone
+
+
+def test_title_is_specific_passes_long_titles_on_content_word_count():
     assert title_is_specific(
         "association between systemic inflammation indices and recurrence risk "
         "in primary budd chiari syndrome"
@@ -51,16 +56,17 @@ def test_clean_body_query():
     assert clean_body_query("smoothquant 8bit activation outliers\nextra line") == (
         "smoothquant 8bit activation outliers"
     )
-    # whole-answer wrapping is unwrapped
-    assert clean_body_query('  "quantized llama throughput"  ') == "quantized llama throughput"
     assert clean_body_query("NO_DISTINCT_QUERY") is None
     assert clean_body_query("  no_distinct_query  ") is None
     assert clean_body_query("") is None
     assert clean_body_query(None) is None
 
 
+def test_clean_body_query_unwraps_whole_answer_quotes():
+    assert clean_body_query('  "quantized llama throughput"  ') == "quantized llama throughput"
+
+
 def test_clean_body_query_preserves_balanced_span_quotes():
-    # a leading quoted span stays balanced (the reported unbalanced-quote bug)
     q = '"relational database that assists parsing" social hierarchies'
     assert clean_body_query(q) == q
     assert clean_body_query('foo "middle span" bar') == 'foo "middle span" bar'
@@ -109,6 +115,8 @@ def test_body_has_bad_anchor():
     assert body_has_bad_anchor("Schur complement bisection Theorem 7.2")
     assert body_has_bad_anchor("Supplementary Table 3 benchmark properties")
     assert body_has_bad_anchor("classification accuracy Figure 2 curves")
-    # distinctive paper-own anchors with numbers are not bad anchors
+
+
+def test_body_has_bad_anchor_allows_distinctive_numeric_anchors():
     assert not body_has_bad_anchor("carvacrol 80.43 percent GC-MS")
     assert not body_has_bad_anchor("Ross 308 broilers cohort")
