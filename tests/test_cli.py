@@ -26,6 +26,16 @@ def test_rss_rejects_trends_only_flags():
         freshstream_cli.Freshstream().generate(source="rss", max_trends=5)
 
 
+def test_trending_rejects_rss_only_flag_at_default_value():
+    with pytest.raises(SystemExit):
+        freshstream_cli.Freshstream().generate(source="trending", min_candidates=30)
+
+
+def test_rss_rejects_trends_only_flag_at_default_value():
+    with pytest.raises(SystemExit):
+        freshstream_cli.Freshstream().generate(source="rss", geos="us-all")
+
+
 def test_run_rejects_bad_feeds_file(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     with pytest.raises(SystemExit):

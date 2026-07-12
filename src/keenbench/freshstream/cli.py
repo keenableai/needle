@@ -64,13 +64,13 @@ class Freshstream:
         source: str = "rss",
         out: str = "-",
         feeds: str | None = None,
-        geos: str = "us-all",
-        max_trends: int = 0,
+        geos: str | None = None,
+        max_trends: int | None = None,
         llm_model: str | None = None,
-        max_rows_per_source: int = 50,
-        fetch_concurrency: int = 15,
+        max_rows_per_source: int | None = None,
+        fetch_concurrency: int | None = None,
         llm_concurrency: int = 8,
-        min_candidates: int = 30,
+        min_candidates: int | None = None,
     ) -> None:
         if source not in ("rss", "trending"):
             raise SystemExit(f"error: unsupported --source {source!r} (known: rss, trending)")
@@ -80,9 +80,9 @@ class Freshstream:
                 name
                 for name, used in (
                     ("--feeds", feeds is not None),
-                    ("--fetch-concurrency", fetch_concurrency != 15),
-                    ("--max-rows-per-source", max_rows_per_source != 50),
-                    ("--min-candidates", min_candidates != 30),
+                    ("--fetch-concurrency", fetch_concurrency is not None),
+                    ("--max-rows-per-source", max_rows_per_source is not None),
+                    ("--min-candidates", min_candidates is not None),
                 )
                 if used
             ]
@@ -90,13 +90,19 @@ class Freshstream:
             misused = [
                 name
                 for name, used in (
-                    ("--geos", geos != "us-all"),
-                    ("--max-trends", max_trends != 0),
+                    ("--geos", geos is not None),
+                    ("--max-trends", max_trends is not None),
                 )
                 if used
             ]
         if misused:
             raise SystemExit(f"error: {', '.join(misused)} is not used with --source {source}")
+
+        geos = "us-all" if geos is None else geos
+        max_trends = 0 if max_trends is None else max_trends
+        max_rows_per_source = 50 if max_rows_per_source is None else max_rows_per_source
+        fetch_concurrency = 15 if fetch_concurrency is None else fetch_concurrency
+        min_candidates = 30 if min_candidates is None else min_candidates
 
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
@@ -141,7 +147,7 @@ class Freshstream:
                     fetch_concurrency=max(1, fetch_concurrency),
                     llm_concurrency=llm_concurrency,
                     max_rows_per_source=max_rows_per_source,
-                    min_candidates=max(0, min_candidates),
+                    min_candidates=min_candidates,
                 )
 
         async def _go():
