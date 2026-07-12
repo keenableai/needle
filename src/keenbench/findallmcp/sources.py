@@ -194,6 +194,7 @@ class UsaspendingClient(HttpSearchClient):
                 out.append({"id": str(r.get("Award ID") or ""), "name": name})
         return out
 
+
 class FedRegClient(HttpSearchClient):
     async def rule_count(self, *, agency: str, start: date, end: date) -> int | None:
         params = {
@@ -439,8 +440,7 @@ async def awards_tasks(client: UsaspendingClient, *, now: datetime) -> list[Task
                     'Respond with JSON only: {"items": [{"name": "<company name>"}, ...]}'
                 ),
                 entities=tuple(
-                    Entity(key=r["id"] or r["name"], name=r["name"])
-                    for r in recipients.values()
+                    Entity(key=r["id"] or r["name"], name=r["name"]) for r in recipients.values()
                 ),
                 provenance={"since": since.isoformat(), "min_amount": min_amount},
             )

@@ -105,7 +105,11 @@ async def test_cpsc_tasks_skip_when_population_too_small():
 
 async def test_awards_tasks_descend_amount_ladder_and_dedupe_recipients():
     awards = [
-        {"id": f"A{i}", "name": "Mega Contractor LLC" if i < 2 else f"Vendor {i} Inc", "amount": 2_500_000_000}
+        {
+            "id": f"A{i}",
+            "name": "Mega Contractor LLC" if i < 2 else f"Vendor {i} Inc",
+            "amount": 2_500_000_000,
+        }
         for i in range(3)
     ] + [{"id": f"B{i}", "name": f"Builder {i} Corp", "amount": 600_000_000} for i in range(9)]
     tasks = await awards_tasks(FakeUsaspending(awards), now=NOW)
