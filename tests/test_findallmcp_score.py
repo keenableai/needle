@@ -15,6 +15,16 @@ def test_parse_answer_handles_fences_and_prose():
     assert parse_answer(None) is None
 
 
+def test_parse_answer_salvages_truncated_items():
+    truncated = (
+        '{"items": [{"name": "Soyuz MS-29", "aliases": []}, {"name": "LOXSAT-1"}, {"name": "Starl'
+    )
+    assert parse_answer(truncated) == {
+        "items": [{"name": "Soyuz MS-29", "aliases": []}, {"name": "LOXSAT-1"}]
+    }
+    assert parse_answer('{"items": [') is None
+
+
 def test_norm_name_strips_show_hn_and_suffixes():
     assert norm_name("Show HN: Bramble – Local-first password manager") == norm_name(
         "Bramble Local first password manager"
@@ -51,6 +61,16 @@ def test_score_set_matches_by_name_or_url():
     assert detail["n_matched"] == 1
     assert detail["recall"] == 0.5
     assert detail["precision"] == 2 / 3
+
+
+def test_score_set_matches_by_item_alias():
+    answer = {
+        "items": [
+            {"name": "something else entirely", "aliases": ["ZeroFS log-structured filesystem"]}
+        ]
+    }
+    detail = score_set(answer, GOLD_ENTITIES)
+    assert detail["n_matched"] == 1
 
 
 def test_score_set_empty_answer():

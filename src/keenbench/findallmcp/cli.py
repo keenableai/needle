@@ -14,7 +14,22 @@ from keenbench.findallmcp.models import (
     serialize_row,
 )
 from keenbench.findallmcp.score import GoldTask, run_findallmcp
-from keenbench.findallmcp.sources import EdgarFtsClient, HnClient, edgar_tasks, hn_tasks
+from keenbench.findallmcp.sources import (
+    EdgarFtsClient,
+    FedRegClient,
+    GithubClient,
+    HnClient,
+    LaunchLibraryClient,
+    NvdClient,
+    WikidataClient,
+    edgar_tasks,
+    fedreg_tasks,
+    github_tasks,
+    hn_tasks,
+    launches_tasks,
+    nvd_tasks,
+    wikidata_tasks,
+)
 from keenbench.shared.cli import parse_csv, sample_or_exit
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient
@@ -74,7 +89,7 @@ class FindallMcp:
     def generate(
         self,
         out: str = "-",
-        suites: str | tuple[str, ...] = "hn,edgar",
+        suites: str | tuple[str, ...] = ",".join(SUITES),
     ) -> None:
         suite_names = tuple(parse_csv(suites))
         unknown = [s for s in suite_names if s not in SUITES]
@@ -86,20 +101,25 @@ class FindallMcp:
         now = datetime.now(UTC)
         hour_ts = now.replace(minute=0, second=0, microsecond=0)
 
-        hn = HnClient() if "hn" in suite_names else None
-        edgar = EdgarFtsClient(max_concurrency=2) if "edgar" in suite_names else None
+        factories = {
+            "hn": (HnClient, hn_tasks),
+            "edgar": (lambda: EdgarFtsClient(max_concurrency=2), edgar_tasks),
+            "launches": (LaunchLibraryClient, launches_tasks),
+            "fedreg": (FedRegClient, fedreg_tasks),
+            "wikidata": (lambda: WikidataClient(timeout_s=60.0), wikidata_tasks),
+            "github": (GithubClient, github_tasks),
+            "nvd": (lambda: NvdClient(timeout_s=60.0), nvd_tasks),
+        }
 
         async def _go() -> list:
             tasks = []
-            try:
-                if hn is not None:
-                    tasks.extend(await hn_tasks(hn, now=now))
-                if edgar is not None:
-                    tasks.extend(await edgar_tasks(edgar, now=now))
-            finally:
-                for client in (hn, edgar):
-                    if client is not None:
-                        await client.aclose()
+            for name in suite_names:
+                make, build = factories[name]
+                client = make()
+                try:
+                    tasks.extend(await build(client, now=now))
+                finally:
+                    await client.aclose()
             return tasks
 
         tasks = asyncio.run(_go())

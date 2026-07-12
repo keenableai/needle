@@ -414,16 +414,32 @@ what they let the same agent find per dollar.
 keenbench findallmcp generate --out findallmcp.jsonl
 ```
 
-Two suites, gold computed at generate time from the registry that scores the
-task:
+Seven suites, gold computed at generate time from the registry that scores the
+task (`--suites` picks a subset). Enumerate gold sets are kept at 8–40
+entries, thresholded suites auto-pick the threshold that lands there:
 
 - **`hn`** — Show HN launches via the keyless Algolia API: one enumerate task
-  (all launches over a point threshold auto-picked so the gold set lands at
-  8–40 entries) and two stat tasks (population count, fraction of titles
-  containing a digit).
+  (all launches over an auto-picked point threshold) and two stat tasks
+  (population count, fraction of titles containing a digit).
 - **`edgar`** — SEC full-text search: enumerate tasks over curated 8-K phrases
   ("material cybersecurity incident", "reverse stock split", …) that yield
   8–40 distinct filers, plus an S-1 filer-count stat task.
+- **`launches`** — orbital launch attempts in the last 30 days via the keyless
+  Launch Library 2 API: enumerate all attempts, plus count and
+  Falcon 9-fraction stat tasks.
+- **`fedreg`** — the Federal Register API: enumerate executive orders
+  published in the last 45 days, plus an EPA final-rule count stat task.
+- **`wikidata`** — deaths in the last 30 days via the Wikidata SPARQL
+  endpoint: enumerate people over an auto-picked sitelink threshold.
+- **`github`** — repositories created in the last 30 days via the GitHub
+  search API: enumerate repos over an auto-picked star threshold, plus a
+  ≥300-star count stat task.
+- **`nvd`** — the NVD CVE API: a critical-CVE count stat task over the last
+  30 days.
+
+Each suite's registry endpoints are blocked in the agent's tool path
+(`BLOCKED_REGISTRIES` in `harness.py`) so answers must come from open-web
+search, not from re-querying the gold source.
 
 ### Run (set recall / stat accuracy per dollar)
 

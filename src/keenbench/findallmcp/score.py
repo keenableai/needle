@@ -27,6 +27,29 @@ class GoldTask:
     stat_rel_tol: float = 0.25
 
 
+def _salvage_items(text: str) -> dict[str, Any] | None:
+    start = text.find('"items"')
+    if start == -1:
+        return None
+    start = text.find("[", start)
+    if start == -1:
+        return None
+    decoder = json.JSONDecoder()
+    items = []
+    i = start + 1
+    while i < len(text):
+        while i < len(text) and text[i] in " \t\r\n,":
+            i += 1
+        if i >= len(text) or text[i] != "{":
+            break
+        try:
+            obj, i = decoder.raw_decode(text, i)
+        except json.JSONDecodeError:
+            break
+        items.append(obj)
+    return {"items": items} if items else None
+
+
 def parse_answer(text: str | None) -> dict[str, Any] | None:
     if not text:
         return None
@@ -34,16 +57,15 @@ def parse_answer(text: str | None) -> dict[str, Any] | None:
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```[a-z]*\s*|\s*```$", "", cleaned, flags=re.IGNORECASE)
     m = _JSON_RE.search(cleaned)
-    if not m:
-        return None
-    for candidate in (m.group(0), cleaned):
+    candidates = (m.group(0), cleaned) if m else (cleaned,)
+    for candidate in candidates:
         try:
             obj = json.loads(candidate)
         except json.JSONDecodeError:
             continue
         if isinstance(obj, dict):
             return obj
-    return None
+    return _salvage_items(cleaned)
 
 
 def norm_name(raw: Any) -> str:
@@ -61,9 +83,13 @@ def names_match(a: str, b: str) -> bool:
 
 
 def _item_matches(item: dict[str, Any], gold: dict[str, Any]) -> bool:
-    item_name = norm_name(item.get("name") or item.get("title") or item.get("company"))
+    raw = [item.get("name") or item.get("title") or item.get("company")]
+    aliases = item.get("aliases")
+    if isinstance(aliases, list):
+        raw.extend(a for a in aliases if isinstance(a, str))
+    item_forms = [norm_name(r) for r in raw]
     gold_forms = [norm_name(gold.get("name"))] + [norm_name(a) for a in gold.get("aliases") or []]
-    if any(names_match(item_name, g) for g in gold_forms if g):
+    if any(names_match(i, g) for i in item_forms if i for g in gold_forms if g):
         return True
     item_url = str(item.get("url") or "")
     for alias in gold.get("aliases") or []:
