@@ -1,62 +1,42 @@
 # keenbench
 
-Hourly search-engine benchmarks. Four benches: freshstream (hourly, RBP@5, LLM
-judge), companyfill (daily, answer-recall@5 + MRR@5, deterministic matcher
-with an LLM judge backstop on misses), scholar (daily, known-item paper
-retrieval, recall@10 + MRR@10 by deterministic arXiv/DOI/PMID match), and
-legal (daily, known-item caselaw/CFR retrieval, recall@5 + MRR@5 by
-deterministic citation/docket/URL match). rarestream is a query producer, not
-a bench: it selects English medium/long queries with rare words (rarity
-defined over BERT WordPiece tokenization). It's
-split in two:
-- `scripts/rarestream_filter.py` — the heavy filter step (BERT WordPiece +
-  fastText language ID). Reads a jsonl/parquet dataset and writes the filtered
-  subset for publishing to the HF dataset. Defaults to the agentic search-log
-  dataset (`agentic/queries.parquet`); also handles the AQL query stream
-  (`aql/queries.jsonl`, from github.com/keenableai/archive-query-log) via
-  `--stream-path`/`--query-field`.
-- `keenbench rarestream generate` / `run` — same interface as the other benches:
-  `generate` emits a query sample (default jsonl to stdout) drawn from the
-  already-filtered artifact (`agentic/rare_entity.parquet` by default) via the
-  shared sampling helper; `run` evaluates that sample with RBP@5 + LLM judge,
-  like freshstream. Row jsonl/parquet I/O lives in `keenbench/rarestream/io.py`.
+Hourly search-engine benchmarks; full docs in README.md. Five benches:
+freshstream (hourly, RBP@5, LLM judge), companyfill (daily, answer-recall@5 +
+MRR@5, deterministic matcher with LLM judge backstop), scholar (daily,
+known-item papers, recall@10 + MRR@10 by arXiv/DOI/PMID match), legal (daily,
+known-item caselaw/CFR, recall@5 + MRR@5 by citation/docket/URL match), and
+findallmcp (manual dispatch only, agentic: an LLM agent drives one MCP search
+backend at a time under a dollar budget, scored against registry gold).
+rarestream is a query producer, not a bench: `scripts/rarestream_filter.py`
+filters a query stream for English rare-word queries (BERT WordPiece +
+fastText language ID), and `keenbench rarestream generate` / `run` samples
+the filtered artifact and evaluates it like freshstream.
 
 ## Layout
 
-- `dashboard/index.html` — the whole dashboard: one self-contained static page,
-  vanilla JS, no build step. Deployed to gh-pages by the bench workflow.
-- Dashboard data: `data/history.jsonl`, `data/latest_companyfill.json`, and
-  `data/runs.json` are published next to the page; full per-run artifacts
-  (`rbp.json`, `recall.json`) live on the HF dataset
+- `dashboard/index.html` — the whole dashboard: one self-contained static
+  page, vanilla JS, no build step; deployed to gh-pages by the bench workflow.
+- Dashboard data: `data/history.jsonl`, `overlap.jsonl`, `uniqueness.jsonl`,
+  `latest_*.json`, and `runs.json`, published by `scripts/publish_bench.py`;
+  full per-run artifacts (`rbp.json`, `recall.json`) live on the HF dataset
   `keenable-ai/keenbench-results` and are fetched directly from there.
 - Per-result report fields (`title`, `url`, `snippet`, `rating`, `penalized`,
-  `label`, `reasoning`) are shaped in `src/keenbench/shared/rankeval.py` — keep
-  the dashboard renderers in sync with it.
+  `label`, `reasoning`) are shaped in `src/keenbench/shared/rankeval.py` —
+  keep the dashboard renderers in sync with it.
 
-## Verifying dashboard changes (screenshot method)
+## Verifying dashboard changes
 
-There is no dev server or test data in the repo. To see a dashboard change
-rendered:
-
-1. Copy `dashboard/index.html` into a scratch dir as `site/index.html` and add
-   fixture files under `site/data/`: `history.jsonl`, `runs.json`, and a run
-   artifact (`rbp.json` or `recall.json`) matching the rankeval report shape.
-2. Serve `site/` over local HTTP (any static server; `fetch` fails on file://).
-3. Drive it with playwright-core, reusing what the machine already has before
-   installing anything:
-   - module: `find "$(npm root -g)" -path '*/playwright-core/index.mjs'` often
-     finds a copy vendored by a global package — import it by absolute path
-     (ESM ignores NODE_PATH). Otherwise `npm i playwright-core` in the scratch
-     dir.
-   - browser: pass `executablePath` pointing at a cached build under
-     `~/.cache/ms-playwright/` or a system chromium; otherwise
-     `npx playwright install chromium-headless-shell`.
-4. Intercept the HF artifact fetch with
-   `page.route('**/huggingface.co/**', ...)` and fulfill from the local
-   fixture, open the page, click a `.qrow summary` to expand a query, and
-   screenshot `#card-runs` (or whichever card changed).
-5. Read the PNG to check the rendering; share it via paste.keenable.ai when a
-   PR needs a screenshot.
+No dev server or test data in the repo. Copy `dashboard/index.html` into a
+scratch `site/`, add fixtures under `site/data/` (`history.jsonl`,
+`runs.json`, an `rbp.json`/`recall.json` in the rankeval shape), and serve
+over local HTTP (`fetch` fails on file://). Screenshot with playwright-core:
+reuse the globally vendored module (`find "$(npm root -g)" -path
+'*/playwright-core/index.mjs'`, import by absolute path) and a cached
+chromium under `~/.cache/ms-playwright/`. Intercept
+`page.route('**/huggingface.co/**', ...)` to fulfill the artifact fetch from
+the fixture, click a `.qrow summary` to expand a query, screenshot the
+changed card, and Read the PNG. Share via paste.keenable.ai when a PR needs
+it.
 
 ## Rules
 
