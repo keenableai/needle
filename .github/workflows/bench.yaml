@@ -176,33 +176,27 @@ jobs:
       - name: Publish
         run: |
           TS=$(date -u +%Y-%m-%dT%H:%MZ)
-          args="--site site-data --runs-out staged --ts $TS"
-          reports=0
+          base_args="--site site-data --runs-out staged --ts $TS"
+          args="$base_args"
           if [ -s rbp.json ]; then
             args="$args --rbp rbp.json --fresh fresh.jsonl"
-            reports=1
           fi
           if [ -s recall.json ]; then
             args="$args --recall recall.json --gold site-data/data/gold.jsonl"
-            reports=1
           fi
           if [ -s rarestream.json ]; then
             args="$args --rarestream rarestream.json"
-            reports=1
           fi
           if [ -s scholar.json ]; then
             args="$args --scholar scholar.json --scholar-queries site-data/data/scholar.jsonl"
-            reports=1
           fi
           if [ -s legal.json ]; then
             args="$args --legal legal.json --legal-queries site-data/data/legal.jsonl"
-            reports=1
           fi
           if [ -s findallmcp.json ]; then
             args="$args --findallmcp findallmcp.json --findallmcp-queries findallmcp.jsonl"
-            reports=1
           fi
-          if [ "$reports" = "0" ]; then
+          if [ "$args" = "$base_args" ]; then
             echo "no reports to publish"
             exit 0
           fi
