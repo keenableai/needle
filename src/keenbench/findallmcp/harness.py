@@ -198,7 +198,10 @@ async def _run_task_inner(
             listed = await session.list_tools()
             system_prompt = SYSTEM_PROMPT.format(budget=budget.limit_usd)
             if init.instructions:
-                system_prompt = f"{init.instructions.strip()}\n\n{system_prompt}"
+                system_prompt = (
+                    f"# MCP server instructions\n\n{init.instructions.strip()}\n\n"
+                    f"---\n\n# Task rules\n\n{system_prompt}"
+                )
             agent = Agent(
                 llm,
                 [_guard_registry(t) for t in mcp_tools_from_session(session, listed.tools)],
