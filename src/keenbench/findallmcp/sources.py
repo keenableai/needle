@@ -1,5 +1,4 @@
 import re
-from collections import Counter
 from datetime import date, datetime, timedelta
 from typing import Any
 
@@ -10,15 +9,28 @@ USER_AGENT = "keenbench/0.1 (contact@keenable.ai)"
 
 HN_SEARCH = "https://hn.algolia.com/api/v1/search_by_date"
 EDGAR_FTS = "https://efts.sec.gov/LATEST/search-index"
-LL2_LAUNCHES = "https://ll.thespacedevs.com/2.2.0/launch/"
 FEDREG_DOCS = "https://www.federalregister.gov/api/v1/documents.json"
-WIKIDATA_SPARQL = "https://query.wikidata.org/sparql"
 GITHUB_SEARCH = "https://api.github.com/search/repositories"
-NVD_CVES = "https://services.nvd.nist.gov/rest/json/cves/2.0"
+CPSC_RECALLS = "https://www.saferproducts.gov/RestWebServices/Recall"
+USASPENDING_SEARCH = "https://api.usaspending.gov/api/v2/search/spending_by_award/"
+USASPENDING_COUNT = "https://api.usaspending.gov/api/v2/search/spending_by_award_count/"
 
 HN_POINT_LADDER = (500, 400, 300, 250, 200, 150)
-SITELINK_LADDER = (40, 30, 25, 20, 15)
 STAR_LADDER = (5000, 3000, 2000, 1000, 500)
+CPSC_DAY_LADDER = (30, 21, 14, 10, 7)
+AWARD_AMOUNT_LADDER = (
+    2_000_000_000,
+    1_500_000_000,
+    1_000_000_000,
+    750_000_000,
+    500_000_000,
+    400_000_000,
+    300_000_000,
+    250_000_000,
+    200_000_000,
+    150_000_000,
+)
+CONTRACT_TYPE_CODES = ("A", "B", "C", "D")
 GOLD_MIN, GOLD_MAX = 8, 40
 
 EDGAR_PHRASES = (
@@ -31,7 +43,12 @@ EDGAR_PHRASES = (
 
 _DIGIT_RE = re.compile(r"\d")
 _DISPLAY_RE = re.compile(r"^(.*?)\s*(?:\(([^)]*)\))?\s*\(CIK (\d+)\)\s*$")
-_PAREN_RE = re.compile(r"\s*\([^)]*\)")
+
+
+def amount_label(amount: int) -> str:
+    if amount >= 1_000_000_000:
+        return f"${amount / 1_000_000_000:g} billion"
+    return f"${amount / 1_000_000:g} million"
 
 
 class HnClient(HttpSearchClient):
@@ -114,52 +131,82 @@ class EdgarFtsClient(HttpSearchClient):
         return list(out.values())
 
 
-class LaunchLibraryClient(HttpSearchClient):
-    async def launches(self, *, since: date, until: date) -> list[dict[str, Any]]:
-        out: list[dict[str, Any]] = []
-        url: str | None = LL2_LAUNCHES
-        params: dict[str, Any] | None = {
-            "net__gte": f"{since.isoformat()}T00:00:00Z",
-            "net__lte": f"{until.isoformat()}T00:00:00Z",
-            "limit": 100,
-            "mode": "list",
+class CpscClient(HttpSearchClient):
+    async def recalls(self, *, since: date, until: date) -> list[dict[str, Any]]:
+        params = {
+            "RecallDateStart": since.isoformat(),
+            "RecallDateEnd": until.isoformat(),
+            "format": "json",
         }
-        while url:
-            payload, err = await self._request_json(
-                "GET", url, params=params, headers={"User-Agent": USER_AGENT}
-            )
-            if err is not None or not isinstance(payload, dict):
-                return []
-            for r in payload.get("results") or []:
-                name = " ".join(str(r.get("name") or "").split())
-                if r.get("id") and name:
-                    out.append({"id": str(r["id"]), "name": name})
-            url = payload.get("next")
-            params = None
+        payload, err = await self._request_json(
+            "GET", CPSC_RECALLS, params=params, headers={"User-Agent": USER_AGENT}
+        )
+        if err is not None or not isinstance(payload, list):
+            return []
+        out = []
+        for r in payload:
+            number = str(r.get("RecallNumber") or "")
+            title = " ".join(str(r.get("Title") or "").split())
+            day = str(r.get("RecallDate") or "")[:10]
+            if not number or not title or not day:
+                continue
+            products = [
+                " ".join(str(p.get("Name") or "").split())
+                for p in r.get("Products") or []
+                if p.get("Name")
+            ]
+            out.append({"number": number, "title": title, "date": day, "products": products})
         return out
+
+
+class UsaspendingClient(HttpSearchClient):
+    def _filters(self, since: date, until: date, min_amount: int) -> dict[str, Any]:
+        return {
+            "time_period": [
+                {
+                    "start_date": since.isoformat(),
+                    "end_date": until.isoformat(),
+                    "date_type": "date_signed",
+                }
+            ],
+            "award_type_codes": list(CONTRACT_TYPE_CODES),
+            "award_amounts": [{"lower_bound": min_amount}],
+        }
+
+    async def awards(
+        self, *, since: date, until: date, min_amount: int, limit: int = 100
+    ) -> list[dict[str, Any]] | None:
+        body = {
+            "filters": self._filters(since, until, min_amount),
+            "fields": ["Award ID", "Recipient Name", "Award Amount"],
+            "limit": limit,
+            "order": "desc",
+            "sort": "Award Amount",
+        }
+        payload, err = await self._request_json(
+            "POST", USASPENDING_SEARCH, json=body, headers={"User-Agent": USER_AGENT}
+        )
+        if err is not None or not isinstance(payload, dict):
+            return None
+        out = []
+        for r in payload.get("results") or []:
+            name = " ".join(str(r.get("Recipient Name") or "").split())
+            if name:
+                out.append({"id": str(r.get("Award ID") or ""), "name": name})
+        return out
+
+    async def award_count(self, *, since: date, until: date, min_amount: int) -> int | None:
+        body = {"filters": self._filters(since, until, min_amount)}
+        payload, err = await self._request_json(
+            "POST", USASPENDING_COUNT, json=body, headers={"User-Agent": USER_AGENT}
+        )
+        if err is not None or not isinstance(payload, dict):
+            return None
+        count = (payload.get("results") or {}).get("contracts")
+        return int(count) if isinstance(count, int) else None
 
 
 class FedRegClient(HttpSearchClient):
-    async def executive_orders(self, *, start: date, end: date) -> list[dict[str, Any]]:
-        params = {
-            "conditions[type][]": "PRESDOCU",
-            "conditions[presidential_document_type][]": "executive_order",
-            "conditions[publication_date][gte]": start.isoformat(),
-            "conditions[publication_date][lte]": end.isoformat(),
-            "fields[]": ["title", "document_number", "executive_order_number"],
-            "per_page": 100,
-        }
-        payload, err = await self._request_json(
-            "GET", FEDREG_DOCS, params=params, headers={"User-Agent": USER_AGENT}
-        )
-        if err is not None or not isinstance(payload, dict):
-            return []
-        out = []
-        for r in payload.get("results") or []:
-            if r.get("document_number") and r.get("title"):
-                out.append(r)
-        return out
-
     async def rule_count(self, *, agency: str, start: date, end: date) -> int | None:
         params = {
             "conditions[type][]": "RULE",
@@ -175,36 +222,6 @@ class FedRegClient(HttpSearchClient):
             return None
         count = payload.get("count")
         return int(count) if isinstance(count, int) else None
-
-
-class WikidataClient(HttpSearchClient):
-    async def deaths(self, *, since: date, until: date, min_links: int) -> list[dict[str, Any]]:
-        query = (
-            "SELECT ?person ?personLabel ?links WHERE { "
-            "?person wdt:P570 ?dod . "
-            f'FILTER(?dod >= "{since.isoformat()}T00:00:00Z"^^xsd:dateTime && '
-            f'?dod < "{until.isoformat()}T00:00:00Z"^^xsd:dateTime) '
-            "?person wdt:P31 wd:Q5 . "
-            "?person wikibase:sitelinks ?links . "
-            f"FILTER(?links >= {min_links}) "
-            'SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } }'
-        )
-        payload, err = await self._request_json(
-            "GET",
-            WIKIDATA_SPARQL,
-            params={"query": query},
-            headers={"User-Agent": USER_AGENT, "Accept": "application/sparql-results+json"},
-        )
-        if err is not None or not isinstance(payload, dict):
-            return []
-        out = []
-        for b in (payload.get("results") or {}).get("bindings") or []:
-            qid = str(b.get("person", {}).get("value") or "").rsplit("/", 1)[-1]
-            label = str(b.get("personLabel", {}).get("value") or "")
-            links = int(b.get("links", {}).get("value") or 0)
-            if qid and label and label != qid:
-                out.append({"qid": qid, "name": label, "links": links})
-        return out
 
 
 class GithubClient(HttpSearchClient):
@@ -230,22 +247,6 @@ class GithubClient(HttpSearchClient):
             if r.get("full_name")
         ]
         return (int(total) if isinstance(total, int) else None), items
-
-
-class NvdClient(HttpSearchClient):
-    async def cve_count(self, *, since: date, until: date) -> int | None:
-        params = {
-            "pubStartDate": f"{since.isoformat()}T00:00:00.000",
-            "pubEndDate": f"{until.isoformat()}T23:59:59.999",
-            "resultsPerPage": 1,
-        }
-        payload, err = await self._request_json(
-            "GET", NVD_CVES, params=params, headers={"User-Agent": USER_AGENT}
-        )
-        if err is not None or not isinstance(payload, dict):
-            return None
-        total = payload.get("totalResults")
-        return int(total) if isinstance(total, int) else None
 
 
 def hn_entity(hit: dict[str, Any]) -> Entity:
@@ -366,71 +367,110 @@ async def edgar_tasks(client: EdgarFtsClient, *, now: datetime) -> list[Task]:
     return tasks
 
 
-def launch_entities(hits: list[dict[str, Any]]) -> tuple[Entity, ...]:
-    names = []
-    for hit in hits:
-        _, _, mission = hit["name"].partition(" | ")
-        names.append(mission.strip() or hit["name"])
-    stripped = [_PAREN_RE.sub("", n).strip() for n in names]
-    counts = Counter(s.lower() for s in stripped if s)
-    out = []
-    for hit, name, plain in zip(hits, names, stripped, strict=True):
-        aliases = [hit["name"]] if name != hit["name"] else []
-        if plain and plain != name and counts[plain.lower()] == 1:
-            aliases.append(plain)
-        out.append(Entity(key=hit["id"], name=name, aliases=tuple(aliases)))
-    return tuple(out)
+def cpsc_entity(recall: dict[str, Any]) -> Entity:
+    products = recall["products"]
+    name = products[0] if products else recall["title"]
+    aliases = [a for a in [recall["title"], *products[1:]] if a and a != name]
+    return Entity(key=recall["number"], name=name, aliases=tuple(dict.fromkeys(aliases)))
 
 
-async def launches_tasks(client: LaunchLibraryClient, *, now: datetime) -> list[Task]:
+async def cpsc_tasks(client: CpscClient, *, now: datetime) -> list[Task]:
     until = now.date()
-    since = until - timedelta(days=30)
-    window = f"between {since.isoformat()} and {until.isoformat()} (UTC)"
-    hits = await client.launches(since=since, until=until)
+    since = until - timedelta(days=max(CPSC_DAY_LADDER))
+    recalls = await client.recalls(since=since, until=until)
     tasks: list[Task] = []
-    if GOLD_MIN <= len(hits) <= GOLD_MAX:
+    for days in CPSC_DAY_LADDER:
+        w_since = until - timedelta(days=days)
+        chosen = [r for r in recalls if r["date"] >= w_since.isoformat()]
+        if len(chosen) < GOLD_MIN:
+            break
+        if len(chosen) > GOLD_MAX:
+            continue
+        window = f"between {w_since.isoformat()} and {until.isoformat()}"
         tasks.append(
             Task(
-                suite="launches",
+                suite="cpsc",
                 bucket="enumerate",
                 prompt=(
-                    f"Find ALL orbital rocket launch attempts worldwide {window}. "
-                    "Be exhaustive - completeness is scored. Missions often have several "
-                    "designations; list every one you saw. Respond with JSON only: "
-                    '{"items": [{"name": "<mission or payload name>", "aliases": '
-                    '["<other designations of the same mission>", ...]}, ...]}'
+                    f"Find ALL consumer product recalls announced by the US Consumer "
+                    f"Product Safety Commission (CPSC) {window}. Be exhaustive - "
+                    "completeness is scored. Respond with JSON only: "
+                    '{"items": [{"name": "<recalled product>", "aliases": '
+                    '["<recalling company or full recall title>"]}, ...]}'
                 ),
-                entities=launch_entities(hits),
-                provenance={"since": since.isoformat()},
+                entities=tuple(cpsc_entity(r) for r in chosen),
+                provenance={"since": w_since.isoformat()},
             )
         )
-    if len(hits) >= GOLD_MIN:
+        break
+    if len(recalls) >= 15:
+        window = f"between {since.isoformat()} and {until.isoformat()}"
         tasks.append(
             Task(
-                suite="launches",
+                suite="cpsc",
                 bucket="stat",
                 prompt=(
-                    f"How many orbital rocket launch attempts took place worldwide {window}? "
+                    f"How many consumer product recalls did the US Consumer Product "
+                    f"Safety Commission (CPSC) announce {window}? "
                     'Respond with JSON only: {"value": <integer>}'
                 ),
-                stat_value=float(len(hits)),
+                stat_value=float(len(recalls)),
                 stat_rel_tol=0.2,
                 provenance={"since": since.isoformat()},
             )
         )
-        falcon = sum(1 for h in hits if h["name"].lower().startswith("falcon 9"))
+    return tasks
+
+
+async def awards_tasks(client: UsaspendingClient, *, now: datetime) -> list[Task]:
+    until = now.date()
+    since = until - timedelta(days=30)
+    window = f"between {since.isoformat()} and {until.isoformat()}"
+    tasks: list[Task] = []
+    for min_amount in AWARD_AMOUNT_LADDER:
+        rows = await client.awards(since=since, until=until, min_amount=min_amount)
+        if rows is None:
+            break
+        recipients: dict[str, dict[str, Any]] = {}
+        for r in rows:
+            recipients.setdefault(r["name"].lower(), r)
+        if len(recipients) > GOLD_MAX:
+            break
+        if len(recipients) < GOLD_MIN:
+            continue
+        label = amount_label(min_amount)
         tasks.append(
             Task(
-                suite="launches",
+                suite="awards",
+                bucket="enumerate",
+                prompt=(
+                    f"Find ALL companies that were awarded a US federal contract worth "
+                    f"at least {label} (total contract value) signed {window}. "
+                    "Be exhaustive - completeness is scored. Respond with JSON only: "
+                    '{"items": [{"name": "<company name>"}, ...]}'
+                ),
+                entities=tuple(
+                    Entity(key=r["id"] or r["name"], name=r["name"])
+                    for r in recipients.values()
+                ),
+                provenance={"since": since.isoformat(), "min_amount": min_amount},
+            )
+        )
+        break
+    count = await client.award_count(since=since, until=until, min_amount=100_000_000)
+    if count is not None and count >= 10:
+        tasks.append(
+            Task(
+                suite="awards",
                 bucket="stat",
                 prompt=(
-                    f"Consider ALL orbital rocket launch attempts worldwide {window}. "
-                    "What fraction of them were SpaceX Falcon 9 launches? "
-                    'Respond with JSON only: {"value": <number between 0 and 1>}'
+                    f"How many US federal contracts worth at least $100 million "
+                    f"(total contract value) were signed {window}? "
+                    'Respond with JSON only: {"value": <integer>}'
                 ),
-                stat_value=falcon / len(hits),
+                stat_value=float(count),
                 stat_rel_tol=0.25,
-                provenance={"since": since.isoformat(), "falcon": falcon},
+                provenance={"since": since.isoformat(), "min_amount": 100_000_000},
             )
         )
     return tasks
@@ -438,34 +478,7 @@ async def launches_tasks(client: LaunchLibraryClient, *, now: datetime) -> list[
 
 async def fedreg_tasks(client: FedRegClient, *, now: datetime) -> list[Task]:
     end = now.date()
-    eo_start = end - timedelta(days=45)
-    eos = await client.executive_orders(start=eo_start, end=end)
     tasks: list[Task] = []
-    if GOLD_MIN <= len(eos) <= GOLD_MAX:
-        window = f"between {eo_start.isoformat()} and {end.isoformat()}"
-        tasks.append(
-            Task(
-                suite="fedreg",
-                bucket="enumerate",
-                prompt=(
-                    f"Find ALL executive orders of the US President published in the "
-                    f"Federal Register {window}. Be exhaustive - completeness is scored. "
-                    'Respond with JSON only: {"items": [{"name": "<executive order '
-                    'title>", "aliases": ["Executive Order <number>"]}, ...]}'
-                ),
-                entities=tuple(
-                    Entity(
-                        key=str(r["document_number"]),
-                        name=str(r["title"]),
-                        aliases=tuple(
-                            f"Executive Order {n}" for n in (r.get("executive_order_number"),) if n
-                        ),
-                    )
-                    for r in eos
-                ),
-                provenance={"start": eo_start.isoformat()},
-            )
-        )
     rule_start = end - timedelta(days=30)
     count = await client.rule_count(
         agency="environmental-protection-agency", start=rule_start, end=end
@@ -490,31 +503,6 @@ async def fedreg_tasks(client: FedRegClient, *, now: datetime) -> list[Task]:
             )
         )
     return tasks
-
-
-async def wikidata_tasks(client: WikidataClient, *, now: datetime) -> list[Task]:
-    until = now.date()
-    since = until - timedelta(days=30)
-    people = await client.deaths(since=since, until=until, min_links=min(SITELINK_LADDER))
-    for min_links in SITELINK_LADDER:
-        chosen = [p for p in people if p["links"] >= min_links]
-        if GOLD_MIN <= len(chosen) <= GOLD_MAX:
-            return [
-                Task(
-                    suite="wikidata",
-                    bucket="enumerate",
-                    prompt=(
-                        f"Find ALL people who died between {since.isoformat()} and "
-                        f"{until.isoformat()} (UTC) and have a Wikipedia article in at "
-                        f"least {min_links} languages. Be exhaustive - completeness is "
-                        'scored. Respond with JSON only: {"items": [{"name": "<person '
-                        'name>"}, ...]}'
-                    ),
-                    entities=tuple(Entity(key=p["qid"], name=p["name"]) for p in chosen),
-                    provenance={"since": since.isoformat(), "min_links": min_links},
-                )
-            ]
-    return []
 
 
 async def github_tasks(client: GithubClient, *, now: datetime) -> list[Task]:
@@ -564,25 +552,3 @@ async def github_tasks(client: GithubClient, *, now: datetime) -> list[Task]:
             )
         )
     return tasks
-
-
-async def nvd_tasks(client: NvdClient, *, now: datetime) -> list[Task]:
-    until = now.date()
-    since = until - timedelta(days=30)
-    total = await client.cve_count(since=since, until=until)
-    if total is None or total < 500:
-        return []
-    return [
-        Task(
-            suite="nvd",
-            bucket="stat",
-            prompt=(
-                f"How many CVEs (of any severity) were published between "
-                f"{since.isoformat()} and {until.isoformat()}? "
-                'Respond with JSON only: {"value": <integer>}'
-            ),
-            stat_value=float(total),
-            stat_rel_tol=0.25,
-            provenance={"since": since.isoformat()},
-        )
-    ]

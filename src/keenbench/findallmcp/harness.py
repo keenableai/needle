@@ -31,11 +31,11 @@ BLOCKED_REGISTRIES = (
     "nvd.nist.gov/vuln/search",
     "cisa.gov/known-exploited-vulnerabilities",
     "known_exploited_vulnerabilities",
-    "thespacedevs.com",
     "federalregister.gov/api",
     "federalregister.gov/documents/search",
-    "query.wikidata.org",
-    "wikidata.org/w/api",
+    "saferproducts.gov",
+    "cpsc.gov/recalls",
+    "usaspending.gov",
 )
 SYSTEM_PROMPT = (
     "You are a research agent with access to web-search tools. Answer the user's "

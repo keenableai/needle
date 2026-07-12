@@ -3,11 +3,10 @@ from datetime import UTC, datetime
 
 from keenbench.findallmcp.models import Entity, Task, build_task_row, serialize_row
 from keenbench.findallmcp.sources import (
+    awards_tasks,
+    cpsc_tasks,
     github_tasks,
     hn_tasks,
-    launch_entities,
-    launches_tasks,
-    wikidata_tasks,
 )
 
 NOW = datetime(2026, 7, 4, 12, 0, tzinfo=UTC)
@@ -50,20 +49,24 @@ async def test_hn_tasks_skip_when_population_too_small():
     assert tasks == []
 
 
-class FakeLaunches:
-    def __init__(self, hits):
-        self._hits = hits
+class FakeCpsc:
+    def __init__(self, recalls):
+        self._recalls = recalls
 
-    async def launches(self, *, since, until):
-        return self._hits
+    async def recalls(self, *, since, until):
+        return [r for r in self._recalls if r["date"] >= since.isoformat()]
 
 
-class FakeWikidata:
-    def __init__(self, people):
-        self._people = people
+class FakeUsaspending:
+    def __init__(self, awards, count):
+        self._awards = awards
+        self._count = count
 
-    async def deaths(self, *, since, until, min_links):
-        return [p for p in self._people if p["links"] >= min_links]
+    async def awards(self, *, since, until, min_amount, limit=100):
+        return [a for a in self._awards if a["amount"] >= min_amount][:limit]
+
+    async def award_count(self, *, since, until, min_amount):
+        return self._count
 
 
 class FakeGithub:
@@ -75,53 +78,53 @@ class FakeGithub:
         return len(matched), matched[:per_page]
 
 
-def test_launch_entities_split_and_alias():
-    ents = launch_entities(
-        [
-            {"id": "1", "name": "Falcon 9 Block 5 | Transporter 17 (Dedicated SSO Rideshare)"},
-            {"id": "2", "name": "Ariane 64 | Amazon Leo (LE-03)"},
-            {"id": "3", "name": "Ariane 64 | Amazon Leo (LA-08)"},
-        ]
-    )
-    assert ents[0].name == "Transporter 17 (Dedicated SSO Rideshare)"
-    assert "Transporter 17" in ents[0].aliases
-    assert all("Amazon Leo" not in e.aliases for e in ents[1:])
+def _recall(n, date, products=None):
+    return {
+        "number": str(n),
+        "title": f"Acme Corp Recalls Widget Model {n} Due to Hazard",
+        "date": date,
+        "products": products if products is not None else [f"Acme Widget Model {n}"],
+    }
 
 
-async def test_launches_tasks_gold_band_and_falcon_fraction():
-    hits = [
-        {
-            "id": str(i),
-            "name": f"Falcon 9 Block 5 | Starlink Group {i}"
-            if i < 5
-            else f"Rocket {i} | Mission {i}",
-        }
-        for i in range(20)
+async def test_cpsc_tasks_shrink_window_into_gold_band():
+    recalls = [_recall(i, "2026-07-01") for i in range(30)] + [
+        _recall(100 + i, "2026-06-10") for i in range(30)
     ]
-    tasks = await launches_tasks(FakeLaunches(hits), now=NOW)
+    tasks = await cpsc_tasks(FakeCpsc(recalls), now=NOW)
     enum = [t for t in tasks if t.bucket == "enumerate"]
     assert len(enum) == 1
-    assert len(enum[0].entities) == 20
-    frac = next(t for t in tasks if "fraction" in t.prompt)
-    assert frac.stat_value == 0.25
-    count = next(t for t in tasks if "How many" in t.prompt)
-    assert count.stat_value == 20.0
+    assert len(enum[0].entities) == 30
+    assert "between 2026-06-13" in enum[0].prompt
+    assert enum[0].entities[0].name == "Acme Widget Model 0"
+    assert enum[0].entities[0].aliases == ("Acme Corp Recalls Widget Model 0 Due to Hazard",)
+    stat = next(t for t in tasks if t.bucket == "stat")
+    assert stat.stat_value == 60.0
 
 
-async def test_wikidata_tasks_pick_sitelink_threshold_in_gold_band():
-    people = [
-        {"qid": f"Q{i}", "name": f"Person Number {i}", "links": 45 if i < 3 else 22}
-        for i in range(30)
-    ]
-    tasks = await wikidata_tasks(FakeWikidata(people), now=NOW)
-    assert len(tasks) == 1
-    assert len(tasks[0].entities) == 30
-    assert "at least 20 languages" in tasks[0].prompt
+async def test_cpsc_tasks_skip_when_population_too_small():
+    tasks = await cpsc_tasks(FakeCpsc([_recall(1, "2026-07-01")]), now=NOW)
+    assert tasks == []
 
 
-async def test_wikidata_tasks_skip_when_out_of_band():
-    people = [{"qid": f"Q{i}", "name": f"Person Number {i}", "links": 15} for i in range(100)]
-    assert await wikidata_tasks(FakeWikidata(people), now=NOW) == []
+async def test_awards_tasks_descend_amount_ladder_and_dedupe_recipients():
+    awards = [
+        {"id": f"A{i}", "name": "Mega Contractor LLC" if i < 2 else f"Vendor {i} Inc", "amount": 2_500_000_000}
+        for i in range(3)
+    ] + [{"id": f"B{i}", "name": f"Builder {i} Corp", "amount": 600_000_000} for i in range(9)]
+    tasks = await awards_tasks(FakeUsaspending(awards, count=25), now=NOW)
+    enum = [t for t in tasks if t.bucket == "enumerate"]
+    assert len(enum) == 1
+    assert "at least $500 million" in enum[0].prompt
+    assert len(enum[0].entities) == 11
+    stat = next(t for t in tasks if t.bucket == "stat")
+    assert stat.stat_value == 25.0
+
+
+async def test_awards_tasks_skip_stat_when_count_too_small():
+    awards = [{"id": f"B{i}", "name": f"Builder {i} Corp", "amount": 600_000_000} for i in range(9)]
+    tasks = await awards_tasks(FakeUsaspending(awards, count=5), now=NOW)
+    assert [t.bucket for t in tasks] == ["enumerate"]
 
 
 async def test_github_tasks_descend_past_underfilled_thresholds():

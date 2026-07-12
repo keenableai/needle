@@ -169,20 +169,21 @@ keenbench findallmcp run --queries findallmcp.jsonl --backends keenable,webql \
   --budget-usd 1.0 --out findallmcp.json
 ```
 
-Seven suites (`--suites` picks a subset), gold computed at generate time from
+Six suites (`--suites` picks a subset), gold computed at generate time from
 the registry that scores the task; enumerate gold sets land at 8–40 entries
 via auto-picked thresholds: **`hn`** (Show HN launches via the keyless
 Algolia API: enumerate plus count and digit-fraction stats), **`edgar`** (SEC
-full-text search over curated 8-K phrases, plus an S-1 count), **`launches`**
-(orbital launch attempts over 30 days via Launch Library 2: enumerate plus
-count and Falcon 9-fraction stats), **`fedreg`** (executive orders over 45
-days via the Federal Register API, plus an EPA final-rule count),
-**`wikidata`** (deaths over 30 days via SPARQL, sitelink-thresholded),
+full-text search over curated 8-K phrases, plus an S-1 count), **`fedreg`**
+(EPA final-rule count over 30 days via the Federal Register API),
 **`github`** (repos created over 30 days, star-thresholded, plus a ≥300-star
-count), and **`nvd`** (published-CVE count over 30 days). Each suite's
-registry endpoints are blocked in the agent's tool path (`BLOCKED_REGISTRIES`
-in `harness.py`) so answers must come from open-web search, not from
-re-querying the gold source.
+count), **`cpsc`** (consumer product recalls via the keyless saferproducts.gov
+API, window-thresholded, plus a count), and **`awards`** (US federal contract
+recipients over an auto-picked dollar threshold via the keyless USAspending
+API, plus a ≥$100M count). Suites are chosen so no single open-web page
+enumerates the population — the answer must be assembled from scattered
+coverage. Each suite's registry endpoints are blocked in the agent's tool
+path (`BLOCKED_REGISTRIES` in `harness.py`) so answers must come from
+open-web search, not from re-querying the gold source.
 
 `run` drives an LLM agent (default `anthropic/claude-sonnet-5`;
 `--agent-model` / `KEENBENCH_AGENT_MODEL`) with the tools of one MCP backend

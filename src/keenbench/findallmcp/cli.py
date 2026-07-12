@@ -17,20 +17,18 @@ from keenbench.findallmcp.models import (
 )
 from keenbench.findallmcp.score import GoldTask, run_findallmcp
 from keenbench.findallmcp.sources import (
+    CpscClient,
     EdgarFtsClient,
     FedRegClient,
     GithubClient,
     HnClient,
-    LaunchLibraryClient,
-    NvdClient,
-    WikidataClient,
+    UsaspendingClient,
+    awards_tasks,
+    cpsc_tasks,
     edgar_tasks,
     fedreg_tasks,
     github_tasks,
     hn_tasks,
-    launches_tasks,
-    nvd_tasks,
-    wikidata_tasks,
 )
 from keenbench.shared.cli import parse_csv, sample_or_exit
 from keenbench.shared.io import write_json, write_jsonl
@@ -106,11 +104,10 @@ class FindallMcp:
         factories: dict[str, tuple[Callable[[], Any], Callable[..., Any]]] = {
             "hn": (HnClient, hn_tasks),
             "edgar": (lambda: EdgarFtsClient(max_concurrency=2), edgar_tasks),
-            "launches": (LaunchLibraryClient, launches_tasks),
             "fedreg": (FedRegClient, fedreg_tasks),
-            "wikidata": (lambda: WikidataClient(timeout_s=60.0), wikidata_tasks),
             "github": (GithubClient, github_tasks),
-            "nvd": (lambda: NvdClient(timeout_s=60.0), nvd_tasks),
+            "cpsc": (lambda: CpscClient(timeout_s=60.0), cpsc_tasks),
+            "awards": (lambda: UsaspendingClient(timeout_s=60.0), awards_tasks),
         }
 
         async def _go() -> list:

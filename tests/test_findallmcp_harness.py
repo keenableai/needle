@@ -38,6 +38,10 @@ def test_blocked_registry_covers_fda_github_nvd():
         "https://nvd.nist.gov/vuln/search/results?form_type=Advanced",
         "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
         "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json",
+        "https://www.saferproducts.gov/RestWebServices/Recall?RecallDateStart=2026-06-12",
+        "https://www.cpsc.gov/Recalls/2026/Best-Buy-Recalls-Insignia-Gas-Ranges",
+        "https://api.usaspending.gov/api/v2/search/spending_by_award/",
+        "https://www.usaspending.gov/search",
     ]
     for url in blocked:
         assert _blocked_registry({"urls": [url]}) is not None, url
@@ -47,6 +51,7 @@ def test_blocked_registry_covers_fda_github_nvd():
         "https://github.com/langchain-ai/openwiki",
         "https://nvd.nist.gov/vuln/detail/CVE-2026-34908",
         "https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-190a",
+        "https://www.cpsc.gov/Newsroom/News-Releases/2026/some-release",
     ]
     for url in allowed:
         assert _blocked_registry({"urls": [url]}) is None, url

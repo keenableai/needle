@@ -6,7 +6,7 @@ from typing import Any
 from keenbench.shared.identity import query_hash, query_id
 
 FINDALLMCP_SOURCE = "findallmcp"
-SUITES = ("hn", "edgar", "launches", "fedreg", "wikidata", "github", "nvd")
+SUITES = ("hn", "edgar", "fedreg", "github", "cpsc", "awards")
 BUCKETS = ("enumerate", "stat")
 
 AGENT_MODEL_ENV = "KEENBENCH_AGENT_MODEL"
