@@ -322,7 +322,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   </div>
   <div class="card" id="card-latency-summary">
     <h2>Search latency — 7-day summary</h2>
-    <div class="sub">pooled over successful search API calls from all benchmarks, last 7 days; error rate = errored searches / queries issued</div>
+    <div class="sub">successful search API calls, all benchmarks, last 7 days — per-call samples pooled; runs without samples contribute their per-run percentiles; error rate = errored searches / queries issued</div>
     <div id="latency-summary"></div>
   </div>
 
@@ -482,7 +482,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <tr><td>score</td><td>findallmcp</td>
         <td>per query: an enumerate task scores recall of the gold entity set (name / alias / registrable-domain matching); a stat task scores max(0, 1 − |answer − gold| / |gold|). The reported score is the mean over all non-errored queries of both kinds; errored agent runs are excluded from the mean and reported as errors.</td></tr>
       <tr><td>latency p50 / p95</td><td>all</td>
-        <td>percentiles over per-call durations of successful search API calls, pooled across queries in the window; failed calls carry no latency sample and show up in the error rate instead.</td></tr>
+        <td>percentiles over per-call durations of successful search API calls, pooled across queries in the window; runs published without per-call samples contribute their per-run percentiles instead. Failed calls carry no latency sample and show up in the error rate.</td></tr>
     </table>
   </div>
 
@@ -776,7 +776,7 @@ function drawChart(card, series, opts) {
       hoverDots[e].setAttribute("cx", x(t)); hoverDots[e].setAttribute("cy", y(p.v));
       atT.push({ e, v: p.v });
     }
-    atT.sort((a, b) => b.v - a.v);
+    atT.sort((a, b) => (opts.lowerIsBetter ? a.v - b.v : b.v - a.v));
     for (const { e, v } of atT) {
       const row = el("div", { class: "row" });
       const key = el("span", { class: "key" }); key.style.background = colorOf(e);
