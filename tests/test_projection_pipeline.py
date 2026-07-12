@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 import pytest
 
 from keenbench.freshstream.models import build_query_row
-from keenbench.freshstream.pipeline import _rss_provenance
+from keenbench.freshstream.pipeline import _rss_provenance, run_rss
 from keenbench.freshstream.projection import (
     build_projection_prompt,
     clean_projection,
@@ -106,6 +106,12 @@ async def test_run_rss_end_to_end(monkeypatch):
     assert origin["subcategory"] == "rss_tech"
     assert origin["provenance"]["url"] == "https://ex.com/a"
     assert stats.projected == 1 and stats.candidates == 1
+
+
+async def test_run_rss_rejects_negative_min_candidates():
+    hour_ts = datetime(2026, 7, 1, 14, 0, tzinfo=UTC)
+    with pytest.raises(ValueError):
+        await run_rss((), FakeLLM((None, None)), hour_ts=hour_ts, min_candidates=-1)
 
 
 def test_emitted_rows_are_stratifiable():

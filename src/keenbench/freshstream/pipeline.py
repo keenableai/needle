@@ -112,12 +112,15 @@ async def run_rss(
     fetch_concurrency: int = 15,
     llm_concurrency: int = 8,
     max_rows_per_source: int = 50,
+    min_candidates: int = 0,
 ) -> tuple[list[QueryRow], RunStats]:
+    if min_candidates < 0:
+        raise ValueError("min_candidates must be >= 0")
     items, _health = await fetch_all_sources(
         sources, max_rows_per_source=max_rows_per_source, concurrency=fetch_concurrency
     )
     anchor = now if now is not None else _fetch_anchor(items)
-    candidates = pick_per_feed(items, now=anchor)
+    candidates = pick_per_feed(items, now=anchor, min_candidates=min_candidates)
     today = hour_ts.strftime("%Y-%m-%d")
     projections = await project_batch(
         llm,
