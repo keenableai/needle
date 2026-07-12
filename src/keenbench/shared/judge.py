@@ -182,7 +182,9 @@ async def judge_one(
     )
     text = None
     for attempt_prompt in (prompt, prompt + PARSE_RETRY_SUFFIX):
-        text, err = await llm.complete(attempt_prompt, max_tokens=32_768, reasoning_effort="minimal")
+        text, err = await llm.complete(
+            attempt_prompt, max_tokens=32_768, reasoning_effort="minimal"
+        )
         if err is not None:
             return None, err
         judgement = parse_judgement(text)
