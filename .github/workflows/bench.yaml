@@ -60,6 +60,8 @@ jobs:
   bench:
     name: Run benchmarks
     runs-on: ubuntu-latest
+    outputs:
+      failed: ${{ steps.outcomes.outputs.failed }}
     steps:
       - uses: actions/checkout@v4
 
@@ -77,12 +79,16 @@ jobs:
         run: uv sync
 
       - name: freshstream (hourly)
+        id: freshstream
+        continue-on-error: true
         run: |
           uv run keenbench freshstream generate --source rss --out fresh.jsonl
           uv run keenbench freshstream run --queries fresh.jsonl --limit 20 \
             --engines "$ENGINES" --out rbp.json
 
       - name: companyfill (daily schedule, dispatch opt-in, or gold bootstrap)
+        id: companyfill
+        continue-on-error: true
         env:
           RUN_COMPANYFILL: ${{ github.event.schedule == '17 0 * * *' || inputs.companyfill == true }}
         run: |
@@ -97,6 +103,8 @@ jobs:
             --limit 120 --engines "$ENGINES" --judge --out recall.json
 
       - name: rarestream (daily schedule or dispatch opt-in)
+        id: rarestream
+        continue-on-error: true
         env:
           RUN_RARESTREAM: ${{ github.event.schedule == '17 6 * * *' || inputs.rarestream == true }}
         run: |
@@ -108,6 +116,8 @@ jobs:
             --engines "$ENGINES" --out rarestream.json
 
       - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
+        id: scholar
+        continue-on-error: true
         env:
           RUN_SCHOLAR: ${{ github.event.schedule == '17 12 * * *' || inputs.scholar == true }}
         run: |
@@ -122,6 +132,8 @@ jobs:
             --engines "$ENGINES" --num-results 10 --out scholar.json
 
       - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
+        id: legal
+        continue-on-error: true
         env:
           RUN_LEGAL: ${{ github.event.schedule == '17 18 * * *' || inputs.legal == true }}
         run: |
@@ -136,6 +148,8 @@ jobs:
             --engines "$ENGINES" --out legal.json
 
       - name: findallmcp (dispatch opt-in)
+        id: findallmcp
+        continue-on-error: true
         env:
           RUN_FINDALLMCP: ${{ inputs.findallmcp == true }}
         run: |
@@ -147,11 +161,26 @@ jobs:
           uv run keenbench findallmcp run findallmcp.jsonl \
             --backends keenable,webql,exa,parallel --out findallmcp.json
 
+      - name: Collect bench outcomes
+        id: outcomes
+        run: |
+          failed=""
+          if [ "${{ steps.freshstream.outcome }}" = "failure" ]; then failed="$failed freshstream"; fi
+          if [ "${{ steps.companyfill.outcome }}" = "failure" ]; then failed="$failed companyfill"; fi
+          if [ "${{ steps.rarestream.outcome }}" = "failure" ]; then failed="$failed rarestream"; fi
+          if [ "${{ steps.scholar.outcome }}" = "failure" ]; then failed="$failed scholar"; fi
+          if [ "${{ steps.legal.outcome }}" = "failure" ]; then failed="$failed legal"; fi
+          if [ "${{ steps.findallmcp.outcome }}" = "failure" ]; then failed="$failed findallmcp"; fi
+          echo "failed=${failed# }" >> "$GITHUB_OUTPUT"
+
       - name: Publish
         run: |
-          uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
           TS=$(date -u +%Y-%m-%dT%H:%MZ)
-          args="--site site-data --runs-out staged --ts $TS --rbp rbp.json --fresh fresh.jsonl"
+          base_args="--site site-data --runs-out staged --ts $TS"
+          args="$base_args"
+          if [ -s rbp.json ]; then
+            args="$args --rbp rbp.json --fresh fresh.jsonl"
+          fi
           if [ -s recall.json ]; then
             args="$args --recall recall.json --gold site-data/data/gold.jsonl"
           fi
@@ -167,6 +196,11 @@ jobs:
           if [ -s findallmcp.json ]; then
             args="$args --findallmcp findallmcp.json --findallmcp-queries findallmcp.jsonl"
           fi
+          if [ "$args" = "$base_args" ]; then
+            echo "no reports to publish"
+            exit 0
+          fi
+          uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
           uv run python scripts/publish_bench.py $args
           uvx --from huggingface_hub hf upload "$HF_DATASET" staged runs \
             --repo-type dataset --commit-message "bench: $TS"
@@ -186,3 +220,13 @@ jobs:
       pages: write
       id-token: write
     uses: ./.github/workflows/deploy-pages.yaml
+
+  check:
+    name: Fail on bench errors
+    needs: bench
+    if: needs.bench.outputs.failed != ''
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "failed benches: ${{ needs.bench.outputs.failed }}"
+          exit 1
