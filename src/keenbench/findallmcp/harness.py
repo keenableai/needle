@@ -25,8 +25,6 @@ BLOCKED_REGISTRIES = (
     "sec.gov/edgar/search",
     "api.fda.gov",
     "datadashboard.fda.gov",
-    "clinicaltrials.gov/api",
-    "clinicaltrials.gov/search",
     "github.com/search",
     "services.nvd.nist.gov",
     "nvd.nist.gov/vuln/search",
