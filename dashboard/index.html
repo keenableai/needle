@@ -562,6 +562,14 @@ const HOME_ENGINE = "keenable";
 function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
+
+function engineCell(engine, cls = "") {
+  const td = el("td", { class: cls });
+  const key = el("span", { class: "key" });
+  key.style.background = colorOf(engine);
+  td.append(key, document.createTextNode(engine));
+  return td;
+}
 let history = [];
 
 const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
@@ -864,11 +872,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics, lastRunOnly = 
     const tr = el("tr");
     markHome(tr, x.e);
     const best = i === 0 && entries.length > 1 ? " best" : "";
-    const nameCell = el("td", { class: best });
-    const key = el("span", { class: "key" });
-    key.style.background = colorOf(x.e);
-    nameCell.append(key, document.createTextNode(x.e));
-    tr.appendChild(nameCell);
+    tr.appendChild(engineCell(x.e, best));
     tr.appendChild(el("td", { class: "num" + best }, fmt3(x.v)));
     for (const v of x.extra) tr.appendChild(el("td", { class: "num" }, v == null ? "–" : fmt3(v)));
     tr.appendChild(el("td", { class: "num" }, String(x.q)));
@@ -933,15 +937,11 @@ function renderLatencySummary(rows) {
   head.appendChild(el("th", {}, "engine"));
   for (const h of ["p50", "p95", "error rate", "calls"]) head.appendChild(el("th", { class: "num" }, h));
   table.appendChild(head);
-  const bestP50 = Math.min(...stats.map((x) => x.p50));
+  const bestP50 = stats[0].p50;
   for (const x of stats) {
     const tr = el("tr");
     markHome(tr, x.e);
-    const nameCell = el("td");
-    const key = el("span", { class: "key" });
-    key.style.background = colorOf(x.e);
-    nameCell.append(key, document.createTextNode(x.e));
-    tr.appendChild(nameCell);
+    tr.appendChild(engineCell(x.e));
     tr.appendChild(el("td", { class: "num" + (x.p50 === bestP50 && stats.length > 1 ? " best" : "") }, fmtMs(x.p50)));
     tr.appendChild(el("td", { class: "num" }, fmtMs(x.p95)));
     tr.appendChild(el("td", { class: "num" }, x.err == null ? "–" : `${(x.err * 100).toFixed(1)}%`));
@@ -1047,11 +1047,8 @@ function overlapMatrix(holder, engines, cellFor) {
   table.appendChild(head);
   for (const a of engines) {
     const tr = el("tr");
-    const nameCell = el("td");
+    const nameCell = engineCell(a);
     markHome(nameCell, a);
-    const key = el("span", { class: "key" });
-    key.style.background = colorOf(a);
-    nameCell.append(key, document.createTextNode(a));
     tr.appendChild(nameCell);
     for (const b of engines) {
       const cell = a === b ? null : cellFor(a, b);
@@ -1285,10 +1282,7 @@ function renderUniqueness(agg) {
     const pct = unique / total;
     const tr = el("tr");
     markHome(tr, e);
-    const nameCell = el("td");
-    const key = el("span", { class: "key" });
-    key.style.background = colorOf(e);
-    nameCell.append(key, document.createTextNode(e));
+    const nameCell = engineCell(e);
     const barCell = el("td");
     const track = el("span", { class: "bar-track" });
     const fill = el("span", { class: "bar-fill" });
@@ -1655,6 +1649,7 @@ function rowsToMarkdown(rows) {
 }
 
 function buildMarkdown() {
+  const clean = (s) => s.replace(/\s+/g, " ").trim();
   const lines = ["# keenbench — search engine benchmarks"];
   const updated = document.getElementById("updated").textContent;
   if (updated) lines.push("", updated);
@@ -1667,10 +1662,10 @@ function buildMarkdown() {
     const prose = rows ? [] : [...card.querySelectorAll(".prose p")];
     if (!rows && !prose.length) continue;
     lines.push("", `## ${card.querySelector("h2").textContent}`);
-    const sub = card.querySelector(".sub")?.textContent.replace(/\s+/g, " ").trim();
+    const sub = clean(card.querySelector(".sub")?.textContent || "");
     if (sub) lines.push("", sub);
     if (rows) lines.push("", rowsToMarkdown(rows));
-    else for (const p of prose) lines.push("", p.textContent.replace(/\s+/g, " ").trim());
+    else for (const p of prose) lines.push("", clean(p.textContent));
   }
   return lines.join("\n") + "\n";
 }
