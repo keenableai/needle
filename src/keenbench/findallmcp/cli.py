@@ -2,8 +2,10 @@ import asyncio
 import json
 import os
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from keenbench.findallmcp.harness import resolve_backend
 from keenbench.findallmcp.models import (
@@ -101,7 +103,7 @@ class FindallMcp:
         now = datetime.now(UTC)
         hour_ts = now.replace(minute=0, second=0, microsecond=0)
 
-        factories = {
+        factories: dict[str, tuple[Callable[[], Any], Callable[..., Any]]] = {
             "hn": (HnClient, hn_tasks),
             "edgar": (lambda: EdgarFtsClient(max_concurrency=2), edgar_tasks),
             "launches": (LaunchLibraryClient, launches_tasks),
