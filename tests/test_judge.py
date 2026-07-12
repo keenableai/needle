@@ -7,13 +7,13 @@ from keenbench.shared.judge import (
 
 
 class FakeLLM:
-    def __init__(self, reply):
-        self.reply = reply
-        self.prompt = None
+    def __init__(self, *replies):
+        self.replies = list(replies)
+        self.prompts = []
 
     async def complete(self, prompt, *, max_tokens, reasoning_effort):
-        self.prompt = prompt
-        return self.reply
+        self.prompts.append(prompt)
+        return self.replies.pop(0) if len(self.replies) > 1 else self.replies[0]
 
 
 def test_parse_plain_yaml():
@@ -106,3 +106,20 @@ async def test_judge_one_success_and_parse_error():
     errored = FakeLLM((None, {"error_type": "http_error", "error_message": "500"}))
     j, err = await judge_one(errored, "q", url="https://e", today="2026-07-01")
     assert j is None and err["error_type"] == "http_error"
+    assert len(errored.prompts) == 1
+
+
+async def test_judge_one_retries_parse_error_with_format_reminder():
+    llm = FakeLLM(("i refuse to answer", None), ("rating: 2\nlabel: SM\nreasoning: r", None))
+    j, err = await judge_one(llm, "q", url="https://e", today="2026-07-01")
+    assert err is None and j.rating == 2
+    assert len(llm.prompts) == 2
+    assert llm.prompts[1].startswith(llm.prompts[0])
+    assert llm.prompts[1] != llm.prompts[0]
+
+
+async def test_judge_one_gives_up_after_one_parse_retry():
+    llm = FakeLLM(("i refuse to answer", None))
+    j, err = await judge_one(llm, "q", url="https://e", today="2026-07-01")
+    assert j is None and err["error_type"] == "judge_parse_error"
+    assert len(llm.prompts) == 2

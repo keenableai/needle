@@ -10,6 +10,10 @@ from keenbench.shared.prompts import render_prompt
 
 DEFAULT_MAX_CONTENT_CHARS = 50_000
 JUDGE_TEMPLATE = "judgement.jinja"
+PARSE_RETRY_SUFFIX = (
+    "\n\nYour previous reply could not be parsed. Respond with only the YAML fields:"
+    " rating (an integer 0-4), label, reasoning."
+)
 
 RATING_LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
 VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
@@ -176,10 +180,12 @@ async def judge_one(
         today=today,
         max_content_chars=max_content_chars,
     )
-    text, err = await llm.complete(prompt, max_tokens=32_768, reasoning_effort="minimal")
-    if err is not None:
-        return None, err
-    judgement = parse_judgement(text)
-    if judgement is None:
-        return None, {"error_type": "judge_parse_error", "error_message": (text or "")[:500]}
-    return judgement, None
+    text = None
+    for attempt_prompt in (prompt, prompt + PARSE_RETRY_SUFFIX):
+        text, err = await llm.complete(attempt_prompt, max_tokens=32_768, reasoning_effort="minimal")
+        if err is not None:
+            return None, err
+        judgement = parse_judgement(text)
+        if judgement is not None:
+            return judgement, None
+    return None, {"error_type": "judge_parse_error", "error_message": (text or "")[:500]}
