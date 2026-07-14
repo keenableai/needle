@@ -2782,3 +2782,14 @@
 {"ts": "2026-07-14T05:14Z", "engine": "octen", "unique_urls": 48, "total_urls": 65}
 {"ts": "2026-07-14T05:14Z", "engine": "ceramic", "unique_urls": 60, "total_urls": 65}
 {"ts": "2026-07-14T05:14Z", "engine": "you", "unique_urls": 7, "total_urls": 65}
+{"ts": "2026-07-14T06:02Z", "engine": "keenable", "unique_urls": 47, "total_urls": 65}
+{"ts": "2026-07-14T06:02Z", "engine": "exa", "unique_urls": 33, "total_urls": 65}
+{"ts": "2026-07-14T06:02Z", "engine": "google", "unique_urls": 22, "total_urls": 55}
+{"ts": "2026-07-14T06:02Z", "engine": "bing", "unique_urls": 32, "total_urls": 65}
+{"ts": "2026-07-14T06:02Z", "engine": "brave", "unique_urls": 6, "total_urls": 65}
+{"ts": "2026-07-14T06:02Z", "engine": "parallel", "unique_urls": 14, "total_urls": 65}
+{"ts": "2026-07-14T06:02Z", "engine": "tavily", "unique_urls": 35, "total_urls": 64}
+{"ts": "2026-07-14T06:02Z", "engine": "perplexity", "unique_urls": 45, "total_urls": 64}
+{"ts": "2026-07-14T06:02Z", "engine": "octen", "unique_urls": 54, "total_urls": 65}
+{"ts": "2026-07-14T06:02Z", "engine": "ceramic", "unique_urls": 63, "total_urls": 65}
+{"ts": "2026-07-14T06:02Z", "engine": "you", "unique_urls": 7, "total_urls": 65}
