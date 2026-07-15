@@ -2594,5 +2594,15 @@
       "fresh.jsonl",
       "rbp.json"
     ]
+  },
+  {
+    "id": "2026-07-15T1852Z",
+    "ts": "2026-07-15T18:52Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "rbp.json"
+    ]
   }
 ]
