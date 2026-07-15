@@ -2504,5 +2504,13 @@
       "rarestream.json",
       "rbp.json"
     ]
+  },
+  {
+    "id": "2026-07-15T0800Z",
+    "ts": "2026-07-15T08:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
   }
 ]
