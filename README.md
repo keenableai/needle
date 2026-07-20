@@ -17,7 +17,6 @@ keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on t
 | [`companyfill`](#companyfill) | company & financial fact lookups grounded in public registries and SEC filings | answer-recall@K + MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | known-item paper retrieval: by title vs. by a full-text-only detail | recall@K + MRR@K by paper-id match |
 | [`legal`](#legal) | known-item caselaw / CFR retrieval | recall@K + MRR@K by citation/docket/URL identity |
-| [`findallmcp`](#findallmcp) | distribution questions answered by an agent under a dollar budget, comparing MCP search backends | set recall/precision + stat accuracy vs registry gold |
 
 Gold is generated on demand from public sources; nothing is committed.
 `rarestream` is a query producer, not a bench: it samples English rare-word
@@ -154,35 +153,6 @@ reporter citations, docket numbers (scored only alongside a gold party
 token), CourtListener/Justia URLs, and CFR citations; breakdowns by suite,
 syntax, and court.
 
-## findallmcp
-
-Agentic — measures the thesis of
-[The Minimum Experiment](https://keenable.ai/blog/the-minimum-experiment):
-every task asks for a distribution ("find all X", "what fraction of X") whose
-ground truth comes from a structured public registry, so an agent reasoning
-from priors or a few top documents scores measurably worse than one that
-actually holds the population.
-
-```bash
-keenbench findallmcp generate --out findallmcp.jsonl
-keenbench findallmcp run --queries findallmcp.jsonl --backends keenable,webql \
-  --budget-usd 0.25 --out findallmcp.json
-```
-
-Two suites: **`hn`** (Show HN launches via the keyless Algolia API) and
-**`edgar`** (SEC full-text search over curated 8-K phrases, plus an S-1
-count). `run` drives an LLM agent (default `anthropic/claude-sonnet-5`;
-`--agent-model` / `KEENBENCH_AGENT_MODEL`) with the tools of one MCP backend
-at a time — `keenable` (stdio, `npx -y @keenable/mcp`), `webql` (hosted, adds
-map/reduce/view distribution tools), `exa`, `parallel` — under a hard dollar
-budget per task: LLM tokens at list prices plus a per-tool price table, spend
-shown to the agent after every tool result, a forced answer once the budget
-crosses. Scoring is deterministic: enumerations match gold entities by
-normalized name or URL domain (recall/precision/F1); stats score
-`max(0, 1 − relative error)`. `--budget-usd` accepts a comma list, nesting
-summaries under `by_budget`. Agent runs are nondeterministic and paid —
-compare means over repeats.
-
 ## Shared infrastructure
 
 `keenbench.shared.search` — a `SearchClient` protocol (errors-as-data
@@ -195,17 +165,16 @@ an `EngineSpec` to `ENGINES` in
 [`factory.py`](src/keenbench/shared/search/factory.py), set the key env var —
 reports and the dashboard pick it up automatically.
 
-`keenbench.shared.agent` — the self-contained tool-calling agent behind
-findallmcp: an `Agent` loop with optional planning and context compaction,
-`mcp_tools_from_session` to bridge MCP tools, `RunBudget` for hard dollar
-budgets.
+`keenbench.shared.agent` — a self-contained tool-calling agent: an `Agent`
+loop with optional planning and context compaction, `mcp_tools_from_session`
+to bridge MCP tools, `RunBudget` for hard dollar budgets.
 
 Pipelines are pure (inputs + clients in, rows/reports out), so they also
 drive from a notebook or scheduler: the ranking harness is
 `keenbench.shared.rankeval.run_rbp`, the recall scorer
 `keenbench.companyfill.score.run_answers`.
 
-Every report except findallmcp carries a synthetic `ultimate` engine: the
+Every bench report carries a synthetic `ultimate` engine: the
 pooled results of all engines per query, oracle-ranked — by judge rating
 (redundancy-penalty aware) on the RBP benches, gold item first on the
 known-item benches. It is the score ceiling any single engine could reach
@@ -216,8 +185,8 @@ and is excluded from the overlap and uniqueness stats.
 [`bench.yaml`](.github/workflows/bench.yaml) runs against all registered
 engines: freshstream hourly (`--limit 20`); daily with fresh gold —
 companyfill 00:17 UTC (`--limit 120 --judge`), rarestream 06:17
-(`--limit 100`), scholar 12:17 (`--per-cell 7`), legal 18:17. findallmcp is
-manual dispatch only (it spends agent budget). Each run appends summary rows
+(`--limit 100`), scholar 12:17 (`--per-cell 7`), legal 18:17. Each run
+appends summary rows
 (`history.jsonl`), engine-pair URL overlap (`overlap.jsonl`), and per-engine
 unique-URL counts (`uniqueness.jsonl`) to `gh-pages`, rendered as a dashboard
 at <https://super-journey-4z52474.pages.github.io/>, and archives full
