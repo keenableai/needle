@@ -487,8 +487,6 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <tr><td>parallel</td><td>Parallel /v1/search</td><td>mode=basic, max_results=k; site: → include_domains, after: → after_date</td></tr>
       <tr><td>perplexity</td><td>Perplexity /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → date filters</td></tr>
       <tr><td>tavily</td><td>Tavily /search</td><td>search_depth=basic, max_results=min(k,20); site: → include_domains, after:/before: → start/end_date</td></tr>
-      <tr><td>octen</td><td>Octen /search</td><td>count=k, highlights ≤512 tokens; site: → include_domains, after:/before: → start/end_time</td></tr>
-      <tr><td>ceramic</td><td>Ceramic /search</td><td>query truncated to 50 words, maxDescriptionLength=1000; site:/after:/before: are stripped, not forwarded (unsupported upstream)</td></tr>
       <tr><td>you</td><td>You.com /v1/search</td><td>count=min(k,100); site: → include_domains, after:/before: → freshness window</td></tr>
     </table>
   </div>
@@ -520,10 +518,11 @@ const RUNS_BASE = "https://huggingface.co/datasets/keenable-ai/keenbench-results
 
 let ENGINES = [];
 const ENGINE_SLOT = new Map();
+const HIDDEN_ENGINES = new Set(["ceramic", "octen"]);
 
 function registerEngines(names) {
   for (const name of names) {
-    if (!ENGINE_SLOT.has(name)) {
+    if (!HIDDEN_ENGINES.has(name) && !ENGINE_SLOT.has(name)) {
       ENGINE_SLOT.set(name, ENGINE_SLOT.size);
       ENGINES.push(name);
     }
@@ -1436,7 +1435,7 @@ async function renderRunDetail(runs) {
   try {
     const report = await fetchJson(`${RUNS_BASE}/${run.id}/${artifact}`);
     if (seq !== runDetailSeq) return;
-    const available = Object.keys(report.engines || {});
+    const available = Object.keys(report.engines || {}).filter((e) => !HIDDEN_ENGINES.has(e));
     if (!available.includes(engineSel.value)) {
       const current = engineSel.value;
       engineSel.replaceChildren();
@@ -1623,7 +1622,7 @@ async function main() {
     fetchRows("data/uniqueness.jsonl"),
     fetchJson("data/latest_companyfill.json").catch(() => null),
   ]);
-  history = histRows.filter((r) => r.bench !== "findallmcp");
+  history = histRows.filter((r) => r.bench !== "findallmcp" && !HIDDEN_ENGINES.has(r.engine));
   registerEngines(history.map((r) => r.engine));
   registerEngines(Object.keys(latestCompanyfill?.engines || {}));
   document.documentElement.style.setProperty("--home", colorOf(HOME_ENGINE));
@@ -1637,8 +1636,8 @@ async function main() {
   renderLeaderboards(history);
   renderLatencySummary(history);
   renderAll(latestCompanyfill);
-  const uniqAgg = uniquenessAgg(uniquenessRows);
-  renderOverlap(overlapRows, uniqAgg);
+  const uniqAgg = uniquenessAgg(uniquenessRows.filter((r) => !HIDDEN_ENGINES.has(r.engine)));
+  renderOverlap(overlapRows.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)), uniqAgg);
   renderUniqueness(uniqAgg);
   initRunBrowser();
   document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
