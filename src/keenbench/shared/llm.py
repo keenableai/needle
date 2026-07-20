@@ -178,7 +178,13 @@ class OpenRouterClient:
         except (json.JSONDecodeError, ValueError) as exc:
             raise LLMClientError("bad_json", str(exc)[:MAX_ERROR_CHARS]) from exc
         if isinstance(payload, dict) and payload.get("error"):
-            raise LLMClientError("api_error", str(payload["error"])[:MAX_ERROR_CHARS])
+            error = payload["error"]
+            code = error.get("code") if isinstance(error, dict) else None
+            raise LLMClientError(
+                "api_error",
+                str(error)[:MAX_ERROR_CHARS],
+                retryable=isinstance(code, int) and code in RETRYABLE_STATUSES,
+            )
         return payload
 
 

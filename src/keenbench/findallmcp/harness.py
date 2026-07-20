@@ -11,10 +11,13 @@ from mcp.client.streamable_http import streamablehttp_client
 
 from keenbench.findallmcp.models import model_price, tool_price
 from keenbench.shared.agent import Agent, RunBudget, Tool, mcp_tools_from_session
-from keenbench.shared.agent.core import truncate_content
+from keenbench.shared.agent.core import ToolCallRecord, truncate_content
 from keenbench.shared.llm import OpenRouterClient
 
 MAX_ERROR_CHARS = 500
+NUDGE_BUDGET_FRACTION = 0.6
+MAX_NUDGES = 3
+WRAP_UP_MAX_STEPS = 8
 BLOCKED_REGISTRIES = (
     "hn.algolia.com",
     "hacker-news.firebaseio.com",
@@ -143,18 +146,38 @@ async def run_task(
         tool_cost=tool_price,
     )
     out: dict[str, Any] = {"answer_text": None, "turns": 0, "error": None}
-    try:
-        await asyncio.wait_for(
-            _run_task_inner(
-                spec, llm, out, budget, prompt=prompt, max_turns=max_turns, trace=trace
-            ),
-            timeout=deadline_s,
+    records: list[ToolCallRecord] = []
+
+    async def _attempts() -> None:
+        await _run_task_inner(
+            spec, llm, out, budget, records, prompt=prompt, max_turns=max_turns
         )
+        if (out["error"] or {}).get("error_type") == "backend_crash" and not budget.exhausted:
+            out["error"] = None
+            await _run_task_inner(
+                spec, llm, out, budget, records, prompt=prompt, max_turns=max_turns
+            )
+
+    try:
+        await asyncio.wait_for(_attempts(), timeout=deadline_s)
     except TimeoutError:
         out["error"] = {
             "error_type": "cell_timeout",
             "error_message": f"exceeded {deadline_s:.0f}s wall clock",
         }
+    if trace:
+        out["trace"] = [
+            {
+                "name": r.name,
+                "arguments": r.arguments,
+                **(
+                    {"error": r.error}
+                    if r.error is not None
+                    else {"result": truncate_content(r.result or "", 4000)}
+                ),
+            }
+            for r in records
+        ]
     out["spent_usd"] = budget.spent
     out["llm_usd"] = budget.llm_usd
     out["tool_usd"] = budget.tool_usd
@@ -171,10 +194,10 @@ async def _run_task_inner(
     llm: OpenRouterClient,
     out: dict[str, Any],
     budget: RunBudget,
+    records: list[ToolCallRecord],
     *,
     prompt: str,
     max_turns: int,
-    trace: bool,
 ) -> None:
     try:
         async with AsyncExitStack() as stack:
@@ -200,22 +223,12 @@ async def _run_task_inner(
                 [_guard_registry(t) for t in mcp_tools_from_session(session, listed.tools)],
                 system_prompt,
                 max_steps=max_turns,
+                nudge_budget_fraction=NUDGE_BUDGET_FRACTION,
+                max_nudges=MAX_NUDGES,
+                wrap_up_max_steps=WRAP_UP_MAX_STEPS,
             )
-            result = await agent.run(prompt, budget=budget)
+            result = await agent.run(prompt, budget=budget, records_out=records)
             out["turns"] = result.steps
-            if trace:
-                out["trace"] = [
-                    {
-                        "name": r.name,
-                        "arguments": r.arguments,
-                        **(
-                            {"error": r.error}
-                            if r.error is not None
-                            else {"result": truncate_content(r.result or "", 4000)}
-                        ),
-                    }
-                    for r in result.tool_calls
-                ]
             if result.error is not None:
                 out["error"] = {
                     "error_type": "agent_error",

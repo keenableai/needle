@@ -22,6 +22,21 @@ BUDGET_EXHAUSTED_PROMPT = (
     "The budget is exhausted. Respond now with only your final answer to the original task."
 )
 
+NUDGE_PROMPT_TEMPLATE = (
+    "You have spent only ${spent:.2f} of your ${limit:.2f} budget - do not finalize yet. "
+    "A single probe returning zero or few results is a failed probe, not an answer. Use "
+    "the remaining budget to gather more evidence or verify your answer against an "
+    "independent source, then give your final answer."
+)
+
+WRAP_UP_PROMPT = (
+    "The budget is exhausted. Do not run any new searches or fetch new pages. You may "
+    "use a few more tool calls ONLY to consolidate evidence you already gathered (for "
+    "example, aggregate or re-read saved result sets), then respond with only your final "
+    "answer to the original task. Never drop an entity you found: an imperfect real item "
+    "can still score, an omitted one cannot."
+)
+
 MAX_STEPS_EXCEEDED_PROMPT = (
     "You have used all available steps. Based on the conversation and tool results so "
     "far, provide your best answer to the user's original question. Synthesize what "

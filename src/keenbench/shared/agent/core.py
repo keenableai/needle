@@ -11,8 +11,10 @@ from keenbench.shared.agent.prompts import (
     COMPACTION_PROMPT,
     END_PLAN_TOKEN,
     MAX_STEPS_EXCEEDED_PROMPT,
+    NUDGE_PROMPT_TEMPLATE,
     PLAN_PREFIX,
     PLAN_SUFFIX,
+    WRAP_UP_PROMPT,
     build_planning_prompt,
 )
 from keenbench.shared.llm import ChatLLMClient, ChatResult, ChatUsage, LLMClientError
@@ -137,6 +139,9 @@ class Agent:
         compaction_threshold: float = 0.75,
         planning_enabled: bool = False,
         max_tool_content_chars: int = MAX_TOOL_CONTENT_CHARS,
+        nudge_budget_fraction: float = 0.0,
+        max_nudges: int = 3,
+        wrap_up_max_steps: int = 0,
     ) -> None:
         self.llm_client = llm_client
         self.system_prompt = system_prompt
@@ -144,6 +149,9 @@ class Agent:
         self.max_output_tokens = max_output_tokens
         self.planning_enabled = planning_enabled
         self.max_tool_content_chars = max_tool_content_chars
+        self.nudge_budget_fraction = nudge_budget_fraction
+        self.max_nudges = max_nudges
+        self.wrap_up_max_steps = wrap_up_max_steps
         self._compaction_token_limit = int(
             (context_window_tokens - max_output_tokens) * compaction_threshold
         )
@@ -162,9 +170,16 @@ class Agent:
         if budget is not None:
             budget.charge_llm(response.usage)
 
-    async def run(self, user_message: str, *, budget: RunBudget | None = None) -> AgentResult:
+    async def run(
+        self,
+        user_message: str,
+        *,
+        budget: RunBudget | None = None,
+        records_out: list[ToolCallRecord] | None = None,
+    ) -> AgentResult:
         usage = AgentUsage()
-        records: list[ToolCallRecord] = []
+        records = records_out if records_out is not None else []
+        nudges_sent = 0
         continuation_chunks: list[str] = []
         messages: list[dict[str, Any]] = [
             {"role": "system", "content": self.system_prompt},
@@ -203,6 +218,23 @@ class Agent:
                     continuation_chunks.append(response.content)
                     messages.append({"role": "user", "content": "Continue."})
                     continue
+                if (
+                    budget is not None
+                    and self.nudge_budget_fraction > 0
+                    and nudges_sent < self.max_nudges
+                    and budget.spent < budget.limit_usd * self.nudge_budget_fraction
+                ):
+                    nudges_sent += 1
+                    continuation_chunks.clear()
+                    messages.append(
+                        {
+                            "role": "user",
+                            "content": NUDGE_PROMPT_TEMPLATE.format(
+                                spent=budget.spent, limit=budget.limit_usd
+                            ),
+                        }
+                    )
+                    continue
                 full = (
                     "".join(continuation_chunks) + response.content
                     if continuation_chunks
@@ -219,36 +251,7 @@ class Agent:
                 )
             continuation_chunks.clear()
 
-            messages.append(
-                {
-                    "role": "assistant",
-                    "content": response.content or None,
-                    "tool_calls": response.tool_calls,
-                }
-            )
-            executed = await asyncio.gather(
-                *(
-                    self._execute_tool(
-                        tc.get("function", {}).get("name", ""),
-                        tc.get("function", {}).get("arguments", "{}"),
-                        budget,
-                    )
-                    for tc in response.tool_calls
-                )
-            )
-            for tc, record in zip(response.tool_calls, executed, strict=True):
-                records.append(record)
-                content = truncate_content(
-                    (record.result if record.error is None else record.error) or "",
-                    self.max_tool_content_chars,
-                )
-                messages.append(
-                    {"role": "tool", "tool_call_id": tc.get("id", ""), "content": content}
-                )
-            if budget is not None:
-                messages[-1]["content"] += (
-                    f"\n\n[spend so far: ${budget.spent:.3f} of ${budget.limit_usd:.2f}]"
-                )
+            await self._run_tool_calls(response, messages, records, budget)
 
             if response.usage.prompt_tokens > self._compaction_token_limit:
                 messages = await self._compact_history(messages, usage, budget)
@@ -256,6 +259,42 @@ class Agent:
         return await self._handle_max_steps_exceeded(
             messages, usage, records, continuation_chunks, budget
         )
+
+    async def _run_tool_calls(
+        self,
+        response: ChatResult,
+        messages: list[dict[str, Any]],
+        records: list[ToolCallRecord],
+        budget: RunBudget | None,
+    ) -> None:
+        messages.append(
+            {
+                "role": "assistant",
+                "content": response.content or None,
+                "tool_calls": response.tool_calls,
+            }
+        )
+        executed = await asyncio.gather(
+            *(
+                self._execute_tool(
+                    tc.get("function", {}).get("name", ""),
+                    tc.get("function", {}).get("arguments", "{}"),
+                    budget,
+                )
+                for tc in response.tool_calls
+            )
+        )
+        for tc, record in zip(response.tool_calls, executed, strict=True):
+            records.append(record)
+            content = truncate_content(
+                (record.result if record.error is None else record.error) or "",
+                self.max_tool_content_chars,
+            )
+            messages.append({"role": "tool", "tool_call_id": tc.get("id", ""), "content": content})
+        if budget is not None:
+            messages[-1]["content"] += (
+                f"\n\n[spend so far: ${budget.spent:.3f} of ${budget.limit_usd:.2f}]"
+            )
 
     async def _handle_budget_exhausted(
         self,
@@ -265,6 +304,38 @@ class Agent:
         budget: RunBudget,
         steps: int,
     ) -> AgentResult:
+        if self.wrap_up_max_steps > 0:
+            messages.append({"role": "user", "content": WRAP_UP_PROMPT})
+            for _ in range(self.wrap_up_max_steps):
+                try:
+                    response = await self.llm_client.chat(
+                        messages,
+                        tools=self._openai_tools or None,
+                        max_tokens=self.max_output_tokens,
+                    )
+                except LLMClientError as e:
+                    return AgentResult(
+                        content="",
+                        success=False,
+                        usage=usage,
+                        tool_calls=records,
+                        steps=steps,
+                        error=str(e),
+                        finish_reason="error",
+                        budget=budget,
+                    )
+                self._account(usage, response, budget)
+                if not response.tool_calls:
+                    return AgentResult(
+                        content=response.content,
+                        success=True,
+                        usage=usage,
+                        tool_calls=records,
+                        steps=steps,
+                        finish_reason="budget",
+                        budget=budget,
+                    )
+                await self._run_tool_calls(response, messages, records, budget)
         messages.append({"role": "user", "content": BUDGET_EXHAUSTED_PROMPT})
         try:
             final = await self.llm_client.chat(

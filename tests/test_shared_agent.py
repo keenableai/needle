@@ -238,3 +238,96 @@ async def test_mcp_dispatch_raises_on_error_result():
     call = _dispatch(FakeSession(), "t")
     with pytest.raises(RuntimeError, match="boom"):
         await call()
+
+
+async def test_nudge_rejects_early_final_answer():
+    llm = ScriptedLLM(
+        [
+            ChatResult(content='{"value": 0}'),
+            ChatResult(content='{"value": 62}'),
+        ]
+    )
+    agent = Agent(llm, [], "sys", max_steps=5, nudge_budget_fraction=0.6, max_nudges=1)
+    result = await agent.run("q", budget=_budget(limit=1.0))
+    assert result.success and result.content == '{"value": 62}'
+    assert len(llm.calls) == 2
+    assert any(
+        m["role"] == "user" and "do not finalize yet" in m["content"]
+        for m in llm.calls[1]["messages"]
+    )
+
+
+async def test_nudge_disabled_by_default():
+    llm = ScriptedLLM([ChatResult(content='{"value": 0}')])
+    agent = Agent(llm, [], "sys", max_steps=5)
+    result = await agent.run("q", budget=_budget(limit=1.0))
+    assert result.content == '{"value": 0}'
+    assert len(llm.calls) == 1
+
+
+async def test_nudge_skipped_past_budget_fraction():
+    llm = ScriptedLLM(
+        [ChatResult(content='{"v": 1}', usage=ChatUsage(prompt_tokens=0, completion_tokens=0))]
+    )
+    budget = _budget(limit=1.0)
+    budget.tool_usd = 0.7
+    agent = Agent(llm, [], "sys", max_steps=5, nudge_budget_fraction=0.6, max_nudges=3)
+    result = await agent.run("q", budget=budget)
+    assert result.content == '{"v": 1}'
+    assert len(llm.calls) == 1
+
+
+async def test_wrap_up_allows_consolidation_tool_calls():
+    calls: list[str] = []
+    llm = ScriptedLLM(
+        [
+            ChatResult(content="", tool_calls=[_tool_call("search", '{"query": "agg"}')]),
+            ChatResult(content='{"items": []}'),
+        ]
+    )
+    budget = _budget(limit=0.05)
+    budget.tool_usd = 0.05
+    agent = Agent(llm, [_search_tool(calls)], "sys", max_steps=10, wrap_up_max_steps=2)
+    result = await agent.run("q", budget=budget)
+    assert result.success and result.finish_reason == "budget"
+    assert result.content == '{"items": []}'
+    assert calls == ["agg"]
+    assert llm.calls[0]["tools"] is not None
+    assert any(
+        m["role"] == "user" and "consolidate" in m["content"]
+        for m in llm.calls[0]["messages"]
+    )
+
+
+async def test_wrap_up_step_limit_forces_final_answer():
+    llm = ScriptedLLM(
+        [
+            ChatResult(content="", tool_calls=[_tool_call("search", '{"query": "a"}')]),
+            ChatResult(content="", tool_calls=[_tool_call("search", '{"query": "b"}')]),
+            ChatResult(content='{"items": [1]}'),
+        ]
+    )
+    budget = _budget(limit=0.05)
+    budget.tool_usd = 0.05
+    agent = Agent(llm, [_search_tool([])], "sys", max_steps=10, wrap_up_max_steps=2)
+    result = await agent.run("q", budget=budget)
+    assert result.success and result.content == '{"items": [1]}'
+    assert llm.calls[2]["tools"] is None
+
+
+async def test_records_out_survives_llm_crash():
+    class CrashingLLM(ScriptedLLM):
+        async def chat(self, messages, tools=None, **kwargs):
+            if not self._responses:
+                raise RuntimeError("session died")
+            return await super().chat(messages, tools=tools, **kwargs)
+
+    llm = CrashingLLM(
+        [ChatResult(content="", tool_calls=[_tool_call("search", '{"query": "x"}')])]
+    )
+    records = []
+    agent = Agent(llm, [_search_tool([])], "sys", max_steps=5)
+    with pytest.raises(RuntimeError, match="session died"):
+        await agent.run("q", budget=_budget(), records_out=records)
+    assert len(records) == 1
+    assert records[0].name == "search"
