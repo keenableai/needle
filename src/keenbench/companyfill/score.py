@@ -174,7 +174,8 @@ async def run_answers(
     for idx, name in enumerate(engine_names):
         per_query = [entries[idx] for entries in query_outs]
         engines_out[name] = _summary(per_query, latency_stats(engines[name].latencies_ms))
-    engines_out[ULTIMATE] = _summary(_ultimate(query_outs, cap=num_results), None)
+    if engine_names:
+        engines_out[ULTIMATE] = _summary(_ultimate(query_outs, cap=num_results), None)
 
     classify_misses(query_outs, engine_names, engines_out)
 

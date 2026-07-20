@@ -92,12 +92,15 @@ def _ultimate_query(
         error = {"error_type": "all_engines_failed", "error_message": "every engine errored"}
         return _score_query(query, None, error, judgements_by_url, k=k)
     urls = list(merged)
-    ratings = [j.rating if (j := judgements_by_url[u]) is not None else None for u in urls]
-    ordered = list(merged.values())
-    if all(r is not None for r in ratings):
-        order = oracle_order(urls, ratings, query_text=query.text)
-        ordered = [ordered[i] for i in order]
-    return _score_query(query, ordered[:num_results], None, judgements_by_url, k=k)
+    ratings: list[int] = []
+    for url in urls:
+        judgement = judgements_by_url[url]
+        if judgement is None:
+            return _score_query(query, list(merged.values()), None, judgements_by_url, k=k)
+        ratings.append(judgement.rating)
+    order = oracle_order(urls, ratings, query_text=query.text)
+    ordered = [merged[urls[i]] for i in order][:num_results]
+    return _score_query(query, ordered, None, judgements_by_url, k=k)
 
 
 def _summarize(
@@ -166,14 +169,15 @@ async def run_rbp(
             results, err = searches[ni]
             per_query.append(_score_query(query, results, err, judgements_by_url, k=k))
         engines_out[name] = _summarize(per_query, k=k, latencies_ms=engines[name].latencies_ms)
-    engines_out[ULTIMATE] = _summarize(
-        [
-            _ultimate_query(query, searches, merged, judgements, num_results=num_results, k=k)
-            for query, (searches, merged, judgements) in zip(queries, query_outs, strict=True)
-        ],
-        k=k,
-        latencies_ms=[],
-    )
+    if names:
+        engines_out[ULTIMATE] = _summarize(
+            [
+                _ultimate_query(query, searches, merged, judgements, num_results=num_results, k=k)
+                for query, (searches, merged, judgements) in zip(queries, query_outs, strict=True)
+            ],
+            k=k,
+            latencies_ms=[],
+        )
 
     return {
         "num_queries": len(queries),

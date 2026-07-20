@@ -178,3 +178,9 @@ async def test_ultimate_unscored_when_all_engines_fail():
     ult = report["engines"]["ultimate"]
     assert ult["num_scored"] == 0
     assert ult["search_errors"] == 1
+
+
+async def test_no_engines_no_ultimate():
+    queries = [_gold("q1", "title", {"arxiv": "2506.00001"}, "2506.00001")]
+    report = await run_papers(queries, {}, num_results=5)
+    assert report["engines"] == {}

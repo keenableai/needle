@@ -190,3 +190,24 @@ async def test_run_rbp_ultimate_unscored_when_all_engines_fail():
     assert ult["search_errors"] == 1
     assert ult["num_scored"] == 0
     assert ult["per_query"][0]["search_error"]["error_type"] == "all_engines_failed"
+
+
+async def test_run_rbp_ultimate_unscored_when_pooled_judgement_fails():
+    class FlakyJudge:
+        async def complete(self, prompt, *, max_tokens, reasoning_effort):
+            if "badhost" in prompt:
+                return None, {"error_type": "http_error", "error_message": "500"}
+            return "rating: 4\nlabel: FullyM\nreasoning: x", None
+
+    a = FakeEngine([SearchResult(url="https://goodhost/a", title="fine")])
+    b = FakeEngine([SearchResult(url="https://badhost/b", title="broken")])
+    report = await run_rbp([q("q1")], {"a": a, "b": b}, FlakyJudge())
+    assert report["engines"]["a"]["num_scored"] == 1
+    ult = report["engines"]["ultimate"]
+    assert ult["num_scored"] == 0
+    assert ult["judge_errors"] == 1
+
+
+async def test_run_rbp_no_engines_no_ultimate():
+    report = await run_rbp([q("q1")], {}, FakeJudge())
+    assert report["engines"] == {}
