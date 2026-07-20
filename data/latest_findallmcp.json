@@ -6,186 +6,186 @@
   "agent_model": "anthropic/claude-sonnet-5",
   "backends": {
     "keenable": {
-      "mean_score": 0.6334504646751513,
-      "set_recall": 0.29411764705882354,
-      "set_precision": 0.2631578947368421,
-      "set_f1": 0.27777777777777773,
-      "stat_score": 0.8596723430860364,
-      "stat_within_tol": 0.6666666666666666,
-      "num_scored": 5,
-      "errors": 1,
-      "mean_spent_usd": 0.3644,
-      "mean_tool_calls": 10.333333333333334,
+      "mean_score": 0.5151360513799808,
+      "set_recall": 0.28860613071139385,
+      "set_precision": 0.47979797979797983,
+      "set_f1": 0.32296296296296295,
+      "stat_score": 0.7416659720485678,
+      "stat_within_tol": 0.3333333333333333,
+      "num_scored": 6,
+      "errors": 0,
+      "mean_spent_usd": 0.4249,
+      "mean_tool_calls": 10.166666666666666,
       "by_budget": {
         "0.25": {
-          "mean_score": 0.6334504646751513,
-          "set_recall": 0.29411764705882354,
-          "set_precision": 0.2631578947368421,
-          "set_f1": 0.27777777777777773,
-          "stat_score": 0.8596723430860364,
-          "stat_within_tol": 0.6666666666666666,
-          "num_scored": 5,
-          "errors": 1,
-          "mean_spent_usd": 0.3644,
-          "mean_tool_calls": 10.333333333333334
+          "mean_score": 0.5151360513799808,
+          "set_recall": 0.28860613071139385,
+          "set_precision": 0.47979797979797983,
+          "set_f1": 0.32296296296296295,
+          "stat_score": 0.7416659720485678,
+          "stat_within_tol": 0.3333333333333333,
+          "num_scored": 6,
+          "errors": 0,
+          "mean_spent_usd": 0.4249,
+          "mean_tool_calls": 10.166666666666666
         }
       },
       "by_suite": {
         "edgar": {
-          "n": 2,
-          "mean_score": 0.6561085972850679
+          "n": 3,
+          "mean_score": 0.3774552660721571
         },
         "hn": {
           "n": 3,
-          "mean_score": 0.6183450429352069
+          "mean_score": 0.6528168366878044
         }
       },
       "by_bucket": {
         "enumerate": {
-          "n": 2,
-          "mean_score": 0.29411764705882354
+          "n": 3,
+          "mean_score": 0.28860613071139385
         },
         "stat": {
           "n": 3,
-          "mean_score": 0.8596723430860364
+          "mean_score": 0.7416659720485678
         }
       }
     },
     "webql": {
-      "mean_score": 0.4633780435251023,
-      "set_recall": 0.39215686274509803,
-      "set_precision": 0.36758563074352546,
-      "set_f1": 0.29279279279279274,
-      "stat_score": 0.5345992243051066,
-      "stat_within_tol": 0.3333333333333333,
+      "mean_score": 0.44626750881538263,
+      "set_recall": 0.2731829573934837,
+      "set_precision": 0.2888888888888889,
+      "set_f1": 0.16477272727272727,
+      "stat_score": 0.6193520602372815,
+      "stat_within_tol": 0.0,
       "num_scored": 6,
       "errors": 0,
-      "mean_spent_usd": 0.3162,
-      "mean_tool_calls": 7.666666666666667,
+      "mean_spent_usd": 0.3602,
+      "mean_tool_calls": 13.166666666666666,
       "by_budget": {
         "0.25": {
-          "mean_score": 0.4633780435251023,
-          "set_recall": 0.39215686274509803,
-          "set_precision": 0.36758563074352546,
-          "set_f1": 0.29279279279279274,
-          "stat_score": 0.5345992243051066,
-          "stat_within_tol": 0.3333333333333333,
+          "mean_score": 0.44626750881538263,
+          "set_recall": 0.2731829573934837,
+          "set_precision": 0.2888888888888889,
+          "set_f1": 0.16477272727272727,
+          "stat_score": 0.6193520602372815,
+          "stat_within_tol": 0.0,
           "num_scored": 6,
           "errors": 0,
-          "mean_spent_usd": 0.3162,
-          "mean_tool_calls": 7.666666666666667
+          "mean_spent_usd": 0.3602,
+          "mean_tool_calls": 13.166666666666666
         }
       },
       "by_suite": {
         "edgar": {
           "n": 3,
-          "mean_score": 0.7088989441930619
+          "mean_score": 0.47473334499038294
         },
         "hn": {
           "n": 3,
-          "mean_score": 0.21785714285714283
+          "mean_score": 0.4178016726403823
         }
       },
       "by_bucket": {
         "enumerate": {
           "n": 3,
-          "mean_score": 0.39215686274509803
+          "mean_score": 0.2731829573934837
         },
         "stat": {
           "n": 3,
-          "mean_score": 0.5345992243051066
+          "mean_score": 0.6193520602372815
         }
       }
     },
     "exa": {
-      "mean_score": 0.5107788916323149,
-      "set_recall": 0.4705882352941177,
-      "set_precision": 0.14221521942110177,
-      "set_f1": 0.17395002658160555,
-      "stat_score": 0.5509695479705122,
-      "stat_within_tol": 0.0,
+      "mean_score": 0.45483059522029784,
+      "set_recall": 0.22479275110854058,
+      "set_precision": 0.43939393939393945,
+      "set_f1": 0.24785456187895213,
+      "stat_score": 0.6848684393320551,
+      "stat_within_tol": 0.3333333333333333,
       "num_scored": 6,
       "errors": 0,
-      "mean_spent_usd": 0.433,
-      "mean_tool_calls": 8.333333333333334,
+      "mean_spent_usd": 0.4422,
+      "mean_tool_calls": 7.5,
       "by_budget": {
         "0.25": {
-          "mean_score": 0.5107788916323149,
-          "set_recall": 0.4705882352941177,
-          "set_precision": 0.14221521942110177,
-          "set_f1": 0.17395002658160555,
-          "stat_score": 0.5509695479705122,
-          "stat_within_tol": 0.0,
+          "mean_score": 0.45483059522029784,
+          "set_recall": 0.22479275110854058,
+          "set_precision": 0.43939393939393945,
+          "set_f1": 0.24785456187895213,
+          "stat_score": 0.6848684393320551,
+          "stat_within_tol": 0.3333333333333333,
           "num_scored": 6,
           "errors": 0,
-          "mean_spent_usd": 0.433,
-          "mean_tool_calls": 8.333333333333334
+          "mean_spent_usd": 0.4422,
+          "mean_tool_calls": 7.5
         }
       },
       "by_suite": {
         "edgar": {
           "n": 3,
-          "mean_score": 0.3514328808446456
+          "mean_score": 0.4579471935653086
         },
         "hn": {
           "n": 3,
-          "mean_score": 0.6701249024199843
+          "mean_score": 0.4517139968752872
         }
       },
       "by_bucket": {
         "enumerate": {
           "n": 3,
-          "mean_score": 0.4705882352941177
+          "mean_score": 0.22479275110854058
         },
         "stat": {
           "n": 3,
-          "mean_score": 0.5509695479705122
+          "mean_score": 0.6848684393320551
         }
       }
     },
     "parallel": {
-      "mean_score": 0.3962065835161303,
-      "set_recall": 0.14215686274509806,
-      "set_precision": 0.4761904761904762,
-      "set_f1": 0.21666666666666667,
-      "stat_score": 0.6502563042871625,
+      "mean_score": 0.41928154746096075,
+      "set_recall": 0.09080393290919607,
+      "set_precision": 0.4166666666666667,
+      "set_f1": 0.12026862026862027,
+      "stat_score": 0.7477591620127253,
       "stat_within_tol": 0.3333333333333333,
       "num_scored": 6,
       "errors": 0,
-      "mean_spent_usd": 0.3836,
-      "mean_tool_calls": 6.166666666666667,
+      "mean_spent_usd": 0.4158,
+      "mean_tool_calls": 5.666666666666667,
       "by_budget": {
         "0.25": {
-          "mean_score": 0.3962065835161303,
-          "set_recall": 0.14215686274509806,
-          "set_precision": 0.4761904761904762,
-          "set_f1": 0.21666666666666667,
-          "stat_score": 0.6502563042871625,
+          "mean_score": 0.41928154746096075,
+          "set_recall": 0.09080393290919607,
+          "set_precision": 0.4166666666666667,
+          "set_f1": 0.12026862026862027,
+          "stat_score": 0.7477591620127253,
           "stat_within_tol": 0.3333333333333333,
           "num_scored": 6,
           "errors": 0,
-          "mean_spent_usd": 0.3836,
-          "mean_tool_calls": 6.166666666666667
+          "mean_spent_usd": 0.4158,
+          "mean_tool_calls": 5.666666666666667
         }
       },
       "by_suite": {
         "edgar": {
           "n": 3,
-          "mean_score": 0.3484162895927602
+          "mean_score": 0.2822171708340619
         },
         "hn": {
           "n": 3,
-          "mean_score": 0.4439968774395004
+          "mean_score": 0.5563459240878595
         }
       },
       "by_bucket": {
         "enumerate": {
           "n": 3,
-          "mean_score": 0.14215686274509806
+          "mean_score": 0.09080393290919607
         },
         "stat": {
           "n": 3,
-          "mean_score": 0.6502563042871625
+          "mean_score": 0.7477591620127253
         }
       }
     }
