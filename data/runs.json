@@ -3445,5 +3445,15 @@
       "fresh.jsonl",
       "rbp.json"
     ]
+  },
+  {
+    "id": "2026-07-20T1206Z",
+    "ts": "2026-07-20T12:06Z",
+    "artifacts": [
+      "findallmcp.json",
+      "findallmcp.jsonl",
+      "fresh.jsonl",
+      "rbp.json"
+    ]
   }
 ]
