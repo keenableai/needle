@@ -17,6 +17,7 @@ MODEL_PRICES_PER_MTOK = {
     "anthropic/claude-sonnet-5": (3.0, 15.0),
     "anthropic/claude-haiku-4.5": (1.0, 5.0),
     "anthropic/claude-opus-4.8": (15.0, 75.0),
+    "openai/gpt-5.6-sol": (5.0, 30.0),
     "google/gemini-3.5-flash": (1.5, 9.0),
     "google/gemini-3-flash-preview": (0.5, 3.0),
     "google/gemini-3.1-flash-lite": (0.25, 1.5),
