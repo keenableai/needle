@@ -52,3 +52,24 @@ def apply_redundancy_penalties(
 
 def rbp_at_k(ratings: Sequence[int], *, p: float = RBP_P, k: int = RBP_K) -> float:
     return (1.0 - p) * sum(gain(r) * p**i for i, r in enumerate(ratings[:k]))
+
+
+def oracle_order(urls: Sequence[str], ratings: Sequence[int], *, query_text: str = "") -> list[int]:
+    remaining = sorted(range(len(urls)), key=lambda i: -ratings[i])
+    if SITE_OPERATOR_RE.search(query_text.lower()):
+        return remaining
+    picked: list[int] = []
+    domain_counts: dict[str, int] = {}
+
+    def penalized(i: int) -> int:
+        prior = domain_counts.get(url_domain(urls[i]), 0)
+        penalty = FULL_DOMAIN_PENALTY if prior >= 2 else PARTIAL_DOMAIN_PENALTY if prior == 1 else 0
+        return max(0, ratings[i] - penalty)
+
+    while remaining:
+        best = max(remaining, key=penalized)
+        remaining.remove(best)
+        picked.append(best)
+        domain = url_domain(urls[best])
+        domain_counts[domain] = domain_counts.get(domain, 0) + 1
+    return picked

@@ -136,3 +136,18 @@ async def test_run_legal_classifies_misses():
     errored = await run_legal([GOLD[0]], {"err": FakeEngine([], error={"error_type": "http"})})
     assert errored["engines"]["err"]["num_scored"] == 0
     assert errored["engines"]["err"]["search_errors"] == 1
+
+
+async def test_run_legal_ultimate_row():
+    hit = _r("https://www.courtlistener.com/opinion/10865557/fresh-mix/")
+    report = await run_legal(
+        [GOLD[0]],
+        {"good": FakeEngine([hit]), "bad": FakeEngine([_r("https://example.com/x")])},
+    )
+    ult = report["engines"]["ultimate"]
+    assert ult["recall_at_k"] == 1.0
+    assert ult["mrr_at_k"] == 1.0
+    pq = ult["per_query"][0]
+    assert pq["hit_rank"] == 1
+    assert pq["results"][0]["url"] == hit.url
+    assert pq["n_results"] == 2

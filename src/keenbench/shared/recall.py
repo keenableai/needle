@@ -1,6 +1,31 @@
 from collections.abc import Callable
 from typing import Any
 
+ULTIMATE = "ultimate"
+
+
+def ultimate_per_query(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
+    out = []
+    for entries in query_outs:
+        pq = dict(entries[0], hit_rank=None, n_results=0, results=[])
+        scored = [e for e in entries if e["search_error"] is None]
+        if scored:
+            pq["search_error"] = None
+            hit = next(
+                (e["results"][e["hit_rank"] - 1] for e in scored if e["hit_rank"] is not None),
+                None,
+            )
+            pooled: dict[str, dict] = {}
+            for e in scored:
+                for r in e["results"]:
+                    pooled.setdefault(r["url"], r)
+            rest = [r for url, r in pooled.items() if hit is None or url != hit["url"]]
+            pq["results"] = (([hit] if hit else []) + rest)[:cap]
+            pq["n_results"] = len(pq["results"])
+            pq["hit_rank"] = 1 if hit else None
+        out.append(pq)
+    return out
+
 
 def group_recall(scored: list[dict], key: Callable[[dict], str]) -> dict[str, dict[str, Any]]:
     groups: dict[str, list[dict]] = {}

@@ -266,3 +266,24 @@ def test_run_stratified_sampling_by_field(tmp_path, monkeypatch):
     )
     assert seen["n"] == 4
     assert seen["fields"] == ["ceo", "website"]
+
+
+async def test_run_answers_ultimate_pools_hits_across_engines():
+    good = FakeEngine({CEO_Q.text: ([_r("https://b.com", "Leadership", "CEO Jensen Huang")], None)})
+    bad = FakeEngine({CEO_Q.text: ([_r("https://a.com", "NVIDIA", "GPU maker")], None)})
+    report = await run_answers([CEO_Q], {"bad": bad, "good": good})
+    ult = report["engines"]["ultimate"]
+    assert ult["recall_at_k"] == 1.0
+    assert ult["mrr_at_k"] == 1.0
+    pq = ult["per_query"][0]
+    assert pq["hit_rank"] == 1
+    assert pq["results"][0]["url"] == "https://b.com"
+    assert pq["n_results"] == 2
+
+
+async def test_run_answers_ultimate_unscored_when_all_engines_fail():
+    err = FakeEngine({CEO_Q.text: (None, {"error_type": "transport", "error_message": "x"})})
+    report = await run_answers([CEO_Q], {"e": err})
+    ult = report["engines"]["ultimate"]
+    assert ult["num_scored"] == 0
+    assert ult["search_errors"] == 1

@@ -205,6 +205,12 @@ drive from a notebook or scheduler: the ranking harness is
 `keenbench.shared.rankeval.run_rbp`, the recall scorer
 `keenbench.companyfill.score.run_answers`.
 
+Every report except findallmcp carries a synthetic `ultimate` engine: the
+pooled results of all engines per query, oracle-ranked — by judge rating
+(redundancy-penalty aware) on the RBP benches, gold item first on the
+known-item benches. It is the score ceiling any single engine could reach
+and is excluded from the overlap and uniqueness stats.
+
 ## Continuous benchmarks
 
 [`bench.yaml`](.github/workflows/bench.yaml) runs against all registered
