@@ -159,7 +159,8 @@ jobs:
           fi
           uv run keenbench findallmcp generate --out findallmcp.jsonl
           uv run keenbench findallmcp run findallmcp.jsonl \
-            --backends keenable,webql,exa,parallel --out findallmcp.json
+            --backends keenable,webql,exa,parallel --out findallmcp.json \
+            --agent-model openai/gpt-5.6-sol --budget-usd 1.0
 
       - name: Collect bench outcomes
         id: outcomes
