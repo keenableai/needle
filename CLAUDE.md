@@ -1,13 +1,11 @@
 # keenbench
 
-Hourly search-engine benchmarks; full docs in README.md. Five benches:
+Hourly search-engine benchmarks; full docs in README.md. Four benches:
 freshstream (hourly, RBP@5, LLM judge), companyfill (daily, answer-recall@5 +
 MRR@5, deterministic matcher with LLM judge backstop), scholar (daily,
-known-item papers, recall@10 + MRR@10 by arXiv/DOI/PMID match), legal (daily,
-known-item caselaw/CFR, recall@5 + MRR@5 by citation/docket/URL match), and
-findallmcp (manual dispatch only, agentic: an LLM agent drives one MCP search
-backend at a time under a dollar budget, scored against registry gold).
-rarestream is a query producer, not a bench: `scripts/rarestream_filter.py`
+known-item papers, recall@10 + MRR@10 by arXiv/DOI/PMID match), and legal
+(daily, known-item caselaw/CFR, recall@5 + MRR@5 by citation/docket/URL
+match). rarestream is a query producer, not a bench: `scripts/rarestream_filter.py`
 filters a query stream for English rare-word queries (BERT WordPiece +
 fastText language ID), and `keenbench rarestream generate` / `run` samples
 the filtered artifact and evaluates it like freshstream.
