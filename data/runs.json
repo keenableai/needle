@@ -1,1 +1,1261 @@
-[{"id": "2026-07-14T0057Z", "ts": "2026-07-14T00:57Z", "artifacts": ["fresh.jsonl", "gold.jsonl", "rbp.json", "recall.json"]}, {"id": "2026-07-14T0200Z", "ts": "2026-07-14T02:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T0326Z", "ts": "2026-07-14T03:26Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T0514Z", "ts": "2026-07-14T05:14Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T0602Z", "ts": "2026-07-14T06:02Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T0711Z", "ts": "2026-07-14T07:11Z", "artifacts": ["fresh.jsonl", "rarestream.json", "rbp.json"]}, {"id": "2026-07-14T0759Z", "ts": "2026-07-14T07:59Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T0900Z", "ts": "2026-07-14T09:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T0959Z", "ts": "2026-07-14T09:59Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T1055Z", "ts": "2026-07-14T10:55Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T1149Z", "ts": "2026-07-14T11:49Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T1306Z", "ts": "2026-07-14T13:06Z", "artifacts": ["fresh.jsonl", "rbp.json", "scholar.json", "scholar.jsonl"]}, {"id": "2026-07-14T1358Z", "ts": "2026-07-14T13:58Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T1458Z", "ts": "2026-07-14T14:58Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T1550Z", "ts": "2026-07-14T15:50Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T1645Z", "ts": "2026-07-14T16:45Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T1744Z", "ts": "2026-07-14T17:44Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T1859Z", "ts": "2026-07-14T18:59Z", "artifacts": ["fresh.jsonl", "legal.json", "legal.jsonl", "rbp.json"]}, {"id": "2026-07-14T1949Z", "ts": "2026-07-14T19:49Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T2042Z", "ts": "2026-07-14T20:42Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T2138Z", "ts": "2026-07-14T21:38Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T2239Z", "ts": "2026-07-14T22:39Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-14T2336Z", "ts": "2026-07-14T23:36Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T0056Z", "ts": "2026-07-15T00:56Z", "artifacts": ["fresh.jsonl", "gold.jsonl", "rbp.json", "recall.json"]}, {"id": "2026-07-15T0159Z", "ts": "2026-07-15T01:59Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T0325Z", "ts": "2026-07-15T03:25Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T0514Z", "ts": "2026-07-15T05:14Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T0605Z", "ts": "2026-07-15T06:05Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T0719Z", "ts": "2026-07-15T07:19Z", "artifacts": ["fresh.jsonl", "rarestream.json", "rbp.json"]}, {"id": "2026-07-15T0800Z", "ts": "2026-07-15T08:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T0904Z", "ts": "2026-07-15T09:04Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T1000Z", "ts": "2026-07-15T10:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T1058Z", "ts": "2026-07-15T10:58Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T1151Z", "ts": "2026-07-15T11:51Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T1306Z", "ts": "2026-07-15T13:06Z", "artifacts": ["fresh.jsonl", "rbp.json", "scholar.json", "scholar.jsonl"]}, {"id": "2026-07-15T1358Z", "ts": "2026-07-15T13:58Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T1458Z", "ts": "2026-07-15T14:58Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T1552Z", "ts": "2026-07-15T15:52Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T1649Z", "ts": "2026-07-15T16:49Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T1746Z", "ts": "2026-07-15T17:46Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T1852Z", "ts": "2026-07-15T18:52Z", "artifacts": ["fresh.jsonl", "legal.json", "legal.jsonl", "rbp.json"]}, {"id": "2026-07-15T1945Z", "ts": "2026-07-15T19:45Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T2039Z", "ts": "2026-07-15T20:39Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T2139Z", "ts": "2026-07-15T21:39Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T2240Z", "ts": "2026-07-15T22:40Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-15T2339Z", "ts": "2026-07-15T23:39Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T0059Z", "ts": "2026-07-16T00:59Z", "artifacts": ["fresh.jsonl", "gold.jsonl", "rbp.json", "recall.json"]}, {"id": "2026-07-16T0200Z", "ts": "2026-07-16T02:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T0326Z", "ts": "2026-07-16T03:26Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T0522Z", "ts": "2026-07-16T05:22Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T0719Z", "ts": "2026-07-16T07:19Z", "artifacts": ["fresh.jsonl", "rarestream.json", "rbp.json"]}, {"id": "2026-07-16T0906Z", "ts": "2026-07-16T09:06Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T1001Z", "ts": "2026-07-16T10:01Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T1059Z", "ts": "2026-07-16T10:59Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T1154Z", "ts": "2026-07-16T11:54Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T1314Z", "ts": "2026-07-16T13:14Z", "artifacts": ["fresh.jsonl", "rbp.json", "scholar.json", "scholar.jsonl"]}, {"id": "2026-07-16T1358Z", "ts": "2026-07-16T13:58Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T1500Z", "ts": "2026-07-16T15:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T1551Z", "ts": "2026-07-16T15:51Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T1648Z", "ts": "2026-07-16T16:48Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T1746Z", "ts": "2026-07-16T17:46Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T1858Z", "ts": "2026-07-16T18:58Z", "artifacts": ["fresh.jsonl", "legal.json", "legal.jsonl", "rbp.json"]}, {"id": "2026-07-16T1944Z", "ts": "2026-07-16T19:44Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T2037Z", "ts": "2026-07-16T20:37Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T2141Z", "ts": "2026-07-16T21:41Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T2238Z", "ts": "2026-07-16T22:38Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-16T2338Z", "ts": "2026-07-16T23:38Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T0102Z", "ts": "2026-07-17T01:02Z", "artifacts": ["fresh.jsonl", "gold.jsonl", "rbp.json", "recall.json"]}, {"id": "2026-07-17T0200Z", "ts": "2026-07-17T02:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T0327Z", "ts": "2026-07-17T03:27Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T0523Z", "ts": "2026-07-17T05:23Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T0714Z", "ts": "2026-07-17T07:14Z", "artifacts": ["fresh.jsonl", "rarestream.json", "rbp.json"]}, {"id": "2026-07-17T0759Z", "ts": "2026-07-17T07:59Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T0903Z", "ts": "2026-07-17T09:03Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T0958Z", "ts": "2026-07-17T09:58Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T1057Z", "ts": "2026-07-17T10:57Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T1148Z", "ts": "2026-07-17T11:48Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T1305Z", "ts": "2026-07-17T13:05Z", "artifacts": ["fresh.jsonl", "rbp.json", "scholar.json", "scholar.jsonl"]}, {"id": "2026-07-17T1357Z", "ts": "2026-07-17T13:57Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T1454Z", "ts": "2026-07-17T14:54Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T1549Z", "ts": "2026-07-17T15:49Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T1643Z", "ts": "2026-07-17T16:43Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T1742Z", "ts": "2026-07-17T17:42Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T1855Z", "ts": "2026-07-17T18:55Z", "artifacts": ["fresh.jsonl", "legal.json", "legal.jsonl", "rbp.json"]}, {"id": "2026-07-17T1943Z", "ts": "2026-07-17T19:43Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T2037Z", "ts": "2026-07-17T20:37Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T2136Z", "ts": "2026-07-17T21:36Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T2235Z", "ts": "2026-07-17T22:35Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-17T2337Z", "ts": "2026-07-17T23:37Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T0056Z", "ts": "2026-07-18T00:56Z", "artifacts": ["fresh.jsonl", "gold.jsonl", "rbp.json", "recall.json"]}, {"id": "2026-07-18T0159Z", "ts": "2026-07-18T01:59Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T0325Z", "ts": "2026-07-18T03:25Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T0512Z", "ts": "2026-07-18T05:12Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T0600Z", "ts": "2026-07-18T06:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T0711Z", "ts": "2026-07-18T07:11Z", "artifacts": ["fresh.jsonl", "rarestream.json", "rbp.json"]}, {"id": "2026-07-18T0757Z", "ts": "2026-07-18T07:57Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T0856Z", "ts": "2026-07-18T08:56Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T0949Z", "ts": "2026-07-18T09:49Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T1045Z", "ts": "2026-07-18T10:45Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T1137Z", "ts": "2026-07-18T11:37Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T1256Z", "ts": "2026-07-18T12:56Z", "artifacts": ["fresh.jsonl", "rbp.json", "scholar.json", "scholar.jsonl"]}, {"id": "2026-07-18T1351Z", "ts": "2026-07-18T13:51Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T1439Z", "ts": "2026-07-18T14:39Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T1538Z", "ts": "2026-07-18T15:38Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T1637Z", "ts": "2026-07-18T16:37Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T1740Z", "ts": "2026-07-18T17:40Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T1849Z", "ts": "2026-07-18T18:49Z", "artifacts": ["fresh.jsonl", "legal.json", "legal.jsonl", "rbp.json"]}, {"id": "2026-07-18T1943Z", "ts": "2026-07-18T19:43Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T2033Z", "ts": "2026-07-18T20:33Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T2136Z", "ts": "2026-07-18T21:36Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T2234Z", "ts": "2026-07-18T22:34Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-18T2337Z", "ts": "2026-07-18T23:37Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T0102Z", "ts": "2026-07-19T01:02Z", "artifacts": ["fresh.jsonl", "gold.jsonl", "rbp.json", "recall.json"]}, {"id": "2026-07-19T0158Z", "ts": "2026-07-19T01:58Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T0327Z", "ts": "2026-07-19T03:27Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T0528Z", "ts": "2026-07-19T05:28Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T0722Z", "ts": "2026-07-19T07:22Z", "artifacts": ["fresh.jsonl", "rarestream.json", "rbp.json"]}, {"id": "2026-07-19T0800Z", "ts": "2026-07-19T08:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T0901Z", "ts": "2026-07-19T09:01Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T0957Z", "ts": "2026-07-19T09:57Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T1048Z", "ts": "2026-07-19T10:48Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T1139Z", "ts": "2026-07-19T11:39Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T1255Z", "ts": "2026-07-19T12:55Z", "artifacts": ["fresh.jsonl", "rbp.json", "scholar.json", "scholar.jsonl"]}, {"id": "2026-07-19T1351Z", "ts": "2026-07-19T13:51Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T1442Z", "ts": "2026-07-19T14:42Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T1538Z", "ts": "2026-07-19T15:38Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T1636Z", "ts": "2026-07-19T16:36Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T1739Z", "ts": "2026-07-19T17:39Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T1851Z", "ts": "2026-07-19T18:51Z", "artifacts": ["fresh.jsonl", "legal.json", "legal.jsonl", "rbp.json"]}, {"id": "2026-07-19T1941Z", "ts": "2026-07-19T19:41Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T2033Z", "ts": "2026-07-19T20:33Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T2136Z", "ts": "2026-07-19T21:36Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T2237Z", "ts": "2026-07-19T22:37Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-19T2338Z", "ts": "2026-07-19T23:38Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T0105Z", "ts": "2026-07-20T01:05Z", "artifacts": ["fresh.jsonl", "gold.jsonl", "rbp.json", "recall.json"]}, {"id": "2026-07-20T0200Z", "ts": "2026-07-20T02:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T0328Z", "ts": "2026-07-20T03:28Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T0530Z", "ts": "2026-07-20T05:30Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T0734Z", "ts": "2026-07-20T07:34Z", "artifacts": ["fresh.jsonl", "rarestream.json", "rbp.json"]}, {"id": "2026-07-20T0820Z", "ts": "2026-07-20T08:20Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T1023Z", "ts": "2026-07-20T10:23Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T1134Z", "ts": "2026-07-20T11:34Z", "artifacts": ["findallmcp.json", "findallmcp.jsonl", "fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T1206Z", "ts": "2026-07-20T12:06Z", "artifacts": ["findallmcp.json", "findallmcp.jsonl", "fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T1209Z", "ts": "2026-07-20T12:09Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T1319Z", "ts": "2026-07-20T13:19Z", "artifacts": ["fresh.jsonl", "rbp.json", "scholar.json", "scholar.jsonl"]}, {"id": "2026-07-20T1400Z", "ts": "2026-07-20T14:00Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T1501Z", "ts": "2026-07-20T15:01Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T1558Z", "ts": "2026-07-20T15:58Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T1649Z", "ts": "2026-07-20T16:49Z", "artifacts": ["fresh.jsonl", "rbp.json"]}, {"id": "2026-07-20T1916Z", "ts": "2026-07-20T19:16Z", "artifacts": ["legal.json", "legal.jsonl"]}]
+[
+  {
+    "id": "2026-07-14T0057Z",
+    "ts": "2026-07-14T00:57Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "rbp.json",
+      "recall.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T0200Z",
+    "ts": "2026-07-14T02:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T0326Z",
+    "ts": "2026-07-14T03:26Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T0514Z",
+    "ts": "2026-07-14T05:14Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T0602Z",
+    "ts": "2026-07-14T06:02Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T0711Z",
+    "ts": "2026-07-14T07:11Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rarestream.json",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T0759Z",
+    "ts": "2026-07-14T07:59Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T0900Z",
+    "ts": "2026-07-14T09:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T0959Z",
+    "ts": "2026-07-14T09:59Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T1055Z",
+    "ts": "2026-07-14T10:55Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T1149Z",
+    "ts": "2026-07-14T11:49Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T1306Z",
+    "ts": "2026-07-14T13:06Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
+  },
+  {
+    "id": "2026-07-14T1358Z",
+    "ts": "2026-07-14T13:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T1458Z",
+    "ts": "2026-07-14T14:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T1550Z",
+    "ts": "2026-07-14T15:50Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T1645Z",
+    "ts": "2026-07-14T16:45Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T1744Z",
+    "ts": "2026-07-14T17:44Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T1859Z",
+    "ts": "2026-07-14T18:59Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T1949Z",
+    "ts": "2026-07-14T19:49Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T2042Z",
+    "ts": "2026-07-14T20:42Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T2138Z",
+    "ts": "2026-07-14T21:38Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T2239Z",
+    "ts": "2026-07-14T22:39Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-14T2336Z",
+    "ts": "2026-07-14T23:36Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T0056Z",
+    "ts": "2026-07-15T00:56Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "rbp.json",
+      "recall.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T0159Z",
+    "ts": "2026-07-15T01:59Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T0325Z",
+    "ts": "2026-07-15T03:25Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T0514Z",
+    "ts": "2026-07-15T05:14Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T0605Z",
+    "ts": "2026-07-15T06:05Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T0719Z",
+    "ts": "2026-07-15T07:19Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rarestream.json",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T0800Z",
+    "ts": "2026-07-15T08:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T0904Z",
+    "ts": "2026-07-15T09:04Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1000Z",
+    "ts": "2026-07-15T10:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1058Z",
+    "ts": "2026-07-15T10:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1151Z",
+    "ts": "2026-07-15T11:51Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1306Z",
+    "ts": "2026-07-15T13:06Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
+  },
+  {
+    "id": "2026-07-15T1358Z",
+    "ts": "2026-07-15T13:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1458Z",
+    "ts": "2026-07-15T14:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1552Z",
+    "ts": "2026-07-15T15:52Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1649Z",
+    "ts": "2026-07-15T16:49Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1746Z",
+    "ts": "2026-07-15T17:46Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1852Z",
+    "ts": "2026-07-15T18:52Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T1945Z",
+    "ts": "2026-07-15T19:45Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T2039Z",
+    "ts": "2026-07-15T20:39Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T2139Z",
+    "ts": "2026-07-15T21:39Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T2240Z",
+    "ts": "2026-07-15T22:40Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-15T2339Z",
+    "ts": "2026-07-15T23:39Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T0059Z",
+    "ts": "2026-07-16T00:59Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "rbp.json",
+      "recall.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T0200Z",
+    "ts": "2026-07-16T02:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T0326Z",
+    "ts": "2026-07-16T03:26Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T0522Z",
+    "ts": "2026-07-16T05:22Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T0719Z",
+    "ts": "2026-07-16T07:19Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rarestream.json",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T0906Z",
+    "ts": "2026-07-16T09:06Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1001Z",
+    "ts": "2026-07-16T10:01Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1059Z",
+    "ts": "2026-07-16T10:59Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1154Z",
+    "ts": "2026-07-16T11:54Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1314Z",
+    "ts": "2026-07-16T13:14Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
+  },
+  {
+    "id": "2026-07-16T1358Z",
+    "ts": "2026-07-16T13:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1500Z",
+    "ts": "2026-07-16T15:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1551Z",
+    "ts": "2026-07-16T15:51Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1648Z",
+    "ts": "2026-07-16T16:48Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1746Z",
+    "ts": "2026-07-16T17:46Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1858Z",
+    "ts": "2026-07-16T18:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T1944Z",
+    "ts": "2026-07-16T19:44Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T2037Z",
+    "ts": "2026-07-16T20:37Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T2141Z",
+    "ts": "2026-07-16T21:41Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T2238Z",
+    "ts": "2026-07-16T22:38Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-16T2338Z",
+    "ts": "2026-07-16T23:38Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T0102Z",
+    "ts": "2026-07-17T01:02Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "rbp.json",
+      "recall.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T0200Z",
+    "ts": "2026-07-17T02:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T0327Z",
+    "ts": "2026-07-17T03:27Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T0523Z",
+    "ts": "2026-07-17T05:23Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T0714Z",
+    "ts": "2026-07-17T07:14Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rarestream.json",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T0759Z",
+    "ts": "2026-07-17T07:59Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T0903Z",
+    "ts": "2026-07-17T09:03Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T0958Z",
+    "ts": "2026-07-17T09:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T1057Z",
+    "ts": "2026-07-17T10:57Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T1148Z",
+    "ts": "2026-07-17T11:48Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T1305Z",
+    "ts": "2026-07-17T13:05Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
+  },
+  {
+    "id": "2026-07-17T1357Z",
+    "ts": "2026-07-17T13:57Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T1454Z",
+    "ts": "2026-07-17T14:54Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T1549Z",
+    "ts": "2026-07-17T15:49Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T1643Z",
+    "ts": "2026-07-17T16:43Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T1742Z",
+    "ts": "2026-07-17T17:42Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T1855Z",
+    "ts": "2026-07-17T18:55Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T1943Z",
+    "ts": "2026-07-17T19:43Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T2037Z",
+    "ts": "2026-07-17T20:37Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T2136Z",
+    "ts": "2026-07-17T21:36Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T2235Z",
+    "ts": "2026-07-17T22:35Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-17T2337Z",
+    "ts": "2026-07-17T23:37Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T0056Z",
+    "ts": "2026-07-18T00:56Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "rbp.json",
+      "recall.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T0159Z",
+    "ts": "2026-07-18T01:59Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T0325Z",
+    "ts": "2026-07-18T03:25Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T0512Z",
+    "ts": "2026-07-18T05:12Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T0600Z",
+    "ts": "2026-07-18T06:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T0711Z",
+    "ts": "2026-07-18T07:11Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rarestream.json",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T0757Z",
+    "ts": "2026-07-18T07:57Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T0856Z",
+    "ts": "2026-07-18T08:56Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T0949Z",
+    "ts": "2026-07-18T09:49Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T1045Z",
+    "ts": "2026-07-18T10:45Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T1137Z",
+    "ts": "2026-07-18T11:37Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T1256Z",
+    "ts": "2026-07-18T12:56Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
+  },
+  {
+    "id": "2026-07-18T1351Z",
+    "ts": "2026-07-18T13:51Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T1439Z",
+    "ts": "2026-07-18T14:39Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T1538Z",
+    "ts": "2026-07-18T15:38Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T1637Z",
+    "ts": "2026-07-18T16:37Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T1740Z",
+    "ts": "2026-07-18T17:40Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T1849Z",
+    "ts": "2026-07-18T18:49Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T1943Z",
+    "ts": "2026-07-18T19:43Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T2033Z",
+    "ts": "2026-07-18T20:33Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T2136Z",
+    "ts": "2026-07-18T21:36Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T2234Z",
+    "ts": "2026-07-18T22:34Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-18T2337Z",
+    "ts": "2026-07-18T23:37Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T0102Z",
+    "ts": "2026-07-19T01:02Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "rbp.json",
+      "recall.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T0158Z",
+    "ts": "2026-07-19T01:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T0327Z",
+    "ts": "2026-07-19T03:27Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T0528Z",
+    "ts": "2026-07-19T05:28Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T0722Z",
+    "ts": "2026-07-19T07:22Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rarestream.json",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T0800Z",
+    "ts": "2026-07-19T08:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T0901Z",
+    "ts": "2026-07-19T09:01Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T0957Z",
+    "ts": "2026-07-19T09:57Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T1048Z",
+    "ts": "2026-07-19T10:48Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T1139Z",
+    "ts": "2026-07-19T11:39Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T1255Z",
+    "ts": "2026-07-19T12:55Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
+  },
+  {
+    "id": "2026-07-19T1351Z",
+    "ts": "2026-07-19T13:51Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T1442Z",
+    "ts": "2026-07-19T14:42Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T1538Z",
+    "ts": "2026-07-19T15:38Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T1636Z",
+    "ts": "2026-07-19T16:36Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T1739Z",
+    "ts": "2026-07-19T17:39Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T1851Z",
+    "ts": "2026-07-19T18:51Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T1941Z",
+    "ts": "2026-07-19T19:41Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T2033Z",
+    "ts": "2026-07-19T20:33Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T2136Z",
+    "ts": "2026-07-19T21:36Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T2237Z",
+    "ts": "2026-07-19T22:37Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-19T2338Z",
+    "ts": "2026-07-19T23:38Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T0105Z",
+    "ts": "2026-07-20T01:05Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "rbp.json",
+      "recall.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T0200Z",
+    "ts": "2026-07-20T02:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T0328Z",
+    "ts": "2026-07-20T03:28Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T0530Z",
+    "ts": "2026-07-20T05:30Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T0734Z",
+    "ts": "2026-07-20T07:34Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rarestream.json",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T0820Z",
+    "ts": "2026-07-20T08:20Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T1023Z",
+    "ts": "2026-07-20T10:23Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T1134Z",
+    "ts": "2026-07-20T11:34Z",
+    "artifacts": [
+      "findallmcp.json",
+      "findallmcp.jsonl",
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T1206Z",
+    "ts": "2026-07-20T12:06Z",
+    "artifacts": [
+      "findallmcp.json",
+      "findallmcp.jsonl",
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T1209Z",
+    "ts": "2026-07-20T12:09Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T1319Z",
+    "ts": "2026-07-20T13:19Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
+  },
+  {
+    "id": "2026-07-20T1400Z",
+    "ts": "2026-07-20T14:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T1501Z",
+    "ts": "2026-07-20T15:01Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T1558Z",
+    "ts": "2026-07-20T15:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T1649Z",
+    "ts": "2026-07-20T16:49Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  },
+  {
+    "id": "2026-07-20T1916Z",
+    "ts": "2026-07-20T19:16Z",
+    "artifacts": [
+      "legal.json",
+      "legal.jsonl"
+    ]
+  },
+  {
+    "id": "2026-07-20T2119Z",
+    "ts": "2026-07-20T21:19Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
+  }
+]
