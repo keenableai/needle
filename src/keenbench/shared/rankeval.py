@@ -4,7 +4,14 @@ from typing import Any
 
 from keenbench.shared.judge import DEFAULT_MAX_CONTENT_CHARS, Judgement, judge_one
 from keenbench.shared.llm import LLMClient
-from keenbench.shared.metrics import RBP_K, RBP_P, apply_redundancy_penalties, rbp_at_k
+from keenbench.shared.metrics import (
+    RBP_K,
+    RBP_P,
+    apply_redundancy_penalties,
+    oracle_order,
+    rbp_at_k,
+)
+from keenbench.shared.recall import ULTIMATE
 from keenbench.shared.search import SearchClient, SearchResult, latency_stats
 
 
@@ -72,6 +79,45 @@ def _score_query(
     return out
 
 
+def _ultimate_query(
+    query: EvalQuery,
+    searches: list[Any],
+    merged: dict[str, SearchResult],
+    judgements_by_url: dict[str, Judgement | None],
+    *,
+    num_results: int,
+    k: int,
+) -> dict[str, Any]:
+    if all(err is not None for _, err in searches):
+        error = {"error_type": "all_engines_failed", "error_message": "every engine errored"}
+        return _score_query(query, None, error, judgements_by_url, k=k)
+    urls = list(merged)
+    ratings: list[int] = []
+    for url in urls:
+        judgement = judgements_by_url[url]
+        if judgement is None:
+            return _score_query(query, list(merged.values()), None, judgements_by_url, k=k)
+        ratings.append(judgement.rating)
+    order = oracle_order(urls, ratings, query_text=query.text)
+    ordered = [merged[urls[i]] for i in order][:num_results]
+    return _score_query(query, ordered, None, judgements_by_url, k=k)
+
+
+def _summarize(
+    per_query: list[dict[str, Any]], *, k: int, latencies_ms: list[float]
+) -> dict[str, Any]:
+    scored = [pq["rbp"] for pq in per_query if pq["rbp"] is not None]
+    return {
+        "mean_rbp": sum(scored) / len(scored) if scored else 0.0,
+        "rbp_max": 1.0 - RBP_P**k,
+        "num_scored": len(scored),
+        "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
+        "judge_errors": sum(pq["judge_errors"] for pq in per_query),
+        "latency": latency_stats(latencies_ms),
+        "per_query": per_query,
+    }
+
+
 async def run_rbp(
     queries: list[EvalQuery],
     engines: dict[str, SearchClient],
@@ -99,7 +145,9 @@ async def run_rbp(
             )
         return judgement
 
-    async def run_query(query: EvalQuery) -> tuple[list[Any], dict[str, Judgement | None]]:
+    async def run_query(
+        query: EvalQuery,
+    ) -> tuple[list[Any], dict[str, SearchResult], dict[str, Judgement | None]]:
         searches = await asyncio.gather(
             *[engines[n].search(query.text, num_results=num_results) for n in names]
         )
@@ -108,34 +156,33 @@ async def run_rbp(
             if err is None:
                 for r in results or []:
                     pair_docs.setdefault(r.url, []).append(r)
-        judgements = await asyncio.gather(
-            *[judge_pair(query, _merge_pair(docs)) for docs in pair_docs.values()]
-        )
-        return searches, dict(zip(pair_docs, judgements, strict=True))
+        merged = {url: _merge_pair(docs) for url, docs in pair_docs.items()}
+        judgements = await asyncio.gather(*[judge_pair(query, doc) for doc in merged.values()])
+        return searches, merged, dict(zip(merged, judgements, strict=True))
 
     query_outs = await asyncio.gather(*[run_query(q) for q in queries])
 
     engines_out: dict[str, dict[str, Any]] = {}
     for ni, name in enumerate(names):
         per_query = []
-        for query, (searches, judgements_by_url) in zip(queries, query_outs, strict=True):
+        for query, (searches, _, judgements_by_url) in zip(queries, query_outs, strict=True):
             results, err = searches[ni]
             per_query.append(_score_query(query, results, err, judgements_by_url, k=k))
-        scored = [pq["rbp"] for pq in per_query if pq["rbp"] is not None]
-        engines_out[name] = {
-            "mean_rbp": sum(scored) / len(scored) if scored else 0.0,
-            "rbp_max": 1.0 - RBP_P**k,
-            "num_scored": len(scored),
-            "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
-            "judge_errors": sum(pq["judge_errors"] for pq in per_query),
-            "latency": latency_stats(engines[name].latencies_ms),
-            "per_query": per_query,
-        }
+        engines_out[name] = _summarize(per_query, k=k, latencies_ms=engines[name].latencies_ms)
+    if names:
+        engines_out[ULTIMATE] = _summarize(
+            [
+                _ultimate_query(query, searches, merged, judgements, num_results=num_results, k=k)
+                for query, (searches, merged, judgements) in zip(queries, query_outs, strict=True)
+            ],
+            k=k,
+            latencies_ms=[],
+        )
 
     return {
         "num_queries": len(queries),
         "num_results": num_results,
         "k": k,
-        "judged_pairs": sum(len(ratings) for _, ratings in query_outs),
+        "judged_pairs": sum(len(judgements) for _, _, judgements in query_outs),
         "engines": engines_out,
     }

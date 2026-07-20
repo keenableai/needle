@@ -1,6 +1,8 @@
 from typing import Any
 from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
 
+from keenbench.shared.recall import ULTIMATE
+
 TS_FMT = "%Y-%m-%dT%H:%MZ"
 TRACKING_PARAMS = {"gclid", "fbclid", "msclkid", "yclid", "igshid", "mc_cid", "mc_eid"}
 
@@ -30,6 +32,7 @@ def _url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
             for pq in e["per_query"]
         ]
         for name, e in report["engines"].items()
+        if name != ULTIMATE
     }
 
 
@@ -46,6 +49,7 @@ def _low_url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
             for pq in e["per_query"]
         ]
         for name, e in report["engines"].items()
+        if name != ULTIMATE
     }
 
 

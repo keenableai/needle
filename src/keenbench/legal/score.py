@@ -3,7 +3,13 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
-from keenbench.shared.recall import classify_misses, group_recall
+from keenbench.shared.recall import (
+    ULTIMATE,
+    classify_misses,
+    group_recall,
+    recall_summary,
+    ultimate_per_query,
+)
 from keenbench.shared.search import SearchClient, SearchResult, latency_stats
 
 CLUSTER_URL_RE = re.compile(r"courtlistener\.com/opinion/(\d+)/", re.IGNORECASE)
@@ -132,6 +138,16 @@ def ids_match(gold: GoldLegal, found: LegalIds, *, result_text: str) -> bool:
     return False
 
 
+def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
+    scored = [pq for pq in per_query if pq["search_error"] is None]
+    return {
+        **recall_summary(per_query, scored, latency),
+        "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
+        "by_syntax": group_recall(scored, lambda pq: pq["syntax"]),
+        "by_court": group_recall([pq for pq in scored if pq["court"]], lambda pq: pq["court"]),
+    }
+
+
 async def run_legal(
     queries: list[GoldLegal],
     engines: dict[str, SearchClient],
@@ -179,19 +195,9 @@ async def run_legal(
     engines_out: dict[str, dict[str, Any]] = {}
     for idx, name in enumerate(engine_names):
         per_query = [entries[idx] for entries in query_outs]
-        scored = [pq for pq in per_query if pq["search_error"] is None]
-        hits = [pq for pq in scored if pq["hit_rank"] is not None]
-        engines_out[name] = {
-            "recall_at_k": len(hits) / len(scored) if scored else 0.0,
-            "mrr_at_k": (sum(1.0 / pq["hit_rank"] for pq in hits) / len(scored) if scored else 0.0),
-            "num_scored": len(scored),
-            "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
-            "latency": latency_stats(engines[name].latencies_ms),
-            "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
-            "by_syntax": group_recall(scored, lambda pq: pq["syntax"]),
-            "by_court": group_recall([pq for pq in scored if pq["court"]], lambda pq: pq["court"]),
-            "per_query": per_query,
-        }
+        engines_out[name] = _summary(per_query, latency_stats(engines[name].latencies_ms))
+    if engine_names:
+        engines_out[ULTIMATE] = _summary(ultimate_per_query(query_outs, cap=num_results), None)
 
     classify_misses(query_outs, engine_names, engines_out)
 

@@ -160,3 +160,54 @@ async def test_run_rbp_uses_per_query_today():
     await run_rbp(queries, {"e": FakeEngine([SearchResult(url="https://a")])}, judge)
     assert any("Today's date: 2026-01-01" in p for p in judge.prompts)
     assert any("Today's date: 2026-02-02" in p for p in judge.prompts)
+
+
+async def test_run_rbp_ultimate_pools_engines():
+    a = FakeEngine([SearchResult(url="https://one.com/a", title="GOODDOC a")])
+    b = FakeEngine([SearchResult(url="https://two.com/b", title="GOODDOC b")])
+    report = await run_rbp([q("q1")], {"a": a, "b": b}, FakeJudge())
+    ult = report["engines"]["ultimate"]
+    assert ult["mean_rbp"] == pytest.approx((1 - 0.8) * (1.0 + 0.8))
+    assert ult["mean_rbp"] > report["engines"]["a"]["mean_rbp"]
+    assert ult["latency"] is None
+    pq = ult["per_query"][0]
+    assert pq["n_results"] == 2
+    assert {r["url"] for r in pq["results"]} == {"https://one.com/a", "https://two.com/b"}
+
+
+async def test_run_rbp_ultimate_dedupes_shared_urls():
+    doc = SearchResult(url="https://one.com/a", title="GOODDOC")
+    report = await run_rbp([q("q1")], {"a": FakeEngine([doc]), "b": FakeEngine([doc])}, FakeJudge())
+    pq = report["engines"]["ultimate"]["per_query"][0]
+    assert pq["n_results"] == 1
+    assert pq["rbp"] == pytest.approx((1 - 0.8) * 1.0)
+
+
+async def test_run_rbp_ultimate_unscored_when_all_engines_fail():
+    err = {"error_type": "http_error", "error_message": "503"}
+    report = await run_rbp([q("q1")], {"a": FakeEngine([], error=err)}, FakeJudge())
+    ult = report["engines"]["ultimate"]
+    assert ult["search_errors"] == 1
+    assert ult["num_scored"] == 0
+    assert ult["per_query"][0]["search_error"]["error_type"] == "all_engines_failed"
+
+
+async def test_run_rbp_ultimate_unscored_when_pooled_judgement_fails():
+    class FlakyJudge:
+        async def complete(self, prompt, *, max_tokens, reasoning_effort):
+            if "badhost" in prompt:
+                return None, {"error_type": "http_error", "error_message": "500"}
+            return "rating: 4\nlabel: FullyM\nreasoning: x", None
+
+    a = FakeEngine([SearchResult(url="https://goodhost/a", title="fine")])
+    b = FakeEngine([SearchResult(url="https://badhost/b", title="broken")])
+    report = await run_rbp([q("q1")], {"a": a, "b": b}, FlakyJudge())
+    assert report["engines"]["a"]["num_scored"] == 1
+    ult = report["engines"]["ultimate"]
+    assert ult["num_scored"] == 0
+    assert ult["judge_errors"] == 1
+
+
+async def test_run_rbp_no_engines_no_ultimate():
+    report = await run_rbp([q("q1")], {}, FakeJudge())
+    assert report["engines"] == {}

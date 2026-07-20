@@ -188,3 +188,18 @@ def test_overlap_rows_suspect_counts_single_shared_low_url():
     (row,) = overlap_rows(report, ts="t")
     assert row["num_suspect"] == 1
     assert row["low_shared_urls"] == 1
+
+
+def test_overlap_and_uniqueness_exclude_ultimate():
+    report = _report(
+        {
+            "e1": [_pq(["https://a.com"])],
+            "e2": [_pq(["https://b.com"])],
+            "ultimate": [_pq(["https://a.com", "https://b.com"])],
+        }
+    )
+    rows = overlap_rows(report, ts="t")
+    assert {(r["a"], r["b"]) for r in rows} == {("e1", "e2")}
+    urows = uniqueness_rows(report, ts="t")
+    assert {r["engine"] for r in urows} == {"e1", "e2"}
+    assert all(r["unique_urls"] == 1 for r in urows)

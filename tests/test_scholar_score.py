@@ -143,3 +143,44 @@ async def test_pmc_resolution_enables_hit():
 
 if __name__ == "__main__":
     pytest.main([__file__, "-q"])
+
+
+async def test_ultimate_pools_hits_across_engines():
+    queries = [
+        _gold("q1", "title", {"arxiv": "2506.00001"}, "2506.00001"),
+        _gold("q2", "title", {"arxiv": "2506.00002"}, "2506.00002"),
+    ]
+    a = FakeEngine(
+        "a",
+        {
+            "q1": [_r("https://other.com"), _r("https://arxiv.org/abs/2506.00001")],
+            "q2": [_r("https://nope.com")],
+        },
+    )
+    b = FakeEngine("b", {"q1": [_r("https://nope.com")], "q2": {"error": True}})
+    report = await run_papers(queries, {"a": a, "b": b}, num_results=5)
+    ult = report["engines"]["ultimate"]
+    assert ult["recall_at_k"] == 0.5
+    assert ult["mrr_at_k"] == 0.5
+    assert ult["num_scored"] == 2
+    assert ult["latency"] is None
+    assert ult["misses_system_specific"] == 0
+    assert ult["misses_universal"] == 1
+    pq1 = ult["per_query"][0]
+    assert pq1["hit_rank"] == 1
+    assert pq1["results"][0]["url"] == "https://arxiv.org/abs/2506.00001"
+    assert pq1["n_results"] == 3
+
+
+async def test_ultimate_unscored_when_all_engines_fail():
+    queries = [_gold("q1", "title", {"arxiv": "2506.00001"}, "2506.00001")]
+    report = await run_papers(queries, {"e": FakeEngine("e", {"q1": {"error": True}})})
+    ult = report["engines"]["ultimate"]
+    assert ult["num_scored"] == 0
+    assert ult["search_errors"] == 1
+
+
+async def test_no_engines_no_ultimate():
+    queries = [_gold("q1", "title", {"arxiv": "2506.00001"}, "2506.00001")]
+    report = await run_papers(queries, {}, num_results=5)
+    assert report["engines"] == {}
