@@ -5,7 +5,13 @@ from typing import Any
 from keenbench.scholar.idconv import IdConverter
 from keenbench.scholar.ids import PaperIds, extract_ids
 from keenbench.scholar.models import AGE_BUCKETS
-from keenbench.shared.recall import ULTIMATE, classify_misses, group_recall, ultimate_per_query
+from keenbench.shared.recall import (
+    ULTIMATE,
+    classify_misses,
+    group_recall,
+    recall_summary,
+    ultimate_per_query,
+)
 from keenbench.shared.search import SearchClient, SearchResult, latency_stats
 
 
@@ -38,18 +44,12 @@ def _age_order(groups: dict[str, dict]) -> dict[str, dict]:
 
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
     scored = [pq for pq in per_query if pq["search_error"] is None]
-    hits = [pq for pq in scored if pq["hit_rank"] is not None]
     return {
-        "recall_at_k": len(hits) / len(scored) if scored else 0.0,
-        "mrr_at_k": (sum(1.0 / pq["hit_rank"] for pq in hits) / len(scored) if scored else 0.0),
-        "num_scored": len(scored),
-        "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
-        "latency": latency,
+        **recall_summary(per_query, scored, latency),
         "by_bucket": _grouped(scored, "bucket"),
         "by_suite": _grouped(scored, "suite"),
         "by_age": _age_order(_grouped(scored, "age_bucket")),
         "by_domain": _grouped(scored, "domain"),
-        "per_query": per_query,
     }
 
 

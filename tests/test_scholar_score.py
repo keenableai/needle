@@ -164,6 +164,8 @@ async def test_ultimate_pools_hits_across_engines():
     assert ult["mrr_at_k"] == 0.5
     assert ult["num_scored"] == 2
     assert ult["latency"] is None
+    assert ult["misses_system_specific"] == 0
+    assert ult["misses_universal"] == 1
     pq1 = ult["per_query"][0]
     assert pq1["hit_rank"] == 1
     assert pq1["results"][0]["url"] == "https://arxiv.org/abs/2506.00001"

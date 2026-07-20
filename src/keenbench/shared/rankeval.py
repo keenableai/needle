@@ -93,12 +93,11 @@ def _ultimate_query(
         return _score_query(query, None, error, judgements_by_url, k=k)
     urls = list(merged)
     ratings = [j.rating if (j := judgements_by_url[u]) is not None else None for u in urls]
+    ordered = list(merged.values())
     if all(r is not None for r in ratings):
         order = oracle_order(urls, ratings, query_text=query.text)
-    else:
-        order = sorted(range(len(urls)), key=lambda i: -1 if ratings[i] is None else -ratings[i])
-    ordered = [merged[urls[i]] for i in order][:num_results]
-    return _score_query(query, ordered, None, judgements_by_url, k=k)
+        ordered = [ordered[i] for i in order]
+    return _score_query(query, ordered[:num_results], None, judgements_by_url, k=k)
 
 
 def _summarize(

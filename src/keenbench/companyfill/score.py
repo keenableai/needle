@@ -6,7 +6,13 @@ from keenbench.companyfill.canon import gold_in_text
 from keenbench.companyfill.judge import judge_answer
 from keenbench.companyfill.models import FRESHNESS_LADDER, cues_for
 from keenbench.shared.llm import LLMClient
-from keenbench.shared.recall import ULTIMATE, classify_misses, group_recall, ultimate_per_query
+from keenbench.shared.recall import (
+    ULTIMATE,
+    classify_misses,
+    group_recall,
+    recall_summary,
+    ultimate_per_query,
+)
 from keenbench.shared.search import SearchClient, SearchResult, latency_stats
 
 
@@ -55,24 +61,18 @@ def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
         for pq in per_query
         if pq["search_error"] is None and not (pq["judge_errors"] and pq["hit_rank"] is None)
     ]
-    hits = [pq for pq in scored if pq["hit_rank"] is not None]
     return {
-        "recall_at_k": len(hits) / len(scored) if scored else 0.0,
-        "mrr_at_k": (sum(1.0 / pq["hit_rank"] for pq in hits) / len(scored) if scored else 0.0),
-        "num_scored": len(scored),
-        "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
+        **recall_summary(per_query, scored, latency),
         "judged_results": sum(pq["judged"] for pq in per_query),
         "judge_errors": sum(pq["judge_errors"] for pq in per_query),
         "judge_upgrades": sum(
             1 for pq in scored if pq["hit_rank"] is not None and pq["hit_rank"] != pq["det_rank"]
         ),
-        "latency": latency,
         "by_field": group_recall(scored, lambda pq: pq["field"]),
         "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
         "by_syntax": group_recall(scored, lambda pq: pq["syntax"]),
         "by_tier": group_recall([pq for pq in scored if pq["tier"]], lambda pq: pq["tier"]),
         "by_freshness": _ladder_order(group_recall(scored, lambda pq: pq["freshness_window"])),
-        "per_query": per_query,
     }
 
 
