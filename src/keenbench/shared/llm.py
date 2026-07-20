@@ -36,6 +36,9 @@ class LLMClientError(Exception):
 class ChatUsage:
     prompt_tokens: int = 0
     completion_tokens: int = 0
+    cached_tokens: int = 0
+    cache_write_tokens: int = 0
+    billed_usd: float = 0.0
 
 
 @dataclass
@@ -179,6 +182,49 @@ class OpenRouterClient:
         return payload
 
 
+CACHEABLE_MODEL_MARKERS = ("anthropic/", "claude")
+
+
+def _mark_cached(message: dict[str, Any]) -> None:
+    content = message.get("content")
+    if isinstance(content, str):
+        message["content"] = [
+            {"type": "text", "text": content, "cache_control": {"type": "ephemeral"}}
+        ]
+    elif isinstance(content, list) and content and isinstance(content[-1], dict):
+        parts = [dict(p) for p in content]
+        parts[-1] = {**parts[-1], "cache_control": {"type": "ephemeral"}}
+        message["content"] = parts
+
+
+def cache_marked(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    marked = [dict(m) for m in messages]
+    markable = [
+        i
+        for i, m in enumerate(marked)
+        if m.get("role") in ("system", "user", "tool") and m.get("content")
+    ]
+    if not markable:
+        return marked
+    prefix = markable[1] if len(markable) > 1 else markable[0]
+    for i in {prefix, *markable[-2:]}:
+        _mark_cached(marked[i])
+    return marked
+
+
+class CachingOpenRouterClient(OpenRouterClient):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self._cache_enabled = any(m in self.model for m in CACHEABLE_MODEL_MARKERS)
+
+    async def _request(self, body: dict[str, Any]) -> Any:
+        body = dict(body)
+        body["usage"] = {"include": True}
+        if self._cache_enabled and body.get("messages"):
+            body["messages"] = cache_marked(body["messages"])
+        return await super()._request(body)
+
+
 def _parse_chat_payload(payload: Any) -> ChatResult:
     try:
         choice = payload["choices"][0]
@@ -193,6 +239,8 @@ def _parse_chat_payload(payload: Any) -> ChatResult:
             "empty_response", f"no content or tool calls, finish_reason={finish_reason}"
         )
     usage = payload.get("usage") or {}
+    details = usage.get("prompt_tokens_details") or {}
+    cost_details = usage.get("cost_details") or {}
     return ChatResult(
         content=content,
         tool_calls=tool_calls,
@@ -200,5 +248,11 @@ def _parse_chat_payload(payload: Any) -> ChatResult:
         usage=ChatUsage(
             prompt_tokens=int(usage.get("prompt_tokens") or 0),
             completion_tokens=int(usage.get("completion_tokens") or 0),
+            cached_tokens=int(details.get("cached_tokens") or 0),
+            cache_write_tokens=int(details.get("cache_write_tokens") or 0),
+            billed_usd=max(
+                float(usage.get("cost") or 0.0),
+                float(cost_details.get("upstream_inference_cost") or 0.0),
+            ),
         ),
     )

@@ -17,7 +17,7 @@ from keenbench.findallmcp.score import GoldTask, run_findallmcp
 from keenbench.findallmcp.sources import EdgarFtsClient, HnClient, edgar_tasks, hn_tasks
 from keenbench.shared.cli import parse_csv, sample_or_exit
 from keenbench.shared.io import write_json, write_jsonl
-from keenbench.shared.llm import OpenRouterClient
+from keenbench.shared.llm import CachingOpenRouterClient
 
 
 def _as_obj(value: object) -> object:
@@ -163,7 +163,7 @@ class FindallMcp:
         if not key:
             raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for the agent)")
         model = agent_model or os.environ.get(AGENT_MODEL_ENV) or DEFAULT_AGENT_MODEL
-        llm = OpenRouterClient(api_key=key, model=model, timeout_s=180.0)
+        llm = CachingOpenRouterClient(api_key=key, model=model, timeout_s=180.0)
 
         async def _go() -> dict:
             try:

@@ -69,6 +69,10 @@ class AgentUsage:
     compactions: int = 0
 
 
+CACHE_READ_RATE = 0.1
+CACHE_WRITE_RATE = 1.25
+
+
 @dataclass
 class RunBudget:
     limit_usd: float
@@ -78,6 +82,8 @@ class RunBudget:
     llm_usd: float = 0.0
     tool_usd: float = 0.0
     tool_calls: dict[str, int] = field(default_factory=dict)
+    cache_read_tokens: int = 0
+    cache_write_tokens: int = 0
 
     @property
     def spent(self) -> float:
@@ -88,8 +94,16 @@ class RunBudget:
         return self.spent >= self.limit_usd
 
     def charge_llm(self, usage: ChatUsage) -> None:
+        self.cache_read_tokens += usage.cached_tokens
+        self.cache_write_tokens += usage.cache_write_tokens
+        if usage.billed_usd > 0:
+            self.llm_usd += usage.billed_usd
+            return
+        uncached = max(usage.prompt_tokens - usage.cached_tokens - usage.cache_write_tokens, 0)
         self.llm_usd += (
-            usage.prompt_tokens * self.in_price_per_mtok
+            uncached * self.in_price_per_mtok
+            + usage.cached_tokens * self.in_price_per_mtok * CACHE_READ_RATE
+            + usage.cache_write_tokens * self.in_price_per_mtok * CACHE_WRITE_RATE
             + usage.completion_tokens * self.out_price_per_mtok
         ) / 1_000_000
 

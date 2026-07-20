@@ -159,6 +159,8 @@ async def run_task(
     out["llm_usd"] = budget.llm_usd
     out["tool_usd"] = budget.tool_usd
     out["tool_calls"] = budget.tool_calls
+    out["cache_read_tokens"] = budget.cache_read_tokens
+    out["cache_write_tokens"] = budget.cache_write_tokens
     out["budget_exhausted"] = budget.exhausted
     out["elapsed_s"] = round(time.perf_counter() - started, 1)
     return out

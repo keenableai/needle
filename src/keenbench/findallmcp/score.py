@@ -185,6 +185,8 @@ async def run_findallmcp(
             "llm_usd": round(run["llm_usd"], 4),
             "tool_usd": round(run["tool_usd"], 4),
             "tool_calls": run["tool_calls"],
+            "cache_read_tokens": run["cache_read_tokens"],
+            "cache_write_tokens": run["cache_write_tokens"],
             "turns": run["turns"],
             "budget_exhausted": run["budget_exhausted"],
             "elapsed_s": run.get("elapsed_s"),
