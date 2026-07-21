@@ -57,8 +57,7 @@ def test_normalize_url():
 def test_normalize_url_query_params():
     assert normalize_url("https://a.com/p?b=2&a=1") == normalize_url("https://a.com/p?a=1&b=2")
     assert normalize_url("https://a.com/p?utm_source=x&gclid=y&a=1") == "a.com/p?a=1"
-    assert normalize_url("https://a.com/p?msockid=x") == "a.com/p"
-    assert normalize_url("https://a.com/p?srsltid=x") == "a.com/p"
+    assert normalize_url("https://a.com/p?msockid=x&srsltid=y&twclid=z") == "a.com/p"
     assert normalize_url("https://a.com/p?utm_source=x") == "a.com/p"
     assert normalize_url("https://a.com/p?a=1") != normalize_url("https://a.com/p")
 
