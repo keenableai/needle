@@ -1,23 +1,9 @@
 from typing import Any
-from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
 
+from keenbench.shared.metrics import normalize_url
 from keenbench.shared.recall import ULTIMATE
 
 TS_FMT = "%Y-%m-%dT%H:%MZ"
-TRACKING_PARAMS = {"gclid", "fbclid", "msclkid", "yclid", "igshid", "mc_cid", "mc_eid"}
-
-
-def normalize_url(url: str) -> str:
-    parts = urlsplit(url.strip())
-    host = (parts.hostname or "").removeprefix("www.")
-    path = unquote(parts.path).rstrip("/")
-    params = sorted(
-        (k, v)
-        for k, v in parse_qsl(parts.query, keep_blank_values=True)
-        if not (k.startswith("utm_") or k in TRACKING_PARAMS)
-    )
-    query = f"?{urlencode(params)}" if params else ""
-    return f"{host}{path}{query}"
 
 
 GOOD_LABELS = frozenset({"HM", "FullyM"})

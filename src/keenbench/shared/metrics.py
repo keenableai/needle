@@ -1,9 +1,11 @@
 import re
 from collections.abc import Sequence
-from urllib.parse import urlsplit
+from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
 
 RBP_P = 0.8
 RBP_K = 5
+
+TRACKING_PARAMS = {"gclid", "fbclid", "msclkid", "yclid", "igshid", "mc_cid", "mc_eid"}
 
 GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
 
@@ -28,14 +30,20 @@ def url_domain(url: str) -> str:
     return host.removeprefix("www.")
 
 
-def canonical_url(url: str) -> str:
+def normalize_url(url: str) -> str:
     try:
-        parts = urlsplit(url)
+        parts = urlsplit(url.strip())
     except ValueError:
         return url
-    host = (parts.hostname or "").lower().removeprefix("www.")
-    path = parts.path.rstrip("/")
-    return f"{host}{path}?{parts.query}" if parts.query else f"{host}{path}"
+    host = (parts.hostname or "").removeprefix("www.")
+    path = unquote(parts.path).rstrip("/")
+    params = sorted(
+        (k, v)
+        for k, v in parse_qsl(parts.query, keep_blank_values=True)
+        if not (k.startswith("utm_") or k in TRACKING_PARAMS)
+    )
+    query = f"?{urlencode(params)}" if params else ""
+    return f"{host}{path}{query}"
 
 
 def _domain_penalty(prior_same_domain: int) -> int:
@@ -56,7 +64,7 @@ def apply_redundancy_penalties(
     out: list[int] = []
     for url, rating in zip(urls, ratings, strict=True):
         domain = url_domain(url)
-        canonical = canonical_url(url)
+        canonical = normalize_url(url)
         prior_same_domain = domain_counts.get(domain, 0)
         penalty = (
             DUPLICATE_URL_PENALTY if canonical in seen_urls else _domain_penalty(prior_same_domain)

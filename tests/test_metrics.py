@@ -4,8 +4,8 @@ from keenbench.shared.metrics import (
     RBP_MAX,
     RBP_P,
     apply_redundancy_penalties,
-    canonical_url,
     gain,
+    normalize_url,
     oracle_order,
     rbp_at_k,
     url_domain,
@@ -45,21 +45,25 @@ def test_url_domain_is_lowercased_host_without_www():
     assert url_domain("not a url") == ""
 
 
-def test_canonical_url_merges_variants():
-    variants = [
-        "https://ex.com/path",
-        "http://ex.com/path",
-        "https://www.ex.com/path",
-        "https://ex.com/path/",
-        "https://ex.com/path#frag",
-    ]
-    assert len({canonical_url(u) for u in variants}) == 1
+def test_normalize_url():
+    assert normalize_url("https://www.Example.com/a/") == "example.com/a"
+    assert normalize_url("http://example.com/a") == "example.com/a"
+    assert normalize_url("https://example.com:443/a") == "example.com/a"
+    assert normalize_url("https://example.com/a?x=1#frag") == "example.com/a?x=1"
+    assert normalize_url("https://example.com/") == "example.com"
+    assert normalize_url("https://example.com/a?x=1") != normalize_url("https://example.com/a?x=2")
 
 
-def test_canonical_url_keeps_distinct_pages_apart():
-    assert canonical_url("https://ex.com/a") != canonical_url("https://ex.com/b")
-    assert canonical_url("https://ex.com/a?p=1") != canonical_url("https://ex.com/a?p=2")
-    assert canonical_url("https://ex.com/a?p=1") != canonical_url("https://ex.com/a")
+def test_normalize_url_query_params():
+    assert normalize_url("https://a.com/p?b=2&a=1") == normalize_url("https://a.com/p?a=1&b=2")
+    assert normalize_url("https://a.com/p?utm_source=x&gclid=y&a=1") == "a.com/p?a=1"
+    assert normalize_url("https://a.com/p?utm_source=x") == "a.com/p"
+    assert normalize_url("https://a.com/p?a=1") != normalize_url("https://a.com/p")
+
+
+def test_normalize_url_percent_encoding():
+    assert normalize_url("https://a.com/caf%C3%A9") == normalize_url("https://a.com/café")
+    assert normalize_url("https://a.com/p?q=a%20b") == normalize_url("https://a.com/p?q=a+b")
 
 
 def test_penalties_duplicate_url_and_domain_redundancy():
