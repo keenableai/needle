@@ -200,6 +200,21 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   .overlap-matrix, #fields-table, #history-table, #uniqueness-table, #latency-summary,
   #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal { overflow-x: auto; }
+  #standings { padding: 4px 0 8px; overflow-x: auto; }
+  #standings svg { min-width: 760px; }
+  #standings .series { transition: opacity 0.18s ease; }
+  #standings .series.cold { opacity: 0.5; }
+  #standings svg.dim .series:not(.hot) { opacity: 0.1; }
+  #standings svg .series.hot { opacity: 1; }
+  #standings .series:focus { outline: none; }
+  #standings .st-label { font-size: 12px; cursor: default; }
+  #standings .st-rank { fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+  #standings .st-name { fill: var(--text-primary); }
+  #standings .st-pct { fill: var(--text-secondary); font-weight: 600; font-variant-numeric: tabular-nums; }
+  #standings .st-col { fill: var(--text-secondary); font-size: 12px; font-weight: 600; text-anchor: middle; }
+  #standings .st-ult { fill: var(--text-secondary); font-size: 11px; }
+  #standings .st-ult .b { font-weight: 700; }
+  #standings .st-ceil { fill: var(--text-muted); font-size: 10px; text-anchor: middle; font-variant-numeric: tabular-nums; }
   .prose { color: var(--text-secondary); font-size: 13px; }
   .prose p { margin: 0 0 10px; max-width: 90ch; }
   .overlap-matrix { padding: 10px 0 14px; }
@@ -273,6 +288,15 @@ document.documentElement.dataset.theme = localStorage.theme ||
       the ceiling for any single engine. All times UTC.
       <span id="updated"></span></p>
   </header>
+
+  <div class="card" id="card-standings">
+    <h2>Standings — all benches</h2>
+    <div class="sub"><b>100% = ultimate: every engine's results pooled per query and
+      re-ranked — the best any single engine could do.</b> Lines are 7-day means as
+      shares of it (raw ceilings under the column names); the shaded band is what even
+      the best engine leaves unclaimed; hover or focus a line to isolate an engine</div>
+    <div id="standings"></div>
+  </div>
 
   <div class="grid2">
     <div class="card">
@@ -639,7 +663,7 @@ function inRange(rows, ms) {
 
 function el(tag, attrs, text) {
   const ns = "http://www.w3.org/2000/svg";
-  const node = ["svg", "path", "line", "circle", "text", "g", "title"].includes(tag)
+  const node = ["svg", "path", "line", "circle", "text", "tspan", "g", "title"].includes(tag)
     ? document.createElementNS(ns, tag) : document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
   if (text != null) node.textContent = text;
@@ -807,18 +831,19 @@ function drawChart(card, series, opts) {
   card.appendChild(svg);
 }
 
+function wmean(rows, metric) {
+  let sum = 0, w = 0;
+  for (const r of rows) {
+    if (r[metric] == null) continue;
+    sum += r[metric] * (r.num_scored || 0);
+    w += r.num_scored || 0;
+  }
+  return w ? sum / w : null;
+}
+
 function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const holder = document.getElementById(holderId);
   holder.replaceChildren();
-  const wmean = (er, metric) => {
-    let sum = 0, w = 0;
-    for (const r of er) {
-      if (r[metric] == null) continue;
-      sum += r[metric] * (r.num_scored || 0);
-      w += r.num_scored || 0;
-    }
-    return w ? sum / w : null;
-  };
   const benchRows = rows.filter((r) => r.bench === bench);
   const entries = ENGINES.map((e) => {
     const er = benchRows.filter((r) => r.engine === e);
@@ -879,6 +904,157 @@ function renderLeaderboards(rows) {
     ["caselaw_recall", "caselaw"],
     ["code_recall", "code"],
   ]);
+}
+
+const STANDINGS_BENCHES = [
+  ["freshstream", "rbp", "RBP@5"],
+  ["rarestream", "rbp", "RBP@5"],
+  ["companyfill", "recall", "recall@5"],
+  ["scholar", "recall", "recall@10"],
+  ["legal", "recall", "recall@5"],
+];
+function renderStandings(rows) {
+  const card = document.getElementById("card-standings");
+  const holder = document.getElementById("standings");
+  holder.replaceChildren();
+  card._mdRows = null;
+  const week = inRange(rows, 7 * 86400e3);
+  const ult = STANDINGS_BENCHES.map(([bench, metric]) =>
+    wmean(week.filter((r) => r.bench === bench && r.engine === ULTIMATE_ENGINE), metric));
+  const entries = ENGINES.filter((e) => e !== ULTIMATE_ENGINE).map((e) => {
+    const shares = STANDINGS_BENCHES.map(([bench, metric], i) => {
+      const v = wmean(week.filter((r) => r.bench === bench && r.engine === e), metric);
+      return v == null || !ult[i] ? null : { v, share: v / ult[i] };
+    });
+    const have = shares.filter(Boolean);
+    return { e, shares,
+      overall: have.length ? have.reduce((s, x) => s + x.share, 0) / have.length : null };
+  }).filter((x) => x.overall != null);
+  if (!entries.length) {
+    holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
+    return;
+  }
+  entries.sort((a, b) => b.overall - a.overall);
+  const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  card._mdRows = () => [
+    ["engine", "overall", ...STANDINGS_BENCHES.map(([b]) => b)],
+    ["ultimate (raw)", "100%", ...ult.map((u) => u == null ? "–" : fmt3(u))],
+    ["gap to ultimate", ...best.map((m) => m == null ? "–" : `−${Math.round((1 - m) * 100)}%`)],
+    ...entries.map((x) => [x.e, fmtPct(x.overall),
+      ...x.shares.map((s) => s ? fmtPct(s.share) : "–")]),
+  ];
+
+  const W = Math.max(card.clientWidth - 32, 760), H = 340;
+  const M = { top: 46, right: 70, bottom: 14, left: 170 };
+  const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
+  const nCols = STANDINGS_BENCHES.length + 1;
+  const colX = (i) => M.left + (iw * i) / (nCols - 1);
+  const y0 = 0.25;
+  const y = (v) => M.top + (1 - (v - y0) / (1.04 - y0)) * ih;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
+    "aria-label": "Engine standings across all benches as share of the ultimate ceiling" });
+
+  for (const gv of [0.5, 0.75]) {
+    svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(gv), y2: y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.left + iw + 6, y: y(gv) + 3, class: "axis-text" }, fmtPct(gv)));
+  }
+  for (let i = 0; i < nCols; i++) {
+    svg.appendChild(el("line", { x1: colX(i), x2: colX(i), y1: y(1.04), y2: y(y0), stroke: "var(--grid)", "stroke-width": 1 }));
+  }
+  const best = [];
+  for (let i = 0; i < nCols; i++) {
+    let m = null;
+    for (const x of entries) {
+      const s = i === 0 ? x.overall : x.shares[i - 1]?.share;
+      if (s != null && (m == null || s > m)) m = s;
+    }
+    best.push(m);
+  }
+  if (best.every((m) => m != null)) {
+    const edge = best.map((m, i) => `${i ? "L" : "M"}${colX(i).toFixed(1)},${y(m).toFixed(1)}`).join("");
+    svg.appendChild(el("path", {
+      d: `${edge}L${colX(nCols - 1)},${y(1)}L${colX(0)},${y(1)}Z`,
+      fill: "var(--grid)", "fill-opacity": 0.55,
+    }));
+    for (let i = 0; i < nCols; i++) {
+      const gap = 1 - best[i];
+      const label = el("text", { x: colX(i), y: y(1) + 13, class: "st-ceil" }, `−${Math.round(gap * 100)}%`);
+      label.appendChild(el("title", {}, `${i === 0 ? "overall" : STANDINGS_BENCHES[i - 1][0]}: best engine reaches ${fmtPct(best[i])} of ultimate — gap ${fmtPct(gap)}`));
+      svg.appendChild(label);
+    }
+  }
+  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(y0), y2: y(y0), stroke: "var(--baseline)", "stroke-width": 1 }));
+  svg.appendChild(el("text", { x: M.left + iw + 6, y: y(y0) + 3, class: "axis-text" }, fmtPct(y0)));
+  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(1), y2: y(1), stroke: "var(--baseline)", "stroke-width": 1 }));
+  svg.appendChild(el("text", { x: M.left + iw + 6, y: y(1) + 3, class: "axis-text" }, "100%"));
+  const ultLabel = el("text", { x: M.left + iw - 4, y: y(1) - 5, "text-anchor": "end", class: "st-ult" });
+  ultLabel.appendChild(el("tspan", { class: "b" }, "ultimate"));
+  ultLabel.appendChild(el("tspan", {}, " — all engines pooled: the ceiling"));
+  svg.appendChild(ultLabel);
+
+  svg.appendChild(el("text", { x: colX(0), y: 16, class: "st-col" }, "overall"));
+  svg.appendChild(el("text", { x: colX(0), y: 30, class: "st-ceil" }, "mean share"));
+  for (const [i, [bench, , label]] of STANDINGS_BENCHES.entries()) {
+    svg.appendChild(el("text", { x: colX(i + 1), y: 16, class: "st-col" }, bench));
+    svg.appendChild(el("text", { x: colX(i + 1), y: 30, class: "st-ceil" },
+      ult[i] == null ? label : `${label} · ${fmt3(ult[i])}`));
+  }
+
+  const labels = [];
+  const contenders = entries.slice(0, 3).map((x) => x.e);
+  for (const [rank, x] of [...entries].reverse().map((x, i) => [entries.length - i, x])) {
+    const hot = contenders.includes(x.e) || x.e === HOME_ENGINE;
+    const g = el("g", { class: "series" + (hot ? "" : " cold"), tabindex: "0" });
+    const pts = [[colX(0), y(x.overall), null, x.overall]];
+    for (const [i, s] of x.shares.entries()) {
+      if (s) pts.push([colX(i + 1), y(s.share), i, s.share]);
+    }
+    const d = pts.map(([px, py], j) => `${j ? "L" : "M"}${px.toFixed(1)},${py.toFixed(1)}`).join("");
+    g.appendChild(el("path", { d, fill: "none", stroke: "transparent", "stroke-width": 14 }));
+    g.appendChild(el("path", { d, fill: "none", stroke: colorOf(x.e), "stroke-width": hot ? 2 : 1.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    for (const [px, py, i, share] of pts) {
+      const dot = el("circle", { cx: px, cy: py, r: 4, fill: colorOf(x.e), stroke: "var(--surface-1)", "stroke-width": 2 });
+      const [bench, , label] = i == null ? ["overall"] : STANDINGS_BENCHES[i];
+      dot.appendChild(el("title", {}, i == null
+        ? `${x.e} — overall: ${fmtPct(share)} mean share of ultimate over ${x.shares.filter(Boolean).length} benches`
+        : `${x.e} — ${bench}: ${label} ${fmt3(x.shares[i].v)} = ${fmtPct(share)} of ultimate ${fmt3(ult[i])}`));
+      g.appendChild(dot);
+    }
+    const text = el("text", { "text-anchor": "end", class: "st-label" });
+    text.appendChild(el("tspan", { class: "st-rank" }, `${rank}  `));
+    const name = el("tspan", { class: "st-name" }, x.e);
+    if (x.e === HOME_ENGINE) name.setAttribute("font-weight", "700");
+    text.appendChild(name);
+    text.appendChild(el("tspan", { class: "st-pct" }, `  ${fmtPct(x.overall)}`));
+    g.appendChild(text);
+    labels.push({ g, text, yPos: y(x.overall) });
+    svg.appendChild(g);
+    g.addEventListener("pointerenter", () => { svg.classList.add("dim"); g.classList.add("hot"); svg.appendChild(g); });
+    g.addEventListener("pointerleave", () => { svg.classList.remove("dim"); g.classList.remove("hot"); });
+    g.addEventListener("focus", () => { svg.classList.add("dim"); g.classList.add("hot"); svg.appendChild(g); });
+    g.addEventListener("blur", () => { svg.classList.remove("dim"); g.classList.remove("hot"); });
+  }
+
+  labels.sort((a, b) => a.yPos - b.yPos);
+  const gap = 15;
+  let lo = M.top + 4;
+  for (const l of labels) {
+    l.labelY = Math.max(l.yPos, lo);
+    lo = l.labelY + gap;
+  }
+  let hi = M.top + ih;
+  for (let i = labels.length - 1; i >= 0; i--) {
+    labels[i].labelY = Math.min(labels[i].labelY, hi);
+    hi = labels[i].labelY - gap;
+  }
+  for (const l of labels) {
+    l.text.setAttribute("x", colX(0) - 14);
+    l.text.setAttribute("y", l.labelY + 4);
+    if (Math.abs(l.labelY - l.yPos) > 3) {
+      l.g.insertBefore(el("line", { x1: colX(0) - 6, y1: l.yPos, x2: colX(0) - 11, y2: l.labelY, stroke: "var(--baseline)", "stroke-width": 1 }), l.text);
+    }
+  }
+  holder.appendChild(svg);
 }
 
 function renderLatencySummary(rows) {
@@ -1501,6 +1677,7 @@ async function initRunBrowser() {
 }
 
 function drawCharts(rows) {
+  renderStandings(rows);
   const ceiling = rows.filter((r) => r.bench === "freshstream").at(-1)?.rbp_max;
   drawChart(document.getElementById("card-rbp"), rbpSeries(rows),
     { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine, 6-hour windows" });
