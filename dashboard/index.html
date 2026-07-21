@@ -215,6 +215,8 @@ document.documentElement.dataset.theme = localStorage.theme ||
   #standings .st-ult { fill: var(--text-secondary); font-size: 11px; }
   #standings .st-ult .b { font-weight: 700; }
   #standings .st-ceil { fill: var(--text-muted); font-size: 10px; text-anchor: middle; font-variant-numeric: tabular-nums; }
+  #standings .poly { fill-opacity: 0; transition: fill-opacity 0.18s ease; }
+  #standings .series.hot .poly { fill-opacity: 0.12; }
   .prose { color: var(--text-secondary); font-size: 13px; }
   .prose p { margin: 0 0 10px; max-width: 90ch; }
   .overlap-matrix { padding: 10px 0 14px; }
@@ -292,9 +294,10 @@ document.documentElement.dataset.theme = localStorage.theme ||
   <div class="card" id="card-standings">
     <h2>Standings — all benches</h2>
     <div class="sub"><b>100% = ultimate: every engine's results pooled per query and
-      re-ranked — the best any single engine could do.</b> Lines are 7-day means as
-      shares of it (raw ceilings under the column names); the shaded band is what even
-      the best engine leaves unclaimed; hover or focus a line to isolate an engine</div>
+      re-ranked — the best any single engine could do.</b> Each spoke is a bench;
+      polygons are 7-day means as shares of it (raw ceilings at the spoke tips); the
+      shaded band is what even the best engine leaves unclaimed; hover or focus to
+      isolate an engine</div>
     <div id="standings"></div>
   </div>
 
@@ -936,6 +939,16 @@ function renderStandings(rows) {
   }
   entries.sort((a, b) => b.overall - a.overall);
   const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const nAx = STANDINGS_BENCHES.length;
+  const best = [];
+  for (let i = 0; i <= nAx; i++) {
+    let m = null;
+    for (const x of entries) {
+      const s = i === 0 ? x.overall : x.shares[i - 1]?.share;
+      if (s != null && (m == null || s > m)) m = s;
+    }
+    best.push(m);
+  }
   card._mdRows = () => [
     ["engine", "overall", ...STANDINGS_BENCHES.map(([b]) => b)],
     ["ultimate (raw)", "100%", ...ult.map((u) => u == null ? "–" : fmt3(u))],
@@ -944,61 +957,62 @@ function renderStandings(rows) {
       ...x.shares.map((s) => s ? fmtPct(s.share) : "–")]),
   ];
 
-  const W = Math.max(card.clientWidth - 32, 760), H = 340;
-  const M = { top: 46, right: 70, bottom: 14, left: 170 };
-  const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
-  const nCols = STANDINGS_BENCHES.length + 1;
-  const colX = (i) => M.left + (iw * i) / (nCols - 1);
-  const y0 = 0;
-  const y = (v) => M.top + (1 - (v - y0) / (1.04 - y0)) * ih;
+  const W = Math.max(card.clientWidth - 32, 760), H = 420;
+  const legendW = 190;
+  const cx = legendW + (W - legendW) / 2, cy = H / 2 + 8;
+  const R = Math.min((W - legendW) / 2 - 150, H / 2 - 64);
+  const ang = (i) => -Math.PI / 2 + (2 * Math.PI * i) / nAx;
+  const pt = (i, v) => [cx + R * v * Math.cos(ang(i)), cy + R * v * Math.sin(ang(i))];
+  const poly = (pts) => pts.map(([px, py], j) => `${j ? "L" : "M"}${px.toFixed(1)},${py.toFixed(1)}`).join("") + "Z";
+  const ringD = (v) => poly(Array.from({ length: nAx }, (_, i) => pt(i, v)));
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
     "aria-label": "Engine standings across all benches as share of the ultimate ceiling" });
 
   for (const gv of [0.25, 0.5, 0.75]) {
-    svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(gv), y2: y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
-    svg.appendChild(el("text", { x: M.left + iw + 6, y: y(gv) + 3, class: "axis-text" }, fmtPct(gv)));
+    svg.appendChild(el("path", { d: ringD(gv), fill: "none", stroke: "var(--grid)", "stroke-width": 1 }));
   }
-  for (let i = 0; i < nCols; i++) {
-    svg.appendChild(el("line", { x1: colX(i), x2: colX(i), y1: y(1.04), y2: y(y0), stroke: "var(--grid)", "stroke-width": 1 }));
+  for (let i = 0; i < nAx; i++) {
+    const [px, py] = pt(i, 1);
+    svg.appendChild(el("line", { x1: cx, y1: cy, x2: px, y2: py, stroke: "var(--grid)", "stroke-width": 1 }));
   }
-  const best = [];
-  for (let i = 0; i < nCols; i++) {
-    let m = null;
-    for (const x of entries) {
-      const s = i === 0 ? x.overall : x.shares[i - 1]?.share;
-      if (s != null && (m == null || s > m)) m = s;
-    }
-    best.push(m);
-  }
-  if (best.every((m) => m != null)) {
-    const edge = best.map((m, i) => `${i ? "L" : "M"}${colX(i).toFixed(1)},${y(m).toFixed(1)}`).join("");
+  const benchBest = best.slice(1);
+  if (benchBest.every((m) => m != null)) {
     svg.appendChild(el("path", {
-      d: `${edge}L${colX(nCols - 1)},${y(1)}L${colX(0)},${y(1)}Z`,
-      fill: "var(--grid)", "fill-opacity": 0.55,
+      d: ringD(1) + poly(benchBest.map((m, i) => pt(i, Math.min(m, 1)))),
+      "fill-rule": "evenodd", fill: "var(--grid)", "fill-opacity": 0.55,
     }));
-    for (let i = 0; i < nCols; i++) {
-      const gap = 1 - best[i];
-      const label = el("text", { x: colX(i), y: y(1) + 13, class: "st-ceil" }, `−${Math.round(gap * 100)}%`);
-      label.appendChild(el("title", {}, `${i === 0 ? "overall" : STANDINGS_BENCHES[i - 1][0]}: best engine reaches ${fmtPct(best[i])} of ultimate — gap ${fmtPct(gap)}`));
-      svg.appendChild(label);
-    }
   }
-  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(y0), y2: y(y0), stroke: "var(--baseline)", "stroke-width": 1 }));
-  svg.appendChild(el("text", { x: M.left + iw + 6, y: y(y0) + 3, class: "axis-text" }, fmtPct(y0)));
-  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(1), y2: y(1), stroke: "var(--baseline)", "stroke-width": 1 }));
-  svg.appendChild(el("text", { x: M.left + iw + 6, y: y(1) + 3, class: "axis-text" }, "100%"));
-  const ultLabel = el("text", { x: M.left + iw - 4, y: y(1) - 5, "text-anchor": "end", class: "st-ult" });
+  svg.appendChild(el("path", { d: ringD(1), fill: "none", stroke: "var(--baseline)", "stroke-width": 1 }));
+  for (const gv of [0.25, 0.5, 0.75]) {
+    svg.appendChild(el("text", { x: cx + 4, y: cy - R * gv - 3, class: "axis-text" }, fmtPct(gv)));
+  }
+  const ultLabel = el("text", { x: W - 8, y: 18, "text-anchor": "end", class: "st-ult" });
   ultLabel.appendChild(el("tspan", { class: "b" }, "ultimate"));
-  ultLabel.appendChild(el("tspan", {}, " — all engines pooled: the ceiling"));
+  ultLabel.appendChild(el("tspan", {}, " — all engines pooled: the outer ring (100%)"));
   svg.appendChild(ultLabel);
 
-  svg.appendChild(el("text", { x: colX(0), y: 16, class: "st-col" }, "overall"));
-  svg.appendChild(el("text", { x: colX(0), y: 30, class: "st-ceil" }, "mean share"));
   for (const [i, [bench, , label]] of STANDINGS_BENCHES.entries()) {
-    svg.appendChild(el("text", { x: colX(i + 1), y: 16, class: "st-col" }, bench));
-    svg.appendChild(el("text", { x: colX(i + 1), y: 30, class: "st-ceil" },
+    const c = Math.cos(ang(i)), s = Math.sin(ang(i));
+    const tx = cx + (R + 14) * c, ty = cy + (R + 14) * s;
+    const anchor = `text-anchor:${c > 0.3 ? "start" : c < -0.3 ? "end" : "middle"}`;
+    const ys = s < -0.5 ? [ty - 26, ty - 13, ty] : s > 0.5 ? [ty + 8, ty + 21, ty + 34] : [ty - 8, ty + 5, ty + 18];
+    svg.appendChild(el("text", { x: tx, y: ys[0], style: anchor, class: "st-col" }, bench));
+    svg.appendChild(el("text", { x: tx, y: ys[1], style: anchor, class: "st-ceil" },
       ult[i] == null ? label : `${label} · ${fmt3(ult[i])}`));
+    if (best[i + 1] != null) {
+      const gap = 1 - best[i + 1];
+      const gt = el("text", { x: tx, y: ys[2], style: anchor, class: "st-ceil" }, `−${Math.round(gap * 100)}%`);
+      gt.appendChild(el("title", {}, `${bench}: best engine reaches ${fmtPct(best[i + 1])} of ultimate — gap ${fmtPct(gap)}`));
+      svg.appendChild(gt);
+    }
   }
+
+  const ohdr = el("text", { x: 10, y: 16, style: "text-anchor:start", class: "st-col" }, "overall");
+  if (best[0] != null) {
+    ohdr.appendChild(el("title", {}, `overall: best engine reaches ${fmtPct(best[0])} of ultimate — gap ${fmtPct(1 - best[0])}`));
+  }
+  svg.appendChild(ohdr);
+  svg.appendChild(el("text", { x: 10, y: 30, style: "text-anchor:start", class: "st-ceil" }, "mean share of ultimate"));
 
   const labels = [];
   let hotG = null;
@@ -1015,64 +1029,48 @@ function renderStandings(rows) {
     }
   };
   const contenders = entries.slice(0, 3).map((x) => x.e);
+  const rowY = (rank) => 48 + (rank - 1) * 16;
   for (const [rank, x] of [...entries].reverse().map((x, i) => [entries.length - i, x])) {
     const hot = contenders.includes(x.e) || x.e === HOME_ENGINE;
     const g = el("g", { class: "series" + (hot ? "" : " cold"), tabindex: "0" });
-    const pts = [[colX(0), y(x.overall), null, x.overall]];
+    const pts = [];
     for (const [i, s] of x.shares.entries()) {
-      if (s) pts.push([colX(i + 1), y(s.share), i, s.share]);
+      if (s) pts.push([...pt(i, s.share), i, s.share]);
     }
-    const d = pts.map(([px, py], j) => `${j ? "L" : "M"}${px.toFixed(1)},${py.toFixed(1)}`).join("");
-    g.appendChild(el("path", { d, fill: "none", stroke: colorOf(x.e), "stroke-width": hot ? 2 : 1.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    g.appendChild(el("path", { d: poly(pts), class: "poly", stroke: colorOf(x.e), fill: colorOf(x.e),
+      "stroke-width": hot ? 2 : 1.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
     for (const [px, py, i, share] of pts) {
       const dot = el("circle", { cx: px, cy: py, r: 4, fill: colorOf(x.e), stroke: "var(--surface-1)", "stroke-width": 2 });
-      const [bench, , label] = i == null ? ["overall"] : STANDINGS_BENCHES[i];
-      dot.appendChild(el("title", {}, i == null
-        ? `${x.e} — overall: ${fmtPct(share)} mean share of ultimate over ${x.shares.filter(Boolean).length} benches`
-        : `${x.e} — ${bench}: ${label} ${fmt3(x.shares[i].v)} = ${fmtPct(share)} of ultimate ${fmt3(ult[i])}`));
+      const [bench, , label] = STANDINGS_BENCHES[i];
+      dot.appendChild(el("title", {}, `${x.e} — ${bench}: ${label} ${fmt3(x.shares[i].v)} = ${fmtPct(share)} of ultimate ${fmt3(ult[i])}`));
       g.appendChild(dot);
     }
-    const text = el("text", { "text-anchor": "end", class: "st-label" });
+    const text = el("text", { x: 10, y: rowY(rank), "text-anchor": "start", class: "st-label" });
     text.appendChild(el("tspan", { class: "st-rank" }, `${rank}  `));
     const name = el("tspan", { class: "st-name" }, x.e);
     if (x.e === HOME_ENGINE) name.setAttribute("font-weight", "700");
     text.appendChild(name);
     text.appendChild(el("tspan", { class: "st-pct" }, `  ${fmtPct(x.overall)}`));
+    text.appendChild(el("title", {}, `${x.e} — overall: ${fmtPct(x.overall)} mean share of ultimate over ${x.shares.filter(Boolean).length} benches`));
     g.appendChild(text);
-    labels.push({ g, text, yPos: y(x.overall), pts });
+    labels.push({ g, rank, pts });
     svg.appendChild(g);
     g.addEventListener("focus", () => setHot(g));
     g.addEventListener("blur", () => setHot(null));
   }
 
-  labels.sort((a, b) => a.yPos - b.yPos);
-  const gap = 15;
-  let lo = M.top + 4;
-  for (const l of labels) {
-    l.labelY = Math.max(l.yPos, lo);
-    lo = l.labelY + gap;
-  }
-  let hi = M.top + ih;
-  for (let i = labels.length - 1; i >= 0; i--) {
-    labels[i].labelY = Math.min(labels[i].labelY, hi);
-    hi = labels[i].labelY - gap;
-  }
-  for (const l of labels) {
-    l.text.setAttribute("x", colX(0) - 14);
-    l.text.setAttribute("y", l.labelY + 4);
-    if (Math.abs(l.labelY - l.yPos) > 3) {
-      l.g.insertBefore(el("line", { x1: colX(0) - 6, y1: l.yPos, x2: colX(0) - 11, y2: l.labelY, stroke: "var(--baseline)", "stroke-width": 1 }), l.text);
-    }
-  }
-
+  const segDist = (mx, my, [ax, ay], [bx, by]) => {
+    const dx = bx - ax, dy = by - ay;
+    const t = Math.max(0, Math.min(1, ((mx - ax) * dx + (my - ay) * dy) / (dx * dx + dy * dy || 1)));
+    return Math.hypot(mx - ax - t * dx, my - ay - t * dy);
+  };
   const distTo = (l, mx, my) => {
-    if (mx < l.pts[0][0]) return Math.abs(my - l.labelY);
-    let [px, py] = l.pts[0];
-    for (const [qx, qy] of l.pts.slice(1)) {
-      if (mx <= qx) return Math.abs(my - (py + ((mx - px) / (qx - px)) * (qy - py)));
-      [px, py] = [qx, qy];
+    if (mx < legendW) return Math.abs(my - (rowY(l.rank) - 4));
+    let d = Infinity;
+    for (let j = 0; j < l.pts.length; j++) {
+      d = Math.min(d, segDist(mx, my, l.pts[j], l.pts[(j + 1) % l.pts.length]));
     }
-    return Math.hypot(mx - px, my - py);
+    return d;
   };
   svg.addEventListener("pointermove", (ev) => {
     const p = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(svg.getScreenCTM().inverse());
