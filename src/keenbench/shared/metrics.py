@@ -5,7 +5,29 @@ from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
 RBP_P = 0.8
 RBP_K = 5
 
-TRACKING_PARAMS = {"gclid", "fbclid", "msclkid", "yclid", "igshid", "mc_cid", "mc_eid"}
+TRACKING_PARAMS = {
+    "_hsenc",
+    "_hsmi",
+    "dclid",
+    "epik",
+    "fbclid",
+    "gbraid",
+    "gclid",
+    "igshid",
+    "mc_cid",
+    "mc_eid",
+    "mkt_tok",
+    "msclkid",
+    "msockid",
+    "oly_anon_id",
+    "oly_enc_id",
+    "srsltid",
+    "ttclid",
+    "twclid",
+    "vero_id",
+    "wbraid",
+    "yclid",
+}
 
 GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
 
