@@ -293,7 +293,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <div class="sub"><b>100% = ultimate: every engine's results pooled per query and
       re-ranked — the best any single engine could do.</b> Each spoke is a bench;
       polygons are 7-day means as shares of it (raw ceilings at the spoke tips); the
-      shaded band is what even the best engine leaves unclaimed; hover or focus to
+      hatched band is what even the best engine leaves unclaimed; hover or focus to
       isolate an engine</div>
     <div id="standings"></div>
   </div>
@@ -680,7 +680,7 @@ function inRange(rows, ms) {
 
 function el(tag, attrs, text) {
   const ns = "http://www.w3.org/2000/svg";
-  const node = ["svg", "path", "line", "circle", "text", "tspan", "g", "title"].includes(tag)
+  const node = ["svg", "path", "line", "circle", "text", "tspan", "g", "title", "defs", "pattern", "rect"].includes(tag)
     ? document.createElementNS(ns, tag) : document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
   if (text != null) node.textContent = text;
@@ -991,9 +991,16 @@ function renderStandings(rows) {
   }
   const benchBest = best.slice(1);
   if (benchBest.every((m) => m != null)) {
+    const defs = el("defs", {});
+    const pat = el("pattern", { id: "st-hatch", width: 7, height: 7,
+      patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+    pat.appendChild(el("rect", { width: 7, height: 7, fill: "#d64545", "fill-opacity": 0.05 }));
+    pat.appendChild(el("line", { x1: 0.5, y1: 0, x2: 0.5, y2: 7, stroke: "#d64545", "stroke-opacity": 0.28, "stroke-width": 1.2 }));
+    defs.appendChild(pat);
+    svg.appendChild(defs);
     svg.appendChild(el("path", {
       d: ringD(1) + poly(benchBest.map((m, i) => pt(i, Math.min(m, 1)))),
-      "fill-rule": "evenodd", fill: "#d64545", "fill-opacity": 0.08,
+      "fill-rule": "evenodd", fill: "url(#st-hatch)",
     }));
   }
   svg.appendChild(el("path", { d: ringD(1), fill: "none", stroke: "var(--baseline)", "stroke-width": 1 }));
