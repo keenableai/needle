@@ -22,9 +22,20 @@ def gain(rating: int) -> float:
 
 def url_domain(url: str) -> str:
     try:
-        return (urlsplit(url).hostname or "").lower()
+        host = (urlsplit(url).hostname or "").lower()
     except ValueError:
         return ""
+    return host.removeprefix("www.")
+
+
+def canonical_url(url: str) -> str:
+    try:
+        parts = urlsplit(url)
+    except ValueError:
+        return url
+    host = (parts.hostname or "").lower().removeprefix("www.")
+    path = parts.path.rstrip("/")
+    return f"{host}{path}?{parts.query}" if parts.query else f"{host}{path}"
 
 
 def _domain_penalty(prior_same_domain: int) -> int:
@@ -45,10 +56,13 @@ def apply_redundancy_penalties(
     out: list[int] = []
     for url, rating in zip(urls, ratings, strict=True):
         domain = url_domain(url)
+        canonical = canonical_url(url)
         prior_same_domain = domain_counts.get(domain, 0)
-        penalty = DUPLICATE_URL_PENALTY if url in seen_urls else _domain_penalty(prior_same_domain)
+        penalty = (
+            DUPLICATE_URL_PENALTY if canonical in seen_urls else _domain_penalty(prior_same_domain)
+        )
         out.append(max(0, rating - penalty))
-        seen_urls.add(url)
+        seen_urls.add(canonical)
         domain_counts[domain] = prior_same_domain + 1
     return out
 

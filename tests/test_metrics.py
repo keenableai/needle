@@ -4,6 +4,7 @@ from keenbench.shared.metrics import (
     RBP_MAX,
     RBP_P,
     apply_redundancy_penalties,
+    canonical_url,
     gain,
     oracle_order,
     rbp_at_k,
@@ -38,9 +39,27 @@ def test_rbp_empty_is_zero():
     assert rbp_at_k([]) == 0.0
 
 
-def test_url_domain_is_lowercased_host():
-    assert url_domain("https://WWW.Ex.com/path?q=1") == "www.ex.com"
+def test_url_domain_is_lowercased_host_without_www():
+    assert url_domain("https://WWW.Ex.com/path?q=1") == "ex.com"
+    assert url_domain("https://ex.com/path") == "ex.com"
     assert url_domain("not a url") == ""
+
+
+def test_canonical_url_merges_variants():
+    variants = [
+        "https://ex.com/path",
+        "http://ex.com/path",
+        "https://www.ex.com/path",
+        "https://ex.com/path/",
+        "https://ex.com/path#frag",
+    ]
+    assert len({canonical_url(u) for u in variants}) == 1
+
+
+def test_canonical_url_keeps_distinct_pages_apart():
+    assert canonical_url("https://ex.com/a") != canonical_url("https://ex.com/b")
+    assert canonical_url("https://ex.com/a?p=1") != canonical_url("https://ex.com/a?p=2")
+    assert canonical_url("https://ex.com/a?p=1") != canonical_url("https://ex.com/a")
 
 
 def test_penalties_duplicate_url_and_domain_redundancy():
@@ -53,6 +72,11 @@ def test_penalties_duplicate_url_and_domain_redundancy():
     ]
     out = apply_redundancy_penalties(urls, [4, 4, 4, 4, 4])
     assert out == [4, 3, 2, 4, 0]
+
+
+def test_penalties_url_variants_count_as_duplicates():
+    urls = ["https://a.com/1", "http://www.a.com/1/"]
+    assert apply_redundancy_penalties(urls, [4, 4]) == [4, 0]
 
 
 def test_penalties_floor_at_zero():

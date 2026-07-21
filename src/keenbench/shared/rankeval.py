@@ -8,6 +8,7 @@ from keenbench.shared.metrics import (
     RBP_K,
     RBP_P,
     apply_redundancy_penalties,
+    canonical_url,
     oracle_order,
     rbp_at_k,
 )
@@ -155,10 +156,15 @@ async def run_rbp(
         for results, err in searches:
             if err is None:
                 for r in results or []:
-                    pair_docs.setdefault(r.url, []).append(r)
-        merged = {url: _merge_pair(docs) for url, docs in pair_docs.items()}
+                    pair_docs.setdefault(canonical_url(r.url), []).append(r)
+        merged = {docs[0].url: _merge_pair(docs) for docs in pair_docs.values()}
         judgements = await asyncio.gather(*[judge_pair(query, doc) for doc in merged.values()])
-        return searches, merged, dict(zip(merged, judgements, strict=True))
+        judgements_by_url = {
+            r.url: judgement
+            for docs, judgement in zip(pair_docs.values(), judgements, strict=True)
+            for r in docs
+        }
+        return searches, merged, judgements_by_url
 
     query_outs = await asyncio.gather(*[run_query(q) for q in queries])
 
@@ -183,6 +189,6 @@ async def run_rbp(
         "num_queries": len(queries),
         "num_results": num_results,
         "k": k,
-        "judged_pairs": sum(len(judgements) for _, _, judgements in query_outs),
+        "judged_pairs": sum(len(merged) for _, merged, _ in query_outs),
         "engines": engines_out,
     }

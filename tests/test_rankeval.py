@@ -183,6 +183,22 @@ async def test_run_rbp_ultimate_dedupes_shared_urls():
     assert pq["rbp"] == pytest.approx((1 - 0.8) * 1.0)
 
 
+async def test_run_rbp_ultimate_dedupes_url_variants():
+    a = FakeEngine([SearchResult(url="https://one.com/a", title="GOODDOC", snippet="short")])
+    b = FakeEngine(
+        [SearchResult(url="http://www.one.com/a/", title="GOODDOC", snippet="GOODDOC longer")]
+    )
+    judge = FakeJudge()
+    report = await run_rbp([q("q1")], {"a": a, "b": b}, judge)
+    assert report["judged_pairs"] == 1
+    assert judge.calls == 1
+    pq = report["engines"]["ultimate"]["per_query"][0]
+    assert pq["n_results"] == 1
+    assert pq["rbp"] == pytest.approx((1 - 0.8) * 1.0)
+    assert report["engines"]["a"]["per_query"][0]["ratings"] == [4]
+    assert report["engines"]["b"]["per_query"][0]["ratings"] == [4]
+
+
 async def test_run_rbp_ultimate_unscored_when_all_engines_fail():
     err = {"error_type": "http_error", "error_message": "503"}
     report = await run_rbp([q("q1")], {"a": FakeEngine([], error=err)}, FakeJudge())
