@@ -949,12 +949,12 @@ function renderStandings(rows) {
   const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
   const nCols = STANDINGS_BENCHES.length + 1;
   const colX = (i) => M.left + (iw * i) / (nCols - 1);
-  const y0 = 0.25;
+  const y0 = 0;
   const y = (v) => M.top + (1 - (v - y0) / (1.04 - y0)) * ih;
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
     "aria-label": "Engine standings across all benches as share of the ultimate ceiling" });
 
-  for (const gv of [0.5, 0.75]) {
+  for (const gv of [0.25, 0.5, 0.75]) {
     svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(gv), y2: y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
     svg.appendChild(el("text", { x: M.left + iw + 6, y: y(gv) + 3, class: "axis-text" }, fmtPct(gv)));
   }
