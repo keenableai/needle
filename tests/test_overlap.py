@@ -1,25 +1,4 @@
-from keenbench.shared.overlap import normalize_url, overlap_rows, uniqueness_rows
-
-
-def test_normalize_url():
-    assert normalize_url("https://www.Example.com/a/") == "example.com/a"
-    assert normalize_url("http://example.com/a") == "example.com/a"
-    assert normalize_url("https://example.com:443/a") == "example.com/a"
-    assert normalize_url("https://example.com/a?x=1#frag") == "example.com/a?x=1"
-    assert normalize_url("https://example.com/") == "example.com"
-    assert normalize_url("https://example.com/a?x=1") != normalize_url("https://example.com/a?x=2")
-
-
-def test_normalize_url_query_params():
-    assert normalize_url("https://a.com/p?b=2&a=1") == normalize_url("https://a.com/p?a=1&b=2")
-    assert normalize_url("https://a.com/p?utm_source=x&gclid=y&a=1") == "a.com/p?a=1"
-    assert normalize_url("https://a.com/p?utm_source=x") == "a.com/p"
-    assert normalize_url("https://a.com/p?a=1") != normalize_url("https://a.com/p")
-
-
-def test_normalize_url_percent_encoding():
-    assert normalize_url("https://a.com/caf%C3%A9") == normalize_url("https://a.com/café")
-    assert normalize_url("https://a.com/p?q=a%20b") == normalize_url("https://a.com/p?q=a+b")
+from keenbench.shared.overlap import overlap_rows, uniqueness_rows
 
 
 def _report(per_query_by_engine):

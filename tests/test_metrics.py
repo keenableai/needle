@@ -5,6 +5,7 @@ from keenbench.shared.metrics import (
     RBP_P,
     apply_redundancy_penalties,
     gain,
+    normalize_url,
     oracle_order,
     rbp_at_k,
     url_domain,
@@ -38,9 +39,31 @@ def test_rbp_empty_is_zero():
     assert rbp_at_k([]) == 0.0
 
 
-def test_url_domain_is_lowercased_host():
-    assert url_domain("https://WWW.Ex.com/path?q=1") == "www.ex.com"
+def test_url_domain_is_lowercased_host_without_www():
+    assert url_domain("https://WWW.Ex.com/path?q=1") == "ex.com"
+    assert url_domain("https://ex.com/path") == "ex.com"
     assert url_domain("not a url") == ""
+
+
+def test_normalize_url():
+    assert normalize_url("https://www.Example.com/a/") == "example.com/a"
+    assert normalize_url("http://example.com/a") == "example.com/a"
+    assert normalize_url("https://example.com:443/a") == "example.com/a"
+    assert normalize_url("https://example.com/a?x=1#frag") == "example.com/a?x=1"
+    assert normalize_url("https://example.com/") == "example.com"
+    assert normalize_url("https://example.com/a?x=1") != normalize_url("https://example.com/a?x=2")
+
+
+def test_normalize_url_query_params():
+    assert normalize_url("https://a.com/p?b=2&a=1") == normalize_url("https://a.com/p?a=1&b=2")
+    assert normalize_url("https://a.com/p?utm_source=x&gclid=y&a=1") == "a.com/p?a=1"
+    assert normalize_url("https://a.com/p?utm_source=x") == "a.com/p"
+    assert normalize_url("https://a.com/p?a=1") != normalize_url("https://a.com/p")
+
+
+def test_normalize_url_percent_encoding():
+    assert normalize_url("https://a.com/caf%C3%A9") == normalize_url("https://a.com/café")
+    assert normalize_url("https://a.com/p?q=a%20b") == normalize_url("https://a.com/p?q=a+b")
 
 
 def test_penalties_duplicate_url_and_domain_redundancy():
@@ -53,6 +76,11 @@ def test_penalties_duplicate_url_and_domain_redundancy():
     ]
     out = apply_redundancy_penalties(urls, [4, 4, 4, 4, 4])
     assert out == [4, 3, 2, 4, 0]
+
+
+def test_penalties_url_variants_count_as_duplicates():
+    urls = ["https://a.com/1", "http://www.a.com/1/"]
+    assert apply_redundancy_penalties(urls, [4, 4]) == [4, 0]
 
 
 def test_penalties_floor_at_zero():
