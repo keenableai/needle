@@ -1001,6 +1001,19 @@ function renderStandings(rows) {
   }
 
   const labels = [];
+  let hotG = null;
+  const setHot = (g) => {
+    if (hotG === g) return;
+    if (hotG) hotG.classList.remove("hot");
+    hotG = g;
+    if (g) {
+      svg.classList.add("dim");
+      g.classList.add("hot");
+      svg.appendChild(g);
+    } else {
+      svg.classList.remove("dim");
+    }
+  };
   const contenders = entries.slice(0, 3).map((x) => x.e);
   for (const [rank, x] of [...entries].reverse().map((x, i) => [entries.length - i, x])) {
     const hot = contenders.includes(x.e) || x.e === HOME_ENGINE;
@@ -1010,7 +1023,6 @@ function renderStandings(rows) {
       if (s) pts.push([colX(i + 1), y(s.share), i, s.share]);
     }
     const d = pts.map(([px, py], j) => `${j ? "L" : "M"}${px.toFixed(1)},${py.toFixed(1)}`).join("");
-    g.appendChild(el("path", { d, fill: "none", stroke: "transparent", "stroke-width": 14 }));
     g.appendChild(el("path", { d, fill: "none", stroke: colorOf(x.e), "stroke-width": hot ? 2 : 1.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
     for (const [px, py, i, share] of pts) {
       const dot = el("circle", { cx: px, cy: py, r: 4, fill: colorOf(x.e), stroke: "var(--surface-1)", "stroke-width": 2 });
@@ -1027,12 +1039,10 @@ function renderStandings(rows) {
     text.appendChild(name);
     text.appendChild(el("tspan", { class: "st-pct" }, `  ${fmtPct(x.overall)}`));
     g.appendChild(text);
-    labels.push({ g, text, yPos: y(x.overall) });
+    labels.push({ g, text, yPos: y(x.overall), pts });
     svg.appendChild(g);
-    g.addEventListener("pointerenter", () => { svg.classList.add("dim"); g.classList.add("hot"); svg.appendChild(g); });
-    g.addEventListener("pointerleave", () => { svg.classList.remove("dim"); g.classList.remove("hot"); });
-    g.addEventListener("focus", () => { svg.classList.add("dim"); g.classList.add("hot"); svg.appendChild(g); });
-    g.addEventListener("blur", () => { svg.classList.remove("dim"); g.classList.remove("hot"); });
+    g.addEventListener("focus", () => setHot(g));
+    g.addEventListener("blur", () => setHot(null));
   }
 
   labels.sort((a, b) => a.yPos - b.yPos);
@@ -1054,6 +1064,26 @@ function renderStandings(rows) {
       l.g.insertBefore(el("line", { x1: colX(0) - 6, y1: l.yPos, x2: colX(0) - 11, y2: l.labelY, stroke: "var(--baseline)", "stroke-width": 1 }), l.text);
     }
   }
+
+  const distTo = (l, mx, my) => {
+    if (mx < l.pts[0][0]) return Math.abs(my - l.labelY);
+    let [px, py] = l.pts[0];
+    for (const [qx, qy] of l.pts.slice(1)) {
+      if (mx <= qx) return Math.abs(my - (py + ((mx - px) / (qx - px)) * (qy - py)));
+      [px, py] = [qx, qy];
+    }
+    return Math.hypot(mx - px, my - py);
+  };
+  svg.addEventListener("pointermove", (ev) => {
+    const p = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(svg.getScreenCTM().inverse());
+    let best = null, bestD = 24;
+    for (const l of labels) {
+      const d = distTo(l, p.x, p.y);
+      if (d < bestD) { bestD = d; best = l.g; }
+    }
+    setHot(best);
+  });
+  svg.addEventListener("pointerleave", () => setHot(null));
   holder.appendChild(svg);
 }
 
