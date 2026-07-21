@@ -208,16 +208,12 @@ document.documentElement.dataset.theme = localStorage.theme ||
   #standings svg .series.hot { opacity: 1; }
   #standings .series:focus { outline: none; }
   #standings .st-label { font-size: 12px; cursor: default; }
-  #standings .st-rank { fill: var(--text-muted); font-variant-numeric: tabular-nums; }
   #standings .st-name { fill: var(--text-primary); }
   #standings .st-pct { fill: var(--text-secondary); font-weight: 600; font-variant-numeric: tabular-nums; }
   #standings .st-col { fill: var(--text-secondary); font-size: 12px; font-weight: 600; text-anchor: middle; }
   #standings .st-ult { fill: var(--text-secondary); font-size: 11px; }
   #standings .st-ult .b { font-weight: 700; }
   #standings .st-ceil { fill: var(--text-muted); font-size: 10px; text-anchor: middle; font-variant-numeric: tabular-nums; }
-  #standings .poly { fill-opacity: 0; transition: fill-opacity 0.18s ease; }
-  #standings .series:not(.cold) .poly { fill-opacity: 0.07; }
-  #standings .series.hot .poly { fill-opacity: 0.12; }
   .prose { color: var(--text-secondary); font-size: 13px; }
   .prose p { margin: 0 0 10px; max-width: 90ch; }
   .overlap-matrix { padding: 10px 0 14px; }
@@ -562,10 +558,11 @@ function registerEngines(names) {
 
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
-  const slot = ENGINE_SLOT.get(engine);
+  const slot = ENGINE_SLOT.get(COLOR_SWAP.get(engine) ?? engine);
   return slot == null || slot >= 12 ? "var(--text-muted)" : `var(--series-${slot + 1})`;
 }
 
+const COLOR_SWAP = new Map([["bing", "google"], ["google", "bing"]]);
 const MARKER_SHAPES = ["circle", "square", "diamond", "up", "down"];
 function markerEl(engine, x, y, r) {
   const shape = MARKER_SHAPES[(ENGINE_SLOT.get(engine) ?? 0) % MARKER_SHAPES.length];
@@ -996,7 +993,7 @@ function renderStandings(rows) {
   if (benchBest.every((m) => m != null)) {
     svg.appendChild(el("path", {
       d: ringD(1) + poly(benchBest.map((m, i) => pt(i, Math.min(m, 1)))),
-      "fill-rule": "evenodd", fill: "var(--grid)", "fill-opacity": 0.55,
+      "fill-rule": "evenodd", fill: "#d64545", "fill-opacity": 0.08,
     }));
   }
   svg.appendChild(el("path", { d: ringD(1), fill: "none", stroke: "var(--baseline)", "stroke-width": 1 }));
@@ -1054,7 +1051,7 @@ function renderStandings(rows) {
     for (const [i, s] of x.shares.entries()) {
       if (s) pts.push([...pt(i, s.share), i, s.share]);
     }
-    g.appendChild(el("path", { d: poly(pts), class: "poly", stroke: colorOf(x.e), fill: colorOf(x.e),
+    g.appendChild(el("path", { d: poly(pts), fill: "none", stroke: colorOf(x.e),
       "stroke-width": hot ? 2 : 1.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
     for (const [px, py, i, share] of pts) {
       const dot = markerEl(x.e, px, py, 4);
@@ -1064,10 +1061,7 @@ function renderStandings(rows) {
     }
     g.appendChild(markerEl(x.e, 16, rowY(rank) - 4, 4));
     const text = el("text", { x: 26, y: rowY(rank), "text-anchor": "start", class: "st-label" });
-    text.appendChild(el("tspan", { class: "st-rank" }, `${rank}  `));
-    const name = el("tspan", { class: "st-name" }, x.e);
-    if (x.e === HOME_ENGINE) name.setAttribute("font-weight", "700");
-    text.appendChild(name);
+    text.appendChild(el("tspan", { class: "st-name" }, x.e));
     text.appendChild(el("tspan", { class: "st-pct" }, `  ${fmtPct(x.overall)}`));
     text.appendChild(el("title", {}, `${x.e} — overall: ${fmtPct(x.overall)} mean share of ultimate over ${x.shares.filter(Boolean).length} benches`));
     g.appendChild(text);
