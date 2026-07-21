@@ -1152,7 +1152,7 @@
       "latency": null
     },
     "ultimate": {
-      "mean_rbp": 0.5022292415999996,
+      "mean_rbp": 0.5000313279999999,
       "rbp_max": 0.6723199999999999,
       "num_scored": 100,
       "search_errors": 0,
