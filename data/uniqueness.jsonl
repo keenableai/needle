@@ -5262,3 +5262,25 @@
 {"ts": "2026-07-22T17:47Z", "engine": "octen", "unique_urls": 76, "total_urls": 100, "relevant_unique_urls": 30, "relevant_total_urls": 50}
 {"ts": "2026-07-22T17:47Z", "engine": "ceramic", "unique_urls": 91, "total_urls": 95, "relevant_unique_urls": 5, "relevant_total_urls": 7}
 {"ts": "2026-07-22T17:47Z", "engine": "you", "unique_urls": 5, "total_urls": 100, "relevant_unique_urls": 4, "relevant_total_urls": 65}
+{"ts": "2026-07-22T18:57Z", "engine": "keenable", "unique_urls": 52, "total_urls": 100}
+{"ts": "2026-07-22T18:57Z", "engine": "exa", "unique_urls": 37, "total_urls": 100}
+{"ts": "2026-07-22T18:57Z", "engine": "google", "unique_urls": 44, "total_urls": 100}
+{"ts": "2026-07-22T18:57Z", "engine": "bing", "unique_urls": 45, "total_urls": 99}
+{"ts": "2026-07-22T18:57Z", "engine": "brave", "unique_urls": 2, "total_urls": 100}
+{"ts": "2026-07-22T18:57Z", "engine": "parallel", "unique_urls": 23, "total_urls": 100}
+{"ts": "2026-07-22T18:57Z", "engine": "tavily", "unique_urls": 64, "total_urls": 96}
+{"ts": "2026-07-22T18:57Z", "engine": "perplexity", "unique_urls": 46, "total_urls": 100}
+{"ts": "2026-07-22T18:57Z", "engine": "octen", "unique_urls": 66, "total_urls": 100}
+{"ts": "2026-07-22T18:57Z", "engine": "ceramic", "unique_urls": 98, "total_urls": 100}
+{"ts": "2026-07-22T18:57Z", "engine": "you", "unique_urls": 9, "total_urls": 100}
+{"ts": "2026-07-22T18:57Z", "engine": "keenable", "unique_urls": 240, "total_urls": 475}
+{"ts": "2026-07-22T18:57Z", "engine": "exa", "unique_urls": 247, "total_urls": 475}
+{"ts": "2026-07-22T18:57Z", "engine": "google", "unique_urls": 161, "total_urls": 449}
+{"ts": "2026-07-22T18:57Z", "engine": "bing", "unique_urls": 164, "total_urls": 383}
+{"ts": "2026-07-22T18:57Z", "engine": "brave", "unique_urls": 17, "total_urls": 398}
+{"ts": "2026-07-22T18:57Z", "engine": "parallel", "unique_urls": 143, "total_urls": 427}
+{"ts": "2026-07-22T18:57Z", "engine": "tavily", "unique_urls": 263, "total_urls": 457}
+{"ts": "2026-07-22T18:57Z", "engine": "perplexity", "unique_urls": 223, "total_urls": 464}
+{"ts": "2026-07-22T18:57Z", "engine": "octen", "unique_urls": 378, "total_urls": 474}
+{"ts": "2026-07-22T18:57Z", "engine": "ceramic", "unique_urls": 375, "total_urls": 400}
+{"ts": "2026-07-22T18:57Z", "engine": "you", "unique_urls": 59, "total_urls": 468}
