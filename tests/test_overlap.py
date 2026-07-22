@@ -202,7 +202,7 @@ def test_uniqueness_relevant_only_by_label():
 
 
 def _pq_hit(urls, hit_rank):
-    return {"search_error": None, "hit_rank": hit_rank, "results": [{"url": u} for u in urls]}
+    return dict(_pq(urls), hit_rank=hit_rank)
 
 
 def test_uniqueness_relevant_only_by_hit_rank():

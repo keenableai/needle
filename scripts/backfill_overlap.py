@@ -19,6 +19,16 @@ def _load(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
+def _done(rows: list[dict], fields: tuple[str, ...]) -> set[str]:
+    stale = {r["ts"] for r in rows if any(f not in r for f in fields)}
+    return {r["ts"] for r in rows} - stale
+
+
+def _merge_write(existing: list[dict], new: list[dict], path: Path) -> None:
+    redone = {r["ts"] for r in new}
+    write_jsonl([r for r in existing if r["ts"] not in redone] + new, str(path))
+
+
 def backfill(site: str, hours: int | None = None, dataset: str | None = None) -> None:
     data = Path(site) / "data"
     index_path = data / "runs.json"
@@ -32,12 +42,8 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
     )
     overlap = _load(data / "overlap.jsonl")
     uniqueness = _load(data / "uniqueness.jsonl")
-    overlap_seen = {r["ts"] for r in overlap}
-    uniqueness_seen = {r["ts"] for r in uniqueness}
-    overlap_fields = ("num_shared3", "num_suspect", "low_shared_urls")
-    overlap_stale = {r["ts"] for r in overlap if any(f not in r for f in overlap_fields)}
-    uniqueness_fields = ("relevant_unique_urls", "relevant_total_urls")
-    uniqueness_stale = {r["ts"] for r in uniqueness if any(f not in r for f in uniqueness_fields)}
+    overlap_done = _done(overlap, ("num_shared3", "num_suspect", "low_shared_urls"))
+    uniqueness_done = _done(uniqueness, ("relevant_unique_urls", "relevant_total_urls"))
     cutoff = (
         (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT) if hours is not None else ""
     )
@@ -47,8 +53,8 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
     n_runs = 0
     with httpx.Client(timeout=60.0, follow_redirects=True) as client:
         for run in runs:
-            want_overlap = run["ts"] not in overlap_seen or run["ts"] in overlap_stale
-            want_uniqueness = run["ts"] not in uniqueness_seen or run["ts"] in uniqueness_stale
+            want_overlap = run["ts"] not in overlap_done
+            want_uniqueness = run["ts"] not in uniqueness_done
             if not (want_overlap or want_uniqueness) or run["ts"] < cutoff:
                 continue
             n_runs += 1
@@ -67,13 +73,9 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
         print("nothing to backfill")
         return
     if new_overlap:
-        redone = {r["ts"] for r in new_overlap}
-        kept = [r for r in overlap if r["ts"] not in redone]
-        write_jsonl(kept + new_overlap, str(data / "overlap.jsonl"))
+        _merge_write(overlap, new_overlap, data / "overlap.jsonl")
     if new_uniqueness:
-        redone = {r["ts"] for r in new_uniqueness}
-        kept = [r for r in uniqueness if r["ts"] not in redone]
-        write_jsonl(kept + new_uniqueness, str(data / "uniqueness.jsonl"))
+        _merge_write(uniqueness, new_uniqueness, data / "uniqueness.jsonl")
     print(f"backfilled {len(new_overlap) + len(new_uniqueness)} rows from {n_runs} runs")
 
 

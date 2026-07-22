@@ -198,7 +198,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
-  .overlap-matrix, #fields-table, #history-table, #uniqueness-table, #uniqueness-relevant-table, #latency-summary,
+  .overlap-matrix, #fields-table, #history-table, .uniq-table, #latency-summary,
   #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal { overflow-x: auto; }
   #standings { padding: 4px 0 8px; overflow-x: auto; }
   #standings svg { min-width: 760px; }
@@ -226,11 +226,11 @@ document.documentElement.dataset.theme = localStorage.theme ||
     width: 32px; min-width: 32px; height: 32px; padding: 0;
     border-radius: 3px; text-align: center; font-variant-numeric: tabular-nums;
   }
-  #uniqueness-table .bar-track, #uniqueness-relevant-table .bar-track {
+  .uniq-table .bar-track {
     display: inline-block; width: 140px; height: 8px; border-radius: 4px;
     background: var(--grid); vertical-align: middle; margin-right: 8px;
   }
-  #uniqueness-table .bar-fill, #uniqueness-relevant-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
+  .uniq-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
   #sharegraph svg { max-width: 460px; margin: 0 auto; }
   #sharegraph .sg-edge { stroke: var(--text-muted); }
   #sharegraph .sg-arrow { fill: var(--text-primary); }
@@ -374,12 +374,12 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <div class="card" id="card-uniqueness">
       <h2>Result uniqueness (all time)</h2>
       <div class="sub" id="uniqueness-sub"></div>
-      <div id="uniqueness-table"></div>
+      <div id="uniqueness-table" class="uniq-table"></div>
     </div>
     <div class="card" id="card-uniqueness-relevant">
       <h2>Result uniqueness — relevant only (all time)</h2>
       <div class="sub" id="uniqueness-relevant-sub"></div>
-      <div id="uniqueness-relevant-table"></div>
+      <div id="uniqueness-relevant-table" class="uniq-table"></div>
     </div>
   </div>
 
