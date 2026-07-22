@@ -75,9 +75,27 @@ def test_uniqueness_rows():
     )
     by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
     empty_rel = {"relevant_unique_urls": 0, "relevant_total_urls": 0}
-    assert by_engine["e1"] == {"ts": "t", "engine": "e1", "unique_urls": 2, "total_urls": 3, **empty_rel}
-    assert by_engine["e2"] == {"ts": "t", "engine": "e2", "unique_urls": 1, "total_urls": 2, **empty_rel}
-    assert by_engine["e3"] == {"ts": "t", "engine": "e3", "unique_urls": 1, "total_urls": 1, **empty_rel}
+    assert by_engine["e1"] == {
+        "ts": "t",
+        "engine": "e1",
+        "unique_urls": 2,
+        "total_urls": 3,
+        **empty_rel,
+    }
+    assert by_engine["e2"] == {
+        "ts": "t",
+        "engine": "e2",
+        "unique_urls": 1,
+        "total_urls": 2,
+        **empty_rel,
+    }
+    assert by_engine["e3"] == {
+        "ts": "t",
+        "engine": "e3",
+        "unique_urls": 1,
+        "total_urls": 1,
+        **empty_rel,
+    }
 
 
 def test_uniqueness_skips_queries_with_no_other_engine():
