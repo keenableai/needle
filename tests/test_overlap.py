@@ -74,9 +74,28 @@ def test_uniqueness_rows():
         }
     )
     by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
-    assert by_engine["e1"] == {"ts": "t", "engine": "e1", "unique_urls": 2, "total_urls": 3}
-    assert by_engine["e2"] == {"ts": "t", "engine": "e2", "unique_urls": 1, "total_urls": 2}
-    assert by_engine["e3"] == {"ts": "t", "engine": "e3", "unique_urls": 1, "total_urls": 1}
+    empty_rel = {"relevant_unique_urls": 0, "relevant_total_urls": 0}
+    assert by_engine["e1"] == {
+        "ts": "t",
+        "engine": "e1",
+        "unique_urls": 2,
+        "total_urls": 3,
+        **empty_rel,
+    }
+    assert by_engine["e2"] == {
+        "ts": "t",
+        "engine": "e2",
+        "unique_urls": 1,
+        "total_urls": 2,
+        **empty_rel,
+    }
+    assert by_engine["e3"] == {
+        "ts": "t",
+        "engine": "e3",
+        "unique_urls": 1,
+        "total_urls": 1,
+        **empty_rel,
+    }
 
 
 def test_uniqueness_skips_queries_with_no_other_engine():
@@ -87,7 +106,14 @@ def test_uniqueness_skips_queries_with_no_other_engine():
         }
     )
     by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
-    assert by_engine["e1"] == {"ts": "t", "engine": "e1", "unique_urls": 0, "total_urls": 0}
+    assert by_engine["e1"] == {
+        "ts": "t",
+        "engine": "e1",
+        "unique_urls": 0,
+        "total_urls": 0,
+        "relevant_unique_urls": 0,
+        "relevant_total_urls": 0,
+    }
 
 
 def _pq_labeled(url_labels, error=None):
@@ -167,6 +193,51 @@ def test_overlap_rows_suspect_counts_single_shared_low_url():
     (row,) = overlap_rows(report, ts="t")
     assert row["num_suspect"] == 1
     assert row["low_shared_urls"] == 1
+
+
+def test_uniqueness_relevant_only_by_label():
+    report = _report(
+        {
+            "e1": [
+                _pq_labeled(
+                    [
+                        ("https://good1.com", "FullyM"),
+                        ("https://good2.com", "HM"),
+                        ("https://junk.com", "SM"),
+                    ]
+                )
+            ],
+            "e2": [_pq_labeled([("https://good1.com", "HM"), ("https://junk.com", "FullyM")])],
+        }
+    )
+    by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
+    r1 = by_engine["e1"]
+    assert r1["relevant_total_urls"] == 2
+    assert r1["relevant_unique_urls"] == 1
+    r2 = by_engine["e2"]
+    assert r2["relevant_total_urls"] == 2
+    assert r2["relevant_unique_urls"] == 1
+
+
+def _pq_hit(urls, hit_rank):
+    return dict(_pq(urls), hit_rank=hit_rank)
+
+
+def test_uniqueness_relevant_only_by_hit_rank():
+    report = _report(
+        {
+            "e1": [_pq_hit(["https://miss.com", "https://gold.com"], 2)],
+            "e2": [_pq_hit(["https://gold.com"], 1)],
+            "e3": [_pq_hit(["https://other.com"], None)],
+        }
+    )
+    by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
+    assert by_engine["e1"]["relevant_total_urls"] == 1
+    assert by_engine["e1"]["relevant_unique_urls"] == 0
+    assert by_engine["e2"]["relevant_total_urls"] == 1
+    assert by_engine["e2"]["relevant_unique_urls"] == 0
+    assert by_engine["e3"]["relevant_total_urls"] == 0
+    assert by_engine["e3"]["relevant_unique_urls"] == 0
 
 
 def test_overlap_and_uniqueness_exclude_ultimate():

@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from typing import Any
 
 from keenbench.shared.metrics import normalize_url
@@ -9,39 +10,42 @@ TS_FMT = "%Y-%m-%dT%H:%MZ"
 GOOD_LABELS = frozenset({"HM", "FullyM"})
 
 
-def _url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
+def _engine_sets(
+    report: dict[str, Any], of_pq: Callable[[dict[str, Any]], Any]
+) -> dict[str, list[Any]]:
     return {
-        name: [
-            None
-            if pq["search_error"] is not None
-            else {normalize_url(r["url"]) for r in pq["results"]}
-            for pq in e["per_query"]
-        ]
+        name: [None if pq["search_error"] is not None else of_pq(pq) for pq in e["per_query"]]
         for name, e in report["engines"].items()
         if name != ULTIMATE
     }
 
 
-def _low_url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
+def _all_urls(pq: dict[str, Any]) -> set[str]:
+    return {normalize_url(r["url"]) for r in pq["results"]}
+
+
+def _low_urls(pq: dict[str, Any]) -> set[str]:
     return {
-        name: [
-            None
-            if pq["search_error"] is not None
-            else {
-                normalize_url(r["url"])
-                for r in pq["results"]
-                if r.get("label") and r["label"] not in GOOD_LABELS
-            }
-            for pq in e["per_query"]
-        ]
-        for name, e in report["engines"].items()
-        if name != ULTIMATE
+        normalize_url(r["url"])
+        for r in pq["results"]
+        if r.get("label") and r["label"] not in GOOD_LABELS
     }
+
+
+def _urls_with_relevant(pq: dict[str, Any]) -> tuple[set[str], set[str]]:
+    urls: set[str] = set()
+    relevant: set[str] = set()
+    for rank, r in enumerate(pq["results"], start=1):
+        url = normalize_url(r["url"])
+        urls.add(url)
+        if r.get("label") in GOOD_LABELS or rank == pq.get("hit_rank"):
+            relevant.add(url)
+    return urls, relevant
 
 
 def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
-    url_sets = _url_sets(report)
-    low_sets = _low_url_sets(report)
+    url_sets = _engine_sets(report, _all_urls)
+    low_sets = _engine_sets(report, _low_urls)
     names = list(url_sets)
     rows = []
     for i, a in enumerate(names):
@@ -76,18 +80,30 @@ def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
 
 
 def uniqueness_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
-    url_sets = _url_sets(report)
+    url_sets = _engine_sets(report, _urls_with_relevant)
     rows = []
     for name, sets in url_sets.items():
-        unique = 0
-        total = 0
-        for i, s in enumerate(sets):
-            if s is None:
+        unique = total = rel_unique = rel_total = 0
+        for i, pair in enumerate(sets):
+            if pair is None:
                 continue
-            others = [s2 for n2, o in url_sets.items() if n2 != name and (s2 := o[i]) is not None]
+            others = [p for n2, o in url_sets.items() if n2 != name and (p := o[i]) is not None]
             if not others:
                 continue
+            s, rel = pair
             total += len(s)
-            unique += len(s - set().union(*others))
-        rows.append({"ts": ts, "engine": name, "unique_urls": unique, "total_urls": total})
+            unique += len(s - set().union(*(p[0] for p in others)))
+            rel_total += len(rel)
+            if rel:
+                rel_unique += len(rel - set().union(*(p[1] for p in others)))
+        rows.append(
+            {
+                "ts": ts,
+                "engine": name,
+                "unique_urls": unique,
+                "total_urls": total,
+                "relevant_unique_urls": rel_unique,
+                "relevant_total_urls": rel_total,
+            }
+        )
     return rows

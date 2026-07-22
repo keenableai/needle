@@ -198,7 +198,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
-  .overlap-matrix, #fields-table, #history-table, #uniqueness-table, #latency-summary,
+  .overlap-matrix, #fields-table, #history-table, .uniq-table, #latency-summary,
   #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal { overflow-x: auto; }
   #standings { padding: 4px 0 8px; overflow-x: auto; }
   #standings svg { min-width: 760px; }
@@ -226,11 +226,11 @@ document.documentElement.dataset.theme = localStorage.theme ||
     width: 32px; min-width: 32px; height: 32px; padding: 0;
     border-radius: 3px; text-align: center; font-variant-numeric: tabular-nums;
   }
-  #uniqueness-table .bar-track {
+  .uniq-table .bar-track {
     display: inline-block; width: 140px; height: 8px; border-radius: 4px;
     background: var(--grid); vertical-align: middle; margin-right: 8px;
   }
-  #uniqueness-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
+  .uniq-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
   #sharegraph svg { max-width: 460px; margin: 0 auto; }
   #sharegraph .sg-edge { stroke: var(--text-muted); }
   #sharegraph .sg-arrow { fill: var(--text-primary); }
@@ -370,10 +370,17 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <div id="sharegraph"></div>
     </div>
   </div>
-  <div class="card" id="card-uniqueness">
-    <h2>Result uniqueness (all time)</h2>
-    <div class="sub" id="uniqueness-sub"></div>
-    <div id="uniqueness-table"></div>
+  <div class="grid2">
+    <div class="card" id="card-uniqueness">
+      <h2>Result uniqueness (all time)</h2>
+      <div class="sub" id="uniqueness-sub"></div>
+      <div id="uniqueness-table" class="uniq-table"></div>
+    </div>
+    <div class="card" id="card-uniqueness-relevant">
+      <h2>Result uniqueness — relevant only (all time)</h2>
+      <div class="sub" id="uniqueness-relevant-sub"></div>
+      <div id="uniqueness-relevant-table" class="uniq-table"></div>
+    </div>
   </div>
 
   <h2 class="section-title" id="sec-slices">Slices</h2>
@@ -1454,31 +1461,40 @@ function renderSharingGraph(holder, engines, pairs, uniqAgg) {
 function uniquenessAgg(rows) {
   const agg = new Map();
   for (const r of rows) {
-    const e = agg.get(r.engine) || { unique: 0, total: 0 };
+    const e = agg.get(r.engine) || { unique: 0, total: 0, relUnique: 0, relTotal: 0 };
     e.unique += r.unique_urls;
     e.total += r.total_urls;
+    e.relUnique += r.relevant_unique_urls || 0;
+    e.relTotal += r.relevant_total_urls || 0;
     agg.set(r.engine, e);
   }
   return agg;
 }
 
 function renderUniqueness(agg) {
-  const holder = document.getElementById("uniqueness-table");
+  renderUniquenessTable(agg, "uniqueness", "unique", "total",
+    "share of an engine's returned URLs that no other engine returned for the same query, all benchmarks, all runs");
+  renderUniquenessTable(agg, "uniqueness-relevant", "relUnique", "relTotal",
+    "same, restricted to relevant URLs on both sides: judged HM/FullyM on the RBP benches, the known-item hit on the recall benches");
+}
+
+function renderUniquenessTable(agg, prefix, uKey, tKey, subText) {
+  const holder = document.getElementById(`${prefix}-table`);
   holder.replaceChildren();
-  document.getElementById("uniqueness-sub").textContent =
-    "share of an engine's returned URLs that no other engine returned for the same query, all benchmarks, all runs";
-  const engines = ENGINES.filter((e) => agg.get(e)?.total);
+  document.getElementById(`${prefix}-sub`).textContent = subText;
+  const engines = ENGINES.filter((e) => agg.get(e)?.[tKey]);
   if (!engines.length) {
     holder.appendChild(el("div", { class: "empty" }, "No uniqueness data yet — accumulates from hourly runs."));
     return;
   }
-  engines.sort((a, b) => agg.get(b).unique / agg.get(b).total - agg.get(a).unique / agg.get(a).total);
+  engines.sort((a, b) => agg.get(b)[uKey] / agg.get(b)[tKey] - agg.get(a)[uKey] / agg.get(a)[tKey]);
   const table = el("table");
   const head = el("tr");
   for (const h of ["engine", "", "unique", "URLs"]) head.appendChild(el("th", {}, h));
   table.appendChild(head);
   for (const e of engines) {
-    const { unique, total } = agg.get(e);
+    const unique = agg.get(e)[uKey];
+    const total = agg.get(e)[tKey];
     const pct = unique / total;
     const tr = el("tr");
     markHome(tr, e);
