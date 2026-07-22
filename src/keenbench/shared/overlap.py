@@ -39,6 +39,24 @@ def _low_url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
     }
 
 
+def _relevant_urls(pq: dict[str, Any]) -> set[str]:
+    urls = {normalize_url(r["url"]) for r in pq["results"] if r.get("label") in GOOD_LABELS}
+    if pq.get("hit_rank") is not None:
+        urls.add(normalize_url(pq["results"][pq["hit_rank"] - 1]["url"]))
+    return urls
+
+
+def _relevant_url_sets(report: dict[str, Any]) -> dict[str, list[set[str] | None]]:
+    return {
+        name: [
+            None if pq["search_error"] is not None else _relevant_urls(pq)
+            for pq in e["per_query"]
+        ]
+        for name, e in report["engines"].items()
+        if name != ULTIMATE
+    }
+
+
 def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
     url_sets = _url_sets(report)
     low_sets = _low_url_sets(report)
@@ -77,17 +95,29 @@ def overlap_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
 
 def uniqueness_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
     url_sets = _url_sets(report)
+    rel_sets = _relevant_url_sets(report)
     rows = []
     for name, sets in url_sets.items():
-        unique = 0
-        total = 0
+        unique = total = rel_unique = rel_total = 0
         for i, s in enumerate(sets):
             if s is None:
                 continue
-            others = [s2 for n2, o in url_sets.items() if n2 != name and (s2 := o[i]) is not None]
-            if not others:
+            other_names = [n2 for n2, o in url_sets.items() if n2 != name and o[i] is not None]
+            if not other_names:
                 continue
             total += len(s)
-            unique += len(s - set().union(*others))
-        rows.append({"ts": ts, "engine": name, "unique_urls": unique, "total_urls": total})
+            unique += len(s - set().union(*(url_sets[n2][i] for n2 in other_names)))
+            rel = rel_sets[name][i]
+            rel_total += len(rel)
+            rel_unique += len(rel - set().union(*(rel_sets[n2][i] for n2 in other_names)))
+        rows.append(
+            {
+                "ts": ts,
+                "engine": name,
+                "unique_urls": unique,
+                "total_urls": total,
+                "relevant_unique_urls": rel_unique,
+                "relevant_total_urls": rel_total,
+            }
+        )
     return rows
