@@ -92,15 +92,17 @@ def _ultimate_query(
     if all(err is not None for _, err in searches):
         error = {"error_type": "all_engines_failed", "error_message": "every engine errored"}
         return _score_query(query, None, error, judgements_by_url, k=k)
-    urls = list(merged)
-    ratings: list[int] = []
-    for url in urls:
-        judgement = judgements_by_url[url]
-        if judgement is None:
-            return _score_query(query, list(merged.values()), None, judgements_by_url, k=k)
-        ratings.append(judgement.rating)
+    judged = [
+        (url, result, judgement)
+        for url, result in merged.items()
+        if (judgement := judgements_by_url[url]) is not None
+    ]
+    if not judged:
+        return _score_query(query, list(merged.values()), None, judgements_by_url, k=k)
+    urls = [url for url, _, _ in judged]
+    ratings = [judgement.rating for _, _, judgement in judged]
     order = oracle_order(urls, ratings, query_text=query.text)
-    ordered = [merged[urls[i]] for i in order][:num_results]
+    ordered = [judged[i][1] for i in order][:num_results]
     return _score_query(query, ordered, None, judgements_by_url, k=k)
 
 

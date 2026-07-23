@@ -132,8 +132,15 @@ def ids_match(gold: GoldLegal, found: LegalIds, *, result_text: str) -> bool:
     if gold.cfr and gold.cfr in found.cfr:
         return True
     if gold.docket and norm_docket(gold.docket) in found.dockets:
-        lowered = result_text.lower()
-        if any(token in lowered for token in gold.party_tokens):
+        if any(
+            token.strip()
+            and re.search(
+                rf"(?<![A-Za-z0-9]){re.escape(token.strip())}(?![A-Za-z0-9])",
+                result_text,
+                re.IGNORECASE,
+            )
+            for token in gold.party_tokens
+        ):
             return True
     return False
 

@@ -41,6 +41,15 @@ def test_text_amounts_with_scales():
     assert 130.5e9 in text_amounts("$130.5B in FY2025")
 
 
+def test_text_amounts_preserves_negative_signs_and_accounting_parentheses():
+    assert text_amounts("net loss of -2.3 billion") == [-2.3e9]
+    assert text_amounts("net loss of -$2.3 billion") == [-2.3e9]
+    assert text_amounts("net loss of $-2.3 billion") == [-2.3e9]
+    assert text_amounts("net loss of ($2.3 billion)") == [-2.3e9]
+    assert gold_in_text("money", -2.3e9, text="reported a net loss of ($2.3 billion)")
+    assert not gold_in_text("money", -2.3e9, text="reported net income of $2.3 billion")
+
+
 def test_person_exact_and_nickname():
     assert gold_in_text("person", "Jensen Huang", text="Nvidia CEO Jensen Huang announced")
     assert gold_in_text("person", "Timothy Donald Cook", text="Apple chief executive Tim Cook said")
