@@ -645,7 +645,7 @@ function rbpSeries(rows) {
   }
   for (const r of rows) {
     const buckets = byEngine.get(r.engine);
-    if (!buckets || r.bench !== "freshstream" || r.rbp == null || r.num_scored <= 0) continue;
+    if (!buckets || r.bench !== "freshstream" || r.rbp == null || !(r.num_scored > 0)) continue;
     const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
     const agg = buckets.get(b) || { sum: 0, n: 0 };
     const n = r.num_scored;
