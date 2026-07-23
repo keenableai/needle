@@ -332,7 +332,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   <div class="grid2">
     <div class="card" id="card-latency-p50">
       <h2>Search latency — p50</h2>
-      <div class="sub">median duration of successful search API calls, all benchmarks, 6-hour windows</div>
+      <div class="sub">median duration of successful search API calls, all benchmarks, 24-hour windows</div>
     </div>
     <div class="card" id="card-latency-p95">
       <h2>Search latency — p95</h2>
@@ -628,6 +628,7 @@ function seriesFor(bench, metric, rows) {
 }
 
 const WINDOW_MS = 6 * 3600e3;
+const LATENCY_WINDOW_MS = 24 * 3600e3;
 
 function rbpSeries(rows) {
   const out = {};
@@ -667,7 +668,7 @@ function latencySeries(rows, p, runMetric) {
   for (const r of rows) {
     const buckets = byEngine.get(r.engine);
     if (!buckets || (!r.lat_ms?.length && r[runMetric] == null)) continue;
-    const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
+    const b = Math.floor(new Date(r.ts).getTime() / LATENCY_WINDOW_MS) * LATENCY_WINDOW_MS;
     const agg = buckets.get(b) || { raw: [], perRun: [] };
     if (r.lat_ms?.length) agg.raw.push(...r.lat_ms);
     else agg.perRun.push(r[runMetric]);
@@ -1778,7 +1779,7 @@ function drawCharts(rows) {
     const sc = msScale(Math.max(0, ...ENGINES.flatMap((e) => lat[e].map((q) => q.v))));
     drawChart(document.getElementById(`card-latency-${name}`), lat,
       { domain: sc.domain, ticks: sc.ticks, fmt: fmtMs, tickFmt: fmtMs, left: 56, lowerIsBetter: true,
-        label: `${name} search latency over time per engine, 6-hour windows`,
+        label: `${name} search latency over time per engine, 24-hour windows`,
         empty: "No latency data yet — collected from new runs." });
   }
 }
