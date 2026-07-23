@@ -46,8 +46,17 @@ def test_text_amounts_preserves_negative_signs_and_accounting_parentheses():
     assert text_amounts("net loss of -$2.3 billion") == [-2.3e9]
     assert text_amounts("net loss of $-2.3 billion") == [-2.3e9]
     assert text_amounts("net loss of ($2.3 billion)") == [-2.3e9]
+    assert text_amounts("net loss of (2.3 billion)") == [-2.3e9]
     assert gold_in_text("money", -2.3e9, text="reported a net loss of ($2.3 billion)")
     assert not gold_in_text("money", -2.3e9, text="reported net income of $2.3 billion")
+
+
+def test_text_amounts_ignores_range_hyphens_and_bare_parentheses():
+    assert text_amounts("revenue between $10-15 billion") == [10.0, 15e9]
+    assert text_amounts("guidance of 1.5-2.0 billion") == [1.5, 2e9]
+    assert text_amounts("see note (3) for details") == [3.0]
+    assert text_amounts("(2024) annual report") == [2024.0]
+    assert gold_in_text("money", 15e9, text="revenue between $10-15 billion")
 
 
 def test_person_exact_and_nickname():

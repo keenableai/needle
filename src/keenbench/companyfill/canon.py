@@ -37,8 +37,8 @@ PUNCT_TABLE = str.maketrans(dict.fromkeys(string.punctuation, " "))
 ARTICLES_RE = re.compile(r"\b(a|an|the)\b")
 YEAR_RE = re.compile(r"\b(1[5-9]\d{2}|20\d{2})\b")
 AMOUNT_RE = re.compile(
-    r"(?P<paren>\()?[ \t]*(?P<sign_before>-)?[ \t]*(?P<currency>[$€£¥])?"
-    r"[ \t]*(?P<sign_after>-)?[ \t]*"
+    r"(?P<paren>\()?[ \t]*(?P<sign_before>(?<![\d.,])-)?[ \t]*(?P<currency>[$€£¥])?"
+    r"[ \t]*(?P<sign_after>(?<![\d.,])-)?[ \t]*"
     r"(?P<number>\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)"
     r"[ \t]*(?P<suffix>trillion|billion|million|thousand|tn|bn|mn|mm|[tbmk])?\b"
     r"[ \t]*(?(paren)\))",
@@ -114,7 +114,9 @@ def text_amounts(raw_text: str) -> list[float]:
         suffix = match.group("suffix") or ""
         amount = float(match.group("number").replace(",", ""))
         amount *= AMOUNT_SCALES.get(suffix.lower(), 1.0)
-        if match.group("paren") or match.group("sign_before") or match.group("sign_after"):
+        signed = match.group("sign_before") or match.group("sign_after")
+        accounting = match.group("paren") and (match.group("currency") or suffix)
+        if signed or accounting:
             amount = -amount
         out.append(amount)
     return out

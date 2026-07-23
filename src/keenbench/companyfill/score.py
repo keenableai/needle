@@ -77,21 +77,19 @@ def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
 
 
 def _ultimate(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
-    eligible_outs = []
-    for entries in query_outs:
-        eligible = [
+    eligible_outs = [
+        [
             e
             for e in entries
             if e["search_error"] is None and not (e["judge_errors"] and e["hit_rank"] is None)
         ]
-        eligible_outs.append(eligible or entries)
-    out = ultimate_per_query(eligible_outs, cap=cap)
-    for pq, entries in zip(out, query_outs, strict=True):
-        eligible = [
-            e
-            for e in entries
-            if e["search_error"] is None and not (e["judge_errors"] and e["hit_rank"] is None)
-        ]
+        for entries in query_outs
+    ]
+    pooled = [
+        eligible or entries for eligible, entries in zip(eligible_outs, query_outs, strict=True)
+    ]
+    out = ultimate_per_query(pooled, cap=cap)
+    for pq, eligible, entries in zip(out, eligible_outs, query_outs, strict=True):
         pq["det_rank"] = pq["hit_rank"]
         pq["judged"] = 0
         pq["judge_errors"] = 0 if eligible else sum(e["judge_errors"] for e in entries)
