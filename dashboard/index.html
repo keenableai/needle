@@ -894,15 +894,12 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   for (const [, label] of metrics) head.appendChild(el("th", { class: "num" }, label));
   head.appendChild(el("th", { class: "num" }, "n"));
   table.appendChild(head);
-  const contenders = entries.filter((x) => x.e !== ULTIMATE_ENGINE);
-  const bestIdx = entries.findIndex((x) => x.e !== ULTIMATE_ENGINE);
-  for (const [i, x] of entries.entries()) {
+  for (const x of entries) {
     const tr = el("tr");
     markHome(tr, x.e);
     if (x.e === ULTIMATE_ENGINE) tr.classList.add("ultimate");
-    const best = i === bestIdx && contenders.length > 1 ? " best" : "";
-    tr.appendChild(engineCell(x.e, best));
-    tr.appendChild(el("td", { class: "num" + best }, fmt3(x.v)));
+    tr.appendChild(engineCell(x.e));
+    tr.appendChild(el("td", { class: "num" }, fmt3(x.v)));
     for (const v of x.extra) tr.appendChild(el("td", { class: "num" }, v == null ? "–" : fmt3(v)));
     tr.appendChild(el("td", { class: "num" }, String(x.q)));
     table.appendChild(tr);
