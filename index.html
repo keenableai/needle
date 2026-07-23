@@ -199,7 +199,8 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
   .overlap-matrix, #fields-table, #history-table, .uniq-table, #latency-summary,
-  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal { overflow-x: auto; }
+  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
+  #app-metrics, #app-engines, #app-data { overflow-x: auto; }
   #standings { padding: 4px 0 8px; overflow-x: auto; }
   #standings svg { min-width: 760px; }
   #standings .series { transition: opacity 0.18s ease; }
@@ -619,7 +620,12 @@ function seriesFor(bench, metric, rows) {
   const out = {};
   for (const e of ENGINES) out[e] = [];
   for (const r of rows) {
-    if ((bench == null || r.bench === bench) && r[metric] != null && out[r.engine]) {
+    if (
+      (bench == null || r.bench === bench)
+      && r[metric] != null
+      && r.num_scored > 0
+      && out[r.engine]
+    ) {
       out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
     }
   }
@@ -639,10 +645,10 @@ function rbpSeries(rows) {
   }
   for (const r of rows) {
     const buckets = byEngine.get(r.engine);
-    if (!buckets || r.bench !== "freshstream" || r.rbp == null) continue;
+    if (!buckets || r.bench !== "freshstream" || r.rbp == null || !(r.num_scored > 0)) continue;
     const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
     const agg = buckets.get(b) || { sum: 0, n: 0 };
-    const n = r.num_scored || 1;
+    const n = r.num_scored;
     agg.sum += r.rbp * n;
     agg.n += n;
     buckets.set(b, agg);
@@ -676,7 +682,7 @@ function latencySeries(rows, p, runMetric) {
   }
   for (const [e, buckets] of byEngine) {
     out[e] = [...buckets].map(([t, agg]) =>
-      ({ t: new Date(t), v: pctl(agg.raw.length ? agg.raw : agg.perRun, p) }));
+      ({ t: new Date(t), v: pctl([...agg.raw, ...agg.perRun], p) }));
   }
   return out;
 }
@@ -856,12 +862,13 @@ function drawChart(card, series, opts) {
   card.appendChild(svg);
 }
 
-function wmean(rows, metric) {
+function wmean(rows, metric, weightMetric = "num_scored") {
   let sum = 0, w = 0;
   for (const r of rows) {
-    if (r[metric] == null) continue;
-    sum += r[metric] * (r.num_scored || 0);
-    w += r.num_scored || 0;
+    const weight = r[weightMetric];
+    if (r[metric] == null || !Number.isFinite(weight) || weight <= 0) continue;
+    sum += r[metric] * weight;
+    w += weight;
   }
   return w ? sum / w : null;
 }
@@ -872,11 +879,11 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const benchRows = rows.filter((r) => r.bench === bench);
   const entries = ENGINES.map((e) => {
     const er = benchRows.filter((r) => r.engine === e);
-    const scored = er.filter((r) => r[metrics[0][0]] != null);
+    const scored = er.filter((r) => r[metrics[0][0]] != null && r.num_scored > 0);
     return { e, v: wmean(er, metrics[0][0]), n: scored.length,
       q: scored.reduce((s, r) => s + (r.num_scored || 0), 0),
       lastT: scored.length ? new Date(scored.at(-1).ts) : null,
-      extra: metrics.slice(1).map(([m]) => wmean(er, m)) };
+      extra: metrics.slice(1).map(([m, , weight]) => wmean(er, m, weight)) };
   }).filter((x) => x.v != null);
   if (!entries.length) {
     document.getElementById(subId).textContent = "";
@@ -894,15 +901,12 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   for (const [, label] of metrics) head.appendChild(el("th", { class: "num" }, label));
   head.appendChild(el("th", { class: "num" }, "n"));
   table.appendChild(head);
-  const contenders = entries.filter((x) => x.e !== ULTIMATE_ENGINE);
-  const bestIdx = entries.findIndex((x) => x.e !== ULTIMATE_ENGINE);
-  for (const [i, x] of entries.entries()) {
+  for (const x of entries) {
     const tr = el("tr");
     markHome(tr, x.e);
     if (x.e === ULTIMATE_ENGINE) tr.classList.add("ultimate");
-    const best = i === bestIdx && contenders.length > 1 ? " best" : "";
-    tr.appendChild(engineCell(x.e, best));
-    tr.appendChild(el("td", { class: "num" + best }, fmt3(x.v)));
+    tr.appendChild(engineCell(x.e));
+    tr.appendChild(el("td", { class: "num" }, fmt3(x.v)));
     for (const v of x.extra) tr.appendChild(el("td", { class: "num" }, v == null ? "–" : fmt3(v)));
     tr.appendChild(el("td", { class: "num" }, String(x.q)));
     table.appendChild(tr);
@@ -915,19 +919,19 @@ function renderLeaderboards(rows) {
   renderLeaderboard("lb-fresh", "lb-fresh-sub", week, "freshstream", [["rbp", "RBP@5"]]);
   renderLeaderboard("lb-company", "lb-company-sub", week, "companyfill", [
     ["recall", "recall@5"],
-    ["filings_recall", "filings"],
-    ["filingdoc_recall", "filingdoc"],
+    ["filings_recall", "filings", "filings_n"],
+    ["filingdoc_recall", "filingdoc", "filingdoc_n"],
   ]);
   renderLeaderboard("lb-scholar", "lb-scholar-sub", week, "scholar", [
     ["recall", "recall@10"],
-    ["title_recall", "title"],
-    ["body_recall", "body"],
+    ["title_recall", "title", "title_n"],
+    ["body_recall", "body", "body_n"],
   ]);
   renderLeaderboard("lb-rare", "lb-rare-sub", week, "rarestream", [["rbp", "RBP@5"]]);
   renderLeaderboard("lb-legal", "lb-legal-sub", week, "legal", [
     ["recall", "recall@5"],
-    ["caselaw_recall", "caselaw"],
-    ["code_recall", "code"],
+    ["caselaw_recall", "caselaw", "caselaw_n"],
+    ["code_recall", "code", "code_n"],
   ]);
 }
 
@@ -1123,15 +1127,16 @@ function renderLatencySummary(rows) {
   const stats = ENGINES.map((e) => {
     const er = week.filter((r) => r.engine === e);
     const raw = er.flatMap((r) => r.lat_ms || []);
-    const p50s = er.map((r) => r.p50_ms).filter((v) => v != null);
-    const p95s = er.map((r) => r.p95_ms).filter((v) => v != null);
+    const fallback = er.filter((r) => !r.lat_ms?.length);
+    const p50s = fallback.map((r) => r.p50_ms).filter((v) => v != null);
+    const p95s = fallback.map((r) => r.p95_ms).filter((v) => v != null);
     const errors = er.reduce((s, r) => s + (r.search_errors || 0), 0);
     const queries = er.reduce((s, r) => s + (r.num_queries || 0), 0);
     if (!raw.length && !p50s.length) return null;
     return {
       e,
-      p50: raw.length ? pctl(raw, 0.5) : pctl(p50s, 0.5),
-      p95: raw.length ? pctl(raw, 0.95) : p95s.length ? pctl(p95s, 0.95) : null,
+      p50: pctl([...raw, ...p50s], 0.5),
+      p95: raw.length || p95s.length ? pctl([...raw, ...p95s], 0.95) : null,
       err: queries ? errors / queries : null,
       n: raw.length,
     };
@@ -1689,12 +1694,10 @@ async function renderRunDetail(runs) {
     const report = await fetchJson(`${RUNS_BASE}/${run.id}/${artifact}`);
     if (seq !== runDetailSeq) return;
     const available = Object.keys(report.engines || {}).filter((e) => !HIDDEN_ENGINES.has(e));
-    if (!available.includes(engineSel.value)) {
-      const current = engineSel.value;
-      engineSel.replaceChildren();
-      for (const e of available) engineSel.appendChild(el("option", { value: e }, e));
-      engineSel.value = available.includes(current) ? current : available[0] || "";
-    }
+    const current = engineSel.value;
+    engineSel.replaceChildren();
+    for (const e of available) engineSel.appendChild(el("option", { value: e }, e));
+    engineSel.value = available.includes(current) ? current : available[0] || "";
     holder.replaceChildren();
     if (benchSel.value === "companyfill") renderCompanyfillRun(holder, report, engineSel.value);
     else if (benchSel.value === "scholar") renderScholarRun(holder, report, engineSel.value);
