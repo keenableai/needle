@@ -73,6 +73,7 @@ def test_docket_match_requires_party_token():
     found = extract_legal_ids(result, snippet_chars=500)
     assert ids_match(gold, found, result_text="docket no. 25-2462 pisanelli bice appeal")
     assert not ids_match(gold, found, result_text="docket no. 25-2462 something unrelated")
+    assert not ids_match(gold, found, result_text="docket no. 25-2462 pisanellian appeal")
 
 
 class FakeEngine:

@@ -180,6 +180,22 @@ async def test_judge_error_excludes_unresolved_miss():
     assert e["by_field"] == {}
 
 
+async def test_ultimate_uses_queries_scored_by_any_engine():
+    clean = FakeEngine({CEO_Q.text: ([_r("https://a.com", "NVIDIA", "GPU maker")], None)})
+    failed = FakeEngine({CEO_Q.text: ([_r("https://b.com", "NVIDIA", "GPU maker")], None)})
+    err = {"error_type": "http_error", "error_message": "429"}
+    report = await run_answers(
+        [CEO_Q], {"clean": clean, "failed": failed}, judge=FakeJudgeLLM(["no", err])
+    )
+    assert report["engines"]["clean"]["num_scored"] == 1
+    assert report["engines"]["failed"]["num_scored"] == 0
+    ultimate = report["engines"]["ultimate"]
+    assert ultimate["num_scored"] == 1
+    assert ultimate["judge_errors"] == 0
+    assert ultimate["per_query"][0]["n_results"] == 1
+    assert ultimate["per_query"][0]["results"][0]["url"] == "https://a.com"
+
+
 def test_run_judge_requires_openrouter_key(tmp_path, monkeypatch):
     f = tmp_path / "q.jsonl"
     row = {
