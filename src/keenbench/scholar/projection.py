@@ -3,12 +3,6 @@ import re
 from keenbench.scholar.models import Paper
 from keenbench.shared.prompts import render_prompt
 
-LLM_BUCKETS = ("body", "clue", "tot")
-QUERY_TEMPLATES = {
-    "body": "body_query.jinja",
-    "clue": "clue_query.jinja",
-    "tot": "tot_query.jinja",
-}
 BODY_EXCERPT_CHARS = 6000
 MIN_TITLE_WORDS = 4
 MIN_QUERY_WORDS = 3
@@ -154,18 +148,24 @@ def tot_query_ok(query: str, *, title: str, abstract: str) -> bool:
         return False
     if _PRECISE_VALUE_RE.search(query):
         return False
-    if len(content_tokens(query) & content_tokens(title)) > MAX_TOT_TITLE_OVERLAP:
+    title_tokens = content_tokens(title)
+    if len(content_tokens(query) & title_tokens) > MAX_TOT_TITLE_OVERLAP:
         return False
-    metadata = content_tokens(title) | content_tokens(abstract)
+    metadata = title_tokens | content_tokens(abstract)
     coined = {w.lower() for w in _WORD_RE.findall(query) if _COINED_WORD_RE.match(w)}
     return not (coined & metadata)
 
 
-_QUERY_OK = {"body": body_query_ok, "clue": clue_query_ok, "tot": tot_query_ok}
+LLM_QUERY_SPECS = {
+    "body": ("body_query.jinja", body_query_ok),
+    "clue": ("clue_query.jinja", clue_query_ok),
+    "tot": ("tot_query.jinja", tot_query_ok),
+}
+LLM_BUCKETS = tuple(LLM_QUERY_SPECS)
 
 
 def query_ok(bucket: str, query: str, *, title: str, abstract: str) -> bool:
-    return _QUERY_OK[bucket](query, title=title, abstract=abstract)
+    return LLM_QUERY_SPECS[bucket][1](query, title=title, abstract=abstract)
 
 
 def body_excerpt(body: str) -> str:
@@ -175,7 +175,7 @@ def body_excerpt(body: str) -> str:
 def build_query_prompt(bucket: str, paper: Paper, body: str) -> str:
     return render_prompt(
         __package__,
-        QUERY_TEMPLATES[bucket],
+        LLM_QUERY_SPECS[bucket][0],
         title=paper.title,
         abstract=paper.abstract[:1500],
         body=body_excerpt(body),
