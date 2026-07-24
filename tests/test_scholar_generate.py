@@ -167,6 +167,12 @@ async def test_failed_llm_bucket_drops_the_paper():
     assert stats.rows == {"title": 1, "body": 1, "clue": 1, "tot": 1}
 
 
+async def test_llm_required_when_llm_buckets_requested():
+    arxiv = FakeArxiv({}, {})
+    with pytest.raises(ValueError, match="llm is required"):
+        await _run(arxiv, None, buckets=("title", "body"))
+
+
 async def test_title_only_skips_llm_and_body_fetch():
     papers = [_paper(i, "computer science", datetime(2026, 7, 1, tzinfo=UTC)) for i in range(2)]
     arxiv = FakeArxiv({"computer science": papers}, {})

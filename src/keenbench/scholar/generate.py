@@ -147,6 +147,8 @@ async def run_generate(
     body_concurrency: int = 8,
 ) -> tuple[list[dict[str, Any]], GenStats]:
     llm_buckets = tuple(b for b in LLM_BUCKETS if b in buckets)
+    if llm_buckets and llm is None:
+        raise ValueError(f"llm is required for buckets: {', '.join(llm_buckets)}")
     domains = [d for d in ARXIV_DOMAINS if arxiv is not None]
     if europepmc is not None:
         domains.append(HEALTH_DOMAIN)

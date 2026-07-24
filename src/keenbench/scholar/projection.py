@@ -84,7 +84,7 @@ _BAD_ANCHOR_RE = re.compile(
 )
 _PRECISE_VALUE_RE = re.compile(r"\d+\.\d+|\d{5,}")
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9\-]+")
-_COINED_WORD_RE = re.compile(r"^(?:[A-Z]{2,}|[A-Za-z0-9\-]*[a-z][A-Z])[A-Za-z0-9\-]*$")
+_COINED_WORD_RE = re.compile(r"^(?:[A-Z]{2,}|[A-Za-z0-9\-]*(?:[a-z][A-Z]|\d))[A-Za-z0-9\-]*$")
 
 
 def _tokens(text: str) -> list[str]:

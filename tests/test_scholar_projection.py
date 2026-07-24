@@ -187,6 +187,17 @@ def test_tot_query_ok_rejects_title_and_coinage_leaks():
     )
 
 
+def test_tot_query_ok_rejects_lowercase_digit_coinage_leak():
+    title = "Genomic Language Modeling for Long Sequences"
+    abstract = "We evaluate dnabert-2 embeddings on long genomic sequences."
+    assert not tot_query_ok(
+        "wasn't there a paper testing dnabert-2 style embeddings on really long "
+        "genetic sequences somehow",
+        title=title,
+        abstract=abstract,
+    )
+
+
 def test_query_ok_dispatches_by_bucket():
     query = "per-channel activation scaling 0.5 migration factor"
     assert query_ok("body", query, title=TITLE, abstract=ABSTRACT)
