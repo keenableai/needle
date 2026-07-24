@@ -3,10 +3,18 @@ import re
 from keenbench.scholar.models import Paper
 from keenbench.shared.prompts import render_prompt
 
-BODY_QUERY_TEMPLATE = "body_query.jinja"
+LLM_BUCKETS = ("body", "clue", "tot")
+QUERY_TEMPLATES = {
+    "body": "body_query.jinja",
+    "clue": "clue_query.jinja",
+    "tot": "tot_query.jinja",
+}
 BODY_EXCERPT_CHARS = 6000
 MIN_TITLE_WORDS = 4
 MIN_QUERY_WORDS = 3
+MIN_CLUE_WORDS = 8
+MIN_TOT_WORDS = 12
+MAX_TOT_TITLE_OVERLAP = 2
 MIN_NOVEL_TOKENS = 2
 MIN_SPECIFIC_CONTENT = 5
 
@@ -80,6 +88,9 @@ _BAD_ANCHOR_RE = re.compile(
     r"|\bsupplementary\b",
     re.IGNORECASE,
 )
+_PRECISE_VALUE_RE = re.compile(r"\d+\.\d+|\d{5,}")
+_WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9\-]+")
+_COINED_WORD_RE = re.compile(r"^(?:[A-Z]{2,}|[A-Za-z0-9\-]*[a-z][A-Z])[A-Za-z0-9\-]*$")
 
 
 def _tokens(text: str) -> list[str]:
@@ -132,14 +143,39 @@ def body_query_ok(query: str, *, title: str, abstract: str) -> bool:
     return len(novel) >= MIN_NOVEL_TOKENS
 
 
+def clue_query_ok(query: str, *, title: str, abstract: str) -> bool:
+    if len(query.split()) < MIN_CLUE_WORDS:
+        return False
+    return body_query_ok(query, title=title, abstract=abstract)
+
+
+def tot_query_ok(query: str, *, title: str, abstract: str) -> bool:
+    if len(query.split()) < MIN_TOT_WORDS or '"' in query:
+        return False
+    if _PRECISE_VALUE_RE.search(query):
+        return False
+    if len(content_tokens(query) & content_tokens(title)) > MAX_TOT_TITLE_OVERLAP:
+        return False
+    metadata = content_tokens(title) | content_tokens(abstract)
+    coined = {w.lower() for w in _WORD_RE.findall(query) if _COINED_WORD_RE.match(w)}
+    return not (coined & metadata)
+
+
+_QUERY_OK = {"body": body_query_ok, "clue": clue_query_ok, "tot": tot_query_ok}
+
+
+def query_ok(bucket: str, query: str, *, title: str, abstract: str) -> bool:
+    return _QUERY_OK[bucket](query, title=title, abstract=abstract)
+
+
 def body_excerpt(body: str) -> str:
     return body[:BODY_EXCERPT_CHARS]
 
 
-def build_body_prompt(paper: Paper, body: str) -> str:
+def build_query_prompt(bucket: str, paper: Paper, body: str) -> str:
     return render_prompt(
         __package__,
-        BODY_QUERY_TEMPLATE,
+        QUERY_TEMPLATES[bucket],
         title=paper.title,
         abstract=paper.abstract[:1500],
         body=body_excerpt(body),

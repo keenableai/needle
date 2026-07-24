@@ -2,10 +2,16 @@ from keenbench.scholar.projection import (
     body_has_bad_anchor,
     body_query_ok,
     clean_body_query,
+    clue_query_ok,
     content_tokens,
     degrade_title,
+    query_ok,
     title_is_specific,
+    tot_query_ok,
 )
+
+TITLE = "SmoothQuant: Accurate Quantization for Language Models"
+ABSTRACT = "We propose smoothquant, a quantization method for large language models."
 
 
 def test_title_is_specific_rejects_generic_short_titles():
@@ -120,3 +126,68 @@ def test_body_has_bad_anchor():
 def test_body_has_bad_anchor_allows_distinctive_numeric_anchors():
     assert not body_has_bad_anchor("carvacrol 80.43 percent GC-MS")
     assert not body_has_bad_anchor("Ross 308 broilers cohort")
+
+
+def test_clue_query_ok_accepts_question_with_novel_body_facts():
+    assert clue_query_ok(
+        "in which benchmark did the migrated activations retain accuracy after per-channel scaling",
+        title=TITLE,
+        abstract=ABSTRACT,
+    )
+
+
+def test_clue_query_ok_rejects_short_or_leaky():
+    assert not clue_query_ok(
+        "per-channel activation scaling factor", title=TITLE, abstract=ABSTRACT
+    )
+    assert not clue_query_ok(
+        "propose quantization method large language models accurate smoothquant",
+        title=TITLE,
+        abstract=ABSTRACT,
+    )
+
+
+def test_tot_query_ok_accepts_hedged_paraphrase():
+    assert tot_query_ok(
+        "wasn't there a recent paper about making huge text networks cheaper to run by "
+        "shifting the hard part from activations to weights",
+        title=TITLE,
+        abstract=ABSTRACT,
+    )
+
+
+def test_tot_query_ok_rejects_short_quoted_or_precise():
+    assert not tot_query_ok("compressed language networks cheaply", title=TITLE, abstract=ABSTRACT)
+    assert not tot_query_ok(
+        'wasn\'t there a paper that scaled "activation outliers" into weights before compressing '
+        "the network somehow",
+        title=TITLE,
+        abstract=ABSTRACT,
+    )
+    assert not tot_query_ok(
+        "wasn't there a paper where the compressed network kept 80.43 percent accuracy on "
+        "some benchmark after rescaling",
+        title=TITLE,
+        abstract=ABSTRACT,
+    )
+
+
+def test_tot_query_ok_rejects_title_and_coinage_leaks():
+    assert not tot_query_ok(
+        "wasn't there a paper about accurate quantization for language models that keeps "
+        "accuracy high somehow",
+        title=TITLE,
+        abstract=ABSTRACT,
+    )
+    assert not tot_query_ok(
+        "I think it was the smoothQuant thing that scaled activations before compressing "
+        "them somehow",
+        title=TITLE,
+        abstract=ABSTRACT,
+    )
+
+
+def test_query_ok_dispatches_by_bucket():
+    query = "per-channel activation scaling 0.5 migration factor"
+    assert query_ok("body", query, title=TITLE, abstract=ABSTRACT)
+    assert not query_ok("tot", query, title=TITLE, abstract=ABSTRACT)

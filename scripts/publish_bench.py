@@ -37,6 +37,7 @@ def rarestream_rows(report: dict, ts: str) -> list[dict]:
 
 
 def scholar_rows(report: dict, ts: str) -> list[dict]:
+    buckets = ("title", "body", "clue", "tot")
     return [
         {
             "ts": ts,
@@ -44,10 +45,11 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
             "engine": name,
             "recall": e["recall_at_k"],
             "mrr": e["mrr_at_k"],
-            "title_recall": e["by_bucket"].get("title", {}).get("recall_at_k"),
-            "title_n": e["by_bucket"].get("title", {}).get("n"),
-            "body_recall": e["by_bucket"].get("body", {}).get("recall_at_k"),
-            "body_n": e["by_bucket"].get("body", {}).get("n"),
+            **{
+                key: e["by_bucket"].get(b, {}).get(metric)
+                for b in buckets
+                for key, metric in ((f"{b}_recall", "recall_at_k"), (f"{b}_n", "n"))
+            },
             "num_scored": e["num_scored"],
             "num_queries": report["num_queries"],
             "search_errors": e["search_errors"],

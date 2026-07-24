@@ -1,15 +1,17 @@
+import asyncio
 import random
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
 from typing import Any
 
 from keenbench.scholar.models import AGE_BANDS, Paper, build_gold_row
 from keenbench.scholar.projection import (
+    LLM_BUCKETS,
     body_has_bad_anchor,
-    body_query_ok,
-    build_body_prompt,
+    build_query_prompt,
     clean_body_query,
     degrade_title,
+    query_ok,
     title_is_specific,
 )
 from keenbench.scholar.sources import ArxivClient, EuropePmcClient
@@ -23,18 +25,11 @@ ARXIV_DOMAINS = (
     "social sciences",
 )
 HEALTH_DOMAIN = "health sciences"
+QUERY_BUCKETS = ("title",) + LLM_BUCKETS
 OVERSAMPLE = 3
 MAX_SUBWINDOWS = 24
 ARXIV_WINDOW_POOL = 20
 ARXIV_MAX_RESULTS = 1000
-
-_DROP_STAT = {
-    "fetch": "body_fetch_fail",
-    "llm_error": "llm_errors",
-    "no_query": "body_no_query",
-    "bad_anchor": "body_bad_anchor",
-    "leak": "body_leak_rejected",
-}
 
 
 @dataclass(frozen=True)
@@ -48,13 +43,8 @@ class Candidate:
 class GenStats:
     candidates: int = 0
     papers: int = 0
-    title_rows: int = 0
-    body_rows: int = 0
-    body_fetch_fail: int = 0
-    body_no_query: int = 0
-    body_bad_anchor: int = 0
-    body_leak_rejected: int = 0
-    llm_errors: int = 0
+    rows: dict[str, int] = field(default_factory=dict)
+    drops: dict[str, int] = field(default_factory=dict)
     generic_title: int = 0
     short_cells: int = 0
 
@@ -129,12 +119,12 @@ async def _fetch_body(
     return None
 
 
-async def _body_query(
-    llm: LLMClient, paper: Paper, body: str
+async def _bucket_query(
+    llm: LLMClient, bucket: str, paper: Paper, body: str
 ) -> tuple[str | None, dict[str, str] | None]:
     try:
         text, err = await llm.complete(
-            build_body_prompt(paper, body), max_tokens=256, reasoning_effort="minimal"
+            build_query_prompt(bucket, paper, body), max_tokens=256, reasoning_effort="minimal"
         )
     except Exception as exc:
         return None, {"error_type": "projection_crash", "error_message": str(exc)[:500]}
@@ -147,14 +137,16 @@ async def run_generate(
     *,
     arxiv: ArxivClient | None,
     europepmc: EuropePmcClient | None,
-    llm: LLMClient,
+    llm: LLMClient | None,
     hour_ts: datetime,
     now: datetime,
     age_buckets: tuple[str, ...],
     per_cell: int,
     seed: int,
+    buckets: tuple[str, ...] = QUERY_BUCKETS,
     body_concurrency: int = 8,
 ) -> tuple[list[dict[str, Any]], GenStats]:
+    llm_buckets = tuple(b for b in LLM_BUCKETS if b in buckets)
     domains = [d for d in ARXIV_DOMAINS if arxiv is not None]
     if europepmc is not None:
         domains.append(HEALTH_DOMAIN)
@@ -191,29 +183,34 @@ async def run_generate(
             candidates.append(Candidate(cell, replace(paper, domain=cell[0]), title_query))
     stats.candidates = len(candidates)
 
-    async def _pair(cand: Candidate) -> tuple[Candidate, str | None, str | None]:
+    async def _pair(cand: Candidate) -> tuple[Candidate, dict[str, str] | None, str | None]:
+        if not llm_buckets or llm is None:
+            return cand, {}, None
         body = await _fetch_body(cand.paper, arxiv=arxiv, europepmc=europepmc)
         if not body:
             return cand, None, "fetch"
-        query, err = await _body_query(llm, cand.paper, body)
-        if err is not None:
-            return cand, None, "llm_error"
-        if query is None:
-            return cand, None, "no_query"
-        if body_has_bad_anchor(query):
-            return cand, None, "bad_anchor"
-        if not body_query_ok(query, title=cand.paper.title, abstract=cand.paper.abstract):
-            return cand, None, "leak"
-        return cand, query, None
+        outs = await asyncio.gather(*[_bucket_query(llm, b, cand.paper, body) for b in llm_buckets])
+        queries: dict[str, str] = {}
+        for bucket, (query, err) in zip(llm_buckets, outs, strict=True):
+            if err is not None:
+                return cand, None, f"{bucket}_llm_error"
+            if query is None:
+                return cand, None, f"{bucket}_no_query"
+            if body_has_bad_anchor(query):
+                return cand, None, f"{bucket}_bad_anchor"
+            if not query_ok(bucket, query, title=cand.paper.title, abstract=cand.paper.abstract):
+                return cand, None, f"{bucket}_leak"
+            queries[bucket] = query
+        return cand, queries, None
 
     paired = await bounded_gather(candidates, _pair, concurrency=body_concurrency)
 
-    by_cell: dict[tuple[str, str], list[tuple[Candidate, str]]] = {c: [] for c in cells}
-    for cand, body_query, drop in paired:
+    by_cell: dict[tuple[str, str], list[tuple[Candidate, dict[str, str]]]] = {c: [] for c in cells}
+    for cand, queries, drop in paired:
         if drop is not None:
-            setattr(stats, _DROP_STAT[drop], getattr(stats, _DROP_STAT[drop]) + 1)
-        elif body_query is not None:
-            by_cell[cand.cell].append((cand, body_query))
+            stats.drops[drop] = stats.drops.get(drop, 0) + 1
+        elif queries is not None:
+            by_cell[cand.cell].append((cand, queries))
 
     rows: list[dict[str, Any]] = []
     seen_ids: set[str] = set()
@@ -221,19 +218,17 @@ async def run_generate(
         selected = by_cell[cell][:per_cell]
         if len(selected) < per_cell:
             stats.short_cells += 1
-        for cand, body_query in selected:
-            for bucket, text in (("title", cand.title_query), ("body", body_query)):
+        for cand, queries in selected:
+            texts = {"title": cand.title_query, **queries}
+            for bucket in buckets:
                 row = build_gold_row(
-                    cand.paper, query_text=text, bucket=bucket, hour_ts=hour_ts, now=now
+                    cand.paper, query_text=texts[bucket], bucket=bucket, hour_ts=hour_ts, now=now
                 )
                 if row["query_id"] in seen_ids:
                     continue
                 seen_ids.add(row["query_id"])
                 rows.append(row)
-                if bucket == "title":
-                    stats.title_rows += 1
-                else:
-                    stats.body_rows += 1
+                stats.rows[bucket] = stats.rows.get(bucket, 0) + 1
             stats.papers += 1
 
     return rows, stats
