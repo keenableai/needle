@@ -82,9 +82,9 @@ _BAD_ANCHOR_RE = re.compile(
     r"|\bsupplementary\b",
     re.IGNORECASE,
 )
-_PRECISE_VALUE_RE = re.compile(r"\d+\.\d+|\d{5,}")
-_WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9\-]+")
-_COINED_WORD_RE = re.compile(r"^(?:[A-Z]{2,}|[A-Za-z0-9\-]*(?:[a-z][A-Z]|\d))[A-Za-z0-9\-]*$")
+PRECISE_VALUE_RE = re.compile(r"\d+\.\d+|\d{5,}")
+WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9\-]+")
+COINED_WORD_RE = re.compile(r"^(?:[A-Z]{2,}|[A-Za-z0-9\-]*(?:[a-z][A-Z]|\d))[A-Za-z0-9\-]*$")
 
 
 def _tokens(text: str) -> list[str]:
@@ -146,13 +146,13 @@ def clue_query_ok(query: str, *, title: str, abstract: str) -> bool:
 def tot_query_ok(query: str, *, title: str, abstract: str) -> bool:
     if len(query.split()) < MIN_TOT_WORDS or '"' in query:
         return False
-    if _PRECISE_VALUE_RE.search(query):
+    if PRECISE_VALUE_RE.search(query):
         return False
     title_tokens = content_tokens(title)
     if len(content_tokens(query) & title_tokens) > MAX_TOT_TITLE_OVERLAP:
         return False
     metadata = title_tokens | content_tokens(abstract)
-    coined = {w.lower() for w in _WORD_RE.findall(query) if _COINED_WORD_RE.match(w)}
+    coined = {w.lower() for w in WORD_RE.findall(query) if COINED_WORD_RE.match(w)}
     return not (coined & metadata)
 
 
