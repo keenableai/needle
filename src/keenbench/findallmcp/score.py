@@ -10,9 +10,9 @@ from keenbench.findallmcp.harness import BackendSpec, run_task
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import OpenRouterClient
 
-_JSON_RE = re.compile(r"\{.*\}", re.DOTALL)
-_SHOW_HN_RE = re.compile(r"^show hn[:\s]*", re.IGNORECASE)
-_PUNCT_RE = re.compile(r"[^a-z0-9\s]")
+JSON_RE = re.compile(r"\{.*\}", re.DOTALL)
+SHOW_HN_RE = re.compile(r"^show hn[:\s]*", re.IGNORECASE)
+PUNCT_RE = re.compile(r"[^a-z0-9\s]")
 MIN_SUBSTRING_LEN = 8
 
 
@@ -33,7 +33,7 @@ def parse_answer(text: str | None) -> dict[str, Any] | None:
     cleaned = text.strip()
     if cleaned.startswith("```"):
         cleaned = re.sub(r"^```[a-z]*\s*|\s*```$", "", cleaned, flags=re.IGNORECASE)
-    m = _JSON_RE.search(cleaned)
+    m = JSON_RE.search(cleaned)
     if not m:
         return None
     for candidate in (m.group(0), cleaned):
@@ -47,8 +47,8 @@ def parse_answer(text: str | None) -> dict[str, Any] | None:
 
 
 def norm_name(raw: Any) -> str:
-    s = _SHOW_HN_RE.sub("", str(raw or "").lower())
-    return " ".join(strip_legal(_PUNCT_RE.sub(" ", s)).split())
+    s = SHOW_HN_RE.sub("", str(raw or "").lower())
+    return " ".join(strip_legal(PUNCT_RE.sub(" ", s)).split())
 
 
 def names_match(a: str, b: str) -> bool:

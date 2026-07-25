@@ -18,8 +18,8 @@ MIN_QUERY_WORDS = 3
 FILINGDOC_SITE = "sec.gov"
 DATE_WINDOW_DAYS = 45
 
-_QUOTED_SPAN_RE = re.compile(r'"([^"]+)"')
-_ADSH_RE = re.compile(r"\d{10}-?\d{2}-?\d{6}")
+QUOTED_SPAN_RE = re.compile(r'"([^"]+)"')
+ADSH_RE = re.compile(r"\d{10}-?\d{2}-?\d{6}")
 
 
 def filings_query(company_title: str, fact: QuarterFact, syntax: str) -> str:
@@ -60,9 +60,9 @@ def clean_filingdoc_query(text: str | None) -> str | None:
 def filingdoc_query_ok(query: str, *, filing: Filing, text: str) -> bool:
     if len(query.split()) < MIN_QUERY_WORDS:
         return False
-    if _ADSH_RE.search(query):
+    if ADSH_RE.search(query):
         return False
-    spans = _QUOTED_SPAN_RE.findall(query)
+    spans = QUOTED_SPAN_RE.findall(query)
     if len(spans) != 1:
         return False
     span_words = spans[0].split()

@@ -3,10 +3,10 @@ from dataclasses import dataclass
 
 from keenbench.shared.search import SearchResult
 
-_ARXIV_ID = r"(?:[a-z-]+/\d{7}|\d{4}\.\d{4,5})"
-ARXIV_URL_RE = re.compile(rf"arxiv\.org/(?:abs|pdf|html)/({_ARXIV_ID})(?:v\d+)?", re.IGNORECASE)
-ARXIV_TEXT_RE = re.compile(rf"arxiv[:\s]+({_ARXIV_ID})(?:v\d+)?", re.IGNORECASE)
-ARXIV_DOI_RE = re.compile(rf"10\.48550/arxiv\.({_ARXIV_ID})", re.IGNORECASE)
+ARXIV_ID = r"(?:[a-z-]+/\d{7}|\d{4}\.\d{4,5})"
+ARXIV_URL_RE = re.compile(rf"arxiv\.org/(?:abs|pdf|html)/({ARXIV_ID})(?:v\d+)?", re.IGNORECASE)
+ARXIV_TEXT_RE = re.compile(rf"arxiv[:\s]+({ARXIV_ID})(?:v\d+)?", re.IGNORECASE)
+ARXIV_DOI_RE = re.compile(rf"10\.48550/arxiv\.({ARXIV_ID})", re.IGNORECASE)
 
 PMID_URL_RES = [
     re.compile(r"pubmed\.ncbi\.nlm\.nih\.gov/(\d+)"),

@@ -16,7 +16,7 @@ AGE_BANDS = {
 
 SCHOLAR_SOURCE = "scholar"
 
-_ARXIV_CAT_DOMAIN = {
+ARXIV_CAT_DOMAIN = {
     "cs": "computer science",
     "q-bio": "life sciences",
     "econ": "social sciences",
@@ -26,7 +26,7 @@ _ARXIV_CAT_DOMAIN = {
 
 def coarse_domain(category: str) -> str:
     prefix = category.split(".", 1)[0].lower()
-    return _ARXIV_CAT_DOMAIN.get(prefix, "physical sciences")
+    return ARXIV_CAT_DOMAIN.get(prefix, "physical sciences")
 
 
 @dataclass(frozen=True)

@@ -18,7 +18,7 @@ ECFR_TITLES = "https://www.ecfr.gov/api/versioner/v1/titles.json"
 ECFR_STRUCTURE = "https://www.ecfr.gov/api/versioner/v1/structure/{issue_date}/title-{title}.json"
 ECFR_SECTION = "https://www.ecfr.gov/api/versioner/v1/full/{issue_date}/title-{title}.xml"
 
-_SECTION_ID_RE = re.compile(r"^\d+\.[\w.\-]+$")
+SECTION_ID_RE = re.compile(r"^\d+\.[\w.\-]+$")
 
 
 def _parse_date(raw: str | None) -> date | None:
@@ -103,7 +103,7 @@ def walk_structure_sections(node: dict[str, Any], part: str = "") -> list[tuple[
         part = identifier
     if node_type == "section":
         label = " ".join(str(node.get("label_description") or "").split())
-        if part and label and _SECTION_ID_RE.match(identifier):
+        if part and label and SECTION_ID_RE.match(identifier):
             return [(part, identifier, label)]
         return []
     out = []
