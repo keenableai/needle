@@ -72,11 +72,11 @@ STOPWORDS = frozenset(
     }
 )
 
-_TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9\-]*")
-_LATEX_RE = re.compile(r"\$[^$]*\$|\\[a-zA-Z]+\{[^}]*\}|\\[a-zA-Z]+")
-_PUNCT_RE = re.compile(r"[^a-zA-Z0-9\s\-]")
-_DISTINCTIVE_RE = re.compile(r"\d|[A-Z]{2,}|[a-z][A-Z]|[A-Za-z]{3,}-[A-Za-z]{3,}")
-_BAD_ANCHOR_RE = re.compile(
+TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9\-]*")
+LATEX_RE = re.compile(r"\$[^$]*\$|\\[a-zA-Z]+\{[^}]*\}|\\[a-zA-Z]+")
+PUNCT_RE = re.compile(r"[^a-zA-Z0-9\s\-]")
+DISTINCTIVE_RE = re.compile(r"\d|[A-Z]{2,}|[a-z][A-Z]|[A-Za-z]{3,}-[A-Za-z]{3,}")
+BAD_ANCHOR_RE = re.compile(
     r"\bet al\b"
     r"|\b(?:table|figure|fig|section|appendix|theorem|lemma|corollary|proposition)\s*\.?\s*\d"
     r"|\bsupplementary\b",
@@ -88,7 +88,7 @@ COINED_WORD_RE = re.compile(r"^(?:[A-Z]{2,}|[A-Za-z0-9\-]*(?:[a-z][A-Z]|\d))[A-Z
 
 
 def _tokens(text: str) -> list[str]:
-    return _TOKEN_RE.findall(text.lower())
+    return TOKEN_RE.findall(text.lower())
 
 
 def content_tokens(text: str) -> set[str]:
@@ -96,8 +96,8 @@ def content_tokens(text: str) -> set[str]:
 
 
 def degrade_title(title: str) -> str | None:
-    text = _LATEX_RE.sub(" ", title)
-    text = _PUNCT_RE.sub(" ", text)
+    text = LATEX_RE.sub(" ", title)
+    text = PUNCT_RE.sub(" ", text)
     words = text.lower().split()
     if len(words) < MIN_TITLE_WORDS:
         return None
@@ -105,7 +105,7 @@ def degrade_title(title: str) -> str | None:
 
 
 def title_is_specific(title: str) -> bool:
-    if _DISTINCTIVE_RE.search(title):
+    if DISTINCTIVE_RE.search(title):
         return True
     return len(content_tokens(title)) >= MIN_SPECIFIC_CONTENT
 
@@ -125,7 +125,7 @@ def clean_body_query(text: str | None) -> str | None:
 
 
 def body_has_bad_anchor(query: str) -> bool:
-    return bool(_BAD_ANCHOR_RE.search(query))
+    return bool(BAD_ANCHOR_RE.search(query))
 
 
 def body_query_ok(query: str, *, title: str, abstract: str) -> bool:
