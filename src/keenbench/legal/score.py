@@ -30,7 +30,7 @@ CFR_URL_RES = [
     re.compile(r"title-(\d{1,2})[^\s]*/section-(\d+\.[\w.\-]+)", re.IGNORECASE),
 ]
 
-_REPORTER_ALLOWED = frozenset(
+REPORTER_ALLOWED = frozenset(
     "us sct led led2d f f2d f3d f4th fsupp fsupp2d fsupp3d fappx fedappx wl"
     " a a2d a3d p p2d p3d ne ne2d ne3d nw nw2d nw3d so so2d so3d se se2d se3d"
     " sw sw2d sw3d cal cal2d cal3d cal4th cal5th nys nys2d nys3d us l ed".split()
@@ -94,7 +94,7 @@ def extract_legal_ids(result: SearchResult, *, snippet_chars: int) -> LegalIds:
         ids.dockets.add(norm_docket(m.group(1)))
     for m in CITE_RE.finditer(text):
         reporter = norm_reporter(m.group(2))
-        if reporter in _REPORTER_ALLOWED:
+        if reporter in REPORTER_ALLOWED:
             ids.cites.add(f"{m.group(1)}:{reporter}:{m.group(3)}")
     for m in DOCKET_RE.finditer(f"{text} {url}"):
         if m.group(1):

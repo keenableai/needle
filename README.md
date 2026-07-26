@@ -114,10 +114,16 @@ bound, applied symmetrically across engines.
 
 ## scholar
 
-Known-item paper retrieval. Each paper yields a **`title`** query (degraded
-title, answerable from metadata) and a **`body`** query (a full-text-only
-detail, machine-verified absent from title and abstract) — the gap between
-the two is the point.
+Known-item paper retrieval. Each paper yields four queries: **`title`**
+(degraded title, answerable from metadata), **`body`** (a keyword query on a
+full-text-only detail, machine-verified absent from title and abstract),
+**`clue`** (the same kind of full-text facts phrased as a natural-language
+question), and **`tot`** (a tip-of-the-tongue description: hedged,
+half-remembered, with names and exact values banned and machine-verified
+absent). The gaps between the buckets are the point: title vs body isolates
+full-text indexing, body vs clue isolates keyword-vs-prose handling, and tot
+isolates semantic retrieval. A paper is kept only if all requested buckets
+pass, so buckets stay comparable; `--buckets` selects a subset.
 
 ```bash
 keenbench scholar generate --age-buckets 7d,30d,1y --per-cell 10 --out gold.jsonl
@@ -127,7 +133,7 @@ keenbench scholar run --queries gold.jsonl --num-results 10 --out report.json
 Gold comes from arXiv and Europe PMC, paired and balanced over
 `(domain × age)` cells. Scoring is deterministic: result URLs and snippets
 are scanned for arXiv ids, DOIs, and PMIDs; a query is a hit when an id
-matches the gold paper. The report separates title vs body recall
+matches the gold paper. The report separates per-bucket recall
 (`by_bucket`) and splits misses into system-specific vs universal. Pages
 with no inline identifier can't match, so recall is a lower bound, applied
 symmetrically.

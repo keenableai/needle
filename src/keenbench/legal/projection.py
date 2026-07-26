@@ -27,24 +27,24 @@ GENERIC_PARTY_TOKENS = frozenset(
     " re parte rel estate matter application petition".split()
 )
 
-_VS_RE = re.compile(r"\s+vs?\.?\s+", re.IGNORECASE)
-_ANNOTATION_RE = re.compile(r"\s+revisions?\s*:.*$", re.IGNORECASE)
-_PUNCT_RE = re.compile(r"[^a-zA-Z0-9\s\-']")
-_QUOTED_SPAN_RE = re.compile(r'"([^"]+)"')
-_CFR_LEAK_RE = re.compile(
+VS_RE = re.compile(r"\s+vs?\.?\s+", re.IGNORECASE)
+ANNOTATION_RE = re.compile(r"\s+revisions?\s*:.*$", re.IGNORECASE)
+PUNCT_RE = re.compile(r"[^a-zA-Z0-9\s\-']")
+QUOTED_SPAN_RE = re.compile(r'"([^"]+)"')
+CFR_LEAK_RE = re.compile(
     r"\bc\.?f\.?r\b|\bu\.?s\.?c\b|§|\bsection\s+\d|\btitle\s+\d", re.IGNORECASE
 )
 
 
 def _clean_party(party: str) -> str:
-    words = _PUNCT_RE.sub(" ", party).lower().split()
+    words = PUNCT_RE.sub(" ", party).lower().split()
     kept = [w for w in words if w not in PARTY_SUFFIXES and not w.replace("-", "").isdigit()]
     return " ".join(kept)
 
 
 def caption_parties(case_name: str) -> list[str]:
-    cleaned = _ANNOTATION_RE.sub("", case_name).split(":", 1)[0]
-    parts = _VS_RE.split(cleaned, maxsplit=1)
+    cleaned = ANNOTATION_RE.sub("", case_name).split(":", 1)[0]
+    parts = VS_RE.split(cleaned, maxsplit=1)
     return [p for p in (_clean_party(part) for part in parts) if p]
 
 
@@ -117,12 +117,12 @@ def _section_number_forms(section: CodeSection) -> list[str]:
 def code_query_ok(query: str, *, section: CodeSection) -> bool:
     if len(query.split()) < MIN_QUERY_WORDS:
         return False
-    if _CFR_LEAK_RE.search(query):
+    if CFR_LEAK_RE.search(query):
         return False
     for form in _section_number_forms(section):
         if re.search(rf"(?<![\w.]){re.escape(form)}(?![\w.])", query):
             return False
-    spans = _QUOTED_SPAN_RE.findall(query)
+    spans = QUOTED_SPAN_RE.findall(query)
     if len(spans) != 1:
         return False
     span_words = spans[0].split()

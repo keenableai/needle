@@ -21,8 +21,8 @@ EDGAR_PHRASES = (
     "voluntary petitions under chapter 11",
 )
 
-_DIGIT_RE = re.compile(r"\d")
-_DISPLAY_RE = re.compile(r"^(.*?)\s*(?:\(([^)]*)\))?\s*\(CIK (\d+)\)\s*$")
+DIGIT_RE = re.compile(r"\d")
+DISPLAY_RE = re.compile(r"^(.*?)\s*(?:\(([^)]*)\))?\s*\(CIK (\d+)\)\s*$")
 
 
 class HnClient(HttpSearchClient):
@@ -91,7 +91,7 @@ class EdgarFtsClient(HttpSearchClient):
             for h in hits:
                 src = h.get("_source") or {}
                 for display in src.get("display_names") or []:
-                    m = _DISPLAY_RE.match(display)
+                    m = DISPLAY_RE.match(display)
                     if not m:
                         continue
                     name, ticker, cik = m.group(1).strip(), m.group(2), m.group(3)
@@ -144,7 +144,7 @@ async def hn_tasks(client: HnClient, *, now: datetime) -> list[Task]:
 
     base = [h for h in posts if h["points"] >= 100]
     if len(base) >= 30:
-        with_digit = sum(1 for h in base if _DIGIT_RE.search(h["title"]))
+        with_digit = sum(1 for h in base if DIGIT_RE.search(h["title"]))
         tasks.append(
             Task(
                 suite="hn",

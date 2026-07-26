@@ -4,6 +4,7 @@ from pathlib import Path
 
 import fire
 
+from keenbench.scholar.generate import QUERY_BUCKETS
 from keenbench.shared.io import append_jsonl, write_json, write_jsonl
 from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
@@ -37,26 +38,31 @@ def rarestream_rows(report: dict, ts: str) -> list[dict]:
 
 
 def scholar_rows(report: dict, ts: str) -> list[dict]:
-    return [
-        {
+    rows = []
+    for name, e in report["engines"].items():
+        row = {
             "ts": ts,
             "bench": "scholar",
             "engine": name,
             "recall": e["recall_at_k"],
             "mrr": e["mrr_at_k"],
-            "title_recall": e["by_bucket"].get("title", {}).get("recall_at_k"),
-            "title_n": e["by_bucket"].get("title", {}).get("n"),
-            "body_recall": e["by_bucket"].get("body", {}).get("recall_at_k"),
-            "body_n": e["by_bucket"].get("body", {}).get("n"),
-            "num_scored": e["num_scored"],
-            "num_queries": report["num_queries"],
-            "search_errors": e["search_errors"],
-            "p50_ms": (e.get("latency") or {}).get("p50_ms"),
-            "p95_ms": (e.get("latency") or {}).get("p95_ms"),
-            "lat_ms": (e.get("latency") or {}).get("samples_ms"),
         }
-        for name, e in report["engines"].items()
-    ]
+        for b in QUERY_BUCKETS:
+            bucket = e["by_bucket"].get(b, {})
+            row[f"{b}_recall"] = bucket.get("recall_at_k")
+            row[f"{b}_n"] = bucket.get("n")
+        row.update(
+            {
+                "num_scored": e["num_scored"],
+                "num_queries": report["num_queries"],
+                "search_errors": e["search_errors"],
+                "p50_ms": (e.get("latency") or {}).get("p50_ms"),
+                "p95_ms": (e.get("latency") or {}).get("p95_ms"),
+                "lat_ms": (e.get("latency") or {}).get("samples_ms"),
+            }
+        )
+        rows.append(row)
+    return rows
 
 
 def _syntax_split(e: dict) -> tuple[float | None, float | None]:

@@ -429,7 +429,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   </div>
 
   <h3 class="subsection-title" id="sec-scholar">scholar</h3>
-  <p class="section-desc">Known-item paper retrieval: find a specific paper by its title vs. by a full-text-only detail. Deterministic match on the paper's arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID.</p>
+  <p class="section-desc">Known-item paper retrieval: find a specific paper by its title, by a full-text-only detail, by a natural-language factual question, or from a vague tip-of-the-tongue description. Deterministic match on the paper's arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID.</p>
   <div class="grid2">
     <div class="card" id="card-scholar-title">
       <h2>scholar — title-query recall@10</h2>
@@ -438,6 +438,14 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <div class="card" id="card-scholar-body">
       <h2>scholar — body-query recall@10</h2>
       <div class="sub">papers found by a full-text-only detail</div>
+    </div>
+    <div class="card" id="card-scholar-clue">
+      <h2>scholar — clue-query recall@10</h2>
+      <div class="sub">papers found by a natural-language question over full-text-only facts</div>
+    </div>
+    <div class="card" id="card-scholar-tot">
+      <h2>scholar — tip-of-the-tongue recall@10</h2>
+      <div class="sub">papers found from a hedged, half-remembered description</div>
     </div>
   </div>
 
@@ -926,6 +934,8 @@ function renderLeaderboards(rows) {
     ["recall", "recall@10"],
     ["title_recall", "title", "title_n"],
     ["body_recall", "body", "body_n"],
+    ["clue_recall", "clue", "clue_n"],
+    ["tot_recall", "tot", "tot_n"],
   ]);
   renderLeaderboard("lb-rare", "lb-rare-sub", week, "rarestream", [["rbp", "RBP@5"]]);
   renderLeaderboard("lb-legal", "lb-legal-sub", week, "legal", [
@@ -1771,6 +1781,10 @@ function drawCharts(rows) {
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar title-query recall at 10 over time per engine" });
   drawChart(document.getElementById("card-scholar-body"), seriesFor("scholar", "body_recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar body-query recall at 10 over time per engine" });
+  drawChart(document.getElementById("card-scholar-clue"), seriesFor("scholar", "clue_recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar clue-query recall at 10 over time per engine" });
+  drawChart(document.getElementById("card-scholar-tot"), seriesFor("scholar", "tot_recall", rows),
+    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar tip-of-the-tongue recall at 10 over time per engine" });
   drawChart(document.getElementById("card-legal-caselaw"), seriesFor("legal", "caselaw_recall", rows),
     { domain: [0, 1], ticks: [0, 0.5, 1], label: "legal caselaw recall at 5 over time per engine",
       empty: "No legal run yet — collected daily." });

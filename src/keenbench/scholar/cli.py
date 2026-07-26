@@ -3,9 +3,10 @@ import os
 import sys
 from datetime import UTC, datetime
 
-from keenbench.scholar.generate import GenStats, run_generate
+from keenbench.scholar.generate import QUERY_BUCKETS, GenStats, run_generate
 from keenbench.scholar.idconv import IdConverter
 from keenbench.scholar.models import AGE_BUCKETS, serialize_row
+from keenbench.scholar.projection import LLM_BUCKETS
 from keenbench.scholar.score import GoldPaper, run_papers
 from keenbench.scholar.sources import ArxivClient, EuropePmcClient
 from keenbench.shared.cli import (
@@ -46,6 +47,7 @@ class Scholar:
         out: str = "-",
         suites: str | tuple[str, ...] = "arxiv,europepmc",
         age_buckets: str | tuple[str, ...] = "7d,30d,1y",
+        buckets: str | tuple[str, ...] = ",".join(QUERY_BUCKETS),
         per_cell: int = 10,
         seed: int | None = None,
         llm_model: str | None = None,
@@ -65,6 +67,13 @@ class Scholar:
                 f"error: unknown --age-buckets {','.join(bad_ages) or age_buckets!r} "
                 f"(known: {', '.join(AGE_BUCKETS)})"
             )
+        bucket_names = tuple(parse_csv(buckets))
+        bad_buckets = [b for b in bucket_names if b not in QUERY_BUCKETS]
+        if bad_buckets or not bucket_names:
+            raise SystemExit(
+                f"error: unknown --buckets {','.join(bad_buckets) or buckets!r} "
+                f"(known: {', '.join(QUERY_BUCKETS)})"
+            )
 
         now = datetime.now(UTC)
         hour_ts = now.replace(minute=0, second=0, microsecond=0)
@@ -73,11 +82,12 @@ class Scholar:
         arxiv = ArxivClient() if "arxiv" in suite_names else None
         europepmc = EuropePmcClient() if "europepmc" in suite_names else None
 
-        key = os.environ.get("OPENROUTER_API_KEY")
-        if not key:
-            raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for body queries)")
-        model = resolve_llm_model(llm_model)
-        llm = OpenRouterClient(api_key=key, model=model)
+        llm = None
+        if any(b in LLM_BUCKETS for b in bucket_names):
+            key = os.environ.get("OPENROUTER_API_KEY")
+            if not key:
+                raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for LLM buckets)")
+            llm = OpenRouterClient(api_key=key, model=resolve_llm_model(llm_model))
 
         async def _go() -> tuple[list[dict], GenStats]:
             try:
@@ -90,23 +100,25 @@ class Scholar:
                     age_buckets=age_names,
                     per_cell=per_cell,
                     seed=seed,
+                    buckets=bucket_names,
                     body_concurrency=body_concurrency,
                 )
             finally:
                 for client in (arxiv, europepmc):
                     if client is not None:
                         await client.aclose()
-                await llm.aclose()
+                if llm is not None:
+                    await llm.aclose()
 
         rows, stats = asyncio.run(_go())
         write_jsonl([serialize_row(r) for r in rows], out)
+        rows_str = ", ".join(f"{b}={stats.rows.get(b, 0)}" for b in bucket_names)
+        drops_str = ", ".join(f"{k}={v}" for k, v in sorted(stats.drops.items())) or "none"
         print(
-            f"scholar: {stats.title_rows + stats.body_rows} queries from {stats.papers} paired "
-            f"papers (title={stats.title_rows}, body={stats.body_rows}; "
-            f"{stats.candidates} candidates; generic_title={stats.generic_title}; "
-            f"body drops: fetch={stats.body_fetch_fail}, no_query={stats.body_no_query}, "
-            f"bad_anchor={stats.body_bad_anchor}, leak={stats.body_leak_rejected}, "
-            f"llm_err={stats.llm_errors}; short_cells={stats.short_cells})",
+            f"scholar: {sum(stats.rows.values())} queries from {stats.papers} paired "
+            f"papers ({rows_str}; {stats.candidates} candidates; "
+            f"generic_title={stats.generic_title}; drops: {drops_str}; "
+            f"short_cells={stats.short_cells})",
             file=sys.stderr,
         )
 
@@ -163,14 +175,15 @@ class Scholar:
             file=sys.stderr,
         )
         for name, e in report["engines"].items():
-            title = e["by_bucket"].get("title", {}).get("recall_at_k")
-            body = e["by_bucket"].get("body", {}).get("recall_at_k")
-            title_str = f"{title:.3f}" if title is not None else "n/a"
-            body_str = f"{body:.3f}" if body is not None else "n/a"
+            bucket_strs = []
+            for bucket in QUERY_BUCKETS:
+                recall = e["by_bucket"].get(bucket, {}).get("recall_at_k")
+                if recall is not None:
+                    bucket_strs.append(f"{bucket} = {recall:.3f}")
             print(
                 f"  {name:10s} recall@{num_results} = {e['recall_at_k']:.4f}  "
                 f"MRR = {e['mrr_at_k']:.4f}  "
-                f"(title = {title_str}, body = {body_str}; "
+                f"({', '.join(bucket_strs) or 'no buckets'}; "
                 f"{e['num_scored']}/{report['num_queries']} scored; "
                 f"{e['search_errors']} search errs; "
                 f"misses: {e['misses_system_specific']} sys / {e['misses_universal']} univ)",
