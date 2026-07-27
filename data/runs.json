@@ -4750,5 +4750,15 @@
       "fresh.jsonl",
       "rbp.json"
     ]
+  },
+  {
+    "id": "2026-07-27T1347Z",
+    "ts": "2026-07-27T13:47Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
   }
 ]
