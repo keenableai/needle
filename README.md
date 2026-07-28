@@ -52,7 +52,8 @@ All `run` commands share one interface:
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
 Per-engine tuning is env-based: `KEENABLE_MODE`, `EXA_CONCURRENCY`,
-`PARALLEL_MODE`, `TAVILY_DEPTH`. Queries whose search or judging failed are
+`TAVILY_DEPTH`; Parallel's mode is fixed per engine entry (`parallel` =
+basic, `parallel-turbo` = turbo). Queries whose search or judging failed are
 excluded from the mean via `num_scored` (with `search_errors` /
 `judge_errors` reported) rather than scored as zero.
 
