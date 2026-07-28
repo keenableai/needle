@@ -27,12 +27,16 @@ def _build_keenable(api_key: str | None, snippet_chars: int) -> SearchClient:
     return KeenableClient(api_key=api_key, mode=os.environ.get("KEENABLE_MODE", "pro"))
 
 
-def _build_exa(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return ExaClient(
-        api_key=api_key or "",
-        max_concurrency=int(os.environ.get("EXA_CONCURRENCY", "1")),
-        highlight_chars=snippet_chars,
-    )
+def _build_exa(search_type: str) -> Callable[[str | None, int], SearchClient]:
+    def build(api_key: str | None, snippet_chars: int) -> SearchClient:
+        return ExaClient(
+            api_key=api_key or "",
+            search_type=search_type,
+            max_concurrency=int(os.environ.get("EXA_CONCURRENCY", "1")),
+            highlight_chars=snippet_chars,
+        )
+
+    return build
 
 
 def _build_searchapi(engine: str) -> Callable[[str | None, int], SearchClient]:
@@ -50,8 +54,11 @@ def _build_brave(api_key: str | None, snippet_chars: int) -> SearchClient:
     return BraveClient(api_key=api_key or "")
 
 
-def _build_parallel(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return ParallelClient(api_key=api_key or "", mode=os.environ.get("PARALLEL_MODE", "basic"))
+def _build_parallel(mode: str) -> Callable[[str | None, int], SearchClient]:
+    def build(api_key: str | None, snippet_chars: int) -> SearchClient:
+        return ParallelClient(api_key=api_key or "", mode=mode)
+
+    return build
 
 
 def _build_perplexity(api_key: str | None, snippet_chars: int) -> SearchClient:
@@ -83,13 +90,21 @@ def _build_you(api_key: str | None, snippet_chars: int) -> SearchClient:
 
 ENGINES: dict[str, EngineSpec] = {
     "keenable": EngineSpec(key_env="KEENABLE_API_KEY", key_required=False, build=_build_keenable),
-    "exa": EngineSpec(key_env="EXA_API_KEY", key_required=True, build=_build_exa),
+    "exa": EngineSpec(key_env="EXA_API_KEY", key_required=True, build=_build_exa("auto")),
+    "exa-instant": EngineSpec(
+        key_env="EXA_API_KEY", key_required=True, build=_build_exa("instant")
+    ),
     "google": EngineSpec(key_env="SERPER_API_KEY", key_required=True, build=_build_serper),
     "bing": EngineSpec(
         key_env="SEARCHAPI_API_KEY", key_required=True, build=_build_searchapi("bing")
     ),
     "brave": EngineSpec(key_env="BRAVE_API_KEY", key_required=True, build=_build_brave),
-    "parallel": EngineSpec(key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel),
+    "parallel": EngineSpec(
+        key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("basic")
+    ),
+    "parallel-turbo": EngineSpec(
+        key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("turbo")
+    ),
     "perplexity": EngineSpec(
         key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity
     ),

@@ -527,7 +527,9 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <tr><td>bing</td><td>SearchApi.io, engine=bing</td><td>query verbatim, num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
       <tr><td>brave</td><td>Brave Web Search</td><td>count=min(k,20), country=us, search_lang=en, result_filter=web; site: kept in the query text, after:/before: → freshness window</td></tr>
       <tr><td>exa</td><td>Exa /search</td><td>type=auto, numResults=k, highlights ≤500 chars; site: → includeDomains, after:/before: → published-date window</td></tr>
+      <tr><td>exa-instant</td><td>Exa /search</td><td>same as exa but type=instant</td></tr>
       <tr><td>parallel</td><td>Parallel /v1/search</td><td>mode=basic, max_results=k; site: → include_domains, after: → after_date</td></tr>
+      <tr><td>parallel-turbo</td><td>Parallel /v1/search</td><td>same as parallel but mode=turbo</td></tr>
       <tr><td>perplexity</td><td>Perplexity /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → date filters</td></tr>
       <tr><td>tavily</td><td>Tavily /search</td><td>search_depth=basic, max_results=min(k,20); site: → include_domains, after:/before: → start/end_date</td></tr>
       <tr><td>you</td><td>You.com /v1/search</td><td>count=min(k,100); site: → include_domains, after:/before: → freshness window</td></tr>

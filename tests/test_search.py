@@ -588,6 +588,18 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["you"].api_key == "yk"
 
 
+def test_factory_builds_engine_variants(monkeypatch):
+    monkeypatch.setenv("EXA_API_KEY", "ek")
+    monkeypatch.setenv("PARALLEL_API_KEY", "pk")
+    clients = build_search_clients(["exa", "exa-instant", "parallel", "parallel-turbo"])
+    assert isinstance(clients["exa-instant"], ExaClient)
+    assert clients["exa"].search_type == "auto"
+    assert clients["exa-instant"].search_type == "instant"
+    assert isinstance(clients["parallel-turbo"], ParallelClient)
+    assert clients["parallel"].mode == "basic"
+    assert clients["parallel-turbo"].mode == "turbo"
+
+
 def test_factory_concurrency_env_overrides(monkeypatch):
     monkeypatch.setenv("OCTEN_API_KEY", "ok")
     monkeypatch.setenv("CERAMIC_API_KEY", "ck")

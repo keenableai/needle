@@ -50,7 +50,7 @@ env:
   YOU_API_KEY: ${{ secrets.YOU_API_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/keenbench-results
-  ENGINES: keenable,exa,google,bing,brave,parallel,tavily,perplexity,octen,ceramic,you
+  ENGINES: keenable,exa,exa-instant,google,bing,brave,parallel,parallel-turbo,tavily,perplexity,octen,ceramic,you
 
 jobs:
   bench:
