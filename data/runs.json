@@ -4969,5 +4969,13 @@
       "rbp.json",
       "recall.json"
     ]
+  },
+  {
+    "id": "2026-07-29T0200Z",
+    "ts": "2026-07-29T02:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json"
+    ]
   }
 ]
