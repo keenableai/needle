@@ -20,8 +20,11 @@ def _engine_sets(
     }
 
 
-def _family(name: str) -> str:
-    return name.split("-")[0]
+FAMILIES = {
+    "keenable-realtime": "keenable",
+    "exa-instant": "exa",
+    "parallel-turbo": "parallel",
+}
 
 
 def _all_urls(pq: dict[str, Any]) -> set[str]:
@@ -94,7 +97,7 @@ def uniqueness_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
             others = [
                 p
                 for n2, o in url_sets.items()
-                if _family(n2) != _family(name) and (p := o[i]) is not None
+                if FAMILIES.get(n2, n2) != FAMILIES.get(name, name) and (p := o[i]) is not None
             ]
             if not others:
                 continue
