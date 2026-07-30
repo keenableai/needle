@@ -4,10 +4,18 @@ from keenbench.shared.rankeval import EvalQuery, run_rbp
 from keenbench.shared.search import SearchResult
 
 TODAY = "2026-07-01"
+PROFILE_YAML = (
+    "objective: find it\ncore_aspects:\n  - the fact\n"
+    "query_type: B\narchetype: Evergreen\ndated_event: false"
+)
 
 
 def q(text):
     return EvalQuery(text=text, today=TODAY)
+
+
+def is_profile_prompt(prompt):
+    return "query_type" in prompt
 
 
 class FakeEngine:
@@ -32,6 +40,8 @@ class FakeJudge:
     async def complete(self, prompt, *, max_tokens, reasoning_effort):
         self.calls += 1
         self.prompts.append(prompt)
+        if is_profile_prompt(prompt):
+            return PROFILE_YAML, None
         rating = 4 if "GOODDOC" in prompt else 0
         label = "FullyM" if rating == 4 else "FailsM"
         return f"rating: {rating}\nlabel: {label}\nreasoning: x", None
@@ -116,8 +126,9 @@ async def test_run_rbp_judges_each_query_url_pair_once_across_engines():
         judge,
     )
     assert report["judged_pairs"] == 1
-    assert judge.calls == 1
-    assert "GOODDOC but much longer" in judge.prompts[0]
+    assert judge.calls == 2
+    assert is_profile_prompt(judge.prompts[0])
+    assert "GOODDOC but much longer" in judge.prompts[1]
     assert report["engines"]["a"]["per_query"][0]["ratings"] == [4]
     assert report["engines"]["b"]["per_query"][0]["ratings"] == [4]
 
@@ -191,7 +202,7 @@ async def test_run_rbp_ultimate_dedupes_url_variants():
     judge = FakeJudge()
     report = await run_rbp([q("q1")], {"a": a, "b": b}, judge)
     assert report["judged_pairs"] == 1
-    assert judge.calls == 1
+    assert judge.calls == 2
     pq = report["engines"]["ultimate"]["per_query"][0]
     assert pq["n_results"] == 1
     assert pq["rbp"] == pytest.approx((1 - 0.8) * 1.0)
@@ -229,3 +240,42 @@ async def test_run_rbp_ultimate_discards_failed_pooled_judgements():
 async def test_run_rbp_no_engines_no_ultimate():
     report = await run_rbp([q("q1")], {}, FakeJudge())
     assert report["engines"] == {}
+
+
+async def test_run_rbp_shares_query_profile_across_pairs():
+    results = [
+        SearchResult(url="https://ex.com/1", title="GOODDOC"),
+        SearchResult(url="https://other.com/2", title="GOODDOC"),
+    ]
+    judge = FakeJudge()
+    report = await run_rbp([q("q1")], {"e": FakeEngine(results)}, judge)
+    profile_prompts = [p for p in judge.prompts if is_profile_prompt(p)]
+    judge_prompts = [p for p in judge.prompts if not is_profile_prompt(p)]
+    assert len(profile_prompts) == 1
+    assert len(judge_prompts) == 2
+    assert all("- Query type: B" in p for p in judge_prompts)
+    assert all("- the fact" in p for p in judge_prompts)
+    pq = report["engines"]["e"]["per_query"][0]
+    assert pq["query_profile"] == {
+        "query_type": "B",
+        "archetype": "Evergreen",
+        "dated_event": False,
+        "objective": "find it",
+        "core_aspects": ("the fact",),
+    }
+    assert report["engines"]["ultimate"]["per_query"][0]["query_profile"] == pq["query_profile"]
+
+
+async def test_run_rbp_judges_without_profile_when_classification_fails():
+    class NoProfileJudge:
+        async def complete(self, prompt, *, max_tokens, reasoning_effort):
+            if is_profile_prompt(prompt):
+                return None, {"error_type": "http_error", "error_message": "500"}
+            return "rating: 4\nlabel: FullyM\nreasoning: x", None
+
+    results = [SearchResult(url="https://a", title="GOODDOC")]
+    report = await run_rbp([q("q1")], {"e": FakeEngine(results)}, NoProfileJudge())
+    pq = report["engines"]["e"]["per_query"][0]
+    assert pq["query_profile"] is None
+    assert pq["ratings"] == [4]
+    assert pq["judge_errors"] == 0

@@ -1,0 +1,44 @@
+Classify a web search query for the Needs Met rating framework. Your classification is passed verbatim to every per-document judgement for this query, so all documents are judged against the same query interpretation. Be decisive.
+
+Today's date: {{ today }}
+
+**Query**: {{ query }}
+
+## Fields
+
+### query_type
+
+These definitions are shared with the per-document judge; HARD GATE lines describe how the judge uses each type.
+
+{% include "query_types.jinja" %}
+
+### archetype
+
+Expected content type, which determines staleness evaluation:
+
+{% include "content_archetypes.jinja" %}
+
+### dated_event
+
+true only if the query refers to a SPECIFIC, dated current event (e.g., "Medvedev vs Berrettini Monte-Carlo Masters Round of 32, April 8, 2026"). General entity or topic queries are false.
+
+### objective
+
+One sentence: what the user wants to find.
+
+### core_aspects
+
+1-4 short phrases: the CORE aspects a document must cover to answer the query. CORE = directly answers the primary objective. Exclude AUXILIARY supporting details.
+
+## Output
+
+Respond with ONLY a YAML block. No text before or after.
+
+```yaml
+objective: "<one sentence>"
+core_aspects:
+  - "<aspect>"
+query_type: <A|B|C>
+archetype: <Ephemeral|Persistent|Evergreen>
+dated_event: <true|false>
+```

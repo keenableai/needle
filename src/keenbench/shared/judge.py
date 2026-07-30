@@ -14,10 +14,17 @@ T = TypeVar("T")
 
 DEFAULT_MAX_CONTENT_CHARS = 50_000
 JUDGE_TEMPLATE = "judgement.jinja"
-PARSE_RETRY_SUFFIX = (
-    "\n\nYour previous reply could not be parsed. Respond with only the YAML fields:"
-    " rating (an integer 0-4), label, reasoning."
+PROFILE_TEMPLATE = "query_profile.jinja"
+RETRY_PREFIX = "\n\nYour previous reply could not be parsed. Respond with only the YAML fields:"
+PARSE_RETRY_SUFFIX = RETRY_PREFIX + " rating (an integer 0-4), label, reasoning."
+PROFILE_RETRY_SUFFIX = (
+    RETRY_PREFIX + " objective, core_aspects, query_type (A, B, or C),"
+    " archetype (Ephemeral, Persistent, or Evergreen), dated_event (true or false)."
 )
+
+QUERY_TYPE_RE = re.compile(r"\b([ABC])\b")
+ARCHETYPE_RE = re.compile(r"ephemeral|persistent|evergreen")
+ARCHETYPES = {"ephemeral": "Ephemeral", "persistent": "Persistent", "evergreen": "Evergreen"}
 
 RATING_LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
 VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
@@ -48,6 +55,30 @@ class Judgement:
     reasoning: str
 
 
+@dataclass(frozen=True)
+class QueryProfile:
+    query_type: str
+    archetype: str
+    dated_event: bool
+    objective: str
+    core_aspects: tuple[str, ...]
+
+
+def _profile_lines(profile: QueryProfile) -> list[str]:
+    lines = [
+        "**Query Analysis** (precomputed — adopt as ground truth, do not re-classify):",
+        f"- Query type: {profile.query_type}",
+        f"- Content archetype: {profile.archetype}",
+        f"- Specific dated current-event query: {'yes' if profile.dated_event else 'no'}",
+    ]
+    if profile.objective:
+        lines.append(f"- Objective: {profile.objective}")
+    if profile.core_aspects:
+        lines.append("- CORE aspects:")
+        lines += [f"  - {aspect}" for aspect in profile.core_aspects]
+    return lines
+
+
 def build_user_message(
     query: str,
     *,
@@ -57,12 +88,17 @@ def build_user_message(
     content: str | None = None,
     today: str,
     max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
+    profile: QueryProfile | None = None,
 ) -> str:
     lines = [
         f"Today's date: {today}",
         "",
         f"**Query**: {query}",
         "",
+    ]
+    if profile is not None:
+        lines += _profile_lines(profile) + [""]
+    lines += [
         "**Document to evaluate**:",
         f"- Title: {title or ''}",
         f"- URL: {url}",
@@ -94,6 +130,7 @@ def build_judge_prompt(
     content: str | None = None,
     today: str,
     max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
+    profile: QueryProfile | None = None,
 ) -> str:
     user = build_user_message(
         query,
@@ -103,6 +140,7 @@ def build_judge_prompt(
         content=content,
         today=today,
         max_content_chars=max_content_chars,
+        profile=profile,
     )
     return _system_prompt() + "\n\n" + user
 
@@ -164,6 +202,35 @@ def parse_judgement(text: str | None) -> Judgement | None:
     return Judgement(rating=rating, label=label, reasoning=reasoning)
 
 
+def _clean_line(raw: object) -> str:
+    return " ".join(str(raw).split())
+
+
+def parse_query_profile(text: str | None) -> QueryProfile | None:
+    if not text:
+        return None
+    data = _load_judgement_dict(_extract_yaml_block(text))
+    if data is None:
+        return None
+    type_match = QUERY_TYPE_RE.search(str(data.get("query_type") or "").upper())
+    arch_match = ARCHETYPE_RE.search(str(data.get("archetype") or "").lower())
+    if type_match is None or arch_match is None:
+        return None
+    dated = data.get("dated_event")
+    if not isinstance(dated, bool):
+        dated = str(dated).strip().lower() in {"true", "yes", "1"}
+    aspects = data.get("core_aspects")
+    if not isinstance(aspects, list):
+        aspects = []
+    return QueryProfile(
+        query_type=type_match.group(1),
+        archetype=ARCHETYPES[arch_match.group(0)],
+        dated_event=dated,
+        objective=_clean_line(data.get("objective") or ""),
+        core_aspects=tuple(s for a in aspects if (s := _clean_line(a))),
+    )
+
+
 async def complete_parsed(
     llm: LLMClient,
     prompt: str,
@@ -197,6 +264,7 @@ async def judge_one(
     content: str | None = None,
     today: str,
     max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
+    profile: QueryProfile | None = None,
 ) -> tuple[Judgement | None, dict[str, str] | None]:
     prompt = build_judge_prompt(
         query,
@@ -206,7 +274,17 @@ async def judge_one(
         content=content,
         today=today,
         max_content_chars=max_content_chars,
+        profile=profile,
     )
     return await complete_parsed(
         llm, prompt, parse_judgement, retry_suffix=PARSE_RETRY_SUFFIX, max_tokens=32_768
+    )
+
+
+async def classify_query(
+    llm: LLMClient, query: str, *, today: str
+) -> tuple[QueryProfile | None, dict[str, str] | None]:
+    prompt = render_prompt("keenbench.shared", PROFILE_TEMPLATE, query=query, today=today)
+    return await complete_parsed(
+        llm, prompt, parse_query_profile, retry_suffix=PROFILE_RETRY_SUFFIX, max_tokens=32_768
     )
