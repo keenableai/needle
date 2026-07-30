@@ -23,8 +23,11 @@ class EngineSpec:
     build: Callable[[str | None, int], SearchClient]
 
 
-def _build_keenable(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return KeenableClient(api_key=api_key, mode=os.environ.get("KEENABLE_MODE", "pro"))
+def _build_keenable(mode: str) -> Callable[[str | None, int], SearchClient]:
+    def build(api_key: str | None, snippet_chars: int) -> SearchClient:
+        return KeenableClient(api_key=api_key, mode=mode)
+
+    return build
 
 
 def _build_exa(search_type: str) -> Callable[[str | None, int], SearchClient]:
@@ -89,7 +92,12 @@ def _build_you(api_key: str | None, snippet_chars: int) -> SearchClient:
 
 
 ENGINES: dict[str, EngineSpec] = {
-    "keenable": EngineSpec(key_env="KEENABLE_API_KEY", key_required=False, build=_build_keenable),
+    "keenable": EngineSpec(
+        key_env="KEENABLE_API_KEY", key_required=False, build=_build_keenable("pro")
+    ),
+    "keenable-realtime": EngineSpec(
+        key_env="KEENABLE_API_KEY", key_required=False, build=_build_keenable("realtime")
+    ),
     "exa": EngineSpec(key_env="EXA_API_KEY", key_required=True, build=_build_exa("auto")),
     "exa-instant": EngineSpec(
         key_env="EXA_API_KEY", key_required=True, build=_build_exa("instant")
