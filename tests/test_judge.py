@@ -1,9 +1,20 @@
 from keenbench.shared.judge import (
     PARSE_RETRY_SUFFIX,
+    QueryProfile,
     build_judge_prompt,
     build_user_message,
+    classify_query,
     judge_one,
     parse_judgement,
+    parse_query_profile,
+)
+
+PROFILE = QueryProfile(
+    query_type="B",
+    archetype="Ephemeral",
+    dated_event=True,
+    objective="find the score",
+    core_aspects=("final score", "match date"),
 )
 
 
@@ -119,3 +130,72 @@ async def test_judge_one_gives_up_after_one_parse_retry():
     assert j is None and err["error_type"] == "judge_parse_error"
     assert err["error_message"] == "still not yaml"
     assert len(llm.prompts) == 2
+
+
+def test_parse_query_profile():
+    p = parse_query_profile(
+        "objective: find the score\ncore_aspects:\n  - final score\n"
+        "query_type: B\narchetype: Ephemeral\ndated_event: true"
+    )
+    assert p.query_type == "B"
+    assert p.archetype == "Ephemeral"
+    assert p.dated_event is True
+    assert p.objective == "find the score"
+    assert p.core_aspects == ("final score",)
+
+
+def test_parse_query_profile_normalizes_variants():
+    p = parse_query_profile(
+        "query_type: b (Specific/Closed)\narchetype: EVERGREEN\ndated_event: 'no'"
+    )
+    assert p.query_type == "B"
+    assert p.archetype == "Evergreen"
+    assert p.dated_event is False
+    assert p.objective == "" and p.core_aspects == ()
+
+
+def test_parse_query_profile_rejects_invalid():
+    assert parse_query_profile(None) is None
+    assert parse_query_profile("") is None
+    assert parse_query_profile("query_type: D\narchetype: Ephemeral") is None
+    assert parse_query_profile("query_type: A\narchetype: Timeless") is None
+    assert parse_query_profile("rating: 3\nlabel: HM") is None
+
+
+def test_user_message_includes_profile_block():
+    msg = build_user_message("who won", url="https://e", today="2026-07-01", profile=PROFILE)
+    assert "**Query Analysis**" in msg
+    assert "- Query type: B" in msg
+    assert "- Content archetype: Ephemeral" in msg
+    assert "- Specific dated current-event query: yes" in msg
+    assert "- Objective: find the score" in msg
+    assert "  - final score" in msg and "  - match date" in msg
+    assert msg.index("**Query Analysis**") < msg.index("**Document to evaluate**")
+
+    without = build_user_message("who won", url="https://e", today="2026-07-01")
+    assert "**Query Analysis**" not in without
+
+
+async def test_judge_one_passes_profile():
+    llm = FakeLLM(("rating: 3\nlabel: HM\nreasoning: r", None))
+    j, err = await judge_one(llm, "who won", url="https://e", today="2026-07-01", profile=PROFILE)
+    assert err is None and j.rating == 3
+    assert "- Query type: B" in llm.prompts[0]
+
+
+async def test_classify_query_success_and_retry():
+    llm = FakeLLM(
+        ("not a profile", None),
+        ("query_type: C\narchetype: Persistent\ndated_event: false\nobjective: o", None),
+    )
+    p, err = await classify_query(llm, "x vs y", today="2026-07-01")
+    assert err is None and p.query_type == "C" and p.archetype == "Persistent"
+    assert len(llm.prompts) == 2
+    assert "**Query**: x vs y" in llm.prompts[0]
+    assert "Today's date: 2026-07-01" in llm.prompts[0]
+
+
+async def test_classify_query_returns_llm_error():
+    llm = FakeLLM((None, {"error_type": "http_error", "error_message": "500"}))
+    p, err = await classify_query(llm, "q", today="2026-07-01")
+    assert p is None and err["error_type"] == "http_error"

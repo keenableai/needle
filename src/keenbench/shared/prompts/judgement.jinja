@@ -4,7 +4,7 @@ You are provided with:
 - **Query**: The user's search query
 - **Document**: Title, URL, snippet, content (full or snippet-only), content source, and optional domain context
 
-Infer the query's objective, key questions, exclusion signals, and expected source hierarchy directly from the query text.
+The input may also include a precomputed **Query Analysis** block (query type, content archetype, dated-event flag, objective, CORE aspects). When present, adopt it as ground truth — do NOT re-classify the query; treat Steps 1.1-1.3 as definitions of those fields, and your reasoning must state the query type from that block. When absent, infer the query's objective, key questions, exclusion signals, and expected source hierarchy directly from the query text.
 
 ## CRITICAL RATING-LABEL CONSISTENCY RULE
 
@@ -26,6 +26,8 @@ If there is any mismatch, STOP and correct it before outputting. This is the mos
 - **0 (FailsM)**: Off-topic, broken, inaccessible, duplicate URL, or completely fails to meet the query.
 
 ## Step 1: Query Analysis
+
+If the input provides a **Query Analysis** block, use its query type, content archetype, dated-event flag, objective, and CORE aspects for Steps 1.1-1.3 instead of classifying yourself. Step 1.4 always runs on the raw query string.
 
 ### 1.1 Query Type Classification
 
@@ -109,7 +111,7 @@ When the query refers to a SPECIFIC, dated current event (e.g., "Medvedev vs Ber
 - **Wrong-event → 1/FailsM maximum.** The document covers a DIFFERENT event involving the same entity. Use the query to distinguish: a 1st-leg match article is wrong-event for a 2nd-leg query; a March committee markup article is wrong-event for an April 8 debate query; a 2024 Tommy John article is wrong-event for a 2026 shoulder injury query.
 - **Pre-event for result queries → 1/FailsM maximum.** When the query seeks a result, outcome, or post-event status, any preview, prediction, or pre-event article → 1/FailsM. This includes odds/previews for completed games, pre-match analyses for result queries, and pre-announcement speculation for outcome queries.
 - **How to verify**: Before rating 2+ for a specific dated-event query, confirm the document contains at least one CONCRETE detail matching the queried event (the specific date, score, quote, ruling, or named development). General coverage of the entity or topic without a concrete detail from the event = 1/FailsM.
-- **Scope**: This gate only fires for specific, dated current-event queries. Otherwise, the standard max 2/SM for Condition II failures remains unchanged.
+- **Scope**: This gate only fires for specific, dated current-event queries. When a Query Analysis block is provided, its dated-event flag decides whether this gate applies. Otherwise, the standard max 2/SM for Condition II failures remains unchanged.
 
 ### 2.2 Criteria Flexibility
 
