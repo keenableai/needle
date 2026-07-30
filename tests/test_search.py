@@ -591,7 +591,12 @@ def test_factory_builds_new_engines(monkeypatch):
 def test_factory_builds_engine_variants(monkeypatch):
     monkeypatch.setenv("EXA_API_KEY", "ek")
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
-    clients = build_search_clients(["exa", "exa-instant", "parallel", "parallel-turbo"])
+    clients = build_search_clients(
+        ["keenable", "keenable-realtime", "exa", "exa-instant", "parallel", "parallel-turbo"]
+    )
+    assert isinstance(clients["keenable-realtime"], KeenableClient)
+    assert clients["keenable"].mode == "pro"
+    assert clients["keenable-realtime"].mode == "realtime"
     assert isinstance(clients["exa-instant"], ExaClient)
     assert clients["exa"].search_type == "auto"
     assert clients["exa-instant"].search_type == "instant"

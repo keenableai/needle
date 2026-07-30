@@ -51,9 +51,10 @@ All `run` commands share one interface:
 | `--limit` / `--sample` / `--seed` | `0` / `stratified` / `0` | deterministic sample of N queries |
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
-Per-engine tuning is env-based: `KEENABLE_MODE`, `EXA_CONCURRENCY`,
-`TAVILY_DEPTH`; Parallel's mode is fixed per engine entry (`parallel` =
-basic, `parallel-turbo` = turbo). Queries whose search or judging failed are
+Per-engine tuning is env-based: `EXA_CONCURRENCY`, `TAVILY_DEPTH`; Keenable's
+and Parallel's modes are fixed per engine entry (`keenable` = pro,
+`keenable-realtime` = realtime, `parallel` = basic, `parallel-turbo` =
+turbo). Queries whose search or judging failed are
 excluded from the mean via `num_scored` (with `search_errors` /
 `judge_errors` reported) rather than scored as zero.
 

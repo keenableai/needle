@@ -523,6 +523,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <table>
       <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
       <tr><td>keenable</td><td>Keenable search</td><td>query verbatim (operators included), mode=pro</td></tr>
+      <tr><td>keenable-realtime</td><td>Keenable search</td><td>same as keenable but mode=realtime</td></tr>
       <tr><td>google</td><td>Serper.dev (Google SERP)</td><td>query verbatim, num=min(k,100), gl=us, hl=en; knowledge-graph and answer-box entries fold into the ranking</td></tr>
       <tr><td>bing</td><td>SearchApi.io, engine=bing</td><td>query verbatim, num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
       <tr><td>brave</td><td>Brave Web Search</td><td>count=min(k,20), country=us, search_lang=en, result_filter=web; site: kept in the query text, after:/before: → freshness window</td></tr>
