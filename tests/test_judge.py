@@ -155,6 +155,20 @@ def test_parse_query_profile_normalizes_variants():
     assert p.dated_event is False
     assert p.objective == "" and p.core_aspects == ()
 
+    p = parse_query_profile("query_type: Type C\narchetype: Ephemeral content\ndated_event: yes")
+    assert p.query_type == "C"
+    assert p.archetype == "Ephemeral"
+    assert p.dated_event is True
+
+
+def test_parse_query_profile_flattens_multiline_fields():
+    p = parse_query_profile(
+        "query_type: A\narchetype: Persistent\nobjective: |\n  line one\n  line two\n"
+        'core_aspects:\n  - "multi\\nline  aspect"'
+    )
+    assert p.objective == "line one line two"
+    assert p.core_aspects == ("multi line aspect",)
+
 
 def test_parse_query_profile_rejects_invalid():
     assert parse_query_profile(None) is None

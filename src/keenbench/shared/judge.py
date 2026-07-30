@@ -22,7 +22,8 @@ PROFILE_RETRY_SUFFIX = (
     " archetype (Ephemeral, Persistent, or Evergreen), dated_event (true or false)."
 )
 
-QUERY_TYPES = frozenset({"A", "B", "C"})
+QUERY_TYPE_RE = re.compile(r"\b([ABC])\b")
+ARCHETYPE_RE = re.compile(r"ephemeral|persistent|evergreen")
 ARCHETYPES = {"ephemeral": "Ephemeral", "persistent": "Persistent", "evergreen": "Evergreen"}
 
 RATING_LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
@@ -201,15 +202,19 @@ def parse_judgement(text: str | None) -> Judgement | None:
     return Judgement(rating=rating, label=label, reasoning=reasoning)
 
 
+def _clean_line(raw: object) -> str:
+    return " ".join(str(raw).split())
+
+
 def parse_query_profile(text: str | None) -> QueryProfile | None:
     if not text:
         return None
     data = _load_judgement_dict(_extract_yaml_block(text))
     if data is None:
         return None
-    query_type = str(data.get("query_type") or "").strip().upper()[:1]
-    archetype = ARCHETYPES.get(str(data.get("archetype") or "").strip().lower())
-    if query_type not in QUERY_TYPES or archetype is None:
+    type_match = QUERY_TYPE_RE.search(str(data.get("query_type") or "").upper())
+    arch_match = ARCHETYPE_RE.search(str(data.get("archetype") or "").lower())
+    if type_match is None or arch_match is None:
         return None
     dated = data.get("dated_event")
     if not isinstance(dated, bool):
@@ -218,11 +223,11 @@ def parse_query_profile(text: str | None) -> QueryProfile | None:
     if not isinstance(aspects, list):
         aspects = []
     return QueryProfile(
-        query_type=query_type,
-        archetype=archetype,
+        query_type=type_match.group(1),
+        archetype=ARCHETYPES[arch_match.group(0)],
         dated_event=dated,
-        objective=str(data.get("objective") or "").strip(),
-        core_aspects=tuple(s for a in aspects if (s := str(a).strip())),
+        objective=_clean_line(data.get("objective") or ""),
+        core_aspects=tuple(s for a in aspects if (s := _clean_line(a))),
     )
 
 
