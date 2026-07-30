@@ -116,6 +116,33 @@ def test_uniqueness_skips_queries_with_no_other_engine():
     }
 
 
+def test_uniqueness_ignores_same_family_engines():
+    report = _report(
+        {
+            "exa": [_pq(["https://a.com", "https://b.com"])],
+            "exa-instant": [_pq(["https://a.com"])],
+            "google": [_pq(["https://b.com"])],
+        }
+    )
+    by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
+    assert by_engine["exa"]["unique_urls"] == 1
+    assert by_engine["exa"]["total_urls"] == 2
+    assert by_engine["exa-instant"]["unique_urls"] == 1
+    assert by_engine["google"]["unique_urls"] == 0
+
+
+def test_uniqueness_skips_queries_with_only_family_engines():
+    report = _report(
+        {
+            "exa": [_pq(["https://a.com"])],
+            "exa-instant": [_pq(["https://a.com"])],
+        }
+    )
+    by_engine = {r["engine"]: r for r in uniqueness_rows(report, ts="t")}
+    assert by_engine["exa"]["total_urls"] == 0
+    assert by_engine["exa-instant"]["total_urls"] == 0
+
+
 def _pq_labeled(url_labels, error=None):
     return {
         "search_error": error,

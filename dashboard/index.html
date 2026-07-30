@@ -1492,7 +1492,7 @@ function uniquenessAgg(rows) {
 
 function renderUniqueness(agg) {
   renderUniquenessTable(agg, "uniqueness", "unique", "total",
-    "share of an engine's returned URLs that no other engine returned for the same query, all benchmarks, all runs");
+    "share of an engine's returned URLs that no engine from another family returned for the same query (variants like exa and exa-instant don't count against each other), all benchmarks, all runs");
   renderUniquenessTable(agg, "uniqueness-relevant", "relUnique", "relTotal",
     "same, restricted to relevant URLs on both sides: judged HM/FullyM on the RBP benches, the known-item hit on the recall benches");
 }
