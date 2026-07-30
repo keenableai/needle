@@ -15,13 +15,10 @@ T = TypeVar("T")
 DEFAULT_MAX_CONTENT_CHARS = 50_000
 JUDGE_TEMPLATE = "judgement.jinja"
 PROFILE_TEMPLATE = "query_profile.jinja"
-PARSE_RETRY_SUFFIX = (
-    "\n\nYour previous reply could not be parsed. Respond with only the YAML fields:"
-    " rating (an integer 0-4), label, reasoning."
-)
+RETRY_PREFIX = "\n\nYour previous reply could not be parsed. Respond with only the YAML fields:"
+PARSE_RETRY_SUFFIX = RETRY_PREFIX + " rating (an integer 0-4), label, reasoning."
 PROFILE_RETRY_SUFFIX = (
-    "\n\nYour previous reply could not be parsed. Respond with only the YAML fields:"
-    " objective, core_aspects, query_type (A, B, or C),"
+    RETRY_PREFIX + " objective, core_aspects, query_type (A, B, or C),"
     " archetype (Ephemeral, Persistent, or Evergreen), dated_event (true or false)."
 )
 

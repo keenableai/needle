@@ -8,17 +8,15 @@ Today's date: {{ today }}
 
 ### query_type
 
-- **A (Broad/Exploratory)**: general topic queries ("what is diabetes", "chris pratt", "history of AI"). CORE = foundational defining facts.
-- **B (Specific/Closed)**: queries requesting a specific answer ("release date of X", "who won the game", "net worth of Y"). CORE = the specific requested fact; nothing else substitutes.
-- **C (List/Multi-Part)**: comparisons, multi-item requests, pros-and-cons ("X vs Y", "top 10 movies", "benefits and risks of Z"). CORE = coverage of all requested items/aspects.
+These definitions are shared with the per-document judge; HARD GATE lines describe how the judge uses each type.
+
+{% include "query_types.jinja" %}
 
 ### archetype
 
 Expected content type, which determines staleness evaluation:
 
-- **Ephemeral**: sports scores, weather, breaking news, stock prices, event schedules. Value decays rapidly.
-- **Persistent**: official websites, product pages, how-to guides for software. URL always relevant but content freshness matters.
-- **Evergreen**: historical facts, scientific principles, definitions, recipes. Largely time-insensitive.
+{% include "content_archetypes.jinja" %}
 
 ### dated_event
 

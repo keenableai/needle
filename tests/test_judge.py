@@ -104,6 +104,8 @@ def test_build_judge_prompt_includes_system_rules():
     prompt = build_judge_prompt("q", url="https://e", today="2026-07-01")
     assert "Needs Met rating framework" in prompt
     assert "**Query**: q" in prompt
+    assert "**Type A (Broad/Exploratory)**" in prompt
+    assert "**Ephemeral**" in prompt
 
 
 async def test_judge_one_success_and_llm_error():
@@ -193,6 +195,8 @@ async def test_classify_query_success_and_retry():
     assert len(llm.prompts) == 2
     assert "**Query**: x vs y" in llm.prompts[0]
     assert "Today's date: 2026-07-01" in llm.prompts[0]
+    assert "**Type A (Broad/Exploratory)**" in llm.prompts[0]
+    assert "**Ephemeral**" in llm.prompts[0]
 
 
 async def test_classify_query_returns_llm_error():

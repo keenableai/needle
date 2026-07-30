@@ -33,15 +33,7 @@ If the input provides a **Query Analysis** block, use its query type, content ar
 
 Before evaluating the document, classify the query type. This determines how strictly to apply content requirements.
 
-- **Type A (Broad/Exploratory)**: General topic queries ("what is diabetes", "chris pratt", "history of AI").
-  - CORE = foundational defining facts. AUXILIARY = statistics, supplementary details.
-  - Document must provide substantial coverage of at least ONE core aspect to qualify for 3+.
-- **Type B (Specific/Closed)**: Queries requesting a specific answer ("release date of X", "who won the game", "net worth of Y").
-  - CORE = the specific requested fact. Nothing else substitutes.
-  - **HARD GATE**: Missing the specific answer = capped at 2/SM, regardless of how much related context is provided.
-- **Type C (List/Multi-Part)**: Comparisons, multi-item requests, pros-and-cons ("X vs Y", "top 10 movies", "benefits and risks of Z").
-  - CORE = coverage of all requested items/aspects.
-  - **HARD GATE**: Covering <50% of requested items = capped at 2/SM.
+{% include "query_types.jinja" %}
 
 ### 1.2 CORE vs AUXILIARY Classification
 
@@ -54,9 +46,7 @@ Missing AUXILIARY alone never drops a document below 3/HM if all CORE aspects ar
 ### 1.3 Content Archetype Classification
 
 Classify the query's expected content to determine staleness evaluation:
-- **Ephemeral**: Sports scores, weather, breaking news, stock prices, event schedules. Value decays rapidly.
-- **Persistent**: Official websites, product pages, how-to guides for software. URL always relevant but content freshness matters.
-- **Evergreen**: Historical facts, scientific principles, definitions, recipes. Largely time-insensitive.
+{% include "content_archetypes.jinja" %}
 
 ### 1.4 Search Operator Extraction (MANDATORY before scoring)
 
