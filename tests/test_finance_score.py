@@ -2,15 +2,15 @@ import json
 
 import pytest
 
-from keenbench.companyfill import cli as companyfill_cli
-from keenbench.companyfill.score import GoldQuery, first_hit_rank, run_answers
+from keenbench.finance import cli as finance_cli
+from keenbench.finance.score import GoldQuery, first_hit_rank, run_answers
 from keenbench.shared.cli import load_gold_rows
 from keenbench.shared.search import SearchResult
 from keenbench.shared.search import factory as search_factory
 
 
 def _load_gold_rows(path):
-    return load_gold_rows(path, bench="companyfill", gold_ok=companyfill_cli._gold_ok)
+    return load_gold_rows(path, bench="finance", gold_ok=finance_cli._gold_ok)
 
 
 CEO_Q = GoldQuery(
@@ -19,7 +19,7 @@ CEO_Q = GoldQuery(
     field_type="person",
     value="Jensen Huang",
     aliases=(),
-    bucket="companyfill",
+    bucket="finance",
     freshness_window="1y",
 )
 EMP_Q = GoldQuery(
@@ -28,7 +28,7 @@ EMP_Q = GoldQuery(
     field_type="numeric_band",
     value=36000,
     aliases=(),
-    bucket="companyfill",
+    bucket="finance",
     freshness_window="1y",
 )
 REV_Q = GoldQuery(
@@ -157,7 +157,7 @@ def _write_rows(path, rows):
 
 
 def _gold_row(field="ceo", field_type="person", value="Jensen Huang", origin_as_string=True):
-    origin = {"bucket": "companyfill", "topical_domain": "finance"}
+    origin = {"bucket": "finance", "topical_domain": "finance"}
     return {
         "query_text": f"nvidia {field}",
         "query_origin": json.dumps(origin) if origin_as_string else origin,
@@ -186,32 +186,32 @@ def test_load_gold_rows_rejects_unknown_field_type(tmp_path):
 
 
 def test_gold_query_parses_stringified_origin():
-    q = companyfill_cli._gold_query(_gold_row())
-    assert q.bucket == "companyfill" and q.field == "ceo" and q.value == "Jensen Huang"
-    q2 = companyfill_cli._gold_query(_gold_row(origin_as_string=False))
-    assert q2.bucket == "companyfill"
+    q = finance_cli._gold_query(_gold_row())
+    assert q.bucket == "finance" and q.field == "ceo" and q.value == "Jensen Huang"
+    q2 = finance_cli._gold_query(_gold_row(origin_as_string=False))
+    assert q2.bucket == "finance"
 
 
 def test_run_rejects_missing_rows_and_bad_flags(tmp_path, monkeypatch):
     empty = tmp_path / "empty.jsonl"
     empty.write_text("\n")
     with pytest.raises(SystemExit):
-        companyfill_cli.Companyfill().run(queries=str(empty))
+        finance_cli.Finance().run(queries=str(empty))
 
     f = tmp_path / "q.jsonl"
     _write_rows(f, [_gold_row(), _gold_row(field="website", field_type="domain", value="a.com")])
     with pytest.raises(SystemExit):
-        companyfill_cli.Companyfill().run(queries=str(f), limit=1, sample="bogus")
+        finance_cli.Finance().run(queries=str(f), limit=1, sample="bogus")
     with pytest.raises(SystemExit):
-        companyfill_cli.Companyfill().run(queries=str(f), engines="bing")
+        finance_cli.Finance().run(queries=str(f), engines="bing")
     monkeypatch.delenv("EXA_API_KEY", raising=False)
     with pytest.raises(SystemExit):
-        companyfill_cli.Companyfill().run(queries=str(f), engines="exa")
+        finance_cli.Finance().run(queries=str(f), engines="exa")
 
 
 def test_generate_rejects_unknown_suite():
     with pytest.raises(SystemExit):
-        companyfill_cli.Companyfill().generate(suites="bogus")
+        finance_cli.Finance().generate(suites="bogus")
 
 
 def test_run_passes_keenable_api_key_and_writes_report(tmp_path, monkeypatch):
@@ -232,9 +232,9 @@ def test_run_passes_keenable_api_key_and_writes_report(tmp_path, monkeypatch):
         return {"num_queries": len(queries), "num_results": 5, "snippet_chars": 500, "engines": {}}
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
-    monkeypatch.setattr(companyfill_cli, "run_answers", fake_run_answers)
+    monkeypatch.setattr(finance_cli, "run_answers", fake_run_answers)
     out = tmp_path / "report.json"
-    companyfill_cli.Companyfill().run(queries=str(f), engines="keenable", out=str(out))
+    finance_cli.Finance().run(queries=str(f), engines="keenable", out=str(out))
     assert created == {"api_key": "kb-key", "mode": "pro"}
     assert json.loads(out.read_text())["num_queries"] == 1
 
@@ -260,8 +260,8 @@ def test_run_stratified_sampling_by_field(tmp_path, monkeypatch):
             pass
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
-    monkeypatch.setattr(companyfill_cli, "run_answers", fake_run_answers)
-    companyfill_cli.Companyfill().run(
+    monkeypatch.setattr(finance_cli, "run_answers", fake_run_answers)
+    finance_cli.Finance().run(
         queries=str(f), engines="keenable", limit=4, out=str(tmp_path / "r.json")
     )
     assert seen["n"] == 4

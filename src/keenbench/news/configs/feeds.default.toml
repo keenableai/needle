@@ -1,5 +1,5 @@
-# Default keenbench freshstream feed list (the built-in SEED_SOURCES).
-# Copy, edit, and pass with: keenbench freshstream run --feeds feeds.default.toml
+# Default keenbench news feed list (the built-in SEED_SOURCES).
+# Copy, edit, and pass with: keenbench news run --feeds feeds.default.toml
 #
 #   source_kind:    rss_news | rss_release | rss_blog | rss_paper | rss_social
 #                   (rss_paper gets a 168h freshness window; everything else 1h)

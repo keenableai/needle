@@ -13,14 +13,14 @@ keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on t
 
 | Benchmark | Queries | Scoring |
 | --- | --- | --- |
-| [`freshstream`](#freshstream) | fresh, time-sensitive queries from live RSS + Google Trends | LLM relevance judge → RBP@5 |
-| [`companyfill`](#companyfill) | company & financial fact lookups grounded in public registries and SEC filings | answer-recall@K + MRR@K, deterministic (optional LLM backstop) |
+| [`news`](#news) | fresh, time-sensitive queries from live RSS + Google Trends | LLM relevance judge → RBP@5 |
+| [`finance`](#finance) | company & financial fact lookups grounded in public registries and SEC filings | answer-recall@K + MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | known-item paper retrieval: by title vs. by a full-text-only detail | recall@K + MRR@K by paper-id match |
 | [`legal`](#legal) | known-item caselaw / CFR retrieval | recall@K + MRR@K by citation/docket/URL identity |
 
 Gold is generated on demand from public sources; nothing is committed.
-`rarestream` is a query producer, not a bench: it samples English rare-word
-queries from a pre-filtered HF artifact and evaluates them like freshstream.
+`agentic_rare` is a query producer, not a bench: it samples English rare-word
+queries from a pre-filtered HF artifact and evaluates them like news.
 
 ## Install
 
@@ -34,7 +34,7 @@ The CLI auto-loads `.env` from the working directory (copy
 
 | Variable | Purpose |
 | --- | --- |
-| `OPENROUTER_API_KEY` | all LLM work — query projection (freshstream, companyfill `filingdoc`, scholar, legal `code`) and judging |
+| `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`) and judging |
 | `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY` | one per engine, required when that engine is in `--engines` |
 | `KEENABLE_API_KEY` | optional — without it the keyless, rate-limited endpoint is used |
 | `KEENBENCH_LLM_MODEL`, `KEENBENCH_JUDGE_MODEL` | defaults `google/gemini-3.1-flash-lite`, `google/gemini-3-flash-preview`; `--llm-model` / `--judge-model` override |
@@ -58,14 +58,14 @@ turbo). Queries whose search or judging failed are
 excluded from the mean via `num_scored` (with `search_errors` /
 `judge_errors` reported) rather than scored as zero.
 
-## freshstream
+## news
 
 Mines what's trending right now into keyword queries; engines are scored on
 how well they rank results for them.
 
 ```bash
-keenbench freshstream generate --source rss --out queries.jsonl    # or --source trending
-keenbench freshstream run --queries queries.jsonl --limit 20 --out rbp.json
+keenbench news generate --source rss --out queries.jsonl    # or --source trending
+keenbench news run --queries queries.jsonl --limit 20 --out rbp.json
 ```
 
 `generate` feeds one cohort from two streams: **RSS** — ~124 curated public
@@ -75,7 +75,7 @@ and **Google Trends** — the keyless Trends RSS across all 52 US geos, merged,
 fuzzy-deduped, capped by traffic. An LLM projects each item into a query and
 refuses evergreen content. `query_id` is deterministic from
 `(query_text, hour_ts)`. The feed list lives in
-[`feeds.default.toml`](src/keenbench/freshstream/configs/feeds.default.toml)
+[`feeds.default.toml`](src/keenbench/news/configs/feeds.default.toml)
 (override with `--feeds`; honor each publisher's ToS and rate limits).
 
 `run` judges each unique `(query, url)` once across engines with an LLM
@@ -84,7 +84,7 @@ relevance judge (Google "Needs Met" 0–4) and scores RBP@5 (`p=0.8`, ceiling
 `--snippet-chars` keeps judge evidence uniform across engines. `--queries`
 also accepts plain text, one query per line.
 
-## companyfill
+## finance
 
 Keyword queries about public companies (`"nvidia ceo"`, `"nvidia q1 fiscal
 2026 net income"`) with gold answers from Wikidata, GLEIF, and SEC filings —
@@ -92,11 +92,11 @@ scored on whether top-K results *contain the answer*, not whether they hit
 one pinned URL.
 
 ```bash
-keenbench companyfill generate --max-companies 100 --per-company 1 --out gold.jsonl
-keenbench companyfill run --queries gold.jsonl --judge --out report.json
+keenbench finance generate --max-companies 100 --per-company 1 --out gold.jsonl
+keenbench finance run --queries gold.jsonl --judge --out report.json
 ```
 
-Three suites (`--suites`): **`companyfill`** — registry facts per company
+Three suites (`--suites`): **`finance`** — registry facts per company
 (ceo, founded_year, hq_country, website, employees, lei, ticker);
 **`filings`** — single-quarter 10-Q facts (net income, operating income,
 diluted EPS) from SEC XBRL, stratified by market cap; **`filingdoc`** —
@@ -180,7 +180,7 @@ to bridge MCP tools, `RunBudget` for hard dollar budgets.
 Pipelines are pure (inputs + clients in, rows/reports out), so they also
 drive from a notebook or scheduler: the ranking harness is
 `keenbench.shared.rankeval.run_rbp`, the recall scorer
-`keenbench.companyfill.score.run_answers`.
+`keenbench.finance.score.run_answers`.
 
 Every bench report carries a synthetic `ultimate` engine: the
 pooled results of all engines per query, oracle-ranked — by judge rating
@@ -191,8 +191,8 @@ and is excluded from the overlap and uniqueness stats.
 ## Continuous benchmarks
 
 [`bench.yaml`](.github/workflows/bench.yaml) runs against all registered
-engines: freshstream hourly (`--limit 20`); daily with fresh gold —
-companyfill 00:17 UTC (`--limit 120 --judge`), rarestream 06:17
+engines: news hourly (`--limit 20`); daily with fresh gold —
+finance 00:17 UTC (`--limit 120 --judge`), agentic_rare 06:17
 (`--limit 100`), scholar 12:17 (`--per-cell 7`), legal 18:17. Each run
 appends summary rows
 (`history.jsonl`), engine-pair URL overlap (`overlap.jsonl`), and per-engine

@@ -2,9 +2,9 @@ import asyncio
 from dataclasses import dataclass
 from typing import Any
 
-from keenbench.companyfill.canon import gold_in_text
-from keenbench.companyfill.judge import judge_answer
-from keenbench.companyfill.models import FRESHNESS_LADDER, cues_for
+from keenbench.finance.canon import gold_in_text
+from keenbench.finance.judge import judge_answer
+from keenbench.finance.models import FRESHNESS_LADDER, cues_for
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.recall import (
     ULTIMATE,

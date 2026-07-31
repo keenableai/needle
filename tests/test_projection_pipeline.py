@@ -2,9 +2,9 @@ from datetime import UTC, datetime
 
 import pytest
 
-from keenbench.freshstream.models import build_query_row
-from keenbench.freshstream.pipeline import _rss_provenance, run_rss
-from keenbench.freshstream.projection import (
+from keenbench.news.models import build_query_row
+from keenbench.news.pipeline import _rss_provenance, run_rss
+from keenbench.news.projection import (
     build_projection_prompt,
     clean_projection,
     project_batch,
@@ -71,7 +71,7 @@ def test_build_projection_prompt_uses_explicit_today():
 
 
 async def test_run_rss_end_to_end(monkeypatch):
-    import keenbench.freshstream.pipeline as pipeline
+    import keenbench.news.pipeline as pipeline
 
     fake_items = [
         {

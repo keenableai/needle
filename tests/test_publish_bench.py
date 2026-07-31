@@ -7,7 +7,7 @@ SPEC = importlib.util.spec_from_file_location(
 assert SPEC and SPEC.loader
 publish_bench = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(publish_bench)
-companyfill_rows = publish_bench.companyfill_rows
+finance_rows = publish_bench.finance_rows
 scholar_rows = publish_bench.scholar_rows
 
 
@@ -43,7 +43,7 @@ def test_scholar_rows_publish_slice_denominators():
 
 
 def test_suite_rows_publish_slice_denominators():
-    row = companyfill_rows(
+    row = finance_rows(
         _report(
             {
                 "filings": {"n": 3, "recall_at_k": 1 / 3},

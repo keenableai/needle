@@ -2,9 +2,9 @@ import json
 
 import pytest
 
-from keenbench.companyfill import cli as companyfill_cli
-from keenbench.companyfill.judge import build_answer_prompt, judge_answer, parse_verdict
-from keenbench.companyfill.score import GoldQuery, run_answers
+from keenbench.finance import cli as finance_cli
+from keenbench.finance.judge import build_answer_prompt, judge_answer, parse_verdict
+from keenbench.finance.score import GoldQuery, run_answers
 from keenbench.shared.search import SearchResult
 from keenbench.shared.search import factory as search_factory
 
@@ -14,7 +14,7 @@ CEO_Q = GoldQuery(
     field_type="person",
     value="Jensen Huang",
     aliases=("Jen-Hsun Huang",),
-    bucket="companyfill",
+    bucket="finance",
     freshness_window="1y",
 )
 
@@ -200,20 +200,20 @@ def test_run_judge_requires_openrouter_key(tmp_path, monkeypatch):
     f = tmp_path / "q.jsonl"
     row = {
         "query_text": "nvidia ceo",
-        "query_origin": json.dumps({"bucket": "companyfill"}),
+        "query_origin": json.dumps({"bucket": "finance"}),
         "gold": {"field": "ceo", "field_type": "person", "value": "Jensen Huang", "aliases": []},
     }
     f.write_text(json.dumps(row) + "\n")
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     with pytest.raises(SystemExit):
-        companyfill_cli.Companyfill().run(queries=str(f), engines="keenable", judge=True)
+        finance_cli.Finance().run(queries=str(f), engines="keenable", judge=True)
 
 
 def test_run_passes_judge_model(tmp_path, monkeypatch):
     f = tmp_path / "q.jsonl"
     row = {
         "query_text": "nvidia ceo",
-        "query_origin": json.dumps({"bucket": "companyfill"}),
+        "query_origin": json.dumps({"bucket": "finance"}),
         "gold": {"field": "ceo", "field_type": "person", "value": "Jensen Huang", "aliases": []},
     }
     f.write_text(json.dumps(row) + "\n")
@@ -241,11 +241,11 @@ def test_run_passes_judge_model(tmp_path, monkeypatch):
         seen["judge"] = kwargs.get("judge")
         return {"num_queries": 1, "num_results": 5, "snippet_chars": 500, "engines": {}}
 
-    monkeypatch.setattr(companyfill_cli, "OpenRouterClient", FakeOpenRouter)
+    monkeypatch.setattr(finance_cli, "OpenRouterClient", FakeOpenRouter)
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
-    monkeypatch.setattr(companyfill_cli, "run_answers", fake_run_answers)
+    monkeypatch.setattr(finance_cli, "run_answers", fake_run_answers)
     out = tmp_path / "r.json"
-    companyfill_cli.Companyfill().run(
+    finance_cli.Finance().run(
         queries=str(f), engines="keenable", judge=True, judge_model="test/model", out=str(out)
     )
     assert created == {"api_key": "or-key", "model": "test/model"}

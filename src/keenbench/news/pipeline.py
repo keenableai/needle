@@ -3,15 +3,15 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from keenbench.freshstream.feeds import SeedSource, fetch_all_sources, pick_per_feed
-from keenbench.freshstream.models import QueryRow, build_query_row
-from keenbench.freshstream.projection import (
+from keenbench.news.feeds import SeedSource, fetch_all_sources, pick_per_feed
+from keenbench.news.models import QueryRow, build_query_row
+from keenbench.news.projection import (
     build_projection_prompt,
     build_trend_prompt,
     project_batch,
 )
-from keenbench.freshstream.taxonomy import TOPICAL_DOMAINS
-from keenbench.freshstream.trends import (
+from keenbench.news.taxonomy import TOPICAL_DOMAINS
+from keenbench.news.trends import (
     GEO_CONCURRENCY,
     TRENDS_MAX_AGE,
     US_GEOS,

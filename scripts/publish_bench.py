@@ -29,12 +29,12 @@ def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
     ]
 
 
-def freshstream_rows(report: dict, ts: str) -> list[dict]:
-    return _rbp_rows(report, ts, "freshstream")
+def news_rows(report: dict, ts: str) -> list[dict]:
+    return _rbp_rows(report, ts, "news")
 
 
-def rarestream_rows(report: dict, ts: str) -> list[dict]:
-    return _rbp_rows(report, ts, "rarestream")
+def agentic_rare_rows(report: dict, ts: str) -> list[dict]:
+    return _rbp_rows(report, ts, "agentic_rare")
 
 
 def scholar_rows(report: dict, ts: str) -> list[dict]:
@@ -102,8 +102,8 @@ def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> l
     return rows
 
 
-def companyfill_rows(report: dict, ts: str) -> list[dict]:
-    return _suite_rows(report, ts, "companyfill", ("filings", "filingdoc"))
+def finance_rows(report: dict, ts: str) -> list[dict]:
+    return _suite_rows(report, ts, "finance", ("filings", "filingdoc"))
 
 
 def legal_rows(report: dict, ts: str) -> list[dict]:
@@ -157,7 +157,7 @@ def publish(
     fresh: str | None = None,
     recall: str | None = None,
     gold: str | None = None,
-    rarestream: str | None = None,
+    agentic_rare: str | None = None,
     scholar: str | None = None,
     scholar_queries: str | None = None,
     legal: str | None = None,
@@ -177,9 +177,9 @@ def publish(
     overlap = []
     uniqueness = []
     for path, to_rows, latest, archive_name in (
-        (rbp, freshstream_rows, "latest_freshstream.json", "rbp.json"),
-        (recall, companyfill_rows, "latest_companyfill.json", "recall.json"),
-        (rarestream, rarestream_rows, "latest_rarestream.json", "rarestream.json"),
+        (rbp, news_rows, "latest_news.json", "rbp.json"),
+        (recall, finance_rows, "latest_finance.json", "recall.json"),
+        (agentic_rare, agentic_rare_rows, "latest_agentic_rare.json", "agentic_rare.json"),
         (scholar, scholar_rows, "latest_scholar.json", "scholar.json"),
         (legal, legal_rows, "latest_legal.json", "legal.json"),
     ):

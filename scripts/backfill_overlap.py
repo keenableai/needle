@@ -10,7 +10,14 @@ from keenbench.shared.io import write_jsonl
 from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
 DEFAULT_DATASET = "keenable-ai/keenbench-results"
-ARTIFACTS = ("rbp.json", "recall.json", "rarestream.json", "scholar.json", "legal.json")
+ARTIFACTS = (
+    "rbp.json",
+    "recall.json",
+    "agentic_rare.json",
+    "rarestream.json",
+    "scholar.json",
+    "legal.json",
+)
 
 
 def _load(path: Path) -> list[dict]:

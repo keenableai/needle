@@ -9,12 +9,12 @@ on:
     - cron: "17 1-5,7-11,13-17,19-23 * * *"
   workflow_dispatch:
     inputs:
-      companyfill:
-        description: "Also run companyfill (regenerates gold)"
+      finance:
+        description: "Also run finance (regenerates gold)"
         type: boolean
         default: false
-      rarestream:
-        description: "Also run rarestream (rare-entity RBP eval)"
+      agentic_rare:
+        description: "Also run agentic_rare (rare-entity RBP eval)"
         type: boolean
         default: false
       scholar:
@@ -74,42 +74,42 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: freshstream (hourly)
-        id: freshstream
+      - name: news (hourly)
+        id: news
         continue-on-error: true
         run: |
-          uv run keenbench freshstream generate --source rss --out fresh.jsonl
-          uv run keenbench freshstream run --queries fresh.jsonl --limit 20 \
+          uv run keenbench news generate --source rss --out fresh.jsonl
+          uv run keenbench news run --queries fresh.jsonl --limit 20 \
             --engines "$ENGINES" --out rbp.json
 
-      - name: companyfill (daily schedule, dispatch opt-in, or gold bootstrap)
-        id: companyfill
+      - name: finance (daily schedule, dispatch opt-in, or gold bootstrap)
+        id: finance
         continue-on-error: true
         env:
-          RUN_COMPANYFILL: ${{ github.event.schedule == '17 0 * * *' || inputs.companyfill == true }}
+          RUN_FINANCE: ${{ github.event.schedule == '17 0 * * *' || inputs.finance == true }}
         run: |
-          if [ "$RUN_COMPANYFILL" != "true" ] && [ -s site-data/data/gold.jsonl ]; then
-            echo "skipping companyfill"
+          if [ "$RUN_FINANCE" != "true" ] && [ -s site-data/data/gold.jsonl ]; then
+            echo "skipping finance"
             exit 0
           fi
           mkdir -p site-data/data
-          uv run keenbench companyfill generate --max-companies 100 --per-company 1 \
+          uv run keenbench finance generate --max-companies 100 --per-company 1 \
             --filingdoc-target 40 --out site-data/data/gold.jsonl
-          uv run keenbench companyfill run --queries site-data/data/gold.jsonl \
+          uv run keenbench finance run --queries site-data/data/gold.jsonl \
             --limit 120 --engines "$ENGINES" --judge --out recall.json
 
-      - name: rarestream (daily schedule or dispatch opt-in)
-        id: rarestream
+      - name: agentic_rare (daily schedule or dispatch opt-in)
+        id: agentic_rare
         continue-on-error: true
         env:
-          RUN_RARESTREAM: ${{ github.event.schedule == '17 6 * * *' || inputs.rarestream == true }}
+          RUN_AGENTIC_RARE: ${{ github.event.schedule == '17 6 * * *' || inputs.agentic_rare == true }}
         run: |
-          if [ "$RUN_RARESTREAM" != "true" ]; then
-            echo "skipping rarestream"
+          if [ "$RUN_AGENTIC_RARE" != "true" ]; then
+            echo "skipping agentic_rare"
             exit 0
           fi
-          uv run keenbench rarestream run --limit 100 \
-            --engines "$ENGINES" --out rarestream.json
+          uv run keenbench agentic_rare run --limit 100 \
+            --engines "$ENGINES" --out agentic_rare.json
 
       - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
         id: scholar
@@ -147,9 +147,9 @@ jobs:
         id: outcomes
         run: |
           failed=""
-          if [ "${{ steps.freshstream.outcome }}" = "failure" ]; then failed="$failed freshstream"; fi
-          if [ "${{ steps.companyfill.outcome }}" = "failure" ]; then failed="$failed companyfill"; fi
-          if [ "${{ steps.rarestream.outcome }}" = "failure" ]; then failed="$failed rarestream"; fi
+          if [ "${{ steps.news.outcome }}" = "failure" ]; then failed="$failed news"; fi
+          if [ "${{ steps.finance.outcome }}" = "failure" ]; then failed="$failed finance"; fi
+          if [ "${{ steps.agentic_rare.outcome }}" = "failure" ]; then failed="$failed agentic_rare"; fi
           if [ "${{ steps.scholar.outcome }}" = "failure" ]; then failed="$failed scholar"; fi
           if [ "${{ steps.legal.outcome }}" = "failure" ]; then failed="$failed legal"; fi
           echo "failed=${failed# }" >> "$GITHUB_OUTPUT"
@@ -165,8 +165,8 @@ jobs:
           if [ -s recall.json ]; then
             args="$args --recall recall.json --gold site-data/data/gold.jsonl"
           fi
-          if [ -s rarestream.json ]; then
-            args="$args --rarestream rarestream.json"
+          if [ -s agentic_rare.json ]; then
+            args="$args --agentic_rare agentic_rare.json"
           fi
           if [ -s scholar.json ]; then
             args="$args --scholar scholar.json --scholar-queries site-data/data/scholar.jsonl"

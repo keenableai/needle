@@ -10,11 +10,11 @@ import httpx
 from defusedxml.common import DefusedXmlException
 from rapidfuzz import fuzz
 
-from keenbench.freshstream.feeds import HTTP_TIMEOUT, _text_of, published_age_seconds
+from keenbench.news.feeds import HTTP_TIMEOUT, _text_of, published_age_seconds
 from keenbench.shared.concurrency import bounded_gather
 
 HT_NS = {"ht": "https://trends.google.com/trending/rss"}
-USER_AGENT = "Mozilla/5.0 (compatible; keenbench-freshstream/0.1)"
+USER_AGENT = "Mozilla/5.0 (compatible; keenbench-news/0.1)"
 
 US_GEOS: tuple[str, ...] = (
     "US",

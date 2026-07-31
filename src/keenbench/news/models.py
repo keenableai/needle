@@ -3,7 +3,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Any
 
-from keenbench.freshstream.taxonomy import TOPICAL_DOMAINS
+from keenbench.news.taxonomy import TOPICAL_DOMAINS
 from keenbench.shared.identity import query_hash, query_id
 
 FRESH_PRODUCER_ID = "fresh-queries"
