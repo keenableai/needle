@@ -1,7 +1,7 @@
 import re
 from datetime import date, timedelta
 
-from keenbench.companyfill.models import (
+from keenbench.finance.models import (
     QUARTERLY_FIELDS,
     Filing,
     QuarterFact,
@@ -38,7 +38,7 @@ def doc_excerpt(text: str) -> str:
 
 def build_filingdoc_prompt(filing: Filing, text: str) -> str:
     return render_prompt(
-        "keenbench.companyfill",
+        "keenbench.finance",
         FILING_QUERY_TEMPLATE,
         company=filing.company,
         form=filing.form,

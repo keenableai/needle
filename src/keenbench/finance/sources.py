@@ -1,8 +1,8 @@
 from datetime import date
 from html.parser import HTMLParser
 
-from keenbench.companyfill.models import Filing, QuarterFact
-from keenbench.companyfill.registries import RegistryClient
+from keenbench.finance.models import Filing, QuarterFact
+from keenbench.finance.registries import RegistryClient
 
 SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
 SEC_DOC_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{adsh_nodash}/{doc}"

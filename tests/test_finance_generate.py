@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
-from keenbench.companyfill.generate import run_generate
-from keenbench.companyfill.models import display_name
+from keenbench.finance.generate import run_generate
+from keenbench.finance.models import display_name
 
 HOUR = datetime(2026, 7, 2, 14, tzinfo=UTC)
 
@@ -80,18 +80,18 @@ def test_display_name():
     assert display_name("BANK OF AMERICA CORP /DE/") == "bank of america"
 
 
-async def test_companyfill_rows_fields_and_gold():
+async def test_finance_rows_fields_and_gold():
     wd = FakeWikidata(qids={"NVIDIA Corp": "Q1"}, claims={"Q1": NVDA_CLAIMS})
     rows, stats = await run_generate(
         [NVDA_SEED],
         wikidata=wd,
         sec=None,
         gleif=None,
-        suites=("companyfill",),
+        suites=("finance",),
         hour_ts=HOUR,
         min_employee_year=2025,
     )
-    by_field = {r["gold"]["field"]: r for r in rows if r["query_origin"]["bucket"] == "companyfill"}
+    by_field = {r["gold"]["field"]: r for r in rows if r["query_origin"]["bucket"] == "finance"}
     assert set(by_field) == {
         "ceo",
         "ceo_since",
@@ -118,7 +118,7 @@ async def test_companyfill_rows_fields_and_gold():
     assert by_field["lei"]["gold"]["value"] == "549300MLUDYVRQOOXS22"
     assert by_field["ticker"]["gold"]["value"] == "NVDA"
     nl_by_field = {
-        r["gold"]["field"]: r for r in rows if r["query_origin"]["bucket"] == "companyfill_nl"
+        r["gold"]["field"]: r for r in rows if r["query_origin"]["bucket"] == "finance_nl"
     }
     assert set(nl_by_field) == {
         "ceo",
@@ -133,8 +133,8 @@ async def test_companyfill_rows_fields_and_gold():
     assert nl_by_field["ceo"]["gold"] == by_field["ceo"]["gold"]
     assert nl_by_field["employees"]["query_text"] == "how many people work at nvidia"
     origin = by_field["ceo"]["query_origin"]
-    assert origin["bucket"] == "companyfill"
-    assert origin["subcategory"] == "companyfill_ceo"
+    assert origin["bucket"] == "finance"
+    assert origin["subcategory"] == "finance_ceo"
     assert origin["provenance"]["qid"] == "Q1"
     assert stats.companies == 1 and stats.resolved == 1 and stats.rows == len(rows)
 
@@ -145,7 +145,7 @@ async def test_rows_are_deterministic_for_same_hour():
         "wikidata": wd,
         "sec": None,
         "gleif": None,
-        "suites": ("companyfill",),
+        "suites": ("finance",),
         "hour_ts": HOUR,
         "min_employee_year": 2025,
     }
@@ -166,7 +166,7 @@ async def test_stale_employees_omitted():
         wikidata=wd,
         sec=None,
         gleif=None,
-        suites=("companyfill",),
+        suites=("finance",),
         hour_ts=HOUR,
         min_employee_year=2025,
     )
@@ -180,7 +180,7 @@ async def test_unresolved_company_dropped_by_min_fields():
         wikidata=wd,
         sec=None,
         gleif=None,
-        suites=("companyfill",),
+        suites=("finance",),
         hour_ts=HOUR,
         min_employee_year=2025,
     )
@@ -194,7 +194,7 @@ async def test_single_letter_ticker_skipped():
         wikidata=wd,
         sec=None,
         gleif=None,
-        suites=("companyfill",),
+        suites=("finance",),
         hour_ts=HOUR,
         min_employee_year=2025,
     )
@@ -209,7 +209,7 @@ async def test_resolve_uses_title_without_state_markers():
         wikidata=wd,
         sec=None,
         gleif=None,
-        suites=("companyfill",),
+        suites=("finance",),
         hour_ts=HOUR,
         min_employee_year=2025,
     )
@@ -225,7 +225,7 @@ async def test_gleif_backfills_missing_lei():
         wikidata=wd,
         sec=None,
         gleif=FakeGleif(),
-        suites=("companyfill",),
+        suites=("finance",),
         hour_ts=HOUR,
         min_employee_year=2025,
     )
@@ -245,7 +245,7 @@ async def test_seed_deduped_by_title():
         wikidata=wd,
         sec=None,
         gleif=None,
-        suites=("companyfill",),
+        suites=("finance",),
         hour_ts=HOUR,
         min_employee_year=2025,
     )
@@ -253,7 +253,7 @@ async def test_seed_deduped_by_title():
     tickers = [
         r["gold"]["value"]
         for r in rows
-        if r["gold"]["field"] == "ticker" and r["query_origin"]["bucket"] == "companyfill"
+        if r["gold"]["field"] == "ticker" and r["query_origin"]["bucket"] == "finance"
     ]
     assert tickers == ["GOOGL"]
 
@@ -394,7 +394,7 @@ async def test_company_exception_counted_not_raised():
         wikidata=BoomWikidata(),
         sec=None,
         gleif=None,
-        suites=("companyfill",),
+        suites=("finance",),
         hour_ts=HOUR,
         min_employee_year=2025,
     )

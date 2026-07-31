@@ -2,8 +2,8 @@ from collections import Counter
 
 import fire
 
-from keenbench.rarestream.io import iter_rows, resolve_dataset, write_rows
-from keenbench.rarestream.rare_entity import filter_rows, load_lid, load_tokenizer
+from keenbench.agentic_rare.io import iter_rows, resolve_dataset, write_rows
+from keenbench.agentic_rare.rare_entity import filter_rows, load_lid, load_tokenizer
 
 DEFAULT_DATASET = "keenable-ai/keenbench-results"
 DEFAULT_STREAM_PATH = "agentic/queries.parquet"

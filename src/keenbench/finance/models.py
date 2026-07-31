@@ -2,10 +2,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
-from keenbench.companyfill.canon import LEGAL_SUFFIXES
+from keenbench.finance.canon import LEGAL_SUFFIXES
 from keenbench.shared.identity import query_hash, query_id
 
-COMPANYFILL_PRODUCER_ID = "companyfill"
+FINANCE_PRODUCER_ID = "finance"
 
 FRESHNESS_LADDER = ("1h", "24h", "7d", "30d", "1y", "5y", "static")
 
@@ -19,7 +19,7 @@ class FieldSpec:
     nl_template: str | None = None
 
 
-COMPANYFILL_FIELDS = {
+FINANCE_FIELDS = {
     "ceo": FieldSpec("person", "1y", "{name} ceo", nl_template="who is the ceo of {name}"),
     "ceo_since": FieldSpec(
         "year",
@@ -83,7 +83,7 @@ QUARTERLY_FIELDS = {
 FILINGDOC_FIELD = "filing"
 FILINGDOC_SPEC = FieldSpec("exact_id", "static", "")
 
-FIELD_SPECS = {**COMPANYFILL_FIELDS, **QUARTERLY_FIELDS, FILINGDOC_FIELD: FILINGDOC_SPEC}
+FIELD_SPECS = {**FINANCE_FIELDS, **QUARTERLY_FIELDS, FILINGDOC_FIELD: FILINGDOC_SPEC}
 
 FILINGS_SYNTAX_CYCLE = ("plain", "quoted")
 FILINGDOC_SYNTAX_CYCLE = ("plain", "site", "plain", "quoted", "plain", "date")
@@ -151,14 +151,14 @@ def build_gold_row(
         "query_id": query_id(query_text, hour_ts=hour_ts),
         "query_hash": query_hash(query_text),
         "query_text": query_text,
-        "query_source": COMPANYFILL_PRODUCER_ID,
+        "query_source": FINANCE_PRODUCER_ID,
         "query_origin": {
             "bucket": bucket,
             "syntax": syntax,
             "topical_domain": "finance",
             "subcategory": f"{bucket}_{field}",
             "provenance": {
-                "producer": COMPANYFILL_PRODUCER_ID,
+                "producer": FINANCE_PRODUCER_ID,
                 "registry": registry,
                 "source_url": source_url,
                 **entity_keys,

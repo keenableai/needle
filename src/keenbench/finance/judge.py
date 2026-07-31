@@ -21,7 +21,7 @@ def build_answer_prompt(
     snippet: str,
 ) -> str:
     return render_prompt(
-        "keenbench.companyfill",
+        "keenbench.finance",
         ANSWER_TEMPLATE,
         query=query_text,
         field=field,

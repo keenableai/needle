@@ -2,21 +2,21 @@ import fire
 from dotenv import load_dotenv
 
 from keenbench import __version__
-from keenbench.companyfill.cli import Companyfill
+from keenbench.agentic_rare.cli import AgenticRare
+from keenbench.finance.cli import Finance
 from keenbench.findallmcp.cli import FindallMcp
-from keenbench.freshstream.cli import Freshstream
 from keenbench.legal.cli import Legal
-from keenbench.rarestream.cli import Rarestream
+from keenbench.news.cli import News
 from keenbench.scholar.cli import Scholar
 
 
 class Keenbench:
     def __init__(self) -> None:
-        self.companyfill = Companyfill()
+        self.finance = Finance()
         self.findallmcp = FindallMcp()
-        self.freshstream = Freshstream()
+        self.news = News()
         self.legal = Legal()
-        self.rarestream = Rarestream()
+        self.agentic_rare = AgenticRare()
         self.scholar = Scholar()
 
     def version(self) -> str:

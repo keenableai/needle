@@ -1,7 +1,7 @@
 from collections.abc import Callable, Sequence
 from typing import Any, TypeVar
 
-from keenbench.freshstream.trends import Trend
+from keenbench.news.trends import Trend
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.prompts import render_prompt

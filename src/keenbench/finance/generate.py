@@ -2,20 +2,20 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from keenbench.companyfill.canon import registrable_domain
-from keenbench.companyfill.models import (
-    COMPANYFILL_FIELDS,
+from keenbench.finance.canon import registrable_domain
+from keenbench.finance.models import (
     FILINGDOC_FIELD,
     FILINGDOC_SPEC,
     FILINGDOC_SYNTAX_CYCLE,
     FILINGS_SYNTAX_CYCLE,
+    FINANCE_FIELDS,
     QUARTERLY_FIELDS,
     Filing,
     QuarterFact,
     build_gold_row,
     display_name,
 )
-from keenbench.companyfill.projection import (
+from keenbench.finance.projection import (
     MIN_DOC_CHARS,
     build_filingdoc_prompt,
     clean_filingdoc_query,
@@ -23,7 +23,7 @@ from keenbench.companyfill.projection import (
     filingdoc_syntax_query,
     filings_query,
 )
-from keenbench.companyfill.registries import (
+from keenbench.finance.registries import (
     GleifClient,
     SecClient,
     WikidataClient,
@@ -33,12 +33,12 @@ from keenbench.companyfill.registries import (
     lei,
     website,
 )
-from keenbench.companyfill.sources import EdgarClient, quarterly_facts
+from keenbench.finance.sources import EdgarClient, quarterly_facts
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.sampling import shuffle_indices
 
-COMPANYFILL_MIN_FIELDS = 4
+FINANCE_MIN_FIELDS = 4
 COMPANY_CONCURRENCY = 16
 FILINGS_CONCURRENCY = 8
 DOC_OVERSAMPLE = 3
@@ -120,7 +120,7 @@ def _grounded_fields(
     return fields
 
 
-async def _companyfill_rows(
+async def _finance_rows(
     seed_row: dict,
     wikidata: WikidataClient,
     gleif: GleifClient | None,
@@ -154,16 +154,16 @@ async def _companyfill_rows(
     if len(ticker) >= 2:
         sec_url = f"https://www.sec.gov/cgi-bin/browse-edgar?CIK={cik}"
         fields.append(("ticker", ticker, [], "sec", sec_url))
-    if len(fields) < COMPANYFILL_MIN_FIELDS:
+    if len(fields) < FINANCE_MIN_FIELDS:
         return []
     name = display_name(title)
     entity_keys = {"entity": title, "ticker": ticker, "cik": cik, "qid": qid}
     rows = []
     for field, value, aliases, registry, source_url in fields:
-        spec = COMPANYFILL_FIELDS[field]
-        variants = [("companyfill", spec.template)]
+        spec = FINANCE_FIELDS[field]
+        variants = [("finance", spec.template)]
         if spec.nl_template:
-            variants.append(("companyfill_nl", spec.nl_template))
+            variants.append(("finance_nl", spec.nl_template))
         for bucket, template in variants:
             rows.append(
                 build_gold_row(
@@ -399,11 +399,11 @@ async def run_generate(
     stats.companies = len(cf_seed)
 
     rows: list[dict] = []
-    if "companyfill" in suites and wikidata is not None:
+    if "finance" in suites and wikidata is not None:
 
         async def company_rows(row: dict) -> list[dict]:
             try:
-                out = await _companyfill_rows(
+                out = await _finance_rows(
                     row, wikidata, gleif, min_employee_year=min_employee_year, hour_ts=hour_ts
                 )
             except Exception:

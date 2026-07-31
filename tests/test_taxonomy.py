@@ -1,4 +1,4 @@
-from keenbench.freshstream.taxonomy import (
+from keenbench.news.taxonomy import (
     TOPICAL_DOMAINS,
     trends_category_to_topical_domain,
 )

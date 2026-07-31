@@ -5,7 +5,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from keenbench.companyfill.canon import registrable_domain, strip_legal
+from keenbench.finance.canon import registrable_domain, strip_legal
 from keenbench.findallmcp.harness import BackendSpec, run_task
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import OpenRouterClient

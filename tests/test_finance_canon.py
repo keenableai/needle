@@ -1,6 +1,6 @@
 import pytest
 
-from keenbench.companyfill.canon import (
+from keenbench.finance.canon import (
     FIELD_TYPES,
     gold_in_text,
     registrable_domain,

@@ -1,4 +1,4 @@
-from keenbench.companyfill.registries import (
+from keenbench.finance.registries import (
     GleifClient,
     SecClient,
     WikidataClient,

@@ -44,7 +44,7 @@ SEED_SOURCES: tuple[SeedSource, ...] = _load_packaged_default()
 
 
 HTTP_TIMEOUT = httpx.Timeout(20.0, connect=10.0)
-USER_AGENT = "keenbench-freshstream/0.1 (+https://github.com/keenableai/keenbench)"
+USER_AGENT = "keenbench-news/0.1 (+https://github.com/keenableai/keenbench)"
 
 NS = {
     "atom": "http://www.w3.org/2005/Atom",

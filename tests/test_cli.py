@@ -3,8 +3,8 @@ from datetime import UTC, datetime
 
 import pytest
 
-from keenbench.freshstream import cli as freshstream_cli
-from keenbench.rarestream import cli as rarestream_cli
+from keenbench.agentic_rare import cli as agentic_rare_cli
+from keenbench.news import cli as news_cli
 from keenbench.shared import cli as shared_cli
 from keenbench.shared import llm as llm_module
 from keenbench.shared.llm import LLMClientError, OpenRouterClient, _content_to_text
@@ -13,33 +13,33 @@ from keenbench.shared.search import factory as search_factory
 
 def test_run_rejects_unsupported_source():
     with pytest.raises(SystemExit):
-        freshstream_cli.Freshstream().generate(source="bogus")
+        news_cli.News().generate(source="bogus")
 
 
 def test_trending_rejects_rss_only_flags():
     with pytest.raises(SystemExit):
-        freshstream_cli.Freshstream().generate(source="trending", feeds="x.toml")
+        news_cli.News().generate(source="trending", feeds="x.toml")
 
 
 def test_rss_rejects_trends_only_flags():
     with pytest.raises(SystemExit):
-        freshstream_cli.Freshstream().generate(source="rss", max_trends=5)
+        news_cli.News().generate(source="rss", max_trends=5)
 
 
 def test_trending_rejects_rss_only_flag_at_default_value():
     with pytest.raises(SystemExit):
-        freshstream_cli.Freshstream().generate(source="trending", min_candidates=30)
+        news_cli.News().generate(source="trending", min_candidates=30)
 
 
 def test_rss_rejects_trends_only_flag_at_default_value():
     with pytest.raises(SystemExit):
-        freshstream_cli.Freshstream().generate(source="rss", geos="us-all")
+        news_cli.News().generate(source="rss", geos="us-all")
 
 
 def test_run_rejects_bad_feeds_file(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     with pytest.raises(SystemExit):
-        freshstream_cli.Freshstream().generate(feeds=str(tmp_path / "does-not-exist.toml"))
+        news_cli.News().generate(feeds=str(tmp_path / "does-not-exist.toml"))
 
 
 def test_resolve_seed_explicit_passthrough_and_time_varying():
@@ -151,7 +151,7 @@ async def test_chat_raises_on_empty_response(monkeypatch):
     assert exc_info.value.error_type == "empty_response"
 
 
-def test_freshstream_run_passes_keenable_api_key(monkeypatch, tmp_path):
+def test_news_run_passes_keenable_api_key(monkeypatch, tmp_path):
     qfile = tmp_path / "q.jsonl"
     qfile.write_text("mayor of austin\n")
     monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
@@ -171,61 +171,59 @@ def test_freshstream_run_passes_keenable_api_key(monkeypatch, tmp_path):
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(shared_cli, "run_rbp", fake_run_rbp)
-    freshstream_cli.Freshstream().run(
-        queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json")
-    )
+    news_cli.News().run(queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json"))
     assert created == {"api_key": "kb-key", "mode": "pro"}
 
 
-def test_freshstream_run_load_rows_and_per_query_today(tmp_path):
+def test_news_run_load_rows_and_per_query_today(tmp_path):
     f = tmp_path / "q.jsonl"
     f.write_text(
         '{"query_text": "a", "topical_domain": "tech", "hour_ts": "2026-07-01T14:00:00+00:00"}\n'
         "plain text query\n"
     )
-    rows = freshstream_cli._load_query_rows(str(f))
+    rows = news_cli._load_query_rows(str(f))
     assert rows[0]["topical_domain"] == "tech"
-    assert freshstream_cli._today_for_row(rows[0], "1999-01-01") == "2026-07-01"
-    assert freshstream_cli._today_for_row(rows[1], "1999-01-01") == "1999-01-01"
+    assert news_cli._today_for_row(rows[0], "1999-01-01") == "2026-07-01"
+    assert news_cli._today_for_row(rows[1], "1999-01-01") == "1999-01-01"
 
 
-def test_freshstream_run_loader_keeps_scalar_lines_and_rejects_missing_file(tmp_path):
+def test_news_run_loader_keeps_scalar_lines_and_rejects_missing_file(tmp_path):
     f = tmp_path / "q.jsonl"
     f.write_text("1984\n")
-    assert freshstream_cli._load_query_rows(str(f))[0]["query_text"] == "1984"
+    assert news_cli._load_query_rows(str(f))[0]["query_text"] == "1984"
     with pytest.raises(SystemExit):
-        freshstream_cli._load_query_rows(str(tmp_path / "missing.jsonl"))
+        news_cli._load_query_rows(str(tmp_path / "missing.jsonl"))
 
 
-def test_freshstream_run_rejects_unknown_sample(tmp_path, monkeypatch):
+def test_news_run_rejects_unknown_sample(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "x")
     f = tmp_path / "q.jsonl"
     f.write_text("a\nb\n")
     with pytest.raises(SystemExit):
-        freshstream_cli.Freshstream().run(queries=str(f), limit=1, sample="bogus")
+        news_cli.News().run(queries=str(f), limit=1, sample="bogus")
 
 
-def test_rarestream_generate_writes_sample(tmp_path):
+def test_agentic_rare_generate_writes_sample(tmp_path):
     src = tmp_path / "filtered.jsonl"
     src.write_text(
         '{"query_text": "a", "length_bucket": "medium"}\n'
         '{"query_text": "b", "length_bucket": "long"}\n'
     )
     out = tmp_path / "o.jsonl"
-    rarestream_cli.Rarestream().generate(queries=str(src), out=str(out), limit=1, sample="head")
+    agentic_rare_cli.AgenticRare().generate(queries=str(src), out=str(out), limit=1, sample="head")
     lines = [ln for ln in out.read_text().splitlines() if ln.strip()]
     assert len(lines) == 1
 
 
-def test_rarestream_run_requires_openrouter_key(tmp_path, monkeypatch):
+def test_agentic_rare_run_requires_openrouter_key(tmp_path, monkeypatch):
     monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
     f = tmp_path / "q.jsonl"
     f.write_text('{"query_text": "a"}\n')
     with pytest.raises(SystemExit):
-        rarestream_cli.Rarestream().run(queries=str(f))
+        agentic_rare_cli.AgenticRare().run(queries=str(f))
 
 
-def test_rarestream_run_evaluates(tmp_path, monkeypatch):
+def test_agentic_rare_run_evaluates(tmp_path, monkeypatch):
     monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
     monkeypatch.setenv("KEENABLE_API_KEY", "kb-key")
     f = tmp_path / "q.jsonl"
@@ -244,5 +242,5 @@ def test_rarestream_run_evaluates(tmp_path, monkeypatch):
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(shared_cli, "run_rbp", fake_run_rbp)
     out = tmp_path / "r.json"
-    rarestream_cli.Rarestream().run(queries=str(f), engines="keenable", out=str(out))
+    agentic_rare_cli.AgenticRare().run(queries=str(f), engines="keenable", out=str(out))
     assert json.loads(out.read_text())["num_queries"] == 1

@@ -1,7 +1,7 @@
 import sys
 from datetime import UTC, datetime
 
-from keenbench.rarestream.io import iter_rows, resolve_dataset, write_rows
+from keenbench.agentic_rare.io import iter_rows, resolve_dataset, write_rows
 from keenbench.shared.cli import run_rbp_eval, sample_or_exit
 from keenbench.shared.rankeval import EvalQuery
 
@@ -18,7 +18,7 @@ def _load_rows(queries: str | None, dataset: str, filtered_path: str) -> list[di
     return list(iter_rows(resolve_dataset(queries, dataset, filtered_path)))
 
 
-class Rarestream:
+class AgenticRare:
     def generate(
         self,
         out: str = "-",
@@ -32,7 +32,7 @@ class Rarestream:
         rows = _load_rows(queries, dataset, filtered_path)
         rows = sample_or_exit(rows, limit, seed, strategy=sample, key=STRATIFY_KEY)
         write_rows(rows, out)
-        print(f"rarestream: {len(rows)} queries ({sample})", file=sys.stderr)
+        print(f"agentic_rare: {len(rows)} queries ({sample})", file=sys.stderr)
 
     def run(
         self,
@@ -57,7 +57,7 @@ class Rarestream:
         today = datetime.now(UTC).strftime("%Y-%m-%d")
         eval_queries = [EvalQuery(text=_query_text(r), today=today) for r in rows]
         run_rbp_eval(
-            "rarestream",
+            "agentic_rare",
             eval_queries,
             engines,
             out,

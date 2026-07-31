@@ -5,12 +5,12 @@ import sys
 from collections import Counter
 from datetime import UTC, datetime
 
-from keenbench.companyfill.canon import FIELD_TYPES
-from keenbench.companyfill.generate import GenStats, run_generate
-from keenbench.companyfill.models import QUARTERLY_FIELDS
-from keenbench.companyfill.registries import GleifClient, SecClient, WikidataClient
-from keenbench.companyfill.score import GoldQuery, run_answers
-from keenbench.companyfill.sources import EdgarClient
+from keenbench.finance.canon import FIELD_TYPES
+from keenbench.finance.generate import GenStats, run_generate
+from keenbench.finance.models import QUARTERLY_FIELDS
+from keenbench.finance.registries import GleifClient, SecClient, WikidataClient
+from keenbench.finance.score import GoldQuery, run_answers
+from keenbench.finance.sources import EdgarClient
 from keenbench.shared.cli import (
     as_obj,
     build_clients_or_exit,
@@ -22,7 +22,7 @@ from keenbench.shared.cli import (
 from keenbench.shared.io import write_json, write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_judge_model, resolve_llm_model
 
-KNOWN_SUITES = ("companyfill", "filings", "filingdoc")
+KNOWN_SUITES = ("finance", "filings", "filingdoc")
 
 
 def _gold_ok(gold: dict) -> bool:
@@ -54,10 +54,10 @@ def _gold_query(row: dict) -> GoldQuery:
     )
 
 
-class Companyfill:
+class Finance:
     def generate(
         self,
-        suites: str | tuple[str, ...] = "companyfill,filings,filingdoc",
+        suites: str | tuple[str, ...] = "finance,filings,filingdoc",
         out: str = "-",
         max_companies: int = 100,
         use_gleif: bool = False,
@@ -93,12 +93,10 @@ class Companyfill:
 
         concurrency = max(1, registry_concurrency)
         sec = SecClient(max_concurrency=concurrency)
-        wikidata = (
-            WikidataClient(max_concurrency=concurrency) if "companyfill" in suite_names else None
-        )
+        wikidata = WikidataClient(max_concurrency=concurrency) if "finance" in suite_names else None
         gleif = (
             GleifClient(max_concurrency=concurrency)
-            if use_gleif and "companyfill" in suite_names
+            if use_gleif and "finance" in suite_names
             else None
         )
         edgar = EdgarClient(max_concurrency=concurrency) if "filingdoc" in suite_names else None
@@ -154,7 +152,7 @@ class Companyfill:
         by_bucket = Counter(row["query_origin"]["bucket"] for row in rows)
         buckets = ", ".join(f"{b}={n}" for b, n in sorted(by_bucket.items())) or "none"
         print(
-            f"companyfill: {stats.rows} queries from {stats.companies} companies "
+            f"finance: {stats.rows} queries from {stats.companies} companies "
             f"({buckets}; {stats.resolved} resolved in wikidata; "
             f"filings={stats.filings_rows} (facts_missing={stats.facts_missing}); "
             f"filingdoc={stats.filingdoc_rows} of {stats.doc_candidates} candidates "
@@ -179,7 +177,7 @@ class Companyfill:
         judge_model: str | None = None,
         judge_concurrency: int = 8,
     ) -> None:
-        rows = load_gold_rows(queries, bench="companyfill", gold_ok=_gold_ok)
+        rows = load_gold_rows(queries, bench="finance", gold_ok=_gold_ok)
         if not rows:
             raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
         rows = sample_or_exit(
@@ -228,7 +226,7 @@ class Companyfill:
 
         judged = f", judge={model}" if model else ""
         print(
-            f"\ncompanyfill: {report['num_queries']} queries, top-{num_results}{judged}",
+            f"\nfinance: {report['num_queries']} queries, top-{num_results}{judged}",
             file=sys.stderr,
         )
         for name, e in report["engines"].items():

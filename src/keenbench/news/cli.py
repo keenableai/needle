@@ -5,9 +5,9 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-from keenbench.freshstream.feeds import SEED_SOURCES, load_sources_from_toml
-from keenbench.freshstream.pipeline import run_rss, run_trends
-from keenbench.freshstream.trends import GoogleTrendsRssProvider, parse_geos
+from keenbench.news.feeds import SEED_SOURCES, load_sources_from_toml
+from keenbench.news.pipeline import run_rss, run_trends
+from keenbench.news.trends import GoogleTrendsRssProvider, parse_geos
 from keenbench.shared.cli import run_rbp_eval, sample_or_exit
 from keenbench.shared.io import write_jsonl
 from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
@@ -57,7 +57,7 @@ def _today_for_row(row: dict, fallback: str) -> str:
     return fallback
 
 
-class Freshstream:
+class News:
     def generate(
         self,
         source: str = "rss",
@@ -173,7 +173,7 @@ class Freshstream:
         else:
             source_summary = f"{stats.candidates} candidates across {stats.feeds} feeds"
         print(
-            f"freshstream: {stats.projected} queries from {source_summary} "
+            f"news: {stats.projected} queries from {source_summary} "
             f"({stats.no_news_event} evergreen, {stats.llm_errors} llm errors, "
             f"{stats.duplicates} dupes)",
             file=sys.stderr,
@@ -202,7 +202,7 @@ class Freshstream:
             EvalQuery(text=r["query_text"], today=_today_for_row(r, fallback_today)) for r in rows
         ]
         run_rbp_eval(
-            "freshstream",
+            "news",
             eval_queries,
             engines,
             out,
