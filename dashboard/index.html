@@ -1087,12 +1087,12 @@ function renderStandings(rows) {
     const lp = [outer[0] + ((outer[0] - cx) / dl) * 52, outer[1] + ((outer[1] - cy) / dl) * 52];
     const al = Math.hypot(tgt[0] - lp[0], tgt[1] - lp[1]);
     const u = [(tgt[0] - lp[0]) / al, (tgt[1] - lp[1]) / al];
-    const off = Math.abs(u[0]) * 34 + Math.abs(u[1]) * 10 + 4;
+    const off = Math.abs(u[0]) * 48 + Math.abs(u[1]) * 14 + 4;
     const gg = el("g", {});
     gg.appendChild(el("line", { x1: lp[0] + u[0] * off, y1: lp[1] + u[1] * off, x2: tgt[0], y2: tgt[1],
       stroke: "#d64545", "stroke-width": 1.2, "marker-end": "url(#st-arrow)" }));
-    gg.appendChild(el("text", { x: lp[0], y: lp[1] + 3, class: "st-gap",
-      style: "font-size:11px" }, "THE GAP"));
+    gg.appendChild(el("text", { x: lp[0], y: lp[1] + 5, class: "st-gap",
+      style: "font-size:16px" }, "THE GAP"));
     gg.appendChild(el("title", {}, "the hatched band: the share of ultimate that no single engine reaches"));
     svg.appendChild(gg);
   }
