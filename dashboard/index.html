@@ -992,8 +992,8 @@ function renderStandings(rows) {
       ...x.shares.map((s) => s ? fmtPct(s.share) : "–")]),
   ];
 
-  const W = 620;
-  const R = 150;
+  const W = 740;
+  const R = 200;
   const cx = W / 2, cy = R + 36;
   const ang = (i) => -Math.PI / 2 + (2 * Math.PI * i) / nAx;
   const pt = (i, v) => [cx + R * v * Math.cos(ang(i)), cy + R * v * Math.sin(ang(i))];
