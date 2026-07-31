@@ -201,8 +201,8 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .overlap-matrix, #fields-table, #history-table, .uniq-table, #latency-summary,
   #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
   #app-metrics, #app-engines, #app-data { overflow-x: auto; }
+  #card-standings { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
   #standings { padding: 4px 0 8px; overflow-x: auto; }
-  #standings svg { min-width: 760px; }
   #standings .series { transition: opacity 0.18s ease; }
   #standings .series.cold { opacity: 0.5; }
   #standings svg.dim .series:not(.hot) { opacity: 0.1; }
@@ -992,7 +992,7 @@ function renderStandings(rows) {
       ...x.shares.map((s) => s ? fmtPct(s.share) : "–")]),
   ];
 
-  const W = Math.max(card.clientWidth - 32, 760);
+  const W = 620;
   const R = 150;
   const cx = W / 2, cy = R + 36;
   const ang = (i) => -Math.PI / 2 + (2 * Math.PI * i) / nAx;
@@ -1050,7 +1050,7 @@ function renderStandings(rows) {
   for (const gv of [0.25, 0.5, 0.75]) {
     svg.appendChild(el("text", { x: cx + 4, y: cy - R * gv - 3, class: "axis-text" }, fmtPct(gv)));
   }
-  const ultLabel = el("text", { x: W - 8, y: 18, "text-anchor": "end", class: "st-ult" });
+  const ultLabel = el("text", { x: 10, y: 32, "text-anchor": "start", class: "st-ult" });
   ultLabel.appendChild(el("tspan", { class: "b" }, "ultimate"));
   ultLabel.appendChild(el("tspan", {}, " — all engines pooled: the outer ring (100%)"));
   svg.appendChild(ultLabel);
