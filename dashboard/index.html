@@ -227,8 +227,9 @@ document.documentElement.dataset.theme = localStorage.theme ||
     width: 32px; min-width: 32px; height: 32px; padding: 0;
     border-radius: 3px; text-align: center; font-variant-numeric: tabular-nums;
   }
+  .uniq-table td, .uniq-table th { white-space: nowrap; padding: 6px 8px; }
   .uniq-table .bar-track {
-    display: inline-block; width: 140px; height: 8px; border-radius: 4px;
+    display: inline-block; width: 100px; height: 8px; border-radius: 4px;
     background: var(--grid); vertical-align: middle; margin-right: 8px;
   }
   .uniq-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
@@ -347,29 +348,25 @@ document.documentElement.dataset.theme = localStorage.theme ||
   </div>
 
   <h2 class="section-title" id="sec-overlap">Engine overlap</h2>
-  <div class="grid2">
-    <div class="card" id="card-overlap">
-      <h2>Shared result URLs (all time)</h2>
-      <div class="sub" id="overlap-sub"></div>
-      <div class="overlap-matrix" id="overlap-table"></div>
-    </div>
-    <div class="card" id="card-overlap3">
-      <h2>Queries sharing &ge;3 URLs (all time)</h2>
-      <div class="sub" id="overlap3-sub"></div>
-      <div class="overlap-matrix" id="overlap3-table"></div>
-    </div>
+  <div class="card" id="card-overlap">
+    <h2>Shared result URLs (all time)</h2>
+    <div class="sub" id="overlap-sub"></div>
+    <div class="overlap-matrix" id="overlap-table"></div>
   </div>
-  <div class="grid2">
-    <div class="card" id="card-lowshared">
-      <h2>Suspicious sharing (all time)</h2>
-      <div class="sub" id="lowshared-sub"></div>
-      <div class="overlap-matrix" id="lowshared-table"></div>
-    </div>
-    <div class="card" id="card-sharegraph">
-      <h2>Borrowing graph (all time)</h2>
-      <div class="sub" id="sharegraph-sub"></div>
-      <div id="sharegraph"></div>
-    </div>
+  <div class="card" id="card-overlap3">
+    <h2>Queries sharing &ge;3 URLs (all time)</h2>
+    <div class="sub" id="overlap3-sub"></div>
+    <div class="overlap-matrix" id="overlap3-table"></div>
+  </div>
+  <div class="card" id="card-lowshared">
+    <h2>Suspicious sharing (all time)</h2>
+    <div class="sub" id="lowshared-sub"></div>
+    <div class="overlap-matrix" id="lowshared-table"></div>
+  </div>
+  <div class="card" id="card-sharegraph">
+    <h2>Borrowing graph (all time)</h2>
+    <div class="sub" id="sharegraph-sub"></div>
+    <div id="sharegraph"></div>
   </div>
   <div class="grid2">
     <div class="card" id="card-uniqueness">
