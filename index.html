@@ -33,6 +33,8 @@ document.documentElement.dataset.theme = localStorage.theme ||
     --series-10: #9a5c14;
     --series-11: #a256c9;
     --series-12: #5f7d00;
+    --seg-track: #f0efeb;
+    --seg-thumb: #fcfcfb;
   }
   :root[data-theme="dark"] {
     color-scheme: dark;
@@ -57,6 +59,8 @@ document.documentElement.dataset.theme = localStorage.theme ||
     --series-10: #b0752c;
     --series-11: #b06fd4;
     --series-12: #8fa838;
+    --seg-track: #232322;
+    --seg-thumb: #3b3b38;
   }
   * { box-sizing: border-box; }
   body {
@@ -93,6 +97,29 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
 
   .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .lb-tabs {
+    position: relative; display: flex;
+    background: var(--seg-track); border-radius: 8px; padding: 3px;
+  }
+  .lb-tabs button {
+    position: relative; z-index: 1; flex: 1 1 0; min-width: 0;
+    font: inherit; font-size: 13px; font-weight: 500;
+    padding: 6px 8px; cursor: pointer;
+    color: var(--text-secondary); background: none; border: none; border-radius: 6px;
+    transition: color 0.15s ease;
+  }
+  .lb-tabs button:hover { color: var(--text-primary); }
+  .lb-tabs button.active { color: var(--text-primary); }
+  #lb-ind {
+    position: absolute; top: 0; left: 0;
+    background: var(--seg-thumb); border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.06);
+    transition: transform 0.18s ease, width 0.18s ease;
+  }
+  .lb-panel { display: none; }
+  .lb-panel.active { display: block; }
+  .lb-panel h2 { display: none; }
+  .lb-panel .sub { margin: 10px 0 6px; }
   .grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   @media (max-width: 720px) { .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); } }
   .section-title {
@@ -221,11 +248,11 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .overlap-matrix { padding: 10px 0 14px; }
   .overlap-matrix table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; font-size: 11px; }
   .overlap-matrix th, .overlap-matrix td { border-bottom: none; }
-  .overlap-matrix td:first-child { white-space: nowrap; padding: 0 6px 0 2px; }
+  .overlap-matrix td:first-child { white-space: nowrap; padding: 0 4px 0 2px; }
   .overlap-matrix th.col { vertical-align: bottom; text-align: center; padding: 2px 0; font-weight: 500; }
   .overlap-matrix th.col span { writing-mode: vertical-rl; rotate: 180deg; }
   .overlap-matrix td.overlap-cell {
-    width: 32px; min-width: 32px; height: 32px; padding: 0;
+    width: 26px; min-width: 26px; height: 26px; padding: 0;
     border-radius: 3px; text-align: center; font-variant-numeric: tabular-nums;
   }
   .uniq-table td, .uniq-table th { white-space: nowrap; padding: 6px 8px; }
@@ -244,7 +271,9 @@ document.documentElement.dataset.theme = localStorage.theme ||
   #sharegraph .sg-name { fill: var(--text-primary); font-size: 12px; font-weight: 500; }
 
   @media print {
-    .header-actions, #toc, .runbar, #card-runs, #history-details { display: none; }
+    .header-actions, #toc, .runbar, #card-runs, #history-details, .lb-tabs { display: none; }
+    .lb-panel { display: block; }
+    .lb-panel h2 { display: block; }
     .card { break-inside: avoid; }
     .card svg { max-width: 100%; height: auto; }
   }
@@ -296,28 +325,36 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <div id="standings"></div>
   </div>
 
-  <div class="grid2">
-    <div class="card">
+  <div class="card" id="card-leaderboards">
+    <div class="lb-tabs" id="lb-tabs" role="tablist" aria-label="Bench leaderboards">
+      <button role="tab" aria-selected="true" class="active" data-panel="card-lb-fresh">news</button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-company">finance</button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-scholar">scholar</button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-rare">agentic_rare</button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-legal">legal</button>
+      <div id="lb-ind" aria-hidden="true"></div>
+    </div>
+    <div class="lb-panel active" id="card-lb-fresh" role="tabpanel">
       <h2>news — 7-day mean</h2>
       <div class="sub" id="lb-fresh-sub"></div>
       <div id="lb-fresh"></div>
     </div>
-    <div class="card">
+    <div class="lb-panel" id="card-lb-company" role="tabpanel">
       <h2>finance — 7-day mean</h2>
       <div class="sub" id="lb-company-sub"></div>
       <div id="lb-company"></div>
     </div>
-    <div class="card">
+    <div class="lb-panel" id="card-lb-scholar" role="tabpanel">
       <h2>scholar — 7-day mean</h2>
       <div class="sub" id="lb-scholar-sub"></div>
       <div id="lb-scholar"></div>
     </div>
-    <div class="card">
+    <div class="lb-panel" id="card-lb-rare" role="tabpanel">
       <h2>agentic_rare — 7-day mean</h2>
       <div class="sub" id="lb-rare-sub"></div>
       <div id="lb-rare"></div>
     </div>
-    <div class="card">
+    <div class="lb-panel" id="card-lb-legal" role="tabpanel">
       <h2>legal — 7-day mean</h2>
       <div class="sub" id="lb-legal-sub"></div>
       <div id="lb-legal"></div>
@@ -344,25 +381,29 @@ document.documentElement.dataset.theme = localStorage.theme ||
   </div>
 
   <h2 class="section-title" id="sec-overlap">Engine overlap</h2>
-  <div class="card" id="card-overlap">
-    <h2>Shared result URLs (all time)</h2>
-    <div class="sub" id="overlap-sub"></div>
-    <div class="overlap-matrix" id="overlap-table"></div>
+  <div class="grid2">
+    <div class="card" id="card-overlap">
+      <h2>Shared result URLs (all time)</h2>
+      <div class="sub" id="overlap-sub"></div>
+      <div class="overlap-matrix" id="overlap-table"></div>
+    </div>
+    <div class="card" id="card-overlap3">
+      <h2>Queries sharing &ge;3 URLs (all time)</h2>
+      <div class="sub" id="overlap3-sub"></div>
+      <div class="overlap-matrix" id="overlap3-table"></div>
+    </div>
   </div>
-  <div class="card" id="card-overlap3">
-    <h2>Queries sharing &ge;3 URLs (all time)</h2>
-    <div class="sub" id="overlap3-sub"></div>
-    <div class="overlap-matrix" id="overlap3-table"></div>
-  </div>
-  <div class="card" id="card-lowshared">
-    <h2>Suspicious sharing (all time)</h2>
-    <div class="sub" id="lowshared-sub"></div>
-    <div class="overlap-matrix" id="lowshared-table"></div>
-  </div>
-  <div class="card" id="card-sharegraph">
-    <h2>Borrowing graph (all time)</h2>
-    <div class="sub" id="sharegraph-sub"></div>
-    <div id="sharegraph"></div>
+  <div class="grid2">
+    <div class="card" id="card-lowshared">
+      <h2>Suspicious sharing (all time)</h2>
+      <div class="sub" id="lowshared-sub"></div>
+      <div class="overlap-matrix" id="lowshared-table"></div>
+    </div>
+    <div class="card" id="card-sharegraph">
+      <h2>Borrowing graph (all time)</h2>
+      <div class="sub" id="sharegraph-sub"></div>
+      <div id="sharegraph"></div>
+    </div>
   </div>
   <div class="grid2">
     <div class="card" id="card-uniqueness">
@@ -1286,6 +1327,7 @@ function renderHistoryTable(rows) {
 const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
 const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 
+let ENGINE_FAMILY = new Map();
 const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
@@ -1355,6 +1397,9 @@ function renderOverlap(rows, uniqAgg) {
     pairs.set(pairKey(r.a, r.b), agg);
   }
   const engines = ENGINES.filter((e) => rows.some((r) => r.a === e || r.b === e));
+  const rank = new Map(engines.map((e, i) => [e, i]));
+  const famRank = (e) => rank.get(ENGINE_FAMILY.get(e) ?? e) ?? rank.get(e);
+  engines.sort((a, b) => famRank(a) - famRank(b));
   const emptyMsg = "No overlap data yet — accumulates from hourly runs.";
   if (engines.length < 2) {
     jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
@@ -1458,13 +1503,13 @@ function renderSharingGraph(holder, engines, pairs, uniqAgg) {
     if (Math.floor(((s + 1) * isolated.length) / total) > ii) ring.push(isolated[ii++]);
     else ring.push(nodes[ci++]);
   }
-  const W = 460, H = 330, cx = W / 2, cy = H / 2;
+  const W = 460, H = 330, cx = W / 2, cy = H / 2, PAD = 20;
   const R = H / 2 - 50;
   const pos = new Map(ring.map((e, i) => {
     const ang = -Math.PI / 2 + (i * 2 * Math.PI) / ring.length;
     return [e, { x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang), ang }];
   }));
-  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  const svg = el("svg", { viewBox: `${-PAD} 0 ${W + 2 * PAD} ${H}`, role: "img" });
   const arrowAt = (tipX, tipY, ux, uy) => {
     const bx = tipX - ux * 13, by = tipY - uy * 13;
     return el("path", {
@@ -1881,8 +1926,8 @@ function buildMarkdown() {
   const lines = ["# keenbench — search engine benchmarks"];
   const updated = document.getElementById("updated").textContent;
   if (updated) lines.push("", updated);
-  for (const card of document.querySelectorAll(".wrap .card")) {
-    if (card.closest("#card-runs")) continue;
+  for (const card of document.querySelectorAll(".wrap .card, .wrap .lb-panel")) {
+    if (card.closest("#card-runs") || card.querySelector(".lb-panel")) continue;
     const table = card.querySelector("table");
     const rows = table
       ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
@@ -1912,6 +1957,28 @@ window.addEventListener("afterprint", () => {
   document.documentElement.dataset.theme = themeBeforePrint;
 });
 
+const lbTabButtons = document.querySelectorAll("#lb-tabs button");
+function moveLbIndicator() {
+  const btn = document.querySelector("#lb-tabs button.active");
+  const ind = document.getElementById("lb-ind");
+  ind.style.width = `${btn.offsetWidth}px`;
+  ind.style.height = `${btn.offsetHeight}px`;
+  ind.style.transform = `translate(${btn.offsetLeft}px, ${btn.offsetTop}px)`;
+}
+for (const btn of lbTabButtons) {
+  btn.addEventListener("click", () => {
+    for (const b of lbTabButtons) {
+      b.classList.toggle("active", b === btn);
+      b.setAttribute("aria-selected", String(b === btn));
+    }
+    for (const p of document.querySelectorAll(".lb-panel"))
+      p.classList.toggle("active", p.id === btn.dataset.panel);
+    moveLbIndicator();
+  });
+}
+moveLbIndicator();
+window.addEventListener("resize", moveLbIndicator);
+
 document.getElementById("theme-toggle").addEventListener("click", () => {
   const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
   document.documentElement.dataset.theme = next;
@@ -1927,12 +1994,14 @@ async function main() {
       .then((r) => (r.ok ? r.text() : ""))
       .catch(() => "")
       .then((text) => text.split("\n").filter(Boolean).map((l) => JSON.parse(l)));
-  const [histRows, overlapRows, uniquenessRows, latestFinance] = await Promise.all([
+  const [histRows, overlapRows, uniquenessRows, latestFinance, families] = await Promise.all([
     fetchRows("data/history.jsonl"),
     fetchRows("data/overlap.jsonl"),
     fetchRows("data/uniqueness.jsonl"),
     fetchJson("data/latest_finance.json").catch(() => null),
+    fetchJson("data/families.json").catch(() => ({})),
   ]);
+  ENGINE_FAMILY = new Map(Object.entries(families));
   for (const r of histRows) r.bench = LEGACY_BENCH[r.bench] || r.bench;
   history = histRows.filter((r) => r.bench !== "findallmcp" && !HIDDEN_ENGINES.has(r.engine));
   registerEngines(history.map((r) => r.engine));
