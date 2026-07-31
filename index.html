@@ -1931,9 +1931,7 @@ async function main() {
     fetchRows("data/history.jsonl"),
     fetchRows("data/overlap.jsonl"),
     fetchRows("data/uniqueness.jsonl"),
-    fetchJson("data/latest_finance.json")
-      .catch(() => fetchJson("data/latest_companyfill.json"))
-      .catch(() => null),
+    fetchJson("data/latest_finance.json").catch(() => null),
   ]);
   for (const r of histRows) r.bench = LEGACY_BENCH[r.bench] || r.bench;
   history = histRows.filter((r) => r.bench !== "findallmcp" && !HIDDEN_ENGINES.has(r.engine));
