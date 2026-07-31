@@ -234,7 +234,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     background: var(--grid); vertical-align: middle; margin-right: 8px;
   }
   .uniq-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
-  #sharegraph svg { max-width: 460px; margin: 0 auto; overflow: visible; }
+  #sharegraph svg { max-width: 460px; margin: 0 auto; }
   #sharegraph .sg-edge { stroke: var(--text-muted); }
   #sharegraph .sg-arrow { fill: var(--text-primary); }
   #sharegraph .sg-label {
@@ -1466,13 +1466,13 @@ function renderSharingGraph(holder, engines, pairs, uniqAgg) {
     if (Math.floor(((s + 1) * isolated.length) / total) > ii) ring.push(isolated[ii++]);
     else ring.push(nodes[ci++]);
   }
-  const W = 460, H = 330, cx = W / 2, cy = H / 2;
+  const W = 460, H = 330, cx = W / 2, cy = H / 2, PAD = 20;
   const R = H / 2 - 50;
   const pos = new Map(ring.map((e, i) => {
     const ang = -Math.PI / 2 + (i * 2 * Math.PI) / ring.length;
     return [e, { x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang), ang }];
   }));
-  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  const svg = el("svg", { viewBox: `${-PAD} 0 ${W + 2 * PAD} ${H}`, role: "img" });
   const arrowAt = (tipX, tipY, ux, uy) => {
     const bx = tipX - ux * 13, by = tipY - uy * 13;
     return el("path", {
