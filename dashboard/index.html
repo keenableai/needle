@@ -1290,11 +1290,7 @@ function renderHistoryTable(rows) {
 const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
 const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 
-const ENGINE_FAMILY = new Map([
-  ["keenable-realtime", "keenable"],
-  ["exa-instant", "exa"],
-  ["parallel-turbo", "parallel"],
-]);
+let ENGINE_FAMILY = new Map();
 const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
@@ -1939,14 +1935,16 @@ async function main() {
       .then((r) => (r.ok ? r.text() : ""))
       .catch(() => "")
       .then((text) => text.split("\n").filter(Boolean).map((l) => JSON.parse(l)));
-  const [histRows, overlapRows, uniquenessRows, latestFinance] = await Promise.all([
+  const [histRows, overlapRows, uniquenessRows, latestFinance, families] = await Promise.all([
     fetchRows("data/history.jsonl"),
     fetchRows("data/overlap.jsonl"),
     fetchRows("data/uniqueness.jsonl"),
     fetchJson("data/latest_finance.json")
       .catch(() => fetchJson("data/latest_companyfill.json"))
       .catch(() => null),
+    fetchJson("data/families.json").catch(() => ({})),
   ]);
+  ENGINE_FAMILY = new Map(Object.entries(families));
   for (const r of histRows) r.bench = LEGACY_BENCH[r.bench] || r.bench;
   history = histRows.filter((r) => r.bench !== "findallmcp" && !HIDDEN_ENGINES.has(r.engine));
   registerEngines(history.map((r) => r.engine));
