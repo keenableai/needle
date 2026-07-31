@@ -15,7 +15,8 @@ the filtered artifact and evaluates it like news.
 - `dashboard/index.html` — the whole dashboard: one self-contained static
   page, vanilla JS, no build step; deployed to gh-pages by the bench workflow.
 - Dashboard data: `data/history.jsonl`, `overlap.jsonl`, `uniqueness.jsonl`,
-  `latest_*.json`, and `runs.json`, published by `scripts/publish_bench.py`;
+  `latest_*.json`, `runs.json`, and `families.json`, published by
+  `scripts/publish_bench.py`;
   full per-run artifacts (`rbp.json`, `recall.json`) live on the HF dataset
   `keenable-ai/keenbench-results` and are fetched directly from there.
 - Per-result report fields (`title`, `url`, `snippet`, `rating`, `penalized`,

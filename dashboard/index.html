@@ -1362,7 +1362,7 @@ function renderOverlap(rows, uniqAgg) {
   const engines = ENGINES.filter((e) => rows.some((r) => r.a === e || r.b === e));
   const rank = new Map(engines.map((e, i) => [e, i]));
   const famRank = (e) => rank.get(ENGINE_FAMILY.get(e) ?? e) ?? rank.get(e);
-  engines.sort((a, b) => famRank(a) - famRank(b) || rank.get(a) - rank.get(b));
+  engines.sort((a, b) => famRank(a) - famRank(b));
   const emptyMsg = "No overlap data yet — accumulates from hourly runs.";
   if (engines.length < 2) {
     jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
