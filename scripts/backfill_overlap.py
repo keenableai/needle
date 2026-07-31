@@ -11,12 +11,11 @@ from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
 DEFAULT_DATASET = "keenable-ai/keenbench-results"
 ARTIFACTS = (
-    "rbp.json",
-    "recall.json",
-    "agentic_rare.json",
-    "rarestream.json",
-    "scholar.json",
-    "legal.json",
+    ("rbp.json",),
+    ("recall.json",),
+    ("agentic_rare.json", "rarestream.json"),
+    ("scholar.json",),
+    ("legal.json",),
 )
 
 
@@ -65,8 +64,9 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
             if not (want_overlap or want_uniqueness) or run["ts"] < cutoff:
                 continue
             n_runs += 1
-            for artifact in ARTIFACTS:
-                if artifact not in run["artifacts"]:
+            for group in ARTIFACTS:
+                artifact = next((a for a in group if a in run["artifacts"]), None)
+                if artifact is None:
                     continue
                 resp = client.get(f"{runs_base}/{run['id']}/{artifact}")
                 resp.raise_for_status()
