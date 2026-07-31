@@ -1290,6 +1290,11 @@ function renderHistoryTable(rows) {
 const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
 const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 
+const ENGINE_FAMILY = new Map([
+  ["keenable-realtime", "keenable"],
+  ["exa-instant", "exa"],
+  ["parallel-turbo", "parallel"],
+]);
 const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
@@ -1359,6 +1364,9 @@ function renderOverlap(rows, uniqAgg) {
     pairs.set(pairKey(r.a, r.b), agg);
   }
   const engines = ENGINES.filter((e) => rows.some((r) => r.a === e || r.b === e));
+  const rank = new Map(engines.map((e, i) => [e, i]));
+  const famRank = (e) => rank.get(ENGINE_FAMILY.get(e) ?? e) ?? rank.get(e);
+  engines.sort((a, b) => famRank(a) - famRank(b) || rank.get(a) - rank.get(b));
   const emptyMsg = "No overlap data yet — accumulates from hourly runs.";
   if (engines.length < 2) {
     jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
