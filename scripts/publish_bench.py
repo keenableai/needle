@@ -6,7 +6,7 @@ import fire
 
 from keenbench.scholar.generate import QUERY_BUCKETS
 from keenbench.shared.io import append_jsonl, write_json, write_jsonl
-from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
+from keenbench.shared.overlap import FAMILIES, TS_FMT, overlap_rows, uniqueness_rows
 
 
 def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
@@ -170,6 +170,7 @@ def publish(
     run_id = ts.replace(":", "")
     data = Path(site) / "data"
     data.mkdir(parents=True, exist_ok=True)
+    write_json(FAMILIES, str(data / "families.json"))
     run_dir = Path(runs_out) / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 
