@@ -992,8 +992,8 @@ function renderStandings(rows) {
       ...x.shares.map((s) => s ? fmtPct(s.share) : "–")]),
   ];
 
-  const W = 740;
-  const R = 200;
+  const W = 860;
+  const R = 240;
   const cx = W / 2, cy = R + 36;
   const ang = (i) => -Math.PI / 2 + (2 * Math.PI * i) / nAx;
   const pt = (i, v) => [cx + R * v * Math.cos(ang(i)), cy + R * v * Math.sin(ang(i))];
@@ -1084,7 +1084,7 @@ function renderStandings(rows) {
     const outer = nb == null ? pt(gi, 1) : mid(pt(gi, 1), pt(nb, 1));
     const tgt = mid(inner, outer);
     const dl = Math.hypot(outer[0] - cx, outer[1] - cy);
-    const lp = [outer[0] + ((outer[0] - cx) / dl) * 34, outer[1] + ((outer[1] - cy) / dl) * 34];
+    const lp = [outer[0] + ((outer[0] - cx) / dl) * 52, outer[1] + ((outer[1] - cy) / dl) * 52];
     const al = Math.hypot(tgt[0] - lp[0], tgt[1] - lp[1]);
     const u = [(tgt[0] - lp[0]) / al, (tgt[1] - lp[1]) / al];
     const off = Math.abs(u[0]) * 34 + Math.abs(u[1]) * 10 + 4;
