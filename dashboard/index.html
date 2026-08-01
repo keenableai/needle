@@ -680,6 +680,21 @@ function seriesFor(bench, metric, rows) {
 
 const WINDOW_MS = 6 * 3600e3;
 const LATENCY_WINDOW_MS = 24 * 3600e3;
+const ROLLING_MS = 7 * 24 * 3600e3;
+const ROLLING_NOTE = `${ROLLING_MS / (24 * 3600e3)}-day rolling mean`;
+
+function rollingMean(series) {
+  const out = {};
+  for (const e of ENGINES) {
+    const pts = series[e], ts = pts.map((p) => p.t.getTime());
+    out[e] = pts.map((p, i) => {
+      let sum = 0, n = 0;
+      for (let j = i; j >= 0 && ts[i] - ts[j] <= ROLLING_MS; j--) { sum += pts[j].v; n++; }
+      return { t: p.t, v: sum / n };
+    });
+  }
+  return out;
+}
 
 function rbpSeries(rows) {
   const out = {};
@@ -699,7 +714,9 @@ function rbpSeries(rows) {
     buckets.set(b, agg);
   }
   for (const [e, buckets] of byEngine) {
-    out[e] = [...buckets].map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
+    out[e] = [...buckets]
+      .sort(([a], [b]) => a - b)
+      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
   }
   return out;
 }
@@ -1842,39 +1859,48 @@ async function initRunBrowser() {
   renderRunDetail(runs);
 }
 
+function drawSlice(cardId, series, opts) {
+  const card = document.getElementById(cardId);
+  const sub = card.querySelector(".sub");
+  sub.dataset.base ??= sub.textContent;
+  sub.textContent = `${sub.dataset.base}; ${ROLLING_NOTE}`;
+  drawChart(card, rollingMean(series),
+    { domain: [0, 1], ticks: [0, 0.5, 1], ...opts, label: `${opts.label}, ${ROLLING_NOTE}` });
+}
+
 function drawCharts(rows) {
   renderStandings(rows);
   const ceiling = rows.filter((r) => r.bench === "news").at(-1)?.rbp_max;
-  drawChart(document.getElementById("card-rbp"), rbpSeries(rows),
+  drawSlice("card-rbp", rbpSeries(rows),
     { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine, 6-hour windows" });
   const rareCeiling = rows.filter((r) => r.bench === "agentic_rare").at(-1)?.rbp_max;
-  drawChart(document.getElementById("card-rbp-rare"), seriesFor("agentic_rare", "rbp", rows),
+  drawSlice("card-rbp-rare", seriesFor("agentic_rare", "rbp", rows),
     { domain: [0, (rareCeiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling: rareCeiling,
       label: "rare-entity RBP over time per engine",
       empty: "No agentic_rare run yet — collected daily." });
-  drawChart(document.getElementById("card-recall"), seriesFor("finance", "recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
-  drawChart(document.getElementById("card-mrr"), seriesFor("finance", "mrr", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
-  drawChart(document.getElementById("card-finance-filings"), seriesFor("finance", "filings_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "finance filings answer-recall at 5 over time per engine",
+  drawSlice("card-recall", seriesFor("finance", "recall", rows),
+    { label: "answer recall at 5 over time per engine" });
+  drawSlice("card-mrr", seriesFor("finance", "mrr", rows),
+    { label: "MRR at 5 over time per engine" });
+  drawSlice("card-finance-filings", seriesFor("finance", "filings_recall", rows),
+    { label: "finance filings answer-recall at 5 over time per engine",
       empty: "No filings data yet — collected daily." });
-  drawChart(document.getElementById("card-finance-filingdoc"), seriesFor("finance", "filingdoc_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "finance filingdoc recall at 5 over time per engine",
+  drawSlice("card-finance-filingdoc", seriesFor("finance", "filingdoc_recall", rows),
+    { label: "finance filingdoc recall at 5 over time per engine",
       empty: "No filingdoc data yet — collected daily." });
-  drawChart(document.getElementById("card-scholar-title"), seriesFor("scholar", "title_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar title-query recall at 10 over time per engine" });
-  drawChart(document.getElementById("card-scholar-body"), seriesFor("scholar", "body_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar body-query recall at 10 over time per engine" });
-  drawChart(document.getElementById("card-scholar-clue"), seriesFor("scholar", "clue_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar clue-query recall at 10 over time per engine" });
-  drawChart(document.getElementById("card-scholar-tot"), seriesFor("scholar", "tot_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar tip-of-the-tongue recall at 10 over time per engine" });
-  drawChart(document.getElementById("card-legal-caselaw"), seriesFor("legal", "caselaw_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "legal caselaw recall at 5 over time per engine",
+  drawSlice("card-scholar-title", seriesFor("scholar", "title_recall", rows),
+    { label: "scholar title-query recall at 10 over time per engine" });
+  drawSlice("card-scholar-body", seriesFor("scholar", "body_recall", rows),
+    { label: "scholar body-query recall at 10 over time per engine" });
+  drawSlice("card-scholar-clue", seriesFor("scholar", "clue_recall", rows),
+    { label: "scholar clue-query recall at 10 over time per engine" });
+  drawSlice("card-scholar-tot", seriesFor("scholar", "tot_recall", rows),
+    { label: "scholar tip-of-the-tongue recall at 10 over time per engine" });
+  drawSlice("card-legal-caselaw", seriesFor("legal", "caselaw_recall", rows),
+    { label: "legal caselaw recall at 5 over time per engine",
       empty: "No legal run yet — collected daily." });
-  drawChart(document.getElementById("card-legal-code"), seriesFor("legal", "code_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "legal code recall at 5 over time per engine",
+  drawSlice("card-legal-code", seriesFor("legal", "code_recall", rows),
+    { label: "legal code recall at 5 over time per engine",
       empty: "No legal run yet — collected daily." });
   for (const [p, metric, name] of [[0.5, "p50_ms", "p50"], [0.95, "p95_ms", "p95"]]) {
     const lat = latencySeries(rows, p, metric);
