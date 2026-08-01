@@ -383,36 +383,36 @@ document.documentElement.dataset.theme = localStorage.theme ||
   <h2 class="section-title" id="sec-overlap">Engine overlap</h2>
   <div class="grid2">
     <div class="card" id="card-overlap">
-      <h2>Shared result URLs (all time)</h2>
+      <h2>Shared result URLs (last 2 weeks)</h2>
       <div class="sub" id="overlap-sub"></div>
       <div class="overlap-matrix" id="overlap-table"></div>
     </div>
     <div class="card" id="card-overlap3">
-      <h2>Queries sharing &ge;3 URLs (all time)</h2>
+      <h2>Queries sharing &ge;3 URLs (last 2 weeks)</h2>
       <div class="sub" id="overlap3-sub"></div>
       <div class="overlap-matrix" id="overlap3-table"></div>
     </div>
   </div>
   <div class="grid2">
     <div class="card" id="card-lowshared">
-      <h2>Suspicious sharing (all time)</h2>
+      <h2>Suspicious sharing (last 2 weeks)</h2>
       <div class="sub" id="lowshared-sub"></div>
       <div class="overlap-matrix" id="lowshared-table"></div>
     </div>
     <div class="card" id="card-sharegraph">
-      <h2>Borrowing graph (all time)</h2>
+      <h2>Borrowing graph (last 2 weeks)</h2>
       <div class="sub" id="sharegraph-sub"></div>
       <div id="sharegraph"></div>
     </div>
   </div>
   <div class="grid2">
     <div class="card" id="card-uniqueness">
-      <h2>Result uniqueness (all time)</h2>
+      <h2>Result uniqueness (last 2 weeks)</h2>
       <div class="sub" id="uniqueness-sub"></div>
       <div id="uniqueness-table" class="uniq-table"></div>
     </div>
     <div class="card" id="card-uniqueness-relevant">
-      <h2>Result uniqueness — relevant only (all time)</h2>
+      <h2>Result uniqueness — relevant only (last 2 weeks)</h2>
       <div class="sub" id="uniqueness-relevant-sub"></div>
       <div id="uniqueness-relevant-table" class="uniq-table"></div>
     </div>
@@ -1345,6 +1345,7 @@ const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
 const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
 
 let ENGINE_FAMILY = new Map();
+const OVERLAP_RANGE_MS = 14 * 86400e3;
 const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
 const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
@@ -1417,7 +1418,7 @@ function renderOverlap(rows, uniqAgg) {
   const rank = new Map(engines.map((e, i) => [e, i]));
   const famRank = (e) => rank.get(ENGINE_FAMILY.get(e) ?? e) ?? rank.get(e);
   engines.sort((a, b) => famRank(a) - famRank(b));
-  const emptyMsg = "No overlap data yet — accumulates from hourly runs.";
+  const emptyMsg = "No overlap data in the last 2 weeks.";
   if (engines.length < 2) {
     jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     shared3Holder.appendChild(el("div", { class: "empty" }, emptyMsg));
@@ -1427,7 +1428,7 @@ function renderOverlap(rows, uniqAgg) {
   }
   const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
   document.getElementById("overlap-sub").textContent =
-    `mean Jaccard overlap of top-K URL sets on the same queries, all benchmarks — up to ${nQueries} queries per pair, all runs`;
+    `mean Jaccard overlap of top-K URL sets on the same queries, all benchmarks — up to ${nQueries} queries per pair, runs from the last 2 weeks`;
   overlapMatrix(jaccardHolder, engines, (a, b) => {
     const agg = pairs.get(pairKey(a, b));
     if (!agg || !agg.n) return null;
@@ -1590,7 +1591,7 @@ function uniquenessAgg(rows) {
 
 function renderUniqueness(agg) {
   renderUniquenessTable(agg, "uniqueness", "unique", "total",
-    "share of an engine's returned URLs that no engine from another family returned for the same query (variants like exa and exa-instant don't count against each other), all benchmarks, all runs");
+    "share of an engine's returned URLs that no engine from another family returned for the same query (variants like exa and exa-instant don't count against each other), all benchmarks, runs from the last 2 weeks");
   renderUniquenessTable(agg, "uniqueness-relevant", "relUnique", "relTotal",
     "same, restricted to relevant URLs on both sides: judged HM/FullyM on the RBP benches, the known-item hit on the recall benches");
 }
@@ -1601,7 +1602,7 @@ function renderUniquenessTable(agg, prefix, uKey, tKey, subText) {
   document.getElementById(`${prefix}-sub`).textContent = subText;
   const engines = ENGINES.filter((e) => agg.get(e)?.[tKey]);
   if (!engines.length) {
-    holder.appendChild(el("div", { class: "empty" }, "No uniqueness data yet — accumulates from hourly runs."));
+    holder.appendChild(el("div", { class: "empty" }, "No uniqueness data in the last 2 weeks."));
     return;
   }
   engines.sort((a, b) => agg.get(b)[uKey] / agg.get(b)[tKey] - agg.get(a)[uKey] / agg.get(a)[tKey]);
@@ -2043,8 +2044,8 @@ async function main() {
   renderLeaderboards(history);
   renderLatencySummary(history);
   renderAll(latestFinance);
-  const uniqAgg = uniquenessAgg(uniquenessRows.filter((r) => !HIDDEN_ENGINES.has(r.engine)));
-  renderOverlap(overlapRows.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)), uniqAgg);
+  const uniqAgg = uniquenessAgg(inRange(uniquenessRows, OVERLAP_RANGE_MS).filter((r) => !HIDDEN_ENGINES.has(r.engine)));
+  renderOverlap(inRange(overlapRows, OVERLAP_RANGE_MS).filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)), uniqAgg);
   renderUniqueness(uniqAgg);
   initRunBrowser();
   document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
