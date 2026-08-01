@@ -681,15 +681,15 @@ function seriesFor(bench, metric, rows) {
 const WINDOW_MS = 6 * 3600e3;
 const LATENCY_WINDOW_MS = 24 * 3600e3;
 const ROLLING_MS = 7 * 24 * 3600e3;
-const ROLLING_NOTE = "7-day rolling mean";
+const ROLLING_NOTE = `${ROLLING_MS / 86400e3}-day rolling mean`;
 
-function rolling7d(series) {
+function rollingMean(series) {
   const out = {};
   for (const e of ENGINES) {
-    const pts = series[e];
+    const pts = series[e], ts = pts.map((p) => p.t.getTime());
     out[e] = pts.map((p, i) => {
       let sum = 0, n = 0;
-      for (let j = i; j >= 0 && p.t - pts[j].t <= ROLLING_MS; j--) { sum += pts[j].v; n++; }
+      for (let j = i; j >= 0 && ts[i] - ts[j] <= ROLLING_MS; j--) { sum += pts[j].v; n++; }
       return { t: p.t, v: sum / n };
     });
   }
@@ -1866,7 +1866,7 @@ function drawSlice(cardId, series, opts) {
     sub.dataset.base ??= sub.textContent;
     sub.textContent = `${sub.dataset.base}; ${ROLLING_NOTE}`;
   }
-  drawChart(card, rolling7d(series), { ...opts, label: `${opts.label}, ${ROLLING_NOTE}` });
+  drawChart(card, rollingMean(series), { ...opts, label: `${opts.label}, ${ROLLING_NOTE}` });
 }
 
 function drawCharts(rows) {
