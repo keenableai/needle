@@ -681,7 +681,7 @@ function seriesFor(bench, metric, rows) {
 const WINDOW_MS = 6 * 3600e3;
 const LATENCY_WINDOW_MS = 24 * 3600e3;
 const ROLLING_MS = 7 * 24 * 3600e3;
-const ROLLING_NOTE = `${ROLLING_MS / 86400e3}-day rolling mean`;
+const ROLLING_NOTE = `${ROLLING_MS / (24 * 3600e3)}-day rolling mean`;
 
 function rollingMean(series) {
   const out = {};
@@ -1862,11 +1862,10 @@ async function initRunBrowser() {
 function drawSlice(cardId, series, opts) {
   const card = document.getElementById(cardId);
   const sub = card.querySelector(".sub");
-  if (sub) {
-    sub.dataset.base ??= sub.textContent;
-    sub.textContent = `${sub.dataset.base}; ${ROLLING_NOTE}`;
-  }
-  drawChart(card, rollingMean(series), { ...opts, label: `${opts.label}, ${ROLLING_NOTE}` });
+  sub.dataset.base ??= sub.textContent;
+  sub.textContent = `${sub.dataset.base}; ${ROLLING_NOTE}`;
+  drawChart(card, rollingMean(series),
+    { domain: [0, 1], ticks: [0, 0.5, 1], ...opts, label: `${opts.label}, ${ROLLING_NOTE}` });
 }
 
 function drawCharts(rows) {
@@ -1880,28 +1879,28 @@ function drawCharts(rows) {
       label: "rare-entity RBP over time per engine",
       empty: "No agentic_rare run yet — collected daily." });
   drawSlice("card-recall", seriesFor("finance", "recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "answer recall at 5 over time per engine" });
+    { label: "answer recall at 5 over time per engine" });
   drawSlice("card-mrr", seriesFor("finance", "mrr", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "MRR at 5 over time per engine" });
+    { label: "MRR at 5 over time per engine" });
   drawSlice("card-finance-filings", seriesFor("finance", "filings_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "finance filings answer-recall at 5 over time per engine",
+    { label: "finance filings answer-recall at 5 over time per engine",
       empty: "No filings data yet — collected daily." });
   drawSlice("card-finance-filingdoc", seriesFor("finance", "filingdoc_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "finance filingdoc recall at 5 over time per engine",
+    { label: "finance filingdoc recall at 5 over time per engine",
       empty: "No filingdoc data yet — collected daily." });
   drawSlice("card-scholar-title", seriesFor("scholar", "title_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar title-query recall at 10 over time per engine" });
+    { label: "scholar title-query recall at 10 over time per engine" });
   drawSlice("card-scholar-body", seriesFor("scholar", "body_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar body-query recall at 10 over time per engine" });
+    { label: "scholar body-query recall at 10 over time per engine" });
   drawSlice("card-scholar-clue", seriesFor("scholar", "clue_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar clue-query recall at 10 over time per engine" });
+    { label: "scholar clue-query recall at 10 over time per engine" });
   drawSlice("card-scholar-tot", seriesFor("scholar", "tot_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "scholar tip-of-the-tongue recall at 10 over time per engine" });
+    { label: "scholar tip-of-the-tongue recall at 10 over time per engine" });
   drawSlice("card-legal-caselaw", seriesFor("legal", "caselaw_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "legal caselaw recall at 5 over time per engine",
+    { label: "legal caselaw recall at 5 over time per engine",
       empty: "No legal run yet — collected daily." });
   drawSlice("card-legal-code", seriesFor("legal", "code_recall", rows),
-    { domain: [0, 1], ticks: [0, 0.5, 1], label: "legal code recall at 5 over time per engine",
+    { label: "legal code recall at 5 over time per engine",
       empty: "No legal run yet — collected daily." });
   for (const [p, metric, name] of [[0.5, "p50_ms", "p50"], [0.95, "p95_ms", "p95"]]) {
     const lat = latencySeries(rows, p, metric);
