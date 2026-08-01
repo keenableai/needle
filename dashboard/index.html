@@ -419,7 +419,6 @@ document.documentElement.dataset.theme = localStorage.theme ||
   </div>
 
   <h2 class="section-title" id="sec-slices">Slices</h2>
-  <p class="section-desc">Every chart below shows a trailing 7-day rolling mean of the per-run scores.</p>
 
   <h3 class="subsection-title" id="sec-news">news</h3>
   <p class="section-desc">Fresh, time-sensitive queries mined hourly from RSS feeds and Google Trends, scored on ranking quality (RBP@5) by an LLM relevance judge.</p>
@@ -681,7 +680,8 @@ function seriesFor(bench, metric, rows) {
 
 const WINDOW_MS = 6 * 3600e3;
 const LATENCY_WINDOW_MS = 24 * 3600e3;
-const ROLLING_MS = 7 * 86400e3;
+const ROLLING_MS = 7 * 24 * 3600e3;
+const ROLLING_NOTE = "7-day rolling mean";
 
 function rolling7d(series) {
   const out = {};
@@ -1860,8 +1860,13 @@ async function initRunBrowser() {
 }
 
 function drawSlice(cardId, series, opts) {
-  drawChart(document.getElementById(cardId), rolling7d(series),
-    { ...opts, label: `${opts.label}, 7-day rolling mean` });
+  const card = document.getElementById(cardId);
+  const sub = card.querySelector(".sub");
+  if (sub) {
+    sub.dataset.base ??= sub.textContent;
+    sub.textContent = `${sub.dataset.base}; ${ROLLING_NOTE}`;
+  }
+  drawChart(card, rolling7d(series), { ...opts, label: `${opts.label}, ${ROLLING_NOTE}` });
 }
 
 function drawCharts(rows) {
