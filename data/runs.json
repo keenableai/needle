@@ -5990,5 +5990,20 @@
       "fresh.jsonl",
       "rbp.json"
     ]
+  },
+  {
+    "id": "2026-08-03T1800Z",
+    "ts": "2026-08-03T18:00Z",
+    "artifacts": [
+      "agentic_rare.json",
+      "fresh.jsonl",
+      "gold.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "rbp.json",
+      "recall.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
   }
 ]
