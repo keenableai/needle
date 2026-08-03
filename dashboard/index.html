@@ -93,8 +93,16 @@ document.documentElement.dataset.theme = localStorage.theme ||
     vertical-align: middle; margin-right: 6px;
   }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
   .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
+  .legend button {
+    display: inline-flex; align-items: center; padding: 3px 9px;
+    background: none; border: 1px solid transparent; border-radius: 8px;
+    color: inherit; cursor: pointer; font: inherit;
+  }
+  .legend button:hover { border-color: var(--grid); }
+  .legend button[aria-pressed="true"] { border-color: var(--border); background: var(--surface-1); color: var(--text-primary); }
+  .legend .note { color: var(--text-muted); margin-left: 8px; }
 
   .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .lb-tabs {
@@ -429,14 +437,14 @@ document.documentElement.dataset.theme = localStorage.theme ||
   <p class="section-desc">Fresh, time-sensitive queries mined hourly from RSS feeds and Google Trends, scored on ranking quality (RBP@5) by an LLM relevance judge.</p>
   <div class="card" id="card-rbp">
     <h2>news — RBP@5</h2>
-    <div class="sub">20 fresh queries per run, mean RBP over all queries in each 6-hour window; the hairline marks the metric ceiling</div>
+    <div class="sub">20 fresh queries per run, mean RBP over all queries in each 6-hour window</div>
   </div>
 
   <h3 class="subsection-title" id="sec-agentic_rare">agentic_rare</h3>
   <p class="section-desc">Rare-entity queries mined from real search logs — obscure names, technical terms, and long compounds selected by tokenizer difficulty. Scored on ranking quality (RBP@5) by the same LLM relevance judge as news.</p>
   <div class="card" id="card-rbp-rare">
     <h2>agentic_rare — RBP@5</h2>
-    <div class="sub">100 rare-entity queries per daily run; the hairline marks the metric ceiling</div>
+    <div class="sub">100 rare-entity queries per daily run</div>
   </div>
 
   <h3 class="subsection-title" id="sec-finance">finance</h3>
@@ -535,7 +543,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <table>
       <tr><th>metric</th><th>benches</th><th>definition</th></tr>
       <tr><td>RBP@5</td><td>news, agentic_rare</td>
-        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672 (the hairline on RBP charts); scores are not normalized by it. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
+        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672; leaderboard scores are not normalized by it, while Slices charts show each engine as a share of ultimate's score. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
       <tr><td>redundancy penalty</td><td>news, agentic_rare</td>
         <td>applied to ratings before RBP: a duplicate URL −4 rating steps, the 2nd result from the same domain −1, the 3rd and later −2, all floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td>finance</td>
@@ -643,6 +651,7 @@ function markerEl(engine, x, y, r) {
 
 const HOME_ENGINE = "keenable";
 const ULTIMATE_ENGINE = "ultimate";
+let selectedEngine = null;
 function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
@@ -691,6 +700,7 @@ const WINDOW_MS = 6 * 3600e3;
 const LATENCY_WINDOW_MS = 24 * 3600e3;
 const ROLLING_MS = 7 * 24 * 3600e3;
 const ROLLING_NOTE = `${ROLLING_MS / (24 * 3600e3)}-day rolling mean`;
+const PCT_NOTE = "% of ultimate's score";
 
 function rollingMean(series) {
   const out = {};
@@ -811,10 +821,6 @@ function drawChart(card, series, opts) {
     svg.appendChild(el("text", { x: M.left - 6, y: y(gv) + 3, "text-anchor": "end", class: "axis-text" }, tickFmt(gv)));
   }
   svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(y0), y2: y(y0), stroke: "var(--baseline)", "stroke-width": 1 }));
-  if (opts.ceiling) {
-    svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(opts.ceiling), y2: y(opts.ceiling), stroke: "var(--baseline)", "stroke-width": 1 }));
-    svg.appendChild(el("text", { x: M.left + 4, y: y(opts.ceiling) - 4, class: "axis-text" }, `ceiling ${opts.ceiling.toFixed(3)}`));
-  }
   const nTicks = Math.min(5, Math.max(2, Math.round(iw / 140)));
   for (let i = 0; i < nTicks; i++) {
     const t = t0 + ((t1 - t0) * i) / (nTicks - 1);
@@ -826,8 +832,9 @@ function drawChart(card, series, opts) {
     const va = series[a].at(-1).v, vb = series[b].at(-1).v;
     return opts.lowerIsBetter ? va - vb : vb - va;
   });
-  const highlight = new Set(byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
-  if (series[HOME_ENGINE]?.length) highlight.add(HOME_ENGINE);
+  const sel = selectedEngine && series[selectedEngine]?.length ? selectedEngine : null;
+  const highlight = new Set(sel ? [sel] : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
+  if (!sel && series[HOME_ENGINE]?.length) highlight.add(HOME_ENGINE);
   if (series[ULTIMATE_ENGINE]?.length) highlight.add(ULTIMATE_ENGINE);
   const endLabels = [];
   for (const e of [...active].sort((a, b) => highlight.has(a) - highlight.has(b))) {
@@ -1880,24 +1887,36 @@ async function initRunBrowser() {
   renderRunDetail(runs);
 }
 
-function drawSlice(cardId, series, opts) {
+function drawSlice(cardId, series, { label, empty }) {
   const card = document.getElementById(cardId);
   const sub = card.querySelector(".sub");
   sub.dataset.base ??= sub.textContent;
-  sub.textContent = `${sub.dataset.base}; ${ROLLING_NOTE}`;
-  drawChart(card, rollingMean(series),
-    { domain: [0, 1], ticks: [0, 0.5, 1], ...opts, label: `${opts.label}, ${ROLLING_NOTE}` });
+  sub.textContent = `${sub.dataset.base}; ${PCT_NOTE}, ${ROLLING_NOTE}`;
+  const rolled = rollingMean(series);
+  const ult = new Map((rolled[ULTIMATE_ENGINE] || []).map((p) => [p.t.getTime(), p.v]));
+  const pct = {};
+  let maxV = 100;
+  for (const e of ENGINES) {
+    pct[e] = [];
+    for (const p of rolled[e]) {
+      const u = ult.get(p.t.getTime());
+      if (!u) continue;
+      const v = (p.v / u) * 100;
+      if (v > maxV) maxV = v;
+      pct[e].push({ t: p.t, v });
+    }
+  }
+  drawChart(card, pct,
+    { domain: [0, maxV * 1.05], ticks: [0, 25, 50, 75, 100],
+      fmt: (v) => `${v.toFixed(1)}%`, tickFmt: (v) => `${v}%`,
+      empty, label: `${label}, ${PCT_NOTE}, ${ROLLING_NOTE}` });
 }
 
 function drawCharts(rows) {
-  renderStandings(rows);
-  const ceiling = rows.filter((r) => r.bench === "news").at(-1)?.rbp_max;
   drawSlice("card-rbp", rbpSeries(rows),
-    { domain: [0, (ceiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling, label: "RBP over time per engine, 6-hour windows" });
-  const rareCeiling = rows.filter((r) => r.bench === "agentic_rare").at(-1)?.rbp_max;
+    { label: "RBP over time per engine, 6-hour windows" });
   drawSlice("card-rbp-rare", seriesFor("agentic_rare", "rbp", rows),
-    { domain: [0, (rareCeiling ?? 0.672) * 1.05], ticks: [0, 0.2, 0.4, 0.6], ceiling: rareCeiling,
-      label: "rare-entity RBP over time per engine",
+    { label: "rare-entity RBP over time per engine",
       empty: "No agentic_rare run yet — collected daily." });
   drawSlice("card-recall", seriesFor("finance", "recall", rows),
     { label: "answer recall at 5 over time per engine" });
@@ -1942,6 +1961,7 @@ function refreshHistoryTable() {
 }
 
 function renderAll(latestFinance) {
+  renderStandings(history);
   drawCharts(history);
   refreshHistoryTable();
   renderFields(latestFinance);
@@ -1951,16 +1971,20 @@ function renderLegend() {
   const legend = document.getElementById("legend");
   legend.replaceChildren();
   for (const e of ENGINES) {
-    const item = el("span");
+    const item = el("button", { type: "button", "aria-pressed": e === selectedEngine });
     const key = el("span", { class: "key" }); key.style.background = colorOf(e);
     item.append(key, document.createTextNode(e));
+    item.addEventListener("click", () => {
+      selectedEngine = selectedEngine === e ? null : e;
+      renderLegend();
+      drawCharts(history);
+    });
     legend.appendChild(item);
   }
-  if (ENGINES.length > 4) {
-    const note = el("span", {}, "charts color the top 3 engines + keenable; the rest are dimmed (hover for values)");
-    note.style.color = "var(--text-muted)";
-    legend.appendChild(note);
-  }
+  const note = el("span", { class: "note" }, selectedEngine
+    ? `charts highlight ${selectedEngine}; click it again to reset`
+    : "charts color the top 3 engines + keenable; click an engine to highlight only it");
+  legend.appendChild(note);
 }
 
 function rowsToMarkdown(rows) {
