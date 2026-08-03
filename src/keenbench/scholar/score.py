@@ -58,7 +58,7 @@ async def run_papers(
     engines: dict[str, SearchClient],
     *,
     num_results: int = 5,
-    snippet_chars: int = 500,
+    snippet_chars: int = 2000,
     idconv: IdConverter | None = None,
 ) -> dict[str, Any]:
     engine_names = list(engines)

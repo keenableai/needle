@@ -47,7 +47,7 @@ All `run` commands share one interface:
 | `--out` | `-` | report path; `-` = stdout |
 | `--engines` | `keenable,exa` | comma-separated engine list |
 | `--num-results` | `5` | top-K fetched and scored per engine |
-| `--snippet-chars` | `500` | uniform cap on per-result evidence text (`0` = uncapped), so engines returning fatter content don't get free evidence |
+| `--snippet-chars` | `2000` | uniform cap on per-result evidence text (`0` = uncapped), so engines returning fatter content don't get free evidence |
 | `--limit` / `--sample` / `--seed` | `0` / `stratified` / `0` | deterministic sample of N queries |
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 

@@ -42,7 +42,7 @@ class AgenticRare:
         filtered_path: str = DEFAULT_FILTERED_PATH,
         engines: str | tuple[str, ...] = "keenable,exa",
         num_results: int = 5,
-        snippet_chars: int = 500,
+        snippet_chars: int = 2000,
         limit: int = 0,
         sample: str = "stratified",
         seed: int | None = None,

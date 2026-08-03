@@ -169,7 +169,7 @@ class Finance:
         out: str = "-",
         engines: str | tuple[str, ...] = "keenable,exa",
         num_results: int = 5,
-        snippet_chars: int = 500,
+        snippet_chars: int = 2000,
         limit: int = 0,
         sample: str = "stratified",
         seed: int | None = None,
