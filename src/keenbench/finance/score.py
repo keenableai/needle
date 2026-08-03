@@ -110,7 +110,7 @@ async def run_answers(
     engines: dict[str, SearchClient],
     *,
     num_results: int = 5,
-    snippet_chars: int = 500,
+    snippet_chars: int = 2000,
     judge: LLMClient | None = None,
     judge_concurrency: int = 8,
 ) -> dict[str, Any]:

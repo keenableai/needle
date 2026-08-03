@@ -99,7 +99,7 @@ def run_rbp_eval(
     out: str,
     *,
     num_results: int = 5,
-    snippet_chars: int = 500,
+    snippet_chars: int = 2000,
     judge_model: str | None = None,
     judge_concurrency: int = 8,
 ) -> None:
