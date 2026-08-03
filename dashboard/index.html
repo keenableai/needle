@@ -543,7 +543,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <table>
       <tr><th>metric</th><th>benches</th><th>definition</th></tr>
       <tr><td>RBP@5</td><td>news, agentic_rare</td>
-        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672; leaderboard scores are not normalized by it, while the top-level chart of each slice shows each engine as a share of ultimate's score. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
+        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672; leaderboard scores are not normalized by it, while the top-level slice charts show each engine as a share of ultimate's score and subslice charts stay absolute. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
       <tr><td>redundancy penalty</td><td>news, agentic_rare</td>
         <td>applied to ratings before RBP: a duplicate URL −4 rating steps, the 2nd result from the same domain −1, the 3rd and later −2, all floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td>finance</td>
