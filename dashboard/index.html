@@ -101,7 +101,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     color: inherit; cursor: pointer; font: inherit;
   }
   .legend button:hover { border-color: var(--grid); }
-  .legend button.active { border-color: var(--baseline); background: var(--surface-1); color: var(--text-primary); }
+  .legend button[aria-pressed="true"] { border-color: var(--border); background: var(--surface-1); color: var(--text-primary); }
   .legend .note { color: var(--text-muted); margin-left: 8px; }
 
   .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -543,7 +543,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <table>
       <tr><th>metric</th><th>benches</th><th>definition</th></tr>
       <tr><td>RBP@5</td><td>news, agentic_rare</td>
-        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672 (the hairline on RBP charts); scores are not normalized by it. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
+        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672; leaderboard scores are not normalized by it, while Slices charts show each engine as a share of ultimate's score. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
       <tr><td>redundancy penalty</td><td>news, agentic_rare</td>
         <td>applied to ratings before RBP: a duplicate URL −4 rating steps, the 2nd result from the same domain −1, the 3rd and later −2, all floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td>finance</td>
@@ -700,6 +700,7 @@ const WINDOW_MS = 6 * 3600e3;
 const LATENCY_WINDOW_MS = 24 * 3600e3;
 const ROLLING_MS = 7 * 24 * 3600e3;
 const ROLLING_NOTE = `${ROLLING_MS / (24 * 3600e3)}-day rolling mean`;
+const PCT_NOTE = "% of ultimate's score";
 
 function rollingMean(series) {
   const out = {};
@@ -831,10 +832,9 @@ function drawChart(card, series, opts) {
     const va = series[a].at(-1).v, vb = series[b].at(-1).v;
     return opts.lowerIsBetter ? va - vb : vb - va;
   });
-  const highlight = selectedEngine && series[selectedEngine]?.length
-    ? new Set([selectedEngine])
-    : new Set(byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
-  if (!selectedEngine && series[HOME_ENGINE]?.length) highlight.add(HOME_ENGINE);
+  const sel = selectedEngine && series[selectedEngine]?.length ? selectedEngine : null;
+  const highlight = new Set(sel ? [sel] : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
+  if (!sel && series[HOME_ENGINE]?.length) highlight.add(HOME_ENGINE);
   if (series[ULTIMATE_ENGINE]?.length) highlight.add(ULTIMATE_ENGINE);
   const endLabels = [];
   for (const e of [...active].sort((a, b) => highlight.has(a) - highlight.has(b))) {
@@ -1887,29 +1887,32 @@ async function initRunBrowser() {
   renderRunDetail(runs);
 }
 
-function drawSlice(cardId, series, opts) {
+function drawSlice(cardId, series, { label, empty }) {
   const card = document.getElementById(cardId);
   const sub = card.querySelector(".sub");
   sub.dataset.base ??= sub.textContent;
-  sub.textContent = `${sub.dataset.base}; % of ultimate's score, ${ROLLING_NOTE}`;
+  sub.textContent = `${sub.dataset.base}; ${PCT_NOTE}, ${ROLLING_NOTE}`;
   const rolled = rollingMean(series);
   const ult = new Map((rolled[ULTIMATE_ENGINE] || []).map((p) => [p.t.getTime(), p.v]));
   const pct = {};
+  let maxV = 100;
   for (const e of ENGINES) {
-    pct[e] = rolled[e].flatMap((p) => {
+    pct[e] = [];
+    for (const p of rolled[e]) {
       const u = ult.get(p.t.getTime());
-      return u ? [{ t: p.t, v: (p.v / u) * 100 }] : [];
-    });
+      if (!u) continue;
+      const v = (p.v / u) * 100;
+      if (v > maxV) maxV = v;
+      pct[e].push({ t: p.t, v });
+    }
   }
-  const maxV = Math.max(100, ...ENGINES.flatMap((e) => pct[e].map((p) => p.v)));
   drawChart(card, pct,
     { domain: [0, maxV * 1.05], ticks: [0, 25, 50, 75, 100],
       fmt: (v) => `${v.toFixed(1)}%`, tickFmt: (v) => `${v}%`,
-      ...opts, label: `${opts.label}, % of ultimate, ${ROLLING_NOTE}` });
+      empty, label: `${label}, ${PCT_NOTE}, ${ROLLING_NOTE}` });
 }
 
 function drawCharts(rows) {
-  renderStandings(rows);
   drawSlice("card-rbp", rbpSeries(rows),
     { label: "RBP over time per engine, 6-hour windows" });
   drawSlice("card-rbp-rare", seriesFor("agentic_rare", "rbp", rows),
@@ -1958,6 +1961,7 @@ function refreshHistoryTable() {
 }
 
 function renderAll(latestFinance) {
+  renderStandings(history);
   drawCharts(history);
   refreshHistoryTable();
   renderFields(latestFinance);
@@ -1967,8 +1971,7 @@ function renderLegend() {
   const legend = document.getElementById("legend");
   legend.replaceChildren();
   for (const e of ENGINES) {
-    const item = el("button", { type: "button", "aria-pressed": String(e === selectedEngine) });
-    if (e === selectedEngine) item.classList.add("active");
+    const item = el("button", { type: "button", "aria-pressed": e === selectedEngine });
     const key = el("span", { class: "key" }); key.style.background = colorOf(e);
     item.append(key, document.createTextNode(e));
     item.addEventListener("click", () => {
