@@ -469,6 +469,10 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   <h3 class="subsection-title" id="sec-scholar">scholar</h3>
   <p class="section-desc">Known-item paper retrieval: find a specific paper by its title, by a full-text-only detail, by a natural-language factual question, or from a vague tip-of-the-tongue description. Deterministic match on the paper's arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID.</p>
+  <div class="card" id="card-scholar-recall">
+    <h2>scholar — recall@10</h2>
+    <div class="sub">gold papers per run across all query types</div>
+  </div>
   <div class="grid2">
     <div class="card" id="card-scholar-title">
       <h2>scholar — title-query recall@10</h2>
@@ -1905,6 +1909,8 @@ function drawCharts(rows) {
   drawSlice("card-finance-filingdoc", seriesFor("finance", "filingdoc_recall", rows),
     { label: "finance filingdoc recall at 5 over time per engine",
       empty: "No filingdoc data yet — collected daily." });
+  drawSlice("card-scholar-recall", seriesFor("scholar", "recall", rows),
+    { label: "scholar recall at 10 over time per engine" });
   drawSlice("card-scholar-title", seriesFor("scholar", "title_recall", rows),
     { label: "scholar title-query recall at 10 over time per engine" });
   drawSlice("card-scholar-body", seriesFor("scholar", "body_recall", rows),
