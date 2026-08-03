@@ -225,7 +225,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
-  .overlap-matrix, #fields-table, #history-table, .uniq-table, #latency-summary,
+  .overlap-matrix, #fields-table, #history-table, .bar-table,
   #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
   #app-metrics, #app-engines, #app-data { overflow-x: auto; }
   #card-standings { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
@@ -255,12 +255,12 @@ document.documentElement.dataset.theme = localStorage.theme ||
     width: 26px; min-width: 26px; height: 26px; padding: 0;
     border-radius: 3px; text-align: center; font-variant-numeric: tabular-nums;
   }
-  .uniq-table td, .uniq-table th { white-space: nowrap; padding: 6px 8px; }
-  .uniq-table .bar-track {
+  .bar-table td, .bar-table th { white-space: nowrap; padding: 6px 8px; }
+  .bar-table .bar-track {
     display: inline-block; width: 100px; height: 8px; border-radius: 4px;
     background: var(--grid); vertical-align: middle; margin-right: 8px;
   }
-  .uniq-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
+  .bar-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
   #sharegraph svg { max-width: 460px; margin: 0 auto; }
   #sharegraph .sg-edge { stroke: var(--text-muted); }
   #sharegraph .sg-arrow { fill: var(--text-primary); }
@@ -374,10 +374,15 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <div class="sub">95th percentile, same windows</div>
     </div>
   </div>
-  <div class="card" id="card-latency-summary">
-    <h2>Search latency — 7-day summary</h2>
-    <div class="sub">successful search API calls, all benchmarks, last 7 days — per-call samples pooled; runs without samples contribute their per-run percentiles; error rate = errored searches / queries issued</div>
-    <div id="latency-summary"></div>
+  <div class="grid2">
+    <div class="card" id="card-latency-summary-p50">
+      <h2>Search latency — 7-day p50</h2>
+      <div id="latency-summary-p50" class="bar-table"></div>
+    </div>
+    <div class="card" id="card-latency-summary-p95">
+      <h2>Search latency — 7-day p95</h2>
+      <div id="latency-summary-p95" class="bar-table"></div>
+    </div>
   </div>
 
   <h2 class="section-title" id="sec-overlap">Engine overlap</h2>
@@ -409,12 +414,12 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <div class="card" id="card-uniqueness">
       <h2>Result uniqueness (last 2 weeks)</h2>
       <div class="sub" id="uniqueness-sub"></div>
-      <div id="uniqueness-table" class="uniq-table"></div>
+      <div id="uniqueness-table" class="bar-table"></div>
     </div>
     <div class="card" id="card-uniqueness-relevant">
       <h2>Result uniqueness — relevant only (last 2 weeks)</h2>
       <div class="sub" id="uniqueness-relevant-sub"></div>
-      <div id="uniqueness-relevant-table" class="uniq-table"></div>
+      <div id="uniqueness-relevant-table" class="bar-table"></div>
     </div>
   </div>
 
@@ -464,6 +469,10 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   <h3 class="subsection-title" id="sec-scholar">scholar</h3>
   <p class="section-desc">Known-item paper retrieval: find a specific paper by its title, by a full-text-only detail, by a natural-language factual question, or from a vague tip-of-the-tongue description. Deterministic match on the paper's arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID.</p>
+  <div class="card" id="card-scholar-recall">
+    <h2>scholar — recall@10</h2>
+    <div class="sub">gold papers per run across all query types</div>
+  </div>
   <div class="grid2">
     <div class="card" id="card-scholar-title">
       <h2>scholar — title-query recall@10</h2>
@@ -1228,8 +1237,6 @@ function renderStandings(rows) {
 }
 
 function renderLatencySummary(rows) {
-  const holder = document.getElementById("latency-summary");
-  holder.replaceChildren();
   const week = inRange(rows, 7 * 86400e3);
   const stats = ENGINES.map((e) => {
     const er = week.filter((r) => r.engine === e);
@@ -1248,28 +1255,41 @@ function renderLatencySummary(rows) {
       n: raw.length,
     };
   }).filter(Boolean);
-  if (!stats.length) {
-    holder.appendChild(el("div", { class: "empty" }, "No latency data yet — collected from new runs."));
-    return;
+  for (const p of ["p50", "p95"]) {
+    const holder = document.getElementById(`latency-summary-${p}`);
+    holder.replaceChildren();
+    const xs = stats.filter((x) => x[p] != null).sort((a, b) => a[p] - b[p]);
+    if (!xs.length) {
+      holder.appendChild(el("div", { class: "empty" }, "No latency data yet — collected from new runs."));
+      continue;
+    }
+    const max = xs[xs.length - 1][p];
+    const table = el("table");
+    const head = el("tr");
+    for (const h of ["engine", "", p]) head.appendChild(el("th", { class: h === p ? "num" : "" }, h));
+    table.appendChild(head);
+    for (const x of xs) {
+      const tr = el("tr");
+      markHome(tr, x.e);
+      const info = [x.n ? `${x.n} calls` : "per-run percentiles"];
+      if (x.err != null) info.push(`${(x.err * 100).toFixed(1)}% errors`);
+      tr.title = info.join(", ");
+      const barCell = el("td");
+      const track = el("span", { class: "bar-track" });
+      const fill = el("span", { class: "bar-fill" });
+      fill.style.width = `${Math.round((x[p] / max) * 100)}%`;
+      fill.style.background = colorOf(x.e);
+      track.appendChild(fill);
+      barCell.appendChild(track);
+      tr.append(
+        engineCell(x.e),
+        barCell,
+        el("td", { class: "num" + (x === xs[0] && xs.length > 1 ? " best" : "") }, fmtMs(x[p])),
+      );
+      table.appendChild(tr);
+    }
+    holder.appendChild(table);
   }
-  stats.sort((a, b) => a.p50 - b.p50);
-  const table = el("table");
-  const head = el("tr");
-  head.appendChild(el("th", {}, "engine"));
-  for (const h of ["p50", "p95", "error rate", "calls"]) head.appendChild(el("th", { class: "num" }, h));
-  table.appendChild(head);
-  const bestP50 = stats[0].p50;
-  for (const x of stats) {
-    const tr = el("tr");
-    markHome(tr, x.e);
-    tr.appendChild(engineCell(x.e));
-    tr.appendChild(el("td", { class: "num" + (x.p50 === bestP50 && stats.length > 1 ? " best" : "") }, fmtMs(x.p50)));
-    tr.appendChild(el("td", { class: "num" }, fmtMs(x.p95)));
-    tr.appendChild(el("td", { class: "num" }, x.err == null ? "–" : `${(x.err * 100).toFixed(1)}%`));
-    tr.appendChild(el("td", { class: "num" }, x.n ? String(x.n) : "–"));
-    table.appendChild(tr);
-  }
-  holder.appendChild(table);
 }
 
 function renderFields(latest) {
@@ -1889,6 +1909,8 @@ function drawCharts(rows) {
   drawSlice("card-finance-filingdoc", seriesFor("finance", "filingdoc_recall", rows),
     { label: "finance filingdoc recall at 5 over time per engine",
       empty: "No filingdoc data yet — collected daily." });
+  drawSlice("card-scholar-recall", seriesFor("scholar", "recall", rows),
+    { label: "scholar recall at 10 over time per engine" });
   drawSlice("card-scholar-title", seriesFor("scholar", "title_recall", rows),
     { label: "scholar title-query recall at 10 over time per engine" });
   drawSlice("card-scholar-body", seriesFor("scholar", "body_recall", rows),
