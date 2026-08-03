@@ -543,7 +543,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <table>
       <tr><th>metric</th><th>benches</th><th>definition</th></tr>
       <tr><td>RBP@5</td><td>news, agentic_rare</td>
-        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672; leaderboard scores are not normalized by it, while Slices charts show each engine as a share of ultimate's score. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
+        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672; leaderboard scores are not normalized by it, while the top-level chart of each slice shows each engine as a share of ultimate's score. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
       <tr><td>redundancy penalty</td><td>news, agentic_rare</td>
         <td>applied to ratings before RBP: a duplicate URL −4 rating steps, the 2nd result from the same domain −1, the 3rd and later −2, all floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td>finance</td>
@@ -1887,41 +1887,47 @@ async function initRunBrowser() {
   renderRunDetail(runs);
 }
 
-function drawSlice(cardId, series, { label, empty }) {
+function drawSlice(cardId, series, { label, empty, pct = false }) {
   const card = document.getElementById(cardId);
   const sub = card.querySelector(".sub");
   sub.dataset.base ??= sub.textContent;
-  sub.textContent = `${sub.dataset.base}; ${PCT_NOTE}, ${ROLLING_NOTE}`;
+  const note = pct ? `${PCT_NOTE}, ${ROLLING_NOTE}` : ROLLING_NOTE;
+  sub.textContent = `${sub.dataset.base}; ${note}`;
   const rolled = rollingMean(series);
+  if (!pct) {
+    drawChart(card, rolled,
+      { domain: [0, 1], ticks: [0, 0.5, 1], empty, label: `${label}, ${note}` });
+    return;
+  }
   const ult = new Map((rolled[ULTIMATE_ENGINE] || []).map((p) => [p.t.getTime(), p.v]));
-  const pct = {};
+  const shares = {};
   let maxV = 100;
   for (const e of ENGINES) {
-    pct[e] = [];
+    shares[e] = [];
     for (const p of rolled[e]) {
       const u = ult.get(p.t.getTime());
       if (!u) continue;
       const v = (p.v / u) * 100;
       if (v > maxV) maxV = v;
-      pct[e].push({ t: p.t, v });
+      shares[e].push({ t: p.t, v });
     }
   }
-  drawChart(card, pct,
+  drawChart(card, shares,
     { domain: [0, maxV * 1.05], ticks: [0, 25, 50, 75, 100],
       fmt: (v) => `${v.toFixed(1)}%`, tickFmt: (v) => `${v}%`,
-      empty, label: `${label}, ${PCT_NOTE}, ${ROLLING_NOTE}` });
+      empty, label: `${label}, ${note}` });
 }
 
 function drawCharts(rows) {
   drawSlice("card-rbp", rbpSeries(rows),
-    { label: "RBP over time per engine, 6-hour windows" });
+    { label: "RBP over time per engine, 6-hour windows", pct: true });
   drawSlice("card-rbp-rare", seriesFor("agentic_rare", "rbp", rows),
-    { label: "rare-entity RBP over time per engine",
+    { label: "rare-entity RBP over time per engine", pct: true,
       empty: "No agentic_rare run yet — collected daily." });
   drawSlice("card-recall", seriesFor("finance", "recall", rows),
-    { label: "answer recall at 5 over time per engine" });
+    { label: "answer recall at 5 over time per engine", pct: true });
   drawSlice("card-mrr", seriesFor("finance", "mrr", rows),
-    { label: "MRR at 5 over time per engine" });
+    { label: "MRR at 5 over time per engine", pct: true });
   drawSlice("card-finance-filings", seriesFor("finance", "filings_recall", rows),
     { label: "finance filings answer-recall at 5 over time per engine",
       empty: "No filings data yet — collected daily." });
@@ -1929,7 +1935,7 @@ function drawCharts(rows) {
     { label: "finance filingdoc recall at 5 over time per engine",
       empty: "No filingdoc data yet — collected daily." });
   drawSlice("card-scholar-recall", seriesFor("scholar", "recall", rows),
-    { label: "scholar recall at 10 over time per engine" });
+    { label: "scholar recall at 10 over time per engine", pct: true });
   drawSlice("card-scholar-title", seriesFor("scholar", "title_recall", rows),
     { label: "scholar title-query recall at 10 over time per engine" });
   drawSlice("card-scholar-body", seriesFor("scholar", "body_recall", rows),
