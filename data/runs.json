@@ -5964,5 +5964,15 @@
       "fresh.jsonl",
       "rbp.json"
     ]
+  },
+  {
+    "id": "2026-08-03T1408Z",
+    "ts": "2026-08-03T14:08Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "rbp.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
   }
 ]
