@@ -200,6 +200,9 @@ unique-URL counts (`uniqueness.jsonl`) to `gh-pages`, rendered as a dashboard
 at <https://super-journey-4z52474.pages.github.io/>, and archives full
 artifacts to the HF dataset
 [`keenable-ai/keenbench-results`](https://huggingface.co/datasets/keenable-ai/keenbench-results).
+Each daily run also merges its queries into `daily_queries.jsonl` at the
+dataset root (`scripts/daily_queries.py`; `backfill` rebuilds it from all
+archived runs).
 Needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, and the per-engine keys.
 
 ## Development

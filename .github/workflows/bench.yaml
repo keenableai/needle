@@ -157,6 +157,7 @@ jobs:
       - name: Publish
         run: |
           TS=$(date -u +%Y-%m-%dT%H:%MZ)
+          echo "TS=$TS" >> "$GITHUB_ENV"
           base_args="--site site-data --runs-out staged --ts $TS"
           args="$base_args"
           if [ -s rbp.json ]; then
@@ -190,6 +191,21 @@ jobs:
           git add -A
           git commit -m "bench: $TS" || echo "nothing to publish"
           git push
+
+      - name: Update daily queries
+        run: |
+          args=""
+          if [ -s recall.json ]; then args="$args --finance site-data/data/gold.jsonl"; fi
+          if [ -s scholar.json ]; then args="$args --scholar site-data/data/scholar.jsonl"; fi
+          if [ -s legal.json ]; then args="$args --legal site-data/data/legal.jsonl"; fi
+          if [ -s agentic_rare.json ]; then args="$args --agentic_rare agentic_rare.json"; fi
+          if [ -z "$args" ]; then
+            echo "no daily queries to update"
+            exit 0
+          fi
+          uv run python scripts/daily_queries.py update --ts "$TS" $args
+          uvx --from huggingface_hub hf upload "$HF_DATASET" daily_queries.jsonl daily_queries.jsonl \
+            --repo-type dataset --commit-message "daily queries: $TS"
 
   deploy-pages:
     needs: bench
