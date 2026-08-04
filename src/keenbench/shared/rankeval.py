@@ -31,26 +31,16 @@ class EvalQuery:
 @dataclass(frozen=True)
 class QueryRun:
     searches: list[Any]
-    merged: dict[str, SearchResult]
-    judgements_by_url: dict[str, Judgement | None]
+    judgements: list[list[Judgement | None]]
+    n_judged: int
     profile: dict[str, Any] | None
-
-
-def _merge_pair(results: list[SearchResult]) -> SearchResult:
-    snippet = max(results, key=lambda r: len(r.snippet or "")).snippet
-    return SearchResult(
-        url=results[0].url,
-        title=next((r.title for r in results if r.title), None),
-        snippet=snippet,
-        published_date=next((r.published_date for r in results if r.published_date), None),
-    )
 
 
 def _score_query(
     query: EvalQuery,
     results: list[SearchResult] | None,
     search_error: dict[str, str] | None,
-    judgements_by_url: dict[str, Judgement | None],
+    judgements: list[Judgement | None],
     *,
     k: int,
     profile: dict[str, Any] | None,
@@ -70,7 +60,6 @@ def _score_query(
         return out
     results = results or []
     out["n_results"] = len(results)
-    judgements = [judgements_by_url[r.url] for r in results]
     ratings = [j.rating if j is not None else None for j in judgements]
     rated = [r for r in ratings if r is not None]
     out["ratings"] = ratings
@@ -99,21 +88,34 @@ def _score_query(
 def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int) -> dict[str, Any]:
     if all(err is not None for _, err in run.searches):
         error = {"error_type": "all_engines_failed", "error_message": "every engine errored"}
-        return _score_query(query, None, error, run.judgements_by_url, k=k, profile=run.profile)
-    judged = [
-        (url, result, judgement)
-        for url, result in run.merged.items()
-        if (judgement := run.judgements_by_url[url]) is not None
-    ]
+        return _score_query(query, None, error, [], k=k, profile=run.profile)
+    best: dict[str, tuple[SearchResult, Judgement | None]] = {}
+    for (results, err), judgements in zip(run.searches, run.judgements, strict=True):
+        if err is not None:
+            continue
+        for r, j in zip(results or [], judgements, strict=True):
+            norm = normalize_url(r.url)
+            cur = best.get(norm)
+            if cur is None:
+                best[norm] = (r, j)
+            elif j is not None and (cur[1] is None or j.rating > cur[1].rating):
+                best[norm] = (r, j)
+    judged = [(r, j) for r, j in best.values() if j is not None]
     if not judged:
-        return _score_query(
-            query, list(run.merged.values()), None, run.judgements_by_url, k=k, profile=run.profile
-        )
-    urls = [url for url, _, _ in judged]
-    ratings = [judgement.rating for _, _, judgement in judged]
+        pooled = [r for r, _ in best.values()]
+        return _score_query(query, pooled, None, [None] * len(pooled), k=k, profile=run.profile)
+    urls = [r.url for r, _ in judged]
+    ratings = [j.rating for _, j in judged]
     order = oracle_order(urls, ratings, query_text=query.text)
-    ordered = [judged[i][1] for i in order][:num_results]
-    return _score_query(query, ordered, None, run.judgements_by_url, k=k, profile=run.profile)
+    ordered = [judged[i] for i in order][:num_results]
+    return _score_query(
+        query,
+        [r for r, _ in ordered],
+        None,
+        [j for _, j in ordered],
+        k=k,
+        profile=run.profile,
+    )
 
 
 def _summarize(
@@ -173,24 +175,22 @@ async def run_rbp(
             ),
             classify(query),
         )
-        pair_docs: dict[str, list[SearchResult]] = {}
+        keyed: list[list[tuple]] = []
+        unique: dict[tuple, SearchResult] = {}
         for results, err in searches:
+            keys = []
             if err is None:
                 for r in results or []:
-                    pair_docs.setdefault(normalize_url(r.url), []).append(r)
-        merged = {docs[0].url: _merge_pair(docs) for docs in pair_docs.values()}
-        judgements = await asyncio.gather(
-            *[judge_pair(query, doc, profile) for doc in merged.values()]
-        )
-        judgements_by_url = {
-            r.url: judgement
-            for docs, judgement in zip(pair_docs.values(), judgements, strict=True)
-            for r in docs
-        }
+                    key = (normalize_url(r.url), r.title, r.snippet, r.published_date)
+                    keys.append(key)
+                    unique.setdefault(key, r)
+            keyed.append(keys)
+        judged = await asyncio.gather(*[judge_pair(query, doc, profile) for doc in unique.values()])
+        by_key = dict(zip(unique.keys(), judged, strict=True))
         return QueryRun(
             searches=searches,
-            merged=merged,
-            judgements_by_url=judgements_by_url,
+            judgements=[[by_key[key] for key in keys] for keys in keyed],
+            n_judged=len(unique),
             profile=asdict(profile) if profile is not None else None,
         )
 
@@ -202,7 +202,7 @@ async def run_rbp(
         for query, run in zip(queries, query_outs, strict=True):
             results, err = run.searches[ni]
             per_query.append(
-                _score_query(query, results, err, run.judgements_by_url, k=k, profile=run.profile)
+                _score_query(query, results, err, run.judgements[ni], k=k, profile=run.profile)
             )
         engines_out[name] = _summarize(per_query, k=k, latencies_ms=engines[name].latencies_ms)
     if names:
@@ -219,6 +219,6 @@ async def run_rbp(
         "num_queries": len(queries),
         "num_results": num_results,
         "k": k,
-        "judged_pairs": sum(len(run.merged) for run in query_outs),
+        "judged_pairs": sum(run.n_judged for run in query_outs),
         "engines": engines_out,
     }
