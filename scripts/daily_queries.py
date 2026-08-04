@@ -23,7 +23,7 @@ def _resolve_base(dataset: str | None) -> str:
 
 def _query_rows(run_id: str, bench: str, text: str) -> list[dict]:
     return [
-        {"run_id": run_id, "bench": bench, **json.loads(line)}
+        {**json.loads(line), "run_id": run_id, "bench": bench}
         for line in text.splitlines()
         if line.strip()
     ]
@@ -52,6 +52,7 @@ def update(
     legal: str | None = None,
     agentic_rare: str | None = None,
 ) -> None:
+    run_id = ts.replace(":", "")
     with httpx.Client(timeout=120.0, follow_redirects=True) as client:
         resp = client.get(f"{_resolve_base(dataset)}/{OUT}")
     if resp.status_code == 404:
@@ -59,12 +60,12 @@ def update(
     else:
         resp.raise_for_status()
         rows = [json.loads(line) for line in resp.text.splitlines() if line.strip()]
-    rows = [r for r in rows if r["run_id"] != ts]
+    rows = [r for r in rows if r["run_id"] != run_id]
     for bench, path in (("finance", finance), ("scholar", scholar), ("legal", legal)):
         if path:
-            rows.extend(_query_rows(ts, bench, Path(path).read_text(encoding="utf-8")))
+            rows.extend(_query_rows(run_id, bench, Path(path).read_text(encoding="utf-8")))
     if agentic_rare:
-        rows.extend(_rare_rows(ts, json.loads(Path(agentic_rare).read_text(encoding="utf-8"))))
+        rows.extend(_rare_rows(run_id, json.loads(Path(agentic_rare).read_text(encoding="utf-8"))))
     _finish(rows, out)
 
 
