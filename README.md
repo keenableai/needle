@@ -78,9 +78,11 @@ refuses evergreen content. `query_id` is deterministic from
 [`feeds.default.toml`](src/keenbench/news/configs/feeds.default.toml)
 (override with `--feeds`; honor each publisher's ToS and rate limits).
 
-`run` judges each unique `(query, url)` once across engines with an LLM
-relevance judge (Google "Needs Met" 0–4) and scores RBP@5 (`p=0.8`, ceiling
-≈ 0.672) with redundancy penalties for duplicate URLs and repeated domains.
+`run` judges each engine's results as returned — its own title and snippet —
+with an LLM relevance judge (Google "Needs Met" 0–4) and scores RBP@5
+(`p=0.8`, ceiling ≈ 0.672) with redundancy penalties for duplicate URLs and
+repeated domains. Results identical across engines are judged once; the
+`ultimate` engine takes the best rating per deduplicated URL.
 `--snippet-chars` keeps judge evidence uniform across engines. `--queries`
 also accepts plain text, one query per line.
 

@@ -116,19 +116,31 @@ async def test_run_rbp_excludes_judge_errors_from_mean():
     assert bad["ratings"] == [None]
 
 
-async def test_run_rbp_judges_each_query_url_pair_once_across_engines():
-    shared = SearchResult(url="https://shared", title="GOODDOC", snippet="short")
+async def test_run_rbp_judges_each_engine_on_its_own_snippet():
+    lean = SearchResult(url="https://shared", title="nope", snippet="short")
     richer = SearchResult(url="https://shared", title=None, snippet="GOODDOC but much longer")
     judge = FakeJudge()
     report = await run_rbp(
         [q("q1")],
-        {"a": FakeEngine([shared]), "b": FakeEngine([richer])},
+        {"a": FakeEngine([lean]), "b": FakeEngine([richer])},
         judge,
     )
+    assert report["judged_pairs"] == 2
+    assert judge.calls == 3
+    assert is_profile_prompt(judge.prompts[0])
+    assert "short" in judge.prompts[1]
+    assert "GOODDOC but much longer" not in judge.prompts[1]
+    assert "GOODDOC but much longer" in judge.prompts[2]
+    assert report["engines"]["a"]["per_query"][0]["ratings"] == [0]
+    assert report["engines"]["b"]["per_query"][0]["ratings"] == [4]
+
+
+async def test_run_rbp_judges_identical_docs_once_across_engines():
+    doc = SearchResult(url="https://shared", title="GOODDOC", snippet="same")
+    judge = FakeJudge()
+    report = await run_rbp([q("q1")], {"a": FakeEngine([doc]), "b": FakeEngine([doc])}, judge)
     assert report["judged_pairs"] == 1
     assert judge.calls == 2
-    assert is_profile_prompt(judge.prompts[0])
-    assert "GOODDOC but much longer" in judge.prompts[1]
     assert report["engines"]["a"]["per_query"][0]["ratings"] == [4]
     assert report["engines"]["b"]["per_query"][0]["ratings"] == [4]
 
@@ -201,13 +213,25 @@ async def test_run_rbp_ultimate_dedupes_url_variants():
     )
     judge = FakeJudge()
     report = await run_rbp([q("q1")], {"a": a, "b": b}, judge)
-    assert report["judged_pairs"] == 1
-    assert judge.calls == 2
+    assert report["judged_pairs"] == 2
+    assert judge.calls == 3
     pq = report["engines"]["ultimate"]["per_query"][0]
     assert pq["n_results"] == 1
     assert pq["rbp"] == pytest.approx((1 - 0.8) * 1.0)
     assert report["engines"]["a"]["per_query"][0]["ratings"] == [4]
     assert report["engines"]["b"]["per_query"][0]["ratings"] == [4]
+
+
+async def test_run_rbp_ultimate_takes_best_rating_per_url():
+    a = FakeEngine([SearchResult(url="https://one.com/a", title="nope", snippet="meh")])
+    b = FakeEngine([SearchResult(url="http://www.one.com/a/", title="GOODDOC", snippet="rich")])
+    report = await run_rbp([q("q1")], {"a": a, "b": b}, FakeJudge())
+    assert report["engines"]["a"]["per_query"][0]["ratings"] == [0]
+    assert report["engines"]["b"]["per_query"][0]["ratings"] == [4]
+    pq = report["engines"]["ultimate"]["per_query"][0]
+    assert pq["n_results"] == 1
+    assert pq["ratings"] == [4]
+    assert pq["rbp"] == pytest.approx((1 - 0.8) * 1.0)
 
 
 async def test_run_rbp_ultimate_unscored_when_all_engines_fail():
