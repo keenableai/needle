@@ -6288,5 +6288,14 @@
       "fresh.jsonl",
       "rbp.json"
     ]
+  },
+  {
+    "id": "2026-08-05T0734Z",
+    "ts": "2026-08-05T07:34Z",
+    "artifacts": [
+      "agentic_rare.json",
+      "fresh.jsonl",
+      "rbp.json"
+    ]
   }
 ]
