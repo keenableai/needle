@@ -195,9 +195,10 @@ jobs:
       - name: Update daily queries
         run: |
           args=""
-          if [ -s recall.json ]; then args="$args --finance site-data/data/gold.jsonl"; fi
-          if [ -s scholar.json ]; then args="$args --scholar site-data/data/scholar.jsonl"; fi
-          if [ -s legal.json ]; then args="$args --legal site-data/data/legal.jsonl"; fi
+          if [ -s rbp.json ]; then args="$args --news fresh.jsonl --news_report rbp.json"; fi
+          if [ -s recall.json ]; then args="$args --finance site-data/data/gold.jsonl --finance_report recall.json"; fi
+          if [ -s scholar.json ]; then args="$args --scholar site-data/data/scholar.jsonl --scholar_report scholar.json"; fi
+          if [ -s legal.json ]; then args="$args --legal site-data/data/legal.jsonl --legal_report legal.json"; fi
           if [ -s agentic_rare.json ]; then args="$args --agentic_rare agentic_rare.json"; fi
           if [ -z "$args" ]; then
             echo "no daily queries to update"

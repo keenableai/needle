@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import fire
@@ -9,7 +10,14 @@ from keenbench.shared.io import write_jsonl
 
 DEFAULT_DATASET = "keenable-ai/keenbench-results"
 OUT = "daily_queries.jsonl"
-QUERY_FILES = {"gold.jsonl": "finance", "scholar.jsonl": "scholar", "legal.jsonl": "legal"}
+WINDOW_HOURS = 24
+RUN_ID_FMT = "%Y-%m-%dT%H%MZ"
+BENCHES = (
+    ("news", "fresh.jsonl", "rbp.json"),
+    ("finance", "gold.jsonl", "recall.json"),
+    ("scholar", "scholar.jsonl", "scholar.json"),
+    ("legal", "legal.jsonl", "legal.json"),
+)
 RARE_REPORTS = ("agentic_rare.json", "rarestream.json")
 
 
@@ -21,11 +29,16 @@ def _resolve_base(dataset: str | None) -> str:
     return f"https://huggingface.co/datasets/{_dataset(dataset)}/resolve/main"
 
 
-def _query_rows(run_id: str, bench: str, text: str) -> list[dict]:
+def _evaluated(report: dict) -> set[str]:
+    engine = next(iter(report["engines"].values()))
+    return {pq["query"] for pq in engine["per_query"]}
+
+
+def _bench_rows(run_id: str, bench: str, queries_text: str, report: dict) -> list[dict]:
+    evaluated = _evaluated(report)
+    rows = [json.loads(line) for line in queries_text.splitlines() if line.strip()]
     return [
-        {**json.loads(line), "run_id": run_id, "bench": bench}
-        for line in text.splitlines()
-        if line.strip()
+        {**rec, "run_id": run_id, "bench": bench} for rec in rows if rec["query_text"] in evaluated
     ]
 
 
@@ -47,12 +60,20 @@ def update(
     ts: str,
     out: str = OUT,
     dataset: str | None = None,
+    news: str | None = None,
+    news_report: str | None = None,
     finance: str | None = None,
+    finance_report: str | None = None,
     scholar: str | None = None,
+    scholar_report: str | None = None,
     legal: str | None = None,
+    legal_report: str | None = None,
     agentic_rare: str | None = None,
 ) -> None:
     run_id = ts.replace(":", "")
+    cutoff = (datetime.strptime(run_id, RUN_ID_FMT) - timedelta(hours=WINDOW_HOURS)).strftime(
+        RUN_ID_FMT
+    )
     with httpx.Client(timeout=120.0, follow_redirects=True) as client:
         resp = client.get(f"{_resolve_base(dataset)}/{OUT}")
     if resp.status_code == 404:
@@ -60,40 +81,56 @@ def update(
     else:
         resp.raise_for_status()
         rows = [json.loads(line) for line in resp.text.splitlines() if line.strip()]
-    rows = [r for r in rows if r["run_id"] != run_id]
-    for bench, path in (("finance", finance), ("scholar", scholar), ("legal", legal)):
-        if path:
-            rows.extend(_query_rows(run_id, bench, Path(path).read_text(encoding="utf-8")))
+    rows = [r for r in rows if r["run_id"] != run_id and r["run_id"] >= cutoff]
+    paths = {
+        "news": (news, news_report),
+        "finance": (finance, finance_report),
+        "scholar": (scholar, scholar_report),
+        "legal": (legal, legal_report),
+    }
+    for bench, (queries_path, report_path) in paths.items():
+        if queries_path and report_path:
+            report = json.loads(Path(report_path).read_text(encoding="utf-8"))
+            queries_text = Path(queries_path).read_text(encoding="utf-8")
+            rows.extend(_bench_rows(run_id, bench, queries_text, report))
     if agentic_rare:
         rows.extend(_rare_rows(run_id, json.loads(Path(agentic_rare).read_text(encoding="utf-8"))))
     _finish(rows, out)
 
 
-def backfill(out: str = OUT, dataset: str | None = None) -> None:
+def backfill(out: str = OUT, dataset: str | None = None, hours: int = WINDOW_HOURS) -> None:
+    cutoff = (datetime.now(UTC) - timedelta(hours=hours)).strftime(RUN_ID_FMT)
     api_base = f"https://huggingface.co/api/datasets/{_dataset(dataset)}/tree/main/runs"
     resolve_base = _resolve_base(dataset)
     rows: list[dict] = []
     with httpx.Client(timeout=120.0, follow_redirects=True) as client:
+
+        def fetch(path: str) -> httpx.Response:
+            resp = client.get(f"{resolve_base}/{path}")
+            resp.raise_for_status()
+            return resp
+
         url = f"{api_base}?recursive=true&limit=1000"
-        paths: list[str] = []
+        by_run: dict[str, set[str]] = {}
         while url:
             resp = client.get(url)
             resp.raise_for_status()
-            paths.extend(f["path"] for f in resp.json() if f["type"] == "file")
+            for f in resp.json():
+                if f["type"] != "file":
+                    continue
+                run_id, name = f["path"].split("/")[1], f["path"].rsplit("/", 1)[1]
+                if run_id >= cutoff:
+                    by_run.setdefault(run_id, set()).add(name)
             url = resp.links.get("next", {}).get("url")
-        rare_by_run: dict[str, str] = {}
-        for path in paths:
-            run_id, name = path.split("/")[1], path.rsplit("/", 1)[1]
-            if name in QUERY_FILES:
-                resp = client.get(f"{resolve_base}/{path}")
-                resp.raise_for_status()
-                rows.extend(_query_rows(run_id, QUERY_FILES[name], resp.text))
-            elif name in RARE_REPORTS and run_id not in rare_by_run:
-                rare_by_run[run_id] = path
-        for run_id, path in rare_by_run.items():
-            resp = client.get(f"{resolve_base}/{path}")
-            resp.raise_for_status()
-            rows.extend(_rare_rows(run_id, resp.json()))
+        for run_id, names in by_run.items():
+            for bench, queries_name, report_name in BENCHES:
+                if queries_name in names and report_name in names:
+                    report = fetch(f"runs/{run_id}/{report_name}").json()
+                    queries_text = fetch(f"runs/{run_id}/{queries_name}").text
+                    rows.extend(_bench_rows(run_id, bench, queries_text, report))
+            rare = next((n for n in RARE_REPORTS if n in names), None)
+            if rare:
+                rows.extend(_rare_rows(run_id, fetch(f"runs/{run_id}/{rare}").json()))
     _finish(rows, out)
 
 
