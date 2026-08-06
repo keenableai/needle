@@ -109,7 +109,7 @@ jobs:
             exit 0
           fi
           uv run keenbench agentic_rare run --limit 100 \
-            --engines "$ENGINES" --out agentic_rare.json
+            --engines "$ENGINES" --queries-out agentic_rare.jsonl --out agentic_rare.json
 
       - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
         id: scholar
@@ -167,7 +167,7 @@ jobs:
             args="$args --recall recall.json --gold site-data/data/gold.jsonl"
           fi
           if [ -s agentic_rare.json ]; then
-            args="$args --agentic_rare agentic_rare.json"
+            args="$args --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl"
           fi
           if [ -s scholar.json ]; then
             args="$args --scholar scholar.json --scholar-queries site-data/data/scholar.jsonl"
@@ -199,7 +199,7 @@ jobs:
           if [ -s recall.json ]; then args="$args --finance site-data/data/gold.jsonl --finance_report recall.json"; fi
           if [ -s scholar.json ]; then args="$args --scholar site-data/data/scholar.jsonl --scholar_report scholar.json"; fi
           if [ -s legal.json ]; then args="$args --legal site-data/data/legal.jsonl --legal_report legal.json"; fi
-          if [ -s agentic_rare.json ]; then args="$args --agentic_rare agentic_rare.json"; fi
+          if [ -s agentic_rare.json ]; then args="$args --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl"; fi
           if [ -z "$args" ]; then
             echo "no daily queries to update"
             exit 0
