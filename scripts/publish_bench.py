@@ -158,6 +158,7 @@ def publish(
     recall: str | None = None,
     gold: str | None = None,
     agentic_rare: str | None = None,
+    agentic_rare_queries: str | None = None,
     scholar: str | None = None,
     scholar_queries: str | None = None,
     legal: str | None = None,
@@ -202,6 +203,7 @@ def publish(
     for path, archive_name in (
         (fresh, "fresh.jsonl"),
         (gold, "gold.jsonl"),
+        (agentic_rare_queries, "agentic_rare.jsonl"),
         (scholar_queries, "scholar.jsonl"),
         (legal_queries, "legal.jsonl"),
         (findallmcp_queries, "findallmcp.jsonl"),

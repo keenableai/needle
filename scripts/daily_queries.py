@@ -15,6 +15,7 @@ RUN_ID_FMT = "%Y-%m-%dT%H%MZ"
 BENCHES = (
     ("news", "fresh.jsonl", "rbp.json"),
     ("finance", "gold.jsonl", "recall.json"),
+    ("agentic_rare", "agentic_rare.jsonl", "agentic_rare.json"),
     ("scholar", "scholar.jsonl", "scholar.json"),
     ("legal", "legal.jsonl", "legal.json"),
 )
@@ -69,6 +70,7 @@ def update(
     legal: str | None = None,
     legal_report: str | None = None,
     agentic_rare: str | None = None,
+    agentic_rare_queries: str | None = None,
 ) -> None:
     run_id = ts.replace(":", "")
     cutoff = (datetime.strptime(run_id, RUN_ID_FMT) - timedelta(hours=WINDOW_HOURS)).strftime(
@@ -85,6 +87,7 @@ def update(
     paths = {
         "news": (news, news_report),
         "finance": (finance, finance_report),
+        "agentic_rare": (agentic_rare_queries, agentic_rare),
         "scholar": (scholar, scholar_report),
         "legal": (legal, legal_report),
     }
@@ -93,7 +96,7 @@ def update(
             report = json.loads(Path(report_path).read_text(encoding="utf-8"))
             queries_text = Path(queries_path).read_text(encoding="utf-8")
             rows.extend(_bench_rows(run_id, bench, queries_text, report))
-    if agentic_rare:
+    if agentic_rare and not agentic_rare_queries:
         rows.extend(_rare_rows(run_id, json.loads(Path(agentic_rare).read_text(encoding="utf-8"))))
     _finish(rows, out)
 
@@ -128,9 +131,10 @@ def backfill(out: str = OUT, dataset: str | None = None, hours: int = WINDOW_HOU
                     report = fetch(f"runs/{run_id}/{report_name}").json()
                     queries_text = fetch(f"runs/{run_id}/{queries_name}").text
                     rows.extend(_bench_rows(run_id, bench, queries_text, report))
-            rare = next((n for n in RARE_REPORTS if n in names), None)
-            if rare:
-                rows.extend(_rare_rows(run_id, fetch(f"runs/{run_id}/{rare}").json()))
+            if "agentic_rare.jsonl" not in names:
+                rare = next((n for n in RARE_REPORTS if n in names), None)
+                if rare:
+                    rows.extend(_rare_rows(run_id, fetch(f"runs/{run_id}/{rare}").json()))
     _finish(rows, out)
 
 
