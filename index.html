@@ -93,16 +93,16 @@ document.documentElement.dataset.theme = localStorage.theme ||
     vertical-align: middle; margin-right: 6px;
   }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
-  .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center; margin: 4px 0; color: var(--text-secondary); font-size: 12px; }
+  .legend .key { display: inline-block; width: 14px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 5px; }
   .legend button {
-    display: inline-flex; align-items: center; padding: 3px 9px;
-    background: none; border: 1px solid transparent; border-radius: 8px;
+    display: inline-flex; align-items: center; padding: 2px 7px;
+    background: none; border: 1px solid transparent; border-radius: 7px;
     color: inherit; cursor: pointer; font: inherit;
   }
-  .legend button:hover { border-color: var(--grid); }
-  .legend button[aria-pressed="true"] { border-color: var(--border); background: var(--surface-1); color: var(--text-primary); }
-  .legend .note { color: var(--text-muted); margin-left: 8px; }
+  .legend button:hover:not(:disabled) { border-color: var(--grid); }
+  .legend button:disabled { cursor: default; }
+  .legend button[aria-pressed="true"] { border-color: var(--border); background: var(--page); color: var(--text-primary); }
 
   .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .lb-tabs {
@@ -368,8 +368,6 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <div id="lb-legal"></div>
     </div>
   </div>
-
-  <div class="legend" id="legend"></div>
 
   <h2 class="section-title" id="sec-latency">Search latency</h2>
   <div class="grid2">
@@ -651,16 +649,19 @@ function markerEl(engine, x, y, r) {
 
 const HOME_ENGINE = "keenable";
 const ULTIMATE_ENGINE = "ultimate";
-let selectedEngine = null;
 function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
 
-function engineCell(engine, cls = "") {
-  const td = el("td", { class: cls });
+function engineKey(engine) {
   const key = el("span", { class: "key" });
   key.style.background = colorOf(engine);
-  td.append(key, document.createTextNode(engine));
+  return key;
+}
+
+function engineCell(engine, cls = "") {
+  const td = el("td", { class: cls });
+  td.append(engineKey(engine), document.createTextNode(engine));
   return td;
 }
 let history = [];
@@ -786,7 +787,9 @@ function drawChart(card, series, opts) {
   card.querySelectorAll("svg, .tooltip, .empty").forEach((n) => n.remove());
   const points = ENGINES.flatMap((e) => series[e]);
   card._mdRows = null;
+  card._sel ??= new Set();
   if (!points.length) {
+    card.querySelector(".legend")?.remove();
     card.appendChild(el("div", { class: "empty" }, opts.empty || "No data yet — first scheduled run pending."));
     return;
   }
@@ -832,10 +835,10 @@ function drawChart(card, series, opts) {
     const va = series[a].at(-1).v, vb = series[b].at(-1).v;
     return opts.lowerIsBetter ? va - vb : vb - va;
   });
-  const sel = selectedEngine && series[selectedEngine]?.length ? selectedEngine : null;
-  const highlight = new Set(sel ? [sel] : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
-  if (!sel && series[HOME_ENGINE]?.length) highlight.add(HOME_ENGINE);
-  if (series[ULTIMATE_ENGINE]?.length) highlight.add(ULTIMATE_ENGINE);
+  const sel = active.filter((e) => card._sel.has(e));
+  const highlight = new Set(sel.length ? sel : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
+  if (!sel.length) highlight.add(HOME_ENGINE);
+  highlight.add(ULTIMATE_ENGINE);
   const endLabels = [];
   for (const e of [...active].sort((a, b) => highlight.has(a) - highlight.has(b))) {
     const pts = series[e];
@@ -894,8 +897,7 @@ function drawChart(card, series, opts) {
     atT.sort((a, b) => (opts.lowerIsBetter ? a.v - b.v : b.v - a.v));
     for (const { e, v } of atT) {
       const row = el("div", { class: "row" });
-      const key = el("span", { class: "key" }); key.style.background = colorOf(e);
-      row.append(key, el("span", { class: "val" }, fmt(v)), el("span", { class: "name" }, e));
+      row.append(engineKey(e), el("span", { class: "val" }, fmt(v)), el("span", { class: "name" }, e));
       tip.appendChild(row);
     }
     tip.style.display = "block";
@@ -937,7 +939,38 @@ function drawChart(card, series, opts) {
     ev.preventDefault();
     showIdx(focusIdx);
   });
-  card.appendChild(svg);
+  let legend = card.querySelector(".legend");
+  if (legend && legend.dataset.engines !== active.join(" ")) {
+    legend.remove();
+    legend = null;
+  }
+  card.insertBefore(svg, legend);
+  if (!legend) {
+    legend = el("div", { class: "legend", "data-engines": active.join(" ") });
+    for (const e of active) {
+      const btn = el("button", { type: "button" });
+      btn.append(engineKey(e), document.createTextNode(e));
+      if (e === ULTIMATE_ENGINE) {
+        btn.disabled = true;
+        btn.title = "always highlighted";
+      } else {
+        btn.addEventListener("click", () => {
+          if (!card._sel.delete(e)) card._sel.add(e);
+          drawChart(card, series, opts);
+        });
+      }
+      legend.appendChild(btn);
+    }
+    card.appendChild(legend);
+  }
+  active.forEach((e, i) => {
+    const btn = legend.children[i];
+    if (btn.disabled) return;
+    const on = card._sel.has(e);
+    btn.setAttribute("aria-pressed", on);
+    btn.title = on ? `stop highlighting ${e}` : `highlight ${e} in this chart`;
+    btn.firstChild.style.background = highlight.has(e) ? colorOf(e) : "var(--baseline)";
+  });
 }
 
 function wmean(rows, metric, weightMetric = "num_scored") {
@@ -1754,33 +1787,7 @@ function renderFinanceRun(holder, report, engine) {
   }
 }
 
-function renderScholarRun(holder, report, engine) {
-  const per = report.engines[engine]?.per_query || [];
-  for (const pq of per) {
-    const row = el("details", { class: "qrow" });
-    const summary = el("summary");
-    summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
-    summary.appendChild(el("span", {}, pq.query));
-    if (pq.paper_key) summary.appendChild(el("span", { class: "host" }, `gold: ${pq.paper_key}`));
-    summary.appendChild(el("span", { class: "score" },
-      pq.search_error ? "search error"
-        : pq.hit_rank ? `hit @${pq.hit_rank}` : "miss"));
-    row.appendChild(summary);
-    (pq.results || []).forEach((r, i) => {
-      const rank = i + 1;
-      const mark = rank === pq.hit_rank
-        ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
-        : el("span", { class: "miss-marker" }, `#${rank}`);
-      const block = resultBlock({ url: r.url, title: r.title }, [mark]);
-      const ids = Object.entries(r.ids || {}).map(([k, v]) => `${k}:${v}`).join(" ");
-      if (ids) block.querySelector(".head").appendChild(el("span", { class: "host" }, ids));
-      row.appendChild(block);
-    });
-    holder.appendChild(row);
-  }
-}
-
-function renderLegalRun(holder, report, engine) {
+function renderKnownItemRun(holder, report, engine, goldKey) {
   const per = report.engines[engine]?.per_query || [];
   for (const pq of per) {
     const row = el("details", { class: "qrow" });
@@ -1788,7 +1795,7 @@ function renderLegalRun(holder, report, engine) {
     summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
     if (pq.syntax && pq.syntax !== "plain") summary.appendChild(el("span", { class: "chip" }, pq.syntax));
     summary.appendChild(el("span", {}, pq.query));
-    if (pq.case_key) summary.appendChild(el("span", { class: "host" }, `gold: ${pq.case_key}`));
+    if (pq[goldKey]) summary.appendChild(el("span", { class: "host" }, `gold: ${pq[goldKey]}`));
     summary.appendChild(el("span", { class: "score" },
       pq.search_error ? "search error"
         : pq.hit_rank ? `hit @${pq.hit_rank}` : "miss"));
@@ -1798,7 +1805,7 @@ function renderLegalRun(holder, report, engine) {
       const mark = rank === pq.hit_rank
         ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
         : el("span", { class: "miss-marker" }, `#${rank}`);
-      const block = resultBlock({ url: r.url, title: r.title }, [mark]);
+      const block = resultBlock(r, [mark]);
       const ids = Object.entries(r.ids || {}).map(([k, v]) => `${k}:${v}`).join(" ");
       if (ids) block.querySelector(".head").appendChild(el("span", { class: "host" }, ids));
       row.appendChild(block);
@@ -1840,8 +1847,8 @@ async function renderRunDetail(runs) {
     engineSel.value = available.includes(current) ? current : available[0] || "";
     holder.replaceChildren();
     if (benchSel.value === "finance") renderFinanceRun(holder, report, engineSel.value);
-    else if (benchSel.value === "scholar") renderScholarRun(holder, report, engineSel.value);
-    else if (benchSel.value === "legal") renderLegalRun(holder, report, engineSel.value);
+    else if (benchSel.value === "scholar") renderKnownItemRun(holder, report, engineSel.value, "paper_key");
+    else if (benchSel.value === "legal") renderKnownItemRun(holder, report, engineSel.value, "case_key");
     else renderNewsRun(holder, report, engineSel.value);
     if (!holder.children.length) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
@@ -1967,26 +1974,6 @@ function renderAll(latestFinance) {
   renderFields(latestFinance);
 }
 
-function renderLegend() {
-  const legend = document.getElementById("legend");
-  legend.replaceChildren();
-  for (const e of ENGINES) {
-    const item = el("button", { type: "button", "aria-pressed": e === selectedEngine });
-    const key = el("span", { class: "key" }); key.style.background = colorOf(e);
-    item.append(key, document.createTextNode(e));
-    item.addEventListener("click", () => {
-      selectedEngine = selectedEngine === e ? null : e;
-      renderLegend();
-      drawCharts(history);
-    });
-    legend.appendChild(item);
-  }
-  const note = el("span", { class: "note" }, selectedEngine
-    ? `charts highlight ${selectedEngine}; click it again to reset`
-    : "charts color the top 3 engines + keenable; click an engine to highlight only it");
-  legend.appendChild(note);
-}
-
 function rowsToMarkdown(rows) {
   const esc = (c) => String(c).replace(/\s+/g, " ").trim().replace(/\|/g, "\\|");
   const lines = [`| ${rows[0].map(esc).join(" | ")} |`, `| ${rows[0].map(() => "---").join(" | ")} |`];
@@ -2080,7 +2067,6 @@ async function main() {
   registerEngines(history.map((r) => r.engine));
   registerEngines(Object.keys(latestFinance?.engines || {}));
   document.documentElement.style.setProperty("--home", colorOf(HOME_ENGINE));
-  renderLegend();
 
   if (history.length) {
     const lastTs = history[history.length - 1].ts;
