@@ -6,11 +6,12 @@ from typing import Any
 from keenbench.shared.recall import (
     ULTIMATE,
     classify_misses,
+    first_rank,
     group_recall,
     recall_summary,
     ultimate_per_query,
 )
-from keenbench.shared.search import SearchClient, SearchResult, latency_stats
+from keenbench.shared.search import SearchClient, SearchResult, capped_snippet, latency_stats
 
 CLUSTER_URL_RE = re.compile(r"courtlistener\.com/opinion/(\d+)/", re.IGNORECASE)
 JUSTIA_US_RE = re.compile(
@@ -76,10 +77,7 @@ class LegalIds:
 
 
 def _capped(result: SearchResult, snippet_chars: int) -> str:
-    snippet = result.snippet or ""
-    if snippet_chars > 0:
-        snippet = snippet[:snippet_chars]
-    return " ".join(part for part in (result.title, snippet) if part)
+    return " ".join(p for p in (result.title, capped_snippet(result, snippet_chars)) if p)
 
 
 def extract_legal_ids(result: SearchResult, *, snippet_chars: int) -> LegalIds:
@@ -181,14 +179,21 @@ async def run_legal(
         results = results or []
         pq["n_results"] = len(results)
         found = [extract_legal_ids(r, snippet_chars=snippet_chars) for r in results]
-        pq["results"] = [
-            {"url": r.url, "title": r.title, "ids": f.as_match_dict()}
+        matches = [
+            ids_match(query, f, result_text=f"{_capped(r, snippet_chars)} {r.url or ''}")
             for r, f in zip(results, found, strict=True)
         ]
-        for rank, (r, f) in enumerate(zip(results, found, strict=True), start=1):
-            if ids_match(query, f, result_text=f"{_capped(r, snippet_chars)} {r.url or ''}"):
-                pq["hit_rank"] = rank
-                break
+        pq["results"] = [
+            {
+                "url": r.url,
+                "title": r.title,
+                "snippet": capped_snippet(r, snippet_chars),
+                "ids": f.as_match_dict(),
+                "matched": m,
+            }
+            for r, f, m in zip(results, found, matches, strict=True)
+        ]
+        pq["hit_rank"] = first_rank(matches)
         return pq
 
     async def run_query(query: GoldLegal) -> list[dict]:

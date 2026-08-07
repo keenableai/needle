@@ -143,6 +143,10 @@ async def test_judge_upgrades_deterministic_miss():
     assert e["judge_upgrades"] == 1
     assert e["recall_at_k"] == 1.0 and e["mrr_at_k"] == 1.0
     assert len(llm.prompts) == 1
+    first, second = pq["results"]
+    assert first["det_match"] is False and first["judge_match"] is True
+    assert second["det_match"] is True and second["judge_match"] is None
+    assert second["snippet"] == "CEO Jensen Huang"
 
 
 async def test_judge_not_called_at_or_after_deterministic_hit():

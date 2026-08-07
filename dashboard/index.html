@@ -1787,33 +1787,7 @@ function renderFinanceRun(holder, report, engine) {
   }
 }
 
-function renderScholarRun(holder, report, engine) {
-  const per = report.engines[engine]?.per_query || [];
-  for (const pq of per) {
-    const row = el("details", { class: "qrow" });
-    const summary = el("summary");
-    summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
-    summary.appendChild(el("span", {}, pq.query));
-    if (pq.paper_key) summary.appendChild(el("span", { class: "host" }, `gold: ${pq.paper_key}`));
-    summary.appendChild(el("span", { class: "score" },
-      pq.search_error ? "search error"
-        : pq.hit_rank ? `hit @${pq.hit_rank}` : "miss"));
-    row.appendChild(summary);
-    (pq.results || []).forEach((r, i) => {
-      const rank = i + 1;
-      const mark = rank === pq.hit_rank
-        ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
-        : el("span", { class: "miss-marker" }, `#${rank}`);
-      const block = resultBlock({ url: r.url, title: r.title }, [mark]);
-      const ids = Object.entries(r.ids || {}).map(([k, v]) => `${k}:${v}`).join(" ");
-      if (ids) block.querySelector(".head").appendChild(el("span", { class: "host" }, ids));
-      row.appendChild(block);
-    });
-    holder.appendChild(row);
-  }
-}
-
-function renderLegalRun(holder, report, engine) {
+function renderKnownItemRun(holder, report, engine, goldKey) {
   const per = report.engines[engine]?.per_query || [];
   for (const pq of per) {
     const row = el("details", { class: "qrow" });
@@ -1821,7 +1795,7 @@ function renderLegalRun(holder, report, engine) {
     summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
     if (pq.syntax && pq.syntax !== "plain") summary.appendChild(el("span", { class: "chip" }, pq.syntax));
     summary.appendChild(el("span", {}, pq.query));
-    if (pq.case_key) summary.appendChild(el("span", { class: "host" }, `gold: ${pq.case_key}`));
+    if (pq[goldKey]) summary.appendChild(el("span", { class: "host" }, `gold: ${pq[goldKey]}`));
     summary.appendChild(el("span", { class: "score" },
       pq.search_error ? "search error"
         : pq.hit_rank ? `hit @${pq.hit_rank}` : "miss"));
@@ -1831,7 +1805,7 @@ function renderLegalRun(holder, report, engine) {
       const mark = rank === pq.hit_rank
         ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
         : el("span", { class: "miss-marker" }, `#${rank}`);
-      const block = resultBlock({ url: r.url, title: r.title }, [mark]);
+      const block = resultBlock(r, [mark]);
       const ids = Object.entries(r.ids || {}).map(([k, v]) => `${k}:${v}`).join(" ");
       if (ids) block.querySelector(".head").appendChild(el("span", { class: "host" }, ids));
       row.appendChild(block);
@@ -1873,8 +1847,8 @@ async function renderRunDetail(runs) {
     engineSel.value = available.includes(current) ? current : available[0] || "";
     holder.replaceChildren();
     if (benchSel.value === "finance") renderFinanceRun(holder, report, engineSel.value);
-    else if (benchSel.value === "scholar") renderScholarRun(holder, report, engineSel.value);
-    else if (benchSel.value === "legal") renderLegalRun(holder, report, engineSel.value);
+    else if (benchSel.value === "scholar") renderKnownItemRun(holder, report, engineSel.value, "paper_key");
+    else if (benchSel.value === "legal") renderKnownItemRun(holder, report, engineSel.value, "case_key");
     else renderNewsRun(holder, report, engineSel.value);
     if (!holder.children.length) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));

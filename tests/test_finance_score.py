@@ -3,7 +3,7 @@ import json
 import pytest
 
 from keenbench.finance import cli as finance_cli
-from keenbench.finance.score import GoldQuery, first_hit_rank, run_answers
+from keenbench.finance.score import GoldQuery, result_answers, run_answers
 from keenbench.shared.cli import load_gold_rows
 from keenbench.shared.search import SearchResult
 from keenbench.shared.search import factory as search_factory
@@ -72,20 +72,19 @@ class FakeEngine:
         self.closed = True
 
 
-def test_first_hit_rank_and_snippet_cap():
-    results = [
-        _r("https://a.com", "NVIDIA news", "GPU launch coverage"),
-        _r("https://b.com", "About", "x" * 100 + " CEO Jensen Huang leads the company"),
-    ]
-    assert first_hit_rank(CEO_Q, results, snippet_chars=0) == 2
-    assert first_hit_rank(CEO_Q, results, snippet_chars=50) is None
+def test_result_answers_and_snippet_cap():
+    miss = _r("https://a.com", "NVIDIA news", "GPU launch coverage")
+    hit = _r("https://b.com", "About", "x" * 100 + " CEO Jensen Huang leads the company")
+    assert result_answers(CEO_Q, miss, snippet_chars=0) is False
+    assert result_answers(CEO_Q, hit, snippet_chars=0) is True
+    assert result_answers(CEO_Q, hit, snippet_chars=50) is False
 
 
 def test_field_cues_applied_from_spec():
-    hit = [_r("https://a.com", None, "NVIDIA has 34,000 employees worldwide")]
-    miss = [_r("https://a.com", None, "34,000 people work at the company")]
-    assert first_hit_rank(EMP_Q, hit, snippet_chars=0) == 1
-    assert first_hit_rank(EMP_Q, miss, snippet_chars=0) is None
+    hit = _r("https://a.com", None, "NVIDIA has 34,000 employees worldwide")
+    miss = _r("https://a.com", None, "34,000 people work at the company")
+    assert result_answers(EMP_Q, hit, snippet_chars=0) is True
+    assert result_answers(EMP_Q, miss, snippet_chars=0) is False
 
 
 async def test_run_answers_metrics_and_breakdowns():

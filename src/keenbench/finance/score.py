@@ -9,11 +9,12 @@ from keenbench.shared.llm import LLMClient
 from keenbench.shared.recall import (
     ULTIMATE,
     classify_misses,
+    first_rank,
     group_recall,
     recall_summary,
     ultimate_per_query,
 )
-from keenbench.shared.search import SearchClient, SearchResult, latency_stats
+from keenbench.shared.search import SearchClient, SearchResult, capped_snippet, latency_stats
 
 
 @dataclass(frozen=True)
@@ -29,13 +30,8 @@ class GoldQuery:
     tier: str = ""
 
 
-def _capped_snippet(result: SearchResult, snippet_chars: int) -> str:
-    snippet = result.snippet or ""
-    return snippet[:snippet_chars] if snippet_chars > 0 else snippet
-
-
 def result_answers(query: GoldQuery, result: SearchResult, *, snippet_chars: int) -> bool:
-    text = " ".join(part for part in (result.title, _capped_snippet(result, snippet_chars)) if part)
+    text = " ".join(part for part in (result.title, capped_snippet(result, snippet_chars)) if part)
     return gold_in_text(
         query.field_type,
         query.value,
@@ -44,15 +40,6 @@ def result_answers(query: GoldQuery, result: SearchResult, *, snippet_chars: int
         url=result.url,
         cues=cues_for(query.field),
     )
-
-
-def first_hit_rank(
-    query: GoldQuery, results: list[SearchResult], *, snippet_chars: int
-) -> int | None:
-    for rank, result in enumerate(results, start=1):
-        if result_answers(query, result, snippet_chars=snippet_chars):
-            return rank
-    return None
 
 
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
@@ -128,7 +115,7 @@ async def run_answers(
                 aliases=query.aliases,
                 title=result.title,
                 url=result.url,
-                snippet=_capped_snippet(result, snippet_chars),
+                snippet=capped_snippet(result, snippet_chars),
             )
         return verdict, err is not None
 
@@ -153,22 +140,30 @@ async def run_answers(
             return pq
         results = results or []
         pq["n_results"] = len(results)
-        pq["results"] = [
-            {"url": r.url, "title": r.title, "snippet": _capped_snippet(r, snippet_chars)}
-            for r in results
-        ]
-        det_rank = first_hit_rank(query, results, snippet_chars=snippet_chars)
+        det_matches = [result_answers(query, r, snippet_chars=snippet_chars) for r in results]
+        det_rank = first_rank(det_matches)
         pq["det_rank"] = det_rank
         pq["hit_rank"] = det_rank
+        judge_matches: list[bool | None] = [None] * len(results)
         if judge is not None:
             cutoff = det_rank - 1 if det_rank is not None else len(results)
-            candidates = list(enumerate(results[:cutoff], start=1))
-            verdicts = await asyncio.gather(*[judge_result(query, r) for _, r in candidates])
-            pq["judged"] = len(candidates)
+            verdicts = await asyncio.gather(*[judge_result(query, r) for r in results[:cutoff]])
+            pq["judged"] = len(verdicts)
             pq["judge_errors"] = sum(1 for _, errored in verdicts if errored)
-            yes_ranks = [rank for (rank, _), (v, _) in zip(candidates, verdicts, strict=True) if v]
-            if yes_ranks:
-                pq["hit_rank"] = min(yes_ranks)
+            judge_matches[: len(verdicts)] = [verdict for verdict, _ in verdicts]
+            judge_rank = first_rank(judge_matches)
+            if judge_rank is not None:
+                pq["hit_rank"] = judge_rank
+        pq["results"] = [
+            {
+                "url": r.url,
+                "title": r.title,
+                "snippet": capped_snippet(r, snippet_chars),
+                "det_match": det,
+                "judge_match": jm,
+            }
+            for r, det, jm in zip(results, det_matches, judge_matches, strict=True)
+        ]
         return pq
 
     async def run_query(query: GoldQuery) -> list[dict]:
