@@ -6571,9 +6571,7 @@
       "legal.json",
       "legal.jsonl",
       "rbp.json",
-      "recall.json",
-      "scholar.json",
-      "scholar.jsonl"
+      "recall.json"
     ]
   },
   {
