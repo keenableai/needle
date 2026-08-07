@@ -153,22 +153,32 @@ async def run_answers(
             return pq
         results = results or []
         pq["n_results"] = len(results)
-        pq["results"] = [
-            {"url": r.url, "title": r.title, "snippet": _capped_snippet(r, snippet_chars)}
-            for r in results
-        ]
-        det_rank = first_hit_rank(query, results, snippet_chars=snippet_chars)
+        det_matches = [result_answers(query, r, snippet_chars=snippet_chars) for r in results]
+        det_rank = next((rank for rank, m in enumerate(det_matches, start=1) if m), None)
         pq["det_rank"] = det_rank
         pq["hit_rank"] = det_rank
+        judge_matches: list[bool | None] = [None] * len(results)
         if judge is not None:
             cutoff = det_rank - 1 if det_rank is not None else len(results)
             candidates = list(enumerate(results[:cutoff], start=1))
             verdicts = await asyncio.gather(*[judge_result(query, r) for _, r in candidates])
             pq["judged"] = len(candidates)
             pq["judge_errors"] = sum(1 for _, errored in verdicts if errored)
-            yes_ranks = [rank for (rank, _), (v, _) in zip(candidates, verdicts, strict=True) if v]
+            for (rank, _), (verdict, _) in zip(candidates, verdicts, strict=True):
+                judge_matches[rank - 1] = verdict
+            yes_ranks = [rank for rank, m in enumerate(judge_matches, start=1) if m]
             if yes_ranks:
                 pq["hit_rank"] = min(yes_ranks)
+        pq["results"] = [
+            {
+                "url": r.url,
+                "title": r.title,
+                "snippet": _capped_snippet(r, snippet_chars),
+                "det_match": det,
+                "judge_match": jm,
+            }
+            for r, det, jm in zip(results, det_matches, judge_matches, strict=True)
+        ]
         return pq
 
     async def run_query(query: GoldQuery) -> list[dict]:

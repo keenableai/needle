@@ -1771,7 +1771,7 @@ function renderScholarRun(holder, report, engine) {
       const mark = rank === pq.hit_rank
         ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
         : el("span", { class: "miss-marker" }, `#${rank}`);
-      const block = resultBlock({ url: r.url, title: r.title }, [mark]);
+      const block = resultBlock(r, [mark]);
       const ids = Object.entries(r.ids || {}).map(([k, v]) => `${k}:${v}`).join(" ");
       if (ids) block.querySelector(".head").appendChild(el("span", { class: "host" }, ids));
       row.appendChild(block);
@@ -1798,7 +1798,7 @@ function renderLegalRun(holder, report, engine) {
       const mark = rank === pq.hit_rank
         ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
         : el("span", { class: "miss-marker" }, `#${rank}`);
-      const block = resultBlock({ url: r.url, title: r.title }, [mark]);
+      const block = resultBlock(r, [mark]);
       const ids = Object.entries(r.ids || {}).map(([k, v]) => `${k}:${v}`).join(" ");
       if (ids) block.querySelector(".head").appendChild(el("span", { class: "host" }, ids));
       row.appendChild(block);

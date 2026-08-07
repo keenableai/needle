@@ -120,6 +120,9 @@ async def test_run_legal_scores_hits_and_breakdowns():
     )
     good = report["engines"]["good"]
     assert good["recall_at_k"] == 1.0
+    first, second = good["per_query"][0]["results"]
+    assert first["matched"] is True and first["snippet"] == ""
+    assert second["matched"] is False
     assert good["by_bucket"]["caselaw"]["recall_at_k"] == 1.0
     assert good["by_syntax"]["site"]["recall_at_k"] == 1.0
     assert good["by_court"]["ca9"]["n"] == 1

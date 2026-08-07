@@ -181,14 +181,21 @@ async def run_legal(
         results = results or []
         pq["n_results"] = len(results)
         found = [extract_legal_ids(r, snippet_chars=snippet_chars) for r in results]
-        pq["results"] = [
-            {"url": r.url, "title": r.title, "ids": f.as_match_dict()}
+        matches = [
+            ids_match(query, f, result_text=f"{_capped(r, snippet_chars)} {r.url or ''}")
             for r, f in zip(results, found, strict=True)
         ]
-        for rank, (r, f) in enumerate(zip(results, found, strict=True), start=1):
-            if ids_match(query, f, result_text=f"{_capped(r, snippet_chars)} {r.url or ''}"):
-                pq["hit_rank"] = rank
-                break
+        pq["results"] = [
+            {
+                "url": r.url,
+                "title": r.title,
+                "snippet": r.snippet,
+                "ids": f.as_match_dict(),
+                "matched": m,
+            }
+            for r, f, m in zip(results, found, matches, strict=True)
+        ]
+        pq["hit_rank"] = next((rank for rank, m in enumerate(matches, start=1) if m), None)
         return pq
 
     async def run_query(query: GoldLegal) -> list[dict]:

@@ -52,13 +52,20 @@ async def test_recall_mrr_and_rank():
     engine = FakeEngine(
         "keenable",
         {
-            "q1": [_r("https://other.com"), _r("https://arxiv.org/abs/2506.00001")],
+            "q1": [
+                _r("https://other.com"),
+                _r("https://arxiv.org/abs/2506.00001", snippet="a preprint"),
+            ],
             "q2": [_r("https://nope.com")],
         },
     )
     engine.latencies_ms = [50.0]
     report = await run_papers(queries, {"keenable": engine}, num_results=5)
     e = report["engines"]["keenable"]
+    first, second = e["per_query"][0]["results"]
+    assert first["matched"] is False
+    assert second["matched"] is True
+    assert second["snippet"] == "a preprint"
     assert e["num_scored"] == 2
     assert e["recall_at_k"] == 0.5
     assert e["mrr_at_k"] == pytest.approx(0.25)

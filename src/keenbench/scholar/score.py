@@ -88,14 +88,18 @@ async def run_papers(
                 for f in found:
                     if f.pmcid and not f.pmid:
                         f.pmid = mapping.get(f.pmcid)
+        matches = [ids_match(query.ids, f) for f in found]
         pq["results"] = [
-            {"url": r.url, "title": r.title, "ids": f.as_match_dict()}
-            for r, f in zip(results, found, strict=True)
+            {
+                "url": r.url,
+                "title": r.title,
+                "snippet": r.snippet,
+                "ids": f.as_match_dict(),
+                "matched": m,
+            }
+            for r, f, m in zip(results, found, matches, strict=True)
         ]
-        for rank, f in enumerate(found, start=1):
-            if ids_match(query.ids, f):
-                pq["hit_rank"] = rank
-                break
+        pq["hit_rank"] = next((rank for rank, m in enumerate(matches, start=1) if m), None)
         return pq
 
     async def run_query(query: GoldPaper) -> list[dict]:
