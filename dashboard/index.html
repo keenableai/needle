@@ -100,7 +100,8 @@ document.documentElement.dataset.theme = localStorage.theme ||
     background: none; border: 1px solid transparent; border-radius: 7px;
     color: inherit; cursor: pointer; font: inherit;
   }
-  .legend button:hover { border-color: var(--grid); }
+  .legend button:hover:not(:disabled) { border-color: var(--grid); }
+  .legend button:disabled { cursor: default; }
   .legend button[aria-pressed="true"] { border-color: var(--border); background: var(--page); color: var(--text-primary); }
 
   .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
@@ -949,16 +950,22 @@ function drawChart(card, series, opts) {
     for (const e of active) {
       const btn = el("button", { type: "button" });
       btn.append(engineKey(e), document.createTextNode(e));
-      btn.addEventListener("click", () => {
-        if (!card._sel.delete(e)) card._sel.add(e);
-        drawChart(card, series, opts);
-      });
+      if (e === ULTIMATE_ENGINE) {
+        btn.disabled = true;
+        btn.title = "always highlighted";
+      } else {
+        btn.addEventListener("click", () => {
+          if (!card._sel.delete(e)) card._sel.add(e);
+          drawChart(card, series, opts);
+        });
+      }
       legend.appendChild(btn);
     }
     card.appendChild(legend);
   }
   active.forEach((e, i) => {
     const btn = legend.children[i];
+    if (btn.disabled) return;
     const on = card._sel.has(e);
     btn.setAttribute("aria-pressed", on);
     btn.title = on ? `stop highlighting ${e}` : `highlight ${e} in this chart`;
