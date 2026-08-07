@@ -93,16 +93,15 @@ document.documentElement.dataset.theme = localStorage.theme ||
     vertical-align: middle; margin-right: 6px;
   }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; margin: 22px 0 8px; color: var(--text-secondary); font-size: 13px; }
-  .legend .key { display: inline-block; width: 18px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center; margin: 4px 0; color: var(--text-secondary); font-size: 12px; }
+  .legend .key { display: inline-block; width: 14px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 5px; }
   .legend button {
-    display: inline-flex; align-items: center; padding: 3px 9px;
-    background: none; border: 1px solid transparent; border-radius: 8px;
+    display: inline-flex; align-items: center; padding: 2px 7px;
+    background: none; border: 1px solid transparent; border-radius: 7px;
     color: inherit; cursor: pointer; font: inherit;
   }
   .legend button:hover { border-color: var(--grid); }
-  .legend button[aria-pressed="true"] { border-color: var(--border); background: var(--surface-1); color: var(--text-primary); }
-  .legend .note { color: var(--text-muted); margin-left: 8px; }
+  .legend button[aria-pressed="true"] { border-color: var(--border); background: var(--page); color: var(--text-primary); }
 
   .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .lb-tabs {
@@ -368,8 +367,6 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <div id="lb-legal"></div>
     </div>
   </div>
-
-  <div class="legend" id="legend"></div>
 
   <h2 class="section-title" id="sec-latency">Search latency</h2>
   <div class="grid2">
@@ -651,7 +648,6 @@ function markerEl(engine, x, y, r) {
 
 const HOME_ENGINE = "keenable";
 const ULTIMATE_ENGINE = "ultimate";
-let selectedEngine = null;
 function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
@@ -783,7 +779,7 @@ function el(tag, attrs, text) {
 }
 
 function drawChart(card, series, opts) {
-  card.querySelectorAll("svg, .tooltip, .empty").forEach((n) => n.remove());
+  card.querySelectorAll("svg, .tooltip, .empty, .legend").forEach((n) => n.remove());
   const points = ENGINES.flatMap((e) => series[e]);
   card._mdRows = null;
   if (!points.length) {
@@ -832,9 +828,10 @@ function drawChart(card, series, opts) {
     const va = series[a].at(-1).v, vb = series[b].at(-1).v;
     return opts.lowerIsBetter ? va - vb : vb - va;
   });
-  const sel = selectedEngine && series[selectedEngine]?.length ? selectedEngine : null;
-  const highlight = new Set(sel ? [sel] : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
-  if (!sel && series[HOME_ENGINE]?.length) highlight.add(HOME_ENGINE);
+  card._sel ??= new Set();
+  const sel = active.filter((e) => card._sel.has(e));
+  const highlight = new Set(sel.length ? sel : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
+  if (!sel.length && series[HOME_ENGINE]?.length) highlight.add(HOME_ENGINE);
   if (series[ULTIMATE_ENGINE]?.length) highlight.add(ULTIMATE_ENGINE);
   const endLabels = [];
   for (const e of [...active].sort((a, b) => highlight.has(a) - highlight.has(b))) {
@@ -938,6 +935,20 @@ function drawChart(card, series, opts) {
     showIdx(focusIdx);
   });
   card.appendChild(svg);
+  const legend = el("div", { class: "legend" });
+  for (const e of byLast) {
+    const btn = el("button", { type: "button", "aria-pressed": String(card._sel.has(e)) });
+    const key = el("span", { class: "key" });
+    key.style.background = colorOf(e);
+    btn.append(key, document.createTextNode(e));
+    btn.title = card._sel.has(e) ? `stop highlighting ${e}` : `highlight ${e} in this chart`;
+    btn.addEventListener("click", () => {
+      if (!card._sel.delete(e)) card._sel.add(e);
+      drawChart(card, series, opts);
+    });
+    legend.appendChild(btn);
+  }
+  card.appendChild(legend);
 }
 
 function wmean(rows, metric, weightMetric = "num_scored") {
@@ -1967,26 +1978,6 @@ function renderAll(latestFinance) {
   renderFields(latestFinance);
 }
 
-function renderLegend() {
-  const legend = document.getElementById("legend");
-  legend.replaceChildren();
-  for (const e of ENGINES) {
-    const item = el("button", { type: "button", "aria-pressed": e === selectedEngine });
-    const key = el("span", { class: "key" }); key.style.background = colorOf(e);
-    item.append(key, document.createTextNode(e));
-    item.addEventListener("click", () => {
-      selectedEngine = selectedEngine === e ? null : e;
-      renderLegend();
-      drawCharts(history);
-    });
-    legend.appendChild(item);
-  }
-  const note = el("span", { class: "note" }, selectedEngine
-    ? `charts highlight ${selectedEngine}; click it again to reset`
-    : "charts color the top 3 engines + keenable; click an engine to highlight only it");
-  legend.appendChild(note);
-}
-
 function rowsToMarkdown(rows) {
   const esc = (c) => String(c).replace(/\s+/g, " ").trim().replace(/\|/g, "\\|");
   const lines = [`| ${rows[0].map(esc).join(" | ")} |`, `| ${rows[0].map(() => "---").join(" | ")} |`];
@@ -2080,7 +2071,6 @@ async function main() {
   registerEngines(history.map((r) => r.engine));
   registerEngines(Object.keys(latestFinance?.engines || {}));
   document.documentElement.style.setProperty("--home", colorOf(HOME_ENGINE));
-  renderLegend();
 
   if (history.length) {
     const lastTs = history[history.length - 1].ts;
