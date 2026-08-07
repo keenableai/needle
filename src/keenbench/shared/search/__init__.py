@@ -2,6 +2,7 @@ from keenbench.shared.search.base import (
     HttpSearchClient,
     SearchClient,
     SearchResult,
+    capped_snippet,
     latency_stats,
 )
 from keenbench.shared.search.brave import BraveClient
@@ -33,5 +34,6 @@ __all__ = [
     "TavilyClient",
     "YouClient",
     "build_search_clients",
+    "capped_snippet",
     "latency_stats",
 ]

@@ -8,11 +8,12 @@ from keenbench.scholar.models import AGE_BUCKETS
 from keenbench.shared.recall import (
     ULTIMATE,
     classify_misses,
+    first_rank,
     group_recall,
     recall_summary,
     ultimate_per_query,
 )
-from keenbench.shared.search import SearchClient, SearchResult, latency_stats
+from keenbench.shared.search import SearchClient, SearchResult, capped_snippet, latency_stats
 
 
 @dataclass(frozen=True)
@@ -93,13 +94,13 @@ async def run_papers(
             {
                 "url": r.url,
                 "title": r.title,
-                "snippet": r.snippet,
+                "snippet": capped_snippet(r, snippet_chars),
                 "ids": f.as_match_dict(),
                 "matched": m,
             }
             for r, f, m in zip(results, found, matches, strict=True)
         ]
-        pq["hit_rank"] = next((rank for rank, m in enumerate(matches, start=1) if m), None)
+        pq["hit_rank"] = first_rank(matches)
         return pq
 
     async def run_query(query: GoldPaper) -> list[dict]:
