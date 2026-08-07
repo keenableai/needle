@@ -652,11 +652,15 @@ function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
 
-function engineCell(engine, cls = "") {
-  const td = el("td", { class: cls });
+function engineKey(engine) {
   const key = el("span", { class: "key" });
   key.style.background = colorOf(engine);
-  td.append(key, document.createTextNode(engine));
+  return key;
+}
+
+function engineCell(engine, cls = "") {
+  const td = el("td", { class: cls });
+  td.append(engineKey(engine), document.createTextNode(engine));
   return td;
 }
 let history = [];
@@ -779,10 +783,12 @@ function el(tag, attrs, text) {
 }
 
 function drawChart(card, series, opts) {
-  card.querySelectorAll("svg, .tooltip, .empty, .legend").forEach((n) => n.remove());
+  card.querySelectorAll("svg, .tooltip, .empty").forEach((n) => n.remove());
   const points = ENGINES.flatMap((e) => series[e]);
   card._mdRows = null;
+  card._sel ??= new Set();
   if (!points.length) {
+    card.querySelector(".legend")?.remove();
     card.appendChild(el("div", { class: "empty" }, opts.empty || "No data yet — first scheduled run pending."));
     return;
   }
@@ -828,11 +834,10 @@ function drawChart(card, series, opts) {
     const va = series[a].at(-1).v, vb = series[b].at(-1).v;
     return opts.lowerIsBetter ? va - vb : vb - va;
   });
-  card._sel ??= new Set();
   const sel = active.filter((e) => card._sel.has(e));
   const highlight = new Set(sel.length ? sel : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
-  if (!sel.length && series[HOME_ENGINE]?.length) highlight.add(HOME_ENGINE);
-  if (series[ULTIMATE_ENGINE]?.length) highlight.add(ULTIMATE_ENGINE);
+  if (!sel.length) highlight.add(HOME_ENGINE);
+  highlight.add(ULTIMATE_ENGINE);
   const endLabels = [];
   for (const e of [...active].sort((a, b) => highlight.has(a) - highlight.has(b))) {
     const pts = series[e];
@@ -891,8 +896,7 @@ function drawChart(card, series, opts) {
     atT.sort((a, b) => (opts.lowerIsBetter ? a.v - b.v : b.v - a.v));
     for (const { e, v } of atT) {
       const row = el("div", { class: "row" });
-      const key = el("span", { class: "key" }); key.style.background = colorOf(e);
-      row.append(key, el("span", { class: "val" }, fmt(v)), el("span", { class: "name" }, e));
+      row.append(engineKey(e), el("span", { class: "val" }, fmt(v)), el("span", { class: "name" }, e));
       tip.appendChild(row);
     }
     tip.style.display = "block";
@@ -934,21 +938,32 @@ function drawChart(card, series, opts) {
     ev.preventDefault();
     showIdx(focusIdx);
   });
-  card.appendChild(svg);
-  const legend = el("div", { class: "legend" });
-  for (const e of byLast) {
-    const btn = el("button", { type: "button", "aria-pressed": String(card._sel.has(e)) });
-    const key = el("span", { class: "key" });
-    key.style.background = colorOf(e);
-    btn.append(key, document.createTextNode(e));
-    btn.title = card._sel.has(e) ? `stop highlighting ${e}` : `highlight ${e} in this chart`;
-    btn.addEventListener("click", () => {
-      if (!card._sel.delete(e)) card._sel.add(e);
-      drawChart(card, series, opts);
-    });
-    legend.appendChild(btn);
+  let legend = card.querySelector(".legend");
+  if (legend && legend.dataset.engines !== active.join(" ")) {
+    legend.remove();
+    legend = null;
   }
-  card.appendChild(legend);
+  card.insertBefore(svg, legend);
+  if (!legend) {
+    legend = el("div", { class: "legend", "data-engines": active.join(" ") });
+    for (const e of active) {
+      const btn = el("button", { type: "button" });
+      btn.append(engineKey(e), document.createTextNode(e));
+      btn.addEventListener("click", () => {
+        if (!card._sel.delete(e)) card._sel.add(e);
+        drawChart(card, series, opts);
+      });
+      legend.appendChild(btn);
+    }
+    card.appendChild(legend);
+  }
+  active.forEach((e, i) => {
+    const btn = legend.children[i];
+    const on = card._sel.has(e);
+    btn.setAttribute("aria-pressed", on);
+    btn.title = on ? `stop highlighting ${e}` : `highlight ${e} in this chart`;
+    btn.firstChild.style.background = highlight.has(e) ? colorOf(e) : "var(--baseline)";
+  });
 }
 
 function wmean(rows, metric, weightMetric = "num_scored") {
