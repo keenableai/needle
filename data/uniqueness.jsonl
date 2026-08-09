@@ -11238,3 +11238,17 @@
 {"ts": "2026-08-09T18:51Z", "engine": "octen", "unique_urls": 368, "total_urls": 480, "relevant_unique_urls": 33, "relevant_total_urls": 57}
 {"ts": "2026-08-09T18:51Z", "engine": "ceramic", "unique_urls": 350, "total_urls": 376, "relevant_unique_urls": 7, "relevant_total_urls": 8}
 {"ts": "2026-08-09T18:51Z", "engine": "you", "unique_urls": 180, "total_urls": 471, "relevant_unique_urls": 17, "relevant_total_urls": 64}
+{"ts": "2026-08-09T19:33Z", "engine": "keenable", "unique_urls": 77, "total_urls": 100, "relevant_unique_urls": 55, "relevant_total_urls": 70}
+{"ts": "2026-08-09T19:33Z", "engine": "keenable-realtime", "unique_urls": 73, "total_urls": 100, "relevant_unique_urls": 50, "relevant_total_urls": 69}
+{"ts": "2026-08-09T19:33Z", "engine": "exa", "unique_urls": 49, "total_urls": 100, "relevant_unique_urls": 37, "relevant_total_urls": 80}
+{"ts": "2026-08-09T19:33Z", "engine": "exa-instant", "unique_urls": 79, "total_urls": 100, "relevant_unique_urls": 23, "relevant_total_urls": 40}
+{"ts": "2026-08-09T19:33Z", "engine": "google", "unique_urls": 37, "total_urls": 100, "relevant_unique_urls": 19, "relevant_total_urls": 58}
+{"ts": "2026-08-09T19:33Z", "engine": "bing", "unique_urls": 40, "total_urls": 95, "relevant_unique_urls": 22, "relevant_total_urls": 63}
+{"ts": "2026-08-09T19:33Z", "engine": "brave", "unique_urls": 0, "total_urls": 0, "relevant_unique_urls": 0, "relevant_total_urls": 0}
+{"ts": "2026-08-09T19:33Z", "engine": "parallel", "unique_urls": 23, "total_urls": 100, "relevant_unique_urls": 7, "relevant_total_urls": 58}
+{"ts": "2026-08-09T19:33Z", "engine": "parallel-turbo", "unique_urls": 84, "total_urls": 100, "relevant_unique_urls": 16, "relevant_total_urls": 22}
+{"ts": "2026-08-09T19:33Z", "engine": "tavily", "unique_urls": 30, "total_urls": 100, "relevant_unique_urls": 18, "relevant_total_urls": 63}
+{"ts": "2026-08-09T19:33Z", "engine": "perplexity", "unique_urls": 38, "total_urls": 99, "relevant_unique_urls": 32, "relevant_total_urls": 79}
+{"ts": "2026-08-09T19:33Z", "engine": "octen", "unique_urls": 70, "total_urls": 100, "relevant_unique_urls": 37, "relevant_total_urls": 61}
+{"ts": "2026-08-09T19:33Z", "engine": "ceramic", "unique_urls": 98, "total_urls": 100, "relevant_unique_urls": 7, "relevant_total_urls": 8}
+{"ts": "2026-08-09T19:33Z", "engine": "you", "unique_urls": 11, "total_urls": 100, "relevant_unique_urls": 8, "relevant_total_urls": 65}
