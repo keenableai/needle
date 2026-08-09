@@ -35,7 +35,6 @@ def _build_exa(search_type: str) -> Callable[[str | None, int], SearchClient]:
         return ExaClient(
             api_key=api_key or "",
             search_type=search_type,
-            max_concurrency=int(os.environ.get("EXA_CONCURRENCY", "1")),
             highlight_chars=snippet_chars,
         )
 
@@ -69,18 +68,11 @@ def _build_perplexity(api_key: str | None, snippet_chars: int) -> SearchClient:
 
 
 def _build_octen(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return OctenClient(
-        api_key=api_key or "",
-        max_concurrency=int(os.environ.get("OCTEN_CONCURRENCY", "1")),
-    )
+    return OctenClient(api_key=api_key or "")
 
 
 def _build_ceramic(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return CeramicClient(
-        api_key=api_key or "",
-        description_chars=snippet_chars,
-        max_concurrency=int(os.environ.get("CERAMIC_CONCURRENCY", "1")),
-    )
+    return CeramicClient(api_key=api_key or "", description_chars=snippet_chars)
 
 
 def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:
