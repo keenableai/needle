@@ -190,22 +190,20 @@ async def run_rbp(
             profile=asdict(profile) if profile is not None else None,
         )
 
-    # Engines run one at a time so no engine's response parsing or the judge
-    # LLM calls share the event loop with another engine's latency window
-    # (concurrent engines inflated measured latency by 100-300ms).
-    searches_by_engine: dict[str, list[Any]] = {}
+    searches_by_engine: list[list[Any]] = []
     for name in names:
-        searches_by_engine[name] = list(
+        searches_by_engine.append(
             await asyncio.gather(
                 *[engines[name].search(q.text, num_results=num_results) for q in queries]
             )
         )
+    searches_by_query = [list(t) for t in zip(*searches_by_engine, strict=True)]
 
     profiles = await asyncio.gather(*[classify(q) for q in queries])
     query_outs = await asyncio.gather(
         *[
-            judge_query(q, [searches_by_engine[n][qi] for n in names], profiles[qi])
-            for qi, q in enumerate(queries)
+            judge_query(query, searches, profile)
+            for query, searches, profile in zip(queries, searches_by_query, profiles, strict=True)
         ]
     )
 
