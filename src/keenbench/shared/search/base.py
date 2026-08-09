@@ -60,9 +60,6 @@ class SearchClient(Protocol):
 async def search_all(
     engines: dict[str, "SearchClient"], texts: list[str], *, num_results: int
 ) -> list[list[tuple[list[SearchResult] | None, dict[str, str] | None]]]:
-    """Search every text on every engine, one engine at a time so no engine's
-    traffic shares the event loop with another's latency measurement. Returns
-    per-text lists ordered like `engines`."""
     by_engine = []
     for client in engines.values():
         by_engine.append(
