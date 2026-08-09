@@ -51,7 +51,8 @@ All `run` commands share one interface:
 | `--limit` / `--sample` / `--seed` | `0` / `stratified` / `0` | deterministic sample of N queries |
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
-Per-engine tuning is env-based: `EXA_CONCURRENCY`, `TAVILY_DEPTH`; Keenable's
+Every engine issues one request at a time, so latency samples are comparable
+across engines. Per-engine tuning is env-based: `TAVILY_DEPTH`; Keenable's
 and Parallel's modes are fixed per engine entry (`keenable` = pro,
 `keenable-realtime` = realtime, `parallel` = basic, `parallel-turbo` =
 turbo). Queries whose search or judging failed are

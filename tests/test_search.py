@@ -554,8 +554,6 @@ async def test_perplexity_maps_results_and_builds_body(monkeypatch):
 
 
 def test_factory_builds_new_engines(monkeypatch):
-    monkeypatch.delenv("OCTEN_CONCURRENCY", raising=False)
-    monkeypatch.delenv("CERAMIC_CONCURRENCY", raising=False)
     monkeypatch.setenv("SERPER_API_KEY", "gk")
     monkeypatch.setenv("SEARCHAPI_API_KEY", "sk")
     monkeypatch.setenv("BRAVE_API_KEY", "bk")
@@ -605,16 +603,6 @@ def test_factory_builds_engine_variants(monkeypatch):
     assert clients["parallel-turbo"].mode == "turbo"
 
 
-def test_factory_concurrency_env_overrides(monkeypatch):
-    monkeypatch.setenv("OCTEN_API_KEY", "ok")
-    monkeypatch.setenv("CERAMIC_API_KEY", "ck")
-    monkeypatch.setenv("OCTEN_CONCURRENCY", "4")
-    monkeypatch.setenv("CERAMIC_CONCURRENCY", "2")
-    clients = build_search_clients(["octen", "ceramic"])
-    assert clients["octen"]._sem._value == 4
-    assert clients["ceramic"]._sem._value == 2
-
-
 def test_factory_requires_key(monkeypatch):
     monkeypatch.delenv("BRAVE_API_KEY", raising=False)
     with pytest.raises(ValueError, match="BRAVE_API_KEY"):
@@ -638,9 +626,13 @@ def test_rejects_zero_max_concurrency():
         KeenableClient(max_concurrency=0)
 
 
-def test_keenable_keyless_defaults_to_low_concurrency():
-    assert KeenableClient()._sem._value == 1
-    assert KeenableClient(api_key="k")._sem._value == 8
+def test_engines_default_to_serial_requests(monkeypatch):
+    monkeypatch.setenv("EXA_API_KEY", "ek")
+    monkeypatch.setenv("OCTEN_API_KEY", "ok")
+    monkeypatch.setenv("CERAMIC_API_KEY", "ck")
+    clients = build_search_clients(["keenable", "exa", "octen", "ceramic"])
+    assert all(c._sem._value == 1 for c in clients.values())
+    assert KeenableClient(api_key="k")._sem._value == 1
     assert KeenableClient(max_concurrency=5)._sem._value == 5
 
 

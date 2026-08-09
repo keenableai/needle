@@ -13,10 +13,8 @@ class KeenableClient(HttpSearchClient):
         mode: str = "pro",
         app_title: str = "keenbench",
         timeout_s: float = 30.0,
-        max_concurrency: int | None = None,
+        max_concurrency: int = 1,
     ) -> None:
-        if max_concurrency is None:
-            max_concurrency = 8 if api_key else 1
         super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
