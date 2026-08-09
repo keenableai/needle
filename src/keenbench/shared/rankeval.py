@@ -168,13 +168,9 @@ async def run_rbp(
             profile, _err = await classify_query(judge, query.text, today=query.today)
         return profile
 
-    async def run_query(query: EvalQuery) -> QueryRun:
-        searches, profile = await asyncio.gather(
-            asyncio.gather(
-                *[engines[n].search(query.text, num_results=num_results) for n in names]
-            ),
-            classify(query),
-        )
+    async def judge_query(
+        query: EvalQuery, searches: list[Any], profile: QueryProfile | None
+    ) -> QueryRun:
         keyed: list[list[tuple]] = []
         unique: dict[tuple, SearchResult] = {}
         for results, err in searches:
@@ -194,7 +190,24 @@ async def run_rbp(
             profile=asdict(profile) if profile is not None else None,
         )
 
-    query_outs = await asyncio.gather(*[run_query(q) for q in queries])
+    # Engines run one at a time so no engine's response parsing or the judge
+    # LLM calls share the event loop with another engine's latency window
+    # (concurrent engines inflated measured latency by 100-300ms).
+    searches_by_engine: dict[str, list[Any]] = {}
+    for name in names:
+        searches_by_engine[name] = list(
+            await asyncio.gather(
+                *[engines[name].search(q.text, num_results=num_results) for q in queries]
+            )
+        )
+
+    profiles = await asyncio.gather(*[classify(q) for q in queries])
+    query_outs = await asyncio.gather(
+        *[
+            judge_query(q, [searches_by_engine[n][qi] for n in names], profiles[qi])
+            for qi, q in enumerate(queries)
+        ]
+    )
 
     engines_out: dict[str, dict[str, Any]] = {}
     for ni, name in enumerate(names):
