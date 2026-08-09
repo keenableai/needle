@@ -19,7 +19,7 @@ from keenbench.shared.metrics import (
     rbp_at_k,
 )
 from keenbench.shared.recall import ULTIMATE
-from keenbench.shared.search import SearchClient, SearchResult, latency_stats
+from keenbench.shared.search import SearchClient, SearchResult, latency_stats, search_all
 
 
 @dataclass(frozen=True)
@@ -190,14 +190,9 @@ async def run_rbp(
             profile=asdict(profile) if profile is not None else None,
         )
 
-    searches_by_engine: list[list[Any]] = []
-    for name in names:
-        searches_by_engine.append(
-            await asyncio.gather(
-                *[engines[name].search(q.text, num_results=num_results) for q in queries]
-            )
-        )
-    searches_by_query = [list(t) for t in zip(*searches_by_engine, strict=True)]
+    searches_by_query = await search_all(
+        engines, [q.text for q in queries], num_results=num_results
+    )
 
     profiles = await asyncio.gather(*[classify(q) for q in queries])
     query_outs = await asyncio.gather(

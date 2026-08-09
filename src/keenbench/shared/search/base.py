@@ -57,6 +57,20 @@ class SearchClient(Protocol):
     async def aclose(self) -> None: ...
 
 
+async def search_all(
+    engines: dict[str, "SearchClient"], texts: list[str], *, num_results: int
+) -> list[list[tuple[list[SearchResult] | None, dict[str, str] | None]]]:
+    """Search every text on every engine, one engine at a time so no engine's
+    traffic shares the event loop with another's latency measurement. Returns
+    per-text lists ordered like `engines`."""
+    by_engine = []
+    for client in engines.values():
+        by_engine.append(
+            await asyncio.gather(*[client.search(t, num_results=num_results) for t in texts])
+        )
+    return [list(t) for t in zip(*by_engine, strict=True)]
+
+
 class HttpSearchClient:
     engine: str = ""
 

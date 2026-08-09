@@ -1,4 +1,3 @@
-import asyncio
 import re
 from dataclasses import dataclass, field
 from typing import Any
@@ -11,7 +10,13 @@ from keenbench.shared.recall import (
     recall_summary,
     ultimate_per_query,
 )
-from keenbench.shared.search import SearchClient, SearchResult, capped_snippet, latency_stats
+from keenbench.shared.search import (
+    SearchClient,
+    SearchResult,
+    capped_snippet,
+    latency_stats,
+    search_all,
+)
 
 CLUSTER_URL_RE = re.compile(r"courtlistener\.com/opinion/(\d+)/", re.IGNORECASE)
 JUSTIA_US_RE = re.compile(
@@ -196,13 +201,13 @@ async def run_legal(
         pq["hit_rank"] = first_rank(matches)
         return pq
 
-    async def run_query(query: GoldLegal) -> list[dict]:
-        searches = await asyncio.gather(
-            *[engines[n].search(query.text, num_results=num_results) for n in engine_names]
-        )
-        return [eval_engine(query, r, e) for r, e in searches]
-
-    query_outs = await asyncio.gather(*[run_query(q) for q in queries])
+    searches_by_query = await search_all(
+        engines, [q.text for q in queries], num_results=num_results
+    )
+    query_outs = [
+        [eval_engine(query, r, e) for r, e in searches]
+        for query, searches in zip(queries, searches_by_query, strict=True)
+    ]
 
     engines_out: dict[str, dict[str, Any]] = {}
     for idx, name in enumerate(engine_names):

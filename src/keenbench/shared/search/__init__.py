@@ -4,6 +4,7 @@ from keenbench.shared.search.base import (
     SearchResult,
     capped_snippet,
     latency_stats,
+    search_all,
 )
 from keenbench.shared.search.brave import BraveClient
 from keenbench.shared.search.ceramic import CeramicClient
@@ -36,4 +37,5 @@ __all__ = [
     "build_search_clients",
     "capped_snippet",
     "latency_stats",
+    "search_all",
 ]
