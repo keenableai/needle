@@ -65,6 +65,8 @@ async def search_all(
         by_engine.append(
             await asyncio.gather(*[client.search(t, num_results=num_results) for t in texts])
         )
+    if not by_engine:
+        return [[] for _ in texts]
     return [list(t) for t in zip(*by_engine, strict=True)]
 
 
