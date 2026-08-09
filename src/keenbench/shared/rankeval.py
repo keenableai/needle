@@ -19,7 +19,7 @@ from keenbench.shared.metrics import (
     rbp_at_k,
 )
 from keenbench.shared.recall import ULTIMATE
-from keenbench.shared.search import SearchClient, SearchResult, latency_stats
+from keenbench.shared.search import SearchClient, SearchResult, latency_stats, search_all
 
 
 @dataclass(frozen=True)
@@ -168,13 +168,9 @@ async def run_rbp(
             profile, _err = await classify_query(judge, query.text, today=query.today)
         return profile
 
-    async def run_query(query: EvalQuery) -> QueryRun:
-        searches, profile = await asyncio.gather(
-            asyncio.gather(
-                *[engines[n].search(query.text, num_results=num_results) for n in names]
-            ),
-            classify(query),
-        )
+    async def judge_query(
+        query: EvalQuery, searches: list[Any], profile: QueryProfile | None
+    ) -> QueryRun:
         keyed: list[list[tuple]] = []
         unique: dict[tuple, SearchResult] = {}
         for results, err in searches:
@@ -194,7 +190,17 @@ async def run_rbp(
             profile=asdict(profile) if profile is not None else None,
         )
 
-    query_outs = await asyncio.gather(*[run_query(q) for q in queries])
+    searches_by_query = await search_all(
+        engines, [q.text for q in queries], num_results=num_results
+    )
+
+    profiles = await asyncio.gather(*[classify(q) for q in queries])
+    query_outs = await asyncio.gather(
+        *[
+            judge_query(query, searches, profile)
+            for query, searches, profile in zip(queries, searches_by_query, profiles, strict=True)
+        ]
+    )
 
     engines_out: dict[str, dict[str, Any]] = {}
     for ni, name in enumerate(names):
