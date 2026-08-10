@@ -65,14 +65,11 @@ class SearchClient(Protocol):
 async def search_all(
     engines: dict[str, "SearchClient"], texts: list[str], *, num_results: int
 ) -> list[list[tuple[list[SearchResult] | None, dict[str, str] | None]]]:
-    by_engine = []
+    rows: list[list[tuple[list[SearchResult] | None, dict[str, str] | None]]] = [[] for _ in texts]
     for client in engines.values():
-        by_engine.append(
-            await asyncio.gather(*[client.search(t, num_results=num_results) for t in texts])
-        )
-    if not by_engine:
-        return [[] for _ in texts]
-    return [list(t) for t in zip(*by_engine, strict=True)]
+        for row, text in zip(rows, texts, strict=True):
+            row.append(await client.search(text, num_results=num_results))
+    return rows
 
 
 class HttpSearchClient:
@@ -164,11 +161,3 @@ class HttpSearchClient:
         if resp is None or resp.status_code != 200:
             return None
         return resp.text
-
-
-class EngineClient(HttpSearchClient):
-    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int | None = None) -> None:
-        super().__init__(
-            timeout_s=timeout_s,
-            max_concurrency=1 if max_concurrency is None else max_concurrency,
-        )

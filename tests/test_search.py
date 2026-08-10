@@ -19,9 +19,9 @@ from keenbench.shared.search import (
     YouClient,
     build_search_clients,
     latency_stats,
+    search_all,
 )
 from keenbench.shared.search import base as search_base
-from keenbench.shared.search.factory import ENGINES
 from keenbench.shared.search.queryops import parse_ops
 
 OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
@@ -579,10 +579,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["perplexity"].api_key == "xk"
     assert isinstance(clients["octen"], OctenClient)
     assert clients["octen"].api_key == "ok"
-    assert clients["octen"]._sem._value == 1
     assert isinstance(clients["ceramic"], CeramicClient)
     assert clients["ceramic"].api_key == "ck"
-    assert clients["ceramic"]._sem._value == 1
     assert isinstance(clients["you"], YouClient)
     assert clients["you"].api_key == "yk"
 
@@ -624,17 +622,38 @@ async def test_error_passthrough(monkeypatch):
 
 def test_rejects_zero_max_concurrency():
     with pytest.raises(ValueError):
-        KeenableClient(max_concurrency=0)
+        search_base.HttpSearchClient(max_concurrency=0)
 
 
-def test_engines_default_to_serial_requests(monkeypatch):
-    for spec in ENGINES.values():
-        monkeypatch.setenv(spec.key_env, "k")
-    clients = build_search_clients(list(ENGINES))
-    for name, client in clients.items():
-        assert client._sem._value == 1, name
-    assert KeenableClient(max_concurrency=None)._sem._value == 1
-    assert KeenableClient(max_concurrency=5)._sem._value == 5
+async def test_search_all_is_serial_and_text_major():
+    active = 0
+    peak = 0
+
+    class FakeClient:
+        def __init__(self, engine):
+            self.engine = engine
+            self.latencies_ms = []
+
+        async def search(self, query, *, num_results=10):
+            nonlocal active, peak
+            active += 1
+            peak = max(peak, active)
+            await asyncio.sleep(0.005)
+            active -= 1
+            return [SearchResult(url=f"https://{self.engine}/{query}")], None
+
+        async def aclose(self):
+            pass
+
+    engines = {"e1": FakeClient("e1"), "e2": FakeClient("e2")}
+    rows = await search_all(engines, ["a", "b"], num_results=5)
+    assert peak == 1
+    assert len(rows) == 2 and all(len(row) == 2 for row in rows)
+    results, err = rows[0][0]
+    assert err is None and results[0].url == "https://e1/a"
+    results, err = rows[1][1]
+    assert results[0].url == "https://e2/b"
+    assert await search_all({}, ["a", "b"], num_results=5) == [[], []]
 
 
 async def test_max_concurrency_caps_in_flight(monkeypatch):
@@ -656,9 +675,9 @@ async def test_max_concurrency_caps_in_flight(monkeypatch):
             active -= 1
             return FakeResp()
 
-    c = KeenableClient(max_concurrency=2)
+    c = search_base.HttpSearchClient(max_concurrency=2)
     monkeypatch.setattr(c, "_http", lambda: FakeHttp())
-    await asyncio.gather(*[c.search("q") for _ in range(6)])
+    await asyncio.gather(*[c._request_json("GET", "http://x") for _ in range(6)])
     assert peak <= 2
 
 

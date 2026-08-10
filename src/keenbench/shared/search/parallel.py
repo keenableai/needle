@@ -1,10 +1,10 @@
 from typing import Any
 
-from keenbench.shared.search.base import EngineClient, SearchResult
+from keenbench.shared.search.base import HttpSearchClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 
-class ParallelClient(EngineClient):
+class ParallelClient(HttpSearchClient):
     engine = "parallel"
 
     def __init__(
@@ -14,9 +14,8 @@ class ParallelClient(EngineClient):
         base_url: str = "https://api.parallel.ai",
         mode: str = "basic",
         timeout_s: float = 60.0,
-        max_concurrency: int | None = None,
     ) -> None:
-        super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
+        super().__init__(timeout_s=timeout_s)
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.mode = mode
