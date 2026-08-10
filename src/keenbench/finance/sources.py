@@ -93,17 +93,16 @@ class EdgarClient(RegistryClient):
         payload = await self._get(SEC_SUBMISSIONS_URL.format(cik=int(cik)))
         recent = ((payload or {}).get("filings") or {}).get("recent") or {}
         accessions = recent.get("accessionNumber") or []
-        blank = [""] * len(accessions)
         matched = (
             {"adsh": adsh, "form": form, "filed": filed, "primary_doc": doc}
-            for adsh, form, filed, doc in zip(
+            for adsh, form, filed, doc in itertools.zip_longest(
                 accessions,
-                recent.get("form") or blank,
-                recent.get("filingDate") or blank,
-                recent.get("primaryDocument") or blank,
-                strict=True,
+                recent.get("form") or (),
+                recent.get("filingDate") or (),
+                recent.get("primaryDocument") or (),
+                fillvalue="",
             )
-            if form in forms
+            if adsh and form in forms
         )
         return list(itertools.islice(matched, limit))
 
