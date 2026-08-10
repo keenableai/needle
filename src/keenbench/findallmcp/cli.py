@@ -12,6 +12,7 @@ from keenbench.findallmcp.models import (
 from keenbench.findallmcp.score import GoldTask, run_findallmcp
 from keenbench.findallmcp.sources import EdgarFtsClient, HnClient, edgar_tasks, hn_tasks
 from keenbench.shared.cli import (
+    aclose_all,
     current_hour,
     load_gold_rows,
     parse_csv,
@@ -19,8 +20,7 @@ from keenbench.shared.cli import (
     require_openrouter_client,
     sample_or_exit,
 )
-from keenbench.shared.identity import serialize_row
-from keenbench.shared.io import write_json, write_jsonl
+from keenbench.shared.io import serialize_row, write_json, write_jsonl
 
 
 def _gold_task(row: dict) -> GoldTask:
@@ -57,9 +57,7 @@ class FindallMcp:
                 if edgar is not None:
                     tasks.extend(await edgar_tasks(edgar, now=now))
             finally:
-                for client in (hn, edgar):
-                    if client is not None:
-                        await client.aclose()
+                await aclose_all(hn, edgar)
             return tasks
 
         tasks = asyncio.run(_go())
@@ -86,10 +84,7 @@ class FindallMcp:
         trace: bool = False,
     ) -> None:
         rows = load_gold_rows(
-            queries,
-            bench="findallmcp",
-            gold_ok=lambda g: g.get("kind") in ("set", "stat"),
-            row_noun="task",
+            queries, bench="findallmcp", gold_ok=lambda g: g.get("kind") in ("set", "stat")
         )
         rows = sample_or_exit(
             rows,

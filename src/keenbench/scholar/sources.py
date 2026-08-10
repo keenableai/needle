@@ -117,11 +117,9 @@ def parse_epmc_result(rec: dict[str, Any]) -> Paper | None:
 
 
 class ScholarClient(HttpSearchClient):
-    def __init__(self, **kwargs: Any) -> None:
-        kwargs.setdefault("retry_attempts", 4)
-        kwargs.setdefault("retry_base_s", 2.0)
-        kwargs.setdefault("default_headers", {"User-Agent": USER_AGENT})
-        super().__init__(**kwargs)
+    default_headers = {"User-Agent": USER_AGENT}
+    retry_attempts = 4
+    retry_base_s = 2.0
 
 
 class ArxivClient(ScholarClient):

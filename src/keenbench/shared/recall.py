@@ -32,47 +32,6 @@ def build_match_rows(
     ]
 
 
-async def run_known_item_eval(
-    queries: Sequence[Any],
-    engines: dict[str, SearchClient],
-    eval_engine: Callable[[Any, list[SearchResult] | None, Any], Awaitable[dict]],
-    summary: Callable[[list[dict], dict | None], dict[str, Any]],
-    *,
-    num_results: int,
-    snippet_chars: int,
-    ultimate_fn: Callable[..., list[dict]] | None = None,
-    extra: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    engine_names = list(engines)
-    searches_by_query = await search_all(
-        engines, [q.text for q in queries], num_results=num_results
-    )
-    query_outs = await asyncio.gather(
-        *[
-            asyncio.gather(*[eval_engine(query, r, e) for r, e in searches])
-            for query, searches in zip(queries, searches_by_query, strict=True)
-        ]
-    )
-
-    engines_out: dict[str, dict[str, Any]] = {}
-    for idx, name in enumerate(engine_names):
-        per_query = [entries[idx] for entries in query_outs]
-        engines_out[name] = summary(per_query, latency_stats(engines[name].latencies_ms))
-    if engine_names:
-        pooled = (ultimate_fn or ultimate_per_query)(query_outs, cap=num_results)
-        engines_out[ULTIMATE] = summary(pooled, None)
-
-    classify_misses(query_outs, engine_names, engines_out)
-
-    return {
-        "num_queries": len(queries),
-        "num_results": num_results,
-        "snippet_chars": snippet_chars,
-        **(extra or {}),
-        "engines": engines_out,
-    }
-
-
 def ultimate_per_query(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
     out = []
     for entries in query_outs:
@@ -146,3 +105,43 @@ def classify_misses(
             for pq in engines_out[ULTIMATE]["per_query"]
             if pq["search_error"] is None and pq["hit_rank"] is None
         )
+
+
+async def run_known_item_eval(
+    queries: Sequence[Any],
+    engines: dict[str, SearchClient],
+    eval_engine: Callable[[Any, list[SearchResult] | None, Any], Awaitable[dict]],
+    summary: Callable[[list[dict], dict | None], dict[str, Any]],
+    *,
+    num_results: int,
+    snippet_chars: int,
+    ultimate_fn: Callable[..., list[dict]] = ultimate_per_query,
+    extra: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    engine_names = list(engines)
+    searches_by_query = await search_all(
+        engines, [q.text for q in queries], num_results=num_results
+    )
+    query_outs = await asyncio.gather(
+        *[
+            asyncio.gather(*[eval_engine(query, r, e) for r, e in searches])
+            for query, searches in zip(queries, searches_by_query, strict=True)
+        ]
+    )
+
+    engines_out: dict[str, dict[str, Any]] = {}
+    for idx, name in enumerate(engine_names):
+        per_query = [entries[idx] for entries in query_outs]
+        engines_out[name] = summary(per_query, latency_stats(engines[name].latencies_ms))
+    if engine_names:
+        engines_out[ULTIMATE] = summary(ultimate_fn(query_outs, cap=num_results), None)
+
+    classify_misses(query_outs, engine_names, engines_out)
+
+    return {
+        "num_queries": len(queries),
+        "num_results": num_results,
+        "snippet_chars": snippet_chars,
+        **(extra or {}),
+        "engines": engines_out,
+    }

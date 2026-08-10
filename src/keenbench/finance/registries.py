@@ -118,18 +118,11 @@ def lei(claims: dict) -> str | None:
 
 
 class RegistryClient(HttpSearchClient):
-    def __init__(
-        self,
-        *,
-        timeout_s: float = 30.0,
-        max_concurrency: int = 4,
-        user_agent: str = USER_AGENT,
-    ) -> None:
-        super().__init__(
-            timeout_s=timeout_s,
-            max_concurrency=max_concurrency,
-            default_headers={"User-Agent": user_agent},
-        )
+    default_headers = {"User-Agent": USER_AGENT}
+
+    def __init__(self, **kwargs: Any) -> None:
+        kwargs.setdefault("max_concurrency", 4)
+        super().__init__(**kwargs)
 
     async def _get(
         self,

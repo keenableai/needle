@@ -163,15 +163,7 @@ class Agent:
 
         for step in range(1, self.max_steps + 1):
             if budget is not None and budget.exhausted:
-                return await self._finalize(
-                    messages,
-                    usage,
-                    records,
-                    budget,
-                    prompt=BUDGET_EXHAUSTED_PROMPT,
-                    steps=step - 1,
-                    finish_reason="budget",
-                )
+                return await self._finalize(messages, usage, records, budget, steps=step - 1)
             try:
                 response = await self.llm_client.chat(
                     messages, tools=openai_tools, max_tokens=self.max_output_tokens
@@ -250,11 +242,9 @@ class Agent:
             usage,
             records,
             budget,
-            prompt=MAX_STEPS_EXCEEDED_PROMPT,
             steps=self.max_steps,
             prefix="".join(continuation_chunks),
             max_steps_exceeded=True,
-            error_prefix="Max steps exceeded and summarization failed: ",
         )
 
     async def _finalize(
@@ -264,13 +254,11 @@ class Agent:
         records: list[ToolCallRecord],
         budget: RunBudget | None,
         *,
-        prompt: str,
         steps: int,
         prefix: str = "",
-        finish_reason: str | None = None,
         max_steps_exceeded: bool = False,
-        error_prefix: str = "",
     ) -> AgentResult:
+        prompt = MAX_STEPS_EXCEEDED_PROMPT if max_steps_exceeded else BUDGET_EXHAUSTED_PROMPT
         try:
             response = await self.llm_client.chat(
                 [*messages, {"role": "user", "content": prompt}],
@@ -278,13 +266,18 @@ class Agent:
                 max_tokens=self.max_output_tokens,
             )
         except LLMClientError as e:
+            error = (
+                f"Max steps exceeded and summarization failed: {e}"
+                if max_steps_exceeded
+                else str(e)
+            )
             return AgentResult(
                 content=prefix,
                 success=False,
                 usage=usage,
                 tool_calls=records,
                 steps=steps,
-                error=f"{error_prefix}{e}",
+                error=error,
                 finish_reason="error",
                 max_steps_exceeded=max_steps_exceeded,
                 budget=budget,
@@ -296,7 +289,7 @@ class Agent:
             usage=usage,
             tool_calls=records,
             steps=steps,
-            finish_reason=finish_reason or response.finish_reason,
+            finish_reason=response.finish_reason if max_steps_exceeded else "budget",
             max_steps_exceeded=max_steps_exceeded,
             budget=budget,
         )

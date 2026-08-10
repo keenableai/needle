@@ -77,22 +77,14 @@ async def search_all(
 
 class HttpSearchClient:
     engine: str = ""
+    default_headers: dict[str, str] = {}
+    retry_attempts: int = RETRY_ATTEMPTS
+    retry_base_s: float = RETRY_BASE_S
 
-    def __init__(
-        self,
-        *,
-        timeout_s: float = 30.0,
-        max_concurrency: int = 8,
-        default_headers: dict[str, str] | None = None,
-        retry_attempts: int = RETRY_ATTEMPTS,
-        retry_base_s: float = RETRY_BASE_S,
-    ) -> None:
+    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int = 8) -> None:
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
         self.timeout_s = timeout_s
-        self.default_headers = default_headers or {}
-        self.retry_attempts = retry_attempts
-        self.retry_base_s = retry_base_s
         self.latencies_ms: list[float] = []
         self._client: httpx.AsyncClient | None = None
         self._sem = asyncio.Semaphore(max_concurrency)
@@ -107,9 +99,9 @@ class HttpSearchClient:
             await self._client.aclose()
             self._client = None
 
-    async def _request_json(
-        self, method: str, url: str, *, error_field: str | None = None, **kwargs: Any
-    ) -> tuple[Any, dict[str, str] | None]:
+    async def _send(
+        self, method: str, url: str, **kwargs: Any
+    ) -> tuple[httpx.Response | None, float, dict[str, str] | None]:
         err: dict[str, str] | None = None
         delay = self.retry_base_s
         for attempt in range(self.retry_attempts):
@@ -138,51 +130,40 @@ class HttpSearchClient:
                     except ValueError:
                         pass
                 continue
-            if resp.status_code != 200:
-                return None, {
-                    "error_type": "http_error",
-                    "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
-                }
-            try:
-                payload = resp.json()
-            except (json.JSONDecodeError, ValueError) as exc:
-                return None, {
-                    "error_type": "bad_json",
-                    "error_message": str(exc)[:MAX_ERROR_CHARS],
-                }
-            if error_field and isinstance(payload, dict) and payload.get(error_field):
-                return None, {
-                    "error_type": "api_error",
-                    "error_message": str(payload[error_field])[:MAX_ERROR_CHARS],
-                }
-            self.latencies_ms.append(elapsed_ms)
-            return payload, None
-        return None, err
+            return resp, elapsed_ms, None
+        return None, 0.0, err
 
-    async def _get_text(
-        self,
-        url: str,
-        *,
-        params: dict[str, Any] | None = None,
-        headers: dict[str, str] | None = None,
-    ) -> str | None:
-        delay = self.retry_base_s
-        for attempt in range(self.retry_attempts):
-            if attempt:
-                await asyncio.sleep(delay)
-                delay = min(delay * 2, RETRY_MAX_S)
-            try:
-                async with self._sem:
-                    resp = await self._http().request(
-                        "GET", url, params=params, headers=headers, follow_redirects=True
-                    )
-            except httpx.HTTPError:
-                continue
-            if resp.status_code == 200:
-                return resp.text
-            if resp.status_code not in RETRYABLE_STATUSES:
-                return None
-        return None
+    async def _request_json(
+        self, method: str, url: str, *, error_field: str | None = None, **kwargs: Any
+    ) -> tuple[Any, dict[str, str] | None]:
+        resp, elapsed_ms, err = await self._send(method, url, **kwargs)
+        if resp is None:
+            return None, err
+        if resp.status_code != 200:
+            return None, {
+                "error_type": "http_error",
+                "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
+            }
+        try:
+            payload = resp.json()
+        except (json.JSONDecodeError, ValueError) as exc:
+            return None, {
+                "error_type": "bad_json",
+                "error_message": str(exc)[:MAX_ERROR_CHARS],
+            }
+        if error_field and isinstance(payload, dict) and payload.get(error_field):
+            return None, {
+                "error_type": "api_error",
+                "error_message": str(payload[error_field])[:MAX_ERROR_CHARS],
+            }
+        self.latencies_ms.append(elapsed_ms)
+        return payload, None
+
+    async def _get_text(self, url: str, *, params: dict[str, Any] | None = None) -> str | None:
+        resp, _, _ = await self._send("GET", url, params=params, follow_redirects=True)
+        if resp is None or resp.status_code != 200:
+            return None
+        return resp.text
 
 
 class EngineClient(HttpSearchClient):

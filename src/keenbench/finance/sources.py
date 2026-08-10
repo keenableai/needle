@@ -1,3 +1,4 @@
+import itertools
 from datetime import date
 from html.parser import HTMLParser
 
@@ -93,7 +94,7 @@ class EdgarClient(RegistryClient):
         recent = ((payload or {}).get("filings") or {}).get("recent") or {}
         accessions = recent.get("accessionNumber") or []
         blank = [""] * len(accessions)
-        out = [
+        matched = (
             {"adsh": adsh, "form": form, "filed": filed, "primary_doc": doc}
             for adsh, form, filed, doc in zip(
                 accessions,
@@ -103,8 +104,8 @@ class EdgarClient(RegistryClient):
                 strict=True,
             )
             if form in forms
-        ]
-        return out[:limit]
+        )
+        return list(itertools.islice(matched, limit))
 
     async def document_text(self, filing: Filing) -> str | None:
         if not filing.primary_doc:

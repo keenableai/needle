@@ -51,12 +51,11 @@ def parse_search_case(rec: dict[str, Any]) -> Case | None:
 class CourtListenerClient(HttpSearchClient):
     def __init__(self, *, api_token: str | None = None, **kwargs: Any) -> None:
         kwargs.setdefault("max_concurrency", 2)
-        self.api_token = api_token or os.environ.get("COURTLISTENER_API_TOKEN") or None
-        headers = {"User-Agent": USER_AGENT}
-        if self.api_token:
-            headers["Authorization"] = f"Token {self.api_token}"
-        kwargs.setdefault("default_headers", headers)
         super().__init__(**kwargs)
+        self.api_token = api_token or os.environ.get("COURTLISTENER_API_TOKEN") or None
+        self.default_headers = {"User-Agent": USER_AGENT}
+        if self.api_token:
+            self.default_headers["Authorization"] = f"Token {self.api_token}"
 
     async def opinions(
         self,
@@ -133,9 +132,10 @@ def parse_section_xml(
 
 
 class EcfrClient(HttpSearchClient):
+    default_headers = {"User-Agent": USER_AGENT}
+
     def __init__(self, **kwargs: Any) -> None:
         kwargs.setdefault("max_concurrency", 4)
-        kwargs.setdefault("default_headers", {"User-Agent": USER_AGENT})
         super().__init__(**kwargs)
         self._issue_dates: dict[int, str] | None = None
 

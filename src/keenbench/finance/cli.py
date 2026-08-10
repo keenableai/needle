@@ -1,8 +1,6 @@
 import asyncio
-import json
 import sys
 from collections import Counter
-from datetime import UTC, datetime
 
 from keenbench.finance.canon import FIELD_TYPES
 from keenbench.finance.generate import GenStats, run_generate
@@ -16,13 +14,12 @@ from keenbench.shared.cli import (
     build_clients_or_exit,
     current_hour,
     load_gold_rows,
-    parse_csv,
     parse_known_csv,
     require_openrouter_client,
     resolve_seed,
     sample_or_exit,
 )
-from keenbench.shared.io import write_json, write_jsonl
+from keenbench.shared.io import serialize_row, write_json, write_jsonl
 from keenbench.shared.llm import resolve_judge_model, resolve_llm_model
 
 KNOWN_SUITES = ("finance", "filings", "filingdoc")
@@ -78,11 +75,11 @@ class Finance:
         field_names = (
             parse_known_csv(fields, QUARTERLY_FIELDS, flag="--fields")
             if "filings" in suite_names
-            else tuple(parse_csv(fields))
+            else ()
         )
-        if min_employee_year <= 0:
-            min_employee_year = datetime.now(UTC).year - 1
         now, hour_ts = current_hour()
+        if min_employee_year <= 0:
+            min_employee_year = now.year - 1
         seed = resolve_seed(seed, hour_ts)
 
         concurrency = max(1, registry_concurrency)
@@ -131,12 +128,7 @@ class Finance:
             rows, stats = asyncio.run(_go())
         except ValueError as exc:
             raise SystemExit(f"error: {exc}") from exc
-        records = []
-        for row in rows:
-            record = dict(row)
-            record["query_origin"] = json.dumps(record["query_origin"], sort_keys=True)
-            records.append(record)
-        write_jsonl(records, out)
+        write_jsonl([serialize_row(r, fields=("query_origin",)) for r in rows], out)
 
         by_bucket = Counter(row["query_origin"]["bucket"] for row in rows)
         buckets = ", ".join(f"{b}={n}" for b, n in sorted(by_bucket.items())) or "none"

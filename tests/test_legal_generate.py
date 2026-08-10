@@ -5,7 +5,7 @@ from datetime import UTC, date, datetime
 from keenbench.legal.generate import run_generate
 from keenbench.legal.models import Case
 from keenbench.legal.sources import month_windows, parse_search_case, walk_structure_sections
-from keenbench.shared.identity import serialize_row
+from keenbench.shared.io import serialize_row
 
 NOW = datetime(2026, 7, 4, 12, 0, tzinfo=UTC)
 HOUR = NOW.replace(minute=0)

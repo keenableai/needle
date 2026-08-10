@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 
 from keenbench.findallmcp.models import Entity, Task, build_task_row
 from keenbench.findallmcp.sources import hn_tasks
-from keenbench.shared.identity import serialize_row
+from keenbench.shared.io import serialize_row
 
 NOW = datetime(2026, 7, 4, 12, 0, tzinfo=UTC)
 HOUR = NOW.replace(minute=0)

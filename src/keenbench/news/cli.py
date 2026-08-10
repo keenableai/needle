@@ -7,7 +7,13 @@ from pathlib import Path
 from keenbench.news.feeds import SEED_SOURCES, load_sources_from_toml
 from keenbench.news.pipeline import run_rss, run_trends
 from keenbench.news.trends import GoogleTrendsRssProvider, parse_geos
-from keenbench.shared.cli import require_openrouter_client, run_rbp_eval, sample_or_exit
+from keenbench.shared.cli import (
+    aclose_all,
+    current_hour,
+    require_openrouter_client,
+    run_rbp_eval,
+    sample_or_exit,
+)
 from keenbench.shared.io import write_jsonl
 from keenbench.shared.llm import resolve_llm_model
 from keenbench.shared.rankeval import EvalQuery
@@ -103,7 +109,7 @@ class News:
         min_candidates = 30 if min_candidates is None else min_candidates
 
         llm = require_openrouter_client(resolve_llm_model(llm_model))
-        hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
+        _, hour_ts = current_hour()
         llm_concurrency = max(1, llm_concurrency)
 
         provider = None
@@ -147,9 +153,7 @@ class News:
             try:
                 return await pipeline()
             finally:
-                await llm.aclose()
-                if provider is not None:
-                    await provider.aclose()
+                await aclose_all(llm, provider)
 
         try:
             rows, stats = asyncio.run(_go())

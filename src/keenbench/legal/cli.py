@@ -17,8 +17,7 @@ from keenbench.shared.cli import (
     resolve_seed,
     sample_or_exit,
 )
-from keenbench.shared.identity import serialize_row
-from keenbench.shared.io import write_json, write_jsonl
+from keenbench.shared.io import serialize_row, write_json, write_jsonl
 from keenbench.shared.llm import resolve_llm_model
 
 DEFAULT_COURTS = "scotus,ca1,ca2,ca3,ca4,ca5,ca6,ca7,ca8,ca9,ca10,ca11,cadc,cafc"

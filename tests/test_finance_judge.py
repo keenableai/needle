@@ -253,6 +253,6 @@ def test_run_passes_judge_model(tmp_path, monkeypatch):
     finance_cli.Finance().run(
         queries=str(f), engines="keenable", judge=True, judge_model="test/model", out=str(out)
     )
-    assert created == {"api_key": "or-key", "model": "test/model"}
+    assert created == {"api_key": "or-key", "model": "test/model", "timeout_s": 60.0}
     assert seen["judge"] is not None
     assert json.loads(out.read_text())["judge_model"] == "test/model"

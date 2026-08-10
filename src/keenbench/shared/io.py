@@ -25,6 +25,15 @@ def append_jsonl(records: Iterable[Record], out: str) -> None:
         _write(records, fh)
 
 
+def serialize_row(
+    row: dict[str, Any], fields: tuple[str, ...] = ("query_origin", "gold")
+) -> dict[str, Any]:
+    out = dict(row)
+    for name in fields:
+        out[name] = json.dumps(row[name], sort_keys=True)
+    return out
+
+
 def read_jsonl(text: str) -> list[dict]:
     return [json.loads(line) for line in text.splitlines() if line.strip()]
 

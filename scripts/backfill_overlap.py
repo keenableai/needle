@@ -35,7 +35,7 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
         print("no runs.json yet; nothing to backfill")
         return
     runs = json.loads(index_path.read_text(encoding="utf-8"))
-    runs_base = resolve_base(dataset, "/runs")
+    runs_base = f"{resolve_base(dataset)}/runs"
     overlap = load_jsonl(data / "overlap.jsonl")
     uniqueness = load_jsonl(data / "uniqueness.jsonl")
     overlap_done = _done(overlap, ("num_shared3", "num_suspect", "low_shared_urls"))

@@ -18,8 +18,7 @@ from keenbench.shared.cli import (
     resolve_seed,
     sample_or_exit,
 )
-from keenbench.shared.identity import serialize_row
-from keenbench.shared.io import write_json, write_jsonl
+from keenbench.shared.io import serialize_row, write_json, write_jsonl
 from keenbench.shared.llm import resolve_llm_model
 
 KNOWN_SUITES = ("arxiv", "europepmc")

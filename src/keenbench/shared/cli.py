@@ -60,19 +60,16 @@ async def aclose_all(*clients: Any) -> None:
 
 
 def require_openrouter_client(
-    model: str, *, purpose: str | None = None, timeout_s: float | None = None
+    model: str, *, purpose: str | None = None, timeout_s: float = 60.0
 ) -> OpenRouterClient:
     key = os.environ.get("OPENROUTER_API_KEY")
     if not key:
         suffix = f" (needed for {purpose})" if purpose else ""
         raise SystemExit(f"error: OPENROUTER_API_KEY is not set{suffix}")
-    kwargs: dict[str, Any] = {"timeout_s": timeout_s} if timeout_s is not None else {}
-    return OpenRouterClient(api_key=key, model=model, **kwargs)
+    return OpenRouterClient(api_key=key, model=model, timeout_s=timeout_s)
 
 
-def load_gold_rows(
-    path: str, *, bench: str, gold_ok: Callable[[dict], bool], row_noun: str = "query"
-) -> list[dict]:
+def load_gold_rows(path: str, *, bench: str, gold_ok: Callable[[dict], bool]) -> list[dict]:
     try:
         lines = Path(path).read_text(encoding="utf-8").splitlines()
     except OSError as exc:
@@ -97,15 +94,14 @@ def load_gold_rows(
     if malformed:
         print(f"{bench}: skipped {malformed} malformed gold rows", file=sys.stderr)
     if not rows:
-        raise SystemExit(f"error: no gold {row_noun} rows loaded from {path!r}")
+        raise SystemExit(f"error: no gold rows loaded from {path!r}")
     return rows
 
 
 def resolve_seed(seed: int | None, hour_ts: datetime | None = None) -> int:
     if seed is not None:
         return seed
-    ts = hour_ts or datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
-    return seed_from_hour_ts(ts)
+    return seed_from_hour_ts(hour_ts or current_hour()[1])
 
 
 def sample_or_exit(
