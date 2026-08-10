@@ -1,7 +1,9 @@
 import hashlib
+import json
 import re
 import unicodedata
 from datetime import UTC, datetime
+from typing import Any
 
 
 def canonicalize(text: str) -> str:
@@ -21,3 +23,10 @@ def query_id(text: str, *, hour_ts: datetime) -> str:
     if hour_ts.tzinfo is not None:
         hour_ts = hour_ts.astimezone(UTC)
     return f"{query_hash(text)}_{hour_ts:%Y-%m-%dT%H}"
+
+
+def serialize_row(row: dict[str, Any]) -> dict[str, Any]:
+    out = dict(row)
+    out["query_origin"] = json.dumps(row["query_origin"], sort_keys=True)
+    out["gold"] = json.dumps(row["gold"], sort_keys=True)
+    return out

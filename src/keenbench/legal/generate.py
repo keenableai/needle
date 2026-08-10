@@ -1,3 +1,4 @@
+import itertools
 import random
 from dataclasses import dataclass
 from datetime import datetime
@@ -18,6 +19,7 @@ from keenbench.legal.projection import (
 from keenbench.legal.sources import CourtListenerClient, EcfrClient, month_windows
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import LLMClient
+from keenbench.shared.sampling import dedupe_by, interleave
 
 CODE_OVERSAMPLE = 3
 
@@ -37,15 +39,6 @@ class GenStats:
     short_titles: int = 0
 
 
-def _interleave(lists: list[list[Any]]) -> list[Any]:
-    merged: list[Any] = []
-    for i in range(max((len(x) for x in lists), default=0)):
-        for x in lists:
-            if i < len(x):
-                merged.append(x[i])
-    return merged
-
-
 async def _caselaw_rows(
     courtlistener: CourtListenerClient,
     *,
@@ -59,7 +52,7 @@ async def _caselaw_rows(
 ) -> list[dict[str, Any]]:
     windows = month_windows(now=now, months_back=months_back)
     rows: list[dict[str, Any]] = []
-    syntax_idx = 0
+    syntax_cycle = itertools.cycle(CASELAW_SYNTAX_CYCLE)
     seen_clusters: set[int] = set()
 
     async def fetch_court(court: str) -> list[Case]:
@@ -70,7 +63,7 @@ async def _caselaw_rows(
         )
         for wi, cases in enumerate(lists):
             random.Random(seed + wi).shuffle(cases)
-        return _interleave(lists)
+        return interleave(lists)
 
     court_cases = await bounded_gather(list(courts), fetch_court, concurrency=2)
 
@@ -87,8 +80,7 @@ async def _caselaw_rows(
             if base is None:
                 stats.generic_caption += 1
                 continue
-            syntax = CASELAW_SYNTAX_CYCLE[syntax_idx % len(CASELAW_SYNTAX_CYCLE)]
-            syntax_idx += 1
+            syntax = next(syntax_cycle)
             query_text = caselaw_syntax_query(case, base, syntax)
             rows.append(
                 build_case_row(
@@ -163,14 +155,13 @@ async def _code_rows(
             by_title[title_num].append((section, query))
 
     rows: list[dict[str, Any]] = []
-    syntax_idx = 0
+    syntax_cycle = itertools.cycle(CODE_SYNTAX_CYCLE)
     for title_num in titles:
         selected = by_title[title_num][:per_title]
         if len(selected) < per_title:
             stats.short_titles += 1
         for section, query in selected:
-            syntax = CODE_SYNTAX_CYCLE[syntax_idx % len(CODE_SYNTAX_CYCLE)]
-            syntax_idx += 1
+            syntax = next(syntax_cycle)
             rows.append(
                 build_code_row(
                     section,
@@ -226,11 +217,4 @@ async def run_generate(
                 stats=stats,
             )
         )
-    seen_ids: set[str] = set()
-    unique_rows = []
-    for row in rows:
-        if row["query_id"] in seen_ids:
-            continue
-        seen_ids.add(row["query_id"])
-        unique_rows.append(row)
-    return unique_rows, stats
+    return dedupe_by(rows, lambda row: row["query_id"]), stats

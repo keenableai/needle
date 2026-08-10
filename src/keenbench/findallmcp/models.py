@@ -1,4 +1,3 @@
-import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
@@ -91,10 +90,3 @@ def build_task_row(task: Task, *, hour_ts: datetime) -> dict[str, Any]:
         "gold": gold,
         "hour_ts": hour_ts.astimezone(UTC).isoformat(),
     }
-
-
-def serialize_row(row: dict[str, Any]) -> dict[str, Any]:
-    out = dict(row)
-    out["query_origin"] = json.dumps(row["query_origin"], sort_keys=True)
-    out["gold"] = json.dumps(row["gold"], sort_keys=True)
-    return out

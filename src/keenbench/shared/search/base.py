@@ -12,6 +12,7 @@ RETRY_ATTEMPTS = 3
 RETRY_BASE_S = 1.0
 RETRY_MAX_S = 30.0
 RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
+USER_AGENT = "keenbench/0.1 (contact@keenable.ai)"
 
 
 def latency_stats(latencies_ms: list[float]) -> dict[str, float | int | list[float]] | None:
@@ -46,6 +47,10 @@ def capped_snippet(result: SearchResult, snippet_chars: int) -> str:
     return snippet[:snippet_chars] if snippet_chars > 0 else snippet
 
 
+def titled_snippet(result: SearchResult, snippet_chars: int) -> str:
+    return " ".join(p for p in (result.title, capped_snippet(result, snippet_chars)) if p)
+
+
 class SearchClient(Protocol):
     engine: str
     latencies_ms: list[float]
@@ -73,17 +78,28 @@ async def search_all(
 class HttpSearchClient:
     engine: str = ""
 
-    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int = 8) -> None:
+    def __init__(
+        self,
+        *,
+        timeout_s: float = 30.0,
+        max_concurrency: int = 8,
+        default_headers: dict[str, str] | None = None,
+        retry_attempts: int = RETRY_ATTEMPTS,
+        retry_base_s: float = RETRY_BASE_S,
+    ) -> None:
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
         self.timeout_s = timeout_s
+        self.default_headers = default_headers or {}
+        self.retry_attempts = retry_attempts
+        self.retry_base_s = retry_base_s
         self.latencies_ms: list[float] = []
         self._client: httpx.AsyncClient | None = None
         self._sem = asyncio.Semaphore(max_concurrency)
 
     def _http(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=self.timeout_s)
+            self._client = httpx.AsyncClient(timeout=self.timeout_s, headers=self.default_headers)
         return self._client
 
     async def aclose(self) -> None:
@@ -95,8 +111,8 @@ class HttpSearchClient:
         self, method: str, url: str, *, error_field: str | None = None, **kwargs: Any
     ) -> tuple[Any, dict[str, str] | None]:
         err: dict[str, str] | None = None
-        delay = RETRY_BASE_S
-        for attempt in range(RETRY_ATTEMPTS):
+        delay = self.retry_base_s
+        for attempt in range(self.retry_attempts):
             if attempt:
                 await asyncio.sleep(delay)
                 delay = min(delay * 2, RETRY_MAX_S)
@@ -150,16 +166,23 @@ class HttpSearchClient:
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> str | None:
-        try:
-            async with self._sem:
-                resp = await self._http().request(
-                    "GET", url, params=params, headers=headers, follow_redirects=True
-                )
-        except httpx.HTTPError:
-            return None
-        if resp.status_code != 200:
-            return None
-        return resp.text
+        delay = self.retry_base_s
+        for attempt in range(self.retry_attempts):
+            if attempt:
+                await asyncio.sleep(delay)
+                delay = min(delay * 2, RETRY_MAX_S)
+            try:
+                async with self._sem:
+                    resp = await self._http().request(
+                        "GET", url, params=params, headers=headers, follow_redirects=True
+                    )
+            except httpx.HTTPError:
+                continue
+            if resp.status_code == 200:
+                return resp.text
+            if resp.status_code not in RETRYABLE_STATUSES:
+                return None
+        return None
 
 
 class EngineClient(HttpSearchClient):

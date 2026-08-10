@@ -17,6 +17,7 @@ from keenbench.scholar.projection import (
 from keenbench.scholar.sources import ArxivClient, EuropePmcClient
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import LLMClient
+from keenbench.shared.sampling import interleave
 
 ARXIV_DOMAINS = (
     "computer science",
@@ -66,15 +67,6 @@ def _subwindows(bucket: str, *, now: datetime, count: int) -> list[tuple[str, st
     return windows
 
 
-def _interleave(lists: list[list[Paper]]) -> list[Paper]:
-    merged: list[Paper] = []
-    for i in range(max((len(x) for x in lists), default=0)):
-        for x in lists:
-            if i < len(x):
-                merged.append(x[i])
-    return merged
-
-
 async def _cell_candidates(
     domain: str,
     bucket: str,
@@ -106,7 +98,7 @@ async def _cell_candidates(
             if len(papers) > per:
                 papers = random.Random(seed + wi).sample(papers, per)
             lists.append(papers)
-    return _interleave(lists)
+    return interleave(lists)
 
 
 async def _fetch_body(

@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 
-from keenbench.shared.search import SearchResult, capped_snippet
+from keenbench.shared.search import SearchResult, titled_snippet
 
 ARXIV_ID = r"(?:[a-z-]+/\d{7}|\d{4}\.\d{4,5})"
 ARXIV_URL_RE = re.compile(rf"arxiv\.org/(?:abs|pdf|html)/({ARXIV_ID})(?:v\d+)?", re.IGNORECASE)
@@ -71,13 +71,9 @@ def extract_doi(url: str, text: str) -> str | None:
     return None
 
 
-def _capped(result: SearchResult, snippet_chars: int) -> str:
-    return " ".join(p for p in (result.title, capped_snippet(result, snippet_chars)) if p)
-
-
 def extract_ids(result: SearchResult, *, snippet_chars: int) -> PaperIds:
     url = result.url or ""
-    text = _capped(result, snippet_chars)
+    text = titled_snippet(result, snippet_chars)
     return PaperIds(
         arxiv=extract_arxiv(url, text),
         doi=extract_doi(url, text),

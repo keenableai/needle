@@ -1,9 +1,7 @@
 import re
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient
-
-USER_AGENT = "keenbench/0.1 (contact@keenable.ai)"
+from keenbench.shared.search.base import USER_AGENT, HttpSearchClient
 
 WIKIDATA_API = "https://www.wikidata.org/w/api.php"
 WIKIDATA_ENTITYDATA = "https://www.wikidata.org/wiki/Special:EntityData/{qid}.json"
@@ -127,8 +125,11 @@ class RegistryClient(HttpSearchClient):
         max_concurrency: int = 4,
         user_agent: str = USER_AGENT,
     ) -> None:
-        super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
-        self.user_agent = user_agent
+        super().__init__(
+            timeout_s=timeout_s,
+            max_concurrency=max_concurrency,
+            default_headers={"User-Agent": user_agent},
+        )
 
     async def _get(
         self,
@@ -136,8 +137,7 @@ class RegistryClient(HttpSearchClient):
         params: dict[str, Any] | None = None,
         headers: dict[str, str] | None = None,
     ) -> Any:
-        h = {"User-Agent": self.user_agent} | (headers or {})
-        payload, err = await self._request_json("GET", url, params=params, headers=h)
+        payload, err = await self._request_json("GET", url, params=params, headers=headers)
         return None if err is not None else payload
 
 

@@ -1,30 +1,28 @@
 import asyncio
-import os
 import sys
-from datetime import UTC, datetime
 
 from keenbench.scholar.generate import QUERY_BUCKETS, GenStats, run_generate
 from keenbench.scholar.idconv import IdConverter
-from keenbench.scholar.models import AGE_BUCKETS, serialize_row
+from keenbench.scholar.models import AGE_BUCKETS
 from keenbench.scholar.projection import LLM_BUCKETS
 from keenbench.scholar.score import GoldPaper, run_papers
 from keenbench.scholar.sources import ArxivClient, EuropePmcClient
 from keenbench.shared.cli import (
+    aclose_all,
     build_clients_or_exit,
+    current_hour,
+    has_gold_ids,
     load_gold_rows,
-    parse_csv,
+    parse_known_csv,
+    require_openrouter_client,
     resolve_seed,
     sample_or_exit,
 )
+from keenbench.shared.identity import serialize_row
 from keenbench.shared.io import write_json, write_jsonl
-from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
+from keenbench.shared.llm import resolve_llm_model
 
 KNOWN_SUITES = ("arxiv", "europepmc")
-
-
-def _gold_ok(gold: dict) -> bool:
-    ids = gold.get("ids")
-    return isinstance(ids, dict) and bool(ids)
 
 
 def _gold_paper(row: dict) -> GoldPaper:
@@ -53,30 +51,11 @@ class Scholar:
         llm_model: str | None = None,
         body_concurrency: int = 8,
     ) -> None:
-        suite_names = tuple(parse_csv(suites))
-        unknown = [s for s in suite_names if s not in KNOWN_SUITES]
-        if unknown or not suite_names:
-            raise SystemExit(
-                f"error: unknown --suites {','.join(unknown) or suites!r} "
-                f"(known: {', '.join(KNOWN_SUITES)})"
-            )
-        age_names = tuple(parse_csv(age_buckets))
-        bad_ages = [a for a in age_names if a not in AGE_BUCKETS]
-        if bad_ages or not age_names:
-            raise SystemExit(
-                f"error: unknown --age-buckets {','.join(bad_ages) or age_buckets!r} "
-                f"(known: {', '.join(AGE_BUCKETS)})"
-            )
-        bucket_names = tuple(parse_csv(buckets))
-        bad_buckets = [b for b in bucket_names if b not in QUERY_BUCKETS]
-        if bad_buckets or not bucket_names:
-            raise SystemExit(
-                f"error: unknown --buckets {','.join(bad_buckets) or buckets!r} "
-                f"(known: {', '.join(QUERY_BUCKETS)})"
-            )
+        suite_names = parse_known_csv(suites, KNOWN_SUITES, flag="--suites")
+        age_names = parse_known_csv(age_buckets, AGE_BUCKETS, flag="--age-buckets")
+        bucket_names = parse_known_csv(buckets, QUERY_BUCKETS, flag="--buckets")
 
-        now = datetime.now(UTC)
-        hour_ts = now.replace(minute=0, second=0, microsecond=0)
+        now, hour_ts = current_hour()
         seed = resolve_seed(seed, hour_ts)
 
         arxiv = ArxivClient() if "arxiv" in suite_names else None
@@ -84,10 +63,7 @@ class Scholar:
 
         llm = None
         if any(b in LLM_BUCKETS for b in bucket_names):
-            key = os.environ.get("OPENROUTER_API_KEY")
-            if not key:
-                raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for LLM buckets)")
-            llm = OpenRouterClient(api_key=key, model=resolve_llm_model(llm_model))
+            llm = require_openrouter_client(resolve_llm_model(llm_model), purpose="LLM buckets")
 
         async def _go() -> tuple[list[dict], GenStats]:
             try:
@@ -104,11 +80,7 @@ class Scholar:
                     body_concurrency=body_concurrency,
                 )
             finally:
-                for client in (arxiv, europepmc):
-                    if client is not None:
-                        await client.aclose()
-                if llm is not None:
-                    await llm.aclose()
+                await aclose_all(arxiv, europepmc, llm)
 
         rows, stats = asyncio.run(_go())
         write_jsonl([serialize_row(r) for r in rows], out)
@@ -134,9 +106,7 @@ class Scholar:
         seed: int | None = None,
         resolve_pmcids: bool = True,
     ) -> None:
-        rows = load_gold_rows(queries, bench="scholar", gold_ok=_gold_ok)
-        if not rows:
-            raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
+        rows = load_gold_rows(queries, bench="scholar", gold_ok=has_gold_ids)
         rows = sample_or_exit(
             rows,
             limit,
@@ -162,10 +132,7 @@ class Scholar:
                     idconv=idconv,
                 )
             finally:
-                for c in clients.values():
-                    await c.aclose()
-                if idconv is not None:
-                    await idconv.aclose()
+                await aclose_all(*clients.values(), idconv)
 
         report = asyncio.run(_go())
         write_json(report, out)

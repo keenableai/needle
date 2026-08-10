@@ -1,4 +1,3 @@
-import asyncio
 from dataclasses import dataclass
 from typing import Any
 
@@ -6,20 +5,13 @@ from keenbench.scholar.idconv import IdConverter
 from keenbench.scholar.ids import PaperIds, extract_ids
 from keenbench.scholar.models import AGE_BUCKETS
 from keenbench.shared.recall import (
-    ULTIMATE,
-    classify_misses,
+    build_match_rows,
     first_rank,
     group_recall,
     recall_summary,
-    ultimate_per_query,
+    run_known_item_eval,
 )
-from keenbench.shared.search import (
-    SearchClient,
-    SearchResult,
-    capped_snippet,
-    latency_stats,
-    search_all,
-)
+from keenbench.shared.search import SearchClient, SearchResult
 
 
 @dataclass(frozen=True)
@@ -68,8 +60,6 @@ async def run_papers(
     snippet_chars: int = 2000,
     idconv: IdConverter | None = None,
 ) -> dict[str, Any]:
-    engine_names = list(engines)
-
     async def eval_engine(query: GoldPaper, results: list[SearchResult] | None, err: Any) -> dict:
         pq: dict[str, Any] = {
             "query": query.text,
@@ -96,41 +86,10 @@ async def run_papers(
                     if f.pmcid and not f.pmid:
                         f.pmid = mapping.get(f.pmcid)
         matches = [ids_match(query.ids, f) for f in found]
-        pq["results"] = [
-            {
-                "url": r.url,
-                "title": r.title,
-                "snippet": capped_snippet(r, snippet_chars),
-                "ids": f.as_match_dict(),
-                "matched": m,
-            }
-            for r, f, m in zip(results, found, matches, strict=True)
-        ]
+        pq["results"] = build_match_rows(results, found, matches, snippet_chars=snippet_chars)
         pq["hit_rank"] = first_rank(matches)
         return pq
 
-    searches_by_query = await search_all(
-        engines, [q.text for q in queries], num_results=num_results
+    return await run_known_item_eval(
+        queries, engines, eval_engine, _summary, num_results=num_results, snippet_chars=snippet_chars
     )
-    query_outs = await asyncio.gather(
-        *[
-            asyncio.gather(*[eval_engine(query, r, e) for r, e in searches])
-            for query, searches in zip(queries, searches_by_query, strict=True)
-        ]
-    )
-
-    engines_out: dict[str, dict[str, Any]] = {}
-    for idx, name in enumerate(engine_names):
-        per_query = [entries[idx] for entries in query_outs]
-        engines_out[name] = _summary(per_query, latency_stats(engines[name].latencies_ms))
-    if engine_names:
-        engines_out[ULTIMATE] = _summary(ultimate_per_query(query_outs, cap=num_results), None)
-
-    classify_misses(query_outs, engine_names, engines_out)
-
-    return {
-        "num_queries": len(queries),
-        "num_results": num_results,
-        "snippet_chars": snippet_chars,
-        "engines": engines_out,
-    }

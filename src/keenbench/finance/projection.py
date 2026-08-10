@@ -8,7 +8,7 @@ from keenbench.finance.models import (
     display_name,
     quarter_phrase,
 )
-from keenbench.shared.prompts import render_prompt
+from keenbench.shared.prompts import clean_llm_line, render_prompt
 
 FILING_QUERY_TEMPLATE = "filing_query.jinja"
 DOC_EXCERPT_OFFSET = 1500
@@ -48,13 +48,7 @@ def build_filingdoc_prompt(filing: Filing, text: str) -> str:
 
 
 def clean_filingdoc_query(text: str | None) -> str | None:
-    text = (text or "").strip()
-    if not text:
-        return None
-    cleaned = text.splitlines()[0].strip().strip("'").strip()
-    if not cleaned or "NO_DISTINCT_QUERY" in cleaned.upper():
-        return None
-    return cleaned
+    return clean_llm_line(text, sentinel="NO_DISTINCT_QUERY")
 
 
 def filingdoc_query_ok(query: str, *, filing: Filing, text: str) -> bool:

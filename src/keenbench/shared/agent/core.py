@@ -163,8 +163,14 @@ class Agent:
 
         for step in range(1, self.max_steps + 1):
             if budget is not None and budget.exhausted:
-                return await self._handle_budget_exhausted(
-                    messages, usage, records, budget, step - 1
+                return await self._finalize(
+                    messages,
+                    usage,
+                    records,
+                    budget,
+                    prompt=BUDGET_EXHAUSTED_PROMPT,
+                    steps=step - 1,
+                    finish_reason="budget",
                 )
             try:
                 response = await self.llm_client.chat(
@@ -239,42 +245,59 @@ class Agent:
             if response.usage.prompt_tokens > self._compaction_token_limit:
                 messages = await self._compact_history(messages, usage, budget)
 
-        return await self._handle_max_steps_exceeded(
-            messages, usage, records, continuation_chunks, budget
+        return await self._finalize(
+            messages,
+            usage,
+            records,
+            budget,
+            prompt=MAX_STEPS_EXCEEDED_PROMPT,
+            steps=self.max_steps,
+            prefix="".join(continuation_chunks),
+            max_steps_exceeded=True,
+            error_prefix="Max steps exceeded and summarization failed: ",
         )
 
-    async def _handle_budget_exhausted(
+    async def _finalize(
         self,
         messages: list[dict[str, Any]],
         usage: AgentUsage,
         records: list[ToolCallRecord],
-        budget: RunBudget,
+        budget: RunBudget | None,
+        *,
+        prompt: str,
         steps: int,
+        prefix: str = "",
+        finish_reason: str | None = None,
+        max_steps_exceeded: bool = False,
+        error_prefix: str = "",
     ) -> AgentResult:
-        messages.append({"role": "user", "content": BUDGET_EXHAUSTED_PROMPT})
         try:
-            final = await self.llm_client.chat(
-                messages, tools=None, max_tokens=self.max_output_tokens
+            response = await self.llm_client.chat(
+                [*messages, {"role": "user", "content": prompt}],
+                tools=None,
+                max_tokens=self.max_output_tokens,
             )
         except LLMClientError as e:
             return AgentResult(
-                content="",
+                content=prefix,
                 success=False,
                 usage=usage,
                 tool_calls=records,
                 steps=steps,
-                error=str(e),
+                error=f"{error_prefix}{e}",
                 finish_reason="error",
+                max_steps_exceeded=max_steps_exceeded,
                 budget=budget,
             )
-        self._account(usage, final, budget)
+        self._account(usage, response, budget)
         return AgentResult(
-            content=final.content or "",
+            content=prefix + (response.content or ""),
             success=True,
             usage=usage,
             tool_calls=records,
             steps=steps,
-            finish_reason="budget",
+            finish_reason=finish_reason or response.finish_reason,
+            max_steps_exceeded=max_steps_exceeded,
             budget=budget,
         )
 
@@ -366,41 +389,3 @@ class Agent:
             *messages[tail_start:],
         ]
 
-    async def _handle_max_steps_exceeded(
-        self,
-        messages: list[dict[str, Any]],
-        usage: AgentUsage,
-        records: list[ToolCallRecord],
-        continuation_chunks: list[str],
-        budget: RunBudget | None,
-    ) -> AgentResult:
-        prefix = "".join(continuation_chunks)
-        try:
-            response = await self.llm_client.chat(
-                [*messages, {"role": "user", "content": MAX_STEPS_EXCEEDED_PROMPT}],
-                tools=None,
-                max_tokens=self.max_output_tokens,
-            )
-            self._account(usage, response, budget)
-            return AgentResult(
-                content=prefix + response.content,
-                success=True,
-                usage=usage,
-                tool_calls=records,
-                steps=self.max_steps,
-                finish_reason=response.finish_reason,
-                max_steps_exceeded=True,
-                budget=budget,
-            )
-        except LLMClientError as e:
-            return AgentResult(
-                content=prefix,
-                success=False,
-                usage=usage,
-                tool_calls=records,
-                steps=self.max_steps,
-                error=f"Max steps exceeded and summarization failed: {e}",
-                finish_reason="error",
-                max_steps_exceeded=True,
-                budget=budget,
-            )

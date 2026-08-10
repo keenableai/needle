@@ -4,7 +4,7 @@ from typing import Any, TypeVar
 from keenbench.news.trends import Trend
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import LLMClient
-from keenbench.shared.prompts import render_prompt
+from keenbench.shared.prompts import clean_llm_line, render_prompt
 
 PROJECTION_TEMPLATE = "projection.jinja"
 TRENDS_TEMPLATE = "trends_projection.jinja"
@@ -13,13 +13,7 @@ T = TypeVar("T")
 
 
 def clean_projection(text: str | None) -> str | None:
-    text = (text or "").strip()
-    if not text:
-        return None
-    cleaned = text.splitlines()[0].strip(" \"'")
-    if not cleaned or "NO_NEWS_EVENT" in cleaned.upper():
-        return None
-    return cleaned
+    return clean_llm_line(text, sentinel="NO_NEWS_EVENT", strip_chars=" \"'")
 
 
 def build_projection_prompt(record: dict[str, Any], *, today: str) -> str:

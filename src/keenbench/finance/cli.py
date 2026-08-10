@@ -1,6 +1,5 @@
 import asyncio
 import json
-import os
 import sys
 from collections import Counter
 from datetime import UTC, datetime
@@ -12,15 +11,19 @@ from keenbench.finance.registries import GleifClient, SecClient, WikidataClient
 from keenbench.finance.score import GoldQuery, run_answers
 from keenbench.finance.sources import EdgarClient
 from keenbench.shared.cli import (
+    aclose_all,
     as_obj,
     build_clients_or_exit,
+    current_hour,
     load_gold_rows,
     parse_csv,
+    parse_known_csv,
+    require_openrouter_client,
     resolve_seed,
     sample_or_exit,
 )
 from keenbench.shared.io import write_json, write_jsonl
-from keenbench.shared.llm import OpenRouterClient, resolve_judge_model, resolve_llm_model
+from keenbench.shared.llm import resolve_judge_model, resolve_llm_model
 
 KNOWN_SUITES = ("finance", "filings", "filingdoc")
 
@@ -71,24 +74,15 @@ class Finance:
         doc_concurrency: int = 8,
         registry_concurrency: int = 4,
     ) -> None:
-        suite_names = tuple(parse_csv(suites))
-        unknown = [s for s in suite_names if s not in KNOWN_SUITES]
-        if unknown or not suite_names:
-            raise SystemExit(
-                f"error: unknown --suites {','.join(unknown) or suites!r} "
-                f"(known: {', '.join(KNOWN_SUITES)})"
-            )
-        field_names = tuple(parse_csv(fields))
-        bad_fields = [f for f in field_names if f not in QUARTERLY_FIELDS]
-        if "filings" in suite_names and (bad_fields or not field_names):
-            raise SystemExit(
-                f"error: unknown --fields {','.join(bad_fields) or fields!r} "
-                f"(known: {', '.join(QUARTERLY_FIELDS)})"
-            )
+        suite_names = parse_known_csv(suites, KNOWN_SUITES, flag="--suites")
+        field_names = (
+            parse_known_csv(fields, QUARTERLY_FIELDS, flag="--fields")
+            if "filings" in suite_names
+            else tuple(parse_csv(fields))
+        )
         if min_employee_year <= 0:
             min_employee_year = datetime.now(UTC).year - 1
-        now = datetime.now(UTC)
-        hour_ts = now.replace(minute=0, second=0, microsecond=0)
+        now, hour_ts = current_hour()
         seed = resolve_seed(seed, hour_ts)
 
         concurrency = max(1, registry_concurrency)
@@ -102,12 +96,9 @@ class Finance:
         edgar = EdgarClient(max_concurrency=concurrency) if "filingdoc" in suite_names else None
         llm = None
         if "filingdoc" in suite_names:
-            key = os.environ.get("OPENROUTER_API_KEY")
-            if not key:
-                raise SystemExit(
-                    "error: OPENROUTER_API_KEY is not set (needed for the filingdoc suite)"
-                )
-            llm = OpenRouterClient(api_key=key, model=resolve_llm_model(llm_model))
+            llm = require_openrouter_client(
+                resolve_llm_model(llm_model), purpose="the filingdoc suite"
+            )
 
         async def _go() -> tuple[list[dict], GenStats]:
             try:
@@ -134,9 +125,7 @@ class Finance:
                     doc_concurrency=doc_concurrency,
                 )
             finally:
-                for client in (sec, wikidata, gleif, edgar, llm):
-                    if client is not None:
-                        await client.aclose()
+                await aclose_all(sec, wikidata, gleif, edgar, llm)
 
         try:
             rows, stats = asyncio.run(_go())
@@ -178,8 +167,6 @@ class Finance:
         judge_concurrency: int = 8,
     ) -> None:
         rows = load_gold_rows(queries, bench="finance", gold_ok=_gold_ok)
-        if not rows:
-            raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
         rows = sample_or_exit(
             rows,
             limit,
@@ -197,11 +184,8 @@ class Finance:
         judge_llm = None
         model = None
         if judge:
-            openrouter_key = os.environ.get("OPENROUTER_API_KEY")
-            if not openrouter_key:
-                raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for --judge)")
             model = resolve_judge_model(judge_model)
-            judge_llm = OpenRouterClient(api_key=openrouter_key, model=model)
+            judge_llm = require_openrouter_client(model, purpose="--judge")
 
         async def _go() -> dict:
             try:
@@ -214,10 +198,7 @@ class Finance:
                     judge_concurrency=judge_concurrency,
                 )
             finally:
-                for c in clients.values():
-                    await c.aclose()
-                if judge_llm is not None:
-                    await judge_llm.aclose()
+                await aclose_all(*clients.values(), judge_llm)
 
         report = asyncio.run(_go())
         if model is not None:

@@ -1,29 +1,28 @@
 import asyncio
-import os
 import sys
-from datetime import UTC, datetime
 
 from keenbench.legal.generate import GenStats, run_generate
-from keenbench.legal.models import SUITES, serialize_row
+from keenbench.legal.models import SUITES
 from keenbench.legal.score import GoldLegal, run_legal
 from keenbench.legal.sources import CourtListenerClient, EcfrClient
 from keenbench.shared.cli import (
+    aclose_all,
     build_clients_or_exit,
+    current_hour,
+    has_gold_ids,
     load_gold_rows,
     parse_csv,
+    parse_known_csv,
+    require_openrouter_client,
     resolve_seed,
     sample_or_exit,
 )
+from keenbench.shared.identity import serialize_row
 from keenbench.shared.io import write_json, write_jsonl
-from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
+from keenbench.shared.llm import resolve_llm_model
 
 DEFAULT_COURTS = "scotus,ca1,ca2,ca3,ca4,ca5,ca6,ca7,ca8,ca9,ca10,ca11,cadc,cafc"
 DEFAULT_TITLES = "7,12,14,17,21,26,29,40,47,49"
-
-
-def _gold_ok(gold: dict) -> bool:
-    ids = gold.get("ids")
-    return isinstance(ids, dict) and bool(ids)
 
 
 def _gold_legal(row: dict) -> GoldLegal:
@@ -58,30 +57,20 @@ class Legal:
         llm_model: str | None = None,
         code_concurrency: int = 8,
     ) -> None:
-        suite_names = tuple(parse_csv(suites))
-        unknown = [s for s in suite_names if s not in SUITES]
-        if unknown or not suite_names:
-            raise SystemExit(
-                f"error: unknown --suites {','.join(unknown) or suites!r} "
-                f"(known: {', '.join(SUITES)})"
-            )
+        suite_names = parse_known_csv(suites, SUITES, flag="--suites")
         try:
             title_nums = tuple(int(t) for t in parse_csv(titles))
         except ValueError:
             raise SystemExit(f"error: --titles must be CFR title numbers, got {titles!r}") from None
 
-        now = datetime.now(UTC)
-        hour_ts = now.replace(minute=0, second=0, microsecond=0)
+        now, hour_ts = current_hour()
         seed = resolve_seed(seed, hour_ts)
 
         courtlistener = CourtListenerClient() if "caselaw" in suite_names else None
         ecfr = EcfrClient() if "code" in suite_names else None
         llm = None
         if "code" in suite_names:
-            key = os.environ.get("OPENROUTER_API_KEY")
-            if not key:
-                raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for the code suite)")
-            llm = OpenRouterClient(api_key=key, model=resolve_llm_model(llm_model))
+            llm = require_openrouter_client(resolve_llm_model(llm_model), purpose="the code suite")
 
         async def _go() -> tuple[list[dict], GenStats]:
             try:
@@ -100,9 +89,7 @@ class Legal:
                     code_concurrency=code_concurrency,
                 )
             finally:
-                for client in (courtlistener, ecfr, llm):
-                    if client is not None:
-                        await client.aclose()
+                await aclose_all(courtlistener, ecfr, llm)
 
         rows, stats = asyncio.run(_go())
         write_jsonl([serialize_row(r) for r in rows], out)
@@ -128,9 +115,7 @@ class Legal:
         sample: str = "stratified",
         seed: int | None = None,
     ) -> None:
-        rows = load_gold_rows(queries, bench="legal", gold_ok=_gold_ok)
-        if not rows:
-            raise SystemExit(f"error: no gold query rows loaded from {queries!r}")
+        rows = load_gold_rows(queries, bench="legal", gold_ok=has_gold_ids)
         rows = sample_or_exit(
             rows,
             limit,
@@ -153,8 +138,7 @@ class Legal:
                     snippet_chars=snippet_chars,
                 )
             finally:
-                for c in clients.values():
-                    await c.aclose()
+                await aclose_all(*clients.values())
 
         report = asyncio.run(_go())
         write_json(report, out)

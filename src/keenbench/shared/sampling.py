@@ -1,9 +1,31 @@
 import hashlib
 from collections.abc import Callable
 from datetime import datetime
-from typing import Any
+from typing import Any, TypeVar
+
+T = TypeVar("T")
 
 MASK64 = (1 << 64) - 1
+
+
+def interleave(lists: list[list[T]]) -> list[T]:
+    merged: list[T] = []
+    for i in range(max((len(x) for x in lists), default=0)):
+        for x in lists:
+            if i < len(x):
+                merged.append(x[i])
+    return merged
+
+
+def dedupe_by(items: list[T], key: Callable[[T], Any]) -> list[T]:
+    seen: set[Any] = set()
+    out: list[T] = []
+    for item in items:
+        k = key(item)
+        if k not in seen:
+            seen.add(k)
+            out.append(item)
+    return out
 
 
 def shuffle_indices(n: int, seed: int) -> list[int]:

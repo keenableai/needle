@@ -1,4 +1,5 @@
 from keenbench.shared.search.base import (
+    USER_AGENT,
     EngineClient,
     HttpSearchClient,
     SearchClient,
@@ -6,6 +7,7 @@ from keenbench.shared.search.base import (
     capped_snippet,
     latency_stats,
     search_all,
+    titled_snippet,
 )
 from keenbench.shared.search.brave import BraveClient
 from keenbench.shared.search.ceramic import CeramicClient
@@ -21,6 +23,7 @@ from keenbench.shared.search.tavily import TavilyClient
 from keenbench.shared.search.you import YouClient
 
 __all__ = [
+    "USER_AGENT",
     "BraveClient",
     "CeramicClient",
     "EngineClient",
@@ -40,4 +43,5 @@ __all__ = [
     "capped_snippet",
     "latency_stats",
     "search_all",
+    "titled_snippet",
 ]

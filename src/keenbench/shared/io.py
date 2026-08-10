@@ -25,6 +25,15 @@ def append_jsonl(records: Iterable[Record], out: str) -> None:
         _write(records, fh)
 
 
+def read_jsonl(text: str) -> list[dict]:
+    return [json.loads(line) for line in text.splitlines() if line.strip()]
+
+
+def load_jsonl(path: str | Path) -> list[dict]:
+    p = Path(path)
+    return read_jsonl(p.read_text(encoding="utf-8")) if p.exists() else []
+
+
 def write_json(obj: Any, out: str) -> None:
     text = json.dumps(obj, ensure_ascii=False, indent=2)
     if out == "-":

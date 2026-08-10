@@ -1,11 +1,11 @@
 import json
 
-from keenbench.scholar.cli import _gold_ok, _gold_paper
-from keenbench.shared.cli import load_gold_rows
+from keenbench.scholar.cli import _gold_paper
+from keenbench.shared.cli import has_gold_ids, load_gold_rows
 
 
 def _load_gold_rows(path):
-    return load_gold_rows(path, bench="scholar", gold_ok=_gold_ok)
+    return load_gold_rows(path, bench="scholar", gold_ok=has_gold_ids)
 
 
 def _row(**over):

@@ -3,20 +3,13 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from keenbench.shared.recall import (
-    ULTIMATE,
-    classify_misses,
+    build_match_rows,
     first_rank,
     group_recall,
     recall_summary,
-    ultimate_per_query,
+    run_known_item_eval,
 )
-from keenbench.shared.search import (
-    SearchClient,
-    SearchResult,
-    capped_snippet,
-    latency_stats,
-    search_all,
-)
+from keenbench.shared.search import SearchClient, SearchResult, titled_snippet
 
 CLUSTER_URL_RE = re.compile(r"courtlistener\.com/opinion/(\d+)/", re.IGNORECASE)
 JUSTIA_US_RE = re.compile(
@@ -81,13 +74,9 @@ class LegalIds:
         return out
 
 
-def _capped(result: SearchResult, snippet_chars: int) -> str:
-    return " ".join(p for p in (result.title, capped_snippet(result, snippet_chars)) if p)
-
-
 def extract_legal_ids(result: SearchResult, *, snippet_chars: int) -> LegalIds:
     url = result.url or ""
-    text = _capped(result, snippet_chars)
+    text = titled_snippet(result, snippet_chars)
     ids = LegalIds()
     for m in CLUSTER_URL_RE.finditer(url):
         ids.clusters.add(m.group(1))
@@ -165,9 +154,7 @@ async def run_legal(
     num_results: int = 5,
     snippet_chars: int = 2000,
 ) -> dict[str, Any]:
-    engine_names = list(engines)
-
-    def eval_engine(query: GoldLegal, results: list[SearchResult] | None, err: Any) -> dict:
+    async def eval_engine(query: GoldLegal, results: list[SearchResult] | None, err: Any) -> dict:
         pq: dict[str, Any] = {
             "query": query.text,
             "case_key": query.case_key,
@@ -185,42 +172,13 @@ async def run_legal(
         pq["n_results"] = len(results)
         found = [extract_legal_ids(r, snippet_chars=snippet_chars) for r in results]
         matches = [
-            ids_match(query, f, result_text=f"{_capped(r, snippet_chars)} {r.url or ''}")
+            ids_match(query, f, result_text=f"{titled_snippet(r, snippet_chars)} {r.url or ''}")
             for r, f in zip(results, found, strict=True)
         ]
-        pq["results"] = [
-            {
-                "url": r.url,
-                "title": r.title,
-                "snippet": capped_snippet(r, snippet_chars),
-                "ids": f.as_match_dict(),
-                "matched": m,
-            }
-            for r, f, m in zip(results, found, matches, strict=True)
-        ]
+        pq["results"] = build_match_rows(results, found, matches, snippet_chars=snippet_chars)
         pq["hit_rank"] = first_rank(matches)
         return pq
 
-    searches_by_query = await search_all(
-        engines, [q.text for q in queries], num_results=num_results
+    return await run_known_item_eval(
+        queries, engines, eval_engine, _summary, num_results=num_results, snippet_chars=snippet_chars
     )
-    query_outs = [
-        [eval_engine(query, r, e) for r, e in searches]
-        for query, searches in zip(queries, searches_by_query, strict=True)
-    ]
-
-    engines_out: dict[str, dict[str, Any]] = {}
-    for idx, name in enumerate(engine_names):
-        per_query = [entries[idx] for entries in query_outs]
-        engines_out[name] = _summary(per_query, latency_stats(engines[name].latencies_ms))
-    if engine_names:
-        engines_out[ULTIMATE] = _summary(ultimate_per_query(query_outs, cap=num_results), None)
-
-    classify_misses(query_outs, engine_names, engines_out)
-
-    return {
-        "num_queries": len(queries),
-        "num_results": num_results,
-        "snippet_chars": snippet_chars,
-        "engines": engines_out,
-    }

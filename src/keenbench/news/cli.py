@@ -1,6 +1,5 @@
 import asyncio
 import json
-import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -8,9 +7,9 @@ from pathlib import Path
 from keenbench.news.feeds import SEED_SOURCES, load_sources_from_toml
 from keenbench.news.pipeline import run_rss, run_trends
 from keenbench.news.trends import GoogleTrendsRssProvider, parse_geos
-from keenbench.shared.cli import run_rbp_eval, sample_or_exit
+from keenbench.shared.cli import require_openrouter_client, run_rbp_eval, sample_or_exit
 from keenbench.shared.io import write_jsonl
-from keenbench.shared.llm import OpenRouterClient, resolve_llm_model
+from keenbench.shared.llm import resolve_llm_model
 from keenbench.shared.rankeval import EvalQuery
 
 
@@ -103,12 +102,7 @@ class News:
         fetch_concurrency = 15 if fetch_concurrency is None else fetch_concurrency
         min_candidates = 30 if min_candidates is None else min_candidates
 
-        api_key = os.environ.get("OPENROUTER_API_KEY")
-        if not api_key:
-            raise SystemExit("error: OPENROUTER_API_KEY is not set")
-
-        model = resolve_llm_model(llm_model)
-        llm = OpenRouterClient(api_key=api_key, model=model)
+        llm = require_openrouter_client(resolve_llm_model(llm_model))
         hour_ts = datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
         llm_concurrency = max(1, llm_concurrency)
 

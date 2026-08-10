@@ -2,7 +2,7 @@ import re
 from datetime import date, timedelta
 
 from keenbench.legal.models import COURT_PHRASES, Case, CodeSection
-from keenbench.shared.prompts import render_prompt
+from keenbench.shared.prompts import clean_llm_line, render_prompt
 
 CODE_QUERY_TEMPLATE = "code_query.jinja"
 SECTION_EXCERPT_CHARS = 6000
@@ -98,13 +98,7 @@ def code_syntax_query(base: str, syntax: str) -> str:
 
 
 def clean_code_query(text: str | None) -> str | None:
-    text = (text or "").strip()
-    if not text:
-        return None
-    cleaned = text.splitlines()[0].strip().strip("'").strip()
-    if not cleaned or "NO_DISTINCT_QUERY" in cleaned.upper():
-        return None
-    return cleaned
+    return clean_llm_line(text, sentinel="NO_DISTINCT_QUERY")
 
 
 def _section_number_forms(section: CodeSection) -> list[str]:

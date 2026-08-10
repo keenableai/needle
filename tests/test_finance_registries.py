@@ -100,7 +100,7 @@ async def test_sec_tickers_parses_and_caches(monkeypatch):
     ]
     assert await c.tickers(limit=1) == rows[:1]
     assert len(calls) == 1
-    assert calls[0][2]["headers"]["User-Agent"].startswith("keenbench/")
+    assert c.default_headers["User-Agent"].startswith("keenbench/")
 
 
 async def test_sec_companyfacts_extracts_us_gaap(monkeypatch):

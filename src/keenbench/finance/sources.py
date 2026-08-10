@@ -92,22 +92,19 @@ class EdgarClient(RegistryClient):
         payload = await self._get(SEC_SUBMISSIONS_URL.format(cik=int(cik)))
         recent = ((payload or {}).get("filings") or {}).get("recent") or {}
         accessions = recent.get("accessionNumber") or []
-        out = []
-        for i, adsh in enumerate(accessions):
-            form = (recent.get("form") or [""] * len(accessions))[i]
-            if form not in forms:
-                continue
-            out.append(
-                {
-                    "adsh": adsh,
-                    "form": form,
-                    "filed": (recent.get("filingDate") or [""] * len(accessions))[i],
-                    "primary_doc": (recent.get("primaryDocument") or [""] * len(accessions))[i],
-                }
+        blank = [""] * len(accessions)
+        out = [
+            {"adsh": adsh, "form": form, "filed": filed, "primary_doc": doc}
+            for adsh, form, filed, doc in zip(
+                accessions,
+                recent.get("form") or blank,
+                recent.get("filingDate") or blank,
+                recent.get("primaryDocument") or blank,
+                strict=True,
             )
-            if len(out) >= limit:
-                break
-        return out
+            if form in forms
+        ]
+        return out[:limit]
 
     async def document_text(self, filing: Filing) -> str | None:
         if not filing.primary_doc:
@@ -115,7 +112,7 @@ class EdgarClient(RegistryClient):
         url = SEC_DOC_URL.format(
             cik=filing.cik, adsh_nodash=filing.adsh_nodash, doc=filing.primary_doc
         )
-        html = await self._get_text(url, headers={"User-Agent": self.user_agent})
+        html = await self._get_text(url)
         if html is None:
             return None
         return html_text(html) or None

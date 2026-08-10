@@ -9,9 +9,7 @@ from defusedxml.common import DefusedXmlException
 
 from keenbench.legal.models import Case, CodeSection
 from keenbench.shared.sampling import shuffle_indices
-from keenbench.shared.search.base import HttpSearchClient
-
-USER_AGENT = "keenbench/0.1 (contact@keenable.ai)"
+from keenbench.shared.search.base import USER_AGENT, HttpSearchClient
 
 COURTLISTENER_SEARCH = "https://www.courtlistener.com/api/rest/v4/search/"
 ECFR_TITLES = "https://www.ecfr.gov/api/versioner/v1/titles.json"
@@ -53,14 +51,12 @@ def parse_search_case(rec: dict[str, Any]) -> Case | None:
 class CourtListenerClient(HttpSearchClient):
     def __init__(self, *, api_token: str | None = None, **kwargs: Any) -> None:
         kwargs.setdefault("max_concurrency", 2)
-        super().__init__(**kwargs)
         self.api_token = api_token or os.environ.get("COURTLISTENER_API_TOKEN") or None
-
-    def _headers(self) -> dict[str, str]:
         headers = {"User-Agent": USER_AGENT}
         if self.api_token:
             headers["Authorization"] = f"Token {self.api_token}"
-        return headers
+        kwargs.setdefault("default_headers", headers)
+        super().__init__(**kwargs)
 
     async def opinions(
         self,
@@ -79,9 +75,7 @@ class CourtListenerClient(HttpSearchClient):
         }
         if published_only:
             params["stat_Published"] = "on"
-        payload, err = await self._request_json(
-            "GET", COURTLISTENER_SEARCH, params=params, headers=self._headers()
-        )
+        payload, err = await self._request_json("GET", COURTLISTENER_SEARCH, params=params)
         if err is not None or not isinstance(payload, dict):
             return []
         cases = []
@@ -141,13 +135,12 @@ def parse_section_xml(
 class EcfrClient(HttpSearchClient):
     def __init__(self, **kwargs: Any) -> None:
         kwargs.setdefault("max_concurrency", 4)
+        kwargs.setdefault("default_headers", {"User-Agent": USER_AGENT})
         super().__init__(**kwargs)
         self._issue_dates: dict[int, str] | None = None
 
     async def _get_json(self, url: str, **kwargs: Any) -> Any:
-        payload, err = await self._request_json(
-            "GET", url, headers={"User-Agent": USER_AGENT}, **kwargs
-        )
+        payload, err = await self._request_json("GET", url, **kwargs)
         return None if err is not None else payload
 
     async def issue_date(self, title_num: int) -> str | None:
@@ -183,7 +176,6 @@ class EcfrClient(HttpSearchClient):
         xml_text = await self._get_text(
             ECFR_SECTION.format(issue_date=issue, title=title_num),
             params={"part": part, "section": identifier},
-            headers={"User-Agent": USER_AGENT},
         )
         if xml_text is None:
             return None

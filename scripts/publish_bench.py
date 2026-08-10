@@ -5,8 +5,17 @@ from pathlib import Path
 import fire
 
 from keenbench.scholar.generate import QUERY_BUCKETS
-from keenbench.shared.io import append_jsonl, write_json, write_jsonl
+from keenbench.shared.io import append_jsonl, load_jsonl, write_json, write_jsonl
 from keenbench.shared.overlap import FAMILIES, TS_FMT, overlap_rows, uniqueness_rows
+
+
+def _latency_fields(e: dict) -> dict:
+    latency = e.get("latency") or {}
+    return {
+        "p50_ms": latency.get("p50_ms"),
+        "p95_ms": latency.get("p95_ms"),
+        "lat_ms": latency.get("samples_ms"),
+    }
 
 
 def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
@@ -21,9 +30,7 @@ def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
             "num_queries": report["num_queries"],
             "search_errors": e["search_errors"],
             "judge_errors": e["judge_errors"],
-            "p50_ms": (e.get("latency") or {}).get("p50_ms"),
-            "p95_ms": (e.get("latency") or {}).get("p95_ms"),
-            "lat_ms": (e.get("latency") or {}).get("samples_ms"),
+            **_latency_fields(e),
         }
         for name, e in report["engines"].items()
     ]
@@ -56,9 +63,7 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
                 "num_scored": e["num_scored"],
                 "num_queries": report["num_queries"],
                 "search_errors": e["search_errors"],
-                "p50_ms": (e.get("latency") or {}).get("p50_ms"),
-                "p95_ms": (e.get("latency") or {}).get("p95_ms"),
-                "lat_ms": (e.get("latency") or {}).get("samples_ms"),
+                **_latency_fields(e),
             }
         )
         rows.append(row)
@@ -94,9 +99,7 @@ def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> l
                 "num_scored": e["num_scored"],
                 "num_queries": report["num_queries"],
                 "search_errors": e["search_errors"],
-                "p50_ms": (e.get("latency") or {}).get("p50_ms"),
-                "p95_ms": (e.get("latency") or {}).get("p95_ms"),
-                "lat_ms": (e.get("latency") or {}).get("samples_ms"),
+                **_latency_fields(e),
             }
         )
     return rows
@@ -140,11 +143,7 @@ def slim_report(report: dict, key: str = "engines") -> dict:
 
 def _publish_rows(path: Path, new_rows: list[dict], ts: str, republish: bool) -> None:
     if republish and path.exists():
-        kept = [
-            row
-            for line in path.read_text(encoding="utf-8").splitlines()
-            if line and (row := json.loads(line))["ts"] != ts
-        ]
+        kept = [row for row in load_jsonl(path) if row["ts"] != ts]
         write_jsonl(kept + new_rows, str(path))
     else:
         append_jsonl(new_rows, str(path))

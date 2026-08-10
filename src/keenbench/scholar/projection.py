@@ -1,7 +1,7 @@
 import re
 
 from keenbench.scholar.models import Paper
-from keenbench.shared.prompts import render_prompt
+from keenbench.shared.prompts import clean_llm_line, render_prompt
 
 BODY_EXCERPT_CHARS = 6000
 MIN_TITLE_WORDS = 4
@@ -111,17 +111,14 @@ def title_is_specific(title: str) -> bool:
 
 
 def clean_body_query(text: str | None) -> str | None:
-    text = (text or "").strip()
-    if not text:
+    cleaned = clean_llm_line(text, sentinel="NO_DISTINCT_QUERY")
+    if cleaned is None:
         return None
-    cleaned = text.splitlines()[0].strip().strip("'").strip()
     if len(cleaned) >= 2 and cleaned[0] == '"' and cleaned[-1] == '"' and '"' not in cleaned[1:-1]:
         cleaned = cleaned[1:-1].strip()
     if cleaned.count('"') % 2:
         cleaned = " ".join(cleaned.replace('"', " ").split())
-    if not cleaned or "NO_DISTINCT_QUERY" in cleaned.upper():
-        return None
-    return cleaned
+    return cleaned or None
 
 
 def body_has_bad_anchor(query: str) -> bool:
