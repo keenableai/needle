@@ -28,6 +28,7 @@ COURT_PHRASES = {
     "ilnd": "northern district of illinois",
 }
 
+
 @dataclass(frozen=True)
 class Case:
     court_id: str

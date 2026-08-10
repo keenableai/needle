@@ -180,5 +180,10 @@ async def run_legal(
         return pq
 
     return await run_known_item_eval(
-        queries, engines, eval_engine, _summary, num_results=num_results, snippet_chars=snippet_chars
+        queries,
+        engines,
+        eval_engine,
+        _summary,
+        num_results=num_results,
+        snippet_chars=snippet_chars,
     )

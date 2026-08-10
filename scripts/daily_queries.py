@@ -104,7 +104,7 @@ def backfill(out: str = OUT, dataset: str | None = None, hours: int = WINDOW_HOU
             resp.raise_for_status()
             return resp
 
-        url = f"{api_base}?recursive=true&limit=1000"
+        url: str | None = f"{api_base}?recursive=true&limit=1000"
         by_run: dict[str, set[str]] = {}
         while url:
             resp = client.get(url)

@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -23,7 +23,7 @@ def parse_csv(value: str | tuple[str, ...]) -> list[str]:
 
 
 def parse_known_csv(
-    value: str | tuple[str, ...], known: tuple[str, ...], *, flag: str
+    value: str | tuple[str, ...], known: Collection[str], *, flag: str
 ) -> tuple[str, ...]:
     names = tuple(parse_csv(value))
     bad = [v for v in names if v not in known]

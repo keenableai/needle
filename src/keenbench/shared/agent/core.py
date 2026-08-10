@@ -388,4 +388,3 @@ class Agent:
             {"role": "user", "content": f"[Conversation history summary]\n{summary}"},
             *messages[tail_start:],
         ]
-
