@@ -59,14 +59,12 @@ async def aclose_all(*clients: Any) -> None:
             await client.aclose()
 
 
-def require_openrouter_client(
-    model: str, *, purpose: str | None = None, timeout_s: float = 60.0
-) -> OpenRouterClient:
+def require_openrouter_client(model: str, *, purpose: str | None = None) -> OpenRouterClient:
     key = os.environ.get("OPENROUTER_API_KEY")
     if not key:
         suffix = f" (needed for {purpose})" if purpose else ""
         raise SystemExit(f"error: OPENROUTER_API_KEY is not set{suffix}")
-    return OpenRouterClient(api_key=key, model=model, timeout_s=timeout_s)
+    return OpenRouterClient(api_key=key, model=model)
 
 
 def load_gold_rows(path: str, *, bench: str, gold_ok: Callable[[dict], bool]) -> list[dict]:
