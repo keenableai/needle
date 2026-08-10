@@ -73,7 +73,9 @@ async def search_all(
 class HttpSearchClient:
     engine: str = ""
 
-    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int = 8) -> None:
+    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int | None = None) -> None:
+        if max_concurrency is None:
+            max_concurrency = 1
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
         self.timeout_s = timeout_s

@@ -21,6 +21,7 @@ from keenbench.shared.search import (
     latency_stats,
 )
 from keenbench.shared.search import base as search_base
+from keenbench.shared.search.factory import ENGINES
 from keenbench.shared.search.queryops import parse_ops
 
 OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
@@ -627,12 +628,13 @@ def test_rejects_zero_max_concurrency():
 
 
 def test_engines_default_to_serial_requests(monkeypatch):
-    monkeypatch.setenv("EXA_API_KEY", "ek")
-    monkeypatch.setenv("OCTEN_API_KEY", "ok")
-    monkeypatch.setenv("CERAMIC_API_KEY", "ck")
-    clients = build_search_clients(["keenable", "exa", "octen", "ceramic"])
-    assert all(c._sem._value == 1 for c in clients.values())
-    assert KeenableClient(api_key="k")._sem._value == 1
+    for spec in ENGINES.values():
+        monkeypatch.setenv(spec.key_env, "k")
+    clients = build_search_clients(list(ENGINES))
+    assert set(clients) == set(ENGINES)
+    for name, client in clients.items():
+        assert client._sem._value == 1, name
+    assert KeenableClient(max_concurrency=None)._sem._value == 1
     assert KeenableClient(max_concurrency=5)._sem._value == 5
 
 

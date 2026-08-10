@@ -18,7 +18,7 @@ class CeramicClient(HttpSearchClient):
         base_url: str = "https://api.ceramic.ai",
         description_chars: int = 0,
         timeout_s: float = 30.0,
-        max_concurrency: int = 1,
+        max_concurrency: int | None = None,
     ) -> None:
         super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
         self.api_key = api_key
