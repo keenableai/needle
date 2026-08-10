@@ -176,10 +176,6 @@ an `EngineSpec` to `ENGINES` in
 [`factory.py`](src/keenbench/shared/search/factory.py), set the key env var —
 reports and the dashboard pick it up automatically.
 
-`keenbench.shared.agent` — a self-contained tool-calling agent: an `Agent`
-loop with optional planning and context compaction, `mcp_tools_from_session`
-to bridge MCP tools, `RunBudget` for hard dollar budgets.
-
 Pipelines are pure (inputs + clients in, rows/reports out), so they also
 drive from a notebook or scheduler: the ranking harness is
 `keenbench.shared.rankeval.run_rbp`, the recall scorer
