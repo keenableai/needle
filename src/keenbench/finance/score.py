@@ -7,20 +7,13 @@ from keenbench.finance.judge import judge_answer
 from keenbench.finance.models import FRESHNESS_LADDER, cues_for
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.recall import (
-    ULTIMATE,
-    classify_misses,
     first_rank,
     group_recall,
     recall_summary,
+    run_known_item_eval,
     ultimate_per_query,
 )
-from keenbench.shared.search import (
-    SearchClient,
-    SearchResult,
-    capped_snippet,
-    latency_stats,
-    search_all,
-)
+from keenbench.shared.search import SearchClient, SearchResult, capped_snippet, titled_snippet
 
 
 @dataclass(frozen=True)
@@ -37,7 +30,7 @@ class GoldQuery:
 
 
 def result_answers(query: GoldQuery, result: SearchResult, *, snippet_chars: int) -> bool:
-    text = " ".join(part for part in (result.title, capped_snippet(result, snippet_chars)) if part)
+    text = titled_snippet(result, snippet_chars)
     return gold_in_text(
         query.field_type,
         query.value,
@@ -107,7 +100,6 @@ async def run_answers(
     judge: LLMClient | None = None,
     judge_concurrency: int = 8,
 ) -> dict[str, Any]:
-    engine_names = list(engines)
     judge_sem = asyncio.Semaphore(max(1, judge_concurrency))
 
     async def judge_result(query: GoldQuery, result: SearchResult) -> tuple[bool | None, bool]:
@@ -172,29 +164,13 @@ async def run_answers(
         ]
         return pq
 
-    searches_by_query = await search_all(
-        engines, [q.text for q in queries], num_results=num_results
+    return await run_known_item_eval(
+        queries,
+        engines,
+        eval_engine,
+        _summary,
+        num_results=num_results,
+        snippet_chars=snippet_chars,
+        ultimate_fn=_ultimate,
+        extra={"judged": judge is not None},
     )
-    query_outs = await asyncio.gather(
-        *[
-            asyncio.gather(*[eval_engine(query, r, e) for r, e in searches])
-            for query, searches in zip(queries, searches_by_query, strict=True)
-        ]
-    )
-
-    engines_out: dict[str, dict[str, Any]] = {}
-    for idx, name in enumerate(engine_names):
-        per_query = [entries[idx] for entries in query_outs]
-        engines_out[name] = _summary(per_query, latency_stats(engines[name].latencies_ms))
-    if engine_names:
-        engines_out[ULTIMATE] = _summary(_ultimate(query_outs, cap=num_results), None)
-
-    classify_misses(query_outs, engine_names, engines_out)
-
-    return {
-        "num_queries": len(queries),
-        "num_results": num_results,
-        "snippet_chars": snippet_chars,
-        "judged": judge is not None,
-        "engines": engines_out,
-    }

@@ -1,4 +1,3 @@
-import json
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
 from typing import Any
@@ -7,7 +6,6 @@ from keenbench.shared.identity import query_hash, query_id
 
 LEGAL_SOURCE = "legal"
 SUITES = ("caselaw", "code")
-SYNTAXES = ("plain", "quoted", "site", "date")
 
 COURT_PHRASES = {
     "scotus": "supreme court",
@@ -28,19 +26,6 @@ COURT_PHRASES = {
     "nysd": "southern district of new york",
     "cand": "northern district of california",
     "ilnd": "northern district of illinois",
-}
-
-CFR_TITLE_NAMES = {
-    7: "agriculture",
-    12: "banking",
-    14: "aviation",
-    17: "securities",
-    21: "food and drugs",
-    26: "internal revenue",
-    29: "labor",
-    40: "environment",
-    47: "telecommunication",
-    49: "transportation",
 }
 
 
@@ -159,10 +144,3 @@ def _row(
         "gold": gold,
         "hour_ts": hour_ts.astimezone(UTC).isoformat(),
     }
-
-
-def serialize_row(row: dict[str, Any]) -> dict[str, Any]:
-    out = dict(row)
-    out["query_origin"] = json.dumps(row["query_origin"], sort_keys=True)
-    out["gold"] = json.dumps(row["gold"], sort_keys=True)
-    return out

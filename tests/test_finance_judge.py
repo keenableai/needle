@@ -5,6 +5,7 @@ import pytest
 from keenbench.finance import cli as finance_cli
 from keenbench.finance.judge import build_answer_prompt, judge_answer, parse_verdict
 from keenbench.finance.score import GoldQuery, run_answers
+from keenbench.shared import cli as shared_cli
 from keenbench.shared.search import SearchResult
 from keenbench.shared.search import factory as search_factory
 
@@ -245,13 +246,13 @@ def test_run_passes_judge_model(tmp_path, monkeypatch):
         seen["judge"] = kwargs.get("judge")
         return {"num_queries": 1, "num_results": 5, "snippet_chars": 500, "engines": {}}
 
-    monkeypatch.setattr(finance_cli, "OpenRouterClient", FakeOpenRouter)
+    monkeypatch.setattr(shared_cli, "OpenRouterClient", FakeOpenRouter)
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(finance_cli, "run_answers", fake_run_answers)
     out = tmp_path / "r.json"
     finance_cli.Finance().run(
         queries=str(f), engines="keenable", judge=True, judge_model="test/model", out=str(out)
     )
-    assert created == {"api_key": "or-key", "model": "test/model"}
+    assert created == {"api_key": "or-key", "model": "test/model", "timeout_s": 60.0}
     assert seen["judge"] is not None
     assert json.loads(out.read_text())["judge_model"] == "test/model"

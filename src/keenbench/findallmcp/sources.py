@@ -3,9 +3,7 @@ from datetime import date, datetime, timedelta
 from typing import Any
 
 from keenbench.findallmcp.models import Entity, Task
-from keenbench.shared.search.base import HttpSearchClient
-
-USER_AGENT = "keenbench/0.1 (contact@keenable.ai)"
+from keenbench.shared.search.base import USER_AGENT, HttpSearchClient
 
 HN_SEARCH = "https://hn.algolia.com/api/v1/search_by_date"
 EDGAR_FTS = "https://efts.sec.gov/LATEST/search-index"

@@ -1,13 +1,13 @@
 import json
 import sys
-from datetime import UTC, datetime
+from datetime import datetime
 
 from keenbench.agentic_rare.io import iter_rows, resolve_dataset, write_rows
-from keenbench.shared.cli import run_rbp_eval, sample_or_exit
+from keenbench.shared.cli import current_hour, run_rbp_eval, sample_or_exit
+from keenbench.shared.hf import DEFAULT_DATASET
 from keenbench.shared.identity import query_hash, query_id
 from keenbench.shared.rankeval import EvalQuery
 
-DEFAULT_DATASET = "keenable-ai/keenbench-results"
 DEFAULT_FILTERED_PATH = "agentic/rare_entity.parquet"
 STRATIFY_KEY = "length_bucket"
 RARE_PRODUCER_ID = "agentic_rare"
@@ -91,8 +91,7 @@ class AgenticRare:
         if not rows:
             raise SystemExit("error: no queries loaded")
 
-        now = datetime.now(UTC)
-        hour_ts = now.replace(minute=0, second=0, microsecond=0)
+        now, hour_ts = current_hour()
         query_rows = [query_row(r, hour_ts=hour_ts) for r in rows]
         if queries_out:
             write_rows(query_rows, queries_out)

@@ -1,3 +1,4 @@
+import itertools
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
@@ -36,7 +37,7 @@ from keenbench.finance.registries import (
 from keenbench.finance.sources import EdgarClient, quarterly_facts
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import LLMClient
-from keenbench.shared.sampling import shuffle_indices
+from keenbench.shared.sampling import dedupe_by, shuffle_indices
 
 FINANCE_MIN_FIELDS = 4
 COMPANY_CONCURRENCY = 16
@@ -223,13 +224,12 @@ async def _filings_rows(
     )
 
     rows: list[dict] = []
-    syntax_idx = 0
+    syntax_cycle = itertools.cycle(FILINGS_SYNTAX_CYCLE)
     for company_list in per_company_lists:
         if not company_list:
             stats.facts_missing += 1
         for row, fact in company_list:
-            syntax = FILINGS_SYNTAX_CYCLE[syntax_idx % len(FILINGS_SYNTAX_CYCLE)]
-            syntax_idx += 1
+            syntax = next(syntax_cycle)
             age_days = _age_days(fact.end, now)
             entity_keys = {
                 "entity": row["title"],
@@ -322,7 +322,7 @@ async def _filingdoc_rows(
         "rejected": "doc_rejected",
     }
     rows: list[dict] = []
-    syntax_idx = 0
+    syntax_cycle = itertools.cycle(FILINGDOC_SYNTAX_CYCLE)
     for outcome in projected:
         if isinstance(outcome, str):
             setattr(stats, drop_stat[outcome], getattr(stats, drop_stat[outcome]) + 1)
@@ -331,8 +331,7 @@ async def _filingdoc_rows(
             stats.doc_surplus += 1
             continue
         filing, query = outcome
-        syntax = FILINGDOC_SYNTAX_CYCLE[syntax_idx % len(FILINGDOC_SYNTAX_CYCLE)]
-        syntax_idx += 1
+        syntax = next(syntax_cycle)
         entity_keys = {
             "entity": filing.company,
             "ticker": filing.ticker,
@@ -449,12 +448,6 @@ async def run_generate(
             )
         )
 
-    seen_ids: set[str] = set()
-    unique = []
-    for row in rows:
-        if row["query_id"] in seen_ids:
-            continue
-        seen_ids.add(row["query_id"])
-        unique.append(row)
+    unique = dedupe_by(rows, lambda row: row["query_id"])
     stats.rows = len(unique)
     return unique, stats

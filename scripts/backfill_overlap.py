@@ -1,15 +1,14 @@
 import json
-import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import fire
 import httpx
 
-from keenbench.shared.io import write_jsonl
+from keenbench.shared.hf import resolve_base
+from keenbench.shared.io import load_jsonl, write_jsonl
 from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
-DEFAULT_DATASET = "keenable-ai/keenbench-results"
 ARTIFACTS = (
     ("rbp.json",),
     ("recall.json",),
@@ -17,12 +16,6 @@ ARTIFACTS = (
     ("scholar.json",),
     ("legal.json",),
 )
-
-
-def _load(path: Path) -> list[dict]:
-    if not path.exists():
-        return []
-    return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line]
 
 
 def _done(rows: list[dict], fields: tuple[str, ...]) -> set[str]:
@@ -42,12 +35,9 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
         print("no runs.json yet; nothing to backfill")
         return
     runs = json.loads(index_path.read_text(encoding="utf-8"))
-    runs_base = (
-        "https://huggingface.co/datasets/"
-        f"{dataset or os.environ.get('HF_DATASET', DEFAULT_DATASET)}/resolve/main/runs"
-    )
-    overlap = _load(data / "overlap.jsonl")
-    uniqueness = _load(data / "uniqueness.jsonl")
+    runs_base = f"{resolve_base(dataset)}/runs"
+    overlap = load_jsonl(data / "overlap.jsonl")
+    uniqueness = load_jsonl(data / "uniqueness.jsonl")
     overlap_done = _done(overlap, ("num_shared3", "num_suspect", "low_shared_urls"))
     uniqueness_done = _done(uniqueness, ("relevant_unique_urls", "relevant_total_urls"))
     cutoff = (

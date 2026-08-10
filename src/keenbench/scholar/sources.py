@@ -7,14 +7,11 @@ from typing import Any
 from xml.etree.ElementTree import Element, ParseError
 
 import defusedxml.ElementTree as ET
-import httpx
 from defusedxml.common import DefusedXmlException
 
 from keenbench.scholar.bodies import html_body_text, jats_body_text
 from keenbench.scholar.models import Paper, coarse_domain
-from keenbench.shared.search.base import HttpSearchClient
-
-USER_AGENT = "keenbench/0.1 (contact@keenable.ai)"
+from keenbench.shared.search.base import USER_AGENT, HttpSearchClient
 
 ARXIV_API = "https://export.arxiv.org/api/query"
 ARXIV_HTML = "https://arxiv.org/html/{arxiv_id}"
@@ -119,35 +116,10 @@ def parse_epmc_result(rec: dict[str, Any]) -> Paper | None:
     )
 
 
-RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
-MAX_ATTEMPTS = 4
-RETRY_BASE_DELAY = 2.0
-
-
 class ScholarClient(HttpSearchClient):
-    async def _request_text(self, url: str, *, params: dict[str, Any] | None = None) -> str | None:
-        delay = RETRY_BASE_DELAY
-        for attempt in range(MAX_ATTEMPTS):
-            retriable = True
-            try:
-                async with self._sem:
-                    resp = await self._http().request(
-                        "GET",
-                        url,
-                        params=params,
-                        headers={"User-Agent": USER_AGENT},
-                        follow_redirects=True,
-                    )
-                if resp.status_code == 200:
-                    return resp.text
-                retriable = resp.status_code in RETRY_STATUSES
-            except httpx.HTTPError:
-                retriable = True
-            if not retriable or attempt == MAX_ATTEMPTS - 1:
-                return None
-            await asyncio.sleep(delay)
-            delay *= 2
-        return None
+    default_headers = {"User-Agent": USER_AGENT}
+    retry_attempts = 4
+    retry_base_s = 2.0
 
 
 class ArxivClient(ScholarClient):
@@ -174,12 +146,12 @@ class ArxivClient(ScholarClient):
             wait = self._last_api + self.delay_s - time.monotonic()
             if wait > 0:
                 await asyncio.sleep(wait)
-            text = await self._request_text(ARXIV_API, params=params)
+            text = await self._get_text(ARXIV_API, params=params)
             self._last_api = time.monotonic()
         return parse_arxiv_atom(text or "")
 
     async def body(self, arxiv_id: str) -> str | None:
-        html = await self._request_text(ARXIV_HTML.format(arxiv_id=arxiv_id))
+        html = await self._get_text(ARXIV_HTML.format(arxiv_id=arxiv_id))
         if not html:
             return None
         return html_body_text(html) or None
@@ -196,9 +168,7 @@ class EuropePmcClient(ScholarClient):
             "resultType": "core",
             "pageSize": min(1000, max(n * 5, 50)),
         }
-        payload, err = await self._request_json(
-            "GET", EUROPEPMC_SEARCH, params=params, headers={"User-Agent": USER_AGENT}
-        )
+        payload, err = await self._request_json("GET", EUROPEPMC_SEARCH, params=params)
         if err is not None or not isinstance(payload, dict):
             return []
         records = ((payload.get("resultList") or {}).get("result")) or []
@@ -212,7 +182,7 @@ class EuropePmcClient(ScholarClient):
         return papers
 
     async def body(self, pmcid: str) -> str | None:
-        xml = await self._request_text(EUROPEPMC_XML.format(pmcid=pmcid))
+        xml = await self._get_text(EUROPEPMC_XML.format(pmcid=pmcid))
         if not xml:
             return None
         return jats_body_text(xml) or None

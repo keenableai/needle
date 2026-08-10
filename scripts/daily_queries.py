@@ -1,14 +1,13 @@
 import json
-import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import fire
 import httpx
 
-from keenbench.shared.io import write_jsonl
+from keenbench.shared.hf import dataset_name, resolve_base
+from keenbench.shared.io import read_jsonl, write_jsonl
 
-DEFAULT_DATASET = "keenable-ai/keenbench-results"
 OUT = "daily_queries.jsonl"
 WINDOW_HOURS = 24
 RUN_ID_FMT = "%Y-%m-%dT%H%MZ"
@@ -22,14 +21,6 @@ BENCHES = (
 RARE_REPORTS = ("agentic_rare.json", "rarestream.json")
 
 
-def _dataset(dataset: str | None) -> str:
-    return dataset or os.environ.get("HF_DATASET", DEFAULT_DATASET)
-
-
-def _resolve_base(dataset: str | None) -> str:
-    return f"https://huggingface.co/datasets/{_dataset(dataset)}/resolve/main"
-
-
 def _evaluated(report: dict) -> set[str]:
     engine = next(iter(report["engines"].values()))
     return {pq["query"] for pq in engine["per_query"]}
@@ -37,7 +28,7 @@ def _evaluated(report: dict) -> set[str]:
 
 def _bench_rows(run_id: str, bench: str, queries_text: str, report: dict) -> list[dict]:
     evaluated = _evaluated(report)
-    rows = [json.loads(line) for line in queries_text.splitlines() if line.strip()]
+    rows = read_jsonl(queries_text)
     return [
         {**rec, "run_id": run_id, "bench": bench} for rec in rows if rec["query_text"] in evaluated
     ]
@@ -77,12 +68,12 @@ def update(
         RUN_ID_FMT
     )
     with httpx.Client(timeout=120.0, follow_redirects=True) as client:
-        resp = client.get(f"{_resolve_base(dataset)}/{OUT}")
+        resp = client.get(f"{resolve_base(dataset)}/{OUT}")
     if resp.status_code == 404:
         rows = []
     else:
         resp.raise_for_status()
-        rows = [json.loads(line) for line in resp.text.splitlines() if line.strip()]
+        rows = read_jsonl(resp.text)
     rows = [r for r in rows if r["run_id"] != run_id and r["run_id"] >= cutoff]
     paths = {
         "news": (news, news_report),
@@ -103,17 +94,17 @@ def update(
 
 def backfill(out: str = OUT, dataset: str | None = None, hours: int = WINDOW_HOURS) -> None:
     cutoff = (datetime.now(UTC) - timedelta(hours=hours)).strftime(RUN_ID_FMT)
-    api_base = f"https://huggingface.co/api/datasets/{_dataset(dataset)}/tree/main/runs"
-    resolve_base = _resolve_base(dataset)
+    api_base = f"https://huggingface.co/api/datasets/{dataset_name(dataset)}/tree/main/runs"
+    base = resolve_base(dataset)
     rows: list[dict] = []
     with httpx.Client(timeout=120.0, follow_redirects=True) as client:
 
         def fetch(path: str) -> httpx.Response:
-            resp = client.get(f"{resolve_base}/{path}")
+            resp = client.get(f"{base}/{path}")
             resp.raise_for_status()
             return resp
 
-        url = f"{api_base}?recursive=true&limit=1000"
+        url: str | None = f"{api_base}?recursive=true&limit=1000"
         by_run: dict[str, set[str]] = {}
         while url:
             resp = client.get(url)

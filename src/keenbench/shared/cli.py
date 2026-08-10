@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -22,6 +22,18 @@ def parse_csv(value: str | tuple[str, ...]) -> list[str]:
     return [str(v).strip() for v in value]
 
 
+def parse_known_csv(
+    value: str | tuple[str, ...], known: Collection[str], *, flag: str
+) -> tuple[str, ...]:
+    names = tuple(parse_csv(value))
+    bad = [v for v in names if v not in known]
+    if bad or not names:
+        raise SystemExit(
+            f"error: unknown {flag} {','.join(bad) or value!r} (known: {', '.join(known)})"
+        )
+    return names
+
+
 def as_obj(value: object) -> object:
     if isinstance(value, str):
         try:
@@ -29,6 +41,32 @@ def as_obj(value: object) -> object:
         except json.JSONDecodeError:
             return None
     return value
+
+
+def has_gold_ids(gold: dict) -> bool:
+    ids = gold.get("ids")
+    return isinstance(ids, dict) and bool(ids)
+
+
+def current_hour() -> tuple[datetime, datetime]:
+    now = datetime.now(UTC)
+    return now, now.replace(minute=0, second=0, microsecond=0)
+
+
+async def aclose_all(*clients: Any) -> None:
+    for client in clients:
+        if client is not None:
+            await client.aclose()
+
+
+def require_openrouter_client(
+    model: str, *, purpose: str | None = None, timeout_s: float = 60.0
+) -> OpenRouterClient:
+    key = os.environ.get("OPENROUTER_API_KEY")
+    if not key:
+        suffix = f" (needed for {purpose})" if purpose else ""
+        raise SystemExit(f"error: OPENROUTER_API_KEY is not set{suffix}")
+    return OpenRouterClient(api_key=key, model=model, timeout_s=timeout_s)
 
 
 def load_gold_rows(path: str, *, bench: str, gold_ok: Callable[[dict], bool]) -> list[dict]:
@@ -55,14 +93,15 @@ def load_gold_rows(path: str, *, bench: str, gold_ok: Callable[[dict], bool]) ->
         rows.append(obj)
     if malformed:
         print(f"{bench}: skipped {malformed} malformed gold rows", file=sys.stderr)
+    if not rows:
+        raise SystemExit(f"error: no gold rows loaded from {path!r}")
     return rows
 
 
 def resolve_seed(seed: int | None, hour_ts: datetime | None = None) -> int:
     if seed is not None:
         return seed
-    ts = hour_ts or datetime.now(UTC).replace(minute=0, second=0, microsecond=0)
-    return seed_from_hour_ts(ts)
+    return seed_from_hour_ts(hour_ts or current_hour()[1])
 
 
 def sample_or_exit(
@@ -103,13 +142,9 @@ def run_rbp_eval(
     judge_model: str | None = None,
     judge_concurrency: int = 8,
 ) -> None:
-    openrouter_key = os.environ.get("OPENROUTER_API_KEY")
-    if not openrouter_key:
-        raise SystemExit("error: OPENROUTER_API_KEY is not set (needed for the judge)")
-
     clients = build_clients_or_exit(engines, snippet_chars=snippet_chars)
     model = resolve_judge_model(judge_model)
-    judge = OpenRouterClient(api_key=openrouter_key, model=model)
+    judge = require_openrouter_client(model, purpose="the judge")
 
     async def _go() -> dict:
         try:
@@ -123,9 +158,7 @@ def run_rbp_eval(
                 max_content_chars=snippet_chars or DEFAULT_MAX_CONTENT_CHARS,
             )
         finally:
-            await judge.aclose()
-            for c in clients.values():
-                await c.aclose()
+            await aclose_all(judge, *clients.values())
 
     report = asyncio.run(_go())
     report["judge_model"] = model
