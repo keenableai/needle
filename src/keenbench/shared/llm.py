@@ -5,7 +5,7 @@ from typing import Any, Protocol
 import httpx
 
 MAX_ERROR_CHARS = 500
-RETRYABLE_STATUSES = frozenset({408, 429, 500, 502, 503, 504})
+TIMEOUT_S = 60.0
 DEFAULT_JUDGE_MODEL = "google/gemini-3-flash-preview"
 DEFAULT_LLM_MODEL = "google/gemini-3.1-flash-lite"
 
@@ -21,11 +21,10 @@ def resolve_llm_model(explicit: str | None) -> str:
 
 
 class LLMClientError(Exception):
-    def __init__(self, error_type: str, message: str, *, retryable: bool = False) -> None:
+    def __init__(self, error_type: str, message: str) -> None:
         super().__init__(f"{error_type}: {message}")
         self.error_type = error_type
         self.message = message
-        self.retryable = retryable
 
 
 class LLMClient(Protocol):
@@ -49,19 +48,17 @@ class OpenRouterClient:
         api_key: str,
         model: str,
         base_url: str = "https://openrouter.ai/api/v1",
-        timeout_s: float = 60.0,
         temperature: float = 0.0,
     ) -> None:
         self.api_key = api_key
         self.model = model
         self.base_url = base_url.rstrip("/")
-        self.timeout_s = timeout_s
         self.temperature = temperature
         self._client: httpx.AsyncClient | None = None
 
     def _http(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=self.timeout_s)
+            self._client = httpx.AsyncClient(timeout=TIMEOUT_S)
         return self._client
 
     async def aclose(self) -> None:
@@ -109,13 +106,9 @@ class OpenRouterClient:
                 json=body,
             )
         except httpx.HTTPError as exc:
-            raise LLMClientError("transport", str(exc)[:MAX_ERROR_CHARS], retryable=True) from exc
+            raise LLMClientError("transport", str(exc)[:MAX_ERROR_CHARS]) from exc
         if resp.status_code != 200:
-            raise LLMClientError(
-                "http_error",
-                f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
-                retryable=resp.status_code in RETRYABLE_STATUSES,
-            )
+            raise LLMClientError("http_error", f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}")
         try:
             payload = resp.json()
         except (json.JSONDecodeError, ValueError) as exc:

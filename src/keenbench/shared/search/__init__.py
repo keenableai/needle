@@ -1,5 +1,4 @@
 from keenbench.shared.search.base import (
-    USER_AGENT,
     EngineClient,
     HttpSearchClient,
     SearchClient,
@@ -23,7 +22,6 @@ from keenbench.shared.search.tavily import TavilyClient
 from keenbench.shared.search.you import YouClient
 
 __all__ = [
-    "USER_AGENT",
     "BraveClient",
     "CeramicClient",
     "EngineClient",

@@ -1,13 +1,14 @@
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient
+from keenbench.shared.search.base import USER_AGENT, HttpSearchClient
 
 IDCONV_ENDPOINT = "https://pmc.ncbi.nlm.nih.gov/tools/idconv/api/v1/articles/"
 BATCH = 100
-USER_AGENT = "keenbench/0.1 (contact@keenable.ai)"
 
 
 class IdConverter(HttpSearchClient):
+    default_headers = {"User-Agent": USER_AGENT}
+
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._cache: dict[str, str | None] = {}
@@ -22,7 +23,6 @@ class IdConverter(HttpSearchClient):
                 "GET",
                 IDCONV_ENDPOINT,
                 params={"ids": ",".join(keys), "format": "json", "tool": "keenbench"},
-                headers={"User-Agent": USER_AGENT},
             )
             if err is not None or not isinstance(payload, dict):
                 continue

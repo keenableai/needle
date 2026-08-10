@@ -1816,6 +1816,7 @@ function renderKnownItemRun(holder, report, engine, goldKey) {
 
 const LEGACY_BENCH = { freshstream: "news", companyfill: "finance", rarestream: "agentic_rare" };
 const RUN_ARTIFACT = { news: ["rbp.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], finance: ["recall.json"], scholar: ["scholar.json"], legal: ["legal.json"] };
+const BENCHES = Object.keys(RUN_ARTIFACT);
 
 let runDetailSeq = 0;
 
@@ -1872,7 +1873,7 @@ async function initRunBrowser() {
   let runs = [];
   try { runs = await fetchJson("data/runs.json"); } catch {}
   runs = [...runs].reverse();
-  for (const b of ["news", "agentic_rare", "finance", "scholar", "legal"]) {
+  for (const b of BENCHES) {
     benchSel.appendChild(el("option", { value: b }, b));
   }
   for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, e));
@@ -2063,7 +2064,7 @@ async function main() {
   ]);
   ENGINE_FAMILY = new Map(Object.entries(families));
   for (const r of histRows) r.bench = LEGACY_BENCH[r.bench] || r.bench;
-  history = histRows.filter((r) => r.bench !== "findallmcp" && !HIDDEN_ENGINES.has(r.engine));
+  history = histRows.filter((r) => BENCHES.includes(r.bench) && !HIDDEN_ENGINES.has(r.engine));
   registerEngines(history.map((r) => r.engine));
   registerEngines(Object.keys(latestFinance?.engines || {}));
   document.documentElement.style.setProperty("--home", colorOf(HOME_ENGINE));
