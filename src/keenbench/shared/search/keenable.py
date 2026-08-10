@@ -1,8 +1,8 @@
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 
-class KeenableClient(HttpSearchClient):
+class KeenableClient(EngineClient):
     engine = "keenable"
 
     def __init__(

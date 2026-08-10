@@ -1,7 +1,7 @@
 from datetime import UTC, date, datetime
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 EPOCH = date(1970, 1, 1)
@@ -19,7 +19,7 @@ def _clip_query(text: str, sites: tuple[str, ...]) -> str:
     return q
 
 
-class BraveClient(HttpSearchClient):
+class BraveClient(EngineClient):
     engine = "brave"
 
     def __init__(

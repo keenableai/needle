@@ -1,12 +1,12 @@
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 MAX_QUERY_CHARS = 500
 
 
-class OctenClient(HttpSearchClient):
+class OctenClient(EngineClient):
     engine = "octen"
 
     def __init__(

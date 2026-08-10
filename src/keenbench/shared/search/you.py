@@ -1,14 +1,14 @@
 from datetime import UTC, date, datetime
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 EPOCH = date(1970, 1, 1)
 MAX_COUNT = 100
 
 
-class YouClient(HttpSearchClient):
+class YouClient(EngineClient):
     engine = "you"
 
     def __init__(

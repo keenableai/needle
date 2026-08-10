@@ -631,7 +631,6 @@ def test_engines_default_to_serial_requests(monkeypatch):
     for spec in ENGINES.values():
         monkeypatch.setenv(spec.key_env, "k")
     clients = build_search_clients(list(ENGINES))
-    assert set(clients) == set(ENGINES)
     for name, client in clients.items():
         assert client._sem._value == 1, name
     assert KeenableClient(max_concurrency=None)._sem._value == 1

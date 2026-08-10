@@ -1,4 +1,4 @@
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 
 
 def _is_empty_results_error(err: dict[str, str]) -> bool:
@@ -14,7 +14,7 @@ def _has_restrictive_operator(query: str) -> bool:
     return "site:" in lowered or "after:" in lowered or "before:" in lowered or quotes >= 2
 
 
-class SearchApiClient(HttpSearchClient):
+class SearchApiClient(EngineClient):
     def __init__(
         self,
         *,

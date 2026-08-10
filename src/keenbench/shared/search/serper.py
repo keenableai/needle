@@ -1,7 +1,7 @@
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 
 
-class SerperClient(HttpSearchClient):
+class SerperClient(EngineClient):
     engine = "google"
 
     def __init__(

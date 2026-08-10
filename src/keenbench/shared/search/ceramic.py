@@ -1,6 +1,6 @@
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 MAX_QUERY_WORDS = 50
@@ -8,7 +8,7 @@ MIN_DESCRIPTION_CHARS = 1000
 MAX_DESCRIPTION_CHARS = 8000
 
 
-class CeramicClient(HttpSearchClient):
+class CeramicClient(EngineClient):
     engine = "ceramic"
 
     def __init__(

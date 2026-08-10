@@ -1,10 +1,10 @@
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 
-class PerplexityClient(HttpSearchClient):
+class PerplexityClient(EngineClient):
     engine = "perplexity"
 
     def __init__(
