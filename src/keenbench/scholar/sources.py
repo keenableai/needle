@@ -121,6 +121,10 @@ class ScholarClient(HttpSearchClient):
     retry_attempts = 4
     retry_base_s = 2.0
 
+    def __init__(self, **kwargs: Any) -> None:
+        kwargs.setdefault("max_concurrency", 8)
+        super().__init__(**kwargs)
+
 
 class ArxivClient(ScholarClient):
     def __init__(self, *, delay_s: float = 3.0, **kwargs: Any) -> None:

@@ -65,11 +65,10 @@ class SearchClient(Protocol):
 async def search_all(
     engines: dict[str, "SearchClient"], texts: list[str], *, num_results: int
 ) -> list[list[tuple[list[SearchResult] | None, dict[str, str] | None]]]:
-    rows: list[list[tuple[list[SearchResult] | None, dict[str, str] | None]]] = [[] for _ in texts]
-    for client in engines.values():
-        for row, text in zip(rows, texts, strict=True):
-            row.append(await client.search(text, num_results=num_results))
-    return rows
+    return [
+        [await client.search(text, num_results=num_results) for client in engines.values()]
+        for text in texts
+    ]
 
 
 class HttpSearchClient:
@@ -78,7 +77,7 @@ class HttpSearchClient:
     retry_attempts: int = RETRY_ATTEMPTS
     retry_base_s: float = RETRY_BASE_S
 
-    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int = 8) -> None:
+    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int = 1) -> None:
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
         self.timeout_s = timeout_s

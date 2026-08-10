@@ -22,6 +22,7 @@ from keenbench.shared.search import (
     search_all,
 )
 from keenbench.shared.search import base as search_base
+from keenbench.shared.search.factory import ENGINES
 from keenbench.shared.search.queryops import parse_ops
 
 OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
@@ -632,18 +633,14 @@ async def test_search_all_is_serial_and_text_major():
     class FakeClient:
         def __init__(self, engine):
             self.engine = engine
-            self.latencies_ms = []
 
-        async def search(self, query, *, num_results=10):
+        async def search(self, query, *, num_results):
             nonlocal active, peak
             active += 1
             peak = max(peak, active)
-            await asyncio.sleep(0.005)
+            await asyncio.sleep(0)
             active -= 1
             return [SearchResult(url=f"https://{self.engine}/{query}")], None
-
-        async def aclose(self):
-            pass
 
     engines = {"e1": FakeClient("e1"), "e2": FakeClient("e2")}
     rows = await search_all(engines, ["a", "b"], num_results=5)
@@ -654,6 +651,13 @@ async def test_search_all_is_serial_and_text_major():
     results, err = rows[1][1]
     assert results[0].url == "https://e2/b"
     assert await search_all({}, ["a", "b"], num_results=5) == [[], []]
+
+
+def test_engines_default_to_serial_requests(monkeypatch):
+    for spec in ENGINES.values():
+        monkeypatch.setenv(spec.key_env, "k")
+    for name, client in build_search_clients(list(ENGINES)).items():
+        assert client._sem._value == 1, name
 
 
 async def test_max_concurrency_caps_in_flight(monkeypatch):
