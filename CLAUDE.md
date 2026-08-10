@@ -13,14 +13,14 @@ the filtered artifact and evaluates it like news.
 ## Layout
 
 - `dashboard/index.html` — the whole dashboard: one self-contained static
-  page, vanilla JS, no build step; deployed to gh-pages by the bench workflow.
-- Dashboard data: `data/history.jsonl`, `overlap.jsonl`, `uniqueness.jsonl`,
-  `latest_*.json`, `runs.json`, and `families.json`, published by
-  `scripts/publish_bench.py`;
-  full per-run artifacts (`rbp.json`, `recall.json`) live on the HF dataset
-  `keenable-ai/keenbench-results` and are fetched directly from there.
-- Per-result report fields (`title`, `url`, `snippet`, `rating`, `penalized`,
-  `label`, `reasoning`) are shaped in `src/keenbench/shared/rankeval.py` —
+  page, vanilla JS, no build step; the bench workflow deploys it to gh-pages.
+- Dashboard data: `scripts/publish_bench.py` publishes `data/history.jsonl`,
+  `overlap.jsonl`, `uniqueness.jsonl`, `latest_*.json`, `runs.json`, and
+  `families.json`; the full per-run artifacts (`rbp.json`, `recall.json`)
+  live on the HF dataset `keenable-ai/keenbench-results`, and the dashboard
+  fetches them directly from there.
+- `src/keenbench/shared/rankeval.py` shapes the per-result report fields
+  (`title`, `url`, `snippet`, `rating`, `penalized`, `label`, `reasoning`) —
   keep the dashboard renderers in sync with it.
 
 ## Verifying dashboard changes
