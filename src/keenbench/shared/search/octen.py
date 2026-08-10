@@ -1,12 +1,12 @@
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 MAX_QUERY_CHARS = 500
 
 
-class OctenClient(HttpSearchClient):
+class OctenClient(EngineClient):
     engine = "octen"
 
     def __init__(
@@ -16,7 +16,7 @@ class OctenClient(HttpSearchClient):
         base_url: str = "https://api.octen.ai",
         highlight_max_tokens: int = 512,
         timeout_s: float = 30.0,
-        max_concurrency: int = 1,
+        max_concurrency: int | None = None,
     ) -> None:
         super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
         self.api_key = api_key

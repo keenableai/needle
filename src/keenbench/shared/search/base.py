@@ -160,3 +160,11 @@ class HttpSearchClient:
         if resp.status_code != 200:
             return None
         return resp.text
+
+
+class EngineClient(HttpSearchClient):
+    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int | None = None) -> None:
+        super().__init__(
+            timeout_s=timeout_s,
+            max_concurrency=1 if max_concurrency is None else max_concurrency,
+        )

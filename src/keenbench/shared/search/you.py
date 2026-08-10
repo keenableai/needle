@@ -1,14 +1,14 @@
 from datetime import UTC, date, datetime
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 EPOCH = date(1970, 1, 1)
 MAX_COUNT = 100
 
 
-class YouClient(HttpSearchClient):
+class YouClient(EngineClient):
     engine = "you"
 
     def __init__(
@@ -17,7 +17,7 @@ class YouClient(HttpSearchClient):
         api_key: str,
         base_url: str = "https://ydc-index.io",
         timeout_s: float = 30.0,
-        max_concurrency: int = 1,
+        max_concurrency: int | None = None,
     ) -> None:
         super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
         self.api_key = api_key

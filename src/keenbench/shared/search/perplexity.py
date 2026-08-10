@@ -1,10 +1,10 @@
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 
-class PerplexityClient(HttpSearchClient):
+class PerplexityClient(EngineClient):
     engine = "perplexity"
 
     def __init__(
@@ -13,7 +13,7 @@ class PerplexityClient(HttpSearchClient):
         api_key: str,
         base_url: str = "https://api.perplexity.ai",
         timeout_s: float = 60.0,
-        max_concurrency: int = 1,
+        max_concurrency: int | None = None,
     ) -> None:
         super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
         self.api_key = api_key

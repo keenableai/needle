@@ -1,8 +1,8 @@
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import EngineClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 
-class KeenableClient(HttpSearchClient):
+class KeenableClient(EngineClient):
     engine = "keenable"
 
     def __init__(
@@ -13,7 +13,7 @@ class KeenableClient(HttpSearchClient):
         mode: str = "pro",
         app_title: str = "keenbench",
         timeout_s: float = 30.0,
-        max_concurrency: int = 1,
+        max_concurrency: int | None = None,
     ) -> None:
         super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
         self.api_key = api_key

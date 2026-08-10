@@ -56,6 +56,7 @@ jobs:
   bench:
     name: Run benchmarks
     runs-on: gke-use5-amd64
+    timeout-minutes: 300
     outputs:
       failed: ${{ steps.outcomes.outputs.failed }}
     steps:
@@ -77,6 +78,7 @@ jobs:
       - name: news (hourly)
         id: news
         continue-on-error: true
+        timeout-minutes: 50
         run: |
           uv run keenbench news generate --source rss --out fresh.jsonl
           uv run keenbench news run --queries fresh.jsonl --limit 20 \
@@ -85,6 +87,7 @@ jobs:
       - name: finance (daily schedule, dispatch opt-in, or gold bootstrap)
         id: finance
         continue-on-error: true
+        timeout-minutes: 120
         env:
           RUN_FINANCE: ${{ github.event.schedule == '17 0 * * *' || inputs.finance == true }}
         run: |
@@ -101,6 +104,7 @@ jobs:
       - name: agentic_rare (daily schedule or dispatch opt-in)
         id: agentic_rare
         continue-on-error: true
+        timeout-minutes: 120
         env:
           RUN_AGENTIC_RARE: ${{ github.event.schedule == '17 6 * * *' || inputs.agentic_rare == true }}
         run: |
@@ -114,6 +118,7 @@ jobs:
       - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
         id: scholar
         continue-on-error: true
+        timeout-minutes: 120
         env:
           RUN_SCHOLAR: ${{ github.event.schedule == '17 12 * * *' || inputs.scholar == true }}
         run: |
@@ -130,6 +135,7 @@ jobs:
       - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
         id: legal
         continue-on-error: true
+        timeout-minutes: 120
         env:
           RUN_LEGAL: ${{ github.event.schedule == '17 18 * * *' || inputs.legal == true }}
         run: |
