@@ -10,6 +10,7 @@ class IdConverter(HttpSearchClient):
     default_headers = {"User-Agent": USER_AGENT}
 
     def __init__(self, **kwargs: Any) -> None:
+        kwargs.setdefault("max_concurrency", 8)
         super().__init__(**kwargs)
         self._cache: dict[str, str | None] = {}
 

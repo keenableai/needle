@@ -1,7 +1,7 @@
-from keenbench.shared.search.base import EngineClient, SearchResult
+from keenbench.shared.search.base import HttpSearchClient, SearchResult
 
 
-class SerperClient(EngineClient):
+class SerperClient(HttpSearchClient):
     engine = "google"
 
     def __init__(
@@ -10,9 +10,8 @@ class SerperClient(EngineClient):
         api_key: str,
         base_url: str = "https://google.serper.dev",
         timeout_s: float = 30.0,
-        max_concurrency: int | None = None,
     ) -> None:
-        super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
+        super().__init__(timeout_s=timeout_s)
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
 

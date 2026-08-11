@@ -1,10 +1,10 @@
 from typing import Any
 
-from keenbench.shared.search.base import EngineClient, SearchResult
+from keenbench.shared.search.base import HttpSearchClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 
-class ExaClient(EngineClient):
+class ExaClient(HttpSearchClient):
     engine = "exa"
 
     def __init__(
@@ -16,9 +16,8 @@ class ExaClient(EngineClient):
         include_text: bool = True,
         highlight_chars: int = 0,
         timeout_s: float = 30.0,
-        max_concurrency: int | None = None,
     ) -> None:
-        super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
+        super().__init__(timeout_s=timeout_s)
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.search_type = search_type

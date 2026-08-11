@@ -1,7 +1,7 @@
 from datetime import UTC, date, datetime
 from typing import Any
 
-from keenbench.shared.search.base import EngineClient, SearchResult
+from keenbench.shared.search.base import HttpSearchClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
 
 EPOCH = date(1970, 1, 1)
@@ -19,7 +19,7 @@ def _clip_query(text: str, sites: tuple[str, ...]) -> str:
     return q
 
 
-class BraveClient(EngineClient):
+class BraveClient(HttpSearchClient):
     engine = "brave"
 
     def __init__(
@@ -28,9 +28,8 @@ class BraveClient(EngineClient):
         api_key: str,
         base_url: str = "https://api.search.brave.com/res/v1",
         timeout_s: float = 30.0,
-        max_concurrency: int | None = None,
     ) -> None:
-        super().__init__(timeout_s=timeout_s, max_concurrency=max_concurrency)
+        super().__init__(timeout_s=timeout_s)
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
 
