@@ -255,6 +255,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   #quality-price { padding: 4px 0 8px; overflow-x: auto; }
   #quality-price .qp-name { fill: var(--text-primary); font-size: 12px; }
   #quality-price .qp-head { fill: var(--text-secondary); font-size: 11px; }
+  #quality-price .qp-quad { fill: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
   .prose { color: var(--text-secondary); font-size: 13px; }
   .prose p { margin: 0 0 10px; max-width: 90ch; }
   .overlap-matrix { padding: 10px 0 14px; }
@@ -1367,11 +1368,20 @@ function renderQualityPrice(rows) {
   const M = { top: 34, right: 24, bottom: 42, left: 44 };
   const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
   const xTop = Math.ceil(Math.max(...pts.map((p) => p.usd))) + 1;
+  const qs = pts.map((p) => p.q);
+  const yLo = Math.max(0, Math.floor((Math.min(...qs) - 0.04) * 20) / 20);
+  const yHi = Math.min(1, Math.ceil((Math.max(...qs) + 0.04) * 20) / 20);
+  const yStep = yHi - yLo <= 0.3 ? 0.05 : 0.1;
   const X = (v) => M.left + (v / xTop) * iw;
-  const Y = (v) => M.top + (1 - v) * ih;
+  const Y = (v) => M.top + (1 - (v - yLo) / (yHi - yLo)) * ih;
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
     "aria-label": "Overall quality as share of ultimate vs price per 1,000 queries" });
-  for (const gv of [0.25, 0.5, 0.75, 1]) {
+  const mx = X(xTop / 2), my = Y((yLo + yHi) / 2);
+  svg.appendChild(el("rect", { x: M.left, y: M.top, width: mx - M.left, height: my - M.top,
+    fill: "var(--delta-up)", "fill-opacity": 0.05 }));
+  svg.appendChild(el("rect", { x: mx, y: my, width: M.left + iw - mx, height: M.top + ih - my,
+    fill: "#d64545", "fill-opacity": 0.05 }));
+  for (let gv = Math.ceil(yLo / yStep) * yStep; gv <= yHi + 1e-9; gv += yStep) {
     svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: Y(gv), y2: Y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
     svg.appendChild(el("text", { x: M.left - 6, y: Y(gv) + 3, "text-anchor": "end", class: "axis-text" }, fmtPct(gv)));
   }
@@ -1379,9 +1389,21 @@ function renderQualityPrice(rows) {
     svg.appendChild(el("line", { x1: X(v), x2: X(v), y1: M.top, y2: M.top + ih, stroke: "var(--grid)", "stroke-width": 1 }));
     svg.appendChild(el("text", { x: X(v), y: M.top + ih + 16, "text-anchor": "middle", class: "axis-text" }, `$${v}`));
   }
-  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: Y(0), y2: Y(0), stroke: "var(--baseline)", "stroke-width": 1 }));
+  svg.appendChild(el("line", { x1: mx, x2: mx, y1: M.top, y2: M.top + ih,
+    stroke: "var(--baseline)", "stroke-width": 1, "stroke-dasharray": "4 4" }));
+  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: my, y2: my,
+    stroke: "var(--baseline)", "stroke-width": 1, "stroke-dasharray": "4 4" }));
+  for (const [qx, qy, anchor, dy, label] of [
+    [M.left + 8, M.top, "start", 14, "cheap & good"],
+    [M.left + iw - 8, M.top, "end", 14, "expensive & good"],
+    [M.left + 8, M.top + ih, "start", -8, "cheap & bad"],
+    [M.left + iw - 8, M.top + ih, "end", -8, "expensive & bad"],
+  ]) {
+    svg.appendChild(el("text", { x: qx, y: qy + dy, "text-anchor": anchor, class: "qp-quad" }, label));
+  }
+  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: Y(yLo), y2: Y(yLo), stroke: "var(--baseline)", "stroke-width": 1 }));
   svg.appendChild(el("text", { x: 10, y: 18, class: "qp-head" },
-    "overall quality — 7-day mean share of ultimate; right and down is worse, the best value sits top-left"));
+    "overall quality — 7-day mean share of ultimate"));
   svg.appendChild(el("text", { x: M.left + iw / 2, y: H - 6, "text-anchor": "middle", class: "qp-head" },
     "$ per 1,000 queries — lowest public price"));
   const items = pts.map((p) => ({ ...p, px: X(p.usd), py: Y(p.q), right: X(p.usd) < M.left + iw - 110 }));
