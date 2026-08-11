@@ -1,44 +1,57 @@
-Classify a web search query for the Needs Met rating framework. Your classification is passed verbatim to every per-document judgement for this query, so all documents are judged against the same query interpretation. Be decisive.
+Classify a web search query for the Needs Met rating framework. Your classification is passed verbatim to every per-document judgement for this query, so all documents are judged against the same query interpretation. The sections below are shared with the per-document judge. Be decisive.
 
 Today's date: {{ today }}
 
 Query: {{ query }}
 
-## Fields
+## Query analysis
 
-### query_type
+### MAIN vs AUXILIARY aspects classification
 
-These definitions are shared with the per-document judge; HARD GATE lines describe how the judge uses each type.
+For each key aspect implied by the query (its objective, sub-questions, and the kind of source it calls for) we have 2 gradations:
+- MAIN: Directly answers the query's primary objective. Foundational facts the user needs.
+- AUX: Supporting details, statistics, context that enhances but doesn't define the answer.
 
+### Query type classification
+
+Query types:
 {% include "query_types.jinja" %}
 
-### archetype
+### Search operator extraction
 
-Expected content type, which determines staleness evaluation:
+Parse the query for explicit search operators. These are hard constraints the user typed deliberately. They are not optional concepts.
 
+- Exact-phrase: any span inside double quotes "...". Each quoted span is a separate required string.
+- site:domain = the document URL host must equal or be a subdomain of `domain`.
+
+### Content archetype classification
+
+Classify the query's expected content to determine staleness evaluation:
 {% include "content_archetypes.jinja" %}
 
-### dated_event
+### Domain classification
 
-true only if the query refers to a SPECIFIC, dated current event (e.g., "Medvedev vs Berrettini Monte-Carlo Masters Round of 32, April 8, 2026"). General entity or topic queries are false.
-
-### objective
-
-One sentence: what the user wants to find.
-
-### core_aspects
-
-1-4 short phrases: the CORE aspects a document must cover to answer the query. CORE = directly answers the primary objective. Exclude AUXILIARY supporting details.
+Classify the query into one of these domains, or "other" if none fits:
+- "health": Medical and health queries.
+- "legal": Law, regulations, caselaw.
+- "financial": Companies, tickers, markets, personal finance.
+- "academic": Science, research, formulas.
+- "tech": Software, hardware, troubleshooting.
+- "news": Current events and reporting.
+- "commerce": Products and shopping.
+- "jobs": Job listings and hiring.
 
 ## Output
 
 Respond with ONLY a YAML block. No text before or after.
 
 ```yaml
-objective: "<one sentence>"
-core_aspects:
-  - "<aspect>"
-query_type: <A|B|C>
-archetype: <Ephemeral|Persistent|Evergreen>
-dated_event: <true|false>
+query_type: <broad|specific|list>
+query_domain: <health|legal|financial|academic|tech|news|commerce|jobs|other>
+query_search_operators_exist: <yes|no>
+query_main_aspects:
+  - "<MAIN aspect>"
+query_aux_aspects:
+  - "<AUX aspect>"
+query_content_archetype: <ephemeral|persistent|evergreen>
 ```

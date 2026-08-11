@@ -18,13 +18,14 @@ PROFILE_TEMPLATE = "query_profile.jinja"
 RETRY_PREFIX = "\n\nYour previous reply could not be parsed. Respond with only the YAML fields:"
 PARSE_RETRY_SUFFIX = RETRY_PREFIX + " rating (an integer 0-4), label, reasoning."
 PROFILE_RETRY_SUFFIX = (
-    RETRY_PREFIX + " objective, core_aspects, query_type (A, B, or C),"
-    " archetype (Ephemeral, Persistent, or Evergreen), dated_event (true or false)."
+    RETRY_PREFIX + " query_type (broad, specific, or list), query_domain,"
+    " query_search_operators_exist (yes or no), query_main_aspects, query_aux_aspects,"
+    " query_content_archetype (ephemeral, persistent, or evergreen)."
 )
 
-QUERY_TYPE_RE = re.compile(r"\b([ABC])\b")
+QUERY_TYPE_RE = re.compile(r"\b(broad|specific|list)\b")
 ARCHETYPE_RE = re.compile(r"ephemeral|persistent|evergreen")
-ARCHETYPES = {"ephemeral": "Ephemeral", "persistent": "Persistent", "evergreen": "Evergreen"}
+DOMAIN_RE = re.compile(r"health|legal|financial|academic|tech|news|commerce|jobs")
 
 RATING_LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
 VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
@@ -58,24 +59,27 @@ class Judgement:
 @dataclass(frozen=True)
 class QueryProfile:
     query_type: str
-    archetype: str
-    dated_event: bool
-    objective: str
-    core_aspects: tuple[str, ...]
+    query_domain: str
+    query_search_operators_exist: bool
+    query_main_aspects: tuple[str, ...]
+    query_aux_aspects: tuple[str, ...]
+    query_content_archetype: str
 
 
 def _profile_lines(profile: QueryProfile) -> list[str]:
     lines = [
         "Query Analysis (precomputed — adopt as ground truth, do not re-classify):",
         f"- Query type: {profile.query_type}",
-        f"- Content archetype: {profile.archetype}",
-        f"- Specific dated current-event query: {'yes' if profile.dated_event else 'no'}",
+        f"- Domain: {profile.query_domain}",
+        f"- Search operators exist: {'yes' if profile.query_search_operators_exist else 'no'}",
+        f"- Content archetype: {profile.query_content_archetype}",
     ]
-    if profile.objective:
-        lines.append(f"- Objective: {profile.objective}")
-    if profile.core_aspects:
-        lines.append("- CORE aspects:")
-        lines += [f"  - {aspect}" for aspect in profile.core_aspects]
+    if profile.query_main_aspects:
+        lines.append("- MAIN aspects:")
+        lines += [f"  - {aspect}" for aspect in profile.query_main_aspects]
+    if profile.query_aux_aspects:
+        lines.append("- AUX aspects:")
+        lines += [f"  - {aspect}" for aspect in profile.query_aux_aspects]
     return lines
 
 
@@ -112,7 +116,7 @@ def build_user_message(
                 f"{head}\n... and another {len(tail.split())} words "
                 f"({len(tail)} characters) not shown ..."
             )
-        lines += ["- Page Content:", "<<<CONTENT>>>", content, "<<</CONTENT>>>"]
+        lines += ["- Page Snippet:", "<<<SNIPPET>>>", content, "<<</SNIPPET>>>"]
     return "\n".join(lines) + "\n"
 
 
@@ -206,28 +210,34 @@ def _clean_line(raw: object) -> str:
     return " ".join(str(raw).split())
 
 
+def _aspect_tuple(raw: object) -> tuple[str, ...]:
+    if isinstance(raw, list):
+        return tuple(s for a in raw if (s := _clean_line(a)))
+    cleaned = _clean_line(raw or "")
+    return (cleaned,) if cleaned else ()
+
+
 def parse_query_profile(text: str | None) -> QueryProfile | None:
     if not text:
         return None
     data = _load_judgement_dict(_extract_yaml_block(text))
     if data is None:
         return None
-    type_match = QUERY_TYPE_RE.search(str(data.get("query_type") or "").upper())
-    arch_match = ARCHETYPE_RE.search(str(data.get("archetype") or "").lower())
+    type_match = QUERY_TYPE_RE.search(str(data.get("query_type") or "").lower())
+    arch_match = ARCHETYPE_RE.search(str(data.get("query_content_archetype") or "").lower())
     if type_match is None or arch_match is None:
         return None
-    dated = data.get("dated_event")
-    if not isinstance(dated, bool):
-        dated = str(dated).strip().lower() in {"true", "yes", "1"}
-    aspects = data.get("core_aspects")
-    if not isinstance(aspects, list):
-        aspects = []
+    domain_match = DOMAIN_RE.search(str(data.get("query_domain") or "").lower())
+    operators = data.get("query_search_operators_exist")
+    if not isinstance(operators, bool):
+        operators = str(operators).strip().lower() in {"true", "yes", "1"}
     return QueryProfile(
         query_type=type_match.group(1),
-        archetype=ARCHETYPES[arch_match.group(0)],
-        dated_event=dated,
-        objective=_clean_line(data.get("objective") or ""),
-        core_aspects=tuple(s for a in aspects if (s := _clean_line(a))),
+        query_domain=domain_match.group(0) if domain_match else "other",
+        query_search_operators_exist=operators,
+        query_main_aspects=_aspect_tuple(data.get("query_main_aspects")),
+        query_aux_aspects=_aspect_tuple(data.get("query_aux_aspects")),
+        query_content_archetype=arch_match.group(0),
     )
 
 

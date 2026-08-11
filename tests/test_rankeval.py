@@ -5,8 +5,9 @@ from keenbench.shared.search import SearchResult
 
 TODAY = "2026-07-01"
 PROFILE_YAML = (
-    "objective: find it\ncore_aspects:\n  - the fact\n"
-    "query_type: B\narchetype: Evergreen\ndated_event: false"
+    "query_type: specific\nquery_domain: other\nquery_search_operators_exist: no\n"
+    "query_main_aspects: the fact\nquery_aux_aspects: ''\n"
+    "query_content_archetype: evergreen"
 )
 
 
@@ -15,7 +16,7 @@ def q(text):
 
 
 def is_profile_prompt(prompt):
-    return "query_type" in prompt
+    return "Classify a web search query" in prompt
 
 
 class FakeEngine:
@@ -277,15 +278,16 @@ async def test_run_rbp_shares_query_profile_across_pairs():
     judge_prompts = [p for p in judge.prompts if not is_profile_prompt(p)]
     assert len(profile_prompts) == 1
     assert len(judge_prompts) == 2
-    assert all("- Query type: B" in p for p in judge_prompts)
+    assert all("- Query type: specific" in p for p in judge_prompts)
     assert all("- the fact" in p for p in judge_prompts)
     pq = report["engines"]["e"]["per_query"][0]
     assert pq["query_profile"] == {
-        "query_type": "B",
-        "archetype": "Evergreen",
-        "dated_event": False,
-        "objective": "find it",
-        "core_aspects": ("the fact",),
+        "query_type": "specific",
+        "query_domain": "other",
+        "query_search_operators_exist": False,
+        "query_main_aspects": ("the fact",),
+        "query_aux_aspects": (),
+        "query_content_archetype": "evergreen",
     }
     assert report["engines"]["ultimate"]["per_query"][0]["query_profile"] == pq["query_profile"]
 
