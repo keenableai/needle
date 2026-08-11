@@ -66,3 +66,8 @@ jobs:
 
       - name: Pytest
         run: uv run pytest
+
+      - name: Judge integration tests
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: uv run pytest -m integration
