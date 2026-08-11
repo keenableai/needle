@@ -1,8 +1,9 @@
 from keenbench.shared.judge import (
     PARSE_RETRY_SUFFIX,
     QueryProfile,
-    build_judge_prompt,
+    build_judge_input,
     classify_query,
+    judge_instructions,
     judge_one,
     parse_judgement,
     parse_query_profile,
@@ -23,8 +24,8 @@ class FakeLLM:
         self.replies = list(replies)
         self.prompts = []
 
-    async def complete(self, prompt, *, max_tokens, reasoning_effort):
-        self.prompts.append(prompt)
+    async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
+        self.prompts.append(f"{system}\n\n{prompt}" if system else prompt)
         return self.replies.pop(0)
 
 
@@ -85,8 +86,8 @@ def test_parse_rejects_non_integer_ratings():
     assert j is not None and j.rating == 3 and j.label == "HM"
 
 
-def test_build_judge_prompt_content_cap():
-    msg = build_judge_prompt(
+def test_build_judge_input_content_cap():
+    msg = build_judge_input(
         "mayor of austin",
         url="https://ex.com",
         title="T",
@@ -100,12 +101,14 @@ def test_build_judge_prompt_content_cap():
     assert "characters) not shown" in msg
 
 
-def test_build_judge_prompt_includes_system_rules():
-    prompt = build_judge_prompt("q", url="https://e", today="2026-07-01")
-    assert "Needs Met rating framework" in prompt
+def test_judge_instructions_and_input_split():
+    system = judge_instructions()
+    assert "Needs Met rating framework" in system
+    assert '"broad": General or exploratory topic queries' in system
+    assert '"ephemeral": Sports scores' in system
+    prompt = build_judge_input("q", url="https://e", today="2026-07-01")
     assert "Query: q" in prompt
-    assert '"broad": General or exploratory topic queries' in prompt
-    assert '"ephemeral": Sports scores' in prompt
+    assert "Needs Met rating framework" not in prompt
 
 
 async def test_judge_one_success_and_llm_error():
@@ -187,8 +190,8 @@ def test_parse_query_profile_rejects_invalid():
     assert parse_query_profile("rating: 3\nlabel: HM") is None
 
 
-def test_judge_prompt_includes_profile_block():
-    msg = build_judge_prompt("who won", url="https://e", today="2026-07-01", profile=PROFILE)
+def test_judge_input_includes_profile_block():
+    msg = build_judge_input("who won", url="https://e", today="2026-07-01", profile=PROFILE)
     assert "Query Analysis" in msg
     assert "- Query type: specific" in msg
     assert "- Domain: news" in msg
@@ -199,7 +202,7 @@ def test_judge_prompt_includes_profile_block():
     assert "- AUX aspects:" in msg and "  - venue" in msg
     assert msg.index("Query Analysis") < msg.index("Document to evaluate")
 
-    without = build_judge_prompt("who won", url="https://e", today="2026-07-01")
+    without = build_judge_input("who won", url="https://e", today="2026-07-01")
     assert "Query Analysis (precomputed" not in without
 
 

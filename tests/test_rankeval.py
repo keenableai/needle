@@ -38,12 +38,13 @@ class FakeJudge:
         self.calls = 0
         self.prompts = []
 
-    async def complete(self, prompt, *, max_tokens, reasoning_effort):
+    async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
         self.calls += 1
-        self.prompts.append(prompt)
-        if is_profile_prompt(prompt):
+        full = f"{system}\n\n{prompt}" if system else prompt
+        self.prompts.append(full)
+        if is_profile_prompt(full):
             return PROFILE_YAML, None
-        rating = 4 if "GOODDOC" in prompt else 0
+        rating = 4 if "GOODDOC" in full else 0
         label = "FullyM" if rating == 4 else "FailsM"
         return f"rating: {rating}\nlabel: {label}\nreasoning: x", None
 
@@ -102,7 +103,7 @@ async def test_run_rbp_excludes_judge_errors_from_mean():
     results = [SearchResult(url="https://a", title="GOODDOC")]
 
     class FlakyJudge:
-        async def complete(self, prompt, *, max_tokens, reasoning_effort):
+        async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
             if "q_bad" in prompt:
                 return None, {"error_type": "http_error", "error_message": "500"}
             return "rating: 4\nlabel: FullyM\nreasoning: x", None
@@ -246,7 +247,7 @@ async def test_run_rbp_ultimate_unscored_when_all_engines_fail():
 
 async def test_run_rbp_ultimate_discards_failed_pooled_judgements():
     class FlakyJudge:
-        async def complete(self, prompt, *, max_tokens, reasoning_effort):
+        async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
             if "badhost" in prompt:
                 return None, {"error_type": "http_error", "error_message": "500"}
             return "rating: 4\nlabel: FullyM\nreasoning: x", None
@@ -294,8 +295,8 @@ async def test_run_rbp_shares_query_profile_across_pairs():
 
 async def test_run_rbp_judges_without_profile_when_classification_fails():
     class NoProfileJudge:
-        async def complete(self, prompt, *, max_tokens, reasoning_effort):
-            if is_profile_prompt(prompt):
+        async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
+            if is_profile_prompt(f"{system}\n\n{prompt}" if system else prompt):
                 return None, {"error_type": "http_error", "error_message": "500"}
             return "rating: 4\nlabel: FullyM\nreasoning: x", None
 

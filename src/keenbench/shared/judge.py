@@ -2,6 +2,7 @@ import json
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from functools import cache
 from typing import TypeVar
 
 import yaml
@@ -13,7 +14,9 @@ T = TypeVar("T")
 
 DEFAULT_MAX_CONTENT_CHARS = 50_000
 JUDGE_TEMPLATE = "judgement.jinja"
+JUDGE_INPUT_TEMPLATE = "judgement_input.jinja"
 PROFILE_TEMPLATE = "query_profile.jinja"
+PROFILE_INPUT_TEMPLATE = "query_profile_input.jinja"
 RETRY_PREFIX = "\n\nYour previous reply could not be parsed. Respond with only the YAML fields:"
 PARSE_RETRY_SUFFIX = RETRY_PREFIX + " rating (an integer 0-4), label, reasoning."
 PROFILE_RETRY_SUFFIX = (
@@ -65,7 +68,17 @@ class QueryProfile:
     query_content_archetype: str
 
 
-def build_judge_prompt(
+@cache
+def judge_instructions() -> str:
+    return render_prompt("keenbench.shared", JUDGE_TEMPLATE)
+
+
+@cache
+def profile_instructions() -> str:
+    return render_prompt("keenbench.shared", PROFILE_TEMPLATE)
+
+
+def build_judge_input(
     query: str,
     *,
     url: str,
@@ -84,7 +97,7 @@ def build_judge_prompt(
         )
     return render_prompt(
         "keenbench.shared",
-        JUDGE_TEMPLATE,
+        JUDGE_INPUT_TEMPLATE,
         query=query,
         url=url,
         title=title or "",
@@ -194,10 +207,11 @@ async def complete_parsed(
     *,
     retry_suffix: str,
     max_tokens: int,
+    system: str | None = None,
 ) -> tuple[T | None, dict[str, str] | None]:
     for attempt_prompt in (prompt, prompt + retry_suffix):
         text, err = await llm.complete(
-            attempt_prompt, max_tokens=max_tokens, reasoning_effort="minimal"
+            attempt_prompt, max_tokens=max_tokens, reasoning_effort="minimal", system=system
         )
         if err is not None:
             return None, err
@@ -222,7 +236,7 @@ async def judge_one(
     max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
     profile: QueryProfile | None = None,
 ) -> tuple[Judgement | None, dict[str, str] | None]:
-    prompt = build_judge_prompt(
+    prompt = build_judge_input(
         query,
         url=url,
         title=title,
@@ -233,14 +247,24 @@ async def judge_one(
         profile=profile,
     )
     return await complete_parsed(
-        llm, prompt, parse_judgement, retry_suffix=PARSE_RETRY_SUFFIX, max_tokens=32_768
+        llm,
+        prompt,
+        parse_judgement,
+        retry_suffix=PARSE_RETRY_SUFFIX,
+        max_tokens=32_768,
+        system=judge_instructions(),
     )
 
 
 async def classify_query(
     llm: LLMClient, query: str, *, today: str
 ) -> tuple[QueryProfile | None, dict[str, str] | None]:
-    prompt = render_prompt("keenbench.shared", PROFILE_TEMPLATE, query=query, today=today)
+    prompt = render_prompt("keenbench.shared", PROFILE_INPUT_TEMPLATE, query=query, today=today)
     return await complete_parsed(
-        llm, prompt, parse_query_profile, retry_suffix=PROFILE_RETRY_SUFFIX, max_tokens=32_768
+        llm,
+        prompt,
+        parse_query_profile,
+        retry_suffix=PROFILE_RETRY_SUFFIX,
+        max_tokens=32_768,
+        system=profile_instructions(),
     )
