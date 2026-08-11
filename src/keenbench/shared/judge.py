@@ -27,7 +27,8 @@ PROFILE_RETRY_SUFFIX = (
 
 QUERY_TYPE_RE = re.compile(r"\b(broad|specific|list)\b")
 ARCHETYPE_RE = re.compile(r"ephemeral|persistent|evergreen")
-DOMAIN_RE = re.compile(r"health|legal|financial|academic|tech|news|commerce|jobs")
+DOMAIN_RE = re.compile(r"\b(health|legal|financial|academic|tech|news|commerce|jobs|other)\b")
+OPERATOR_VALUES = {"true": True, "yes": True, "1": True, "false": False, "no": False, "0": False}
 
 RATING_LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
 VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
@@ -186,13 +187,23 @@ def parse_query_profile(text: str | None) -> QueryProfile | None:
     arch_match = ARCHETYPE_RE.search(str(data.get("query_content_archetype") or "").lower())
     if type_match is None or arch_match is None:
         return None
-    domain_match = DOMAIN_RE.search(str(data.get("query_domain") or "").lower())
-    operators = data.get("query_search_operators_exist")
-    if not isinstance(operators, bool):
-        operators = str(operators).strip().lower() in {"true", "yes", "1"}
+    domain_raw = str(data.get("query_domain") or "").lower()
+    domain_match = DOMAIN_RE.search(domain_raw)
+    if domain_raw and domain_match is None:
+        return None
+    operators_raw = data.get("query_search_operators_exist")
+    if isinstance(operators_raw, bool):
+        operators = operators_raw
+    elif operators_raw is None or operators_raw == "":
+        operators = False
+    else:
+        parsed_operators = OPERATOR_VALUES.get(str(operators_raw).strip().lower())
+        if parsed_operators is None:
+            return None
+        operators = parsed_operators
     return QueryProfile(
         query_type=type_match.group(1),
-        query_domain=domain_match.group(0) if domain_match else "other",
+        query_domain=domain_match.group(1) if domain_match else "other",
         query_search_operators_exist=operators,
         query_main_aspects=_aspect_tuple(data.get("query_main_aspects")),
         query_aux_aspects=_aspect_tuple(data.get("query_aux_aspects")),

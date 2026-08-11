@@ -190,6 +190,17 @@ def test_parse_query_profile_rejects_invalid():
     assert parse_query_profile("rating: 3\nlabel: HM") is None
 
 
+def test_parse_query_profile_rejects_unrecognized_field_values():
+    base = "query_type: broad\nquery_content_archetype: evergreen\n"
+    assert parse_query_profile(base + "query_domain: sports") is None
+    assert parse_query_profile(base + "query_domain: biotechnology") is None
+    assert parse_query_profile(base + "query_search_operators_exist: maybe") is None
+
+    p = parse_query_profile(base + "query_domain: tech news\nquery_search_operators_exist: 'false'")
+    assert p.query_domain == "tech"
+    assert p.query_search_operators_exist is False
+
+
 def test_judge_input_includes_profile_block():
     msg = build_judge_input("who won", url="https://e", today="2026-07-01", profile=PROFILE)
     assert "Query Analysis" in msg
