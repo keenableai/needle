@@ -1,4 +1,4 @@
-Classify a web search query for the Needs Met rating framework. Your classification is passed verbatim to every per-document judgement for this query, so all documents are judged against the same query interpretation. The sections below are shared with the per-document judge. Be decisive.
+Classify a web search query for the Needs Met rating framework. Your classification is passed verbatim to every per-document judgement for this query, so all documents are judged against the same query interpretation. The sections below are shared with the per-document judge. References like 2/SM or 3+ are ratings on the judge's 0-4 Needs Met scale (0-1 FailsM, 2 SM, 3 HM, 4 FullyM); they describe how the judge uses each classification. Be decisive.
 
 ## Query analysis
 
@@ -8,11 +8,12 @@ For each key aspect implied by the query (its objective, sub-questions, and the 
 - MAIN: Directly answers the query's primary objective. Foundational facts the user needs.
 - AUX: Supporting details, statistics, context that enhances but doesn't define the answer.
 
+Aspects describe what a document must cover, never the answer itself. Write "the identity of the author", not the author's name. Do not answer the query from your own knowledge: the judge scores documents against their own content, and a wrong precomputed answer would corrupt every judgement for this query.
+
 ### Query type classification
 
 Query types:
 {% include "query_types.jinja" %}
-
 ### Search operator extraction
 
 Parse the query for explicit search operators. These are hard constraints the user typed deliberately. They are not optional concepts.
@@ -24,7 +25,6 @@ Parse the query for explicit search operators. These are hard constraints the us
 
 Classify the query's expected content to determine staleness evaluation:
 {% include "content_archetypes.jinja" %}
-
 ### Domain classification
 
 Classify the query into one of these domains, or "other" if none fits:

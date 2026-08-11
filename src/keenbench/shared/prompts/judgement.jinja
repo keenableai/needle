@@ -1,11 +1,12 @@
 Evaluate how well a search result document matches a user's query intent using the Needs Met rating framework (0-4 scale).
 
 You are provided with:
+- Today's date
 - Query: The user's search query
 - Query Analysis: precomputed classification (query type, domain, search-operators flag, MAIN and AUX aspects, content archetype)
-- Document: Title, URL, snippet
+- Document: Title, URL, optional published date, snippet
 
-Adopt the Query Analysis block as ground truth and do not re-classify the query. Step 1 below defines its fields. If the block is absent, infer these fields from the query text yourself.
+Adopt the Query Analysis block as ground truth and do not re-classify the query. Step 1 below defines its fields. If the block is absent, infer these fields from the query text yourself. The Query Analysis defines what to look for; the document itself is the only source of factual answers — judge facts against the document's content and source authority, never against your own knowledge of the answer.
 
 ## Rating Scale
 
@@ -26,7 +27,7 @@ If there is any mismatch, correct it before outputting.
 
 ## Step 1: Query analysis
 
-### MAIN vs AUXILIARY aspects classification
+### MAIN vs AUXILIARY aspects
 
 For each key aspect implied by the query (its objective, sub-questions, and the kind of source it calls for) we have 2 gradations:
 - MAIN: Directly answers the query's primary objective. Foundational facts the user needs.
@@ -35,14 +36,13 @@ For each key aspect implied by the query (its objective, sub-questions, and the 
 Missing AUX alone never drops a document below 3/HM if all MAIN aspects are adequately covered.
 Additionally, queries might have hard gates that cap the maximum possible label.
 
-### Query type classification
+### Query types
 
-Before evaluating the document, classify the query type. This determines how strictly to apply content requirements.
+The query type determines how strictly to apply content requirements.
 
 Query types:
 {% include "query_types.jinja" %}
-
-### Search operator extraction
+### Search operators
 
 Parse the query for explicit search operators. These are hard constraints the user typed deliberately. They are not optional concepts.
 
@@ -51,11 +51,10 @@ Parse the query for explicit search operators. These are hard constraints the us
 
 If the query has no operators, skip operator gates and score normally.
 
-### Content archetype classification
+### Content archetypes
 
-Classify the query's expected content to determine staleness evaluation:
+The content archetype determines staleness evaluation:
 {% include "content_archetypes.jinja" %}
-
 ## Step 2: Document analysis
 
 ### Document integrity check
@@ -165,16 +164,24 @@ Respond with only a YAML block. No text before or after.
 ```yaml
 reasoning: "<2-3 sentences. State the query type (broad/specific/list), which document conditions passed/failed, key evidence from the document, and any penalties applied (staleness, domain gate). Be specific about WHAT content was present or missing.>"
 document_integrity_check: <fail|limit|pass>
-document_spirit_condition: <fail|pass|na>
-document_coverage_condition: <fail|pass|na>
+document_spirit_condition: <fail|pass>
+document_coverage_condition: <fail|pass>
 document_completeness_condition: <fail|pass|na>
 freshness_gate: <fail|pass|na>
-staleness_gate: <fail|pass|na>
+staleness_gate: <fail|pass>
 domain_gate: <fail|pass|na>
 search_operators_gate: <fail|pass|na>
 rating: <0-4>
 label: <FailsM|SM|HM|FullyM>
 ```
+
+Gate field rules:
+- document_spirit_condition and document_coverage_condition apply to every query: always pass or fail.
+- document_completeness_condition: na unless the query type is "list".
+- freshness_gate: na unless the query names a specific, dated current event.
+- staleness_gate: fail only when a staleness penalty applies; pass otherwise.
+- domain_gate: na when the query domain is "other".
+- search_operators_gate: na when the query has no search operators.
 
 Output rules:
 - YAML only. No markdown fences, no commentary, no extra fields.
