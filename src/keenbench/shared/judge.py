@@ -2,7 +2,6 @@ import json
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
-from functools import cache
 from typing import TypeVar
 
 import yaml
@@ -66,65 +65,6 @@ class QueryProfile:
     query_content_archetype: str
 
 
-def _profile_lines(profile: QueryProfile) -> list[str]:
-    lines = [
-        "Query Analysis (precomputed — adopt as ground truth, do not re-classify):",
-        f"- Query type: {profile.query_type}",
-        f"- Domain: {profile.query_domain}",
-        f"- Search operators exist: {'yes' if profile.query_search_operators_exist else 'no'}",
-        f"- Content archetype: {profile.query_content_archetype}",
-    ]
-    if profile.query_main_aspects:
-        lines.append("- MAIN aspects:")
-        lines += [f"  - {aspect}" for aspect in profile.query_main_aspects]
-    if profile.query_aux_aspects:
-        lines.append("- AUX aspects:")
-        lines += [f"  - {aspect}" for aspect in profile.query_aux_aspects]
-    return lines
-
-
-def build_user_message(
-    query: str,
-    *,
-    url: str,
-    title: str | None = None,
-    published: str | None = None,
-    content: str | None = None,
-    today: str,
-    max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
-    profile: QueryProfile | None = None,
-) -> str:
-    lines = [
-        f"Today's date: {today}",
-        "",
-        f"Query: {query}",
-        "",
-    ]
-    if profile is not None:
-        lines += _profile_lines(profile) + [""]
-    lines += [
-        "Document to evaluate:",
-        f"- Title: {title or ''}",
-        f"- URL: {url}",
-    ]
-    if published:
-        lines.append(f"- Published: {published}")
-    if content:
-        if max_content_chars > 0 and len(content) > max_content_chars:
-            head, tail = content[:max_content_chars], content[max_content_chars:]
-            content = (
-                f"{head}\n... and another {len(tail.split())} words "
-                f"({len(tail)} characters) not shown ..."
-            )
-        lines += ["- Page Snippet:", "<<<SNIPPET>>>", content, "<<</SNIPPET>>>"]
-    return "\n".join(lines) + "\n"
-
-
-@cache
-def _system_prompt() -> str:
-    return render_prompt("keenbench.shared", JUDGE_TEMPLATE)
-
-
 def build_judge_prompt(
     query: str,
     *,
@@ -136,17 +76,23 @@ def build_judge_prompt(
     max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
     profile: QueryProfile | None = None,
 ) -> str:
-    user = build_user_message(
-        query,
+    if content and 0 < max_content_chars < len(content):
+        head, tail = content[:max_content_chars], content[max_content_chars:]
+        content = (
+            f"{head}\n... and another {len(tail.split())} words "
+            f"({len(tail)} characters) not shown ..."
+        )
+    return render_prompt(
+        "keenbench.shared",
+        JUDGE_TEMPLATE,
+        query=query,
         url=url,
-        title=title,
+        title=title or "",
         published=published,
         content=content,
         today=today,
-        max_content_chars=max_content_chars,
         profile=profile,
     )
-    return _system_prompt() + "\n\n" + user
 
 
 def _parse_rating(raw: object) -> int | None:
