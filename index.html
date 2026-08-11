@@ -233,7 +233,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
-  .overlap-matrix, #fields-table, #history-table, .bar-table,
+  .overlap-matrix, #fields-table, #history-table, .bar-table, #prices-table,
   #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
   #app-metrics, #app-engines, #app-data { overflow-x: auto; }
   #card-standings { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
@@ -251,6 +251,11 @@ document.documentElement.dataset.theme = localStorage.theme ||
   #standings .st-ult .b { font-weight: 700; }
   #standings .st-ceil { fill: var(--text-muted); font-size: 10px; text-anchor: middle; font-variant-numeric: tabular-nums; }
   #standings .st-gap { fill: #d64545; font-size: 10px; font-weight: 600; text-anchor: middle; font-variant-numeric: tabular-nums; }
+  #card-quality-price { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
+  #quality-price { padding: 4px 0 8px; overflow-x: auto; }
+  #quality-price .qp-name { fill: var(--text-primary); font-size: 12px; }
+  #quality-price .qp-head { fill: var(--text-secondary); font-size: 11px; }
+  #quality-price .qp-quad { fill: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
   .prose { color: var(--text-secondary); font-size: 13px; }
   .prose p { margin: 0 0 10px; max-width: 90ch; }
   .overlap-matrix { padding: 10px 0 14px; }
@@ -292,6 +297,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   <div class="toc-head">Contents</div>
   <ul>
     <li><a href="#top">Overview</a></li>
+    <li><a href="#sec-price">Quality vs price</a></li>
     <li><a href="#sec-latency">Search latency</a></li>
     <li><a href="#sec-overlap">Engine overlap</a></li>
     <li><a href="#sec-slices">Slices</a>
@@ -367,6 +373,18 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <div class="sub" id="lb-legal-sub"></div>
       <div id="lb-legal"></div>
     </div>
+  </div>
+
+  <h2 class="section-title" id="sec-price">Quality vs price</h2>
+  <div class="card" id="card-quality-price">
+    <h2>Overall quality vs price</h2>
+    <div class="sub">7-day mean share of ultimate across all benches vs the lowest public price per 1,000 queries</div>
+    <div id="quality-price"></div>
+  </div>
+  <div class="card" id="card-prices">
+    <h2>Price per 1,000 queries</h2>
+    <div class="sub" id="prices-sub"></div>
+    <div id="prices-table"></div>
   </div>
 
   <h2 class="section-title" id="sec-latency">Search latency</h2>
@@ -1055,11 +1073,7 @@ const STANDINGS_BENCHES = [
   ["scholar", "recall", "recall@10"],
   ["legal", "recall", "recall@5"],
 ];
-function renderStandings(rows) {
-  const card = document.getElementById("card-standings");
-  const holder = document.getElementById("standings");
-  holder.replaceChildren();
-  card._mdRows = null;
+function shareEntries(rows) {
   const week = inRange(rows, 7 * 86400e3);
   const ult = STANDINGS_BENCHES.map(([bench, metric]) =>
     wmean(week.filter((r) => r.bench === bench && r.engine === ULTIMATE_ENGINE), metric));
@@ -1072,11 +1086,19 @@ function renderStandings(rows) {
     return { e, shares,
       overall: have.length ? have.reduce((s, x) => s + x.share, 0) / have.length : null };
   }).filter((x) => x.overall != null);
+  entries.sort((a, b) => b.overall - a.overall);
+  return { ult, entries };
+}
+function renderStandings(rows) {
+  const card = document.getElementById("card-standings");
+  const holder = document.getElementById("standings");
+  holder.replaceChildren();
+  card._mdRows = null;
+  const { ult, entries } = shareEntries(rows);
   if (!entries.length) {
     holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
     return;
   }
-  entries.sort((a, b) => b.overall - a.overall);
   const fmtPct = (v) => `${Math.round(v * 100)}%`;
   const nAx = STANDINGS_BENCHES.length;
   const best = [];
@@ -1273,6 +1295,149 @@ function renderStandings(rows) {
     setHot(best);
   });
   svg.addEventListener("pointerleave", () => setHot(null));
+  holder.appendChild(svg);
+}
+
+const PRICES_ASOF = "2026-08-11";
+const PRICES = new Map([
+  ["keenable", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["keenable-realtime", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["google", { usd: 0.30, plan: "Serper Ultimate — $3,750 / 12.5M credits" }],
+  ["bing", { usd: 1.00, plan: "SearchApi.io Octo 5M — $5,000/mo" }],
+  ["brave", { usd: 5.00, plan: "flat rate" }],
+  ["exa", { usd: 7.00, plan: "pay-as-you-go" }],
+  ["exa-instant", { usd: 7.00, plan: "pay-as-you-go" }],
+  ["parallel", { usd: 5.00, plan: "pay-as-you-go" }],
+  ["parallel-turbo", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["perplexity", { usd: 5.00, plan: "flat rate" }],
+  ["tavily", { usd: 5.00, plan: "Growth — $500/mo / 100k credits" }],
+  ["you", { usd: 5.00, plan: "Web Search API plan" }],
+  ["octen", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["ceramic", { usd: 0.05, plan: "pay-as-you-go" }],
+]);
+const fmtUsd = (v) => `$${v.toFixed(2)}`;
+
+function renderPriceTable() {
+  const holder = document.getElementById("prices-table");
+  holder.replaceChildren();
+  document.getElementById("prices-sub").textContent =
+    `lowest public price per 1,000 queries — each provider's biggest self-serve tier, no enterprise quotes; collected ${PRICES_ASOF}`;
+  const engines = ENGINES.filter((e) => PRICES.has(e))
+    .sort((a, b) => PRICES.get(a).usd - PRICES.get(b).usd || a.localeCompare(b));
+  if (!engines.length) {
+    holder.appendChild(el("div", { class: "empty" }, "No engines yet."));
+    return;
+  }
+  const table = el("table");
+  const head = el("tr");
+  head.appendChild(el("th", {}, "engine"));
+  head.appendChild(el("th", { class: "num" }, "$ / 1k queries"));
+  head.appendChild(el("th", {}, "plan"));
+  table.appendChild(head);
+  for (const e of engines) {
+    const p = PRICES.get(e);
+    const tr = el("tr");
+    markHome(tr, e);
+    tr.appendChild(engineCell(e));
+    tr.appendChild(el("td", { class: "num" }, fmtUsd(p.usd)));
+    tr.appendChild(el("td", {}, p.plan));
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
+function renderQualityPrice(rows) {
+  const card = document.getElementById("card-quality-price");
+  const holder = document.getElementById("quality-price");
+  holder.replaceChildren();
+  card._mdRows = null;
+  const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const pts = shareEntries(rows).entries.flatMap((x) => {
+    const p = PRICES.get(x.e);
+    return p ? [{ e: x.e, usd: p.usd, q: x.overall, plan: p.plan }] : [];
+  });
+  if (!pts.length) {
+    holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
+    return;
+  }
+  card._mdRows = () => [
+    ["engine", "$ / 1k queries", "overall"],
+    ...pts.map((p) => [p.e, fmtUsd(p.usd), fmtPct(p.q)]),
+  ];
+  const W = 860, H = 400;
+  const M = { top: 34, right: 24, bottom: 42, left: 44 };
+  const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
+  const xTop = Math.ceil(Math.max(...pts.map((p) => p.usd))) + 1;
+  const qs = pts.map((p) => p.q);
+  const yLo = Math.max(0, Math.floor((Math.min(...qs) - 0.04) * 20) / 20);
+  const yHi = Math.min(1, Math.ceil((Math.max(...qs) + 0.04) * 20) / 20);
+  const yStep = yHi - yLo <= 0.3 ? 0.05 : 0.1;
+  const X = (v) => M.left + (v / xTop) * iw;
+  const Y = (v) => M.top + (1 - (v - yLo) / (yHi - yLo)) * ih;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
+    "aria-label": "Overall quality as share of ultimate vs price per 1,000 queries" });
+  const mx = X(xTop / 2), my = Y((yLo + yHi) / 2);
+  svg.appendChild(el("rect", { x: M.left, y: M.top, width: mx - M.left, height: my - M.top,
+    fill: "var(--delta-up)", "fill-opacity": 0.05 }));
+  svg.appendChild(el("rect", { x: mx, y: my, width: M.left + iw - mx, height: M.top + ih - my,
+    fill: "#d64545", "fill-opacity": 0.05 }));
+  for (let gv = Math.ceil(yLo / yStep) * yStep; gv <= yHi + 1e-9; gv += yStep) {
+    svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: Y(gv), y2: Y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.left - 6, y: Y(gv) + 3, "text-anchor": "end", class: "axis-text" }, fmtPct(gv)));
+  }
+  for (let v = 1; v <= xTop; v++) {
+    svg.appendChild(el("line", { x1: X(v), x2: X(v), y1: M.top, y2: M.top + ih, stroke: "var(--grid)", "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: X(v), y: M.top + ih + 16, "text-anchor": "middle", class: "axis-text" }, `$${v}`));
+  }
+  svg.appendChild(el("line", { x1: mx, x2: mx, y1: M.top, y2: M.top + ih,
+    stroke: "var(--baseline)", "stroke-width": 1, "stroke-dasharray": "4 4" }));
+  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: my, y2: my,
+    stroke: "var(--baseline)", "stroke-width": 1, "stroke-dasharray": "4 4" }));
+  for (const [qx, qy, anchor, dy, label] of [
+    [M.left + 8, M.top, "start", 14, "cheap & good"],
+    [M.left + iw - 8, M.top, "end", 14, "expensive & good"],
+    [M.left + 8, M.top + ih, "start", -8, "cheap & bad"],
+    [M.left + iw - 8, M.top + ih, "end", -8, "expensive & bad"],
+  ]) {
+    svg.appendChild(el("text", { x: qx, y: qy + dy, "text-anchor": anchor, class: "qp-quad" }, label));
+  }
+  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: Y(yLo), y2: Y(yLo), stroke: "var(--baseline)", "stroke-width": 1 }));
+  svg.appendChild(el("text", { x: 10, y: 18, class: "qp-head" },
+    "overall quality — 7-day mean share of ultimate"));
+  svg.appendChild(el("text", { x: M.left + iw / 2, y: H - 6, "text-anchor": "middle", class: "qp-head" },
+    "$ per 1,000 queries — lowest public price"));
+  const items = pts.map((p) => ({ ...p, px: X(p.usd), py: Y(p.q), right: X(p.usd) < M.left + iw - 110 }));
+  const clusters = new Map();
+  for (const it of items) {
+    const k = `${it.usd}|${it.right}`;
+    clusters.set(k, [...(clusters.get(k) || []), it]);
+  }
+  const gap = 14;
+  for (const group of clusters.values()) {
+    group.sort((a, b) => a.py - b.py);
+    let lo = M.top + 8;
+    for (const it of group) { it.ly = Math.max(it.py, lo); lo = it.ly + gap; }
+    let hi = M.top + ih - 2;
+    for (let i = group.length - 1; i >= 0; i--) {
+      group[i].ly = Math.min(group[i].ly, hi);
+      hi = group[i].ly - gap;
+    }
+  }
+  for (const it of items) {
+    const s = it.right ? 1 : -1;
+    if (Math.abs(it.ly - it.py) > 4) {
+      svg.appendChild(el("line", { x1: it.px + s * 6, y1: it.py, x2: it.px + s * 12, y2: it.ly,
+        stroke: "var(--baseline)", "stroke-width": 1 }));
+    }
+    svg.appendChild(el("text", { x: it.px + s * 14, y: it.ly + 4,
+      "text-anchor": it.right ? "start" : "end", class: "qp-name" }, it.e));
+  }
+  for (const it of items) {
+    const dot = markerEl(it.e, it.px, it.py, 5);
+    dot.appendChild(el("title", {},
+      `${it.e} — ${fmtPct(it.q)} of ultimate at ${fmtUsd(it.usd)} / 1k queries (${it.plan})`));
+    svg.appendChild(dot);
+  }
   holder.appendChild(svg);
 }
 
@@ -1970,6 +2135,8 @@ function refreshHistoryTable() {
 
 function renderAll(latestFinance) {
   renderStandings(history);
+  renderQualityPrice(history);
+  renderPriceTable();
   drawCharts(history);
   refreshHistoryTable();
   renderFields(latestFinance);
