@@ -6,8 +6,8 @@ import httpx
 
 MAX_ERROR_CHARS = 500
 TIMEOUT_S = 60.0
-DEFAULT_JUDGE_MODEL = "google/gemini-3-flash-preview"
-DEFAULT_LLM_MODEL = "google/gemini-3.1-flash-lite"
+DEFAULT_JUDGE_MODEL = "openai/gpt-5.6-sol"
+DEFAULT_LLM_MODEL = "openai/gpt-5.6-sol"
 
 NO_REASONING_EFFORTS = frozenset({"", "none", "minimal"})
 
