@@ -39,6 +39,8 @@ packages = ["src/keenbench"]
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+markers = ["integration: end-to-end tests that call the real judge LLM"]
+addopts = "-m 'not integration'"
 
 [tool.ruff]
 target-version = "py311"

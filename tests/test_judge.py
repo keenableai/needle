@@ -1,20 +1,21 @@
 from keenbench.shared.judge import (
     PARSE_RETRY_SUFFIX,
     QueryProfile,
-    build_judge_prompt,
-    build_user_message,
+    build_judge_input,
     classify_query,
+    judge_instructions,
     judge_one,
     parse_judgement,
     parse_query_profile,
 )
 
 PROFILE = QueryProfile(
-    query_type="B",
-    archetype="Ephemeral",
-    dated_event=True,
-    objective="find the score",
-    core_aspects=("final score", "match date"),
+    query_type="specific",
+    query_domain="news",
+    query_search_operators_exist=False,
+    query_main_aspects=("final score", "match date"),
+    query_aux_aspects=("venue",),
+    query_content_archetype="ephemeral",
 )
 
 
@@ -23,8 +24,8 @@ class FakeLLM:
         self.replies = list(replies)
         self.prompts = []
 
-    async def complete(self, prompt, *, max_tokens, reasoning_effort):
-        self.prompts.append(prompt)
+    async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
+        self.prompts.append(f"{system}\n\n{prompt}" if system else prompt)
         return self.replies.pop(0)
 
 
@@ -85,8 +86,8 @@ def test_parse_rejects_non_integer_ratings():
     assert j is not None and j.rating == 3 and j.label == "HM"
 
 
-def test_build_user_message_and_content_cap():
-    msg = build_user_message(
+def test_build_judge_input_content_cap():
+    msg = build_judge_input(
         "mayor of austin",
         url="https://ex.com",
         title="T",
@@ -100,12 +101,14 @@ def test_build_user_message_and_content_cap():
     assert "characters) not shown" in msg
 
 
-def test_build_judge_prompt_includes_system_rules():
-    prompt = build_judge_prompt("q", url="https://e", today="2026-07-01")
-    assert "Needs Met rating framework" in prompt
+def test_judge_instructions_and_input_split():
+    system = judge_instructions()
+    assert "Needs Met rating framework" in system
+    assert '"broad": General or exploratory topic queries' in system
+    assert '"ephemeral": Sports scores' in system
+    prompt = build_judge_input("q", url="https://e", today="2026-07-01")
     assert "Query: q" in prompt
-    assert "Type A (Broad/Exploratory)" in prompt
-    assert "Ephemeral" in prompt
+    assert "Needs Met rating framework" not in prompt
 
 
 async def test_judge_one_success_and_llm_error():
@@ -136,81 +139,107 @@ async def test_judge_one_gives_up_after_one_parse_retry():
 
 def test_parse_query_profile():
     p = parse_query_profile(
-        "objective: find the score\ncore_aspects:\n  - final score\n"
-        "query_type: B\narchetype: Ephemeral\ndated_event: true"
+        "query_type: specific\nquery_domain: news\nquery_search_operators_exist: no\n"
+        'query_main_aspects: "final score"\nquery_aux_aspects: "venue"\n'
+        "query_content_archetype: ephemeral"
     )
-    assert p.query_type == "B"
-    assert p.archetype == "Ephemeral"
-    assert p.dated_event is True
-    assert p.objective == "find the score"
-    assert p.core_aspects == ("final score",)
+    assert p.query_type == "specific"
+    assert p.query_domain == "news"
+    assert p.query_search_operators_exist is False
+    assert p.query_main_aspects == ("final score",)
+    assert p.query_aux_aspects == ("venue",)
+    assert p.query_content_archetype == "ephemeral"
 
 
 def test_parse_query_profile_normalizes_variants():
     p = parse_query_profile(
-        "query_type: b (Specific/Closed)\narchetype: EVERGREEN\ndated_event: 'no'"
+        "query_type: Specific (closed)\nquery_content_archetype: EVERGREEN\n"
+        "query_search_operators_exist: 'yes'"
     )
-    assert p.query_type == "B"
-    assert p.archetype == "Evergreen"
-    assert p.dated_event is False
-    assert p.objective == "" and p.core_aspects == ()
+    assert p.query_type == "specific"
+    assert p.query_content_archetype == "evergreen"
+    assert p.query_domain == "other"
+    assert p.query_search_operators_exist is True
+    assert p.query_main_aspects == () and p.query_aux_aspects == ()
 
-    p = parse_query_profile("query_type: Type C\narchetype: Ephemeral content\ndated_event: yes")
-    assert p.query_type == "C"
-    assert p.archetype == "Ephemeral"
-    assert p.dated_event is True
+    p = parse_query_profile(
+        "query_type: list query\nquery_content_archetype: Ephemeral content\n"
+        "query_domain: Financial markets"
+    )
+    assert p.query_type == "list"
+    assert p.query_content_archetype == "ephemeral"
+    assert p.query_domain == "financial"
+    assert p.query_search_operators_exist is False
 
 
 def test_parse_query_profile_flattens_multiline_fields():
     p = parse_query_profile(
-        "query_type: A\narchetype: Persistent\nobjective: |\n  line one\n  line two\n"
-        'core_aspects:\n  - "multi\\nline  aspect"'
+        "query_type: broad\nquery_content_archetype: persistent\n"
+        "query_main_aspects: |\n  line one\n  line two\n"
+        'query_aux_aspects:\n  - "multi\\nline  aspect"\n  - second'
     )
-    assert p.objective == "line one line two"
-    assert p.core_aspects == ("multi line aspect",)
+    assert p.query_main_aspects == ("line one line two",)
+    assert p.query_aux_aspects == ("multi line aspect", "second")
 
 
 def test_parse_query_profile_rejects_invalid():
     assert parse_query_profile(None) is None
     assert parse_query_profile("") is None
-    assert parse_query_profile("query_type: D\narchetype: Ephemeral") is None
-    assert parse_query_profile("query_type: A\narchetype: Timeless") is None
+    assert parse_query_profile("query_type: exact\nquery_content_archetype: ephemeral") is None
+    assert parse_query_profile("query_type: broad\nquery_content_archetype: Timeless") is None
     assert parse_query_profile("rating: 3\nlabel: HM") is None
 
 
-def test_user_message_includes_profile_block():
-    msg = build_user_message("who won", url="https://e", today="2026-07-01", profile=PROFILE)
+def test_parse_query_profile_rejects_unrecognized_field_values():
+    base = "query_type: broad\nquery_content_archetype: evergreen\n"
+    assert parse_query_profile(base + "query_domain: sports") is None
+    assert parse_query_profile(base + "query_domain: biotechnology") is None
+    assert parse_query_profile(base + "query_search_operators_exist: maybe") is None
+
+    p = parse_query_profile(base + "query_domain: tech news\nquery_search_operators_exist: 'false'")
+    assert p.query_domain == "tech"
+    assert p.query_search_operators_exist is False
+
+
+def test_judge_input_includes_profile_block():
+    msg = build_judge_input("who won", url="https://e", today="2026-07-01", profile=PROFILE)
     assert "Query Analysis" in msg
-    assert "- Query type: B" in msg
-    assert "- Content archetype: Ephemeral" in msg
-    assert "- Specific dated current-event query: yes" in msg
-    assert "- Objective: find the score" in msg
+    assert "- Query type: specific" in msg
+    assert "- Domain: news" in msg
+    assert "- Search operators exist: no" in msg
+    assert "- Content archetype: ephemeral" in msg
+    assert "- MAIN aspects:" in msg
     assert "  - final score" in msg and "  - match date" in msg
+    assert "- AUX aspects:" in msg and "  - venue" in msg
     assert msg.index("Query Analysis") < msg.index("Document to evaluate")
 
-    without = build_user_message("who won", url="https://e", today="2026-07-01")
-    assert "Query Analysis" not in without
+    without = build_judge_input("who won", url="https://e", today="2026-07-01")
+    assert "Query Analysis (precomputed" not in without
 
 
 async def test_judge_one_passes_profile():
     llm = FakeLLM(("rating: 3\nlabel: HM\nreasoning: r", None))
     j, err = await judge_one(llm, "who won", url="https://e", today="2026-07-01", profile=PROFILE)
     assert err is None and j.rating == 3
-    assert "- Query type: B" in llm.prompts[0]
+    assert "- Query type: specific" in llm.prompts[0]
 
 
 async def test_classify_query_success_and_retry():
     llm = FakeLLM(
         ("not a profile", None),
-        ("query_type: C\narchetype: Persistent\ndated_event: false\nobjective: o", None),
+        (
+            "query_type: list\nquery_domain: tech\nquery_search_operators_exist: no\n"
+            "query_main_aspects: m\nquery_aux_aspects: a\nquery_content_archetype: persistent",
+            None,
+        ),
     )
     p, err = await classify_query(llm, "x vs y", today="2026-07-01")
-    assert err is None and p.query_type == "C" and p.archetype == "Persistent"
+    assert err is None and p.query_type == "list" and p.query_content_archetype == "persistent"
     assert len(llm.prompts) == 2
     assert "Query: x vs y" in llm.prompts[0]
     assert "Today's date: 2026-07-01" in llm.prompts[0]
-    assert "Type A (Broad/Exploratory)" in llm.prompts[0]
-    assert "Ephemeral" in llm.prompts[0]
+    assert '"broad": General or exploratory topic queries' in llm.prompts[0]
+    assert '"ephemeral": Sports scores' in llm.prompts[0]
 
 
 async def test_classify_query_returns_llm_error():

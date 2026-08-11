@@ -29,7 +29,7 @@ class LLMClientError(Exception):
 
 class LLMClient(Protocol):
     async def complete(
-        self, prompt: str, *, max_tokens: int, reasoning_effort: str
+        self, prompt: str, *, max_tokens: int, reasoning_effort: str, system: str | None = None
     ) -> tuple[str | None, dict[str, str] | None]: ...
 
 
@@ -67,11 +67,13 @@ class OpenRouterClient:
             self._client = None
 
     async def complete(
-        self, prompt: str, *, max_tokens: int, reasoning_effort: str
+        self, prompt: str, *, max_tokens: int, reasoning_effort: str, system: str | None = None
     ) -> tuple[str | None, dict[str, str] | None]:
+        messages = [{"role": "system", "content": system}] if system else []
+        messages.append({"role": "user", "content": prompt})
         body: dict[str, Any] = {
             "model": self.model,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": messages,
             "max_tokens": max_tokens,
             "temperature": self.temperature,
         }

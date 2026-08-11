@@ -5,8 +5,9 @@ from keenbench.shared.search import SearchResult
 
 TODAY = "2026-07-01"
 PROFILE_YAML = (
-    "objective: find it\ncore_aspects:\n  - the fact\n"
-    "query_type: B\narchetype: Evergreen\ndated_event: false"
+    "query_type: specific\nquery_domain: other\nquery_search_operators_exist: no\n"
+    "query_main_aspects: the fact\nquery_aux_aspects: ''\n"
+    "query_content_archetype: evergreen"
 )
 
 
@@ -15,7 +16,7 @@ def q(text):
 
 
 def is_profile_prompt(prompt):
-    return "query_type" in prompt
+    return "Classify a web search query" in prompt
 
 
 class FakeEngine:
@@ -37,12 +38,13 @@ class FakeJudge:
         self.calls = 0
         self.prompts = []
 
-    async def complete(self, prompt, *, max_tokens, reasoning_effort):
+    async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
         self.calls += 1
-        self.prompts.append(prompt)
-        if is_profile_prompt(prompt):
+        full = f"{system}\n\n{prompt}" if system else prompt
+        self.prompts.append(full)
+        if is_profile_prompt(full):
             return PROFILE_YAML, None
-        rating = 4 if "GOODDOC" in prompt else 0
+        rating = 4 if "GOODDOC" in full else 0
         label = "FullyM" if rating == 4 else "FailsM"
         return f"rating: {rating}\nlabel: {label}\nreasoning: x", None
 
@@ -101,7 +103,7 @@ async def test_run_rbp_excludes_judge_errors_from_mean():
     results = [SearchResult(url="https://a", title="GOODDOC")]
 
     class FlakyJudge:
-        async def complete(self, prompt, *, max_tokens, reasoning_effort):
+        async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
             if "q_bad" in prompt:
                 return None, {"error_type": "http_error", "error_message": "500"}
             return "rating: 4\nlabel: FullyM\nreasoning: x", None
@@ -245,7 +247,7 @@ async def test_run_rbp_ultimate_unscored_when_all_engines_fail():
 
 async def test_run_rbp_ultimate_discards_failed_pooled_judgements():
     class FlakyJudge:
-        async def complete(self, prompt, *, max_tokens, reasoning_effort):
+        async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
             if "badhost" in prompt:
                 return None, {"error_type": "http_error", "error_message": "500"}
             return "rating: 4\nlabel: FullyM\nreasoning: x", None
@@ -277,23 +279,24 @@ async def test_run_rbp_shares_query_profile_across_pairs():
     judge_prompts = [p for p in judge.prompts if not is_profile_prompt(p)]
     assert len(profile_prompts) == 1
     assert len(judge_prompts) == 2
-    assert all("- Query type: B" in p for p in judge_prompts)
+    assert all("- Query type: specific" in p for p in judge_prompts)
     assert all("- the fact" in p for p in judge_prompts)
     pq = report["engines"]["e"]["per_query"][0]
     assert pq["query_profile"] == {
-        "query_type": "B",
-        "archetype": "Evergreen",
-        "dated_event": False,
-        "objective": "find it",
-        "core_aspects": ("the fact",),
+        "query_type": "specific",
+        "query_domain": "other",
+        "query_search_operators_exist": False,
+        "query_main_aspects": ("the fact",),
+        "query_aux_aspects": (),
+        "query_content_archetype": "evergreen",
     }
     assert report["engines"]["ultimate"]["per_query"][0]["query_profile"] == pq["query_profile"]
 
 
 async def test_run_rbp_judges_without_profile_when_classification_fails():
     class NoProfileJudge:
-        async def complete(self, prompt, *, max_tokens, reasoning_effort):
-            if is_profile_prompt(prompt):
+        async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
+            if is_profile_prompt(f"{system}\n\n{prompt}" if system else prompt):
                 return None, {"error_type": "http_error", "error_message": "500"}
             return "rating: 4\nlabel: FullyM\nreasoning: x", None
 

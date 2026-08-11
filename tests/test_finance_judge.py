@@ -41,7 +41,7 @@ class FakeJudgeLLM:
         self.replies = replies
         self.prompts = []
 
-    async def complete(self, prompt, *, max_tokens, reasoning_effort):
+    async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
         self.prompts.append(prompt)
         reply = self.replies[min(len(self.prompts), len(self.replies)) - 1]
         if isinstance(reply, dict):
