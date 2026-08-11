@@ -95,7 +95,7 @@ def test_build_user_message_and_content_cap():
         today="2026-07-01",
         max_content_chars=10,
     )
-    assert "**Query**: mayor of austin" in msg
+    assert "Query: mayor of austin" in msg
     assert "- Published: 2026-07-01" in msg
     assert "characters) not shown" in msg
 
@@ -103,9 +103,9 @@ def test_build_user_message_and_content_cap():
 def test_build_judge_prompt_includes_system_rules():
     prompt = build_judge_prompt("q", url="https://e", today="2026-07-01")
     assert "Needs Met rating framework" in prompt
-    assert "**Query**: q" in prompt
-    assert "**Type A (Broad/Exploratory)**" in prompt
-    assert "**Ephemeral**" in prompt
+    assert "Query: q" in prompt
+    assert "Type A (Broad/Exploratory)" in prompt
+    assert "Ephemeral" in prompt
 
 
 async def test_judge_one_success_and_llm_error():
@@ -180,16 +180,16 @@ def test_parse_query_profile_rejects_invalid():
 
 def test_user_message_includes_profile_block():
     msg = build_user_message("who won", url="https://e", today="2026-07-01", profile=PROFILE)
-    assert "**Query Analysis**" in msg
+    assert "Query Analysis" in msg
     assert "- Query type: B" in msg
     assert "- Content archetype: Ephemeral" in msg
     assert "- Specific dated current-event query: yes" in msg
     assert "- Objective: find the score" in msg
     assert "  - final score" in msg and "  - match date" in msg
-    assert msg.index("**Query Analysis**") < msg.index("**Document to evaluate**")
+    assert msg.index("Query Analysis") < msg.index("Document to evaluate")
 
     without = build_user_message("who won", url="https://e", today="2026-07-01")
-    assert "**Query Analysis**" not in without
+    assert "Query Analysis" not in without
 
 
 async def test_judge_one_passes_profile():
@@ -207,10 +207,10 @@ async def test_classify_query_success_and_retry():
     p, err = await classify_query(llm, "x vs y", today="2026-07-01")
     assert err is None and p.query_type == "C" and p.archetype == "Persistent"
     assert len(llm.prompts) == 2
-    assert "**Query**: x vs y" in llm.prompts[0]
+    assert "Query: x vs y" in llm.prompts[0]
     assert "Today's date: 2026-07-01" in llm.prompts[0]
-    assert "**Type A (Broad/Exploratory)**" in llm.prompts[0]
-    assert "**Ephemeral**" in llm.prompts[0]
+    assert "Type A (Broad/Exploratory)" in llm.prompts[0]
+    assert "Ephemeral" in llm.prompts[0]
 
 
 async def test_classify_query_returns_llm_error():

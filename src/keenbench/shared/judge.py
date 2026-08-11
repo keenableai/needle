@@ -66,7 +66,7 @@ class QueryProfile:
 
 def _profile_lines(profile: QueryProfile) -> list[str]:
     lines = [
-        "**Query Analysis** (precomputed — adopt as ground truth, do not re-classify):",
+        "Query Analysis (precomputed — adopt as ground truth, do not re-classify):",
         f"- Query type: {profile.query_type}",
         f"- Content archetype: {profile.archetype}",
         f"- Specific dated current-event query: {'yes' if profile.dated_event else 'no'}",
@@ -93,13 +93,13 @@ def build_user_message(
     lines = [
         f"Today's date: {today}",
         "",
-        f"**Query**: {query}",
+        f"Query: {query}",
         "",
     ]
     if profile is not None:
         lines += _profile_lines(profile) + [""]
     lines += [
-        "**Document to evaluate**:",
+        "Document to evaluate:",
         f"- Title: {title or ''}",
         f"- URL: {url}",
     ]
