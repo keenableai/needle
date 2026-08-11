@@ -6,7 +6,7 @@ You are provided with:
 - Query Analysis: precomputed classification (query type, domain, search-operators flag, MAIN and AUX aspects, content archetype)
 - Document: Title, URL, optional published date, snippet
 
-Adopt the Query Analysis block as ground truth and do not re-classify the query. Step 1 below defines its fields. If the block is absent, infer these fields from the query text yourself. The Query Analysis defines what to look for; the document itself is the only source of factual answers — judge facts against the document's content and source authority, never against your own knowledge of the answer.
+Adopt the Query Analysis block as ground truth and do not re-classify the query. Step 1 below defines its fields. If the block is absent, infer these fields from the query text yourself. The Query Analysis defines what to look for; the document itself is the only source of factual answers — judge facts against the document's content and source authority, never against your own knowledge of the answer. You may still use general knowledge to recognize that two names or descriptions refer to the same entity.
 
 ## Rating Scale
 
@@ -71,6 +71,7 @@ Three conditions constrain the maximum rating. All applicable conditions must ho
 Spirit condition (all query types):
 - Document must address the correct topic, entity, jurisdiction, and domain context.
 - Wrong entity = 0/FailsM regardless of content quality (e.g., Burlington franchise for "North End Regina Pizzeria" query).
+- An under-specified reference to the same entity is NOT a wrong entity: a document that omits a middle name, an alias, or leaves a counterparty unnamed still passes spirit when nothing contradicts the query's entity.
 - Wrong jurisdiction = 0/FailsM for legal/financial queries.
 - General topic match without specific query elements = fails spirit for "specific" queries.
 
@@ -81,6 +82,8 @@ Coverage condition (all query types):
 - "broad" queries: At least one MAIN aspect with meaningful depth.
 - "specific" queries: The specific requested answer must be present.
 - "list" queries: ≥50% of requested items/aspects must be covered.
+- A document that authoritatively corrects the query's premise answers the query: for "did X die", a report establishing that X is alive or that the event belongs to a related entity satisfies coverage. Do not demand confirmation of a premise the document credibly refutes.
+- A secondary query detail the document leaves unconfirmed (a date, a middle name, an unnamed counterparty) is a minor gap to note in reasoning, not a coverage failure, when the queried fact itself is reported.
 - If condition fails, document is capped at 2/SM.
 
 Completeness condition (for "list" queries):
