@@ -1299,20 +1299,20 @@ function renderStandings(rows) {
 
 const PRICES_ASOF = "2026-08-11";
 const PRICES = new Map([
-  ["keenable", { usd: 1.00, plan: "—", note: "no public price list; shown at a nominal $1/1k" }],
-  ["keenable-realtime", { usd: 1.00, plan: "—", note: "same nominal price as keenable" }],
-  ["google", { usd: 0.30, plan: "Serper Ultimate — $3,750 / 12.5M credits", note: "10 results = 1 credit; credits expire after 6 months" }],
-  ["bing", { usd: 1.00, plan: "SearchApi.io Octo 5M — $5,000/mo", note: "self-serve tiers on the pricing page end at $2/1k" }],
-  ["brave", { usd: 5.00, plan: "flat rate", note: "volume tiers removed in Feb 2026" }],
-  ["exa", { usd: 7.00, plan: "pay-as-you-go", note: "covers 10 results; +$1/1k per extra result" }],
-  ["exa-instant", { usd: 7.00, plan: "pay-as-you-go", note: "same billed endpoint as exa" }],
-  ["parallel", { usd: 5.00, plan: "pay-as-you-go", note: "basic processor, up to 10 results" }],
-  ["parallel-turbo", { usd: 1.00, plan: "pay-as-you-go", note: "turbo processor, up to 10 results" }],
-  ["perplexity", { usd: 5.00, plan: "flat rate", note: "flat for 1–20 results" }],
-  ["tavily", { usd: 5.00, plan: "Growth — $500/mo / 100k credits", note: "basic search = 1 credit; pay-as-you-go is $8/1k" }],
-  ["you", { usd: 5.00, plan: "Web Search API plan", note: "1–100 results per call" }],
-  ["octen", { usd: 1.00, plan: "pay-as-you-go", note: "80% promo off the $5/1k list price" }],
-  ["ceramic", { usd: 0.05, plan: "pay-as-you-go", note: "" }],
+  ["keenable", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["keenable-realtime", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["google", { usd: 0.30, plan: "Serper Ultimate — $3,750 / 12.5M credits" }],
+  ["bing", { usd: 1.00, plan: "SearchApi.io Octo 5M — $5,000/mo" }],
+  ["brave", { usd: 5.00, plan: "flat rate" }],
+  ["exa", { usd: 7.00, plan: "pay-as-you-go" }],
+  ["exa-instant", { usd: 7.00, plan: "pay-as-you-go" }],
+  ["parallel", { usd: 5.00, plan: "pay-as-you-go" }],
+  ["parallel-turbo", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["perplexity", { usd: 5.00, plan: "flat rate" }],
+  ["tavily", { usd: 5.00, plan: "Growth — $500/mo / 100k credits" }],
+  ["you", { usd: 5.00, plan: "Web Search API plan" }],
+  ["octen", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["ceramic", { usd: 0.05, plan: "pay-as-you-go" }],
 ]);
 const fmtUsd = (v) => `$${v.toFixed(2)}`;
 
@@ -1332,7 +1332,6 @@ function renderPriceTable() {
   head.appendChild(el("th", {}, "engine"));
   head.appendChild(el("th", { class: "num" }, "$ / 1k queries"));
   head.appendChild(el("th", {}, "plan"));
-  head.appendChild(el("th", {}, "notes"));
   table.appendChild(head);
   for (const e of engines) {
     const p = PRICES.get(e);
@@ -1341,7 +1340,6 @@ function renderPriceTable() {
     tr.appendChild(engineCell(e));
     tr.appendChild(el("td", { class: "num" }, fmtUsd(p.usd)));
     tr.appendChild(el("td", {}, p.plan));
-    tr.appendChild(el("td", {}, p.note));
     table.appendChild(tr);
   }
   holder.appendChild(table);
