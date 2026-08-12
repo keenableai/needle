@@ -6,16 +6,10 @@ from keenbench.shared.search.queryops import parse_ops
 
 class TavilyClient(HttpSearchClient):
     engine = "tavily"
+    base_url = "https://api.tavily.com"
 
-    def __init__(
-        self,
-        *,
-        api_key: str,
-        base_url: str = "https://api.tavily.com",
-        search_depth: str = "basic",
-        timeout_s: float = 30.0,
-    ) -> None:
-        super().__init__(api_key=api_key, base_url=base_url, timeout_s=timeout_s)
+    def __init__(self, *, api_key: str, search_depth: str = "basic", timeout_s: float = 30.0) -> None:
+        super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.search_depth = search_depth
 
     async def search(

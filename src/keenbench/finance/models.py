@@ -98,6 +98,9 @@ class QuarterFact:
     end: str
 
 
+SEC_DOC_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{adsh_nodash}/{doc}"
+
+
 @dataclass(frozen=True)
 class Filing:
     cik: int
@@ -112,6 +115,10 @@ class Filing:
     @property
     def adsh_nodash(self) -> str:
         return self.adsh.replace("-", "")
+
+    @property
+    def doc_url(self) -> str:
+        return SEC_DOC_URL.format(cik=self.cik, adsh_nodash=self.adsh_nodash, doc=self.primary_doc)
 
 
 def quarter_phrase(fact: QuarterFact) -> str:

@@ -43,7 +43,7 @@ class FakeCourtListener:
     def __init__(self, cases_by_court):
         self._by_court = cases_by_court
 
-    async def opinions(self, court, *, filed_after, filed_before, published_only=True):
+    async def opinions(self, court, *, filed_after, filed_before):
         return list(self._by_court.get(court, []))
 
 

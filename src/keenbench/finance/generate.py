@@ -35,7 +35,7 @@ from keenbench.finance.registries import (
     lei,
     website,
 )
-from keenbench.finance.sources import SEC_DOC_URL, EdgarClient, quarterly_facts
+from keenbench.finance.sources import EdgarClient, quarterly_facts
 from keenbench.shared.concurrency import bounded_gather
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.sampling import dedupe_by, shuffle_indices
@@ -338,9 +338,6 @@ async def _filingdoc_rows(
             "form": filing.form,
             "filed": filing.filed,
         }
-        source_url = SEC_DOC_URL.format(
-            cik=filing.cik, adsh_nodash=filing.adsh_nodash, doc=filing.primary_doc
-        )
         rows.append(
             build_gold_row(
                 field=FILINGDOC_FIELD,
@@ -351,7 +348,7 @@ async def _filingdoc_rows(
                 query_text=filingdoc_syntax_query(query, syntax, filed=filing.filed),
                 entity_keys=entity_keys,
                 registry="sec_submissions",
-                source_url=source_url,
+                source_url=filing.doc_url,
                 hour_ts=hour_ts,
                 syntax=syntax,
                 tier=filing.tier,

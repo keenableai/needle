@@ -8,16 +8,10 @@ MAX_QUERY_CHARS = 500
 
 class OctenClient(HttpSearchClient):
     engine = "octen"
+    base_url = "https://api.octen.ai"
 
-    def __init__(
-        self,
-        *,
-        api_key: str,
-        base_url: str = "https://api.octen.ai",
-        highlight_max_tokens: int = 512,
-        timeout_s: float = 30.0,
-    ) -> None:
-        super().__init__(api_key=api_key, base_url=base_url, timeout_s=timeout_s)
+    def __init__(self, *, api_key: str, highlight_max_tokens: int = 512, timeout_s: float = 30.0) -> None:
+        super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.highlight_max_tokens = highlight_max_tokens
 
     async def search(

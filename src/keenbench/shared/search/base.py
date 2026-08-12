@@ -56,6 +56,37 @@ def titled_snippet(result: SearchResult, snippet_chars: int) -> str:
     return " ".join(p for p in (result.title, capped_snippet(result, snippet_chars)) if p)
 
 
+def serp_results(
+    payload: Any, *, kg_key: str, ab_key: str, organic_key: str, num_results: int
+) -> list[SearchResult]:
+    if not isinstance(payload, dict):
+        payload = {}
+    results: list[SearchResult] = []
+    kg = payload.get(kg_key)
+    if isinstance(kg, dict) and kg.get("website"):
+        results.append(
+            SearchResult(url=kg["website"], title=kg.get("title"), snippet=kg.get("description"))
+        )
+    ab = payload.get(ab_key)
+    if isinstance(ab, dict) and ab.get("link"):
+        results.append(
+            SearchResult(url=ab["link"], title=ab.get("title"), snippet=ab.get("snippet"))
+        )
+    organic = payload.get(organic_key)
+    for r in organic if isinstance(organic, list) else []:
+        if not isinstance(r, dict) or not r.get("link"):
+            continue
+        results.append(
+            SearchResult(
+                url=r["link"],
+                title=r.get("title"),
+                snippet=r.get("snippet"),
+                published_date=r.get("date"),
+            )
+        )
+    return results[:num_results]
+
+
 class SearchClient(Protocol):
     engine: str
     latencies_ms: list[float]

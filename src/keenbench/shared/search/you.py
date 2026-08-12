@@ -1,7 +1,7 @@
 from typing import Any
 
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
-from keenbench.shared.search.queryops import parse_ops
+from keenbench.shared.search.queryops import freshness_window, parse_ops
 
 MAX_COUNT = 100
 
@@ -17,7 +17,7 @@ class YouClient(HttpSearchClient):
         body: dict[str, Any] = {"query": ops.text, "count": min(num_results, MAX_COUNT)}
         if ops.sites:
             body["include_domains"] = list(ops.sites)
-        if (fresh := ops.freshness_window()) is not None:
+        if fresh := freshness_window(ops):
             body["freshness"] = fresh
         payload, err = await self._request_json(
             "POST",

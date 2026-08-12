@@ -1,7 +1,7 @@
 from typing import Any
 
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
-from keenbench.shared.search.queryops import parse_ops
+from keenbench.shared.search.queryops import freshness_window, parse_ops
 
 MAX_QUERY_WORDS = 50
 MAX_QUERY_CHARS = 400
@@ -32,7 +32,7 @@ class BraveClient(HttpSearchClient):
             "search_lang": "en",
             "result_filter": "web",
         }
-        if (fresh := ops.freshness_window()) is not None:
+        if fresh := freshness_window(ops):
             params["freshness"] = fresh
         payload, err = await self._request_json(
             "GET",

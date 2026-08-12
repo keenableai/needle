@@ -19,9 +19,6 @@ class GoldPaper:
     paper_key: str
     ids: dict[str, str]
     bucket: str
-    suite: str
-    age_bucket: str
-    domain: str
 
 
 def ids_match(gold: dict[str, str], found: PaperIds) -> bool:
@@ -50,9 +47,6 @@ async def run_papers(
             "query": query.text,
             "paper_key": query.paper_key,
             "bucket": query.bucket,
-            "suite": query.suite,
-            "age_bucket": query.age_bucket,
-            "domain": query.domain,
             "hit_rank": None,
             "n_results": 0,
             "results": [],

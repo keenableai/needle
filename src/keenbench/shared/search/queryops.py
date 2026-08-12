@@ -22,12 +22,13 @@ class QueryOps:
     def text_with_sites(self) -> str:
         return " ".join([self.text, *(f"site:{s}" for s in self.sites)]).strip()
 
-    def freshness_window(self) -> str | None:
-        if not (self.after or self.before):
-            return None
-        lo = self.after or EPOCH
-        hi = self.before or datetime.now(UTC).date()
-        return f"{lo.isoformat()}to{hi.isoformat()}"
+
+def freshness_window(ops: QueryOps) -> str | None:
+    if not (ops.after or ops.before):
+        return None
+    lo = ops.after or EPOCH
+    hi = ops.before or datetime.now(UTC).date()
+    return f"{lo.isoformat()}to{hi.isoformat()}"
 
 
 def parse_ops(query: str) -> QueryOps:

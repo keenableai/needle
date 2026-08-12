@@ -6,18 +6,18 @@ from keenbench.shared.search.queryops import parse_ops
 
 class ExaClient(HttpSearchClient):
     engine = "exa"
+    base_url = "https://api.exa.ai"
 
     def __init__(
         self,
         *,
         api_key: str,
-        base_url: str = "https://api.exa.ai",
         search_type: str = "auto",
         include_text: bool = True,
         highlight_chars: int = 0,
         timeout_s: float = 30.0,
     ) -> None:
-        super().__init__(api_key=api_key, base_url=base_url, timeout_s=timeout_s)
+        super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.search_type = search_type
         self.include_text = include_text
         self.highlight_chars = highlight_chars
