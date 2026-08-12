@@ -17,9 +17,7 @@ class ExaClient(HttpSearchClient):
         highlight_chars: int = 0,
         timeout_s: float = 30.0,
     ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+        super().__init__(api_key=api_key, base_url=base_url, timeout_s=timeout_s)
         self.search_type = search_type
         self.include_text = include_text
         self.highlight_chars = highlight_chars
@@ -58,8 +56,6 @@ class ExaClient(HttpSearchClient):
                 title=r.get("title"),
                 snippet=r.get("text") or "\n".join(r.get("highlights") or []) or r.get("summary"),
                 published_date=r.get("publishedDate"),
-                score=r.get("score"),
-                raw=r,
             )
             for r in raw_results[:num_results]
             if r.get("url")

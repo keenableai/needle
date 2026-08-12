@@ -2,7 +2,7 @@ import asyncio
 import json
 import math
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Protocol
 
 import httpx
@@ -38,8 +38,6 @@ class SearchResult:
     title: str | None = None
     snippet: str | None = None
     published_date: str | None = None
-    score: float | None = None
-    raw: dict[str, Any] = field(default_factory=dict)
 
 
 DEFAULT_SNIPPET_CHARS = 2000
@@ -80,13 +78,24 @@ async def search_all(
 
 class HttpSearchClient:
     engine: str = ""
+    base_url: str = ""
     default_headers: dict[str, str] = {}
     retry_attempts: int = RETRY_ATTEMPTS
     retry_base_s: float = RETRY_BASE_S
 
-    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int = 1) -> None:
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        timeout_s: float = 30.0,
+        max_concurrency: int = 1,
+    ) -> None:
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
+        self.api_key = api_key
+        if base_url is not None:
+            self.base_url = base_url.rstrip("/")
         self.timeout_s = timeout_s
         self.latencies_ms: list[float] = []
         self._client: httpx.AsyncClient | None = None

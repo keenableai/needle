@@ -17,9 +17,7 @@ class OctenClient(HttpSearchClient):
         highlight_max_tokens: int = 512,
         timeout_s: float = 30.0,
     ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+        super().__init__(api_key=api_key, base_url=base_url, timeout_s=timeout_s)
         self.highlight_max_tokens = highlight_max_tokens
 
     async def search(
@@ -56,7 +54,6 @@ class OctenClient(HttpSearchClient):
                 title=r.get("title") or None,
                 snippet=r.get("highlight") or None,
                 published_date=r.get("time_published") or None,
-                raw=r,
             )
             for r in raw_results[:num_results]
             if r.get("url")

@@ -6,18 +6,10 @@ from keenbench.shared.search.queryops import parse_ops
 
 class ParallelClient(HttpSearchClient):
     engine = "parallel"
+    base_url = "https://api.parallel.ai"
 
-    def __init__(
-        self,
-        *,
-        api_key: str,
-        base_url: str = "https://api.parallel.ai",
-        mode: str = "basic",
-        timeout_s: float = 60.0,
-    ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+    def __init__(self, *, api_key: str, mode: str = "basic", timeout_s: float = 60.0) -> None:
+        super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.mode = mode
 
     async def search(
@@ -51,7 +43,6 @@ class ParallelClient(HttpSearchClient):
                 url=r["url"],
                 title=r.get("title"),
                 snippet="\n".join(r.get("excerpts") or []) or None,
-                raw=r,
             )
             for r in raw_results[:num_results]
             if r.get("url")

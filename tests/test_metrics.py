@@ -1,7 +1,7 @@
 import pytest
 
 from keenbench.shared.metrics import (
-    RBP_MAX,
+    RBP_K,
     RBP_P,
     apply_redundancy_penalties,
     gain,
@@ -21,7 +21,7 @@ def test_gain_mapping():
 
 
 def test_rbp_all_perfect_hits_the_ceiling():
-    assert rbp_at_k([4, 4, 4, 4, 4]) == pytest.approx(RBP_MAX)
+    assert rbp_at_k([4, 4, 4, 4, 4]) == pytest.approx(1.0 - RBP_P**RBP_K)
 
 
 def test_rbp_top_rank_weighted_more():

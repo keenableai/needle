@@ -23,10 +23,8 @@ class SearchApiClient(HttpSearchClient):
         base_url: str = "https://www.searchapi.io/api/v1",
         timeout_s: float = 30.0,
     ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
+        super().__init__(api_key=api_key, base_url=base_url, timeout_s=timeout_s)
         self.engine = engine
-        self.base_url = base_url.rstrip("/")
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -53,19 +51,12 @@ class SearchApiClient(HttpSearchClient):
         kg = payload.get("knowledge_graph")
         if isinstance(kg, dict) and kg.get("website"):
             results.append(
-                SearchResult(
-                    url=kg["website"],
-                    title=kg.get("title"),
-                    snippet=kg.get("description"),
-                    raw=kg,
-                )
+                SearchResult(url=kg["website"], title=kg.get("title"), snippet=kg.get("description"))
             )
         ab = payload.get("answer_box")
         if isinstance(ab, dict) and ab.get("link"):
             results.append(
-                SearchResult(
-                    url=ab["link"], title=ab.get("title"), snippet=ab.get("snippet"), raw=ab
-                )
+                SearchResult(url=ab["link"], title=ab.get("title"), snippet=ab.get("snippet"))
             )
         for r in payload.get("organic_results") or []:
             if not r.get("link"):
@@ -76,7 +67,6 @@ class SearchApiClient(HttpSearchClient):
                     title=r.get("title"),
                     snippet=r.get("snippet"),
                     published_date=r.get("date"),
-                    raw=r,
                 )
             )
         return results[:num_results], None

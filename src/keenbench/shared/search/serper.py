@@ -3,17 +3,7 @@ from keenbench.shared.search.base import HttpSearchClient, SearchResult
 
 class SerperClient(HttpSearchClient):
     engine = "google"
-
-    def __init__(
-        self,
-        *,
-        api_key: str,
-        base_url: str = "https://google.serper.dev",
-        timeout_s: float = 30.0,
-    ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+    base_url = "https://google.serper.dev"
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -33,19 +23,12 @@ class SerperClient(HttpSearchClient):
         kg = payload.get("knowledgeGraph")
         if isinstance(kg, dict) and kg.get("website"):
             results.append(
-                SearchResult(
-                    url=kg["website"],
-                    title=kg.get("title"),
-                    snippet=kg.get("description"),
-                    raw=kg,
-                )
+                SearchResult(url=kg["website"], title=kg.get("title"), snippet=kg.get("description"))
             )
         ab = payload.get("answerBox")
         if isinstance(ab, dict) and ab.get("link"):
             results.append(
-                SearchResult(
-                    url=ab["link"], title=ab.get("title"), snippet=ab.get("snippet"), raw=ab
-                )
+                SearchResult(url=ab["link"], title=ab.get("title"), snippet=ab.get("snippet"))
             )
         organic = payload.get("organic")
         for r in organic if isinstance(organic, list) else []:
@@ -57,7 +40,6 @@ class SerperClient(HttpSearchClient):
                     title=r.get("title"),
                     snippet=r.get("snippet"),
                     published_date=r.get("date"),
-                    raw=r,
                 )
             )
         return results[:num_results], None

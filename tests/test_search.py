@@ -42,7 +42,7 @@ def _canned(payload):
 
 def test_search_result_defaults():
     r = SearchResult(url="https://ex.com")
-    assert r.title is None and r.score is None and r.raw == {}
+    assert r.title is None and r.snippet is None and r.published_date is None
 
 
 async def test_keenable_maps_fields_and_truncates(monkeypatch):
@@ -108,7 +108,6 @@ async def test_exa_maps_fields_and_builds_body(monkeypatch):
     assert results[0].url == "https://a"
     assert results[0].snippet == "body"
     assert results[0].published_date == "2023-01-01"
-    assert results[0].score == 0.42
     assert calls["json"] == {
         "query": "hi",
         "numResults": 5,
@@ -339,7 +338,6 @@ async def test_tavily_maps_fields_and_builds_body(monkeypatch):
     assert err is None
     assert results[0].snippet == "ca"
     assert results[0].published_date == "2026-07-01"
-    assert results[0].score == 0.9
     assert calls["json"] == {"query": "hi", "max_results": 20, "search_depth": "basic"}
     assert calls["headers"] == {"Authorization": "Bearer k"}
 

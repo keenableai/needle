@@ -3,7 +3,6 @@ from typing import Any
 
 from keenbench.scholar.idconv import IdConverter
 from keenbench.scholar.ids import PaperIds, extract_ids
-from keenbench.scholar.models import AGE_BUCKETS
 from keenbench.shared.recall import (
     build_match_rows,
     first_rank,
@@ -30,25 +29,11 @@ def ids_match(gold: dict[str, str], found: PaperIds) -> bool:
     return any(found_ids.get(k) == v for k, v in gold.items())
 
 
-def _grouped(scored: list[dict], field: str) -> dict[str, dict[str, Any]]:
-    return group_recall(scored, lambda pq: pq[field])
-
-
-def _age_order(groups: dict[str, dict]) -> dict[str, dict]:
-    def rank(bucket: str) -> int:
-        return AGE_BUCKETS.index(bucket) if bucket in AGE_BUCKETS else len(AGE_BUCKETS)
-
-    return dict(sorted(groups.items(), key=lambda kv: rank(kv[0])))
-
-
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
     scored = [pq for pq in per_query if pq["search_error"] is None]
     return {
         **recall_summary(per_query, scored, latency),
-        "by_bucket": _grouped(scored, "bucket"),
-        "by_suite": _grouped(scored, "suite"),
-        "by_age": _age_order(_grouped(scored, "age_bucket")),
-        "by_domain": _grouped(scored, "domain"),
+        "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
     }
 
 

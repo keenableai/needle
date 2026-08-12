@@ -86,9 +86,6 @@ def _classify_httpx_error(exc: Exception) -> str:
         return "timeout"
     if isinstance(exc, httpx.ConnectError):
         return "connection"
-    name = type(exc).__name__.lower()
-    if "ssl" in name:
-        return "ssl"
     if isinstance(exc, httpx.InvalidURL):
         return "invalid_url"
     if isinstance(exc, httpx.TooManyRedirects):

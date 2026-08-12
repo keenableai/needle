@@ -63,7 +63,6 @@ class CourtListenerClient(HttpSearchClient):
         *,
         filed_after: date,
         filed_before: date,
-        published_only: bool = True,
     ) -> list[Case]:
         params: dict[str, str] = {
             "type": "o",
@@ -71,9 +70,8 @@ class CourtListenerClient(HttpSearchClient):
             "filed_after": filed_after.strftime("%m/%d/%Y"),
             "filed_before": filed_before.strftime("%m/%d/%Y"),
             "order_by": "dateFiled desc",
+            "stat_Published": "on",
         }
-        if published_only:
-            params["stat_Published"] = "on"
         payload, err = await self._request_json("GET", COURTLISTENER_SEARCH, params=params)
         if err is not None or not isinstance(payload, dict):
             return []

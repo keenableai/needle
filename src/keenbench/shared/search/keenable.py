@@ -20,9 +20,7 @@ class KeenableClient(HttpSearchClient):
         snippet_chars: int = 0,
         timeout_s: float = 30.0,
     ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+        super().__init__(api_key=api_key, base_url=base_url, timeout_s=timeout_s)
         self.mode = mode
         self.app_title = app_title
         self.snippet_chars = snippet_chars
@@ -63,7 +61,6 @@ class KeenableClient(HttpSearchClient):
                 title=r.get("title"),
                 snippet=r.get("snippet") or r.get("description"),
                 published_date=r.get("published_at"),
-                raw=r,
             )
             for r in raw_results[:num_results]
             if r.get("url")
