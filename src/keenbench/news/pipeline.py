@@ -116,7 +116,7 @@ async def run_rss(
 ) -> tuple[list[QueryRow], RunStats]:
     if min_candidates < 0:
         raise ValueError("min_candidates must be >= 0")
-    items, _health = await fetch_all_sources(
+    items = await fetch_all_sources(
         sources, max_rows_per_source=max_rows_per_source, concurrency=fetch_concurrency
     )
     anchor = now if now is not None else _fetch_anchor(items)

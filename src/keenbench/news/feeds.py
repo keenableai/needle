@@ -1,4 +1,3 @@
-import time
 import tomllib
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
@@ -62,47 +61,17 @@ QUERY_MAX_AGE_BY_KIND: dict[str, timedelta] = {"rss_paper": timedelta(hours=168)
 FUTURE_SKEW_TOLERANCE = timedelta(minutes=5)
 FUTURE_SKEW_TOLERANCE_S = FUTURE_SKEW_TOLERANCE.total_seconds()
 
-HEALTH_WINDOWS: tuple[tuple[str, timedelta], ...] = (
-    ("items_lt_1h", timedelta(hours=1)),
-    ("items_lt_6h", timedelta(hours=6)),
-    ("items_lt_24h", timedelta(hours=24)),
-    ("items_lt_48h", timedelta(hours=48)),
-)
-
 RSS_KINDS: frozenset[str] = frozenset(
     {"rss_news", "rss_release", "rss_blog", "rss_paper", "rss_social"}
 )
 
 
-@dataclass(frozen=True)
-class _FetchOutcome:
-    text: str | None
-    http_status: int
-    fetch_error_class: str | None
-
-
-def _classify_httpx_error(exc: Exception) -> str:
-    if isinstance(exc, httpx.TimeoutException):
-        return "timeout"
-    if isinstance(exc, httpx.ConnectError):
-        return "connection"
-    if isinstance(exc, httpx.InvalidURL):
-        return "invalid_url"
-    if isinstance(exc, httpx.TooManyRedirects):
-        return "too_many_redirects"
-    return "other"
-
-
-async def _fetch_text(client: httpx.AsyncClient, url: str) -> _FetchOutcome:
+async def _fetch_text(client: httpx.AsyncClient, url: str) -> str | None:
     try:
         r = await client.get(url, headers={"User-Agent": USER_AGENT}, follow_redirects=True)
-    except (httpx.HTTPError, httpx.InvalidURL) as exc:
-        return _FetchOutcome(
-            text=None, http_status=-1, fetch_error_class=_classify_httpx_error(exc)
-        )
-    if r.status_code != 200:
-        return _FetchOutcome(text=None, http_status=r.status_code, fetch_error_class="http_error")
-    return _FetchOutcome(text=r.text, http_status=200, fetch_error_class=None)
+    except (httpx.HTTPError, httpx.InvalidURL):
+        return None
+    return r.text if r.status_code == 200 else None
 
 
 def _text_of(el: Element | None) -> str | None:
@@ -201,63 +170,24 @@ async def _fetch_one(
     source: SeedSource,
     *,
     max_rows_per_source: int,
-) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    started = time.perf_counter()
-    outcome = await _fetch_text(client, source.url)
-    fetch_duration_ms = (time.perf_counter() - started) * 1000.0
+) -> list[dict[str, Any]]:
+    text = await _fetch_text(client, source.url)
     now = datetime.now(UTC)
-
-    base_health: dict[str, Any] = {
-        "source_url": source.url,
-        "source_kind": source.source_kind,
-        "topical_domain": source.topical_domain,
-        "http_status": outcome.http_status,
-        "fetch_error_class": outcome.fetch_error_class,
-        "parse_ok": False,
-        "items_total": 0,
-        "items_lt_1h": 0,
-        "items_lt_6h": 0,
-        "items_lt_24h": 0,
-        "items_lt_48h": 0,
-        "newest_item_age_minutes": None,
-        "fetch_duration_ms": fetch_duration_ms,
-        "observed_at": now,
-    }
-
-    if outcome.text is None:
-        return [], base_health
-
+    if text is None:
+        return []
     try:
-        root = ET.fromstring(outcome.text)
+        root = ET.fromstring(text)
     except (ParseError, DefusedXmlException):
-        return [], base_health
-    base_health["parse_ok"] = True
-
-    parsed_items = _parse_feed(root)
-    base_health["items_total"] = len(parsed_items)
+        return []
 
     max_age_seconds = _raw_max_age_for_kind(source.source_kind).total_seconds()
-    item_ages_seconds: list[float] = []
     recent_items: list[dict[str, str | None]] = []
-    newest_age_seconds: float | None = None
-    for e in parsed_items:
+    for e in _parse_feed(root):
         age = published_age_seconds(e.get("published_at"), now=now)
-        if age is None:
-            continue
-        item_ages_seconds.append(age)
-        if newest_age_seconds is None or age < newest_age_seconds:
-            newest_age_seconds = age
-        if age <= max_age_seconds:
+        if age is not None and age <= max_age_seconds:
             recent_items.append(e)
 
-    for col, window in HEALTH_WINDOWS:
-        window_seconds = window.total_seconds()
-        base_health[col] = sum(1 for s in item_ages_seconds if s <= window_seconds)
-    if newest_age_seconds is not None:
-        base_health["newest_item_age_minutes"] = newest_age_seconds / 60.0
-
-    entries = recent_items[:max_rows_per_source]
-    item_rows = [
+    return [
         {
             "url": e.get("url") or source.url,
             "title": e.get("title"),
@@ -268,9 +198,8 @@ async def _fetch_one(
             "lastmod_or_pub_at": e.get("published_at"),
             "observed_at": now,
         }
-        for e in entries
+        for e in recent_items[:max_rows_per_source]
     ]
-    return item_rows, base_health
 
 
 async def fetch_all_sources(
@@ -278,22 +207,17 @@ async def fetch_all_sources(
     *,
     max_rows_per_source: int = 50,
     concurrency: int = 15,
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+) -> list[dict[str, Any]]:
     if max_rows_per_source < 1:
         raise ValueError("max_rows_per_source must be >= 1")
     async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
 
-        async def _one(s: SeedSource) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+        async def _one(s: SeedSource) -> list[dict[str, Any]]:
             return await _fetch_one(client, s, max_rows_per_source=max_rows_per_source)
 
         results = await bounded_gather(sources, _one, concurrency=concurrency)
 
-    items: list[dict[str, Any]] = []
-    healths: list[dict[str, Any]] = []
-    for item_rows, health_row in results:
-        items.extend(item_rows)
-        healths.append(health_row)
-    return items, healths
+    return [row for item_rows in results for row in item_rows]
 
 
 def pick_per_feed(
