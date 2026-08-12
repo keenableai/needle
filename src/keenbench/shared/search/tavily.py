@@ -8,7 +8,9 @@ class TavilyClient(HttpSearchClient):
     engine = "tavily"
     base_url = "https://api.tavily.com"
 
-    def __init__(self, *, api_key: str, search_depth: str = "basic", timeout_s: float = 30.0) -> None:
+    def __init__(
+        self, *, api_key: str, search_depth: str = "basic", timeout_s: float = 30.0
+    ) -> None:
         super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.search_depth = search_depth
 

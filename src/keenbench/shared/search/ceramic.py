@@ -12,7 +12,9 @@ class CeramicClient(HttpSearchClient):
     engine = "ceramic"
     base_url = "https://api.ceramic.ai"
 
-    def __init__(self, *, api_key: str, description_chars: int = 0, timeout_s: float = 30.0) -> None:
+    def __init__(
+        self, *, api_key: str, description_chars: int = 0, timeout_s: float = 30.0
+    ) -> None:
         super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.description_chars = description_chars
 
