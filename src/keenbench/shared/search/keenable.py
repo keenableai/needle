@@ -1,6 +1,6 @@
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import HttpSearchClient, SearchResult, clamped_chars
 from keenbench.shared.search.queryops import parse_ops
 
 MIN_SNIPPET_CHARS = 180
@@ -44,10 +44,10 @@ class KeenableClient(HttpSearchClient):
         else:
             path = "/v1/search/public"
         body: dict[str, Any] = {"query": query, "mode": self.mode}
-        if self.snippet_chars > 0:
-            body["snippet_max_length"] = min(
-                max(self.snippet_chars, MIN_SNIPPET_CHARS), MAX_SNIPPET_CHARS
-            )
+        if (
+            n := clamped_chars(self.snippet_chars, MIN_SNIPPET_CHARS, MAX_SNIPPET_CHARS)
+        ) is not None:
+            body["snippet_max_length"] = n
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}{path}",

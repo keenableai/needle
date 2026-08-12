@@ -68,24 +68,13 @@ async def test_keenable_maps_fields_and_truncates(monkeypatch):
     assert calls["headers"] == {"X-Keenable-Title": "keenbench"}
 
 
-async def test_keenable_clamps_snippet_chars(monkeypatch):
-    c = KeenableClient(snippet_chars=50)
+@pytest.mark.parametrize("chars,expected", [(50, 180), (20000, 10000), (0, None)])
+async def test_keenable_clamps_snippet_chars(monkeypatch, chars, expected):
+    c = KeenableClient(snippet_chars=chars)
     fake, calls = _canned({"results": []})
     monkeypatch.setattr(c, "_request_json", fake)
     await c.search("hi")
-    assert calls["json"]["snippet_max_length"] == 180
-
-    c = KeenableClient(snippet_chars=20000)
-    fake, calls = _canned({"results": []})
-    monkeypatch.setattr(c, "_request_json", fake)
-    await c.search("hi")
-    assert calls["json"]["snippet_max_length"] == 10000
-
-    c = KeenableClient()
-    fake, calls = _canned({"results": []})
-    monkeypatch.setattr(c, "_request_json", fake)
-    await c.search("hi")
-    assert "snippet_max_length" not in calls["json"]
+    assert calls["json"].get("snippet_max_length") == expected
 
 
 async def test_keenable_snippet_falls_back_to_description(monkeypatch):
