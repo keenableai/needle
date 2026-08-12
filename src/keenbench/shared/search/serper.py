@@ -1,19 +1,9 @@
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import HttpSearchClient, SearchResult, serp_results
 
 
 class SerperClient(HttpSearchClient):
     engine = "google"
-
-    def __init__(
-        self,
-        *,
-        api_key: str,
-        base_url: str = "https://google.serper.dev",
-        timeout_s: float = 30.0,
-    ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+    base_url = "https://google.serper.dev"
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -26,38 +16,11 @@ class SerperClient(HttpSearchClient):
         )
         if err is not None:
             return None, err
-        if not isinstance(payload, dict):
-            payload = {}
-
-        results: list[SearchResult] = []
-        kg = payload.get("knowledgeGraph")
-        if isinstance(kg, dict) and kg.get("website"):
-            results.append(
-                SearchResult(
-                    url=kg["website"],
-                    title=kg.get("title"),
-                    snippet=kg.get("description"),
-                    raw=kg,
-                )
-            )
-        ab = payload.get("answerBox")
-        if isinstance(ab, dict) and ab.get("link"):
-            results.append(
-                SearchResult(
-                    url=ab["link"], title=ab.get("title"), snippet=ab.get("snippet"), raw=ab
-                )
-            )
-        organic = payload.get("organic")
-        for r in organic if isinstance(organic, list) else []:
-            if not isinstance(r, dict) or not r.get("link"):
-                continue
-            results.append(
-                SearchResult(
-                    url=r["link"],
-                    title=r.get("title"),
-                    snippet=r.get("snippet"),
-                    published_date=r.get("date"),
-                    raw=r,
-                )
-            )
-        return results[:num_results], None
+        results = serp_results(
+            payload,
+            kg_key="knowledgeGraph",
+            ab_key="answerBox",
+            organic_key="organic",
+            num_results=num_results,
+        )
+        return results, None

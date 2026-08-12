@@ -25,7 +25,6 @@ def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
             "bench": bench,
             "engine": name,
             "rbp": e["mean_rbp"],
-            "rbp_max": e["rbp_max"],
             "num_scored": e["num_scored"],
             "num_queries": report["num_queries"],
             "search_errors": e["search_errors"],
@@ -70,19 +69,9 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
     return rows
 
 
-def _syntax_split(e: dict) -> tuple[float | None, float | None]:
-    groups = e.get("by_syntax") or {}
-    plain = groups.get("plain", {}).get("recall_at_k")
-    ops = [(g["n"], g["recall_at_k"]) for name, g in groups.items() if name != "plain"]
-    total = sum(n for n, _ in ops)
-    op = sum(n * r for n, r in ops) / total if total else None
-    return plain, op
-
-
 def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> list[dict]:
     rows = []
     for name, e in report["engines"].items():
-        plain_recall, op_recall = _syntax_split(e)
         rows.append(
             {
                 "ts": ts,
@@ -94,8 +83,6 @@ def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> l
                 f"{suites[0]}_n": e["by_bucket"].get(suites[0], {}).get("n"),
                 f"{suites[1]}_recall": e["by_bucket"].get(suites[1], {}).get("recall_at_k"),
                 f"{suites[1]}_n": e["by_bucket"].get(suites[1], {}).get("n"),
-                "plain_recall": plain_recall,
-                "op_recall": op_recall,
                 "num_scored": e["num_scored"],
                 "num_queries": report["num_queries"],
                 "search_errors": e["search_errors"],

@@ -8,7 +8,6 @@ from keenbench.news.feeds import (
     SEED_SOURCES,
     SeedSource,
     _fetch_one,
-    _FetchOutcome,
     _parse_feed,
     fetch_all_sources,
     load_sources_from_toml,
@@ -39,7 +38,7 @@ def _rfc822(dt):
 
 async def _run_fetch_one(monkeypatch, xml, *, max_rows=50):
     async def fake_fetch_text(client, url):
-        return _FetchOutcome(text=xml, http_status=200, fetch_error_class=None)
+        return xml
 
     monkeypatch.setattr(feeds_mod, "_fetch_text", fake_fetch_text)
     src = SeedSource("https://ex.com/feed", "rss_news", "tech")
@@ -214,9 +213,8 @@ async def test_fetch_one_drops_undated_items_so_they_cannot_crowd_out_fresh(monk
         f"<item><title>fresh</title><link>https://x/f</link><pubDate>{fresh}</pubDate></item>"
         "</channel></rss>"
     )
-    items, health = await _run_fetch_one(monkeypatch, xml, max_rows=2)
+    items = await _run_fetch_one(monkeypatch, xml, max_rows=2)
     assert [i["title"] for i in items] == ["fresh"]
-    assert health["items_total"] == 3
 
 
 async def test_fetch_one_tolerates_small_future_skew(monkeypatch):
@@ -229,10 +227,8 @@ async def test_fetch_one_tolerates_small_future_skew(monkeypatch):
         f"<item><title>far</title><link>https://x/z</link><pubDate>{far_future}</pubDate></item>"
         "</channel></rss>"
     )
-    items, health = await _run_fetch_one(monkeypatch, xml)
+    items = await _run_fetch_one(monkeypatch, xml)
     assert [i["title"] for i in items] == ["skewed"]
-    assert health["newest_item_age_minutes"] == 0.0
-    assert health["items_lt_1h"] == 1
 
 
 def test_pick_per_feed_tolerates_small_future_skew():
@@ -250,9 +246,8 @@ def test_pick_per_feed_tolerates_small_future_skew():
 
 
 async def test_fetch_one_handles_defused_parse_failure(monkeypatch):
-    items, health = await _run_fetch_one(monkeypatch, ENTITY_BOMB)
+    items = await _run_fetch_one(monkeypatch, ENTITY_BOMB)
     assert items == []
-    assert health["parse_ok"] is False
 
 
 def test_load_sources_from_toml(tmp_path):

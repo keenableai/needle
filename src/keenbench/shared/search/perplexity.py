@@ -6,17 +6,10 @@ from keenbench.shared.search.queryops import parse_ops
 
 class PerplexityClient(HttpSearchClient):
     engine = "perplexity"
+    base_url = "https://api.perplexity.ai"
 
-    def __init__(
-        self,
-        *,
-        api_key: str,
-        base_url: str = "https://api.perplexity.ai",
-        timeout_s: float = 60.0,
-    ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+    def __init__(self, *, api_key: str, timeout_s: float = 60.0) -> None:
+        super().__init__(api_key=api_key, timeout_s=timeout_s)
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -49,7 +42,6 @@ class PerplexityClient(HttpSearchClient):
                 title=r.get("title"),
                 snippet=r.get("snippet"),
                 published_date=r.get("date"),
-                raw=r,
             )
             for r in payload.get("results") or []
             if isinstance(r, dict) and r.get("url")

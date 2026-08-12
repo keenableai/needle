@@ -25,6 +25,7 @@ from keenbench.finance.projection import (
     filings_query,
 )
 from keenbench.finance.registries import (
+    SEC_FACTS_URL,
     GleifClient,
     SecClient,
     WikidataClient,
@@ -250,9 +251,7 @@ async def _filings_rows(
                     query_text=filings_query(row["title"], fact, syntax),
                     entity_keys=entity_keys,
                     registry="sec_xbrl",
-                    source_url=(
-                        f"https://data.sec.gov/api/xbrl/companyfacts/CIK{row['cik']:010d}.json"
-                    ),
+                    source_url=SEC_FACTS_URL.format(cik=int(row["cik"])),
                     hour_ts=hour_ts,
                     syntax=syntax,
                     tier=row.get("tier") or "",
@@ -339,10 +338,6 @@ async def _filingdoc_rows(
             "form": filing.form,
             "filed": filing.filed,
         }
-        source_url = (
-            f"https://www.sec.gov/Archives/edgar/data/{filing.cik}"
-            f"/{filing.adsh_nodash}/{filing.primary_doc}"
-        )
         rows.append(
             build_gold_row(
                 field=FILINGDOC_FIELD,
@@ -353,7 +348,7 @@ async def _filingdoc_rows(
                 query_text=filingdoc_syntax_query(query, syntax, filed=filing.filed),
                 entity_keys=entity_keys,
                 registry="sec_submissions",
-                source_url=source_url,
+                source_url=filing.doc_url,
                 hour_ts=hour_ts,
                 syntax=syntax,
                 tier=filing.tier,

@@ -47,12 +47,12 @@ def result_answers(query: GoldQuery, result: SearchResult, *, snippet_chars: int
     )
 
 
+def _scoreable(pq: dict) -> bool:
+    return pq["search_error"] is None and not (pq["judge_errors"] and pq["hit_rank"] is None)
+
+
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
-    scored = [
-        pq
-        for pq in per_query
-        if pq["search_error"] is None and not (pq["judge_errors"] and pq["hit_rank"] is None)
-    ]
+    scored = [pq for pq in per_query if _scoreable(pq)]
     return {
         **recall_summary(per_query, scored, latency),
         "judged_results": sum(pq["judged"] for pq in per_query),
@@ -69,14 +69,7 @@ def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
 
 
 def _ultimate(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
-    eligible_outs = [
-        [
-            e
-            for e in entries
-            if e["search_error"] is None and not (e["judge_errors"] and e["hit_rank"] is None)
-        ]
-        for entries in query_outs
-    ]
+    eligible_outs = [[e for e in entries if _scoreable(e)] for entries in query_outs]
     pooled = [
         eligible or entries for eligible, entries in zip(eligible_outs, query_outs, strict=True)
     ]

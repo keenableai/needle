@@ -51,11 +51,10 @@ def parse_search_case(rec: dict[str, Any]) -> Case | None:
 class CourtListenerClient(HttpSearchClient):
     def __init__(self, *, api_token: str | None = None, **kwargs: Any) -> None:
         kwargs.setdefault("max_concurrency", 2)
-        super().__init__(**kwargs)
-        self.api_token = api_token or os.environ.get("COURTLISTENER_API_TOKEN") or None
+        super().__init__(api_key=api_token or os.environ.get("COURTLISTENER_API_TOKEN"), **kwargs)
         self.default_headers = {"User-Agent": USER_AGENT}
-        if self.api_token:
-            self.default_headers["Authorization"] = f"Token {self.api_token}"
+        if self.api_key:
+            self.default_headers["Authorization"] = f"Token {self.api_key}"
 
     async def opinions(
         self,
@@ -63,7 +62,6 @@ class CourtListenerClient(HttpSearchClient):
         *,
         filed_after: date,
         filed_before: date,
-        published_only: bool = True,
     ) -> list[Case]:
         params: dict[str, str] = {
             "type": "o",
@@ -71,9 +69,8 @@ class CourtListenerClient(HttpSearchClient):
             "filed_after": filed_after.strftime("%m/%d/%Y"),
             "filed_before": filed_before.strftime("%m/%d/%Y"),
             "order_by": "dateFiled desc",
+            "stat_Published": "on",
         }
-        if published_only:
-            params["stat_Published"] = "on"
         payload, err = await self._request_json("GET", COURTLISTENER_SEARCH, params=params)
         if err is not None or not isinstance(payload, dict):
             return []

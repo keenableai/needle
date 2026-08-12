@@ -10,18 +10,12 @@ MAX_DESCRIPTION_CHARS = 8000
 
 class CeramicClient(HttpSearchClient):
     engine = "ceramic"
+    base_url = "https://api.ceramic.ai"
 
     def __init__(
-        self,
-        *,
-        api_key: str,
-        base_url: str = "https://api.ceramic.ai",
-        description_chars: int = 0,
-        timeout_s: float = 30.0,
+        self, *, api_key: str, description_chars: int = 0, timeout_s: float = 30.0
     ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+        super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.description_chars = description_chars
 
     async def search(
@@ -48,7 +42,6 @@ class CeramicClient(HttpSearchClient):
                 url=r["url"],
                 title=r.get("title") or None,
                 snippet=r.get("description") or None,
-                raw=r,
             )
             for r in raw_results[:num_results]
             if r.get("url")

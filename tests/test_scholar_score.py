@@ -32,16 +32,8 @@ def test_ids_match():
     assert not ids_match({"doi": "10.1/x"}, PaperIds())
 
 
-def _gold(text, bucket, ids, paper_key, **kw):
-    return GoldPaper(
-        text=text,
-        paper_key=paper_key,
-        ids=ids,
-        bucket=bucket,
-        suite=kw.get("suite", "arxiv"),
-        age_bucket=kw.get("age_bucket", "7d"),
-        domain=kw.get("domain", "computer science"),
-    )
+def _gold(text, bucket, ids, paper_key):
+    return GoldPaper(text=text, paper_key=paper_key, ids=ids, bucket=bucket)
 
 
 async def test_recall_mrr_and_rank():
@@ -137,7 +129,7 @@ class FakeIdConv:
 
 
 async def test_pmc_resolution_enables_hit():
-    queries = [_gold("q1", "title", {"pmid": "999"}, "999", suite="europepmc")]
+    queries = [_gold("q1", "title", {"pmid": "999"}, "999")]
     engine = FakeEngine(
         "keenable",
         {"q1": [_r("https://pmc.ncbi.nlm.nih.gov/articles/PMC7654321")]},

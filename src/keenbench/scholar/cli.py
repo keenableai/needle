@@ -33,9 +33,6 @@ def _gold_paper(row: dict) -> GoldPaper:
         paper_key=str(gold.get("paper_key") or ""),
         ids={k: str(v) for k, v in (gold.get("ids") or {}).items()},
         bucket=str(origin.get("bucket") or "unknown"),
-        suite=str(origin.get("suite") or gold.get("suite") or "unknown"),
-        age_bucket=str(gold.get("age_bucket") or "unknown"),
-        domain=str(gold.get("domain") or "unknown"),
     )
 
 

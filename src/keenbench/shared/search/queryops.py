@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import UTC, date, datetime
+
+EPOCH = date(1970, 1, 1)
 
 
 def _normalize_host(value: str) -> str:
@@ -19,6 +21,14 @@ class QueryOps:
 
     def text_with_sites(self) -> str:
         return " ".join([self.text, *(f"site:{s}" for s in self.sites)]).strip()
+
+
+def freshness_window(ops: QueryOps) -> str | None:
+    if not (ops.after or ops.before):
+        return None
+    lo = ops.after or EPOCH
+    hi = ops.before or datetime.now(UTC).date()
+    return f"{lo.isoformat()}to{hi.isoformat()}"
 
 
 def parse_ops(query: str) -> QueryOps:

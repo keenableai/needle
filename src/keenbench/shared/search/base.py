@@ -2,7 +2,7 @@ import asyncio
 import json
 import math
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any, Protocol
 
 import httpx
@@ -38,8 +38,6 @@ class SearchResult:
     title: str | None = None
     snippet: str | None = None
     published_date: str | None = None
-    score: float | None = None
-    raw: dict[str, Any] = field(default_factory=dict)
 
 
 DEFAULT_SNIPPET_CHARS = 2000
@@ -56,6 +54,37 @@ def capped_snippet(result: SearchResult, snippet_chars: int) -> str:
 
 def titled_snippet(result: SearchResult, snippet_chars: int) -> str:
     return " ".join(p for p in (result.title, capped_snippet(result, snippet_chars)) if p)
+
+
+def serp_results(
+    payload: Any, *, kg_key: str, ab_key: str, organic_key: str, num_results: int
+) -> list[SearchResult]:
+    if not isinstance(payload, dict):
+        payload = {}
+    results: list[SearchResult] = []
+    kg = payload.get(kg_key)
+    if isinstance(kg, dict) and kg.get("website"):
+        results.append(
+            SearchResult(url=kg["website"], title=kg.get("title"), snippet=kg.get("description"))
+        )
+    ab = payload.get(ab_key)
+    if isinstance(ab, dict) and ab.get("link"):
+        results.append(
+            SearchResult(url=ab["link"], title=ab.get("title"), snippet=ab.get("snippet"))
+        )
+    organic = payload.get(organic_key)
+    for r in organic if isinstance(organic, list) else []:
+        if not isinstance(r, dict) or not r.get("link"):
+            continue
+        results.append(
+            SearchResult(
+                url=r["link"],
+                title=r.get("title"),
+                snippet=r.get("snippet"),
+                published_date=r.get("date"),
+            )
+        )
+    return results[:num_results]
 
 
 class SearchClient(Protocol):
@@ -80,13 +109,24 @@ async def search_all(
 
 class HttpSearchClient:
     engine: str = ""
+    base_url: str = ""
     default_headers: dict[str, str] = {}
     retry_attempts: int = RETRY_ATTEMPTS
     retry_base_s: float = RETRY_BASE_S
 
-    def __init__(self, *, timeout_s: float = 30.0, max_concurrency: int = 1) -> None:
+    def __init__(
+        self,
+        *,
+        api_key: str | None = None,
+        base_url: str | None = None,
+        timeout_s: float = 30.0,
+        max_concurrency: int = 1,
+    ) -> None:
         if max_concurrency < 1:
             raise ValueError("max_concurrency must be >= 1")
+        self.api_key = api_key
+        if base_url is not None:
+            self.base_url = base_url.rstrip("/")
         self.timeout_s = timeout_s
         self.latencies_ms: list[float] = []
         self._client: httpx.AsyncClient | None = None

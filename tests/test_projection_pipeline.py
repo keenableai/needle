@@ -87,7 +87,7 @@ async def test_run_rss_end_to_end(monkeypatch):
     ]
 
     async def fake_fetch(sources, *, max_rows_per_source, concurrency):
-        return fake_items, [{"source_url": "https://ex.com/feed", "parse_ok": True}]
+        return fake_items
 
     monkeypatch.setattr(pipeline, "fetch_all_sources", fake_fetch)
 

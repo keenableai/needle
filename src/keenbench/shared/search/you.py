@@ -1,26 +1,14 @@
-from datetime import UTC, date, datetime
 from typing import Any
 
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
-from keenbench.shared.search.queryops import parse_ops
+from keenbench.shared.search.queryops import freshness_window, parse_ops
 
-EPOCH = date(1970, 1, 1)
 MAX_COUNT = 100
 
 
 class YouClient(HttpSearchClient):
     engine = "you"
-
-    def __init__(
-        self,
-        *,
-        api_key: str,
-        base_url: str = "https://ydc-index.io",
-        timeout_s: float = 30.0,
-    ) -> None:
-        super().__init__(timeout_s=timeout_s)
-        self.api_key = api_key
-        self.base_url = base_url.rstrip("/")
+    base_url = "https://ydc-index.io"
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -29,10 +17,8 @@ class YouClient(HttpSearchClient):
         body: dict[str, Any] = {"query": ops.text, "count": min(num_results, MAX_COUNT)}
         if ops.sites:
             body["include_domains"] = list(ops.sites)
-        if ops.after or ops.before:
-            lo = ops.after or EPOCH
-            hi = ops.before or datetime.now(UTC).date()
-            body["freshness"] = f"{lo.isoformat()}to{hi.isoformat()}"
+        if fresh := freshness_window(ops):
+            body["freshness"] = fresh
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/v1/search",
@@ -58,7 +44,6 @@ class YouClient(HttpSearchClient):
                         title=r.get("title") or None,
                         snippet="\n".join(r.get("snippets") or []) or r.get("description") or None,
                         published_date=r.get("page_age") or None,
-                        raw=r,
                     )
                 )
         return results[:num_results], None

@@ -6,7 +6,6 @@ from keenbench.finance.models import Filing, QuarterFact
 from keenbench.finance.registries import RegistryClient
 
 SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
-SEC_DOC_URL = "https://www.sec.gov/Archives/edgar/data/{cik}/{adsh_nodash}/{doc}"
 
 QUARTERLY_CONCEPTS = {
     "revenue": [
@@ -109,10 +108,7 @@ class EdgarClient(RegistryClient):
     async def document_text(self, filing: Filing) -> str | None:
         if not filing.primary_doc:
             return None
-        url = SEC_DOC_URL.format(
-            cik=filing.cik, adsh_nodash=filing.adsh_nodash, doc=filing.primary_doc
-        )
-        html = await self._get_text(url)
+        html = await self._get_text(filing.doc_url)
         if html is None:
             return None
         return html_text(html) or None
