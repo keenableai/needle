@@ -324,8 +324,8 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <h1>keenbench — search engine benchmarks</h1>
     <p>Hourly search-engine benchmarks from
       <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.
-      news runs hourly (RBP@5, LLM judge); agentic_rare daily
-      (rare-entity RBP@5, LLM judge); finance, scholar, and legal
+      news runs hourly (nDCG@5, LLM judge); agentic_rare daily
+      (rare-entity nDCG@5, LLM judge); finance, scholar, and legal
       daily (deterministic recall). The italic <em>ultimate</em> row pools
       every engine's results per query and ranks them by actual relevance —
       the ceiling for any single engine. All times UTC.
@@ -448,16 +448,16 @@ document.documentElement.dataset.theme = localStorage.theme ||
   <h2 class="section-title" id="sec-slices">Slices</h2>
 
   <h3 class="subsection-title" id="sec-news">news</h3>
-  <p class="section-desc">Fresh, time-sensitive queries mined hourly from RSS feeds and Google Trends, scored on ranking quality (RBP@5) by an LLM relevance judge.</p>
-  <div class="card" id="card-rbp">
-    <h2>news — RBP@5</h2>
-    <div class="sub">20 fresh queries per run, mean RBP over all queries in each 6-hour window</div>
+  <p class="section-desc">Fresh, time-sensitive queries mined hourly from RSS feeds and Google Trends, scored on ranking quality (nDCG@5 against the pooled ultimate ranking) by an LLM relevance judge.</p>
+  <div class="card" id="card-ndcg">
+    <h2>news — nDCG@5</h2>
+    <div class="sub">20 fresh queries per run, mean nDCG over all queries in each 6-hour window</div>
   </div>
 
   <h3 class="subsection-title" id="sec-agentic_rare">agentic_rare</h3>
-  <p class="section-desc">Rare-entity queries mined from real search logs — obscure names, technical terms, and long compounds selected by tokenizer difficulty. Scored on ranking quality (RBP@5) by the same LLM relevance judge as news.</p>
-  <div class="card" id="card-rbp-rare">
-    <h2>agentic_rare — RBP@5</h2>
+  <p class="section-desc">Rare-entity queries mined from real search logs — obscure names, technical terms, and long compounds selected by tokenizer difficulty. Scored on ranking quality (nDCG@5) by the same LLM relevance judge as news.</p>
+  <div class="card" id="card-ndcg-rare">
+    <h2>agentic_rare — nDCG@5</h2>
     <div class="sub">100 rare-entity queries per daily run</div>
   </div>
 
@@ -556,10 +556,10 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <div class="sub">how every number on this page is computed (src/keenbench/shared/metrics.py and per-bench score.py)</div>
     <table>
       <tr><th>metric</th><th>benches</th><th>definition</th></tr>
-      <tr><td>RBP@5</td><td>news, agentic_rare</td>
-        <td>rank-biased precision with persistence p = 0.8: (1 − p) · Σ gain(rᵢ) · pⁱ⁻¹ over the top 5 results. Judge ratings map to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0. The all-4s ceiling is 1 − 0.8⁵ = 0.672; leaderboard scores are not normalized by it, while Slices charts show each engine as a share of ultimate's score. A query is scored only if every one of its results was judged; otherwise it is dropped from the mean and counted as judge errors.</td></tr>
+      <tr><td>nDCG@5</td><td>news, agentic_rare</td>
+        <td>DCG over the top 5 results — Σ gain(rᵢ) / log₂(i + 1) with judge ratings mapped to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0 — divided by the DCG of the ideal ranking: the pooled ultimate ordering of every engine's deduplicated results, so ultimate scores exactly 1. A query is scored only if every one of its results was judged (otherwise it is dropped from the mean and counted as judge errors) and only if the pooled ideal has any gain — queries where no engine found anything relevant are excluded. Runs before 2026-08-12 published RBP@5 (persistence 0.8) instead; RBP points appear in the Slices charts as a share of ultimate's RBP, but not in leaderboards or standings.</td></tr>
       <tr><td>redundancy penalty</td><td>news, agentic_rare</td>
-        <td>applied to ratings before RBP: a duplicate URL −4 rating steps, the 2nd result from the same domain −1, the 3rd and later −2, all floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
+        <td>applied to ratings before scoring, on the engine and ideal sides alike: a duplicate URL −4 rating steps, the 2nd result from the same domain −1, the 3rd and later −2, all floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td>finance</td>
         <td>a query is a hit when the gold answer appears in a top-5 title or snippet — deterministic matcher, with an LLM-judge backstop for paraphrased answers. MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@10, MRR@10</td><td>scholar</td>
@@ -697,16 +697,17 @@ function msScale(maxV) {
 const fmtTime = (d) => d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
 
 function seriesFor(bench, metric, rows) {
+  const pick = typeof metric === "function" ? metric : (r) => r[metric];
   const out = {};
   for (const e of ENGINES) out[e] = [];
   for (const r of rows) {
     if (
       (bench == null || r.bench === bench)
-      && r[metric] != null
+      && pick(r) != null
       && r.num_scored > 0
       && out[r.engine]
     ) {
-      out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
+      out[r.engine].push({ t: new Date(r.ts), v: pick(r) });
     }
   }
   for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
@@ -732,7 +733,7 @@ function rollingMean(series) {
   return out;
 }
 
-function rbpSeries(rows) {
+function newsSeries(rows) {
   const out = {};
   const byEngine = new Map();
   for (const e of ENGINES) {
@@ -741,11 +742,12 @@ function rbpSeries(rows) {
   }
   for (const r of rows) {
     const buckets = byEngine.get(r.engine);
-    if (!buckets || r.bench !== "news" || r.rbp == null || !(r.num_scored > 0)) continue;
+    const v = r.ndcg ?? r.rbp;
+    if (!buckets || r.bench !== "news" || v == null || !(r.num_scored > 0)) continue;
     const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
     const agg = buckets.get(b) || { sum: 0, n: 0 };
     const n = r.num_scored;
-    agg.sum += r.rbp * n;
+    agg.sum += v * n;
     agg.n += n;
     buckets.set(b, agg);
   }
@@ -1043,7 +1045,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
 
 function renderLeaderboards(rows) {
   const week = inRange(rows, 7 * 86400e3);
-  renderLeaderboard("lb-fresh", "lb-fresh-sub", week, "news", [["rbp", "RBP@5"]]);
+  renderLeaderboard("lb-fresh", "lb-fresh-sub", week, "news", [["ndcg", "nDCG@5"]]);
   renderLeaderboard("lb-company", "lb-company-sub", week, "finance", [
     ["recall", "recall@5"],
     ["filings_recall", "filings", "filings_n"],
@@ -1056,7 +1058,7 @@ function renderLeaderboards(rows) {
     ["clue_recall", "clue", "clue_n"],
     ["tot_recall", "tot", "tot_n"],
   ]);
-  renderLeaderboard("lb-rare", "lb-rare-sub", week, "agentic_rare", [["rbp", "RBP@5"]]);
+  renderLeaderboard("lb-rare", "lb-rare-sub", week, "agentic_rare", [["ndcg", "nDCG@5"]]);
   renderLeaderboard("lb-legal", "lb-legal-sub", week, "legal", [
     ["recall", "recall@5"],
     ["caselaw_recall", "caselaw", "caselaw_n"],
@@ -1065,8 +1067,8 @@ function renderLeaderboards(rows) {
 }
 
 const STANDINGS_BENCHES = [
-  ["news", "rbp", "RBP@5"],
-  ["agentic_rare", "rbp", "RBP@5"],
+  ["news", "ndcg", "nDCG@5"],
+  ["agentic_rare", "ndcg", "nDCG@5"],
   ["finance", "recall", "recall@5"],
   ["scholar", "recall", "recall@10"],
   ["legal", "recall", "recall@5"],
@@ -1544,7 +1546,8 @@ function renderHistoryTable(rows) {
   table.appendChild(head);
   for (const r of [...rows].reverse()) {
     const k = r.bench === "scholar" ? 10 : 5;
-    const metrics = ["news", "agentic_rare"].includes(r.bench) ? [["RBP@5", r.rbp]]
+    const metrics = ["news", "agentic_rare"].includes(r.bench)
+      ? [r.ndcg != null || r.rbp == null ? ["nDCG@5", r.ndcg] : ["RBP@5", r.rbp]]
       : [[`recall@${k}`, r.recall], [`MRR@${k}`, r.mrr]];
     for (const [name, v] of metrics) {
       const tr = el("tr");
@@ -1816,7 +1819,7 @@ function renderUniqueness(agg) {
   renderUniquenessTable(agg, "uniqueness", "unique", "total",
     "share of an engine's returned URLs that no engine from another family returned for the same query (variants like exa and exa-instant don't count against each other), all benchmarks, runs from the last 2 weeks");
   renderUniquenessTable(agg, "uniqueness-relevant", "relUnique", "relTotal",
-    "same, restricted to relevant URLs on both sides: judged HM/FullyM on the RBP benches, the known-item hit on the recall benches");
+    "same, restricted to relevant URLs on both sides: judged HM/FullyM on the judged benches, the known-item hit on the recall benches");
 }
 
 function renderUniquenessTable(agg, prefix, uKey, tKey, subText) {
@@ -1909,7 +1912,8 @@ function renderNewsRun(holder, report, engine) {
     for (const r of pq.ratings || []) chips.appendChild(ratingChip(r));
     summary.appendChild(chips);
     summary.appendChild(el("span", { class: "score" },
-      pq.search_error ? "search error" : `RBP ${fmt3(pq.rbp)}`));
+      pq.search_error ? "search error"
+        : pq.ndcg != null || pq.rbp == null ? `nDCG ${fmt3(pq.ndcg)}` : `RBP ${fmt3(pq.rbp)}`));
     row.appendChild(summary);
     for (const r of pq.results || []) {
       const chips = [ratingChip(r.rating, "judge rating")];
@@ -1978,7 +1982,7 @@ function renderKnownItemRun(holder, report, engine, goldKey) {
 }
 
 const LEGACY_BENCH = { freshstream: "news", companyfill: "finance", rarestream: "agentic_rare" };
-const RUN_ARTIFACT = { news: ["rbp.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], finance: ["recall.json"], scholar: ["scholar.json"], legal: ["legal.json"] };
+const RUN_ARTIFACT = { news: ["ndcg.json", "rbp.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], finance: ["recall.json"], scholar: ["scholar.json"], legal: ["legal.json"] };
 const BENCHES = Object.keys(RUN_ARTIFACT);
 
 let runDetailSeq = 0;
@@ -2084,10 +2088,10 @@ function drawSlice(cardId, series, { label, empty }) {
 }
 
 function drawCharts(rows) {
-  drawSlice("card-rbp", rbpSeries(rows),
-    { label: "RBP over time per engine, 6-hour windows" });
-  drawSlice("card-rbp-rare", seriesFor("agentic_rare", "rbp", rows),
-    { label: "rare-entity RBP over time per engine",
+  drawSlice("card-ndcg", newsSeries(rows),
+    { label: "nDCG over time per engine, 6-hour windows" });
+  drawSlice("card-ndcg-rare", seriesFor("agentic_rare", (r) => r.ndcg ?? r.rbp, rows),
+    { label: "rare-entity nDCG over time per engine",
       empty: "No agentic_rare run yet — collected daily." });
   drawSlice("card-recall", seriesFor("finance", "recall", rows),
     { label: "answer recall at 5 over time per engine" });
