@@ -5,7 +5,7 @@ import pytest
 from keenbench.finance import cli as finance_cli
 from keenbench.finance.score import GoldQuery, result_answers, run_answers
 from keenbench.shared.cli import load_gold_rows
-from keenbench.shared.search import SearchResult
+from keenbench.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult
 from keenbench.shared.search import factory as search_factory
 
 
@@ -234,7 +234,11 @@ def test_run_passes_keenable_api_key_and_writes_report(tmp_path, monkeypatch):
     monkeypatch.setattr(finance_cli, "run_answers", fake_run_answers)
     out = tmp_path / "report.json"
     finance_cli.Finance().run(queries=str(f), engines="keenable", out=str(out))
-    assert created == {"api_key": "kb-key", "mode": "pro"}
+    assert created == {
+        "api_key": "kb-key",
+        "mode": "pro",
+        "snippet_chars": DEFAULT_SNIPPET_CHARS,
+    }
     assert json.loads(out.read_text())["num_queries"] == 1
 
 

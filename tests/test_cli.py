@@ -7,6 +7,7 @@ from keenbench.agentic_rare import cli as agentic_rare_cli
 from keenbench.news import cli as news_cli
 from keenbench.shared import cli as shared_cli
 from keenbench.shared.llm import OpenRouterClient, _content_to_text
+from keenbench.shared.search import DEFAULT_SNIPPET_CHARS
 from keenbench.shared.search import factory as search_factory
 
 
@@ -104,7 +105,11 @@ def test_news_run_passes_keenable_api_key(monkeypatch, tmp_path):
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(shared_cli, "run_rbp", fake_run_rbp)
     news_cli.News().run(queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json"))
-    assert created == {"api_key": "kb-key", "mode": "pro"}
+    assert created == {
+        "api_key": "kb-key",
+        "mode": "pro",
+        "snippet_chars": DEFAULT_SNIPPET_CHARS,
+    }
 
 
 def test_news_run_load_rows_and_per_query_today(tmp_path):

@@ -9,7 +9,12 @@ from keenbench.shared.recall import (
     recall_summary,
     run_known_item_eval,
 )
-from keenbench.shared.search import SearchClient, SearchResult, titled_snippet
+from keenbench.shared.search import (
+    DEFAULT_SNIPPET_CHARS,
+    SearchClient,
+    SearchResult,
+    titled_snippet,
+)
 
 CLUSTER_URL_RE = re.compile(r"courtlistener\.com/opinion/(\d+)/", re.IGNORECASE)
 JUSTIA_US_RE = re.compile(
@@ -152,7 +157,7 @@ async def run_legal(
     engines: dict[str, SearchClient],
     *,
     num_results: int = 5,
-    snippet_chars: int = 2000,
+    snippet_chars: int = DEFAULT_SNIPPET_CHARS,
 ) -> dict[str, Any]:
     async def eval_engine(query: GoldLegal, results: list[SearchResult] | None, err: Any) -> dict:
         pq: dict[str, Any] = {
