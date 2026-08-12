@@ -13,11 +13,11 @@ keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on t
 
 | Benchmark | Queries | Scoring |
 | --- | --- | --- |
-| [`news`](#news) | fresh, time-sensitive queries from live RSS + Google Trends | LLM relevance judge → RBP@5 |
+| [`news`](#news) | fresh, time-sensitive queries from live RSS + Google Trends | LLM relevance judge → nDCG@5 |
 | [`finance`](#finance) | company and financial fact lookups, gold from public registries and SEC filings | answer-recall@K + MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | known-item paper retrieval: by title vs. by a full-text-only detail | recall@K + MRR@K by paper-id match |
 | [`legal`](#legal) | known-item caselaw / CFR retrieval | recall@K + MRR@K by citation/docket/URL identity |
-| [`agentic_rare`](#agentic_rare) | English rare-word queries sampled from a filtered query stream | LLM relevance judge → RBP@5 |
+| [`agentic_rare`](#agentic_rare) | English rare-word queries sampled from a filtered query stream | LLM relevance judge → nDCG@5 |
 
 Each bench generates gold on demand from public sources; the repo commits
 none of it. `agentic_rare` differs: it is a query producer plus a news-style
@@ -68,7 +68,7 @@ each engine ranks results for them.
 
 ```bash
 keenbench news generate --source rss --out queries.jsonl    # or --source trending
-keenbench news run --queries queries.jsonl --limit 20 --out rbp.json
+keenbench news run --queries queries.jsonl --limit 20 --out ndcg.json
 ```
 
 `generate` builds one cohort from two sources. **RSS**: ~124 curated public
@@ -82,10 +82,12 @@ refuses evergreen content. `query_id` is deterministic from
 (override with `--feeds`; honor each publisher's ToS and rate limits).
 
 `run` judges each engine's results as returned — its own title and snippet —
-with an LLM relevance judge (Google "Needs Met" 0–4) and scores RBP@5
-(`p=0.8`, ceiling ≈ 0.672) with redundancy penalties for duplicate URLs and
-repeated domains. The judge rates results identical across engines once; the
-`ultimate` engine takes the best rating per deduplicated URL.
+with an LLM relevance judge (Google "Needs Met" 0–4) and scores nDCG@5
+with redundancy penalties for duplicate URLs and repeated domains. The
+ideal ranking is the pooled `ultimate` ordering — the best rating per
+deduplicated URL across all engines, oracle-ranked — so `ultimate` scores
+exactly 1 and queries where no engine found anything relevant are excluded.
+The judge rates results identical across engines once.
 `--snippet-chars` keeps judge evidence uniform across engines. `--queries`
 also accepts plain text, one query per line.
 
@@ -192,7 +194,7 @@ hard words with their subword splits.
 
 `generate` and `run` sample the filtered artifact
 (`agentic/rare_entity.parquet`), stratified by `length_bucket`; `run`
-scores exactly like news (LLM relevance judge, RBP@5). `--queries` reads a
+scores exactly like news (LLM relevance judge, nDCG@5). `--queries` reads a
 local file instead of the HF artifact; `run --queries-out` also saves the
 sampled query rows.
 
@@ -210,13 +212,14 @@ var — reports and the dashboard pick it up automatically.
 
 Pipelines are pure (inputs + clients in, rows/reports out), so a notebook or
 scheduler can also drive them: the ranking harness is
-`keenbench.shared.rankeval.run_rbp`, the recall scorer
+`keenbench.shared.rankeval.run_ndcg`, the recall scorer
 `keenbench.finance.score.run_answers`.
 
 Every bench report carries a synthetic `ultimate` engine: the pooled results
 of all engines per query, oracle-ranked — by judge rating
-(redundancy-penalty aware) on the RBP benches, gold item first on the
-known-item benches. It shows the score ceiling for any single engine; the
+(redundancy-penalty aware) on the judged benches, gold item first on the
+known-item benches. It is the nDCG ideal ranking on the judged benches and
+the score ceiling for any single engine; the
 overlap and uniqueness stats exclude it.
 
 ## Continuous benchmarks

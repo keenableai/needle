@@ -11,12 +11,11 @@ from keenbench.shared.judge import (
 )
 from keenbench.shared.llm import LLMClient
 from keenbench.shared.metrics import (
-    RBP_K,
-    RBP_P,
+    NDCG_K,
     apply_redundancy_penalties,
+    dcg_at_k,
     normalize_url,
     oracle_order,
-    rbp_at_k,
 )
 from keenbench.shared.recall import ULTIMATE
 from keenbench.shared.search import SearchClient, SearchResult, latency_stats, search_all
@@ -44,11 +43,13 @@ def _score_query(
     *,
     k: int,
     profile: dict[str, Any] | None,
+    idcg: float | None = None,
 ) -> dict[str, Any]:
     out: dict[str, Any] = {
         "query": query.text,
         "query_profile": profile,
-        "rbp": None,
+        "ndcg": None,
+        "dcg": None,
         "ratings": [],
         "penalized_ratings": [],
         "results": [],
@@ -69,7 +70,9 @@ def _score_query(
             [r.url for r in results], rated, query_text=query.text
         )
         out["penalized_ratings"] = penalized
-        out["rbp"] = rbp_at_k(penalized, k=k)
+        out["dcg"] = dcg_at_k(penalized, k=k)
+        if idcg:
+            out["ndcg"] = out["dcg"] / idcg
     out["results"] = [
         {
             "url": r.url,
@@ -118,13 +121,10 @@ def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int
     )
 
 
-def _summarize(
-    per_query: list[dict[str, Any]], *, k: int, latencies_ms: list[float]
-) -> dict[str, Any]:
-    scored = [pq["rbp"] for pq in per_query if pq["rbp"] is not None]
+def _summarize(per_query: list[dict[str, Any]], *, latencies_ms: list[float]) -> dict[str, Any]:
+    scored = [pq["ndcg"] for pq in per_query if pq["ndcg"] is not None]
     return {
-        "mean_rbp": sum(scored) / len(scored) if scored else 0.0,
-        "rbp_max": 1.0 - RBP_P**k,
+        "mean_ndcg": sum(scored) / len(scored) if scored else 0.0,
         "num_scored": len(scored),
         "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
         "judge_errors": sum(pq["judge_errors"] for pq in per_query),
@@ -133,13 +133,13 @@ def _summarize(
     }
 
 
-async def run_rbp(
+async def run_ndcg(
     queries: list[EvalQuery],
     engines: dict[str, SearchClient],
     judge: LLMClient,
     *,
     num_results: int = 5,
-    k: int = RBP_K,
+    k: int = NDCG_K,
     judge_concurrency: int = 8,
     max_content_chars: int = DEFAULT_MAX_CONTENT_CHARS,
 ) -> dict[str, Any]:
@@ -202,24 +202,28 @@ async def run_rbp(
         ]
     )
 
+    ultimate_pqs = [
+        _ultimate_query(query, run, num_results=num_results, k=k)
+        for query, run in zip(queries, query_outs, strict=True)
+    ]
+    idcgs = [pq["dcg"] or None for pq in ultimate_pqs]
+    for pq, idcg in zip(ultimate_pqs, idcgs, strict=True):
+        if idcg:
+            pq["ndcg"] = 1.0
+
     engines_out: dict[str, dict[str, Any]] = {}
     for ni, name in enumerate(names):
         per_query = []
-        for query, run in zip(queries, query_outs, strict=True):
+        for query, run, idcg in zip(queries, query_outs, idcgs, strict=True):
             results, err = run.searches[ni]
             per_query.append(
-                _score_query(query, results, err, run.judgements[ni], k=k, profile=run.profile)
+                _score_query(
+                    query, results, err, run.judgements[ni], k=k, profile=run.profile, idcg=idcg
+                )
             )
-        engines_out[name] = _summarize(per_query, k=k, latencies_ms=engines[name].latencies_ms)
+        engines_out[name] = _summarize(per_query, latencies_ms=engines[name].latencies_ms)
     if names:
-        engines_out[ULTIMATE] = _summarize(
-            [
-                _ultimate_query(query, run, num_results=num_results, k=k)
-                for query, run in zip(queries, query_outs, strict=True)
-            ],
-            k=k,
-            latencies_ms=[],
-        )
+        engines_out[ULTIMATE] = _summarize(ultimate_pqs, latencies_ms=[])
 
     return {
         "num_queries": len(queries),

@@ -1,9 +1,9 @@
+import math
 import re
 from collections.abc import Sequence
 from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
 
-RBP_P = 0.8
-RBP_K = 5
+NDCG_K = 5
 
 TRACKING_PARAMS = {
     "_hsenc",
@@ -95,8 +95,8 @@ def apply_redundancy_penalties(
     return out
 
 
-def rbp_at_k(ratings: Sequence[int], *, p: float = RBP_P, k: int = RBP_K) -> float:
-    return (1.0 - p) * sum(gain(r) * p**i for i, r in enumerate(ratings[:k]))
+def dcg_at_k(ratings: Sequence[int], *, k: int = NDCG_K) -> float:
+    return sum(gain(r) / math.log2(i + 2) for i, r in enumerate(ratings[:k]))
 
 
 def oracle_order(urls: Sequence[str], ratings: Sequence[int], *, query_text: str = "") -> list[int]:

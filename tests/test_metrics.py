@@ -1,13 +1,14 @@
+import math
+
 import pytest
 
 from keenbench.shared.metrics import (
-    RBP_K,
-    RBP_P,
+    NDCG_K,
     apply_redundancy_penalties,
+    dcg_at_k,
     gain,
     normalize_url,
     oracle_order,
-    rbp_at_k,
     url_domain,
 )
 
@@ -20,23 +21,24 @@ def test_gain_mapping():
     assert gain(0) == 0.0
 
 
-def test_rbp_all_perfect_hits_the_ceiling():
-    assert rbp_at_k([4, 4, 4, 4, 4]) == pytest.approx(1.0 - RBP_P**RBP_K)
+def test_dcg_all_perfect_hits_the_ceiling():
+    ceiling = sum(1.0 / math.log2(i + 2) for i in range(NDCG_K))
+    assert dcg_at_k([4, 4, 4, 4, 4]) == pytest.approx(ceiling)
 
 
-def test_rbp_top_rank_weighted_more():
-    top = rbp_at_k([4, 0, 0, 0, 0])
-    bottom = rbp_at_k([0, 0, 0, 0, 4])
+def test_dcg_top_rank_weighted_more():
+    top = dcg_at_k([4, 0, 0, 0, 0])
+    bottom = dcg_at_k([0, 0, 0, 0, 4])
     assert top > bottom
-    assert top == pytest.approx((1 - RBP_P) * 1.0)
+    assert top == pytest.approx(1.0)
 
 
-def test_rbp_truncates_at_k():
-    assert rbp_at_k([4, 4, 4, 4, 4, 4], k=5) == rbp_at_k([4, 4, 4, 4, 4], k=5)
+def test_dcg_truncates_at_k():
+    assert dcg_at_k([4, 4, 4, 4, 4, 4], k=5) == dcg_at_k([4, 4, 4, 4, 4], k=5)
 
 
-def test_rbp_empty_is_zero():
-    assert rbp_at_k([]) == 0.0
+def test_dcg_empty_is_zero():
+    assert dcg_at_k([]) == 0.0
 
 
 def test_url_domain_is_lowercased_host_without_www():

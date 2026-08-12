@@ -1,7 +1,7 @@
 # keenbench
 
 Hourly search-engine benchmarks; full docs in README.md. Four benches:
-news (hourly, RBP@5, LLM judge), finance (daily, answer-recall@5 +
+news (hourly, nDCG@5, LLM judge), finance (daily, answer-recall@5 +
 MRR@5, deterministic matcher with LLM judge backstop), scholar (daily,
 known-item papers, recall@10 + MRR@10 by arXiv/DOI/PMID match), and legal
 (daily, known-item caselaw/CFR, recall@5 + MRR@5 by citation/docket/URL
@@ -16,7 +16,7 @@ the filtered artifact and evaluates it like news.
   page, vanilla JS, no build step; the bench workflow deploys it to gh-pages.
 - Dashboard data: `scripts/publish_bench.py` publishes `data/history.jsonl`,
   `overlap.jsonl`, `uniqueness.jsonl`, `latest_*.json`, `runs.json`, and
-  `families.json`; the full per-run artifacts (`rbp.json`, `recall.json`)
+  `families.json`; the full per-run artifacts (`ndcg.json`, `recall.json`)
   live on the HF dataset `keenable-ai/keenbench-results`, and the dashboard
   fetches them directly from there.
 - `src/keenbench/shared/rankeval.py` shapes the per-result report fields
@@ -27,7 +27,7 @@ the filtered artifact and evaluates it like news.
 
 No dev server or test data in the repo. Copy `dashboard/index.html` into a
 scratch `site/`, add fixtures under `site/data/` (`history.jsonl`,
-`runs.json`, an `rbp.json`/`recall.json` in the rankeval shape), and serve
+`runs.json`, an `ndcg.json`/`recall.json` in the rankeval shape), and serve
 over local HTTP (`fetch` fails on file://). Screenshot with playwright-core:
 reuse the globally vendored module (`find "$(npm root -g)" -path
 '*/playwright-core/index.mjs'`, import by absolute path) and a cached

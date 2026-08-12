@@ -3,7 +3,7 @@ import sys
 from datetime import datetime
 
 from keenbench.agentic_rare.io import iter_rows, resolve_dataset, write_rows
-from keenbench.shared.cli import current_hour, run_rbp_eval, sample_or_exit
+from keenbench.shared.cli import current_hour, run_ndcg_eval, sample_or_exit
 from keenbench.shared.hf import DEFAULT_DATASET
 from keenbench.shared.identity import query_hash, query_id
 from keenbench.shared.rankeval import EvalQuery
@@ -99,7 +99,7 @@ class AgenticRare:
 
         today = now.strftime("%Y-%m-%d")
         eval_queries = [EvalQuery(text=r["query_text"], today=today) for r in query_rows]
-        run_rbp_eval(
+        run_ndcg_eval(
             "agentic_rare",
             eval_queries,
             engines,

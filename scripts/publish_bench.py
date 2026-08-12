@@ -18,13 +18,13 @@ def _latency_fields(e: dict) -> dict:
     }
 
 
-def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
+def _ndcg_rows(report: dict, ts: str, bench: str) -> list[dict]:
     return [
         {
             "ts": ts,
             "bench": bench,
             "engine": name,
-            "rbp": e["mean_rbp"],
+            "ndcg": e["mean_ndcg"],
             "num_scored": e["num_scored"],
             "num_queries": report["num_queries"],
             "search_errors": e["search_errors"],
@@ -36,11 +36,11 @@ def _rbp_rows(report: dict, ts: str, bench: str) -> list[dict]:
 
 
 def news_rows(report: dict, ts: str) -> list[dict]:
-    return _rbp_rows(report, ts, "news")
+    return _ndcg_rows(report, ts, "news")
 
 
 def agentic_rare_rows(report: dict, ts: str) -> list[dict]:
-    return _rbp_rows(report, ts, "agentic_rare")
+    return _ndcg_rows(report, ts, "agentic_rare")
 
 
 def scholar_rows(report: dict, ts: str) -> list[dict]:
@@ -120,7 +120,7 @@ def _publish_rows(path: Path, new_rows: list[dict], ts: str, republish: bool) ->
 def publish(
     site: str,
     runs_out: str,
-    rbp: str | None = None,
+    ndcg: str | None = None,
     fresh: str | None = None,
     recall: str | None = None,
     gold: str | None = None,
@@ -144,7 +144,7 @@ def publish(
     overlap = []
     uniqueness = []
     for path, to_rows, latest, archive_name in (
-        (rbp, news_rows, "latest_news.json", "rbp.json"),
+        (ndcg, news_rows, "latest_news.json", "ndcg.json"),
         (recall, finance_rows, "latest_finance.json", "recall.json"),
         (agentic_rare, agentic_rare_rows, "latest_agentic_rare.json", "agentic_rare.json"),
         (scholar, scholar_rows, "latest_scholar.json", "scholar.json"),

@@ -12,7 +12,7 @@ OUT = "daily_queries.jsonl"
 WINDOW_HOURS = 24
 RUN_ID_FMT = "%Y-%m-%dT%H%MZ"
 BENCHES = (
-    ("news", "fresh.jsonl", "rbp.json"),
+    ("news", "fresh.jsonl", "ndcg.json"),
     ("finance", "gold.jsonl", "recall.json"),
     ("agentic_rare", "agentic_rare.jsonl", "agentic_rare.json"),
     ("scholar", "scholar.jsonl", "scholar.json"),

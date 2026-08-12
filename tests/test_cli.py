@@ -99,11 +99,11 @@ def test_news_run_passes_keenable_api_key(monkeypatch, tmp_path):
         async def aclose(self):
             pass
 
-    async def fake_run_rbp(queries, clients, judge, **kwargs):
+    async def fake_run_ndcg(queries, clients, judge, **kwargs):
         return {"num_queries": len(queries), "num_results": 5, "engines": {}}
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
-    monkeypatch.setattr(shared_cli, "run_rbp", fake_run_rbp)
+    monkeypatch.setattr(shared_cli, "run_ndcg", fake_run_ndcg)
     news_cli.News().run(queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json"))
     assert created == {
         "api_key": "kb-key",
@@ -173,11 +173,11 @@ def test_agentic_rare_run_evaluates(tmp_path, monkeypatch):
         async def aclose(self):
             pass
 
-    async def fake_run_rbp(eval_queries, clients, judge, **kwargs):
+    async def fake_run_ndcg(eval_queries, clients, judge, **kwargs):
         return {"num_queries": len(eval_queries), "engines": {}}
 
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
-    monkeypatch.setattr(shared_cli, "run_rbp", fake_run_rbp)
+    monkeypatch.setattr(shared_cli, "run_ndcg", fake_run_ndcg)
     out = tmp_path / "r.json"
     agentic_rare_cli.AgenticRare().run(queries=str(f), engines="keenable", out=str(out))
     assert json.loads(out.read_text())["num_queries"] == 1

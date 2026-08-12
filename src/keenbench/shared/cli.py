@@ -10,7 +10,7 @@ from typing import Any
 from keenbench.shared.io import write_json
 from keenbench.shared.judge import DEFAULT_MAX_CONTENT_CHARS
 from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
-from keenbench.shared.rankeval import EvalQuery, run_rbp
+from keenbench.shared.rankeval import EvalQuery, run_ndcg
 from keenbench.shared.sampling import sample as sample_rows
 from keenbench.shared.sampling import seed_from_hour_ts
 from keenbench.shared.search import DEFAULT_SNIPPET_CHARS, SearchClient, build_search_clients
@@ -129,7 +129,7 @@ def build_clients_or_exit(
         raise SystemExit(f"error: {exc}") from exc
 
 
-def run_rbp_eval(
+def run_ndcg_eval(
     bench: str,
     eval_queries: list[EvalQuery],
     engines: str | tuple[str, ...],
@@ -146,7 +146,7 @@ def run_rbp_eval(
 
     async def _go() -> dict:
         try:
-            return await run_rbp(
+            return await run_ndcg(
                 eval_queries,
                 clients,
                 judge,
@@ -165,8 +165,8 @@ def run_rbp_eval(
     print(f"\n{bench}: {report['num_queries']} queries, judge={model}", file=sys.stderr)
     for name, e in report["engines"].items():
         print(
-            f"  {name:10s} RBP@{num_results} = {e['mean_rbp']:.4f}  "
-            f"({e['num_scored']}/{report['num_queries']} scored; max {e['rbp_max']:.3f}; "
+            f"  {name:10s} nDCG@{num_results} = {e['mean_ndcg']:.4f}  "
+            f"({e['num_scored']}/{report['num_queries']} scored; "
             f"{e['search_errors']} search errs, {e['judge_errors']} judge errs)",
             file=sys.stderr,
         )
