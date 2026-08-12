@@ -1,5 +1,10 @@
+from typing import Any
+
 from keenbench.shared.search.base import HttpSearchClient, SearchResult
 from keenbench.shared.search.queryops import parse_ops
+
+MIN_SNIPPET_CHARS = 180
+MAX_SNIPPET_CHARS = 10000
 
 
 class KeenableClient(HttpSearchClient):
@@ -12,6 +17,7 @@ class KeenableClient(HttpSearchClient):
         base_url: str = "https://api.keenable.ai",
         mode: str = "pro",
         app_title: str = "keenbench",
+        snippet_chars: int = 0,
         timeout_s: float = 30.0,
     ) -> None:
         super().__init__(timeout_s=timeout_s)
@@ -19,6 +25,7 @@ class KeenableClient(HttpSearchClient):
         self.base_url = base_url.rstrip("/")
         self.mode = mode
         self.app_title = app_title
+        self.snippet_chars = snippet_chars
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -36,10 +43,15 @@ class KeenableClient(HttpSearchClient):
             headers["X-API-Key"] = self.api_key
         else:
             path = "/v1/search/public"
+        body: dict[str, Any] = {"query": query, "mode": self.mode}
+        if self.snippet_chars > 0:
+            body["snippet_max_length"] = min(
+                max(self.snippet_chars, MIN_SNIPPET_CHARS), MAX_SNIPPET_CHARS
+            )
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}{path}",
-            json={"query": query, "mode": self.mode},
+            json=body,
             headers=headers,
         )
         if err is not None:

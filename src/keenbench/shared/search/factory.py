@@ -25,7 +25,7 @@ class EngineSpec:
 
 def _build_keenable(mode: str) -> Callable[[str | None, int], SearchClient]:
     def build(api_key: str | None, snippet_chars: int) -> SearchClient:
-        return KeenableClient(api_key=api_key, mode=mode)
+        return KeenableClient(api_key=api_key, mode=mode, snippet_chars=snippet_chars)
 
     return build
 
