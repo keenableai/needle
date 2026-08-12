@@ -68,6 +68,15 @@ async def test_keenable_maps_fields_and_truncates(monkeypatch):
     assert calls["headers"] == {"X-Keenable-Title": "keenbench"}
 
 
+@pytest.mark.parametrize("chars,expected", [(50, 180), (20000, 10000), (0, None)])
+async def test_keenable_clamps_snippet_chars(monkeypatch, chars, expected):
+    c = KeenableClient(snippet_chars=chars)
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+    await c.search("hi")
+    assert calls["json"].get("snippet_max_length") == expected
+
+
 async def test_keenable_snippet_falls_back_to_description(monkeypatch):
     c = KeenableClient(api_key="k")
     fake, calls = _canned({"results": [{"url": "https://b", "description": "db"}]})
@@ -590,10 +599,12 @@ def test_factory_builds_engine_variants(monkeypatch):
     monkeypatch.setenv("EXA_API_KEY", "ek")
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
     clients = build_search_clients(
-        ["keenable", "keenable-realtime", "exa", "exa-instant", "parallel", "parallel-turbo"]
+        ["keenable", "keenable-realtime", "exa", "exa-instant", "parallel", "parallel-turbo"],
+        snippet_chars=500,
     )
     assert isinstance(clients["keenable-realtime"], KeenableClient)
     assert clients["keenable"].mode == "pro"
+    assert clients["keenable"].snippet_chars == 500
     assert clients["keenable-realtime"].mode == "realtime"
     assert isinstance(clients["exa-instant"], ExaClient)
     assert clients["exa"].search_type == "auto"

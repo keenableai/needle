@@ -13,7 +13,13 @@ from keenbench.shared.recall import (
     run_known_item_eval,
     ultimate_per_query,
 )
-from keenbench.shared.search import SearchClient, SearchResult, capped_snippet, titled_snippet
+from keenbench.shared.search import (
+    DEFAULT_SNIPPET_CHARS,
+    SearchClient,
+    SearchResult,
+    capped_snippet,
+    titled_snippet,
+)
 
 
 @dataclass(frozen=True)
@@ -96,7 +102,7 @@ async def run_answers(
     engines: dict[str, SearchClient],
     *,
     num_results: int = 5,
-    snippet_chars: int = 2000,
+    snippet_chars: int = DEFAULT_SNIPPET_CHARS,
     judge: LLMClient | None = None,
     judge_concurrency: int = 8,
 ) -> dict[str, Any]:

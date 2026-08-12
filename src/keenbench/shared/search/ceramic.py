@@ -1,6 +1,6 @@
 from typing import Any
 
-from keenbench.shared.search.base import HttpSearchClient, SearchResult
+from keenbench.shared.search.base import HttpSearchClient, SearchResult, clamped_chars
 from keenbench.shared.search.queryops import parse_ops
 
 MAX_QUERY_WORDS = 50
@@ -29,10 +29,10 @@ class CeramicClient(HttpSearchClient):
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
         ops = parse_ops(query)
         body: dict[str, Any] = {"query": " ".join(ops.text.split()[:MAX_QUERY_WORDS])}
-        if self.description_chars > 0:
-            body["maxDescriptionLength"] = min(
-                max(self.description_chars, MIN_DESCRIPTION_CHARS), MAX_DESCRIPTION_CHARS
-            )
+        if (
+            n := clamped_chars(self.description_chars, MIN_DESCRIPTION_CHARS, MAX_DESCRIPTION_CHARS)
+        ) is not None:
+            body["maxDescriptionLength"] = n
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/search",

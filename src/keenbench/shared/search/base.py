@@ -42,6 +42,13 @@ class SearchResult:
     raw: dict[str, Any] = field(default_factory=dict)
 
 
+DEFAULT_SNIPPET_CHARS = 2000
+
+
+def clamped_chars(requested: int, lo: int, hi: int) -> int | None:
+    return min(max(requested, lo), hi) if requested > 0 else None
+
+
 def capped_snippet(result: SearchResult, snippet_chars: int) -> str:
     snippet = result.snippet or ""
     return snippet[:snippet_chars] if snippet_chars > 0 else snippet

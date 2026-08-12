@@ -1,4 +1,5 @@
 from keenbench.shared.search.base import (
+    DEFAULT_SNIPPET_CHARS,
     HttpSearchClient,
     SearchClient,
     SearchResult,
@@ -23,6 +24,7 @@ from keenbench.shared.search.you import YouClient
 __all__ = [
     "BraveClient",
     "CeramicClient",
+    "DEFAULT_SNIPPET_CHARS",
     "ExaClient",
     "HttpSearchClient",
     "KeenableClient",

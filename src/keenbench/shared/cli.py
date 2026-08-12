@@ -13,7 +13,7 @@ from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
 from keenbench.shared.rankeval import EvalQuery, run_rbp
 from keenbench.shared.sampling import sample as sample_rows
 from keenbench.shared.sampling import seed_from_hour_ts
-from keenbench.shared.search import SearchClient, build_search_clients
+from keenbench.shared.search import DEFAULT_SNIPPET_CHARS, SearchClient, build_search_clients
 
 
 def parse_csv(value: str | tuple[str, ...]) -> list[str]:
@@ -136,7 +136,7 @@ def run_rbp_eval(
     out: str,
     *,
     num_results: int = 5,
-    snippet_chars: int = 2000,
+    snippet_chars: int = DEFAULT_SNIPPET_CHARS,
     judge_model: str | None = None,
     judge_concurrency: int = 8,
 ) -> None:

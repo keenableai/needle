@@ -7,6 +7,7 @@ from keenbench.shared.cli import current_hour, run_rbp_eval, sample_or_exit
 from keenbench.shared.hf import DEFAULT_DATASET
 from keenbench.shared.identity import query_hash, query_id
 from keenbench.shared.rankeval import EvalQuery
+from keenbench.shared.search import DEFAULT_SNIPPET_CHARS
 
 DEFAULT_FILTERED_PATH = "agentic/rare_entity.parquet"
 STRATIFY_KEY = "length_bucket"
@@ -79,7 +80,7 @@ class AgenticRare:
         filtered_path: str = DEFAULT_FILTERED_PATH,
         engines: str | tuple[str, ...] = "keenable,exa",
         num_results: int = 5,
-        snippet_chars: int = 2000,
+        snippet_chars: int = DEFAULT_SNIPPET_CHARS,
         limit: int = 0,
         sample: str = "stratified",
         seed: int | None = None,

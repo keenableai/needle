@@ -17,6 +17,7 @@ from keenbench.shared.cli import (
 from keenbench.shared.io import write_jsonl
 from keenbench.shared.llm import resolve_llm_model
 from keenbench.shared.rankeval import EvalQuery
+from keenbench.shared.search import DEFAULT_SNIPPET_CHARS
 
 
 def _read_queries_file(path: str) -> list[str]:
@@ -183,7 +184,7 @@ class News:
         out: str = "-",
         engines: str | tuple[str, ...] = "keenable,exa",
         num_results: int = 5,
-        snippet_chars: int = 2000,
+        snippet_chars: int = DEFAULT_SNIPPET_CHARS,
         limit: int = 0,
         sample: str = "stratified",
         seed: int | None = None,

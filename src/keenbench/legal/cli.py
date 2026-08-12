@@ -19,6 +19,7 @@ from keenbench.shared.cli import (
 )
 from keenbench.shared.io import serialize_row, write_json, write_jsonl
 from keenbench.shared.llm import resolve_llm_model
+from keenbench.shared.search import DEFAULT_SNIPPET_CHARS
 
 DEFAULT_COURTS = "scotus,ca1,ca2,ca3,ca4,ca5,ca6,ca7,ca8,ca9,ca10,ca11,cadc,cafc"
 DEFAULT_TITLES = "7,12,14,17,21,26,29,40,47,49"
@@ -109,7 +110,7 @@ class Legal:
         out: str = "-",
         engines: str | tuple[str, ...] = "keenable,exa",
         num_results: int = 5,
-        snippet_chars: int = 2000,
+        snippet_chars: int = DEFAULT_SNIPPET_CHARS,
         limit: int = 0,
         sample: str = "stratified",
         seed: int | None = None,

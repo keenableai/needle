@@ -21,6 +21,7 @@ from keenbench.shared.cli import (
 )
 from keenbench.shared.io import serialize_row, write_json, write_jsonl
 from keenbench.shared.llm import resolve_judge_model, resolve_llm_model
+from keenbench.shared.search import DEFAULT_SNIPPET_CHARS
 
 KNOWN_SUITES = ("finance", "filings", "filingdoc")
 
@@ -150,7 +151,7 @@ class Finance:
         out: str = "-",
         engines: str | tuple[str, ...] = "keenable,exa",
         num_results: int = 5,
-        snippet_chars: int = 2000,
+        snippet_chars: int = DEFAULT_SNIPPET_CHARS,
         limit: int = 0,
         sample: str = "stratified",
         seed: int | None = None,

@@ -11,7 +11,7 @@ from keenbench.shared.recall import (
     recall_summary,
     run_known_item_eval,
 )
-from keenbench.shared.search import SearchClient, SearchResult
+from keenbench.shared.search import DEFAULT_SNIPPET_CHARS, SearchClient, SearchResult
 
 
 @dataclass(frozen=True)
@@ -57,7 +57,7 @@ async def run_papers(
     engines: dict[str, SearchClient],
     *,
     num_results: int = 5,
-    snippet_chars: int = 2000,
+    snippet_chars: int = DEFAULT_SNIPPET_CHARS,
     idconv: IdConverter | None = None,
 ) -> dict[str, Any]:
     async def eval_engine(query: GoldPaper, results: list[SearchResult] | None, err: Any) -> dict:
