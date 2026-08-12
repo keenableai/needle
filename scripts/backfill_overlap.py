@@ -10,7 +10,7 @@ from keenbench.shared.io import load_jsonl, write_jsonl
 from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
 ARTIFACTS = (
-    ("rbp.json",),
+    ("ndcg.json", "rbp.json"),
     ("recall.json",),
     ("agentic_rare.json", "rarestream.json"),
     ("scholar.json",),

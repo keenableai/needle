@@ -11,7 +11,7 @@ from keenbench.shared.cli import (
     aclose_all,
     current_hour,
     require_openrouter_client,
-    run_rbp_eval,
+    run_ndcg_eval,
     sample_or_exit,
 )
 from keenbench.shared.io import write_jsonl
@@ -200,7 +200,7 @@ class News:
         eval_queries = [
             EvalQuery(text=r["query_text"], today=_today_for_row(r, fallback_today)) for r in rows
         ]
-        run_rbp_eval(
+        run_ndcg_eval(
             "news",
             eval_queries,
             engines,

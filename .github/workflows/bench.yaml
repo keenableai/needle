@@ -14,7 +14,7 @@ on:
         type: boolean
         default: false
       agentic_rare:
-        description: "Also run agentic_rare (rare-entity RBP eval)"
+        description: "Also run agentic_rare (rare-entity nDCG eval)"
         type: boolean
         default: false
       scholar:
@@ -82,7 +82,7 @@ jobs:
         run: |
           uv run keenbench news generate --source rss --out fresh.jsonl
           uv run keenbench news run --queries fresh.jsonl --limit 20 \
-            --engines "$ENGINES" --out rbp.json
+            --engines "$ENGINES" --out ndcg.json
 
       - name: finance (daily schedule, dispatch opt-in, or gold bootstrap)
         id: finance
@@ -166,8 +166,8 @@ jobs:
           echo "TS=$TS" >> "$GITHUB_ENV"
           base_args="--site site-data --runs-out staged --ts $TS"
           args="$base_args"
-          if [ -s rbp.json ]; then
-            args="$args --rbp rbp.json --fresh fresh.jsonl"
+          if [ -s ndcg.json ]; then
+            args="$args --ndcg ndcg.json --fresh fresh.jsonl"
           fi
           if [ -s recall.json ]; then
             args="$args --recall recall.json --gold site-data/data/gold.jsonl"
@@ -201,7 +201,7 @@ jobs:
       - name: Update daily queries
         run: |
           args=""
-          if [ -s rbp.json ]; then args="$args --news fresh.jsonl --news_report rbp.json"; fi
+          if [ -s ndcg.json ]; then args="$args --news fresh.jsonl --news_report ndcg.json"; fi
           if [ -s recall.json ]; then args="$args --finance site-data/data/gold.jsonl --finance_report recall.json"; fi
           if [ -s scholar.json ]; then args="$args --scholar site-data/data/scholar.jsonl --scholar_report scholar.json"; fi
           if [ -s legal.json ]; then args="$args --legal site-data/data/legal.jsonl --legal_report legal.json"; fi

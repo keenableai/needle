@@ -12,11 +12,11 @@ OUT = "daily_queries.jsonl"
 WINDOW_HOURS = 24
 RUN_ID_FMT = "%Y-%m-%dT%H%MZ"
 BENCHES = (
-    ("news", "fresh.jsonl", "rbp.json"),
-    ("finance", "gold.jsonl", "recall.json"),
-    ("agentic_rare", "agentic_rare.jsonl", "agentic_rare.json"),
-    ("scholar", "scholar.jsonl", "scholar.json"),
-    ("legal", "legal.jsonl", "legal.json"),
+    ("news", "fresh.jsonl", ("ndcg.json", "rbp.json")),
+    ("finance", "gold.jsonl", ("recall.json",)),
+    ("agentic_rare", "agentic_rare.jsonl", ("agentic_rare.json",)),
+    ("scholar", "scholar.jsonl", ("scholar.json",)),
+    ("legal", "legal.jsonl", ("legal.json",)),
 )
 RARE_REPORTS = ("agentic_rare.json", "rarestream.json")
 
@@ -117,8 +117,9 @@ def backfill(out: str = OUT, dataset: str | None = None, hours: int = WINDOW_HOU
                     by_run.setdefault(run_id, set()).add(name)
             url = resp.links.get("next", {}).get("url")
         for run_id, names in by_run.items():
-            for bench, queries_name, report_name in BENCHES:
-                if queries_name in names and report_name in names:
+            for bench, queries_name, report_names in BENCHES:
+                report_name = next((n for n in report_names if n in names), None)
+                if queries_name in names and report_name is not None:
                     report = fetch(f"runs/{run_id}/{report_name}").json()
                     queries_text = fetch(f"runs/{run_id}/{queries_name}").text
                     rows.extend(_bench_rows(run_id, bench, queries_text, report))
