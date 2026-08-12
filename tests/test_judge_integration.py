@@ -126,7 +126,7 @@ async def test_classify_query_end_to_end():
     llm = _make_llm()
     try:
         specific, err_s = await classify_query(
-            llm, "who won the 2026 monaco grand prix", today=TODAY
+            llm, "who won the monaco grand prix yesterday", today=TODAY
         )
         broad, err_b = await classify_query(llm, "what is photosynthesis", today=TODAY)
     finally:
