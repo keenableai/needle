@@ -268,14 +268,13 @@ document.documentElement.dataset.theme = localStorage.theme ||
   #card-standings { max-width: var(--measure); }
   #standings svg { width: 100%; height: auto; display: block; }
   #latency-dumbbell svg { width: 100%; height: auto; display: block; }
-  .slice-svg { width: 100%; height: auto; display: block; }
   #standings { padding: 4px 0 8px; overflow-x: auto; }
   #standings .series { transition: opacity 0.18s ease; }
-  #standings .series.cold { opacity: 0.5; }
+  #standings .series.cold { opacity: 0.22; }
   #standings svg.dim .series:not(.hot) { opacity: 0.1; }
   #standings svg .series.hot { opacity: 1; }
   #standings .series:focus { outline: none; }
-  #standings .st-label { font-size: 12px; cursor: default; }
+  #standings .st-label { font-size: 12px; cursor: pointer; }
   #standings .st-name { fill: var(--text-primary); }
   #standings .st-pct { fill: var(--text-secondary); font-weight: 600; font-variant-numeric: tabular-nums; }
   #standings .st-col { fill: var(--text-secondary); font-size: 12px; font-weight: 600; text-anchor: middle; }
@@ -338,15 +337,6 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <li><a href="#sec-results">Quality results</a></li>
     <li><a href="#sec-price">Quality vs price</a></li>
     <li><a href="#sec-latency">Search latency</a></li>
-    <li><a href="#sec-slices">Slices</a>
-      <ul>
-        <li><a href="#sec-news"><span class="vert" data-vert="news"></span></a></li>
-        <li><a href="#sec-agentic_rare"><span class="vert" data-vert="agentic_rare"></span></a></li>
-        <li><a href="#sec-finance"><span class="vert" data-vert="finance"></span></a></li>
-        <li><a href="#sec-scholar"><span class="vert" data-vert="scholar"></span></a></li>
-        <li><a href="#sec-legal"><span class="vert" data-vert="legal"></span></a></li>
-      </ul>
-    </li>
     <li><a href="#sec-overlap">Index independence</a></li>
     <li><a href="#sec-appendix">Appendix</a></li>
   </ul>
@@ -361,12 +351,12 @@ document.documentElement.dataset.theme = localStorage.theme ||
         <svg class="moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       </button>
     </div>
-    <h1>NEEDLE: Which search API moves the needle for AI agents?</h1>
+    <h1><span class="vert">Needle</span>: Which search API moves the needle for AI agents?</h1>
     <div class="fm">
       <p class="lastrun"><span id="updated"></span>
         <span class="cadence">News runs hourly; all other suites run
         daily. Times are UTC.</span></p>
-      <p>NEEDLE (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
+      <p><span class="vert">Needle</span> (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
         <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is an
         agentic search benchmark that compares major search engines using
         queries modeled on real agent behavior. We include five verticals
@@ -426,14 +416,21 @@ document.documentElement.dataset.theme = localStorage.theme ||
   </header>
 
   <h2 class="section-title" id="sec-results">Quality Results</h2>
-  <p class="section-desc">The radar shows each engine as a share of
-    <em>ultimate</em> on all five verticals; the hatched ring is the
-    distance from the best engine to the ceiling. The leaderboards below
-    rank engines per vertical over the last 7 days, with bootstrap
-    confidence intervals.</p>
+  <p class="section-desc">The radar shows where every engine stands
+    against <em>ultimate</em> on all five verticals at once; the hatched
+    band is the part nobody reaches yet. Below it, the leaderboards rank
+    engines vertical by vertical over the last 7 days, confidence
+    intervals included.</p>
 
   <div class="card" id="card-standings">
     <h2>Standings — all verticals</h2>
+    <div class="sub">Each spoke is a benchmark vertical: an engine at 75%
+      achieves 75% of the pooled <em>ultimate</em> engine's score on that
+      vertical, and farther out is better. Hatched area = performance no
+      individual engine currently captures; the red % is the gap between
+      today's best engine and <em>ultimate</em>. A default selection of
+      engines is drawn at full strength; click a legend name to toggle
+      any engine in or out.</div>
     <div id="standings"></div>
   </div>
 
@@ -505,106 +502,6 @@ document.documentElement.dataset.theme = localStorage.theme ||
       search API calls across all benchmarks, sorted by p50 on a log
       scale; hover a row for exact values</div>
     <div id="latency-dumbbell"></div>
-  </div>
-
-  <h2 class="section-title" id="sec-slices">Slices</h2>
-
-  <h3 class="subsection-title" id="sec-news"><span class="vert" data-vert="news"></span></h3>
-  <p class="section-desc">We mine fresh, time-sensitive queries hourly from RSS feeds and Google Trends, and score ranking quality (nDCG@5 against the pooled ultimate ranking) with an LLM relevance judge.</p>
-  <div class="card" id="card-ndcg">
-    <h2><span class="vert" data-vert="news"></span> — nDCG@5</h2>
-    <div class="sub">20 fresh queries per run, mean nDCG over all queries in each 6-hour window</div>
-  </div>
-
-  <h3 class="subsection-title" id="sec-agentic_rare"><span class="vert" data-vert="agentic_rare"></span></h3>
-  <p class="section-desc">We mine rare-entity queries from real agentic search logs: obscure names, technical terms, and long compounds selected by tokenizer difficulty. We score them like <span class="vert" data-vert="news"></span> (nDCG@5, the same LLM relevance judge). Query construction and the source log release are documented in <a href="#app-queries">A1</a>.</p>
-  <div class="card" id="card-ndcg-rare">
-    <h2><span class="vert" data-vert="agentic_rare"></span> — nDCG@5</h2>
-    <div class="sub">100 rare-entity queries per daily run</div>
-  </div>
-
-  <h3 class="subsection-title" id="sec-finance"><span class="vert" data-vert="finance"></span></h3>
-  <p class="section-desc">Company &amp; financial fact-lookups: registry-grounded facts (CEO, HQ, founding year…), quarterly SEC-XBRL facts (filings), and known-item SEC-filing retrieval by accession identity (filingdoc). We mix companies across cap tiers and give ~half the filings/filingdoc queries operator syntax ("quoted", site:, date filters). We score uniform deterministic answer-recall@5 with an LLM-judge backstop.</p>
-  <div class="card">
-    <div class="lb-tabs" role="tablist" aria-label="Finance slices">
-      <button role="tab" aria-selected="true" class="active" data-panel="card-recall">overview</button>
-      <button role="tab" aria-selected="false" data-panel="card-mrr">MRR</button>
-      <button role="tab" aria-selected="false" data-panel="card-finance-filings">filings</button>
-      <button role="tab" aria-selected="false" data-panel="card-finance-filingdoc">filingdoc</button>
-      <div class="tab-ind" aria-hidden="true"></div>
-    </div>
-    <div class="lb-panel active" id="card-recall" role="tabpanel">
-      <h2><span class="vert" data-vert="finance"></span> — answer-recall@5</h2>
-      <div class="sub">answer-recall@5, gold queries per run across all suites</div>
-    </div>
-    <div class="lb-panel" id="card-mrr" role="tabpanel">
-      <h2><span class="vert" data-vert="finance"></span> — MRR@5</h2>
-      <div class="sub">MRR@5, same runs as recall</div>
-    </div>
-    <div class="lb-panel" id="card-finance-filings" role="tabpanel">
-      <h2><span class="vert" data-vert="finance"></span> — filings recall@5</h2>
-      <div class="sub">recall@5 on quarterly facts (net income, operating income, diluted EPS) in top-5 snippets</div>
-    </div>
-    <div class="lb-panel" id="card-finance-filingdoc" role="tabpanel">
-      <h2><span class="vert" data-vert="finance"></span> — filingdoc recall@5</h2>
-      <div class="sub">recall@5 on SEC filings found by a distinctive detail (accession identity)</div>
-    </div>
-  </div>
-
-  <h3 class="subsection-title" id="sec-scholar"><span class="vert" data-vert="scholar"></span></h3>
-  <p class="section-desc">Known-item paper retrieval: find a specific paper by its title, by a full-text-only detail, by a natural-language factual question, or from a vague tip-of-the-tongue description. We match deterministically on the paper's arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID, and document query construction per slice in <a href="#app-queries">A1</a>.</p>
-  <div class="card">
-    <div class="lb-tabs" role="tablist" aria-label="Scholar slices">
-      <button role="tab" aria-selected="true" class="active" data-panel="card-scholar-recall">overview</button>
-      <button role="tab" aria-selected="false" data-panel="card-scholar-title">title</button>
-      <button role="tab" aria-selected="false" data-panel="card-scholar-body">body</button>
-      <button role="tab" aria-selected="false" data-panel="card-scholar-clue">clue</button>
-      <button role="tab" aria-selected="false" data-panel="card-scholar-tot">tot</button>
-      <div class="tab-ind" aria-hidden="true"></div>
-    </div>
-    <div class="lb-panel active" id="card-scholar-recall" role="tabpanel">
-      <h2><span class="vert" data-vert="scholar"></span> — recall@10</h2>
-      <div class="sub">recall@10, gold papers per run across all query types</div>
-    </div>
-    <div class="lb-panel" id="card-scholar-title" role="tabpanel">
-      <h2><span class="vert" data-vert="scholar"></span> — title-query recall@10</h2>
-      <div class="sub">recall@10 on papers found by their (degraded) title</div>
-    </div>
-    <div class="lb-panel" id="card-scholar-body" role="tabpanel">
-      <h2><span class="vert" data-vert="scholar"></span> — body-query recall@10</h2>
-      <div class="sub">recall@10 on papers found by a full-text-only detail</div>
-    </div>
-    <div class="lb-panel" id="card-scholar-clue" role="tabpanel">
-      <h2><span class="vert" data-vert="scholar"></span> — clue-query recall@10</h2>
-      <div class="sub">recall@10 on papers found by a natural-language question over full-text-only facts</div>
-    </div>
-    <div class="lb-panel" id="card-scholar-tot" role="tabpanel">
-      <h2><span class="vert" data-vert="scholar"></span> — tip-of-the-tongue recall@10</h2>
-      <div class="sub">recall@10 on papers found from a hedged, half-remembered description</div>
-    </div>
-  </div>
-
-  <h3 class="subsection-title" id="sec-legal"><span class="vert" data-vert="legal"></span></h3>
-  <p class="section-desc">Known-item legal retrieval: find a specific court opinion by its caption, or a specific CFR section from its substance. We give roughly half the queries operator syntax ("quoted", site:, date filters) and match deterministically on citation / docket / URL identity.</p>
-  <div class="card">
-    <div class="lb-tabs" role="tablist" aria-label="Legal slices">
-      <button role="tab" aria-selected="true" class="active" data-panel="card-legal-recall">overview</button>
-      <button role="tab" aria-selected="false" data-panel="card-legal-caselaw">caselaw</button>
-      <button role="tab" aria-selected="false" data-panel="card-legal-code">code</button>
-      <div class="tab-ind" aria-hidden="true"></div>
-    </div>
-    <div class="lb-panel active" id="card-legal-recall" role="tabpanel">
-      <h2><span class="vert" data-vert="legal"></span> — recall@5</h2>
-      <div class="sub">recall@5, gold documents per run across both suites</div>
-    </div>
-    <div class="lb-panel" id="card-legal-caselaw" role="tabpanel">
-      <h2><span class="vert" data-vert="legal"></span> — caselaw recall@5</h2>
-      <div class="sub">recall@5 on federal court opinions found by caption-style queries</div>
-    </div>
-    <div class="lb-panel" id="card-legal-code" role="tabpanel">
-      <h2><span class="vert" data-vert="legal"></span> — code recall@5</h2>
-      <div class="sub">recall@5 on CFR sections found from their regulatory substance</div>
-    </div>
   </div>
 
   <h2 class="section-title" id="sec-overlap">Index independence</h2>
@@ -788,10 +685,10 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <h2>A4 — LLM judge</h2>
     <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; we use it for <span class="vert" data-vert="finance"></span> only as a fallback answer matcher, and judge <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> deterministically</div>
     <div class="prose">
-      <p>We judge with <code>openai/gpt-5.6-sol</code> via OpenRouter, temperature 0, one pointwise call per document. We record the exact model a run used as <code>judge_model</code> in its archived report and show it when you pick a run in the judgement browser, so judge swaps are visible in the history.</p>
+      <p>We judge with <code>openai/gpt-5.6-terra</code> via OpenRouter, temperature 0, one pointwise call per document. We record the exact model a run used as <code>judge_model</code> in its archived report and show it when you pick a run in the judgement browser, so judge swaps are visible in the history.</p>
       <p>The judge is blind to engine identity: the prompt contains the query, document title, URL, published date, and snippet, never the engine name. We pool results with the same URL from different engines, judge them once per query (longest available snippet, first non-empty title and date), and reuse that single judgement for every engine that returned the URL, so an engine cannot gain from formatting the same page differently. Snippet quality still matters across distinct URLs: a judge preference for a snippet style would be a shared bias across engines. We publish the per-result reasoning with every run so this can be audited.</p>
       <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard gates for wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/keenbench/shared/prompts/judgement.jinja.</p>
-      <p>Known limitation: we operate NEEDLE ourselves and have not yet run a systematic human-agreement audit of the judge. What makes the numbers checkable in the meantime: the judge is blind and shared across engines, every rating ships with its reasoning, and we publish queries, prompts, and raw results, so anyone can independently re-score any rating.</p>
+      <p>Known limitation: we operate <span class="vert">Needle</span> ourselves and have not yet run a systematic human-agreement audit of the judge. What makes the numbers checkable in the meantime: the judge is blind and shared across engines, every rating ships with its reasoning, and we publish queries, prompts, and raw results, so anyone can independently re-score any rating.</p>
     </div>
   </div>
 
@@ -921,68 +818,6 @@ const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
 const fmtMs = (v) => v == null ? "–" : v >= 1000 ? `${(v / 1000).toFixed(v >= 9950 ? 0 : 1)} s` : `${Math.round(v)} ms`;
 
 const fmtTime = (d) => d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
-
-function seriesFor(bench, metric, rows) {
-  const pick = typeof metric === "function" ? metric : (r) => r[metric];
-  const out = {};
-  for (const e of ENGINES) out[e] = [];
-  for (const r of rows) {
-    if (
-      (bench == null || r.bench === bench)
-      && pick(r) != null
-      && r.num_scored > 0
-      && out[r.engine]
-    ) {
-      out[r.engine].push({ t: new Date(r.ts), v: pick(r) });
-    }
-  }
-  for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
-  return out;
-}
-
-const WINDOW_MS = 6 * 3600e3;
-const ROLLING_MS = 7 * 24 * 3600e3;
-const ROLLING_NOTE = `${ROLLING_MS / (24 * 3600e3)}-day rolling mean`;
-const PCT_NOTE = "% of ultimate's score";
-
-function rollingMean(series) {
-  const out = {};
-  for (const e of ENGINES) {
-    const pts = series[e], ts = pts.map((p) => p.t.getTime());
-    out[e] = pts.map((p, i) => {
-      let sum = 0, n = 0;
-      for (let j = i; j >= 0 && ts[i] - ts[j] <= ROLLING_MS; j--) { sum += pts[j].v; n++; }
-      return { t: p.t, v: sum / n };
-    });
-  }
-  return out;
-}
-
-function newsSeries(rows) {
-  const out = {};
-  const byEngine = new Map();
-  for (const e of ENGINES) {
-    out[e] = [];
-    byEngine.set(e, new Map());
-  }
-  for (const r of rows) {
-    const buckets = byEngine.get(r.engine);
-    const v = r.ndcg;
-    if (!buckets || r.bench !== "news" || v == null || !(r.num_scored > 0)) continue;
-    const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
-    const agg = buckets.get(b) || { sum: 0, n: 0 };
-    const n = r.num_scored;
-    agg.sum += v * n;
-    agg.n += n;
-    buckets.set(b, agg);
-  }
-  for (const [e, buckets] of byEngine) {
-    out[e] = [...buckets]
-      .sort(([a], [b]) => a - b)
-      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
-  }
-  return out;
-}
 
 function pctl(values, p) {
   const s = [...values].sort((a, b) => a - b);
@@ -1197,13 +1032,22 @@ function renderStandings(rows) {
   }
   svg.appendChild(defs);
   svg.appendChild(el("path", { d: ringD(1), fill: "none", stroke: "var(--baseline)", "stroke-width": 1 }));
-  for (const gv of [0.25, 0.5, 0.75]) {
-    svg.appendChild(el("text", { x: cx + 4, y: cy - R * gv - 3, class: "axis-text" }, fmtPct(gv)));
+  if (benchBest.every((m) => m != null)) {
+    svg.appendChild(el("path", { d: poly(benchBest.map((m, i) => pt(i, m))), fill: "none",
+      stroke: "#d64545", "stroke-width": 1.2, "stroke-dasharray": "5 4", "stroke-opacity": 0.55 }));
   }
+  for (const gv of [0.25, 0.5, 0.75]) {
+    svg.appendChild(el("text", { x: cx + 4, y: cy - R * gv - 3, class: "axis-text" }, `${fmtPct(gv)} of ultimate`));
+  }
+  svg.appendChild(el("text", { x: cx + 4, y: cy - R - 3, class: "axis-text" }, "100% = ultimate"));
   const ultLabel = el("text", { x: 10, y: 32, "text-anchor": "start", class: "st-ult" });
   ultLabel.appendChild(el("tspan", { class: "b" }, "ultimate"));
   ultLabel.appendChild(el("tspan", {}, " — all engines pooled: the outer ring (100%)"));
   svg.appendChild(ultLabel);
+  const bfLabel = el("text", { x: 10, y: 46, "text-anchor": "start", class: "st-ult" });
+  bfLabel.appendChild(el("tspan", { class: "b" }, "best engine"));
+  bfLabel.appendChild(el("tspan", {}, " — the dashed frontier: highest single engine per vertical"));
+  svg.appendChild(bfLabel);
 
   for (const [i, [bench]] of STANDINGS_BENCHES.entries()) {
     const c = Math.cos(ang(i)), s = Math.sin(ang(i));
@@ -1268,9 +1112,9 @@ function renderStandings(rows) {
       svg.classList.remove("dim");
     }
   };
-  const contenders = entries.slice(0, 3).map((x) => x.e);
+  const defaults = new Set(["exa", "parallel", "perplexity", "bing", "keenable"]);
   for (const x of [...entries].reverse()) {
-    const hot = contenders.includes(x.e) || x.e === HOME_ENGINE;
+    const hot = defaults.has(x.e);
     const g = el("g", { class: "series" + (hot ? "" : " cold"), tabindex: "0" });
     const pts = [];
     for (const [i, s] of x.shares.entries()) {
@@ -1281,7 +1125,11 @@ function renderStandings(rows) {
     for (const [px, py, i, share] of pts) {
       const dot = markerEl(x.e, px, py, 4);
       const [bench, , label] = STANDINGS_BENCHES[i];
-      dot.appendChild(el("title", {}, `${displayName(x.e)} — ${verticalName(bench)}: ${label} ${fmt3(x.shares[i].v)} = ${fmtPct(share)} of ultimate ${fmt3(ult[i])}`));
+      const c = ciData?.benches?.[bench]?.engines?.[x.e];
+      dot.appendChild(el("title", {}, `${displayName(x.e)} · ${verticalName(bench)}: `
+        + `${fmtPct(share)} of ultimate · raw ${label} ${fmt3(x.shares[i].v)} vs ultimate ${fmt3(ult[i])}`
+        + (benchBest[i] != null ? ` · best engine ${fmtPct(benchBest[i])}` : "")
+        + (c ? ` · 7-day mean ${fmt3(c.point)}, 95% CI [${fmt3(c.lo)}, ${fmt3(c.hi)}]` : "")));
       g.appendChild(dot);
     }
     const lp = lpos.get(x.e);
@@ -1295,6 +1143,7 @@ function renderStandings(rows) {
     svg.appendChild(g);
     g.addEventListener("focus", () => setHot(g));
     g.addEventListener("blur", () => setHot(null));
+    text.addEventListener("click", () => g.classList.toggle("cold"));
   }
 
   const segDist = (mx, my, [ax, ay], [bx, by]) => {
@@ -2181,117 +2030,6 @@ async function initRunBrowser() {
   renderRunDetail(runs);
 }
 
-function drawSlice(cardId, series, { label, empty }) {
-  const card = document.getElementById(cardId);
-  const sub = card.querySelector(".sub");
-  sub.dataset.base ??= sub.textContent;
-  sub.textContent = `${sub.dataset.base}; ${PCT_NOTE}, ${ROLLING_NOTE}`;
-  card.querySelectorAll("svg, .empty, .legend").forEach((n) => n.remove());
-  card._mdRows = null;
-  const rolled = rollingMean(series);
-  const ult = new Map((rolled[ULTIMATE_ENGINE] || []).map((p) => [p.t.getTime(), p.v]));
-  const rows = [];
-  for (const e of ENGINES) {
-    if (e === ULTIMATE_ENGINE) continue;
-    const pts = [];
-    for (const p of rolled[e] || []) {
-      const u = ult.get(p.t.getTime());
-      if (u) pts.push({ t: p.t.getTime(), v: (p.v / u) * 100 });
-    }
-    if (!pts.length) continue;
-    rows.push({ e, now: pts[pts.length - 1].v });
-  }
-  if (!rows.length) {
-    card.appendChild(el("div", { class: "empty" }, empty || "No data yet — first scheduled run pending."));
-    return;
-  }
-  rows.sort((a, b) => b.now - a.now);
-  card._mdRows = () => [
-    ["engine", "% of ultimate (7d mean)"],
-    ...rows.map((r) => [displayName(r.e), `${r.now.toFixed(1)}%`]),
-  ];
-  const colored = new Set([HOME_ENGINE, ...rows.slice(0, 3).map((r) => r.e)]);
-  const rowColor = (e) => colored.has(e) ? colorOf(e) : "var(--baseline)";
-
-  const W = 720, LBL = 138, VALW = 36, GAP = 16, ROW = 24, TOP = 22;
-  const dotW = W - LBL - VALW - GAP * 2;
-  const valX = LBL + dotW + GAP + VALW;
-  const allVals = rows.map((r) => r.now);
-  const lo = Math.max(0, Math.floor((Math.min(...allVals) - 4) / 10) * 10);
-  const x = (v) => LBL + ((Math.min(v, 100) - lo) / (100 - lo)) * dotW;
-  const H = TOP + rows.length * ROW + 24;
-  const svg = el("svg", { class: "slice-svg", viewBox: `0 0 ${W} ${H}`, role: "img",
-    "aria-label": `${label}, ${PCT_NOTE}, ${ROLLING_NOTE}` });
-  const step = 100 - lo > 45 ? 20 : 10;
-  const ticks = [];
-  for (let t = lo; t < 100 - step / 2; t += step) ticks.push(t);
-  ticks.push(100);
-  for (const t of ticks) {
-    const ref = t === 100;
-    svg.appendChild(el("line", { x1: x(t), y1: TOP, x2: x(t), y2: TOP + rows.length * ROW,
-      stroke: ref ? "var(--baseline)" : "var(--grid)", "stroke-width": ref ? 1.4 : 1 }));
-    svg.appendChild(el("text", { x: x(t), y: TOP + rows.length * ROW + 14, "text-anchor": "middle",
-      "font-size": 10, fill: "var(--text-muted)" }, ref ? "100% = ultimate" : `${t}%`));
-  }
-  svg.appendChild(el("text", { x: valX, y: TOP - 9, "text-anchor": "end",
-    "font-size": 10, fill: "var(--text-muted)" }, "current"));
-  rows.forEach((r, i) => {
-    const y = TOP + i * ROW + ROW / 2;
-    const g = el("g");
-    g.appendChild(el("title", {}, `${displayName(r.e)} — ${r.now.toFixed(1)}% of ultimate`));
-    if (r.e === HOME_ENGINE) {
-      g.appendChild(el("rect", { x: 0, y: y - ROW / 2, width: W, height: ROW,
-        fill: "var(--home)", "fill-opacity": 0.07 }));
-    }
-    g.appendChild(el("text", { x: LBL - 10, y: y + 3.5, "text-anchor": "end",
-      "font-size": 11.5, fill: "var(--text-primary)",
-      "font-weight": r.e === HOME_ENGINE ? 650 : 400 }, displayName(r.e)));
-    g.appendChild(el("circle", { cx: x(r.now), cy: y, r: 4, fill: rowColor(r.e) }));
-    g.appendChild(el("text", { x: valX, y: y + 3.5, "text-anchor": "end",
-      "font-size": 11.5, "font-variant-numeric": "tabular-nums",
-      fill: "var(--text-primary)" }, r.now.toFixed(0)));
-    svg.appendChild(g);
-  });
-  card.appendChild(svg);
-}
-
-function drawCharts(rows) {
-  drawSlice("card-ndcg", newsSeries(rows),
-    { label: "nDCG over time per engine, 6-hour windows" });
-  drawSlice("card-ndcg-rare", seriesFor("agentic_rare", (r) => r.ndcg, rows),
-    { label: "rare-entity nDCG over time per engine",
-      empty: `No ${verticalName("agentic_rare")} run yet — collected daily.` });
-  drawSlice("card-recall", seriesFor("finance", "recall", rows),
-    { label: "answer recall at 5 over time per engine" });
-  drawSlice("card-mrr", seriesFor("finance", "mrr", rows),
-    { label: "MRR at 5 over time per engine" });
-  drawSlice("card-finance-filings", seriesFor("finance", "filings_recall", rows),
-    { label: "finance filings answer-recall at 5 over time per engine",
-      empty: "No filings data yet — collected daily." });
-  drawSlice("card-finance-filingdoc", seriesFor("finance", "filingdoc_recall", rows),
-    { label: "finance filingdoc recall at 5 over time per engine",
-      empty: "No filingdoc data yet — collected daily." });
-  drawSlice("card-scholar-recall", seriesFor("scholar", "recall", rows),
-    { label: "scholar recall at 10 over time per engine" });
-  drawSlice("card-scholar-title", seriesFor("scholar", "title_recall", rows),
-    { label: "scholar title-query recall at 10 over time per engine" });
-  drawSlice("card-scholar-body", seriesFor("scholar", "body_recall", rows),
-    { label: "scholar body-query recall at 10 over time per engine" });
-  drawSlice("card-scholar-clue", seriesFor("scholar", "clue_recall", rows),
-    { label: "scholar clue-query recall at 10 over time per engine" });
-  drawSlice("card-scholar-tot", seriesFor("scholar", "tot_recall", rows),
-    { label: "scholar tip-of-the-tongue recall at 10 over time per engine" });
-  drawSlice("card-legal-recall", seriesFor("legal", "recall", rows),
-    { label: "legal recall at 5 over time per engine",
-      empty: "No legal run yet — collected daily." });
-  drawSlice("card-legal-caselaw", seriesFor("legal", "caselaw_recall", rows),
-    { label: "legal caselaw recall at 5 over time per engine",
-      empty: "No legal run yet — collected daily." });
-  drawSlice("card-legal-code", seriesFor("legal", "code_recall", rows),
-    { label: "legal code recall at 5 over time per engine",
-      empty: "No legal run yet — collected daily." });
-}
-
 function refreshHistoryTable() {
   if (document.getElementById("history-details").open) {
     renderHistoryTable(history);
@@ -2302,7 +2040,6 @@ function renderAll() {
   renderStandings(history);
   renderQualityPrice(history);
   renderPriceTable();
-  drawCharts(history);
   refreshHistoryTable();
 }
 
@@ -2420,11 +2157,6 @@ async function main() {
   renderUniqueness(uniqAgg);
   initRunBrowser();
   document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
-  let resizeTimer;
-  window.addEventListener("resize", () => {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => drawCharts(history), 150);
-  });
 }
 main();
 </script>
