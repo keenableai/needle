@@ -351,12 +351,12 @@ document.documentElement.dataset.theme = localStorage.theme ||
         <svg class="moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
       </button>
     </div>
-    <h1>NEEDLE: Which search API moves the needle for AI agents?</h1>
+    <h1><span class="vert">Needle</span>: Which search API moves the needle for AI agents?</h1>
     <div class="fm">
       <p class="lastrun"><span id="updated"></span>
         <span class="cadence">News runs hourly; all other suites run
         daily. Times are UTC.</span></p>
-      <p>NEEDLE (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
+      <p><span class="vert">Needle</span> (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
         <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is an
         agentic search benchmark that compares major search engines using
         queries modeled on real agent behavior. We include five verticals
@@ -685,10 +685,10 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <h2>A4 — LLM judge</h2>
     <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; we use it for <span class="vert" data-vert="finance"></span> only as a fallback answer matcher, and judge <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> deterministically</div>
     <div class="prose">
-      <p>We judge with <code>openai/gpt-5.6-sol</code> via OpenRouter, temperature 0, one pointwise call per document. We record the exact model a run used as <code>judge_model</code> in its archived report and show it when you pick a run in the judgement browser, so judge swaps are visible in the history.</p>
+      <p>We judge with <code>openai/gpt-5.6-terra</code> via OpenRouter, temperature 0, one pointwise call per document. We record the exact model a run used as <code>judge_model</code> in its archived report and show it when you pick a run in the judgement browser, so judge swaps are visible in the history.</p>
       <p>The judge is blind to engine identity: the prompt contains the query, document title, URL, published date, and snippet, never the engine name. We pool results with the same URL from different engines, judge them once per query (longest available snippet, first non-empty title and date), and reuse that single judgement for every engine that returned the URL, so an engine cannot gain from formatting the same page differently. Snippet quality still matters across distinct URLs: a judge preference for a snippet style would be a shared bias across engines. We publish the per-result reasoning with every run so this can be audited.</p>
       <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard gates for wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/keenbench/shared/prompts/judgement.jinja.</p>
-      <p>Known limitation: we operate NEEDLE ourselves and have not yet run a systematic human-agreement audit of the judge. What makes the numbers checkable in the meantime: the judge is blind and shared across engines, every rating ships with its reasoning, and we publish queries, prompts, and raw results, so anyone can independently re-score any rating.</p>
+      <p>Known limitation: we operate <span class="vert">Needle</span> ourselves and have not yet run a systematic human-agreement audit of the judge. What makes the numbers checkable in the meantime: the judge is blind and shared across engines, every rating ships with its reasoning, and we publish queries, prompts, and raw results, so anyone can independently re-score any rating.</p>
     </div>
   </div>
 
