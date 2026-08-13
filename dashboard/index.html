@@ -161,6 +161,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     border-bottom: 2px solid var(--baseline); scroll-margin-top: 16px;
   }
   .section-desc { color: var(--text-secondary); font-size: 13px; margin: 0 0 12px; }
+  .vert { font-variant: small-caps; letter-spacing: 0.015em; }
   .subsection-title {
     font-size: 15px; font-weight: 600; color: var(--text-primary);
     margin: 22px 0 6px; scroll-margin-top: 16px;
@@ -339,11 +340,11 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <li><a href="#sec-latency">Search latency</a></li>
     <li><a href="#sec-slices">Slices</a>
       <ul>
-        <li><a href="#sec-news">news</a></li>
-        <li><a href="#sec-agentic_rare">agentic_rare</a></li>
-        <li><a href="#sec-finance">finance</a></li>
-        <li><a href="#sec-scholar">scholar</a></li>
-        <li><a href="#sec-legal">legal</a></li>
+        <li><a href="#sec-news"><span class="vert" data-vert="news"></span></a></li>
+        <li><a href="#sec-agentic_rare"><span class="vert" data-vert="agentic_rare"></span></a></li>
+        <li><a href="#sec-finance"><span class="vert" data-vert="finance"></span></a></li>
+        <li><a href="#sec-scholar"><span class="vert" data-vert="scholar"></span></a></li>
+        <li><a href="#sec-legal"><span class="vert" data-vert="legal"></span></a></li>
       </ul>
     </li>
     <li><a href="#sec-overlap">Index independence</a></li>
@@ -372,51 +373,49 @@ document.documentElement.dataset.theme = localStorage.theme ||
         that mirror the use cases we see every day in Keenable's own
         search traffic:</p>
       <ul>
-        <li><b>News:</b> breaking and developing stories that people are
+        <li><b><span class="vert" data-vert="news"></span>:</b> breaking and developing stories that people are
           asking about right now, generated hourly from roughly 124
           curated RSS feeds and Google Trends</li>
-        <li><b>Finance:</b> everyday company and SEC-filing lookups, with
+        <li><b><span class="vert" data-vert="finance"></span>:</b> everyday company and SEC-filing lookups, with
           known answers drawn from Wikidata, GLEIF, and SEC XBRL</li>
-        <li><b>Scholar:</b> expert literature searches; the task is to
+        <li><b><span class="vert" data-vert="scholar"></span>:</b> expert literature searches; the task is to
           find a specific paper from a degraded title, a full-text
           detail, or a tip-of-the-tongue description (inspired by
           <a href="https://exa.ai/blog/publications-search">Exa's
           publication-search evals</a>)</li>
-        <li><b>Agentic rare:</b> obscure, long-tail entities; rare-word
+        <li><b><span class="vert" data-vert="agentic_rare"></span>:</b> obscure, long-tail entities; rare-word
           queries sampled from the DeepResearchGym agentic search logs
           (<a href="https://dl.acm.org/doi/10.1145/3805712.3809627">Agentic
           Search in the Wild</a>, SIGIR '26)</li>
-        <li><b>Legal:</b> find a specific court opinion or section of the
+        <li><b><span class="vert" data-vert="legal"></span>:</b> find a specific court opinion or section of the
           Code of Federal Regulations</li>
       </ul>
-      <p>We regenerate the known-answer sets (<code>finance</code>,
-        <code>scholar</code>, and <code>legal</code>) daily from public
-        sources. About half of the finance and legal queries use search
-        operators such as <code>"…"</code>, <code>site:</code>, and
-        <code>after:</code>.</p>
-      <p>We send every engine the same query at the same time, one
-        request at a time, and score it blind on its results exactly as
-        returned. We exclude failed searches and judgements from the
-        averages instead of counting them as zero. The full comparison
+      <p><b>Methodology.</b> We send every engine the same query at the
+        same moment, one request at a time, and score it blind on its
+        results exactly as returned. We exclude failed searches and
+        judgements from the averages instead of counting them as zero,
+        and regenerate every query set from public sources: <span class="vert" data-vert="news"></span> hourly,
+        the other verticals daily. About half of the <span class="vert" data-vert="finance"></span> and <span class="vert" data-vert="legal"></span>
+        queries use search operators such as <code>"…"</code>,
+        <code>site:</code>, and <code>after:</code>. The full comparison
         protocol is in the <a href="#app-protocol">appendix</a>; we
         maintain the benchmarks in
         <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.</p>
-
-      <h2 class="section-title" id="sec-metrics">Metrics</h2>
-      <p>Each vertical reports one headline metric; which one depends on
-        whether a query has a single known answer.</p>
-      <p><b>Open-ended</b> (<code>news</code>, <code>agentic_rare</code>):
-        our LLM judge scores every result from 0 to 4; the headline metric
-        is <b>nDCG@5</b>: discounted cumulative gain over the top 5
-        results, normalized by the ideal ranking of every engine's pooled
-        results, so <em>ultimate</em> scores exactly&nbsp;1. We penalize
-        duplicate URLs and repeated domains.</p>
-      <p><b>Known-answer</b> (<code>finance</code>, <code>scholar</code>,
-        <code>legal</code>): we check whether the target answer appears in
-        the top 5 (finance, legal) or top 10 (scholar), and report mean
-        reciprocal rank (MRR) for how high it ranked. Charts show
-        seven-day rolling averages.</p>
-      <p><b>The <em>ultimate</em> ceiling</b>: we also score a synthetic
+      <p id="sec-metrics"><b>Metrics.</b> <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> queries
+        have no single correct result, so the metric there is ranking
+        quality: our LLM judge rates every result from 0 to 4 and we
+        report <b>nDCG@5</b>, normalized by the best ordering of all
+        engines' pooled results so that <em>ultimate</em> scores
+        exactly&nbsp;1, with penalties for duplicate URLs and repeated
+        domains. For <span class="vert" data-vert="finance"></span> what counts is whether the answer text
+        reaches the agent at all; we scan the top-5 titles and snippets
+        for it, from any source, and report <b>answer-recall@5</b> plus
+        MRR@5. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> have one gold document per query, and
+        identifiers (arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID, citations,
+        dockets, CFR sections) let us score <b>recall@10</b> and
+        <b>recall@5</b> with MRR deterministically, no judge involved.
+        Exact definitions are in <a href="#app-metrics">A3</a>.</p>
+      <p><b>The <em>ultimate</em> ceiling.</b> We also score a synthetic
         engine that pools every engine's results per query and ranks them
         oracle-style (full definition in
         <a href="#app-protocol">A2</a>). It appears as the italicized row
@@ -434,7 +433,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     confidence intervals.</p>
 
   <div class="card" id="card-standings">
-    <h2>Standings — all benches</h2>
+    <h2>Standings — all verticals</h2>
     <div id="standings"></div>
   </div>
 
@@ -443,41 +442,41 @@ document.documentElement.dataset.theme = localStorage.theme ||
     means over all runs from the last 7 days, with a bootstrap 95%
     confidence interval on the headline metric; <code>n</code> counts
     scored queries. The remaining columns split the score by suite:
-    filings and filingdoc for finance, the four query buckets for scholar,
-    caselaw and code for legal. The italicized <em>ultimate</em> row is
+    filings and filingdoc for <span class="vert" data-vert="finance"></span>, the four query buckets for <span class="vert" data-vert="scholar"></span>,
+    caselaw and code for <span class="vert" data-vert="legal"></span>. The italicized <em>ultimate</em> row is
     the pooled ceiling described under metrics.</p>
 
   <div class="card" id="card-leaderboards">
     <div class="lb-tabs" id="lb-tabs" role="tablist" aria-label="Bench leaderboards">
-      <button role="tab" aria-selected="true" class="active" data-panel="card-lb-fresh">news</button>
-      <button role="tab" aria-selected="false" data-panel="card-lb-company">finance</button>
-      <button role="tab" aria-selected="false" data-panel="card-lb-scholar">scholar</button>
-      <button role="tab" aria-selected="false" data-panel="card-lb-rare">agentic_rare</button>
-      <button role="tab" aria-selected="false" data-panel="card-lb-legal">legal</button>
+      <button role="tab" aria-selected="true" class="active" data-panel="card-lb-fresh"><span class="vert" data-vert="news"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-company"><span class="vert" data-vert="finance"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-scholar"><span class="vert" data-vert="scholar"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-rare"><span class="vert" data-vert="agentic_rare"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-legal"><span class="vert" data-vert="legal"></span></button>
       <div id="lb-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-lb-fresh" role="tabpanel">
-      <h2>news — 7-day mean</h2>
+      <h2><span class="vert" data-vert="news"></span> — 7-day mean</h2>
       <div class="sub" id="lb-fresh-sub"></div>
       <div id="lb-fresh"></div>
     </div>
     <div class="lb-panel" id="card-lb-company" role="tabpanel">
-      <h2>finance — 7-day mean</h2>
+      <h2><span class="vert" data-vert="finance"></span> — 7-day mean</h2>
       <div class="sub" id="lb-company-sub"></div>
       <div id="lb-company"></div>
     </div>
     <div class="lb-panel" id="card-lb-scholar" role="tabpanel">
-      <h2>scholar — 7-day mean</h2>
+      <h2><span class="vert" data-vert="scholar"></span> — 7-day mean</h2>
       <div class="sub" id="lb-scholar-sub"></div>
       <div id="lb-scholar"></div>
     </div>
     <div class="lb-panel" id="card-lb-rare" role="tabpanel">
-      <h2>agentic_rare — 7-day mean</h2>
+      <h2><span class="vert" data-vert="agentic_rare"></span> — 7-day mean</h2>
       <div class="sub" id="lb-rare-sub"></div>
       <div id="lb-rare"></div>
     </div>
     <div class="lb-panel" id="card-lb-legal" role="tabpanel">
-      <h2>legal — 7-day mean</h2>
+      <h2><span class="vert" data-vert="legal"></span> — 7-day mean</h2>
       <div class="sub" id="lb-legal-sub"></div>
       <div id="lb-legal"></div>
     </div>
@@ -486,7 +485,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   <h2 class="section-title" id="sec-price">Quality vs price</h2>
   <div class="card" id="card-quality-price">
     <h2>Overall quality vs price</h2>
-    <div class="sub">7-day mean share of ultimate across all benches vs the lowest public price per 1,000 queries</div>
+    <div class="sub">7-day mean share of ultimate across all verticals vs the lowest public price per 1,000 queries</div>
     <div id="quality-price"></div>
   </div>
   <div class="card" id="card-prices">
@@ -510,21 +509,21 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   <h2 class="section-title" id="sec-slices">Slices</h2>
 
-  <h3 class="subsection-title" id="sec-news">news</h3>
+  <h3 class="subsection-title" id="sec-news"><span class="vert" data-vert="news"></span></h3>
   <p class="section-desc">We mine fresh, time-sensitive queries hourly from RSS feeds and Google Trends, and score ranking quality (nDCG@5 against the pooled ultimate ranking) with an LLM relevance judge.</p>
   <div class="card" id="card-ndcg">
-    <h2>news — nDCG@5</h2>
+    <h2><span class="vert" data-vert="news"></span> — nDCG@5</h2>
     <div class="sub">20 fresh queries per run, mean nDCG over all queries in each 6-hour window</div>
   </div>
 
-  <h3 class="subsection-title" id="sec-agentic_rare">agentic_rare</h3>
-  <p class="section-desc">We mine rare-entity queries from real agentic search logs: obscure names, technical terms, and long compounds selected by tokenizer difficulty. We score them like news (nDCG@5, the same LLM relevance judge). Query construction and the source log release are documented in <a href="#app-queries">A1</a>.</p>
+  <h3 class="subsection-title" id="sec-agentic_rare"><span class="vert" data-vert="agentic_rare"></span></h3>
+  <p class="section-desc">We mine rare-entity queries from real agentic search logs: obscure names, technical terms, and long compounds selected by tokenizer difficulty. We score them like <span class="vert" data-vert="news"></span> (nDCG@5, the same LLM relevance judge). Query construction and the source log release are documented in <a href="#app-queries">A1</a>.</p>
   <div class="card" id="card-ndcg-rare">
-    <h2>agentic_rare — nDCG@5</h2>
+    <h2><span class="vert" data-vert="agentic_rare"></span> — nDCG@5</h2>
     <div class="sub">100 rare-entity queries per daily run</div>
   </div>
 
-  <h3 class="subsection-title" id="sec-finance">finance</h3>
+  <h3 class="subsection-title" id="sec-finance"><span class="vert" data-vert="finance"></span></h3>
   <p class="section-desc">Company &amp; financial fact-lookups: registry-grounded facts (CEO, HQ, founding year…), quarterly SEC-XBRL facts (filings), and known-item SEC-filing retrieval by accession identity (filingdoc). We mix companies across cap tiers and give ~half the filings/filingdoc queries operator syntax ("quoted", site:, date filters). We score uniform deterministic answer-recall@5 with an LLM-judge backstop.</p>
   <div class="card">
     <div class="lb-tabs" role="tablist" aria-label="Finance slices">
@@ -535,24 +534,24 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <div class="tab-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-recall" role="tabpanel">
-      <h2>finance — answer-recall@5</h2>
+      <h2><span class="vert" data-vert="finance"></span> — answer-recall@5</h2>
       <div class="sub">answer-recall@5, gold queries per run across all suites</div>
     </div>
     <div class="lb-panel" id="card-mrr" role="tabpanel">
-      <h2>finance — MRR@5</h2>
+      <h2><span class="vert" data-vert="finance"></span> — MRR@5</h2>
       <div class="sub">MRR@5, same runs as recall</div>
     </div>
     <div class="lb-panel" id="card-finance-filings" role="tabpanel">
-      <h2>finance — filings recall@5</h2>
+      <h2><span class="vert" data-vert="finance"></span> — filings recall@5</h2>
       <div class="sub">recall@5 on quarterly facts (net income, operating income, diluted EPS) in top-5 snippets</div>
     </div>
     <div class="lb-panel" id="card-finance-filingdoc" role="tabpanel">
-      <h2>finance — filingdoc recall@5</h2>
+      <h2><span class="vert" data-vert="finance"></span> — filingdoc recall@5</h2>
       <div class="sub">recall@5 on SEC filings found by a distinctive detail (accession identity)</div>
     </div>
   </div>
 
-  <h3 class="subsection-title" id="sec-scholar">scholar</h3>
+  <h3 class="subsection-title" id="sec-scholar"><span class="vert" data-vert="scholar"></span></h3>
   <p class="section-desc">Known-item paper retrieval: find a specific paper by its title, by a full-text-only detail, by a natural-language factual question, or from a vague tip-of-the-tongue description. We match deterministically on the paper's arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID, and document query construction per slice in <a href="#app-queries">A1</a>.</p>
   <div class="card">
     <div class="lb-tabs" role="tablist" aria-label="Scholar slices">
@@ -564,28 +563,28 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <div class="tab-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-scholar-recall" role="tabpanel">
-      <h2>scholar — recall@10</h2>
+      <h2><span class="vert" data-vert="scholar"></span> — recall@10</h2>
       <div class="sub">recall@10, gold papers per run across all query types</div>
     </div>
     <div class="lb-panel" id="card-scholar-title" role="tabpanel">
-      <h2>scholar — title-query recall@10</h2>
+      <h2><span class="vert" data-vert="scholar"></span> — title-query recall@10</h2>
       <div class="sub">recall@10 on papers found by their (degraded) title</div>
     </div>
     <div class="lb-panel" id="card-scholar-body" role="tabpanel">
-      <h2>scholar — body-query recall@10</h2>
+      <h2><span class="vert" data-vert="scholar"></span> — body-query recall@10</h2>
       <div class="sub">recall@10 on papers found by a full-text-only detail</div>
     </div>
     <div class="lb-panel" id="card-scholar-clue" role="tabpanel">
-      <h2>scholar — clue-query recall@10</h2>
+      <h2><span class="vert" data-vert="scholar"></span> — clue-query recall@10</h2>
       <div class="sub">recall@10 on papers found by a natural-language question over full-text-only facts</div>
     </div>
     <div class="lb-panel" id="card-scholar-tot" role="tabpanel">
-      <h2>scholar — tip-of-the-tongue recall@10</h2>
+      <h2><span class="vert" data-vert="scholar"></span> — tip-of-the-tongue recall@10</h2>
       <div class="sub">recall@10 on papers found from a hedged, half-remembered description</div>
     </div>
   </div>
 
-  <h3 class="subsection-title" id="sec-legal">legal</h3>
+  <h3 class="subsection-title" id="sec-legal"><span class="vert" data-vert="legal"></span></h3>
   <p class="section-desc">Known-item legal retrieval: find a specific court opinion by its caption, or a specific CFR section from its substance. We give roughly half the queries operator syntax ("quoted", site:, date filters) and match deterministically on citation / docket / URL identity.</p>
   <div class="card">
     <div class="lb-tabs" role="tablist" aria-label="Legal slices">
@@ -595,15 +594,15 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <div class="tab-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-legal-recall" role="tabpanel">
-      <h2>legal — recall@5</h2>
+      <h2><span class="vert" data-vert="legal"></span> — recall@5</h2>
       <div class="sub">recall@5, gold documents per run across both suites</div>
     </div>
     <div class="lb-panel" id="card-legal-caselaw" role="tabpanel">
-      <h2>legal — caselaw recall@5</h2>
+      <h2><span class="vert" data-vert="legal"></span> — caselaw recall@5</h2>
       <div class="sub">recall@5 on federal court opinions found by caption-style queries</div>
     </div>
     <div class="lb-panel" id="card-legal-code" role="tabpanel">
-      <h2>legal — code recall@5</h2>
+      <h2><span class="vert" data-vert="legal"></span> — code recall@5</h2>
       <div class="sub">recall@5 on CFR sections found from their regulatory substance</div>
     </div>
   </div>
@@ -704,21 +703,22 @@ document.documentElement.dataset.theme = localStorage.theme ||
       generate.py in the repo); we archive the exact query rows every run
       used with it (A6)</div>
     <div class="prose">
-      <p>We generate every query set fresh from public sources: news
-        hourly, the other verticals daily. For scholar we sample papers
+      <p>We generate every query set fresh from public sources:
+        <span class="vert" data-vert="news"></span> hourly, the other verticals daily. For
+        <span class="vert" data-vert="scholar"></span> we sample papers
         from arXiv (computer, physical, life, and social sciences) and
         Europe PMC (health sciences) over four age bands reaching from
         the last week back to roughly five years. Each paper yields one
-        query per slice, so the four scholar slices rank engines on the
+        query per slice, so the four <span class="vert" data-vert="scholar"></span> slices rank engines on the
         same papers, and the gaps between slices are the point: title vs
         body isolates full-text indexing, body vs clue isolates
         keyword-vs-prose handling, and tot isolates semantic retrieval.
-        We leak-check the LLM-written scholar queries (at least two
+        We leak-check the LLM-written <span class="vert" data-vert="scholar"></span> queries (at least two
         content words must not appear in the title or abstract) and keep
         a paper only if every slice produced a valid query. We modeled
         the known-item and tip-of-the-tongue framing on Exa's
         <a href="https://exa.ai/blog/publications-search">"SOTA Search
-        Over Academic Publications"</a> (Jul 2026). The agentic_rare
+        Over Academic Publications"</a> (Jul 2026). The <span class="vert" data-vert="agentic_rare"></span>
         stream is the anonymized DeepResearchGym log release (14.44M
         search requests from real agentic clients) published with
         <a href="https://dl.acm.org/doi/10.1145/3805712.3809627">"Agentic
@@ -726,28 +726,28 @@ document.documentElement.dataset.theme = localStorage.theme ||
         Real Search Requests"</a> (SIGIR '26).</p>
     </div>
     <table>
-      <tr><th>bench</th><th>slice</th><th>query construction</th></tr>
-      <tr><td>news</td><td>fresh</td>
+      <tr><th>vertical</th><th>slice</th><th>query construction</th></tr>
+      <tr><td><span class="vert" data-vert="news"></span></td><td>fresh</td>
         <td>the newest item per feed from ~124 curated RSS feeds within a freshness window, merged with Google Trends RSS across all 52 US geos (fuzzy-deduped, capped by traffic); an LLM projects each item into a keyword query and refuses evergreen content</td></tr>
-      <tr><td>agentic_rare</td><td>rare-entity</td>
+      <tr><td><span class="vert" data-vert="agentic_rare"></span></td><td>rare-entity</td>
         <td>sampled from the anonymized DeepResearchGym agentic search logs, keeping queries where BERT WordPiece splits a word into 5+ subwords or maps it to [UNK]; fastText language ID gates for English, an n-gram cap drops near-copies, and each run samples stratified by query length</td></tr>
-      <tr><td>finance</td><td>finance / finance_nl</td>
+      <tr><td><span class="vert" data-vert="finance"></span></td><td>finance / finance_nl</td>
         <td>registry facts per company (CEO, founding year, HQ country, website, employees, LEI, ticker) from Wikidata and GLEIF, asked as a keyword query and, where a template exists, as a natural-language variant</td></tr>
-      <tr><td>finance</td><td>filings</td>
+      <tr><td><span class="vert" data-vert="finance"></span></td><td>filings</td>
         <td>single-quarter 10-Q facts (net income, operating income, diluted EPS) from SEC XBRL, companies stratified by market cap; about half the queries carry operator syntax ("quoted", site:, after:/before:)</td></tr>
-      <tr><td>finance</td><td>filingdoc</td>
+      <tr><td><span class="vert" data-vert="finance"></span></td><td>filingdoc</td>
         <td>known-item SEC-filing retrieval; the gold answer is the filing's accession number; about half the queries carry operator syntax</td></tr>
-      <tr><td>scholar</td><td>title</td>
+      <tr><td><span class="vert" data-vert="scholar"></span></td><td>title</td>
         <td>the paper's title, lowercased with LaTeX and punctuation stripped; plain known-item lookup, answerable from metadata</td></tr>
-      <tr><td>scholar</td><td>body</td>
+      <tr><td><span class="vert" data-vert="scholar"></span></td><td>body</td>
         <td>a keyword query (3–8 words) anchored on a globally distinctive detail that appears in the full text but not in the title or abstract (a named method, cohort, instrument, or an unusual measured value); answerable only by engines that index the paper body</td></tr>
-      <tr><td>scholar</td><td>clue</td>
+      <tr><td><span class="vert" data-vert="scholar"></span></td><td>clue</td>
         <td>a natural-language question built from 2–3 precise factual clues taken from the body, the way a researcher re-finds a paper from remembered specifics</td></tr>
-      <tr><td>scholar</td><td>tot</td>
+      <tr><td><span class="vert" data-vert="scholar"></span></td><td>tot</td>
         <td>a hedged, half-remembered description with every specific blurred: approximate quantities, no names the paper introduces, at most two content words reused from the title</td></tr>
-      <tr><td>legal</td><td>caselaw</td>
+      <tr><td><span class="vert" data-vert="legal"></span></td><td>caselaw</td>
         <td>recent published opinions from the CourtListener API across 14 federal courts, one caption-style query per case; gold is the reporter citation, docket number with party tokens, and cluster id</td></tr>
-      <tr><td>legal</td><td>code</td>
+      <tr><td><span class="vert" data-vert="legal"></span></td><td>code</td>
         <td>eCFR sections; an LLM projects each section into a query about its regulatory substance with one verbatim quoted span, rejected if it leaks the citation; gold is the "title CFR section" citation</td></tr>
     </table>
   </div>
@@ -759,7 +759,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <p>We send every engine in a run the identical query text at the same moment, with the per-engine request shapes pinned in git (A5). Each engine issues one request at a time, so latency percentiles are comparable across engines rather than reflecting different concurrency.</p>
       <p>We judge an engine on its own ranking, titles, and snippets, with no fetching and no re-ranking. We cap evidence at the same snippet length for every engine, so engines that return fatter content get no extra signal to the judge or the answer matchers. We judge results with the same URL once across engines and share the rating, so formatting differences cannot split a judgement (A4 has the full judging setup).</p>
       <p>We exclude failed searches and judgements from the mean and report them through <code>search_errors</code> and <code>judge_errors</code>. An outage therefore reduces <code>num_scored</code> and raises the error rate without lowering the quality score.</p>
-      <p>We mint fresh news queries every hour and regenerate the known-answer verticals daily from public sources (A1), so there is no fixed benchmark set to overfit. We archive the exact queries each run used with it (A6).</p>
+      <p>We mint fresh <span class="vert" data-vert="news"></span> queries every hour and regenerate the known-answer verticals daily from public sources (A1), so there is no fixed benchmark set to overfit. We archive the exact queries each run used with it (A6).</p>
       <p>Every vertical also reports <em>ultimate</em>, a synthetic engine that pools all engines' results per query and ranks them oracle-style: best judge rating first (redundancy-aware) on the judged verticals, the gold item first on the known-answer ones. Its score is what a single engine would achieve if it always returned the best of what the whole field found, separating "the engine ranked poorly" from "nothing better was findable". We exclude it from the overlap and uniqueness statistics.</p>
     </div>
   </div>
@@ -769,15 +769,15 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <div class="sub">how we compute every number on this page (src/keenbench/shared/metrics.py and per-bench score.py)</div>
     <table>
       <tr><th>metric</th><th>benches</th><th>definition</th></tr>
-      <tr><td>nDCG@5</td><td>news, agentic_rare</td>
+      <tr><td>nDCG@5</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>DCG over the top 5 results (Σ gain(rᵢ) / log₂(i + 1), with judge ratings mapped to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0), divided by the DCG of the ideal ranking: the pooled ultimate ordering of every engine's deduplicated results, so ultimate scores exactly 1. A query is scored only if every one of its results was judged (otherwise it is dropped from the mean and counted as judge errors) and only if the pooled ideal has any gain; queries where no engine found anything relevant are excluded.</td></tr>
-      <tr><td>redundancy penalty</td><td>news, agentic_rare</td>
+      <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>applied to ratings before scoring, on the engine and ideal sides alike: a duplicate URL −4 rating steps, the 2nd result from the same domain −1, the 3rd and later −2, all floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
-      <tr><td>answer-recall@5, MRR@5</td><td>finance</td>
+      <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
         <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher, with an LLM-judge backstop for paraphrased answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
-      <tr><td>recall@10, MRR@10</td><td>scholar</td>
+      <tr><td>recall@10, MRR@10</td><td><span class="vert" data-vert="scholar"></span></td>
         <td>known-item: the gold paper identified in the top 10 by arXiv&nbsp;ID / DOI / PMID match.</td></tr>
-      <tr><td>recall@5, MRR@5</td><td>legal</td>
+      <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
         <td>known-item: the gold opinion or CFR section identified by citation / docket / URL match.</td></tr>
       <tr><td>latency p50 / p95</td><td>all</td>
         <td>percentiles over per-call durations of successful search API calls, pooled across queries in the window; runs published without per-call samples contribute their per-run percentiles instead. Failed calls carry no latency sample and show up in the error rate.</td></tr>
@@ -786,7 +786,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   <div class="card" id="app-judge">
     <h2>A4 — LLM judge</h2>
-    <div class="sub">rates news and agentic_rare results; we use it for finance only as a fallback answer matcher, and judge scholar and legal deterministically</div>
+    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; we use it for <span class="vert" data-vert="finance"></span> only as a fallback answer matcher, and judge <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> deterministically</div>
     <div class="prose">
       <p>We judge with <code>openai/gpt-5.6-sol</code> via OpenRouter, temperature 0, one pointwise call per document. We record the exact model a run used as <code>judge_model</code> in its archived report and show it when you pick a run in the judgement browser, so judge swaps are visible in the history.</p>
       <p>The judge is blind to engine identity: the prompt contains the query, document title, URL, published date, and snippet, never the engine name. We pool results with the same URL from different engines, judge them once per query (longest available snippet, first non-empty title and date), and reuse that single judgement for every engine that returned the URL, so an engine cannot gain from formatting the same page differently. Snippet quality still matters across distinct URLs: a judge preference for a snippet style would be a shared bias across engines. We publish the per-result reasoning with every run so this can be audited.</p>
@@ -797,7 +797,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   <div class="card" id="app-engines">
     <h2>A5 — engine configuration</h2>
-    <div class="sub">we pin each engine's request shape in git (src/keenbench/shared/search/), request 5 results per query except scholar (10), and record the requested top-k per run as num_results. Engines are live, unversioned APIs; provider-side changes surface as trend shifts and can be audited against the archived raw runs.</div>
+    <div class="sub">we pin each engine's request shape in git (src/keenbench/shared/search/), request 5 results per query except <span class="vert" data-vert="scholar"></span> (10), and record the requested top-k per run as num_results. Engines are live, unversioned APIs; provider-side changes surface as trend shifts and can be audited against the archived raw runs.</div>
     <table>
       <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
       <tr><td>keenable</td><td>Keenable search</td><td>query verbatim (operators included), mode=pro</td></tr>
@@ -898,6 +898,10 @@ function markHome(node, engine) {
 
 const DISPLAY_NAMES = new Map([["google", "google/serper"], ["bing", "bing/serp"]]);
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
+
+const VERTICALS = new Map([["news", "News"], ["finance", "Finance"],
+  ["scholar", "Scholar"], ["agentic_rare", "AgenticRare"], ["legal", "Legal"]]);
+const verticalName = (b) => VERTICALS.get(b) ?? b;
 
 function engineKey(engine) {
   const key = el("span", { class: "key" });
@@ -1131,7 +1135,7 @@ function renderStandings(rows) {
     best.push(m);
   }
   card._mdRows = () => [
-    ["engine", "overall", ...STANDINGS_BENCHES.map(([b]) => b)],
+    ["engine", "overall", ...STANDINGS_BENCHES.map(([b]) => verticalName(b))],
     ["ultimate (raw)", "100%", ...ult.map((u) => u == null ? "–" : fmt3(u))],
     ["gap to ultimate", ...best.map((m) => m == null ? "–" : `−${Math.round((1 - m) * 100)}%`)],
     ...entries.map((x) => [displayName(x.e), fmtPct(x.overall),
@@ -1161,7 +1165,7 @@ function renderStandings(rows) {
   }
   const H = legendY0 + [...lpos.values()].reduce((m, p) => Math.max(m, p.y - legendY0), 0) + 8;
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
-    "aria-label": "Engine standings across all benches as share of the ultimate ceiling" });
+    "aria-label": "Engine standings across all verticals as share of the ultimate ceiling" });
 
   for (const gv of [0.25, 0.5, 0.75]) {
     svg.appendChild(el("path", { d: ringD(gv), fill: "none", stroke: "var(--grid)", "stroke-width": 1 }));
@@ -1206,13 +1210,13 @@ function renderStandings(rows) {
     const tx = cx + (R + 14) * c, ty = cy + (R + 14) * s;
     const anchor = `text-anchor:${c > 0.3 ? "start" : c < -0.3 ? "end" : "middle"}`;
     const ly = s < -0.5 ? ty - 6 : s > 0.5 ? ty + 12 : ty + 4;
-    svg.appendChild(el("text", { x: tx, y: ly, style: anchor, class: "st-col" }, bench));
+    svg.appendChild(el("text", { x: tx, y: ly, style: anchor, class: "st-col vert" }, verticalName(bench)));
     if (best[i + 1] != null) {
       const gap = 1 - best[i + 1];
       const [ax, ay] = pt(i, best[i + 1]), [bx, by] = pt(i, 1);
       const gt = el("text", { x: (ax + bx) / 2 - s * 9, y: (ay + by) / 2 + c * 9 + 3,
         class: "st-gap" }, `−${Math.round(gap * 100)}%`);
-      gt.appendChild(el("title", {}, `${bench}: best engine reaches ${fmtPct(best[i + 1])} of ultimate — gap ${fmtPct(gap)}`));
+      gt.appendChild(el("title", {}, `${verticalName(bench)}: best engine reaches ${fmtPct(best[i + 1])} of ultimate — gap ${fmtPct(gap)}`));
       svg.appendChild(gt);
     }
   }
@@ -1277,7 +1281,7 @@ function renderStandings(rows) {
     for (const [px, py, i, share] of pts) {
       const dot = markerEl(x.e, px, py, 4);
       const [bench, , label] = STANDINGS_BENCHES[i];
-      dot.appendChild(el("title", {}, `${displayName(x.e)} — ${bench}: ${label} ${fmt3(x.shares[i].v)} = ${fmtPct(share)} of ultimate ${fmt3(ult[i])}`));
+      dot.appendChild(el("title", {}, `${displayName(x.e)} — ${verticalName(bench)}: ${label} ${fmt3(x.shares[i].v)} = ${fmtPct(share)} of ultimate ${fmt3(ult[i])}`));
       g.appendChild(dot);
     }
     const lp = lpos.get(x.e);
@@ -1563,7 +1567,7 @@ function renderHistoryTable(rows) {
       const tr = el("tr");
       markHome(tr, r.engine);
       tr.appendChild(el("td", {}, fmtTime(new Date(r.ts))));
-      tr.appendChild(el("td", {}, r.bench));
+      tr.appendChild(el("td", {}, verticalName(r.bench)));
       tr.appendChild(el("td", {}, displayName(r.engine)));
       tr.appendChild(el("td", {}, name));
       tr.appendChild(el("td", { class: "num" }, fmt3(v)));
@@ -2156,7 +2160,7 @@ async function initRunBrowser() {
   try { runs = await fetchJson("data/runs.json"); } catch {}
   runs = [...runs].reverse();
   for (const b of BENCHES) {
-    benchSel.appendChild(el("option", { value: b }, b));
+    benchSel.appendChild(el("option", { value: b }, verticalName(b)));
   }
   for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, displayName(e)));
 
@@ -2256,7 +2260,7 @@ function drawCharts(rows) {
     { label: "nDCG over time per engine, 6-hour windows" });
   drawSlice("card-ndcg-rare", seriesFor("agentic_rare", (r) => r.ndcg, rows),
     { label: "rare-entity nDCG over time per engine",
-      empty: "No agentic_rare run yet — collected daily." });
+      empty: `No ${verticalName("agentic_rare")} run yet — collected daily.` });
   drawSlice("card-recall", seriesFor("finance", "recall", rows),
     { label: "answer recall at 5 over time per engine" });
   drawSlice("card-mrr", seriesFor("finance", "mrr", rows),
@@ -2344,6 +2348,10 @@ window.addEventListener("beforeprint", () => {
 window.addEventListener("afterprint", () => {
   document.documentElement.dataset.theme = themeBeforePrint;
 });
+
+for (const n of document.querySelectorAll("[data-vert]")) {
+  n.textContent = verticalName(n.dataset.vert);
+}
 
 for (const bar of document.querySelectorAll(".lb-tabs")) {
   const holder = bar.parentElement;
