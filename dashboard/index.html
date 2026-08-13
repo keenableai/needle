@@ -1916,15 +1916,103 @@ const NDCG_GAIN = { 4: 1, 3: 0.667, 2: 0.117 };
 const dcgAtK = (ratings, k) =>
   (ratings || []).slice(0, k).reduce((s, r, i) => s + (NDCG_GAIN[r] || 0) / Math.log2(i + 2), 0);
 
+const TRACKING_PARAMS = new Set(["_hsenc", "_hsmi", "dclid", "epik", "fbclid",
+  "gbraid", "gclid", "igshid", "mc_cid", "mc_eid", "mkt_tok", "msclkid", "msockid",
+  "oly_anon_id", "oly_enc_id", "srsltid", "ttclid", "twclid", "vero_id", "wbraid", "yclid"]);
+const stripWww = (host) => host.startsWith("www.") ? host.slice(4) : host;
+
+function urlDomainOf(url) {
+  try { return stripWww(new URL(url).hostname.toLowerCase()); } catch { return ""; }
+}
+
+function normalizeUrl(url) {
+  let parts;
+  try { parts = new URL(url.trim()); } catch { return url; }
+  const host = stripWww(parts.hostname);
+  let path = parts.pathname;
+  try { path = decodeURIComponent(path); } catch {}
+  path = path.replace(/\/+$/, "");
+  const params = [...parts.searchParams.entries()]
+    .filter(([key]) => !key.startsWith("utm_") && !TRACKING_PARAMS.has(key))
+    .sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0);
+  const query = params.length ? `?${new URLSearchParams(params)}` : "";
+  return `${host}${path}${query}`;
+}
+
+const HAS_SITE_OP = (queryText) => /\bsite:/.test((queryText || "").toLowerCase());
+const domainPenalty = (prior) => prior >= 2 ? 2 : prior === 1 ? 1 : 0;
+
+function oracleOrder(urls, ratings, queryText) {
+  const remaining = urls.map((_, i) => i).sort((a, b) => ratings[b] - ratings[a]);
+  if (HAS_SITE_OP(queryText)) return remaining;
+  const domains = urls.map(urlDomainOf);
+  const picked = [];
+  const counts = new Map();
+  const penalized = (i) => Math.max(0, ratings[i] - domainPenalty(counts.get(domains[i]) || 0));
+  while (remaining.length) {
+    let best = 0;
+    for (let j = 1; j < remaining.length; j++) {
+      if (penalized(remaining[j]) > penalized(remaining[best])) best = j;
+    }
+    const i = remaining.splice(best, 1)[0];
+    picked.push(i);
+    counts.set(domains[i], (counts.get(domains[i]) || 0) + 1);
+  }
+  return picked;
+}
+
+function penalizeRedundancy(urls, ratings, queryText) {
+  if (HAS_SITE_OP(queryText)) return [...ratings];
+  const seen = new Set();
+  const counts = new Map();
+  const out = [];
+  for (let i = 0; i < urls.length; i++) {
+    const domain = urlDomainOf(urls[i]);
+    const canonical = normalizeUrl(urls[i]);
+    const prior = counts.get(domain) || 0;
+    out.push(Math.max(0, ratings[i] - (seen.has(canonical) ? 4 : domainPenalty(prior))));
+    seen.add(canonical);
+    counts.set(domain, prior + 1);
+  }
+  return out;
+}
+
+function pooledIdcg(report, query, k) {
+  const best = new Map();
+  for (const e of Object.values(report.engines || {})) {
+    for (const pq of e.per_query || []) {
+      if (pq.query !== query || pq.search_error != null) continue;
+      for (const r of pq.results || []) {
+        if (r.rating == null) continue;
+        const norm = normalizeUrl(r.url);
+        const cur = best.get(norm);
+        if (!cur || r.rating > cur[1]) best.set(norm, [r.url, r.rating]);
+      }
+    }
+  }
+  if (!best.size) return null;
+  const urls = [...best.values()].map((x) => x[0]);
+  const ratings = [...best.values()].map((x) => x[1]);
+  const order = oracleOrder(urls, ratings, query).slice(0, k);
+  const penalized = penalizeRedundancy(
+    order.map((i) => urls[i]), order.map((i) => ratings[i]), query);
+  return dcgAtK(penalized, k) || null;
+}
+
 function legacyNdcg(report) {
   const k = report.k ?? report.num_results ?? 5;
+  const ultimate = report.engines?.ultimate;
   const idcg = new Map();
-  for (const pq of report.engines?.ultimate?.per_query || []) {
+  for (const pq of ultimate?.per_query || []) {
     if (pq.rbp != null) idcg.set(pq.query, dcgAtK(pq.penalized_ratings, k));
   }
   return (pq) => {
     if (!pq.penalized_ratings) return null;
-    const ideal = idcg.get(pq.query);
+    let ideal = idcg.get(pq.query);
+    if (ideal === undefined && !ultimate) {
+      ideal = pooledIdcg(report, pq.query, k);
+      idcg.set(pq.query, ideal);
+    }
     return ideal ? dcgAtK(pq.penalized_ratings, k) / ideal : null;
   };
 }
