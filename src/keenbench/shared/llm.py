@@ -6,8 +6,8 @@ import httpx
 
 MAX_ERROR_CHARS = 500
 TIMEOUT_S = 60.0
-DEFAULT_JUDGE_MODEL = "openai/gpt-5.6-sol"
-DEFAULT_LLM_MODEL = "openai/gpt-5.6-sol"
+DEFAULT_JUDGE_MODEL = "openai/gpt-5.6-terra"
+DEFAULT_LLM_MODEL = "openai/gpt-5.6-terra"
 
 NO_REASONING_EFFORTS = frozenset({"", "none", "minimal"})
 
