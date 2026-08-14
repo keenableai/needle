@@ -103,6 +103,8 @@ class Legal:
             f"short_titles={stats.short_titles})",
             file=sys.stderr,
         )
+        if stats.llm_error_sample:
+            print(f"legal first llm error: {stats.llm_error_sample}", file=sys.stderr)
 
     def run(
         self,
