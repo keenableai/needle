@@ -118,7 +118,7 @@ async def _code_rows(
 
     async def project(
         entry: tuple[int, str, str, str],
-    ) -> tuple[int, CodeSection | None, str | None, str | None]:
+    ) -> tuple[int, CodeSection | None, str | None, str | tuple[str, str] | None]:
         title_num, part, identifier, label = entry
         section = await ecfr.section(title_num, part, identifier, label)
         if section is None:

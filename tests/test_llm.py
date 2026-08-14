@@ -5,12 +5,6 @@ import httpx
 from keenbench.shared.llm import OpenRouterClient
 
 
-def _client(handler):
-    client = OpenRouterClient(api_key="k", model="openai/gpt-5.6-terra")
-    client._client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
-    return client
-
-
 def _capture(seen, *, finish_reason="stop", content="hello"):
     def handler(request):
         seen.update(json.loads(request.content))
@@ -22,10 +16,18 @@ def _capture(seen, *, finish_reason="stop", content="hello"):
     return handler
 
 
+async def _complete(handler, *, reasoning_effort, max_tokens=256):
+    client = OpenRouterClient(api_key="k", model="openai/gpt-5.6-terra")
+    client._client = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    try:
+        return await client.complete("p", max_tokens=max_tokens, reasoning_effort=reasoning_effort)
+    finally:
+        await client.aclose()
+
+
 async def test_complete_sends_minimal_reasoning_effort():
     seen = {}
-    client = _client(_capture(seen))
-    text, err = await client.complete("p", max_tokens=256, reasoning_effort="minimal")
+    text, err = await _complete(_capture(seen), reasoning_effort="minimal")
     assert err is None and text == "hello"
     assert seen["reasoning"] == {"effort": "minimal"}
 
@@ -33,22 +35,21 @@ async def test_complete_sends_minimal_reasoning_effort():
 async def test_complete_omits_reasoning_when_disabled():
     for effort in ("", "none"):
         seen = {}
-        client = _client(_capture(seen))
-        text, err = await client.complete("p", max_tokens=256, reasoning_effort=effort)
+        text, err = await _complete(_capture(seen), reasoning_effort=effort)
         assert err is None and text == "hello"
         assert "reasoning" not in seen
 
 
 async def test_complete_passes_other_efforts_through():
     seen = {}
-    client = _client(_capture(seen))
-    await client.complete("p", max_tokens=256, reasoning_effort="high")
+    await _complete(_capture(seen), reasoning_effort="high")
     assert seen["reasoning"] == {"effort": "high"}
 
 
 async def test_complete_reports_truncation():
     seen = {}
-    client = _client(_capture(seen, finish_reason="length"))
-    text, err = await client.complete("p", max_tokens=8, reasoning_effort="minimal")
+    text, err = await _complete(
+        _capture(seen, finish_reason="length"), reasoning_effort="minimal", max_tokens=8
+    )
     assert text is None
     assert err["error_type"] == "truncated"
