@@ -35,6 +35,7 @@ class GenStats:
     code_no_query: int = 0
     code_rejected: int = 0
     llm_errors: int = 0
+    llm_error_sample: str = ""
     short_courts: int = 0
     short_titles: int = 0
 
@@ -117,19 +118,20 @@ async def _code_rows(
 
     async def project(
         entry: tuple[int, str, str, str],
-    ) -> tuple[int, CodeSection | None, str | None, str | None]:
+    ) -> tuple[int, CodeSection | None, str | None, str | tuple[str, str] | None]:
         title_num, part, identifier, label = entry
         section = await ecfr.section(title_num, part, identifier, label)
         if section is None:
             return title_num, None, None, "fetch"
         try:
             text, err = await llm.complete(
-                build_code_prompt(section), max_tokens=256, reasoning_effort="minimal"
+                build_code_prompt(section), max_tokens=1024, reasoning_effort="minimal"
             )
-        except Exception:
-            return title_num, None, None, "llm_error"
+        except Exception as exc:
+            return title_num, None, None, ("llm_error", str(exc)[:200])
         if err is not None:
-            return title_num, None, None, "llm_error"
+            sample = f"{err.get('error_type')}: {err.get('error_message')}"[:200]
+            return title_num, None, None, ("llm_error", sample)
         query = clean_code_query(text)
         if query is None:
             return title_num, None, None, "no_query"
@@ -150,7 +152,10 @@ async def _code_rows(
     by_title: dict[int, list[tuple[CodeSection, str]]] = {t: [] for t in titles}
     for title_num, section, query, drop in projected:
         if drop is not None:
-            setattr(stats, drop_stat[drop], getattr(stats, drop_stat[drop]) + 1)
+            key, sample = drop if isinstance(drop, tuple) else (drop, None)
+            setattr(stats, drop_stat[key], getattr(stats, drop_stat[key]) + 1)
+            if sample and not stats.llm_error_sample:
+                stats.llm_error_sample = sample
         elif section is not None and query is not None:
             by_title[title_num].append((section, query))
 

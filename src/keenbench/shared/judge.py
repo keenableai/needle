@@ -222,7 +222,7 @@ async def complete_parsed(
 ) -> tuple[T | None, dict[str, str] | None]:
     for attempt_prompt in (prompt, prompt + retry_suffix):
         text, err = await llm.complete(
-            attempt_prompt, max_tokens=max_tokens, reasoning_effort="minimal", system=system
+            attempt_prompt, max_tokens=max_tokens, reasoning_effort="", system=system
         )
         if err is not None:
             return None, err

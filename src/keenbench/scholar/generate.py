@@ -46,6 +46,7 @@ class GenStats:
     papers: int = 0
     rows: dict[str, int] = field(default_factory=dict)
     drops: dict[str, int] = field(default_factory=dict)
+    drop_samples: dict[str, str] = field(default_factory=dict)
     generic_title: int = 0
     short_cells: int = 0
 
@@ -116,7 +117,7 @@ async def _bucket_query(
 ) -> tuple[str | None, dict[str, str] | None]:
     try:
         text, err = await llm.complete(
-            build_query_prompt(bucket, paper, body), max_tokens=256, reasoning_effort="minimal"
+            build_query_prompt(bucket, paper, body), max_tokens=1024, reasoning_effort="minimal"
         )
     except Exception as exc:
         return None, {"error_type": "projection_crash", "error_message": str(exc)[:500]}
@@ -177,7 +178,9 @@ async def run_generate(
             candidates.append(Candidate(cell, replace(paper, domain=cell[0]), title_query))
     stats.candidates = len(candidates)
 
-    async def _pair(cand: Candidate) -> tuple[Candidate, dict[str, str] | None, str | None]:
+    async def _pair(
+        cand: Candidate,
+    ) -> tuple[Candidate, dict[str, str] | None, str | tuple[str, str] | None]:
         if not llm_buckets or llm is None:
             return cand, {}, None
         body = await _fetch_body(cand.paper, arxiv=arxiv, europepmc=europepmc)
@@ -187,7 +190,8 @@ async def run_generate(
         queries: dict[str, str] = {}
         for bucket, (query, err) in zip(llm_buckets, outs, strict=True):
             if err is not None:
-                return cand, None, f"{bucket}_llm_error"
+                sample = f"{err.get('error_type')}: {err.get('error_message')}"[:200]
+                return cand, None, (f"{bucket}_llm_error", sample)
             if query is None:
                 return cand, None, f"{bucket}_no_query"
             if body_has_bad_anchor(query):
@@ -202,7 +206,10 @@ async def run_generate(
     by_cell: dict[tuple[str, str], list[tuple[Candidate, dict[str, str]]]] = {c: [] for c in cells}
     for cand, queries, drop in paired:
         if drop is not None:
-            stats.drops[drop] = stats.drops.get(drop, 0) + 1
+            key, sample = drop if isinstance(drop, tuple) else (drop, None)
+            stats.drops[key] = stats.drops.get(key, 0) + 1
+            if sample and key not in stats.drop_samples:
+                stats.drop_samples[key] = sample
         elif queries is not None:
             by_cell[cand.cell].append((cand, queries))
 

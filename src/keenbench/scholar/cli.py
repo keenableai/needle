@@ -90,6 +90,9 @@ class Scholar:
             f"short_cells={stats.short_cells})",
             file=sys.stderr,
         )
+        if stats.drop_samples:
+            samples = "; ".join(f"{k}: {v}" for k, v in sorted(stats.drop_samples.items()))
+            print(f"scholar first drop errors: {samples}", file=sys.stderr)
 
     def run(
         self,

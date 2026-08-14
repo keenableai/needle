@@ -209,3 +209,35 @@ def test_walk_structure_sections_skips_reserved():
         ],
     }
     assert walk_structure_sections(tree) == [("240", "240.10b-5", "Manipulative devices")]
+
+
+async def test_code_llm_errors_counted_with_sample():
+    from keenbench.legal.models import CodeSection
+
+    class ErrLLM:
+        async def complete(self, prompt, *, max_tokens, reasoning_effort):
+            return None, {"error_type": "truncated", "error_message": "hit max_tokens"}
+
+    section = CodeSection(
+        title_num=17,
+        part="240",
+        section="240.10b-5",
+        heading="Employment of manipulative and deceptive devices.",
+        text="It shall be unlawful to employ any device scheme or artifice to defraud investors.",
+    )
+    rows, stats = await run_generate(
+        courtlistener=None,
+        ecfr=FakeEcfr({17: [("240", "240.10b-5", "x")]}, {(17, "240.10b-5"): section}),
+        llm=ErrLLM(),
+        hour_ts=HOUR,
+        now=NOW,
+        courts=(),
+        per_court=0,
+        months_back=1,
+        titles=(17,),
+        per_title=1,
+        seed=0,
+    )
+    assert stats.code_rows == 0
+    assert stats.llm_errors == 1
+    assert stats.llm_error_sample == "truncated: hit max_tokens"

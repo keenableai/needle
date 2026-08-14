@@ -9,7 +9,7 @@ TIMEOUT_S = 60.0
 DEFAULT_JUDGE_MODEL = "openai/gpt-5.6-terra"
 DEFAULT_LLM_MODEL = "openai/gpt-5.6-terra"
 
-NO_REASONING_EFFORTS = frozenset({"", "none", "minimal"})
+NO_REASONING_EFFORTS = frozenset({"", "none"})
 
 
 def resolve_judge_model(explicit: str | None) -> str:
