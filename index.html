@@ -161,6 +161,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
     border-bottom: 2px solid var(--baseline); scroll-margin-top: 16px;
   }
   .section-desc { color: var(--text-secondary); font-size: 13px; margin: 0 0 12px; }
+  .hint { border-bottom: 1px dotted var(--text-muted); cursor: help; }
   .vert { font-variant: small-caps; letter-spacing: 0.015em; }
   .subsection-title {
     font-size: 15px; font-weight: 600; color: var(--text-primary);
@@ -329,11 +330,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
 <nav id="toc" aria-label="Contents">
   <div class="toc-head">Contents</div>
   <ul>
-    <li><a href="#top">Overview</a>
-      <ul>
-        <li><a href="#sec-metrics">Metrics</a></li>
-      </ul>
-    </li>
+    <li><a href="#top">Overview</a></li>
     <li><a href="#sec-results">Quality results</a></li>
     <li><a href="#sec-price">Quality vs price</a></li>
     <li><a href="#sec-latency">Search latency</a></li>
@@ -354,94 +351,74 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <h1><span class="vert">Needle</span>: Which search API moves the needle for AI agents?</h1>
     <div class="fm">
       <p class="lastrun"><span id="updated"></span>
-        <span class="cadence">News runs hourly; all other suites run
-        daily. Times are UTC.</span></p>
+        <span class="cadence">News runs each hour; all other suites run
+        each day. Times are UTC.</span></p>
       <p><span class="vert">Needle</span> (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
         <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is an
-        agentic search benchmark that compares major search engines using
-        queries modeled on real agent behavior. We include five verticals
-        that mirror the use cases we see every day in Keenable's own
-        search traffic:</p>
+        agentic search benchmark. It compares major search engines with
+        queries that model real agent behavior. The five verticals match
+        the use cases we see each day in Keenable's own search
+        traffic:</p>
       <ul>
-        <li><b><span class="vert" data-vert="news"></span>:</b> breaking and developing stories that people are
-          asking about right now, generated hourly from roughly 124
-          curated RSS feeds and Google Trends</li>
-        <li><b><span class="vert" data-vert="finance"></span>:</b> everyday company and SEC-filing lookups, with
-          known answers drawn from Wikidata, GLEIF, and SEC XBRL</li>
-        <li><b><span class="vert" data-vert="scholar"></span>:</b> expert literature searches; the task is to
-          find a specific paper from a degraded title, a full-text
-          detail, or a tip-of-the-tongue description (inspired by
-          <a href="https://exa.ai/blog/publications-search">Exa's
-          publication-search evals</a>)</li>
+        <li><b><span class="vert" data-vert="news"></span>:</b> breaking and developing stories; new queries
+          each hour from curated RSS feeds and Google Trends</li>
+        <li><b><span class="vert" data-vert="finance"></span>:</b> everyday company and SEC-filing lookups with
+          known answers from public registries</li>
+        <li><b><span class="vert" data-vert="scholar"></span>:</b> expert literature searches: find a specific
+          paper from a degraded title, a full-text detail, or a
+          tip-of-the-tongue description</li>
         <li><b><span class="vert" data-vert="agentic_rare"></span>:</b> obscure, long-tail entities; rare-word
-          queries sampled from the DeepResearchGym agentic search logs
-          (<a href="https://dl.acm.org/doi/10.1145/3805712.3809627">Agentic
-          Search in the Wild</a>, SIGIR '26)</li>
+          queries sampled from the
+          <a href="https://dl.acm.org/doi/10.1145/3805712.3809627">DeepResearchGym</a>,
+          <a href="https://arxiv.org/abs/2603.20278">OpenResearcher</a>, and
+          <a href="https://arxiv.org/abs/2604.04949">LRAT</a>
+          agentic search logs</li>
         <li><b><span class="vert" data-vert="legal"></span>:</b> find a specific court opinion or section of the
           Code of Federal Regulations</li>
       </ul>
-      <p><b>Methodology.</b> We send every engine the same query at the
-        same moment, one request at a time, and score it blind on its
-        results exactly as returned. We exclude failed searches and
-        judgements from the averages instead of counting them as zero,
-        and regenerate every query set from public sources: <span class="vert" data-vert="news"></span> hourly,
-        the other verticals daily. About half of the <span class="vert" data-vert="finance"></span> and <span class="vert" data-vert="legal"></span>
-        queries use search operators such as <code>"…"</code>,
-        <code>site:</code>, and <code>after:</code>. The full comparison
-        protocol is in the <a href="#app-protocol">appendix</a>; we
-        maintain the benchmarks in
+      <p><b>Methodology.</b> Each engine in a run receives the same query
+        text. We score each engine on the ranking, titles, and snippets
+        it returned. We do not fetch pages and we do not re-rank. The
+        judge does not see the engine name. We make new query sets from
+        public sources, <span class="vert" data-vert="news"></span> each hour and the rest each day, so
+        there is no fixed set to overfit.
+        <a href="#app-protocol">A2</a> gives the full comparison
+        protocol; we keep the benchmarks in
         <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.</p>
       <p id="sec-metrics"><b>Metrics.</b> <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> queries
-        have no single correct result, so the metric there is ranking
-        quality: our LLM judge rates every result from 0 to 4 and we
-        report <b>nDCG@5</b>, normalized by the best ordering of all
-        engines' pooled results so that <em>ultimate</em> scores
+        have no single correct result, so we measure ranking quality. An
+        LLM judge rates each result from 0 to 4. We report nDCG@5,
+        normalized so that the pooled <em>ultimate</em> engine scores
         exactly&nbsp;1, with penalties for duplicate URLs and repeated
-        domains. For <span class="vert" data-vert="finance"></span> what counts is whether the answer text
-        reaches the agent at all; we scan the top-5 titles and snippets
-        for it, from any source, and report <b>answer-recall@5</b> plus
-        MRR@5. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> have one gold document per query, and
-        identifiers (arXiv&nbsp;/&nbsp;DOI&nbsp;/&nbsp;PMID, citations,
-        dockets, CFR sections) let us score <b>recall@10</b> and
-        <b>recall@5</b> with MRR deterministically, no judge involved.
-        Exact definitions are in <a href="#app-metrics">A3</a>.</p>
-      <p><b>The <em>ultimate</em> ceiling.</b> We also score a synthetic
-        engine that pools every engine's results per query and ranks them
-        oracle-style (full definition in
-        <a href="#app-protocol">A2</a>). It appears as the italicized row
-        in every leaderboard, and the standings radar plots each engine
-        as a share of it.</p>
+        domains. <span class="vert" data-vert="finance"></span> measures if the answer text reaches the
+        agent: we scan the top-5 titles and snippets and report
+        answer-recall@5 with MRR@5. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are
+        known-item tasks: we match identifiers and report recall@10 and
+        recall@5 with MRR. <a href="#app-metrics">A3</a> gives the exact
+        definitions.</p>
+      <p><b>The <em>ultimate</em> ceiling.</b> The italicized row in
+        each leaderboard is <em>ultimate</em>, a synthetic engine. It
+        pools all engines' results per query and ranks them oracle-style
+        (<a href="#app-protocol">A2</a>). The standings radar plots each
+        engine as a share of <em>ultimate</em>.</p>
 
     </div>
   </header>
 
   <h2 class="section-title" id="sec-results">Quality Results</h2>
-  <p class="section-desc">The radar shows where every engine stands
-    against <em>ultimate</em> on all five verticals at once; the hatched
-    band is the part nobody reaches yet. Below it, the leaderboards rank
-    engines vertical by vertical over the last 7 days, confidence
-    intervals included.</p>
-
   <div class="card" id="card-standings">
     <h2>Standings — all verticals</h2>
-    <div class="sub">Each spoke is a benchmark vertical: an engine at 75%
-      achieves 75% of the pooled <em>ultimate</em> engine's score on that
-      vertical, and farther out is better. Hatched area = performance no
-      individual engine currently captures; the red % is the gap between
-      today's best engine and <em>ultimate</em>. A default selection of
-      engines is drawn at full strength; click a legend name to toggle
-      any engine in or out.</div>
+    <div class="sub">share of <em>ultimate</em> per spoke, farther out is
+      better; click legend names to toggle &middot;
+      <span class="hint" title="The hatched band is performance no single engine currently captures; the red % is the gap between today's best engine and ultimate. A default selection of engines is drawn at full strength.">hatched band?</span></div>
     <div id="standings"></div>
   </div>
 
   <h3 class="subsection-title" id="sec-leaderboards">7-day leaderboards</h3>
-  <p class="section-desc">One tab per vertical. We report query-weighted
-    means over all runs from the last 7 days, with a bootstrap 95%
-    confidence interval on the headline metric; <code>n</code> counts
-    scored queries. The remaining columns split the score by suite:
-    filings and filingdoc for <span class="vert" data-vert="finance"></span>, the four query buckets for <span class="vert" data-vert="scholar"></span>,
-    caselaw and code for <span class="vert" data-vert="legal"></span>. The italicized <em>ultimate</em> row is
-    the pooled ceiling described under metrics.</p>
+  <p class="section-desc">Query-weighted 7-day means with a 95% CI;
+    <code>n</code> counts scored queries;
+    <span class="hint" title="filings and filingdoc for Finance; title, body, clue, and tot for Scholar; caselaw and code for Legal">suite columns</span>
+    split the score.</p>
 
   <div class="card" id="card-leaderboards">
     <div class="lb-tabs" id="lb-tabs" role="tablist" aria-label="Bench leaderboards">
@@ -482,7 +459,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   <h2 class="section-title" id="sec-price">Quality vs price</h2>
   <div class="card" id="card-quality-price">
     <h2>Overall quality vs price</h2>
-    <div class="sub">7-day mean share of ultimate across all verticals vs the lowest public price per 1,000 queries</div>
+    <div class="sub">7-day mean share of ultimate vs lowest public price per 1,000 queries</div>
     <div id="quality-price"></div>
   </div>
   <div class="card" id="card-prices">
@@ -493,29 +470,18 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   <h2 class="section-title" id="sec-latency">Search latency</h2>
   <p class="section-desc">Agents wait on each search call, so latency
-    adds directly to task time. We measure it on the same
-    one-request-at-a-time calls the quality scores come from, so the
-    percentiles are comparable across engines.</p>
+    adds directly to task time.</p>
   <div class="card" id="card-latency-dumbbell">
     <h2>Search latency — last 7 days</h2>
-    <div class="sub">p50 (filled) to p95 (open) per engine, successful
-      search API calls across all benchmarks, sorted by p50 on a log
-      scale; hover a row for exact values</div>
+    <div class="sub">p50 (filled) to p95 (open), successful calls, log
+      scale; hover for values (<a href="#app-protocol">A2</a>)</div>
     <div id="latency-dumbbell"></div>
   </div>
 
   <h2 class="section-title" id="sec-overlap">Index independence</h2>
-  <p class="section-desc">We send every engine identical queries, so we
-    can compare returned URLs directly across engines. Independent
-    engines will naturally overlap on canonical, relevant results.
-    Repeated overlap on low-relevance URLs or near-identical result lists
-    instead suggests a shared upstream index.</p>
-  <p class="section-desc"><em>Suspicious sharing</em> measures these
-    cases. The <em>borrowing graph</em> estimates the likely direction of
-    sharing, while <em>URL overlap</em>, <em>3+ shared</em>, and the
-    <em>uniqueness</em> tables provide the underlying similarity measures.
-    All views use runs from the previous two weeks, across all
-    benchmarks.</p>
+  <p class="section-desc">Repeated overlap on junk or near-identical
+    lists suggests a shared upstream index (last 2 weeks, all
+    benchmarks).</p>
 
   <div class="card" id="card-def-suspicious">
     <h2>Definition: suspicious sharing</h2>
@@ -531,13 +497,14 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <p class="eq">|<var>L<sub>A</sub></var>(<var>q</var>) ∩
         <var>L<sub>B</sub></var>(<var>q</var>)| ≥ 1&emsp;or&emsp;|<var>U<sub>A</sub></var>(<var>q</var>) ∩
         <var>U<sub>B</sub></var>(<var>q</var>)| ≥ 3.</p>
-      <p>Each matrix cell is the share of comparable queries (both searches
-        succeeded and at least one returned a result) on which the pair
-        shares suspiciously, pooled over all runs from the last 2 weeks.
-        Sharing <em>good</em> results is how ranking is supposed to work;
-        sharing junk, or 3+ URLs at once, suggests a common upstream index.
-        On the known-answer verticals results carry no judgements, so only
-        the second clause can fire.</p>
+      <p>Each matrix cell shows the share of comparable queries (both
+        searches succeeded and at least one returned a result) where the
+        pair shares suspiciously, pooled over all runs from the last 2
+        weeks. Engines that share <em>good</em> results show normal
+        ranking behavior. Engines that share junk, or 3+ URLs at once,
+        possibly share an upstream index. Results on the known-answer
+        verticals have no judgements, so only the second clause can
+        apply.</p>
     </div>
   </div>
 
@@ -590,50 +557,55 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   <h2 class="section-title" id="sec-appendix">Appendix — methodology &amp; configuration</h2>
   <p class="section-desc">We pin everything below in
-    <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>; the dashboard
-    only aggregates published run data, and you can recompute every number on this page from
-    the archived artifacts (A6).</p>
+    <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>;
+    you can compute each number on this page again from the archived
+    artifacts (A6).</p>
 
   <div class="card" id="app-queries">
     <h2>A1 — query generation</h2>
     <div class="sub">how we build each slice's queries (per-bench
-      generate.py in the repo); we archive the exact query rows every run
-      used with it (A6)</div>
+      generate.py); the exact rows every run used are archived (A6)</div>
     <div class="prose">
-      <p>We generate every query set fresh from public sources:
-        <span class="vert" data-vert="news"></span> hourly, the other verticals daily. For
-        <span class="vert" data-vert="scholar"></span> we sample papers
+      <p>We make each query set fresh from public sources:
+        <span class="vert" data-vert="news"></span> each hour, the other verticals each day.</p>
+      <p>For <span class="vert" data-vert="scholar"></span> we sample papers
         from arXiv (computer, physical, life, and social sciences) and
-        Europe PMC (health sciences) over four age bands reaching from
-        the last week back to roughly five years. Each paper yields one
-        query per slice, so the four <span class="vert" data-vert="scholar"></span> slices rank engines on the
-        same papers, and the gaps between slices are the point: title vs
-        body isolates full-text indexing, body vs clue isolates
-        keyword-vs-prose handling, and tot isolates semantic retrieval.
-        We leak-check the LLM-written <span class="vert" data-vert="scholar"></span> queries (at least two
-        content words must not appear in the title or abstract) and keep
-        a paper only if every slice produced a valid query. We modeled
-        the known-item and tip-of-the-tongue framing on Exa's
+        Europe PMC (health sciences). Four age bands reach from the last
+        week back to approximately five years. Each paper gives one
+        query per slice, so the four <span class="vert" data-vert="scholar"></span> slices rank engines on
+        the same papers. The gaps between the slices are the point:
+        title vs body isolates full-text indexing, body vs clue isolates
+        keyword-vs-prose handling, and tot isolates semantic
+        retrieval.</p>
+      <p>We leak-check each LLM-written <span class="vert" data-vert="scholar"></span> query: at least two
+        content words must not appear in the title or the abstract. We
+        keep a paper only if each slice produced a valid query. The
+        known-item and tip-of-the-tongue framing follows Exa's
         <a href="https://exa.ai/blog/publications-search">"SOTA Search
-        Over Academic Publications"</a> (Jul 2026). The <span class="vert" data-vert="agentic_rare"></span>
-        stream is the anonymized DeepResearchGym log release (14.44M
-        search requests from real agentic clients) published with
+        Over Academic Publications"</a> (Jul 2026).</p>
+      <p>The <span class="vert" data-vert="agentic_rare"></span>
+        stream merges search queries from three public agent-trajectory
+        releases: the anonymized DeepResearchGym logs (14M+ search
+        requests from real agentic clients;
         <a href="https://dl.acm.org/doi/10.1145/3805712.3809627">"Agentic
-        Search in the Wild: Intents and Trajectory Dynamics from 14M+
-        Real Search Requests"</a> (SIGIR '26).</p>
+        Search in the Wild"</a>, SIGIR '26), the
+        <a href="https://arxiv.org/abs/2603.20278">OpenResearcher</a>
+        deep-research trajectories (TIGER-AI-Lab, 2026), and
+        <a href="https://arxiv.org/abs/2604.04949">LRAT-Train</a>
+        ("Learning to Retrieve from Agent Trajectories", SIGIR '26).</p>
     </div>
     <table>
       <tr><th>vertical</th><th>slice</th><th>query construction</th></tr>
       <tr><td><span class="vert" data-vert="news"></span></td><td>fresh</td>
         <td>the newest item per feed from ~124 curated RSS feeds within a freshness window, merged with Google Trends RSS across all 52 US geos (fuzzy-deduped, capped by traffic); an LLM projects each item into a keyword query and refuses evergreen content</td></tr>
       <tr><td><span class="vert" data-vert="agentic_rare"></span></td><td>rare-entity</td>
-        <td>sampled from the anonymized DeepResearchGym agentic search logs, keeping queries where BERT WordPiece splits a word into 5+ subwords or maps it to [UNK]; fastText language ID gates for English, an n-gram cap drops near-copies, and each run samples stratified by query length</td></tr>
+        <td>sampled from the merged DeepResearchGym + OpenResearcher + LRAT-Train query stream, keeping queries where BERT WordPiece splits a word into 5+ subwords or maps it to [UNK]; fastText language ID gates for English, an n-gram cap drops near-copies, and each run samples stratified by query length</td></tr>
       <tr><td><span class="vert" data-vert="finance"></span></td><td>finance / finance_nl</td>
-        <td>registry facts per company (CEO, founding year, HQ country, website, employees, LEI, ticker) from Wikidata and GLEIF, asked as a keyword query and, where a template exists, as a natural-language variant</td></tr>
+        <td>registry facts per company (CEO, founding year, HQ country, website, employees, LEI) from Wikidata and GLEIF, ticker from SEC, asked as a keyword query and, where a template exists, as a natural-language variant</td></tr>
       <tr><td><span class="vert" data-vert="finance"></span></td><td>filings</td>
-        <td>single-quarter 10-Q facts (net income, operating income, diluted EPS) from SEC XBRL, companies stratified by market cap; about half the queries carry operator syntax ("quoted", site:, after:/before:)</td></tr>
+        <td>single-quarter 10-Q facts (net income, operating income, diluted EPS) from SEC XBRL, companies stratified by market cap; half the queries are quoted phrases</td></tr>
       <tr><td><span class="vert" data-vert="finance"></span></td><td>filingdoc</td>
-        <td>known-item SEC-filing retrieval; the gold answer is the filing's accession number; about half the queries carry operator syntax</td></tr>
+        <td>known-item SEC-filing retrieval; the gold answer is the filing's accession number; half the queries carry operator syntax (site:, "quoted", after:/before:)</td></tr>
       <tr><td><span class="vert" data-vert="scholar"></span></td><td>title</td>
         <td>the paper's title, lowercased with LaTeX and punctuation stripped; plain known-item lookup, answerable from metadata</td></tr>
       <tr><td><span class="vert" data-vert="scholar"></span></td><td>body</td>
@@ -653,17 +625,17 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <h2>A2 — comparison protocol</h2>
     <div class="sub">the fairness rules behind every number on this page</div>
     <div class="prose">
-      <p>We send every engine in a run the identical query text at the same moment, with the per-engine request shapes pinned in git (A5). Each engine issues one request at a time, so latency percentiles are comparable across engines rather than reflecting different concurrency.</p>
-      <p>We judge an engine on its own ranking, titles, and snippets, with no fetching and no re-ranking. We cap evidence at the same snippet length for every engine, so engines that return fatter content get no extra signal to the judge or the answer matchers. We judge results with the same URL once across engines and share the rating, so formatting differences cannot split a judgement (A4 has the full judging setup).</p>
-      <p>We exclude failed searches and judgements from the mean and report them through <code>search_errors</code> and <code>judge_errors</code>. An outage therefore reduces <code>num_scored</code> and raises the error rate without lowering the quality score.</p>
-      <p>We mint fresh <span class="vert" data-vert="news"></span> queries every hour and regenerate the known-answer verticals daily from public sources (A1), so there is no fixed benchmark set to overfit. We archive the exact queries each run used with it (A6).</p>
-      <p>Every vertical also reports <em>ultimate</em>, a synthetic engine that pools all engines' results per query and ranks them oracle-style: best judge rating first (redundancy-aware) on the judged verticals, the gold item first on the known-answer ones. Its score is what a single engine would achieve if it always returned the best of what the whole field found, separating "the engine ranked poorly" from "nothing better was findable". We exclude it from the overlap and uniqueness statistics.</p>
+      <p>We send each engine in a run the same query text. We pin the per-engine request shapes in git (A5). The runner sends requests in sequence, one call at a time across the whole run. Thus the latency percentiles are comparable across engines, and no engine gets concurrent load. Engines see the live web minutes apart in a run, not at the same instant.</p>
+      <p>We judge an engine on its own ranking, titles, and snippets. We do not fetch pages and we do not re-rank. We cap the evidence at the same snippet length for each engine, so engines that return more content get no extra signal to the judge or the answer matchers. We judge each distinct combination of URL, title, snippet, and date once per query. We use that rating again where the identical result occurs for other engines (A4 gives the full judging setup).</p>
+      <p>We remove failed searches and judgements from the mean and report them as <code>search_errors</code> and <code>judge_errors</code>. An outage decreases <code>num_scored</code> and increases the error rate; it does not decrease the quality score.</p>
+      <p>We make fresh <span class="vert" data-vert="news"></span> queries each hour and new known-answer queries each day from public sources (A1), so there is no fixed benchmark set to overfit. We archive the exact queries with each run (A6).</p>
+      <p>Each vertical also reports <em>ultimate</em>, a synthetic engine. It pools all engines' results per query and ranks them oracle-style: best judge rating first (redundancy-aware) on the judged verticals, and the gold item first on the known-answer verticals. Its score shows what one engine could get if it always returned the best results that the full field found. This separates "the engine ranked poorly" from "no engine found better results". We do not include <em>ultimate</em> in the overlap and uniqueness statistics.</p>
     </div>
   </div>
 
   <div class="card" id="app-metrics">
     <h2>A3 — metric definitions</h2>
-    <div class="sub">how we compute every number on this page (src/keenbench/shared/metrics.py and per-bench score.py)</div>
+    <div class="sub">src/keenbench/shared/metrics.py and per-bench score.py</div>
     <table>
       <tr><th>metric</th><th>benches</th><th>definition</th></tr>
       <tr><td>nDCG@5</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
@@ -675,7 +647,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <tr><td>recall@10, MRR@10</td><td><span class="vert" data-vert="scholar"></span></td>
         <td>known-item: the gold paper identified in the top 10 by arXiv&nbsp;ID / DOI / PMID match.</td></tr>
       <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
-        <td>known-item: the gold opinion or CFR section identified by citation / docket / URL match.</td></tr>
+        <td>known-item: the gold opinion or CFR section identified by citation, docket (with a party-token check), CFR citation, or URL match.</td></tr>
       <tr><td>latency p50 / p95</td><td>all</td>
         <td>percentiles over per-call durations of successful search API calls, pooled across queries in the window; runs published without per-call samples contribute their per-run percentiles instead. Failed calls carry no latency sample and show up in the error rate.</td></tr>
     </table>
@@ -683,26 +655,27 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   <div class="card" id="app-judge">
     <h2>A4 — LLM judge</h2>
-    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; we use it for <span class="vert" data-vert="finance"></span> only as a fallback answer matcher, and judge <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> deterministically</div>
+    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; <span class="vert" data-vert="finance"></span> fallback matcher only; <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are deterministic</div>
     <div class="prose">
-      <p>We judge with <code>openai/gpt-5.6-terra</code> via OpenRouter, temperature 0, one pointwise call per document. We record the exact model a run used as <code>judge_model</code> in its archived report and show it when you pick a run in the judgement browser, so judge swaps are visible in the history.</p>
-      <p>The judge is blind to engine identity: the prompt contains the query, document title, URL, published date, and snippet, never the engine name. We pool results with the same URL from different engines, judge them once per query (longest available snippet, first non-empty title and date), and reuse that single judgement for every engine that returned the URL, so an engine cannot gain from formatting the same page differently. Snippet quality still matters across distinct URLs: a judge preference for a snippet style would be a shared bias across engines. We publish the per-result reasoning with every run so this can be audited.</p>
-      <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard gates for wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/keenbench/shared/prompts/judgement.jinja.</p>
-      <p>Known limitation: we operate <span class="vert">Needle</span> ourselves and have not yet run a systematic human-agreement audit of the judge. What makes the numbers checkable in the meantime: the judge is blind and shared across engines, every rating ships with its reasoning, and we publish queries, prompts, and raw results, so anyone can independently re-score any rating.</p>
+      <p>We judge with <code>openai/gpt-5.6-terra</code> via OpenRouter, temperature 0, one pointwise call per document. We record the model for each run as <code>judge_model</code> in its archived report. The judgement browser shows it when you select a run, so judge changes stay visible in the history.</p>
+      <p>The judge does not see the engine identity. The prompt contains the query, the document title, the URL, the published date, and the snippet — not the engine name. We judge each distinct combination of URL, title, snippet, and date once per query and use that rating again where the identical result occurs for other engines. We judge the same URL with a different snippet separately, with the same blind judge and rubric.</p>
+      <p>A judge preference for a snippet style would be a shared bias across engines. We publish the per-result reasoning with each run, so you can audit this.</p>
+      <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard gates for a wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/keenbench/shared/prompts/judgement.jinja.</p>
+      <p>Known limitation: we operate <span class="vert">Needle</span> ourselves, and we did not yet do a systematic human-agreement audit of the judge. But you can check the numbers: the judge is blind and shared across engines, each rating includes its reasoning, and we publish the queries, prompts, and raw results. Thus anyone can score any rating again.</p>
     </div>
   </div>
 
   <div class="card" id="app-engines">
     <h2>A5 — engine configuration</h2>
-    <div class="sub">we pin each engine's request shape in git (src/keenbench/shared/search/), request 5 results per query except <span class="vert" data-vert="scholar"></span> (10), and record the requested top-k per run as num_results. Engines are live, unversioned APIs; provider-side changes surface as trend shifts and can be audited against the archived raw runs.</div>
+    <div class="sub">request shapes pinned in git (src/keenbench/shared/search/); 5 results per query except <span class="vert" data-vert="scholar"></span> (10). Engines are live, unversioned APIs; provider-side changes surface as trend shifts.</div>
     <table>
       <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
-      <tr><td>keenable</td><td>Keenable search</td><td>query verbatim (operators included), mode=pro</td></tr>
+      <tr><td>keenable</td><td>Keenable search</td><td>query verbatim with site: kept; after:/before: → published_after:/published_before:; mode=pro</td></tr>
       <tr><td>keenable-realtime</td><td>Keenable search</td><td>same as keenable but mode=realtime</td></tr>
       <tr><td>google/serper</td><td>Serper.dev (Google SERP)</td><td>query verbatim, num=min(k,100), gl=us, hl=en; knowledge-graph and answer-box entries fold into the ranking</td></tr>
-      <tr><td>bing/serp</td><td>SearchApi.io, engine=bing</td><td>query verbatim, num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
+      <tr><td>bing/searchapi</td><td>SearchApi.io, engine=bing</td><td>query verbatim, num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
       <tr><td>brave</td><td>Brave Web Search</td><td>count=min(k,20), country=us, search_lang=en, result_filter=web; site: kept in the query text, after:/before: → freshness window</td></tr>
-      <tr><td>exa</td><td>Exa /search</td><td>type=auto, numResults=k, highlights ≤500 chars; site: → includeDomains, after:/before: → published-date window</td></tr>
+      <tr><td>exa</td><td>Exa /search</td><td>type=auto, numResults=k, highlights capped at the shared 2,000-char snippet limit; site: → includeDomains, after:/before: → published-date window</td></tr>
       <tr><td>exa-instant</td><td>Exa /search</td><td>same as exa but type=instant</td></tr>
       <tr><td>parallel</td><td>Parallel /v1/search</td><td>mode=basic, max_results=k; site: → include_domains, after: → after_date</td></tr>
       <tr><td>parallel-turbo</td><td>Parallel /v1/search</td><td>same as parallel but mode=turbo</td></tr>
@@ -734,9 +707,9 @@ document.documentElement.dataset.theme = localStorage.theme ||
 
   <div class="card" id="card-runs">
     <h2>A7 — judgement browser</h2>
-    <div class="sub">We archive every run in full on the
-      <a href="https://huggingface.co/datasets/keenable-ai/keenbench-results">HF dataset</a>.
-      Pick a benchmark, then a run, to inspect each query and its results.</div>
+    <div class="sub">pick a benchmark, then a run, to inspect each query;
+      full runs on the
+      <a href="https://huggingface.co/datasets/keenable-ai/keenbench-results">HF dataset</a></div>
     <div class="runbar">
       <select id="run-bench" aria-label="Benchmark"></select>
       <select id="run-select" aria-label="Run"></select>
@@ -793,7 +766,7 @@ function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
 
-const DISPLAY_NAMES = new Map([["google", "google/serper"], ["bing", "bing/serp"]]);
+const DISPLAY_NAMES = new Map([["google", "google/serper"], ["bing", "bing/searchapi"]]);
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
 const VERTICALS = new Map([["news", "News"], ["finance", "Finance"],
@@ -1194,7 +1167,7 @@ function renderPriceTable() {
   const holder = document.getElementById("prices-table");
   holder.replaceChildren();
   document.getElementById("prices-sub").textContent =
-    `lowest public price per 1,000 queries: each provider's biggest self-serve tier, no enterprise quotes; collected ${PRICES_ASOF}`;
+    `biggest self-serve tier, no enterprise quotes; collected ${PRICES_ASOF}`;
   const engines = ENGINES.filter((e) => PRICES.has(e))
     .sort((a, b) => PRICES.get(a).usd - PRICES.get(b).usd || a.localeCompare(b));
   if (!engines.length) {
@@ -1517,7 +1490,7 @@ function renderOverlap(rows, uniqAgg) {
   }
   const nQueries = Math.max(...[...pairs.values()].map((p) => p.n));
   document.getElementById("overlap-sub").textContent =
-    `mean Jaccard overlap of top-K URL sets on the same queries, all benchmarks; up to ${nQueries} queries per pair, runs from the last 2 weeks`;
+    `mean Jaccard overlap of top-K URL sets; up to ${nQueries} queries per pair`;
   overlapMatrix(jaccardHolder, engines, (a, b) => {
     const agg = pairs.get(pairKey(a, b));
     if (!agg || !agg.n) return null;
@@ -1529,7 +1502,7 @@ function renderOverlap(rows, uniqAgg) {
     };
   });
   document.getElementById("overlap3-sub").textContent =
-    "share of queries where both engines return 3+ of the same URLs; near-identical result lists suggest a shared backend";
+    "share of queries where both engines return 3+ of the same URLs";
   overlapMatrix(shared3Holder, engines, (a, b) => {
     const agg = pairs.get(pairKey(a, b));
     if (!agg || !agg.n3) return null;
@@ -1541,7 +1514,7 @@ function renderOverlap(rows, uniqAgg) {
     };
   });
   document.getElementById("lowshared-sub").textContent =
-    "share of queries where the pair shares a below-HM URL or 3+ URLs of any rating. Sharing good URLs is expected; sharing junk or near-identical lists suggests a common upstream index";
+    "share of queries where the pair shares a below-HM URL or 3+ URLs of any rating";
   overlapMatrix(lowHolder, engines, (a, b) => {
     const agg = pairs.get(pairKey(a, b));
     if (!agg || !agg.nLow) return null;
@@ -1561,7 +1534,7 @@ const GRAPH_TIE_GAP = 0.05;
 function renderSharingGraph(holder, engines, pairs, uniqAgg) {
   const fmtPct = (v) => `${Math.round(v * 100)}%`;
   document.getElementById("sharegraph-sub").textContent =
-    `pairs from the suspicious-sharing matrix at ${fmtPct(GRAPH_MIN_SHARE)}+ of queries; the arrow points from the likely source (the engine whose results are less unique overall) to the engine borrowing from it; double-headed when uniqueness is too close to call; edge width tracks the share`;
+    `pairs at ${fmtPct(GRAPH_MIN_SHARE)}+ suspicious sharing; arrows point from the likely source (less-unique engine), width tracks the share`;
   const uniqPct = (e) => {
     const u = uniqAgg.get(e);
     return u?.total ? u.unique / u.total : null;
@@ -1680,9 +1653,9 @@ function uniquenessAgg(rows) {
 
 function renderUniqueness(agg) {
   renderUniquenessTable(agg, "uniqueness", "unique", "total",
-    "share of an engine's returned URLs that no engine from another family returned for the same query (variants like exa and exa-instant don't count against each other), all benchmarks, runs from the last 2 weeks");
+    "share of an engine's URLs that no other engine family returned for the same query");
   renderUniquenessTable(agg, "uniqueness-relevant", "relUnique", "relTotal",
-    "same, restricted to relevant URLs on both sides: judged HM/FullyM on the judged benches, the known-item hit on the recall benches");
+    "same, relevant URLs only: judged HM/FullyM or the known-item hit");
 }
 
 function renderUniquenessTable(agg, prefix, uKey, tKey, subText) {
