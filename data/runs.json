@@ -8071,5 +8071,13 @@
       "ndcg.json",
       "recall.json"
     ]
+  },
+  {
+    "id": "2026-08-15T0200Z",
+    "ts": "2026-08-15T02:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "ndcg.json"
+    ]
   }
 ]
