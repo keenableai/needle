@@ -151,6 +151,8 @@ document.documentElement.dataset.theme = localStorage.theme ||
   }
   #card-independence .lb-tabs button { flex: 1 1 auto; }
   .lb-panel { display: none; }
+  .chart-host { position: relative; }
+  .chart-host svg { height: auto; }
   .lb-panel.active { display: block; }
   .lb-panel h2 { display: none; }
   .lb-panel .sub { margin: 10px 0 6px; }
@@ -332,6 +334,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
   <ul>
     <li><a href="#top">Overview</a></li>
     <li><a href="#sec-results">Quality results</a></li>
+    <li><a href="#sec-trends">Slices over time</a></li>
     <li><a href="#sec-price">Quality vs price</a></li>
     <li><a href="#sec-latency">Search latency</a></li>
     <li><a href="#sec-overlap">Index independence</a></li>
@@ -453,6 +456,106 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <h2><span class="vert" data-vert="legal"></span> — 7-day mean</h2>
       <div class="sub" id="lb-legal-sub"></div>
       <div id="lb-legal"></div>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="sec-trends">Slices over time</h2>
+  <p class="section-desc">The same slices as the leaderboards, plotted
+    over the full history: each engine's score as
+    <span class="hint" title="an engine at 75% achieves 75% of the pooled ultimate engine's score at that time">% of <em>ultimate</em></span>,
+    smoothed with a 7-day rolling mean. Click legend names to highlight
+    engines.</p>
+  <div class="card" id="card-trends">
+    <div class="lb-tabs" role="tablist" aria-label="Slice trends">
+      <button role="tab" aria-selected="true" class="active" data-panel="trend-news"><span class="vert" data-vert="news"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-finance"><span class="vert" data-vert="finance"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-scholar"><span class="vert" data-vert="scholar"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-rare"><span class="vert" data-vert="agentic_rare"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-legal"><span class="vert" data-vert="legal"></span></button>
+      <div class="tab-ind" aria-hidden="true"></div>
+    </div>
+    <div class="lb-panel active" id="trend-news" role="tabpanel">
+      <h2><span class="vert" data-vert="news"></span> — nDCG@5 over time</h2>
+      <div class="sub">20 fresh queries per run, mean nDCG over all queries in each 6-hour window</div>
+    </div>
+    <div class="lb-panel" id="trend-finance" role="tabpanel">
+      <div class="lb-tabs" role="tablist" aria-label="Finance slices">
+        <button role="tab" aria-selected="true" class="active" data-panel="trend-finance-recall">overview</button>
+        <button role="tab" aria-selected="false" data-panel="trend-finance-mrr">MRR</button>
+        <button role="tab" aria-selected="false" data-panel="trend-finance-filings">filings</button>
+        <button role="tab" aria-selected="false" data-panel="trend-finance-filingdoc">filingdoc</button>
+        <div class="tab-ind" aria-hidden="true"></div>
+      </div>
+      <div class="lb-panel active" id="trend-finance-recall" role="tabpanel">
+        <h2><span class="vert" data-vert="finance"></span> — answer-recall@5 over time</h2>
+        <div class="sub">answer-recall@5, gold queries per run across all suites</div>
+      </div>
+      <div class="lb-panel" id="trend-finance-mrr" role="tabpanel">
+        <h2><span class="vert" data-vert="finance"></span> — MRR@5 over time</h2>
+        <div class="sub">MRR@5, same runs as recall</div>
+      </div>
+      <div class="lb-panel" id="trend-finance-filings" role="tabpanel">
+        <h2><span class="vert" data-vert="finance"></span> — filings recall@5 over time</h2>
+        <div class="sub">recall@5 on quarterly facts (net income, operating income, diluted EPS) in top-5 snippets</div>
+      </div>
+      <div class="lb-panel" id="trend-finance-filingdoc" role="tabpanel">
+        <h2><span class="vert" data-vert="finance"></span> — filingdoc recall@5 over time</h2>
+        <div class="sub">recall@5 on SEC filings found by a distinctive detail (accession identity)</div>
+      </div>
+    </div>
+    <div class="lb-panel" id="trend-scholar" role="tabpanel">
+      <div class="lb-tabs" role="tablist" aria-label="Scholar slices">
+        <button role="tab" aria-selected="true" class="active" data-panel="trend-scholar-recall">overview</button>
+        <button role="tab" aria-selected="false" data-panel="trend-scholar-title">title</button>
+        <button role="tab" aria-selected="false" data-panel="trend-scholar-body">body</button>
+        <button role="tab" aria-selected="false" data-panel="trend-scholar-clue">clue</button>
+        <button role="tab" aria-selected="false" data-panel="trend-scholar-tot">tot</button>
+        <div class="tab-ind" aria-hidden="true"></div>
+      </div>
+      <div class="lb-panel active" id="trend-scholar-recall" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — recall@10 over time</h2>
+        <div class="sub">recall@10, gold papers per run across all query types</div>
+      </div>
+      <div class="lb-panel" id="trend-scholar-title" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — title-query recall@10 over time</h2>
+        <div class="sub">recall@10 on papers found by their (degraded) title</div>
+      </div>
+      <div class="lb-panel" id="trend-scholar-body" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — body-query recall@10 over time</h2>
+        <div class="sub">recall@10 on papers found by a full-text-only detail</div>
+      </div>
+      <div class="lb-panel" id="trend-scholar-clue" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — clue-query recall@10 over time</h2>
+        <div class="sub">recall@10 on papers found by a natural-language question over full-text-only facts</div>
+      </div>
+      <div class="lb-panel" id="trend-scholar-tot" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — tip-of-the-tongue recall@10 over time</h2>
+        <div class="sub">recall@10 on papers found from a hedged, half-remembered description</div>
+      </div>
+    </div>
+    <div class="lb-panel" id="trend-rare" role="tabpanel">
+      <h2><span class="vert" data-vert="agentic_rare"></span> — nDCG@5 over time</h2>
+      <div class="sub">100 rare-entity queries per daily run</div>
+    </div>
+    <div class="lb-panel" id="trend-legal" role="tabpanel">
+      <div class="lb-tabs" role="tablist" aria-label="Legal slices">
+        <button role="tab" aria-selected="true" class="active" data-panel="trend-legal-recall">overview</button>
+        <button role="tab" aria-selected="false" data-panel="trend-legal-caselaw">caselaw</button>
+        <button role="tab" aria-selected="false" data-panel="trend-legal-code">code</button>
+        <div class="tab-ind" aria-hidden="true"></div>
+      </div>
+      <div class="lb-panel active" id="trend-legal-recall" role="tabpanel">
+        <h2><span class="vert" data-vert="legal"></span> — recall@5 over time</h2>
+        <div class="sub">recall@5, gold documents per run across both suites</div>
+      </div>
+      <div class="lb-panel" id="trend-legal-caselaw" role="tabpanel">
+        <h2><span class="vert" data-vert="legal"></span> — caselaw recall@5 over time</h2>
+        <div class="sub">recall@5 on federal court opinions found by caption-style queries</div>
+      </div>
+      <div class="lb-panel" id="trend-legal-code" role="tabpanel">
+        <h2><span class="vert" data-vert="legal"></span> — code recall@5 over time</h2>
+        <div class="sub">recall@5 on CFR sections found from their regulatory substance</div>
+      </div>
     </div>
   </div>
 
@@ -697,7 +800,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
         <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
-        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, runs.json</td>
+        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, runs.json, ci_scores.jsonl, ci.json</td>
         <td>data/ on this site (gh-pages)</td></tr>
       <tr><td>prompts &amp; scoring code</td>
         <td>judge prompt (shared/prompts/judgement.jinja), metric implementations, engine clients</td>
@@ -790,7 +893,8 @@ let ciData = null;
 const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
 const fmtMs = (v) => v == null ? "–" : v >= 1000 ? `${(v / 1000).toFixed(v >= 9950 ? 0 : 1)} s` : `${Math.round(v)} ms`;
 
-const fmtTime = (d) => d.toLocaleString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
+const FMT_TIME = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
+const fmtTime = (d) => FMT_TIME.format(d);
 
 function pctl(values, p) {
   const s = [...values].sort((a, b) => a - b);
@@ -809,6 +913,290 @@ function el(tag, attrs, text) {
   for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
   if (text != null) node.textContent = text;
   return node;
+}
+
+const WINDOW_MS = 6 * 3600e3;
+const ROLLING_MS = 7 * 86400e3;
+const ROLLING_NOTE = "7-day rolling mean";
+const PCT_NOTE = "% of ultimate's score";
+
+function seriesFor(bench, metric, rows) {
+  const out = {};
+  for (const e of ENGINES) out[e] = [];
+  for (const r of rows) {
+    if (r.bench === bench && r[metric] != null && r.num_scored > 0 && out[r.engine]) {
+      out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
+    }
+  }
+  for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
+  return out;
+}
+
+function rollingMean(series) {
+  const out = {};
+  for (const e of ENGINES) {
+    const pts = series[e], ts = pts.map((p) => p.t.getTime());
+    out[e] = pts.map((p, i) => {
+      let sum = 0, n = 0;
+      for (let j = i; j >= 0 && ts[i] - ts[j] <= ROLLING_MS; j--) { sum += pts[j].v; n++; }
+      return { t: p.t, v: sum / n };
+    });
+  }
+  return out;
+}
+
+function newsSeries(rows) {
+  const byEngine = new Map(ENGINES.map((e) => [e, new Map()]));
+  for (const r of rows) {
+    const buckets = byEngine.get(r.engine);
+    if (!buckets || r.bench !== "news" || r.ndcg == null || !(r.num_scored > 0)) continue;
+    const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
+    const agg = buckets.get(b) || { sum: 0, n: 0 };
+    agg.sum += r.ndcg * r.num_scored;
+    agg.n += r.num_scored;
+    buckets.set(b, agg);
+  }
+  const out = {};
+  for (const [e, buckets] of byEngine) {
+    out[e] = [...buckets]
+      .sort(([a], [b]) => a - b)
+      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
+  }
+  return out;
+}
+
+function stackLabels(labels, lo, hi, gap) {
+  labels.sort((a, b) => a.yPos - b.yPos);
+  for (const l of labels) { l.labelY = Math.max(l.yPos, lo); lo = l.labelY + gap; }
+  for (let i = labels.length - 1; i >= 0; i--) {
+    labels[i].labelY = Math.min(labels[i].labelY, hi);
+    hi = labels[i].labelY - gap;
+  }
+}
+
+function drawChart(card, series, opts) {
+  card.querySelectorAll("svg, .tooltip, .empty").forEach((n) => n.remove());
+  card.classList.add("chart-host");
+  card._mdRows = null;
+  card._sel ??= new Set();
+  const active = ENGINES.filter((e) => series[e].length);
+  if (!active.length) {
+    card.appendChild(el("div", { class: "empty" }, opts.empty || "No data yet — first scheduled run pending."));
+    return;
+  }
+  const fmt = (v) => `${v.toFixed(1)}%`;
+  const byT = new Map(active.map((e) => [e, new Map(series[e].map((p) => [p.t.getTime(), p.v]))]));
+  const stamps = [...new Set(active.flatMap((e) => [...byT.get(e).keys()]))].sort((a, b) => a - b);
+  card._mdRows = () => {
+    const rows = [["time (UTC)", ...active.map(displayName)]];
+    for (const t of stamps) {
+      rows.push([fmtTime(new Date(t)), ...active.map((e) => {
+        const v = byT.get(e).get(t);
+        return v == null ? "–" : fmt(v);
+      })]);
+    }
+    return rows;
+  };
+  const W = 860, H = 220;
+  const M = { top: 12, right: 92, bottom: 26, left: 40 };
+  const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
+  let t0 = stamps[0], t1 = stamps[stamps.length - 1];
+  if (t0 === t1) { t0 -= 3600e3; t1 += 3600e3; }
+  const x = (t) => M.left + ((t - t0) / (t1 - t0)) * iw;
+  const y = (v) => M.top + (1 - v / opts.max) * ih;
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, tabindex: "0", role: "img", "aria-label": opts.label });
+
+  for (const gv of [0, 25, 50, 75, 100]) {
+    if (gv) svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(gv), y2: y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.left - 6, y: y(gv) + 3, "text-anchor": "end", class: "axis-text" }, `${gv}%`));
+  }
+  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(0), y2: y(0), stroke: "var(--baseline)", "stroke-width": 1 }));
+  const nTicks = 5;
+  for (let i = 0; i < nTicks; i++) {
+    const t = t0 + ((t1 - t0) * i) / (nTicks - 1);
+    svg.appendChild(el("text", { x: x(t), y: H - 8, "text-anchor": i === 0 ? "start" : i === nTicks - 1 ? "end" : "middle", class: "axis-text" }, fmtTime(new Date(t))));
+  }
+
+  const byLast = [...active].sort((a, b) => series[b].at(-1).v - series[a].at(-1).v);
+  const sel = active.filter((e) => card._sel.has(e));
+  const highlight = new Set(sel.length ? sel : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
+  if (!sel.length) highlight.add(HOME_ENGINE);
+  highlight.add(ULTIMATE_ENGINE);
+  const endLabels = [];
+  for (const e of [...active].sort((a, b) => highlight.has(a) - highlight.has(b))) {
+    const pts = series[e];
+    const hot = highlight.has(e);
+    const d = pts.map((p, i) => `${i ? "L" : "M"}${x(p.t.getTime()).toFixed(1)},${y(p.v).toFixed(1)}`).join("");
+    svg.appendChild(el("path", { d, fill: "none", stroke: hot ? colorOf(e) : "var(--baseline)", "stroke-width": hot ? 2 : 1.25, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    if (!hot) continue;
+    const last = pts[pts.length - 1];
+    svg.appendChild(markerEl(e, x(last.t.getTime()), y(last.v), 4));
+    endLabels.push({ e, yPos: y(last.v), xPos: x(last.t.getTime()) });
+  }
+  stackLabels(endLabels, M.top + 4, M.top + ih, 13);
+  for (const l of endLabels) {
+    if (Math.abs(l.labelY - l.yPos) > 3) {
+      svg.appendChild(el("line", { x1: l.xPos + 5, y1: l.yPos, x2: l.xPos + 11, y2: l.labelY, stroke: "var(--baseline)", "stroke-width": 1 }));
+    }
+    svg.appendChild(el("text", { x: l.xPos + 13, y: l.labelY + 4, class: "end-label" }, displayName(l.e)));
+  }
+
+  const cross = el("line", { y1: M.top, y2: M.top + ih, stroke: "var(--baseline)", "stroke-width": 1, visibility: "hidden" });
+  svg.appendChild(cross);
+  const hoverDots = {};
+  for (const e of active) {
+    hoverDots[e] = el("circle", { r: 4, fill: colorOf(e), stroke: "var(--surface-1)", "stroke-width": 2, visibility: "hidden" });
+    svg.appendChild(hoverDots[e]);
+  }
+
+  const tip = el("div", { class: "tooltip" });
+  card.appendChild(tip);
+
+  function showAt(t) {
+    cross.setAttribute("x1", x(t)); cross.setAttribute("x2", x(t));
+    cross.setAttribute("visibility", "visible");
+    tip.replaceChildren();
+    tip.appendChild(el("div", { class: "when" }, fmtTime(new Date(t))));
+    const atT = [];
+    for (const e of active) {
+      const v = byT.get(e).get(t);
+      hoverDots[e].setAttribute("visibility", v == null ? "hidden" : "visible");
+      if (v == null) continue;
+      hoverDots[e].setAttribute("cx", x(t)); hoverDots[e].setAttribute("cy", y(v));
+      atT.push({ e, v });
+    }
+    atT.sort((a, b) => b.v - a.v);
+    for (const { e, v } of atT) {
+      const row = el("div", { class: "row" });
+      row.append(engineKey(e), el("span", { class: "val" }, fmt(v)), el("span", { class: "name" }, displayName(e)));
+      tip.appendChild(row);
+    }
+    tip.style.display = "block";
+    const rect = card.getBoundingClientRect();
+    const px = (x(t) / W) * rect.width;
+    tip.style.left = Math.min(px + 14, rect.width - tip.offsetWidth - 8) + "px";
+    tip.style.top = "36px";
+  }
+  let shownIdx = -1;
+  function showIdx(i) {
+    if (i === shownIdx) return;
+    shownIdx = i;
+    showAt(stamps[i]);
+  }
+  function hide() {
+    shownIdx = -1;
+    cross.setAttribute("visibility", "hidden");
+    tip.style.display = "none";
+    for (const e of active) hoverDots[e].setAttribute("visibility", "hidden");
+  }
+  let focusIdx = stamps.length - 1;
+  svg.addEventListener("pointermove", (ev) => {
+    const rect = svg.getBoundingClientRect();
+    const t = t0 + (((ev.clientX - rect.left) / rect.width) * W - M.left) / iw * (t1 - t0);
+    let best = 0;
+    for (let i = 1; i < stamps.length; i++) {
+      if (Math.abs(stamps[i] - t) < Math.abs(stamps[best] - t)) best = i;
+    }
+    focusIdx = best;
+    showIdx(best);
+  });
+  svg.addEventListener("pointerleave", hide);
+  svg.addEventListener("focus", () => showIdx(focusIdx));
+  svg.addEventListener("blur", hide);
+  svg.addEventListener("keydown", (ev) => {
+    if (ev.key === "ArrowLeft") focusIdx = Math.max(0, focusIdx - 1);
+    else if (ev.key === "ArrowRight") focusIdx = Math.min(stamps.length - 1, focusIdx + 1);
+    else return;
+    ev.preventDefault();
+    showIdx(focusIdx);
+  });
+  let legend = card.querySelector(".legend");
+  card.insertBefore(svg, legend);
+  if (!legend) {
+    legend = el("div", { class: "legend" });
+    for (const e of active) {
+      const btn = el("button", { type: "button" });
+      btn.append(engineKey(e), document.createTextNode(displayName(e)));
+      if (e === ULTIMATE_ENGINE) {
+        btn.disabled = true;
+        btn.title = "always highlighted";
+      } else {
+        btn.addEventListener("click", () => {
+          if (!card._sel.delete(e)) card._sel.add(e);
+          drawChart(card, series, opts);
+        });
+      }
+      legend.appendChild(btn);
+    }
+    card.appendChild(legend);
+  }
+  active.forEach((e, i) => {
+    const btn = legend.children[i];
+    if (btn.disabled) return;
+    const on = card._sel.has(e);
+    btn.setAttribute("aria-pressed", on);
+    btn.title = on ? `stop highlighting ${displayName(e)}` : `highlight ${displayName(e)} in this chart`;
+    btn.firstChild.style.background = highlight.has(e) ? colorOf(e) : "var(--baseline)";
+  });
+}
+
+function drawSlice(cardId, series, empty) {
+  const card = document.getElementById(cardId);
+  card.querySelector(".sub").textContent += `; ${PCT_NOTE}, ${ROLLING_NOTE}`;
+  const title = card.querySelector("h2").textContent.replace(/\s+/g, " ").trim();
+  const rolled = rollingMean(series);
+  const ult = new Map((rolled[ULTIMATE_ENGINE] || []).map((p) => [p.t.getTime(), p.v]));
+  const pct = {};
+  let maxV = 100;
+  for (const e of ENGINES) {
+    pct[e] = [];
+    for (const p of rolled[e]) {
+      const u = ult.get(p.t.getTime());
+      if (!u) continue;
+      const v = (p.v / u) * 100;
+      if (v > maxV) maxV = v;
+      pct[e].push({ t: p.t, v });
+    }
+  }
+  drawChart(card, pct, { max: maxV * 1.05, empty,
+    label: `${title} per engine, ${PCT_NOTE}, ${ROLLING_NOTE}` });
+}
+
+const TREND_SLICES = [
+  ["trend-rare", "agentic_rare", "ndcg"],
+  ["trend-finance-recall", "finance", "recall"],
+  ["trend-finance-mrr", "finance", "mrr"],
+  ["trend-finance-filings", "finance", "filings_recall"],
+  ["trend-finance-filingdoc", "finance", "filingdoc_recall"],
+  ["trend-scholar-recall", "scholar", "recall"],
+  ["trend-scholar-title", "scholar", "title_recall"],
+  ["trend-scholar-body", "scholar", "body_recall"],
+  ["trend-scholar-clue", "scholar", "clue_recall"],
+  ["trend-scholar-tot", "scholar", "tot_recall"],
+  ["trend-legal-recall", "legal", "recall"],
+  ["trend-legal-caselaw", "legal", "caselaw_recall"],
+  ["trend-legal-code", "legal", "code_recall"],
+];
+
+let drawAllTrends = null;
+
+function drawTrends(rows) {
+  const pending = new Map([["trend-news", () => drawSlice("trend-news", newsSeries(rows))]]);
+  for (const [id, bench, metric] of TREND_SLICES) {
+    pending.set(id, () => drawSlice(id, seriesFor(bench, metric, rows),
+      `No ${verticalName(bench)} data yet — collected daily.`));
+  }
+  const flush = (all) => {
+    for (const [id, draw] of pending) {
+      if (!all && document.getElementById(id).closest(".lb-panel:not(.active)")) continue;
+      pending.delete(id);
+      draw();
+    }
+  };
+  document.getElementById("card-trends").addEventListener("click", () => flush(false));
+  drawAllTrends = () => flush(true);
+  flush(false);
 }
 
 function wmean(rows, metric, weightMetric = "num_scored") {
@@ -844,14 +1232,14 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
   document.getElementById(subId).textContent =
     `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
-  const ci = ciData?.benches?.[bench]?.engines || null;
+  const ci = ciData?.benches?.[bench] || null;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
   head.appendChild(el("th", { class: "num" }, metrics[0][1]));
   if (ci) {
     const th = el("th", { class: "num ci-col" }, "95% CI");
-    th.title = `${Math.round((ciData.confidence || 0.95) * 100)}% bootstrap interval on the ${metrics[0][1]} column (${ciData.benches[bench].method}, ${ciData.resamples} resamples, ${ciData.window_days}-day window ending ${ciData.window_end})`;
+    th.title = `${Math.round((ciData.confidence || 0.95) * 100)}% bootstrap interval on the ${metrics[0][1]} column (${ciData.method}, ${ciData.resamples} resamples, ${ciData.window_days}-day window ending ${ciData.window_end})`;
     head.appendChild(th);
   }
   for (const [, label] of metrics.slice(1)) head.appendChild(el("th", { class: "num" }, label));
@@ -1098,7 +1486,7 @@ function renderStandings(rows) {
     for (const [px, py, i, share] of pts) {
       const dot = markerEl(x.e, px, py, 4);
       const [bench, , label] = STANDINGS_BENCHES[i];
-      const c = ciData?.benches?.[bench]?.engines?.[x.e];
+      const c = ciData?.benches?.[bench]?.[x.e];
       dot.appendChild(el("title", {}, `${displayName(x.e)} · ${verticalName(bench)}: `
         + `${fmtPct(share)} of ultimate · raw ${label} ${fmt3(x.shares[i].v)} vs ultimate ${fmt3(ult[i])}`
         + (benchBest[i] != null ? ` · best engine ${fmtPct(benchBest[i])}` : "")
@@ -1252,34 +1640,24 @@ function renderQualityPrice(rows) {
     "overall quality — 7-day mean share of ultimate"));
   svg.appendChild(el("text", { x: M.left + iw / 2, y: H - 6, "text-anchor": "middle", class: "qp-head" },
     "$ per 1,000 queries — lowest public price"));
-  const items = pts.map((p) => ({ ...p, px: X(p.usd), py: Y(p.q), right: X(p.usd) < M.left + iw - 110 }));
+  const items = pts.map((p) => ({ ...p, px: X(p.usd), yPos: Y(p.q), right: X(p.usd) < M.left + iw - 110 }));
   const clusters = new Map();
   for (const it of items) {
     const k = `${it.usd}|${it.right}`;
     clusters.set(k, [...(clusters.get(k) || []), it]);
   }
-  const gap = 14;
-  for (const group of clusters.values()) {
-    group.sort((a, b) => a.py - b.py);
-    let lo = M.top + 8;
-    for (const it of group) { it.ly = Math.max(it.py, lo); lo = it.ly + gap; }
-    let hi = M.top + ih - 2;
-    for (let i = group.length - 1; i >= 0; i--) {
-      group[i].ly = Math.min(group[i].ly, hi);
-      hi = group[i].ly - gap;
-    }
-  }
+  for (const group of clusters.values()) stackLabels(group, M.top + 8, M.top + ih - 2, 14);
   for (const it of items) {
     const s = it.right ? 1 : -1;
-    if (Math.abs(it.ly - it.py) > 4) {
-      svg.appendChild(el("line", { x1: it.px + s * 6, y1: it.py, x2: it.px + s * 12, y2: it.ly,
+    if (Math.abs(it.labelY - it.yPos) > 4) {
+      svg.appendChild(el("line", { x1: it.px + s * 6, y1: it.yPos, x2: it.px + s * 12, y2: it.labelY,
         stroke: "var(--baseline)", "stroke-width": 1 }));
     }
-    svg.appendChild(el("text", { x: it.px + s * 14, y: it.ly + 4,
+    svg.appendChild(el("text", { x: it.px + s * 14, y: it.labelY + 4,
       "text-anchor": it.right ? "start" : "end", class: "qp-name" }, displayName(it.e)));
   }
   for (const it of items) {
-    const dot = markerEl(it.e, it.px, it.py, 5);
+    const dot = markerEl(it.e, it.px, it.yPos, 5);
     dot.appendChild(el("title", {},
       `${displayName(it.e)} — ${fmtPct(it.q)} of ultimate at ${fmtUsd(it.usd)} / 1k queries (${it.plan})`));
     svg.appendChild(dot);
@@ -2024,6 +2402,7 @@ function rowsToMarkdown(rows) {
 }
 
 function buildMarkdown() {
+  drawAllTrends?.();
   const clean = (s) => s.replace(/\s+/g, " ").trim();
   const lines = ["# NEEDLE — search engine benchmarks"];
   const updated = document.getElementById("updated").textContent;
@@ -2052,6 +2431,7 @@ document.getElementById("export-md").addEventListener("click", () => {
 document.getElementById("export-pdf").addEventListener("click", () => window.print());
 let themeBeforePrint = null;
 window.addEventListener("beforeprint", () => {
+  drawAllTrends?.();
   themeBeforePrint = document.documentElement.dataset.theme;
   document.documentElement.dataset.theme = "light";
 });
@@ -2085,7 +2465,7 @@ for (const bar of document.querySelectorAll(".lb-tabs")) {
     });
   }
   move();
-  window.addEventListener("resize", move);
+  new ResizeObserver(move).observe(bar);
 }
 
 document.getElementById("theme-toggle").addEventListener("click", () => {
@@ -2123,6 +2503,7 @@ async function main() {
   }
 
   renderLeaderboards(history);
+  drawTrends(history);
   renderLatencySummary(history);
   renderAll();
   const uniqAgg = uniquenessAgg(inRange(uniquenessRows, OVERLAP_RANGE_MS).filter((r) => !HIDDEN_ENGINES.has(r.engine)));
