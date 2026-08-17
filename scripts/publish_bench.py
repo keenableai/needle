@@ -145,18 +145,12 @@ def publish(
     overlap = []
     uniqueness = []
     score_rows = []
-    for bench, path, to_rows, latest, archive_name in (
-        ("news", ndcg, news_rows, "latest_news.json", "ndcg.json"),
-        ("finance", recall, finance_rows, "latest_finance.json", "recall.json"),
-        (
-            "agentic_rare",
-            agentic_rare,
-            agentic_rare_rows,
-            "latest_agentic_rare.json",
-            "agentic_rare.json",
-        ),
-        ("scholar", scholar, scholar_rows, "latest_scholar.json", "scholar.json"),
-        ("legal", legal, legal_rows, "latest_legal.json", "legal.json"),
+    for bench, path, to_rows, archive_name in (
+        ("news", ndcg, news_rows, "ndcg.json"),
+        ("finance", recall, finance_rows, "recall.json"),
+        ("agentic_rare", agentic_rare, agentic_rare_rows, "agentic_rare.json"),
+        ("scholar", scholar, scholar_rows, "scholar.json"),
+        ("legal", legal, legal_rows, "legal.json"),
     ):
         if not path:
             continue
@@ -166,7 +160,7 @@ def publish(
         overlap.extend(overlap_rows(report, ts=ts))
         uniqueness.extend(uniqueness_rows(report, ts=ts))
         score_rows.append(score_row(report, bench, ts))
-        write_json(slim_report(report), str(data / latest))
+        write_json(slim_report(report), str(data / f"latest_{bench}.json"))
         (run_dir / archive_name).write_text(raw, encoding="utf-8")
     for path, archive_name in (
         (fresh, "fresh.jsonl"),
