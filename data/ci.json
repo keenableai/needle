@@ -2,7 +2,7 @@
   "confidence": 0.95,
   "resamples": 10000,
   "window_days": 7,
-  "window_end": "2026-08-17T20:39Z",
+  "window_end": "2026-08-17T21:38Z",
   "method": "percentile cluster bootstrap, wider of query and run clustering",
   "benches": {
     "agentic_rare": {
@@ -223,64 +223,64 @@
     },
     "news": {
       "bing": {
-        "point": 0.3873,
-        "lo": 0.3767,
-        "hi": 0.3978
+        "point": 0.3877,
+        "lo": 0.3773,
+        "hi": 0.398
       },
       "ceramic": {
-        "point": 0.0676,
-        "lo": 0.0605,
-        "hi": 0.0749
+        "point": 0.0679,
+        "lo": 0.0609,
+        "hi": 0.0751
       },
       "exa": {
-        "point": 0.6336,
-        "lo": 0.6187,
-        "hi": 0.6486
+        "point": 0.6339,
+        "lo": 0.6186,
+        "hi": 0.6488
       },
       "exa-instant": {
-        "point": 0.3894,
-        "lo": 0.3724,
-        "hi": 0.4062
+        "point": 0.3892,
+        "lo": 0.3725,
+        "hi": 0.406
       },
       "google": {
         "point": 0.3031,
-        "lo": 0.2903,
-        "hi": 0.3158
+        "lo": 0.2905,
+        "hi": 0.3156
       },
       "keenable": {
-        "point": 0.6206,
-        "lo": 0.6063,
-        "hi": 0.6343
+        "point": 0.62,
+        "lo": 0.6057,
+        "hi": 0.6337
       },
       "keenable-realtime": {
-        "point": 0.6257,
-        "lo": 0.61,
-        "hi": 0.6404
+        "point": 0.625,
+        "lo": 0.6096,
+        "hi": 0.6399
       },
       "octen": {
-        "point": 0.3515,
-        "lo": 0.3363,
-        "hi": 0.3669
+        "point": 0.3525,
+        "lo": 0.3374,
+        "hi": 0.3675
       },
       "parallel": {
-        "point": 0.3354,
-        "lo": 0.3236,
-        "hi": 0.3471
+        "point": 0.3361,
+        "lo": 0.3245,
+        "hi": 0.3477
       },
       "parallel-turbo": {
-        "point": 0.3273,
-        "lo": 0.3108,
-        "hi": 0.3439
+        "point": 0.327,
+        "lo": 0.3104,
+        "hi": 0.3435
       },
       "perplexity": {
-        "point": 0.5324,
-        "lo": 0.5186,
-        "hi": 0.5457
+        "point": 0.5328,
+        "lo": 0.5183,
+        "hi": 0.5462
       },
       "tavily": {
-        "point": 0.3425,
-        "lo": 0.3292,
-        "hi": 0.3557
+        "point": 0.3424,
+        "lo": 0.329,
+        "hi": 0.3558
       },
       "ultimate": {
         "point": 1.0,
@@ -288,9 +288,9 @@
         "hi": 1.0
       },
       "you": {
-        "point": 0.5393,
-        "lo": 0.5247,
-        "hi": 0.5541
+        "point": 0.5397,
+        "lo": 0.525,
+        "hi": 0.5542
       }
     },
     "scholar": {

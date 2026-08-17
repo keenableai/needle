@@ -4,150 +4,145 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NEEDLE — search engine benchmarks</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230d0d0d'/%3E%3Ccircle cx='14' cy='14' r='9' fill='none' stroke='%23e1e0d9' stroke-width='2.5'/%3E%3Cline x1='21' y1='21' x2='27' y2='27' stroke='%23e1e0d9' stroke-width='3.5' stroke-linecap='round'/%3E%3Crect x='9' y='14.5' width='2.8' height='5' rx='1' fill='%232a78d6'/%3E%3Crect x='12.6' y='11.5' width='2.8' height='8' rx='1' fill='%231baf7a'/%3E%3Crect x='16.2' y='9' width='2.8' height='10.5' rx='1' fill='%23eda100'/%3E%3C/svg%3E">
-<script>
-document.documentElement.dataset.theme = localStorage.theme ||
-  (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 177.922 102.29%22 width%3D%22177.922%22 height%3D%22102.29%22 role%3D%22img%22 aria-label%3D%22Keenable icon%22%3E%3Cg transform%3D%22translate(0,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(51.255,21.698)%22 d%3D%22M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3Cg transform%3D%22translate(81.137,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(49.16,21.698)%22 d%3D%22M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@300;400;500&family=TASA+Orbiter:wght@400..800&display=swap">
 <style>
   :root {
     --measure: 760px;
     color-scheme: light;
-    --surface-1: #fcfcfb;
-    --page: #f9f9f7;
-    --text-primary: #0b0b0b;
-    --text-secondary: #52514e;
-    --text-muted: #898781;
-    --grid: #e1e0d9;
-    --baseline: #c3c2b7;
-    --border: rgba(11, 11, 11, 0.10);
-    --delta-up: #006300;
-    --series-1: #2a78d6;
-    --series-2: #1baf7a;
-    --series-3: #eda100;
-    --series-4: #008300;
-    --series-5: #4a3aa7;
-    --series-6: #e34948;
-    --series-7: #e87ba4;
-    --series-8: #eb6834;
-    --series-9: #0898bd;
-    --series-10: #9a5c14;
-    --series-11: #a256c9;
-    --series-12: #5f7d00;
-    --seg-track: #f0efeb;
-    --seg-thumb: #fcfcfb;
-  }
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --surface-1: #1a1a19;
-    --page: #0d0d0d;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --grid: #2c2c2a;
-    --baseline: #383835;
-    --border: rgba(255, 255, 255, 0.10);
-    --delta-up: #0ca30c;
-    --series-1: #3987e5;
-    --series-2: #199e70;
-    --series-3: #c98500;
-    --series-4: #008300;
-    --series-5: #9085e9;
-    --series-6: #e66767;
-    --series-7: #d55181;
-    --series-8: #d95926;
-    --series-9: #1a9fbe;
-    --series-10: #b0752c;
-    --series-11: #b06fd4;
-    --series-12: #8fa838;
-    --seg-track: #232322;
-    --seg-thumb: #3b3b38;
+    --keenable-white: #FFFFFF;
+    --keenable-black: #2A2A2A;
+    --keenable-blue: #005CFF;
+    --keenable-orange: #F25F34;
+    --surface-1: #FFFFFF;
+    --surface-sunken: #F9F9F9;
+    --page: #FFFFFF;
+    --text-primary: #2A2A2A;
+    --text-secondary: #646464;
+    --text-muted: #8D8D8D;
+    --grid: #DDDDDD;
+    --baseline: #BBBBBB;
+    --border: #DDDDDD;
+    --track: #F0F0F0;
+    --link: #0A57E8;
+    --expressive: #F25F34;
+    --expressive-text: #D34517;
+    --home-tint: #EAF2FF;
+    --delta-up: #0A57E8;
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --font-display: "Stack Sans", "Stack Sans Headline", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Stack Sans", "Stack Sans Headline", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-utility: "TASA Orbiter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --series-1: #005CFF;
+    --series-2: #74A6FF;
+    --series-3: #009798;
+    --series-4: #10602D;
+    --series-5: #7F4188;
+    --series-6: #994920;
+    --series-7: #CD7E5A;
+    --series-8: #563E98;
+    --series-9: #8877C8;
+    --series-10: #A63C72;
+    --series-11: #6F8433;
+    --series-12: #814800;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--page);
     color: var(--text-primary);
-    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    font: 400 14px/1.5 var(--font-body);
+    letter-spacing: 0.010em;
+    counter-reset: sec;
   }
+  a { color: var(--link); }
   .wrap { max-width: calc(var(--measure) + 40px); margin: 0 auto; padding: 28px 20px 56px; }
+  .brand { display: inline-block; margin: 4px 0 34px; }
+  .brand svg { display: block; height: 22px; width: auto; }
   header h1 {
-    font-size: 26px; font-weight: 650; margin: 0 0 4px;
-    letter-spacing: -0.01em; text-wrap: balance;
+    font-family: var(--font-display); font-size: 38px; font-weight: 400;
+    line-height: 0.92; letter-spacing: 0.010em; margin: 0 0 14px; text-wrap: balance;
   }
   header p { margin: 4px 0 0; color: var(--text-secondary); }
   .fm p, .fm ul { max-width: var(--measure); }
   .fm .hook {
-    font-size: 14px; font-weight: 600; color: var(--text-primary);
+    font-size: 15px; font-weight: 500; color: var(--text-primary);
     margin: 12px 0 8px;
   }
   .fm p {
-    margin: 0 0 8px; font-size: 13px; line-height: 1.55;
+    margin: 0 0 10px; font-size: 14px; font-weight: 300; line-height: 1.6;
     color: var(--text-secondary);
   }
-  .fm ul { margin: 0 0 10px; padding-left: 18px; }
+  .fm ul { margin: 0 0 12px; padding-left: 18px; }
   .fm li {
-    font-size: 13px; line-height: 1.55; margin-bottom: 3px;
+    font-size: 14px; font-weight: 300; line-height: 1.6; margin-bottom: 4px;
     color: var(--text-secondary);
   }
-  .fm b { font-weight: 600; color: var(--text-primary); }
+  .fm b { font-weight: 500; color: var(--text-primary); }
   .fm h3 {
-    font-size: 13px; font-weight: 600; color: var(--text-primary);
+    font-size: 14px; font-weight: 500; color: var(--text-primary);
     margin: 12px 0 3px;
   }
-  .fm .lastrun { font-weight: 600; color: var(--text-primary); }
-  .fm .cadence { font-weight: 400; color: var(--text-muted); }
-  header { margin-bottom: 20px; position: relative; padding-top: 34px; }
+  .fm .lastrun { font-weight: 400; color: var(--text-primary); }
+  .fm .lastrun #updated { font-weight: 500; }
+  .fm .cadence { font-weight: 300; color: var(--text-muted); }
+  header { margin-bottom: 20px; position: relative; }
   header a { color: inherit; }
   .header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 6px; }
   .header-actions button {
     display: flex; align-items: center; justify-content: center;
-    height: 30px; padding: 0 9px;
-    background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px;
+    height: 30px; padding: 0 10px;
+    background: var(--surface-1); border: 1px solid var(--grid); border-radius: 0;
     color: var(--text-secondary); cursor: pointer;
-    font: 600 11px system-ui, -apple-system, "Segoe UI", sans-serif;
+    font: 500 11px var(--font-utility); letter-spacing: -0.004em;
+    transition: color 0.12s var(--ease), border-color 0.12s var(--ease), transform 0.12s var(--ease);
   }
-  .header-actions button:hover { color: var(--text-primary); }
-  #theme-toggle { width: 30px; padding: 0; }
-  #theme-toggle .sun { display: none; }
-  :root[data-theme="dark"] #theme-toggle .sun { display: block; }
-  :root[data-theme="dark"] #theme-toggle .moon { display: none; }
+  .header-actions button:hover { color: var(--text-primary); border-color: var(--baseline); }
+  .header-actions button:active { transform: scale(0.94); }
 
   td .key {
     display: inline-block; width: 14px; height: 3px; border-radius: 2px;
     vertical-align: middle; margin-right: 6px;
   }
 
-  .legend { display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center; margin: 4px 0; color: var(--text-secondary); font-size: 12px; }
-  .legend .key { display: inline-block; width: 14px; height: 2px; border-radius: 1px; vertical-align: middle; margin-right: 5px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center; margin: 6px 0 4px; color: var(--text-secondary); font-size: 12px; }
+  .legend .key { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 6px; }
+  .key-logo {
+    width: 14px; height: 14px; object-fit: contain;
+    vertical-align: -2px; margin-right: 6px;
+    transition: opacity 0.12s var(--ease);
+  }
   .legend button {
     display: inline-flex; align-items: center; padding: 2px 7px;
-    background: none; border: 1px solid transparent; border-radius: 7px;
+    background: none; border: 1px solid transparent; border-radius: 0;
     color: inherit; cursor: pointer; font: inherit;
+    transition: border-color 0.12s var(--ease), color 0.12s var(--ease);
   }
   .legend button:hover:not(:disabled) { border-color: var(--grid); }
   .legend button:disabled { cursor: default; }
-  .legend button[aria-pressed="true"] { border-color: var(--border); background: var(--page); color: var(--text-primary); }
+  .legend button[aria-pressed="true"] { border-color: var(--keenable-blue); color: var(--text-primary); }
 
   .grid2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .lb-tabs {
     position: relative; display: flex;
-    background: var(--seg-track); border-radius: 8px; padding: 3px;
+    background: none; border-bottom: 1px solid var(--grid);
+    border-radius: 0; padding: 0; margin-bottom: 10px;
   }
   .lb-tabs button {
     position: relative; z-index: 1; flex: 1 1 0; min-width: 0;
-    font: inherit; font-size: 13px; font-weight: 500;
-    padding: 6px 8px; cursor: pointer;
-    color: var(--text-secondary); background: none; border: none; border-radius: 6px;
-    transition: color 0.15s ease;
+    font: inherit; font-size: 13px; font-weight: 400;
+    padding: 8px 8px 9px; cursor: pointer;
+    color: var(--text-secondary); background: none; border: none; border-radius: 0;
+    transition: color 0.12s var(--ease);
   }
   .lb-tabs button:hover { color: var(--text-primary); }
   .lb-tabs button.active { color: var(--text-primary); }
   #lb-ind, .tab-ind {
-    position: absolute; top: 0; left: 0;
-    background: var(--seg-thumb); border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10), 0 1px 2px rgba(0, 0, 0, 0.06);
-    transition: transform 0.18s ease, width 0.18s ease;
+    position: absolute; top: 0; left: 0; height: 2px;
+    background: var(--keenable-blue);
+    transition: transform 0.22s var(--ease), width 0.22s var(--ease);
   }
   #card-independence .lb-tabs button { flex: 1 1 auto; }
   .lb-panel { display: none; }
@@ -158,16 +153,22 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .lb-panel .sub { margin: 10px 0 6px; }
   @media (max-width: 720px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
   .section-title {
-    font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em;
-    color: var(--text-primary); margin: 38px 0 8px; padding-bottom: 7px;
-    border-bottom: 2px solid var(--baseline); scroll-margin-top: 16px;
+    font-family: var(--font-display); font-size: 30px; font-weight: 400;
+    line-height: 0.9; letter-spacing: 0.010em;
+    color: var(--text-primary); margin: 64px 0 10px; padding-top: 18px;
+    border-top: 1px solid var(--grid); scroll-margin-top: 16px;
   }
-  .section-desc { color: var(--text-secondary); font-size: 13px; margin: 0 0 12px; }
+  .section-title::before {
+    counter-increment: sec; content: counter(sec, decimal-leading-zero);
+    display: block; margin-bottom: 12px;
+    font: 500 12px/1 var(--font-utility); letter-spacing: -0.004em;
+    color: var(--text-muted);
+  }
+  .section-desc { color: var(--text-secondary); font-size: 13px; font-weight: 300; line-height: 1.6; margin: 0 0 14px; }
   .hint { border-bottom: 1px dotted var(--text-muted); cursor: help; }
-  .vert { font-variant: small-caps; letter-spacing: 0.015em; }
   .subsection-title {
-    font-size: 15px; font-weight: 600; color: var(--text-primary);
-    margin: 22px 0 6px; scroll-margin-top: 16px;
+    font-family: var(--font-display); font-size: 18px; font-weight: 500;
+    color: var(--text-primary); margin: 26px 0 6px; scroll-margin-top: 16px;
   }
 
   #toc { display: none; }
@@ -178,7 +179,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
       font-size: 13px; line-height: 1.5;
     }
     #toc .toc-head {
-      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+      font: 500 11px var(--font-utility); letter-spacing: -0.004em;
       color: var(--text-muted); margin-bottom: 8px;
     }
     #toc ul { list-style: none; margin: 0; padding: 0; }
@@ -188,31 +189,42 @@ document.documentElement.dataset.theme = localStorage.theme ||
     #toc a:hover { color: var(--text-primary); }
   }
   .card {
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 10px; padding: 14px 16px 8px; margin-bottom: 12px;
+    background: var(--surface-1); border: 1px solid var(--grid);
+    border-radius: 0; padding: 16px 18px 10px; margin-bottom: 14px;
     position: relative;
   }
-  .card h2 { font-size: 14px; font-weight: 600; margin: 0; }
-  .card .sub { color: var(--text-muted); font-size: 12px; margin: 1px 0 6px; }
+  .card h2 { font-family: var(--font-display); font-size: 16px; font-weight: 500; margin: 0; }
+  .card .sub { color: var(--text-muted); font-size: 12px; line-height: 1.6; margin: 2px 0 8px; }
   .card .sub a { color: inherit; }
   .card svg { display: block; width: 100%; }
-  .card svg:focus { outline: 1px solid var(--baseline); outline-offset: 2px; }
+  .card svg:focus { outline: 2px solid var(--keenable-blue); outline-offset: 2px; }
   .empty { color: var(--text-muted); padding: 32px 0 40px; text-align: center; }
+
+  .stats { display: flex; gap: 48px; flex-wrap: wrap; margin: 18px 0 8px; }
+  .stat-num {
+    display: block; font-family: var(--font-display); font-size: 72px;
+    font-weight: 300; line-height: 0.9; letter-spacing: 0.010em;
+    color: var(--text-primary); font-variant-numeric: tabular-nums;
+  }
+  .stat-num.gap { color: var(--expressive); }
+  .stat-cap {
+    font: 400 12px/1.6 var(--font-utility); letter-spacing: -0.004em;
+    color: var(--text-secondary); margin-top: 8px; max-width: 250px;
+  }
 
   .tooltip {
     position: absolute; pointer-events: none; display: none; z-index: 2;
-    background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 8px; padding: 8px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    background: var(--surface-1); border: 1px solid var(--grid);
+    border-radius: 0; padding: 8px 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     font-size: 12px; min-width: 130px;
   }
   .tooltip .when { color: var(--text-muted); margin-bottom: 4px; }
   .tooltip .row { display: flex; align-items: center; gap: 6px; }
-  .tooltip .row .key { width: 12px; height: 2px; border-radius: 1px; flex: none; }
-  .tooltip .row .val { font-weight: 600; }
+  .tooltip .row .key { width: 12px; height: 3px; flex: none; }
+  .tooltip .row .val { font-weight: 500; }
   .tooltip .row .name { color: var(--text-secondary); }
 
-  .home { background: color-mix(in srgb, var(--home, transparent) 12%, transparent); }
-  td.home, th.home { border-radius: 4px; }
+  .home { background: var(--home-tint); }
   tr.ultimate td { color: var(--text-muted); font-style: italic; }
 
   table { border-collapse: collapse; width: 100%; font-size: 13px; }
@@ -221,21 +233,22 @@ document.documentElement.dataset.theme = localStorage.theme ||
   td.ci-col { color: var(--text-muted); white-space: nowrap; }
   .slower { color: var(--text-muted); font-size: 11px; }
   th.ci-col { cursor: help; }
-  th { color: var(--text-secondary); font-weight: 500; }
+  th { color: var(--text-secondary); font: 500 12px/1.6 var(--font-utility); letter-spacing: -0.004em; }
   tr:last-child td { border-bottom: none; }
-  .best { font-weight: 600; }
+  .best { font-weight: 500; color: #0E0E0E; }
 
   details { margin-top: 14px; }
   summary { cursor: pointer; color: var(--text-secondary); }
-  .axis-text { fill: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-  .end-label { fill: var(--text-secondary); font-size: 11px; }
+  svg text { letter-spacing: normal; }
+  .axis-text { fill: var(--text-muted); font-family: var(--font-utility); font-size: 11px; letter-spacing: -0.004em; font-variant-numeric: tabular-nums; }
+  .end-label { fill: var(--text-secondary); font-family: var(--font-body); font-size: 11.5px; }
 
   .runbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0 12px; }
   .runbar select {
     font: inherit; color: var(--text-primary); background: var(--surface-1);
-    border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px;
+    border: 1px solid var(--grid); border-radius: 0; padding: 4px 8px;
   }
-  .qrow { border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; }
+  .qrow { border: 1px solid var(--grid); border-radius: 0; margin: 8px 0; }
   .qrow > summary {
     list-style: none; display: flex; gap: 10px; align-items: baseline;
     padding: 8px 12px; color: var(--text-primary);
@@ -253,13 +266,15 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .result .judgement {
     display: flex; gap: 8px; align-items: baseline;
     margin-top: 8px; padding: 7px 10px;
-    background: var(--page); border: 1px solid var(--grid); border-radius: 8px;
+    background: var(--surface-sunken); border: 1px solid var(--grid); border-radius: 0;
     font-size: 13px; color: var(--text-secondary);
   }
-  .result .judgement .label { font-weight: 600; color: var(--text-primary); }
+  .result .judgement .label { font-weight: 500; color: var(--text-primary); }
   .chip {
-    display: inline-block; min-width: 20px; text-align: center; border-radius: 5px;
-    font-size: 11px; font-weight: 600; padding: 1px 5px; flex: none;
+    display: inline-block; min-width: 20px; text-align: center; border-radius: 0;
+    border: 1px solid var(--grid); color: var(--text-secondary);
+    font: 500 11px/1.5 var(--font-utility); letter-spacing: -0.004em;
+    padding: 1px 5px; flex: none;
   }
   .chips { display: inline-flex; gap: 3px; }
   .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
@@ -273,27 +288,27 @@ document.documentElement.dataset.theme = localStorage.theme ||
   #latency-dumbbell svg { width: 100%; height: auto; display: block; }
   #standings { padding: 4px 0 8px; overflow-x: auto; }
   #standings .series { transition: opacity 0.18s ease; }
-  #standings .series.cold { opacity: 0.22; }
+  #standings .series.cold { opacity: 0.35; }
   #standings svg.dim .series:not(.hot) { opacity: 0.1; }
   #standings svg .series.hot { opacity: 1; }
   #standings .series:focus { outline: none; }
   #standings .st-label { font-size: 12px; cursor: pointer; }
   #standings .st-name { fill: var(--text-primary); }
-  #standings .st-pct { fill: var(--text-secondary); font-weight: 600; font-variant-numeric: tabular-nums; }
-  #standings .st-col { fill: var(--text-secondary); font-size: 12px; font-weight: 600; text-anchor: middle; }
-  #standings .st-ult { fill: var(--text-secondary); font-size: 11px; }
-  #standings .st-ult .b { font-weight: 700; }
-  #standings .st-gap { fill: #d64545; font-size: 10px; font-weight: 600; text-anchor: middle; font-variant-numeric: tabular-nums; }
+  #standings .st-pct { fill: var(--text-secondary); font-weight: 500; font-variant-numeric: tabular-nums; }
+  #standings .st-col { fill: var(--text-secondary); font-size: 12px; font-weight: 500; text-anchor: middle; }
+  #standings .st-ult { fill: var(--text-secondary); font-family: var(--font-utility); font-size: 11px; letter-spacing: -0.004em; }
+  #standings .st-ult .b { font-weight: 600; }
+  #standings .st-gap { fill: var(--expressive-text); font-family: var(--font-utility); font-size: 10px; font-weight: 600; letter-spacing: -0.004em; text-anchor: middle; font-variant-numeric: tabular-nums; }
   #card-quality-price { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
   #quality-price { padding: 4px 0 8px; overflow-x: auto; }
   #quality-price .qp-name { fill: var(--text-primary); font-size: 12px; }
-  #quality-price .qp-head { fill: var(--text-secondary); font-size: 11px; }
-  #quality-price .qp-quad { fill: var(--text-muted); font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
-  .prose { color: var(--text-secondary); font-size: 13px; }
+  #quality-price .qp-head { fill: var(--text-secondary); font-family: var(--font-utility); font-size: 11px; letter-spacing: -0.004em; }
+  #quality-price .qp-quad { fill: var(--text-muted); font-family: var(--font-utility); font-size: 11px; font-weight: 500; letter-spacing: -0.004em; }
+  .prose { color: var(--text-secondary); font-size: 14px; font-weight: 300; line-height: 1.6; }
   .prose p { margin: 0 0 10px; max-width: 90ch; }
-  .defn var { font-family: Georgia, "Times New Roman", serif; font-size: 14px; }
+  .defn var { font-family: inherit; font-size: 14px; }
   .defn .eq { text-align: center; color: var(--text-primary); margin: 12px 0; }
-  .defn b { color: var(--text-primary); }
+  .defn b { color: var(--text-primary); font-weight: 500; }
   .overlap-matrix { padding: 10px 0 14px; }
   .overlap-matrix table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; font-size: 11px; }
   .overlap-matrix th, .overlap-matrix td { border-bottom: none; }
@@ -302,19 +317,21 @@ document.documentElement.dataset.theme = localStorage.theme ||
   .overlap-matrix th.col span { writing-mode: vertical-rl; rotate: 180deg; }
   .overlap-matrix td.overlap-cell {
     width: 26px; min-width: 26px; height: 26px; padding: 0;
-    border-radius: 3px; text-align: center; font-variant-numeric: tabular-nums;
+    border-radius: 0; text-align: center; font-variant-numeric: tabular-nums;
+    font-family: var(--font-utility); letter-spacing: -0.004em;
   }
   .bar-table td, .bar-table th { white-space: nowrap; padding: 6px 8px; }
   .bar-table .bar-track {
-    display: inline-block; width: 100px; height: 8px; border-radius: 4px;
-    background: var(--grid); vertical-align: middle; margin-right: 8px;
+    display: inline-block; width: 100px; height: 8px; border-radius: 0;
+    background: var(--track); vertical-align: middle; margin-right: 8px;
   }
-  .bar-table .bar-fill { display: block; height: 100%; border-radius: 4px; }
+  .bar-table .bar-fill { display: block; height: 100%; border-radius: 0; }
   #sharegraph svg { max-width: 460px; margin: 0 auto; }
   #sharegraph .sg-edge { stroke: var(--text-muted); }
   #sharegraph .sg-arrow { fill: var(--text-primary); }
   #sharegraph .sg-label {
-    fill: var(--text-secondary); font-size: 11px; font-variant-numeric: tabular-nums;
+    fill: var(--text-secondary); font-family: var(--font-utility); font-size: 11px;
+    letter-spacing: -0.004em; font-variant-numeric: tabular-nums;
     text-anchor: middle; paint-order: stroke; stroke: var(--surface-1); stroke-width: 3px;
   }
   #sharegraph .sg-name { fill: var(--text-primary); font-size: 12px; font-weight: 500; }
@@ -346,17 +363,14 @@ document.documentElement.dataset.theme = localStorage.theme ||
     <div class="header-actions">
       <button id="export-md" title="Open the current tables as Markdown">MD</button>
       <button id="export-pdf" title="Print / save as PDF">PDF</button>
-      <button id="theme-toggle" aria-label="Toggle color theme">
-        <svg class="sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-        <svg class="moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-      </button>
     </div>
-    <h1><span class="vert">Needle</span>: Which search API moves the needle for AI agents?</h1>
+    <a class="brand" href="https://keenable.ai" aria-label="Keenable"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 737.122 134" width="737.122" height="134" role="img" aria-label="Keenable"><g fill="#2A2A2A"><path transform="translate(0,0)" d="M 0 128.576 L 0 0 L 20.043 0 L 20.043 128.576 L 0 128.576 Z M 19.854 63.153 L 76.011 0 L 99.646 0 L 37.249 69.204 L 38.195 55.968 L 101.348 128.576 L 75.633 128.576 L 19.854 63.153 Z"></path><path transform="translate(288.14,31.387)" d="M 84.803 38.006 L 84.803 97.188 L 65.895 97.188 L 65.895 42.543 C 65.895 38.258 64.824 34.35 62.681 30.82 C 60.601 27.228 57.796 24.392 54.267 22.312 C 50.737 20.169 46.798 19.097 42.449 19.097 C 38.1 19.097 34.129 20.169 30.537 22.312 C 27.007 24.392 24.171 27.228 22.028 30.82 C 19.948 34.35 18.908 38.258 18.908 42.543 L 18.908 97.188 L 0 97.188 L 0 2.647 L 18.908 2.647 L 18.908 13.047 C 22.186 9.013 26.251 5.83 31.104 3.498 C 35.957 1.166 41.22 0 46.892 0 C 53.888 0 60.254 1.702 65.99 5.105 C 71.725 8.509 76.295 13.078 79.698 18.814 C 83.102 24.549 84.803 30.946 84.803 38.006 Z"></path><path transform="translate(384.394,31.387)" d="M 79.698 2.647 L 98.606 2.647 L 98.606 97.188 L 79.698 97.188 L 78.847 83.007 C 76.074 87.986 72.261 92.02 67.408 95.108 C 62.618 98.134 56.945 99.646 50.39 99.646 C 43.394 99.646 36.84 98.354 30.726 95.77 C 24.675 93.123 19.318 89.499 14.654 84.898 C 10.053 80.234 6.46 74.845 3.876 68.731 C 1.292 62.618 0 56.094 0 49.161 C 0 42.354 1.261 35.989 3.782 30.064 C 6.303 24.139 9.801 18.94 14.276 14.465 C 18.751 9.927 23.95 6.397 29.875 3.876 C 35.8 1.292 42.134 0 48.878 0 C 55.811 0 61.924 1.607 67.219 4.822 C 72.576 7.973 76.988 12.07 80.454 17.112 L 79.698 2.647 Z M 49.918 81.4 C 55.59 81.4 60.538 79.982 64.761 77.146 C 69.047 74.309 72.355 70.528 74.687 65.801 C 77.019 61.011 78.185 55.716 78.185 49.918 C 78.185 43.993 76.988 38.667 74.593 33.94 C 72.261 29.15 68.983 25.369 64.761 22.595 C 60.538 19.759 55.59 18.341 49.918 18.341 C 44.308 18.341 39.172 19.759 34.507 22.595 C 29.843 25.432 26.156 29.245 23.446 34.035 C 20.736 38.825 19.381 44.119 19.381 49.918 C 19.381 55.779 20.768 61.105 23.541 65.895 C 26.377 70.622 30.096 74.404 34.697 77.24 C 39.361 80.013 44.434 81.4 49.918 81.4 Z"></path><path transform="translate(504,0.713)" d="M 48.878 30.675 C 58.08 30.675 66.431 32.912 73.931 37.387 C 81.494 41.862 87.514 47.881 91.988 55.444 C 96.463 62.945 98.701 71.296 98.701 80.498 C 98.701 87.368 97.409 93.828 94.825 99.879 C 92.241 105.866 88.648 111.161 84.047 115.762 C 79.509 120.3 74.215 123.861 68.164 126.445 C 62.177 129.029 55.748 130.321 48.878 130.321 C 42.134 130.321 36.241 128.777 31.199 125.689 C 26.156 122.537 22.06 118.472 18.908 113.493 L 18.908 127.863 L 0 127.863 L 0 0 L 18.908 0 L 18.908 47.503 C 22.06 42.524 26.156 38.49 31.199 35.402 C 36.241 32.25 42.134 30.675 48.878 30.675 Z M 48.689 111.98 C 54.361 111.98 59.498 110.562 64.099 107.726 C 68.763 104.889 72.482 101.076 75.255 96.286 C 78.028 91.496 79.415 86.233 79.415 80.498 C 79.415 74.573 77.996 69.247 75.16 64.52 C 72.387 59.73 68.668 55.949 64.004 53.176 C 59.34 50.339 54.235 48.921 48.689 48.921 C 43.079 48.921 38.132 50.371 33.846 53.27 C 29.623 56.106 26.345 59.919 24.013 64.71 C 21.681 69.437 20.515 74.699 20.515 80.498 C 20.515 86.359 21.681 91.685 24.013 96.475 C 26.408 101.202 29.717 104.984 33.94 107.82 C 38.163 110.593 43.079 111.98 48.689 111.98 Z"></path><path transform="translate(613,0.713)" d="M 0 127.863 L 0 0 L 18.908 0 L 18.908 127.863 L 0 127.863 Z"></path><path transform="translate(642.839,31.71)" d="M 47.271 99.646 C 38.573 99.646 30.631 97.409 23.446 92.934 C 16.324 88.459 10.62 82.471 6.334 74.971 C 2.111 67.408 0 59.057 0 49.918 C 0 42.985 1.229 36.524 3.687 30.537 C 6.145 24.486 9.517 19.192 13.803 14.654 C 18.152 10.053 23.194 6.46 28.93 3.876 C 34.665 1.292 40.779 0 47.271 0 C 54.456 0 61.074 1.481 67.124 4.443 C 73.175 7.406 78.343 11.503 82.629 16.734 C 86.915 21.965 90.066 28.016 92.083 34.886 C 94.1 41.693 94.73 48.909 93.974 56.536 L 20.232 56.536 C 21.051 61.137 22.69 65.265 25.148 68.92 C 27.606 72.513 30.726 75.381 34.507 77.524 C 38.289 79.604 42.543 80.675 47.271 80.738 C 52.25 80.738 56.756 79.478 60.79 76.956 C 64.887 74.435 68.227 71 70.811 66.651 L 90.003 71.095 C 86.221 79.478 80.518 86.348 72.891 91.705 C 65.265 96.999 56.725 99.646 47.271 99.646 Z M 19.57 42.071 L 74.877 42.071 C 74.309 37.407 72.702 33.152 70.055 29.308 C 67.471 25.463 64.193 22.406 60.223 20.137 C 56.252 17.868 51.935 16.734 47.271 16.734 C 42.607 16.734 38.321 17.868 34.413 20.137 C 30.505 22.343 27.259 25.369 24.675 29.213 C 22.091 33.058 20.389 37.344 19.57 42.071 Z"></path></g><g transform="translate(99.081,31.71)"><path fill="#005CFF" d="M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z"></path><path fill="#2A2A2A" transform="translate(51.255,21.698)" d="M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z"></path></g><g transform="translate(180.218,31.71)"><path fill="#005CFF" d="M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z"></path><path fill="#2A2A2A" transform="translate(49.161,21.698)" d="M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z"></path></g></svg></a>
+    <h1>NEEDLE: Which search API moves the needle for AI&nbsp;agents?</h1>
     <div class="fm">
       <p class="lastrun"><span id="updated"></span>
         <span class="cadence">News runs each hour; all other suites run
         each day. Times are UTC.</span></p>
-      <p><span class="vert">Needle</span> (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
+      <p>NEEDLE (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
         <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is an
         agentic search benchmark. It compares major search engines with
         queries that model real agent behavior. The five verticals match
@@ -408,12 +422,13 @@ document.documentElement.dataset.theme = localStorage.theme ||
     </div>
   </header>
 
-  <h2 class="section-title" id="sec-results">Quality Results</h2>
+  <h2 class="section-title" id="sec-results">Quality results</h2>
   <div class="card" id="card-standings">
     <h2>Standings — all verticals</h2>
     <div class="sub">share of <em>ultimate</em> per spoke, farther out is
-      better; click legend names to toggle &middot;
-      <span class="hint" title="The hatched band is performance no single engine currently captures; the red % is the gap between today's best engine and ultimate. A default selection of engines is drawn at full strength.">hatched band?</span></div>
+      better; whiskers are 95% CIs (run-level bootstrap); click legend
+      names to toggle &middot;
+      <span class="hint" title="The hatched band is performance no single engine currently captures; the orange % is the gap between today's best engine and ultimate. A default selection of engines is drawn at full strength.">hatched band?</span></div>
     <div id="standings"></div>
   </div>
 
@@ -764,7 +779,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
       <p>The judge does not see the engine identity. The prompt contains the query, the document title, the URL, the published date, and the snippet — not the engine name. We judge each distinct combination of URL, title, snippet, and date once per query and use that rating again where the identical result occurs for other engines. We judge the same URL with a different snippet separately, with the same blind judge and rubric.</p>
       <p>A judge preference for a snippet style would be a shared bias across engines. We publish the per-result reasoning with each run, so you can audit this.</p>
       <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard gates for a wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/keenbench/shared/prompts/judgement.jinja.</p>
-      <p>Known limitation: we operate <span class="vert">Needle</span> ourselves, and we did not yet do a systematic human-agreement audit of the judge. But you can check the numbers: the judge is blind and shared across engines, each rating includes its reasoning, and we publish the queries, prompts, and raw results. Thus anyone can score any rating again.</p>
+      <p>Known limitation: we operate NEEDLE ourselves, and we did not yet do a systematic human-agreement audit of the judge. But you can check the numbers: the judge is blind and shared across engines, each rating includes its reasoning, and we publish the queries, prompts, and raw results. Thus anyone can score any rating again.</p>
     </div>
   </div>
 
@@ -840,13 +855,14 @@ function registerEngines(names) {
   }
 }
 
+registerEngines(["keenable", "keenable-realtime", "google", "bing", "brave",
+  "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity", "tavily", "you"]);
+
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
-  const slot = ENGINE_SLOT.get(COLOR_SWAP.get(engine) ?? engine);
+  const slot = ENGINE_SLOT.get(engine);
   return slot == null || slot >= 12 ? "var(--text-muted)" : `var(--series-${slot + 1})`;
 }
-
-const COLOR_SWAP = new Map([["bing", "google"], ["google", "bing"]]);
 const MARKER_SHAPES = ["circle", "square", "diamond", "up", "down"];
 function markerEl(engine, x, y, r) {
   const shape = MARKER_SHAPES[(ENGINE_SLOT.get(engine) ?? 0) % MARKER_SHAPES.length];
@@ -876,7 +892,17 @@ const VERTICALS = new Map([["news", "News"], ["finance", "Finance"],
   ["scholar", "Scholar"], ["agentic_rare", "AgenticRare"], ["legal", "Legal"]]);
 const verticalName = (b) => VERTICALS.get(b) ?? b;
 
+const ENGINE_LOGOS = new Map([
+  ["keenable", "data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 177.922 102.29%22 width%3D%22177.922%22 height%3D%22102.29%22 role%3D%22img%22 aria-label%3D%22Keenable icon%22%3E%3Cg transform%3D%22translate(0,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(51.255,21.698)%22 d%3D%22M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3Cg transform%3D%22translate(81.137,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(49.16,21.698)%22 d%3D%22M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E"], ["keenable-realtime", "data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 177.922 102.29%22 width%3D%22177.922%22 height%3D%22102.29%22 role%3D%22img%22 aria-label%3D%22Keenable icon%22%3E%3Cg transform%3D%22translate(0,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(51.255,21.698)%22 d%3D%22M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3Cg transform%3D%22translate(81.137,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(49.16,21.698)%22 d%3D%22M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E"],
+  ["google", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAApVBMVEVHcEz4+Pj8/Pz9/f38/Pz59/by8/Pz8/T7+/v9/f309PX29/fy8vP29/f///84qlfsUENHiPT8wBLrTD88rFpJivNEhvUqp006g/T7/PvT4P3rRjjqPSzg8Ojva1uWz6T7ugWWt/j4xcH+78jA4slxv4T85eTtW0v61tRctGaDrPdSj/YtffRmmvb1p6L+3I790mKuuUHykIg+nZ3G2Pv0lCs8o3o82clfAAAADnRSTlMAoetQ0/wdM7c/jGYSeQFEN8MAAAMjSURBVFiF5VdZm6IwEBQURBFQRGOGwxOvUWd0dvf//7QNEpLOAeLDPm09+QFV6erudGKn888wsgeeYTiOYXgD+2227TqmD2A67jsi3Z6vgdNtSXdNHf0ZRxuJgXb1Cr3BK77RRC9gNNLtxuVpEA3ZHLymF6i10W3H9/2aXKp8a38k2FvtFPrSR/tbNp7GSRLH4+y2l172Vf4IC19sDkk8HRNMCeI4OWyE13ikCAj532Qlu1IgSLIj/KIn8z349sHphE8l4uQBv/EkAzB1WTwGmDIkGbQpmnBA8g5Tkc4kEiEPTk0FLJk/1fPFSoAAMmA/TsZZdiCV1PFhCDZ/emP+ieWNRUzj/SYjEgrf9/mmGPIEMH6cgeY5Zhq+P2QCbILgRyWQ3IRv8VFmE5iqg+2KplDi16Dy4LInX2H4bIL40UDjcJUahAS/SeEPuIHG4cgp2K4KhdVBlzEdTHkffj0FwhVs2Q8FKXuH5Tb8LgXCb7DKZSHhcuYvy2bkkzCk2AKBxYxjUmB+fSmwahb45AbL8dptKzApBWZcoPuehUlNBG0tTCoBXxIAVaACX0DgMmegCkoS+TijfRDegcB5XeFcKixAGelYqw4OXHZieEepLwD7he31orSwZs8t2spsouOnQBQEua/BtYzg8sGeVLOdzxOShHtEgHYq/xcNYMZPumq08yxuV/egEIiCVObjTzUFbKyywuJTyScuZIVrGcBkwR1gNtL4tWSHIqqAlpCe0vWFncAvK+BYyGkIJA+nHXWL0xz9zJUUwoOBn6wWEyBBRPmSID8hFAR/ZnMpA/B8BXcLZuKZCVQgKEEUFmAfiLeMHlQIGD8gP4OIChAbk1QfgHi9ogqBjAj9gATIVy1wOvpphBR2EUEES+t0JHBzpPNzVQGhJZz1WOZ3+sJRQAqHRHoudBbW3LKESw6RWJ4Qw2kpNaan8uGeqjR2yyd2ysYY6vj6izbWHXK1F+5hqyMR16xfwG2hgN16PqlF7b+VCqYm/2/YaAq/gu3USmCn3V8327A0Gtgy2v/zG7mOqIEtx1Uv6M3oe0bPtAjMnuG9ytz/jb8i8rQexpJ/GAAAAABJRU5ErkJggg=="], ["bing", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABuklEQVRYhe2WsXXCMBCG/xMNpbIBmSB0aa0wQDJBkgmINrDZwDgLQCZIBuDJKdN5gzCCShrrUhiwCNiI95wq/quz/XP3cZLOBnr1+u+iUKPUJoIrHwBxD2C0vV2AuACJmU3V+k8ApDYSjBjMuj0Tp1sQ2xmA1EbCuRygm8B8BQSpSyBE61NGfFCckUOQgqArm90RBCkAS+8XY7CLQ4sDLR2Q2ozg+Nujmdlskpz0TlcJQHXhqgt5CEBzB1xZFyNaNBUHAJtNEjDqgs49hBRvB4CoW08HbT6tAc3qC7rvAADjXRDYzsKLR10A7CW1kec8lx6/EIC1F4+bTDtJbSLvsmjyXQDAH/uw5PNHy5XP+5ioAwAh3uuEiOTUNEJUz8ST5581eX+rfRJOVylAL7WbFyCxtKnKt/tijJJjEKK9h5Hb1zvVDYA2Eo4NAvbAr7SJzVRQF1pPgU2VrcYtz89m8gcROGlbsmCAHYTNJhqCrlHNfX+DrQGeQ5Cq2s7evw6DCP4eCNXRe+HMcgy6Bth8veXD20cCKNreioa3z9h8LT9P+YMm4aWqXlyHy9Hk/ROAYwgOngu9ev0//QDmCZ48wX3K8AAAAABJRU5ErkJggg=="], ["brave", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAUVBMVEVHcEz/QAD/QQD/////SgD/QwD/OQD/PAD/PgD/KwD/MAD/RwD/KAD/QQD/UAD/OwD/IQD/TQT/NgD/VAn/7un/29P/bU3/jXX/q5r/xLf/CwAIaoj2AAAACnRSTlMAYAv/3qwghzrR7UleYgAAA+lJREFUWIWdV9mi6iAMdGmtUihbocv/f+gNhbCVnuO50QerZhiGIYTbrRXv0QXzwSGUUuTd/Ot1PvMAPAKo17f5r1G2GBD1+C7/0fl0jxAZAIXPdwCQ32bwBYLj2If8mgGBF+3Dn5oxdNMku06G8RsMCKEfQin9DE3mE4SEwPSzBh6DUkEbc+l0BJCZBtwH5lOX7yBOCJ2OAJwFBkwRZi2nRIUpwNDkAgHyA8Co18VCAldEruYJYRYmIGMXdlkDBUFFieDGDwBsdknztq7HBx9mXc3xaHZkIESfAfQaGajt+WOsO+aLfCleyGBcfs5/Pq1AhEc1Bwcw2t/yn08uPECp4nAAyHH+HcDsXsR7YxXYIcBszLZtpkpzX3khDxkqBu9DAy+AsZS6hR8X1HPeLHGq7bs1KEOlwQD5wAATVq04mJAw/0jBSooKjQs7724KxSq4CWiWrSCYh4+M+LUXnFO1ZHNadgfwyWfgCMhy1qti2n8CG6/lbweASCUu2KCSeyNhUa2oFA0AmQjTMYXqbzMN4y6ihq6nAFaenJlLF2wiiLLuJfRMTiLe/TKWPrQ0ABpR/DArv4y5k15+GQuELawiZIhchNltbgdQOHHymylHkDw+SKLT92NzL/RhOyeEVfG4M8GI0SNShIJSFtY7FhSGWZrxuPgLwRXF3QwA5VH5mLCk4bgrYXrzTlzHyMCKWNJuZaSiigMbCXV0tJZBGdRBxAUr2rksD6kqK7TDQo9DQQmcC1TEUJVrCfyGxrIe/WS0YozY9Lyng6E+6x9TBMjNAPLl+0iGcwGUvNURTyZW1GVdmHAVOIX+BDBEEfMdMSuWPzoRPMD9BPCODPJ8ybnOnxGANtqdyCD53sDZzJRMHLYwhfPZCtEHgOTmTbnTmal0WqGI9CzB7XEPAFNwkrEE6qqWFApqWMlF4OF6lgC2dOwPnJuNhdLOXSU1i3MPfJqPfM+g2ebI2KEwNhKwYCzjCxR2wV1zEBi0m60+b3E4yY9ZN7jr0pBBs0e63VOLM7KlOiVnS32HdPRI7a73lTHg1UHgdpZrkgKDZj7UNQSAt6oaBSgEKjK46jf7TAOmbN7iMOp6ZWTQlgDcnDEYwULRkmBAbBMPBpdte9FojiydTKFbDwyuO+YhZwDvo5SC/qnRPBi0bOjjIXMG4CelZ8NUvC94BuQyH6yQGPgbCyekaHUdgx+vPkPJoLqxHAyuJ4AcEoOxui+4+PXq9eou7wvw/nxzbRrwvsCq+wJRVw6q4t21GXy+vve5e9P5zvTl8IHEiQH/w8UVSeQa/Gl4JIEyct79dfhAAhn8x/CBxMHgP4f3MbDuF+v+A4tzcSbr/fGlAAAAAElFTkSuQmCC"],
+  ["exa", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"], ["exa-instant", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"],
+  ["parallel", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEX///8dHBoAAAASEQ5eXl3x8fGysbGBgYAZGBbPz88pKCbJycgbGhgVFBLX19Z7e3oLCANLSkm7u7uQkJCHh4Zqamlvb27h4eFDQkH5+fk8OzowMC5RUVCampmmpqXBwcCxW53tAAABoklEQVRYhc2X2RaCIBBAZVxwIylTMZf+/y+zzGPDYpAPed84hxmYhWHG8wy02UiDW0pIJ+prlISmfXqaQQAAZzkhJI99Pi3E0NhKt2P3lJ54yi8wgFtkdzotrjNlyv0XbNYRAwxuhgTVTA8rFycVC+UKtbPjgNwLulKUFhJnjHjFdQFqVaCsET1niJggoFDk0Qk89sk2Ska0eFmBCss/gWzTA2Gr4Il3Xs5wcHxfhyBMMFlr2hnpKWW3LpG4Z5iLJgRPuBTKnM/yo7LzSw6syTC/zES6QNIZbgCQYwVMOLlggssaT45xaE4SB02m0EzDU4yfaBQYYzARS8Do1d9itQmn3lBIVOCbkZWzQLWg6QMzKS5cHDpHB49U4vpLmP6KjQmuTtwdxn2J5FONnY6prLL7MR0ay5J2MXFXnPoqqrvL+u6PpY2km0aG801fm4rt56rLoi2U791R/v9sN1m727wBlxrCvqWAMnpQXLuEa6ursN1sV84edG/3D8bw29D149j3MXh2ePBkEFu9P+Poe7YfOjXDd28/fL/vgcb/k7GzfwA4QDbEYc0sKAAAAABJRU5ErkJggg=="], ["parallel-turbo", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEX///8dHBoAAAASEQ5eXl3x8fGysbGBgYAZGBbPz88pKCbJycgbGhgVFBLX19Z7e3oLCANLSkm7u7uQkJCHh4Zqamlvb27h4eFDQkH5+fk8OzowMC5RUVCampmmpqXBwcCxW53tAAABoklEQVRYhc2X2RaCIBBAZVxwIylTMZf+/y+zzGPDYpAPed84hxmYhWHG8wy02UiDW0pIJ+prlISmfXqaQQAAZzkhJI99Pi3E0NhKt2P3lJ54yi8wgFtkdzotrjNlyv0XbNYRAwxuhgTVTA8rFycVC+UKtbPjgNwLulKUFhJnjHjFdQFqVaCsET1niJggoFDk0Qk89sk2Ska0eFmBCss/gWzTA2Gr4Il3Xs5wcHxfhyBMMFlr2hnpKWW3LpG4Z5iLJgRPuBTKnM/yo7LzSw6syTC/zES6QNIZbgCQYwVMOLlggssaT45xaE4SB02m0EzDU4yfaBQYYzARS8Do1d9itQmn3lBIVOCbkZWzQLWg6QMzKS5cHDpHB49U4vpLmP6KjQmuTtwdxn2J5FONnY6prLL7MR0ay5J2MXFXnPoqqrvL+u6PpY2km0aG801fm4rt56rLoi2U791R/v9sN1m727wBlxrCvqWAMnpQXLuEa6ursN1sV84edG/3D8bw29D149j3MXh2ePBkEFu9P+Poe7YfOjXDd28/fL/vgcb/k7GzfwA4QDbEYc0sKAAAAABJRU5ErkJggg=="],
+  ["perplexity", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAASFBMVEUAAAAAAAD9/fqXl5UAAAAAAAD///8HBwcAAAAAAADy8vCnp6X4+PXU1NKLi4pBQUDDw8Hk5OGenpwmJiWRkZB2dnRbW1qxsa/SbbTeAAAACnRSTlME////0jT//vOEODX2gQAAAoJJREFUWIWll9u2qyAMRYV2R6t4v/3/n54EBAPWgoc8dDQIUwjJQoqiKD7vqhSPrazen4Lsr3o+2Fr1h4CM8UjA+eeMF+JTvPMA77wV0Br+I/7cyiJoWHrfVWrx+veeixYCGli5+wJ4cX+FJgrwRrwubhwgYbgDDPgwASBhnL8B5pGepcxAgtqugE3pRwkx2PFN0IWADhvHPSUGOJbWuvuAXcemSwSIBQBaDmixYRHpANHXAHVvAdZ7AKAtA8wpDVglHFv7BECdYcK1LBPwtnSAmbiU+DvaAnkG0JmHxjJz+QVQoI1GWFPSmGtwT9UXQM07uu4BwLbX3wFtYKMZP4btd4BzXsZmAuAyxj54oO4Avrxh9Ry74IuMKNMAlAcL/nSLq4xHAKoem4nAJSIRgNUjN1sLG+5DvT0BoPiY6jmqEZNSntIUB1D4zJxtOZOcuYyMAmjNrfl7KlJLgeiTAFyYmSaSTJn9jAA87eaq3FhR/gmYmaIGANJVCVMEQK9heecfLKuZQgTw62gzepAB6CIA/J0ur+TnOQIwBrfVKIdhGCUHUEbyKsAwjtjpVlCMZJ0AymBpctoB5K0iWU08AXSckrmjVh+Qt5rYk80siJTR+o3SCQrGYJ91xy8AY2cQSUda5DVUBYsDxM4FBzAVoXfhTO4HgOOEN3mw2/JKB9C0acePRJqOAk8FnBVlM7EzspgG6HplBJEBtCyqPg0wKHDJc9YCndVqSAFILuKsmPS64l9pE6VO61yvGtuU78Qp90t18lcZ6EGTEoOOu+HXehcH+AdxCBBrDBBcYC4AMfuuCK88vluW8/z7TlRGLl3lZU6BVfnXvuyLZ/bVN//ynXn9/wfurDA/lO1fuwAAAABJRU5ErkJggg=="], ["tavily", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEMklEQVRYhcWXXVCUVRjHf+e8uyzI4rvDgqPxNXwbHzcK2YzaFNYFgnbn1FVTjWNidduQNXIbU0rjmGmWQobZRaVeOOMQ0Ea22ER+DBe5DMiIAirDtm3Ygu97unj5kI+FhYX6z7w37zznPP/zPOf5n+cRGRkZoBRAJvAGsB1IA1YBNkAQHRTwCBgBbgMXgaNAD4Bt3HkpcBh4ahkczoQA7IA+/hUCW4G3gV81l65nAieAp1fAeThCqUAx0KK5dL0a2PUfOX8cKUBIAuWLda6UQlmpiwYCKJdYF25RWLMmmbi4uOUgkSaB+EitDcOguKiQhlMneOvNvWiaFi2BeBtWqS0IpRROp5Oqqj08WVTME6kpeL1XaP3REw0RmyTC/CtTsXPHdrZtew6MMXSXi6qqPSS53dGkQshIrEzTJDsni927XyfG4bB+GgabNpXy0su7EGLpBRQhAUVpaQnZ2VkTqmktttl54fkyEhKcS46C5tL1moWMhBAMDQ3h83XhTkxkXWoKD0dG+Oz45zQ2nuXWrd4lOYcIIyCEYGBgkMYzZ7np8wGSUCjE9+cu4Gn7GdM0V5bABAmbzYaUE0sEmqahyYi3iI7AYrAYpVw8ASEBDTQt7O2Pj19FcnJSREQiEqFJ30LQ8VsHd/r6cDgcBINBlFIYhjFpo5TitVdf4cWdlTR82ci3350jEAiEFSuRkZ4ecf2YponbnUhRUSHd3T3cv/+AgoL1xMXFTlanEIJ9+/ayZeszjI0+xNPq4cgnx+j4/erSCBiGMRnqpKQkag7sp7KiHI+njXeq36fuYC0lJRumRcFut0+dWNN4cO8edXWHOf3V17P2nzcFUko2btzAn34/w8N+amreo3JHBUJqrNZ1YmMdxK9OwB7rxM4UAUxjSrBMRVJyMvn5eUgpZ5VsWAKmaZKWlsqhjz4gFAoxMDjI5i2bEVLS29NDbe2HhP4J0dzUgveyd9plKyt7lty8XBCCwbv91DecpvHMN9OiuTABpcjNyWHturXEOBzk5ueBUvR29/Du/gNc/qUdKSUHD308a63T6SQrM5Omph84cvQ4165dB5izasISEEBBwXrr8RkPm2manDzVgOentskcyxlCpJTii5P1NLe04vW2Ewj8Ne9zHVYHHI4YCgsLph5MIZD2GCoqynG7E8PWtxACn6+LS5eaCAb/XrBXsGH17dNio5QiIWE1mVlZgMRUimAgQH//AB0dVxkdHZ1305lRmQfKhjU02GeeYmRkhPPnL9Du9XLjRid/3PTR13cHv9+PaZpR9QCP4ZHISE8fBlxz0gMYVzohBFLK5XI8Ab/EGpfmhGDqFdTm0f4ocFtizWpR99dLgAIuSuAY0P4/EGgHPtVcuj4MXMea1VJY+RFNAVewhtNOzaXrAHeBZmAMa4J1ABqWTizXeB4EuoB6oBroRAj+BajZemNynEWXAAAAAElFTkSuQmCC"], ["you", "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAEAAQAMBEQACEQEDEQH/xAAbAAABBQEBAAAAAAAAAAAAAAAAAwQFBgcBAv/EADUQAAEDAwEECAQFBQAAAAAAAAECAwQABRExBhITIRQiQXGBkaHBUVJTYTIzsbPRFTZEVOH/xAAaAQACAwEBAAAAAAAAAAAAAAAAAwECBAUG/8QAKBEAAgIBBAECBgMAAAAAAAAAAAECAxEEEiExUTJBBRM0UoGxImGh/9oADAMBAAIRAxEAPwDbKsQFABQAhKmxYeOlPobzoFHmfCrwrnP0rJDaQRZsaWD0Z9DmNQk8x4UTrnD1LAJpi9UJCgAoAKAG0+4RLe1xJj6Wx2A6q7hqaZXVOx4gskNpdlTuW17z+W7ejgI+ovBWfDQetdOrQRjzZyLdmeiJhNuXGe20p08R5WC4sknTtrTY1VBtLhFVyxaQ25b5zjSXTxGVY30HHlVItWwTx2S+GTVu2mdbwicnip+dPJQ9jWS3Rp8w4LKfkssSZHmN78Z1Kx2gajvHZWCcJQeJIYnkWqgDK9Tv6bapMwAFTaeqDoVE4HqRTqKvm2qHkiTwsmVvSXpTyn5DinHVnKlKPM16SMIwW2KwjLnJ6SqoaAmtlG1PXyNujkjK1fYAfzjzrHrGo0sZDliu0iFM3yTvcgshaT8QQP8AvlVdK91KJl2MUqpzRA4jvuMOJcZWULTooUuUVJYZKZfrdJ6ZCZkYwVp5gfHQ+tcayGybiOTyiL23ONl5ve3+4mtPw/6mP5/TKWelmdW+DMnlYhR1vFGN7c7M6fpXetthX63gzpN9EpG2avLywnoSmx2qcUEge/lWWesoSzuLKEi77P2RqzsK63EkOfmOY5dw+361yNTqXfLwkPjHaer7Zm7qykhXDkN/gcxyx8D9qjT6h0v+glHJU3LBdWVlJiqWPmbUCDXSWqpkuxe1nU2i5/6TvlUPUVfcG1lxsTTjFpYaeQUOJ3spOo6xrl6iSlY2hseiP26/tWb3tfuJrR8O+pj+f0ylvoZm9uuky3FZgyFMlzAVugc8aa99d+2iu3G9ZwZoya6JWLtZeWXAoy+KO1DiEkHyGfWss9Bp2sbcF1ZIvezt9ZvUdRCeHIb/ADG858R9q42q0sqJeUx8J7jt/vbNnZTlPEkOflt5x4n7VGm00r34SJlLaVBzaW6vL3uk8MfK2gAD3rqLR0xXQrezqb9dD/mueQ/ih6Wn7SdzLpYH3ZNojvPrK3Fb2VHt6xFcnURULXFdDYvKC/W83SzyoSSAp1HUJ03gQRnxAo01vybYz8ETjujgx19h6I+tiS0pp1BwpCxgivVxlGcd0XlGNprs6hVDQJk/sZIWztFECDyc3m1D4gg+4B8Kw6+Cenln2G1vEhTayQt7aGXvnk2QhI+AAHvk+NU0UEqI49wm/wCRGIVWhoqOorbsh5DLCFOOKOEpTqaXNqKzLosuTTLVEMG3MRiQVNp6xHxPM+prz90/mWORoSwsDqlEjK52mDdWuHOjodx+FWik9x1FOpvspeYPBWUVLso152Flxd521r6U19JWA4PZXp3V2aPikJ8WrD8+wiVLXRG7KpW3tPBbdQpDiXSFJUMEHdOorRrWnppNeCtfrQptIFubTTW20KWtTuEpSMknA0FV0uFpot+CZ+pkxZ9jpT+65cl9Hb+mnBcPsPXurJf8RhHivl/4XjW/cuVvt0S3N7kNhLedVaqV3nU1yrLp2vM2OSS6HVKJCgAoAKAEHoUV6Q1IdjtqfaOW3CnrJ8avGycYuKfDIws5BmHGYfdkNMNpedOXHAnrK7zRKycoqLfCDCXIvVCQoAKAP//Z"],
+]);
+
 function engineKey(engine) {
+  const logo = ENGINE_LOGOS.get(engine);
+  if (logo) return el("img", { class: "key-logo", src: logo, alt: "" });
   const key = el("span", { class: "key" });
   key.style.background = colorOf(engine);
   return key;
@@ -908,7 +934,7 @@ function inRange(rows, ms) {
 
 function el(tag, attrs, text) {
   const ns = "http://www.w3.org/2000/svg";
-  const node = ["svg", "path", "line", "circle", "text", "tspan", "g", "title", "defs", "pattern", "rect", "mask", "marker"].includes(tag)
+  const node = ["svg", "path", "line", "circle", "text", "tspan", "g", "title", "defs", "pattern", "rect", "mask", "marker", "image"].includes(tag)
     ? document.createElementNS(ns, tag) : document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
   if (text != null) node.textContent = text;
@@ -1137,7 +1163,9 @@ function drawChart(card, series, opts) {
     const on = card._sel.has(e);
     btn.setAttribute("aria-pressed", on);
     btn.title = on ? `stop highlighting ${displayName(e)}` : `highlight ${displayName(e)} in this chart`;
-    btn.firstChild.style.background = highlight.has(e) ? colorOf(e) : "var(--baseline)";
+    const key = btn.firstChild;
+    if (key.tagName === "IMG") key.style.opacity = highlight.has(e) ? 1 : 0.35;
+    else key.style.background = highlight.has(e) ? colorOf(e) : "var(--baseline)";
   });
 }
 
@@ -1309,6 +1337,81 @@ function shareEntries(rows) {
   entries.sort((a, b) => b.overall - a.overall);
   return { ult, entries };
 }
+
+function mulberry32(seed) {
+  let a = seed | 0;
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const BOOT_RESAMPLES = 2000;
+
+function bootstrapShares(rows) {
+  const out = new Map();
+  const idx = new Map(ENGINES.map((e, i) => [e, i]));
+  const ultI = idx.get(ULTIMATE_ENGINE);
+  if (ultI == null) return out;
+  const week = inRange(rows, 7 * 86400e3);
+  const nE = ENGINES.length;
+  const benchRuns = STANDINGS_BENCHES.map(([bench, metric]) => {
+    const byTs = new Map();
+    for (const r of week) {
+      const ei = idx.get(r.engine);
+      if (ei == null || r.bench !== bench || r[metric] == null || !(r.num_scored > 0)) continue;
+      let run = byTs.get(r.ts);
+      if (!run) byTs.set(r.ts, run = []);
+      run.push(ei, r[metric], r.num_scored);
+    }
+    return [...byTs.values()];
+  });
+  const rand = mulberry32(1926);
+  const sums = new Float64Array(nE), wts = new Float64Array(nE);
+  const benchSamples = STANDINGS_BENCHES.map(() => Array.from({ length: nE }, () => []));
+  const overallSamples = Array.from({ length: nE }, () => []);
+  for (let it = 0; it < BOOT_RESAMPLES; it++) {
+    const acc = new Float64Array(nE), accN = new Float64Array(nE);
+    benchRuns.forEach((runs, bi) => {
+      if (!runs.length) return;
+      sums.fill(0);
+      wts.fill(0);
+      for (let k = 0; k < runs.length; k++) {
+        const run = runs[(rand() * runs.length) | 0];
+        for (let j = 0; j < run.length; j += 3) {
+          sums[run[j]] += run[j + 1] * run[j + 2];
+          wts[run[j]] += run[j + 2];
+        }
+      }
+      if (!wts[ultI]) return;
+      const u = sums[ultI] / wts[ultI];
+      if (!u) return;
+      for (let ei = 0; ei < nE; ei++) {
+        if (!wts[ei] || ei === ultI) continue;
+        const share = sums[ei] / wts[ei] / u;
+        benchSamples[bi][ei].push(share);
+        acc[ei] += share;
+        accN[ei]++;
+      }
+    });
+    for (let ei = 0; ei < nE; ei++) {
+      if (accN[ei]) overallSamples[ei].push(acc[ei] / accN[ei]);
+    }
+  }
+  for (let ei = 0; ei < nE; ei++) {
+    if (ENGINES[ei] === ULTIMATE_ENGINE || !overallSamples[ei].length) continue;
+    out.set(ENGINES[ei], {
+      lo: pctl(overallSamples[ei], 0.025),
+      hi: pctl(overallSamples[ei], 0.975),
+      benches: benchSamples.map((b) => b[ei].length
+        ? { lo: pctl(b[ei], 0.025), hi: pctl(b[ei], 0.975) }
+        : null),
+    });
+  }
+  return out;
+}
 function renderStandings(rows) {
   const card = document.getElementById("card-standings");
   const holder = document.getElementById("standings");
@@ -1320,6 +1423,7 @@ function renderStandings(rows) {
     return;
   }
   const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const boot = bootstrapShares(rows);
   const nAx = STANDINGS_BENCHES.length;
   const best = [];
   for (let i = 0; i <= nAx; i++) {
@@ -1331,12 +1435,52 @@ function renderStandings(rows) {
     best.push(m);
   }
   card._mdRows = () => [
-    ["engine", "overall", ...STANDINGS_BENCHES.map(([b]) => verticalName(b))],
-    ["ultimate (raw)", "100%", ...ult.map((u) => u == null ? "–" : fmt3(u))],
-    ["gap to ultimate", ...best.map((m) => m == null ? "–" : `−${Math.round((1 - m) * 100)}%`)],
-    ...entries.map((x) => [displayName(x.e), fmtPct(x.overall),
-      ...x.shares.map((s) => s ? fmtPct(s.share) : "–")]),
+    ["engine", "overall", "overall 95% CI", ...STANDINGS_BENCHES.map(([b]) => verticalName(b))],
+    ["ultimate (raw)", "100%", "", ...ult.map((u) => u == null ? "–" : fmt3(u))],
+    ["gap to ultimate", best[0] == null ? "–" : `−${Math.round((1 - best[0]) * 100)}%`, "",
+      ...best.slice(1).map((m) => m == null ? "–" : `−${Math.round((1 - m) * 100)}%`)],
+    ...entries.map((x) => {
+      const c = boot.get(x.e);
+      return [displayName(x.e), fmtPct(x.overall),
+        c ? `[${fmtPct(c.lo)}, ${fmtPct(c.hi)}]` : "–",
+        ...x.shares.map((s) => s ? fmtPct(s.share) : "–")];
+    }),
   ];
+
+  if (best[0] != null) {
+    const leader = entries[0];
+    const lc = boot.get(leader.e);
+    const tied = [leader];
+    if (lc) {
+      for (const x of entries.slice(1)) {
+        const c = boot.get(x.e);
+        if (c && c.hi >= lc.lo && lc.hi >= c.lo) tied.push(x);
+        else break;
+      }
+    }
+    const names = tied.map((x) => displayName(x.e)).reduce((a, n, i, arr) =>
+      i === 0 ? n : i === arr.length - 1 ? `${a} and ${n}` : `${a}, ${n}`, "");
+    const stats = el("div", { class: "stats" });
+    const s1 = el("div", { class: "stat" });
+    s1.appendChild(el("span", { class: "stat-num" }, tied.length > 1
+      ? `${Math.round(tied.at(-1).overall * 100)}–${Math.round(leader.overall * 100)}%`
+      : fmtPct(best[0])));
+    s1.appendChild(el("div", { class: "stat-cap" }, tied.length > 1
+      ? `${names} — statistically tied for best engine (95% CIs overlap), mean share of ultimate, last 7 days`
+      : `${names} — best single engine, mean share of ultimate across the five verticals, last 7 days${lc ? `; 95% CI ${fmtPct(lc.lo)}–${fmtPct(lc.hi)}` : ""}`));
+    if (boot.size) {
+      s1.title = tied.map((x) => {
+        const c = boot.get(x.e);
+        return `${displayName(x.e)} ${fmtPct(x.overall)}${c ? ` [${fmtPct(c.lo)}, ${fmtPct(c.hi)}]` : ""}`;
+      }).join(" · ") + ` — 95% run-level cluster bootstrap, ${BOOT_RESAMPLES} resamples`;
+    }
+    const s2 = el("div", { class: "stat" });
+    s2.appendChild(el("span", { class: "stat-num gap" }, `−${Math.round((1 - best[0]) * 100)}%`));
+    s2.appendChild(el("div", { class: "stat-cap" },
+      `the gap — the share of ultimate that no single engine reaches${lc ? ` (95% CI ${Math.round((1 - lc.hi) * 100)}–${Math.round((1 - lc.lo) * 100)}%)` : ""}`));
+    stats.append(s1, s2);
+    holder.appendChild(stats);
+  }
 
   const W = 860;
   const R = 240;
@@ -1373,14 +1517,14 @@ function renderStandings(rows) {
   const defs = el("defs", {});
   const arrow = el("marker", { id: "st-arrow", viewBox: "0 0 8 8", refX: 7, refY: 4,
     markerWidth: 5, markerHeight: 5, orient: "auto" });
-  arrow.appendChild(el("path", { d: "M0,0L8,4L0,8Z", fill: "#d64545" }));
+  arrow.appendChild(el("path", { d: "M0,0L8,4L0,8Z", fill: "var(--expressive-text)" }));
   defs.appendChild(arrow);
   const benchBest = best.slice(1);
   if (benchBest.every((m) => m != null)) {
     const pat = el("pattern", { id: "st-hatch", width: 7, height: 7,
       patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
-    pat.appendChild(el("rect", { width: 7, height: 7, fill: "#d64545", "fill-opacity": 0.05 }));
-    pat.appendChild(el("line", { x1: 0.5, y1: 0, x2: 0.5, y2: 7, stroke: "#d64545", "stroke-opacity": 0.28, "stroke-width": 1.2 }));
+    pat.appendChild(el("rect", { width: 7, height: 7, fill: "var(--expressive)", "fill-opacity": 0.02 }));
+    pat.appendChild(el("line", { x1: 0.5, y1: 0, x2: 0.5, y2: 7, stroke: "var(--expressive)", "stroke-opacity": 0.18, "stroke-width": 1 }));
     defs.appendChild(pat);
     const mask = el("mask", { id: "st-unclaimed", maskUnits: "userSpaceOnUse" });
     mask.appendChild(el("path", { d: ringD(1), fill: "#fff" }));
@@ -1395,7 +1539,7 @@ function renderStandings(rows) {
   svg.appendChild(el("path", { d: ringD(1), fill: "none", stroke: "var(--baseline)", "stroke-width": 1 }));
   if (benchBest.every((m) => m != null)) {
     svg.appendChild(el("path", { d: poly(benchBest.map((m, i) => pt(i, m))), fill: "none",
-      stroke: "#d64545", "stroke-width": 1.2, "stroke-dasharray": "5 4", "stroke-opacity": 0.55 }));
+      stroke: "var(--expressive-text)", "stroke-width": 1.2, "stroke-dasharray": "5 4", "stroke-opacity": 0.7 }));
   }
   for (const gv of [0.25, 0.5, 0.75]) {
     svg.appendChild(el("text", { x: cx + 4, y: cy - R * gv - 3, class: "axis-text" }, `${fmtPct(gv)} of ultimate`));
@@ -1445,9 +1589,9 @@ function renderStandings(rows) {
     const off = Math.min(42 / (Math.abs(u[0]) || 1e-9), 12 / (Math.abs(u[1]) || 1e-9)) + 3;
     const gg = el("g", {});
     gg.appendChild(el("line", { x1: lp[0] + u[0] * off, y1: lp[1] + u[1] * off, x2: tgt[0], y2: tgt[1],
-      stroke: "#d64545", "stroke-width": 1.2, "marker-end": "url(#st-arrow)" }));
+      stroke: "var(--expressive-text)", "stroke-width": 1.2, "marker-end": "url(#st-arrow)" }));
     gg.appendChild(el("text", { x: lp[0], y: lp[1] + 5, class: "st-gap",
-      style: "font-size:16px" }, "THE GAP"));
+      style: "font-size:15px" }, "the gap"));
     gg.appendChild(el("title", {}, "the hatched band: the share of ultimate that no single engine reaches"));
     svg.appendChild(gg);
   }
@@ -1483,6 +1627,16 @@ function renderStandings(rows) {
     }
     g.appendChild(el("path", { d: poly(pts), fill: "none", stroke: colorOf(x.e),
       "stroke-width": hot ? 2 : 1.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    const bc = boot.get(x.e);
+    for (const [, , i] of pts) {
+      const ci = bc?.benches[i];
+      if (!ci) continue;
+      const [wx1, wy1] = pt(i, Math.min(ci.lo, 1));
+      const [wx2, wy2] = pt(i, Math.min(ci.hi, 1));
+      g.appendChild(el("line", { x1: wx1, y1: wy1, x2: wx2, y2: wy2,
+        stroke: colorOf(x.e), "stroke-width": 2.5, "stroke-opacity": 0.4,
+        "stroke-linecap": "round" }));
+    }
     for (const [px, py, i, share] of pts) {
       const dot = markerEl(x.e, px, py, 4);
       const [bench, , label] = STANDINGS_BENCHES[i];
@@ -1490,6 +1644,7 @@ function renderStandings(rows) {
       dot.appendChild(el("title", {}, `${displayName(x.e)} · ${verticalName(bench)}: `
         + `${fmtPct(share)} of ultimate · raw ${label} ${fmt3(x.shares[i].v)} vs ultimate ${fmt3(ult[i])}`
         + (benchBest[i] != null ? ` · best engine ${fmtPct(benchBest[i])}` : "")
+        + (bc?.benches[i] ? ` · share 95% CI ${fmtPct(bc.benches[i].lo)}–${fmtPct(bc.benches[i].hi)}` : "")
         + (c ? ` · 7-day mean ${fmt3(c.point)}, 95% CI [${fmt3(c.lo)}, ${fmt3(c.hi)}]` : "")));
       g.appendChild(dot);
     }
@@ -1611,10 +1766,6 @@ function renderQualityPrice(rows) {
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
     "aria-label": "Overall quality as share of ultimate vs price per 1,000 queries" });
   const mx = X(xTop / 2), my = Y((yLo + yHi) / 2);
-  svg.appendChild(el("rect", { x: M.left, y: M.top, width: mx - M.left, height: my - M.top,
-    fill: "var(--delta-up)", "fill-opacity": 0.05 }));
-  svg.appendChild(el("rect", { x: mx, y: my, width: M.left + iw - mx, height: M.top + ih - my,
-    fill: "#d64545", "fill-opacity": 0.05 }));
   for (let gv = Math.ceil(yLo / yStep) * yStep; gv <= yHi + 1e-9; gv += yStep) {
     svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: Y(gv), y2: Y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
     svg.appendChild(el("text", { x: M.left - 6, y: Y(gv) + 3, "text-anchor": "end", class: "axis-text" }, fmtPct(gv)));
@@ -1717,7 +1868,7 @@ function renderLatencySummary(rows) {
     svg.appendChild(el("line", { x1: lx(t), y1: TOP, x2: lx(t), y2: TOP + xs.length * ROW,
       stroke: "var(--grid)", "stroke-width": 1 }));
     svg.appendChild(el("text", { x: lx(t), y: TOP - 9, "text-anchor": "middle",
-      "font-size": 10, fill: "var(--text-muted)" }, fmtMs(t)));
+      class: "axis-text", "font-size": 10 }, fmtMs(t)));
   }
   xs.forEach((x, i) => {
     const y = TOP + i * ROW + ROW / 2;
@@ -1725,11 +1876,13 @@ function renderLatencySummary(rows) {
     g.appendChild(el("title", {}, rowInfo(x)));
     if (x.e === HOME_ENGINE) {
       g.appendChild(el("rect", { x: 0, y: y - ROW / 2, width: W, height: ROW,
-        fill: "var(--home)", "fill-opacity": 0.07 }));
+        fill: "var(--home-tint)" }));
     }
-    g.appendChild(el("text", { x: LBL - 10, y: y + 3.5, "text-anchor": "end",
+    g.appendChild(el("text", { x: LBL - 30, y: y + 3.5, "text-anchor": "end",
       "font-size": 11.5, fill: "var(--text-primary)",
-      "font-weight": x.e === HOME_ENGINE ? 650 : 400 }, displayName(x.e)));
+      "font-weight": x.e === HOME_ENGINE ? 500 : 400 }, displayName(x.e)));
+    const logo = ENGINE_LOGOS.get(x.e);
+    if (logo) g.appendChild(el("image", { href: logo, x: LBL - 24, y: y - 8, width: 16, height: 16 }));
     g.appendChild(el("line", { x1: lx(x.p50), y1: y, x2: lx(x.p95), y2: y,
       stroke: colorOf(x.e), "stroke-width": 2, "stroke-opacity": 0.55,
       "stroke-linecap": "round" }));
@@ -1740,12 +1893,10 @@ function renderLatencySummary(rows) {
   });
   const ly = TOP + xs.length * ROW + 18;
   svg.appendChild(el("circle", { cx: LBL, cy: ly - 3.5, r: 4.2, fill: "var(--text-secondary)" }));
-  svg.appendChild(el("text", { x: LBL + 9, y: ly, "font-size": 10.5,
-    fill: "var(--text-secondary)" }, "p50"));
+  svg.appendChild(el("text", { x: LBL + 9, y: ly, class: "axis-text", "font-size": 10.5 }, "p50"));
   svg.appendChild(el("circle", { cx: LBL + 44, cy: ly - 3.5, r: 4.2,
     fill: "var(--surface-1)", stroke: "var(--text-secondary)", "stroke-width": 1.8 }));
-  svg.appendChild(el("text", { x: LBL + 53, y: ly, "font-size": 10.5,
-    fill: "var(--text-secondary)" }, "p95"));
+  svg.appendChild(el("text", { x: LBL + 53, y: ly, class: "axis-text", "font-size": 10.5 }, "p95"));
   holderD.appendChild(svg);
 }
 
@@ -1781,13 +1932,13 @@ function renderHistoryTable(rows) {
   holder.appendChild(table);
 }
 
-const RATING_BG = ["#cde2fb", "#86b6ef", "#3987e5", "#1c5cab", "#0d366b"];
-const RATING_INK = ["#0b0b0b", "#0b0b0b", "#ffffff", "#ffffff", "#ffffff"];
+const RATING_BG = ["#EAF2FF", "#C7E0FF", "#74A6FF", "#005CFF", "#0D2C6A"];
+const RATING_INK = ["#2A2A2A", "#2A2A2A", "#2A2A2A", "#ffffff", "#ffffff"];
 
 let ENGINE_FAMILY = new Map();
 const OVERLAP_RANGE_MS = 14 * 86400e3;
-const OVERLAP_BG = ["#0ca30c", "#a9d79c", "#f0efec", "#f0b0a1", "#c22e2e"];
-const OVERLAP_INK = ["#0b0b0b", "#0b0b0b", "#0b0b0b", "#0b0b0b", "#ffffff"];
+const OVERLAP_BG = ["#62BB78", "#C3EAC9", "#F7EFB5", "#FCA68E", "#D34517"];
+const OVERLAP_INK = ["#2A2A2A", "#2A2A2A", "#2A2A2A", "#2A2A2A", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
 const SHARED3_STEPS = [0.05, 0.15, 0.3, 0.5];
 const LOWSHARED_STEPS = [0.05, 0.12, 0.25, 0.5];
@@ -2004,7 +2155,9 @@ function renderSharingGraph(holder, engines, pairs, uniqAgg) {
     const g = el("g");
     const u = uniqPct(e);
     g.appendChild(el("title", {}, u == null ? displayName(e) : `${displayName(e)}: ${fmtPct(u)} unique URLs`));
-    g.appendChild(el("circle", { cx: p.x, cy: p.y, r: 7, fill: colorOf(e) }));
+    const logo = ENGINE_LOGOS.get(e);
+    if (logo) g.appendChild(el("image", { href: logo, x: p.x - 9, y: p.y - 9, width: 18, height: 18 }));
+    else g.appendChild(el("circle", { cx: p.x, cy: p.y, r: 7, fill: colorOf(e) }));
     const c = Math.cos(p.ang);
     g.appendChild(el("text", {
       x: cx + (R + 15) * Math.cos(p.ang), y: cy + (R + 15) * Math.sin(p.ang) + 4,
@@ -2072,8 +2225,9 @@ function renderUniquenessTable(agg, prefix, uKey, tKey, subText) {
 
 function ratingChip(rating, title) {
   const chip = el("span", { class: "chip" }, rating == null ? "?" : String(rating));
-  chip.style.background = rating == null ? "var(--grid)" : RATING_BG[rating];
+  chip.style.background = rating == null ? "var(--track)" : RATING_BG[rating];
   chip.style.color = rating == null ? "var(--text-secondary)" : RATING_INK[rating];
+  chip.style.borderColor = "transparent";
   if (title) chip.title = title;
   return chip;
 }
@@ -2429,15 +2583,7 @@ document.getElementById("export-md").addEventListener("click", () => {
   window.open(URL.createObjectURL(blob));
 });
 document.getElementById("export-pdf").addEventListener("click", () => window.print());
-let themeBeforePrint = null;
-window.addEventListener("beforeprint", () => {
-  drawAllTrends?.();
-  themeBeforePrint = document.documentElement.dataset.theme;
-  document.documentElement.dataset.theme = "light";
-});
-window.addEventListener("afterprint", () => {
-  document.documentElement.dataset.theme = themeBeforePrint;
-});
+window.addEventListener("beforeprint", () => drawAllTrends?.());
 
 for (const n of document.querySelectorAll("[data-vert]")) {
   n.textContent = verticalName(n.dataset.vert);
@@ -2450,8 +2596,7 @@ for (const bar of document.querySelectorAll(".lb-tabs")) {
   const move = () => {
     const btn = bar.querySelector("button.active");
     ind.style.width = `${btn.offsetWidth}px`;
-    ind.style.height = `${btn.offsetHeight}px`;
-    ind.style.transform = `translate(${btn.offsetLeft}px, ${btn.offsetTop}px)`;
+    ind.style.transform = `translate(${btn.offsetLeft}px, ${btn.offsetTop + btn.offsetHeight - 2}px)`;
   };
   for (const btn of buttons) {
     btn.addEventListener("click", () => {
@@ -2467,15 +2612,6 @@ for (const bar of document.querySelectorAll(".lb-tabs")) {
   move();
   new ResizeObserver(move).observe(bar);
 }
-
-document.getElementById("theme-toggle").addEventListener("click", () => {
-  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  document.documentElement.dataset.theme = next;
-  localStorage.theme = next;
-});
-matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
-  if (!localStorage.theme) document.documentElement.dataset.theme = e.matches ? "dark" : "light";
-});
 
 async function main() {
   const fetchRows = (url) =>
@@ -2495,7 +2631,6 @@ async function main() {
   for (const r of histRows) r.bench = LEGACY_BENCH[r.bench] || r.bench;
   history = histRows.filter((r) => BENCHES.includes(r.bench) && !HIDDEN_ENGINES.has(r.engine));
   registerEngines(history.map((r) => r.engine));
-  document.documentElement.style.setProperty("--home", colorOf(HOME_ENGINE));
 
   if (history.length) {
     const lastTs = history[history.length - 1].ts;
