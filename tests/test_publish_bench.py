@@ -1,5 +1,8 @@
 import importlib.util
+import json
 from pathlib import Path
+
+import pytest
 
 SPEC = importlib.util.spec_from_file_location(
     "publish_bench", Path(__file__).parents[1] / "scripts" / "publish_bench.py"
@@ -54,3 +57,33 @@ def test_suite_rows_publish_slice_denominators():
     )[0]
     assert row["filings_n"] == 3
     assert row["filingdoc_n"] == 4
+
+
+def test_publish_writes_ci_files(tmp_path):
+    report = {
+        "num_queries": 2,
+        "engines": {
+            "e": {
+                "mean_ndcg": 0.5,
+                "num_scored": 2,
+                "search_errors": 0,
+                "judge_errors": 0,
+                "latency": None,
+                "per_query": [
+                    {"query": "q1", "score": 1.0, "search_error": None, "results": []},
+                    {"query": "q2", "score": 0.0, "search_error": None, "results": []},
+                ],
+            }
+        },
+    }
+    ndcg = tmp_path / "ndcg.json"
+    ndcg.write_text(json.dumps(report), encoding="utf-8")
+    site = tmp_path / "site"
+    publish_bench.publish(
+        site=str(site), runs_out=str(tmp_path / "runs"), ndcg=str(ndcg), ts="2026-08-17T00:00Z"
+    )
+    scores = (site / "data" / "ci_scores.jsonl").read_text(encoding="utf-8")
+    assert json.loads(scores)["engines"]["e"] == [1.0, 0.0]
+    ci = json.loads((site / "data" / "ci.json").read_text(encoding="utf-8"))
+    assert ci["window_end"] == "2026-08-17T00:00Z"
+    assert ci["benches"]["news"]["e"]["point"] == pytest.approx(0.5)

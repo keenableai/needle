@@ -122,6 +122,8 @@ def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int
 
 
 def _summarize(per_query: list[dict[str, Any]], *, latencies_ms: list[float]) -> dict[str, Any]:
+    for pq in per_query:
+        pq["score"] = pq["ndcg"]
     scored = [pq["ndcg"] for pq in per_query if pq["ndcg"] is not None]
     return {
         "mean_ndcg": sum(scored) / len(scored) if scored else 0.0,

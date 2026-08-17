@@ -5,6 +5,7 @@ from pathlib import Path
 import fire
 
 from keenbench.scholar.generate import QUERY_BUCKETS
+from keenbench.shared.ci import ci_payload, score_row, updated_scores
 from keenbench.shared.io import append_jsonl, load_jsonl, write_json, write_jsonl
 from keenbench.shared.overlap import FAMILIES, TS_FMT, overlap_rows, uniqueness_rows
 
@@ -143,12 +144,13 @@ def publish(
     rows = []
     overlap = []
     uniqueness = []
-    for path, to_rows, latest, archive_name in (
-        (ndcg, news_rows, "latest_news.json", "ndcg.json"),
-        (recall, finance_rows, "latest_finance.json", "recall.json"),
-        (agentic_rare, agentic_rare_rows, "latest_agentic_rare.json", "agentic_rare.json"),
-        (scholar, scholar_rows, "latest_scholar.json", "scholar.json"),
-        (legal, legal_rows, "latest_legal.json", "legal.json"),
+    score_rows = []
+    for bench, path, to_rows, archive_name in (
+        ("news", ndcg, news_rows, "ndcg.json"),
+        ("finance", recall, finance_rows, "recall.json"),
+        ("agentic_rare", agentic_rare, agentic_rare_rows, "agentic_rare.json"),
+        ("scholar", scholar, scholar_rows, "scholar.json"),
+        ("legal", legal, legal_rows, "legal.json"),
     ):
         if not path:
             continue
@@ -157,7 +159,8 @@ def publish(
         rows.extend(to_rows(report, ts))
         overlap.extend(overlap_rows(report, ts=ts))
         uniqueness.extend(uniqueness_rows(report, ts=ts))
-        write_json(slim_report(report), str(data / latest))
+        score_rows.append(score_row(report, bench, ts))
+        write_json(slim_report(report), str(data / f"latest_{bench}.json"))
         (run_dir / archive_name).write_text(raw, encoding="utf-8")
     for path, archive_name in (
         (fresh, "fresh.jsonl"),
@@ -176,6 +179,11 @@ def publish(
     _publish_rows(data / "history.jsonl", rows, ts, republish)
     for name, new_rows in (("overlap.jsonl", overlap), ("uniqueness.jsonl", uniqueness)):
         _publish_rows(data / name, new_rows, ts, republish)
+
+    scores = updated_scores(load_jsonl(data / "ci_scores.jsonl"), score_rows, ts)
+    if scores:
+        write_jsonl(scores, str(data / "ci_scores.jsonl"))
+        write_json(ci_payload(scores, max(r["ts"] for r in scores)), str(data / "ci.json"))
 
     runs = [r for r in runs if r.get("id") != run_id]
     runs.append({"id": run_id, "ts": ts, "artifacts": sorted(p.name for p in run_dir.iterdir())})

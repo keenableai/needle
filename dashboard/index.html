@@ -697,7 +697,7 @@ document.documentElement.dataset.theme = localStorage.theme ||
         <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
-        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, runs.json</td>
+        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, runs.json, ci_scores.jsonl, ci.json</td>
         <td>data/ on this site (gh-pages)</td></tr>
       <tr><td>prompts &amp; scoring code</td>
         <td>judge prompt (shared/prompts/judgement.jinja), metric implementations, engine clients</td>
@@ -844,14 +844,14 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
   document.getElementById(subId).textContent =
     `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
-  const ci = ciData?.benches?.[bench]?.engines || null;
+  const ci = ciData?.benches?.[bench] || null;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
   head.appendChild(el("th", { class: "num" }, metrics[0][1]));
   if (ci) {
     const th = el("th", { class: "num ci-col" }, "95% CI");
-    th.title = `${Math.round((ciData.confidence || 0.95) * 100)}% bootstrap interval on the ${metrics[0][1]} column (${ciData.benches[bench].method}, ${ciData.resamples} resamples, ${ciData.window_days}-day window ending ${ciData.window_end})`;
+    th.title = `${Math.round((ciData.confidence || 0.95) * 100)}% bootstrap interval on the ${metrics[0][1]} column (${ciData.method}, ${ciData.resamples} resamples, ${ciData.window_days}-day window ending ${ciData.window_end})`;
     head.appendChild(th);
   }
   for (const [, label] of metrics.slice(1)) head.appendChild(el("th", { class: "num" }, label));
@@ -1098,7 +1098,7 @@ function renderStandings(rows) {
     for (const [px, py, i, share] of pts) {
       const dot = markerEl(x.e, px, py, 4);
       const [bench, , label] = STANDINGS_BENCHES[i];
-      const c = ciData?.benches?.[bench]?.engines?.[x.e];
+      const c = ciData?.benches?.[bench]?.[x.e];
       dot.appendChild(el("title", {}, `${displayName(x.e)} · ${verticalName(bench)}: `
         + `${fmtPct(share)} of ultimate · raw ${label} ${fmt3(x.shares[i].v)} vs ultimate ${fmt3(ult[i])}`
         + (benchBest[i] != null ? ` · best engine ${fmtPct(benchBest[i])}` : "")

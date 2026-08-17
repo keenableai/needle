@@ -58,6 +58,10 @@ def ultimate_per_query(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
 def recall_summary(
     per_query: list[dict], scored: list[dict], latency: dict | None
 ) -> dict[str, Any]:
+    for pq in per_query:
+        pq["score"] = None
+    for pq in scored:
+        pq["score"] = 1.0 if pq["hit_rank"] is not None else 0.0
     hits = [pq for pq in scored if pq["hit_rank"] is not None]
     return {
         "recall_at_k": len(hits) / len(scored) if scored else 0.0,
