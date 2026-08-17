@@ -2,69 +2,141 @@
   "confidence": 0.95,
   "resamples": 10000,
   "window_days": 7,
-  "window_end": "2026-08-17T17:39Z",
+  "window_end": "2026-08-17T19:45Z",
   "method": "percentile cluster bootstrap, wider of query and run clustering",
   "benches": {
-    "news": {
+    "legal": {
       "bing": {
-        "point": 0.3532,
-        "lo": 0.2857,
-        "hi": 0.4213
+        "point": 0.9114,
+        "lo": 0.8481,
+        "hi": 0.9747
       },
       "ceramic": {
-        "point": 0.0596,
-        "lo": 0.0335,
-        "hi": 0.0928
+        "point": 0.0833,
+        "lo": 0.0312,
+        "hi": 0.1458
       },
       "exa": {
-        "point": 0.6051,
-        "lo": 0.5091,
-        "hi": 0.6987
+        "point": 0.8021,
+        "lo": 0.7188,
+        "hi": 0.875
       },
       "exa-instant": {
-        "point": 0.4026,
-        "lo": 0.3027,
-        "hi": 0.5063
+        "point": 0.6771,
+        "lo": 0.5833,
+        "hi": 0.7708
       },
       "google": {
-        "point": 0.3244,
-        "lo": 0.2593,
-        "hi": 0.3923
+        "point": 0.6875,
+        "lo": 0.5938,
+        "hi": 0.7708
       },
       "keenable": {
-        "point": 0.5932,
-        "lo": 0.4982,
-        "hi": 0.6892
+        "point": 0.9167,
+        "lo": 0.8542,
+        "hi": 0.9688
       },
       "keenable-realtime": {
-        "point": 0.5741,
-        "lo": 0.4772,
-        "hi": 0.6708
+        "point": 0.9062,
+        "lo": 0.8438,
+        "hi": 0.9583
       },
       "octen": {
-        "point": 0.3415,
-        "lo": 0.2487,
-        "hi": 0.4426
+        "point": 0.6354,
+        "lo": 0.5417,
+        "hi": 0.7292
       },
       "parallel": {
-        "point": 0.2917,
-        "lo": 0.2175,
-        "hi": 0.3694
+        "point": 0.7604,
+        "lo": 0.6771,
+        "hi": 0.8438
       },
       "parallel-turbo": {
-        "point": 0.3788,
-        "lo": 0.2934,
-        "hi": 0.4648
+        "point": 0.3958,
+        "lo": 0.3021,
+        "hi": 0.4896
       },
       "perplexity": {
-        "point": 0.498,
-        "lo": 0.417,
-        "hi": 0.5774
+        "point": 0.6667,
+        "lo": 0.5729,
+        "hi": 0.7604
       },
       "tavily": {
-        "point": 0.3294,
-        "lo": 0.2525,
-        "hi": 0.4107
+        "point": 0.6042,
+        "lo": 0.5104,
+        "hi": 0.6979
+      },
+      "ultimate": {
+        "point": 0.9896,
+        "lo": 0.9688,
+        "hi": 1.0
+      },
+      "you": {
+        "point": 0.6354,
+        "lo": 0.5417,
+        "hi": 0.7292
+      }
+    },
+    "news": {
+      "bing": {
+        "point": 0.3433,
+        "lo": 0.2904,
+        "hi": 0.3971
+      },
+      "ceramic": {
+        "point": 0.0587,
+        "lo": 0.0352,
+        "hi": 0.0867
+      },
+      "exa": {
+        "point": 0.6223,
+        "lo": 0.5489,
+        "hi": 0.6904
+      },
+      "exa-instant": {
+        "point": 0.3656,
+        "lo": 0.2828,
+        "hi": 0.4618
+      },
+      "google": {
+        "point": 0.3118,
+        "lo": 0.2569,
+        "hi": 0.367
+      },
+      "keenable": {
+        "point": 0.5897,
+        "lo": 0.5107,
+        "hi": 0.6684
+      },
+      "keenable-realtime": {
+        "point": 0.5729,
+        "lo": 0.4894,
+        "hi": 0.6563
+      },
+      "octen": {
+        "point": 0.3313,
+        "lo": 0.2514,
+        "hi": 0.4316
+      },
+      "parallel": {
+        "point": 0.2794,
+        "lo": 0.2223,
+        "hi": 0.3402
+      },
+      "parallel-turbo": {
+        "point": 0.3627,
+        "lo": 0.2946,
+        "hi": 0.435
+      },
+      "perplexity": {
+        "point": 0.5098,
+        "lo": 0.4449,
+        "hi": 0.5738
+      },
+      "tavily": {
+        "point": 0.3466,
+        "lo": 0.278,
+        "hi": 0.4174
       },
       "ultimate": {
         "point": 1.0,
@@ -72,9 +144,9 @@
         "hi": 1.0
       },
       "you": {
-        "point": 0.4315,
-        "lo": 0.3271,
-        "hi": 0.537
+        "point": 0.4658,
+        "lo": 0.3786,
+        "hi": 0.5536
       }
     }
   }
