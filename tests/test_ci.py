@@ -61,6 +61,7 @@ def test_point_matches_query_weighted_mean():
     )
     out = ci_payload(rows, "2026-08-17T00:00Z", resamples=200)
     assert out["benches"]["news"]["e"]["point"] == pytest.approx(0.75)
+    assert out["runs"]["news"] == ["2026-08-16T00:00Z", "2026-08-17T00:00Z"]
     assert ci_payload(rows, "2026-08-17T00:00Z", resamples=200) == out
 
 

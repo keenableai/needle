@@ -52,6 +52,7 @@ def bootstrap_interval(clusters: dict[str, list[float]], resamples: int) -> tupl
 
 def ci_payload(rows: list[dict], window_end: str, *, resamples: int = RESAMPLES) -> dict[str, Any]:
     benches: dict[str, Any] = {}
+    runs: dict[str, list[str]] = {}
     for bench in sorted({r["bench"] for r in rows}):
         bench_rows = [r for r in rows if r["bench"] == bench]
         engines: dict[str, Any] = {}
@@ -81,11 +82,13 @@ def ci_payload(rows: list[dict], window_end: str, *, resamples: int = RESAMPLES)
             }
         if engines:
             benches[bench] = engines
+            runs[bench] = sorted({r["ts"] for r in bench_rows})
     return {
         "confidence": CONFIDENCE,
         "resamples": resamples,
         "window_days": WINDOW_DAYS,
         "window_end": window_end,
         "method": METHOD,
+        "runs": runs,
         "benches": benches,
     }

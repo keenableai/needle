@@ -1241,13 +1241,14 @@ function wmean(rows, metric, weightMetric = "num_scored") {
 function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const holder = document.getElementById(holderId);
   holder.replaceChildren();
-  const benchRows = rows.filter((r) => r.bench === bench);
+  const ciRuns = ciData?.runs?.[bench] ? new Set(ciData.runs[bench]) : null;
+  const windowed = ciRuns ? rows.filter((r) => ciRuns.has(r.ts)) : inRange(rows, 7 * 86400e3);
+  const benchRows = windowed.filter((r) => r.bench === bench);
   const ci = ciData?.benches?.[bench] || null;
   const entries = ENGINES.map((e) => {
     const er = benchRows.filter((r) => r.engine === e);
     const scored = er.filter((r) => r[metrics[0][0]] != null && r.num_scored > 0);
-    const v = wmean(er, metrics[0][0]);
-    return { e, v: v == null ? null : ci?.[e]?.point ?? v, n: scored.length,
+    return { e, v: wmean(er, metrics[0][0]), n: scored.length,
       q: scored.reduce((s, r) => s + (r.num_scored || 0), 0),
       lastT: scored.length ? new Date(scored.at(-1).ts) : null,
       extra: metrics.slice(1).map(([m, , weight]) => wmean(er, m, weight)) };
@@ -1293,22 +1294,21 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
 }
 
 function renderLeaderboards(rows) {
-  const week = inRange(rows, 7 * 86400e3);
-  renderLeaderboard("lb-fresh", "lb-fresh-sub", week, "news", [["ndcg", "nDCG@5"]]);
-  renderLeaderboard("lb-company", "lb-company-sub", week, "finance", [
+  renderLeaderboard("lb-fresh", "lb-fresh-sub", rows, "news", [["ndcg", "nDCG@5"]]);
+  renderLeaderboard("lb-company", "lb-company-sub", rows, "finance", [
     ["recall", "recall@5"],
     ["filings_recall", "filings", "filings_n"],
     ["filingdoc_recall", "filingdoc", "filingdoc_n"],
   ]);
-  renderLeaderboard("lb-scholar", "lb-scholar-sub", week, "scholar", [
+  renderLeaderboard("lb-scholar", "lb-scholar-sub", rows, "scholar", [
     ["recall", "recall@10"],
     ["title_recall", "title", "title_n"],
     ["body_recall", "body", "body_n"],
     ["clue_recall", "clue", "clue_n"],
     ["tot_recall", "tot", "tot_n"],
   ]);
-  renderLeaderboard("lb-rare", "lb-rare-sub", week, "agentic_rare", [["ndcg", "nDCG@5"]]);
-  renderLeaderboard("lb-legal", "lb-legal-sub", week, "legal", [
+  renderLeaderboard("lb-rare", "lb-rare-sub", rows, "agentic_rare", [["ndcg", "nDCG@5"]]);
+  renderLeaderboard("lb-legal", "lb-legal-sub", rows, "legal", [
     ["recall", "recall@5"],
     ["caselaw_recall", "caselaw", "caselaw_n"],
     ["code_recall", "code", "code_n"],
