@@ -844,7 +844,7 @@ const RUNS_BASE = "https://huggingface.co/datasets/keenable-ai/keenbench-results
 
 let ENGINES = [];
 const ENGINE_SLOT = new Map();
-const HIDDEN_ENGINES = new Set(["ceramic", "octen"]);
+const HIDDEN_ENGINES = new Set(["ceramic", "octen", "keenable"]);
 
 function registerEngines(names) {
   for (const name of names) {
@@ -855,7 +855,7 @@ function registerEngines(names) {
   }
 }
 
-registerEngines(["keenable", "keenable-realtime", "google", "bing", "brave",
+registerEngines(["keenable-realtime", "google", "bing", "brave",
   "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity", "tavily", "you"]);
 
 function colorOf(engine) {
@@ -879,7 +879,7 @@ function markerEl(engine, x, y, r) {
   return el("path", { d, ...attrs });
 }
 
-const HOME_ENGINE = "keenable";
+const HOME_ENGINE = "keenable-realtime";
 const ULTIMATE_ENGINE = "ultimate";
 function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
@@ -1618,7 +1618,7 @@ function renderStandings(rows) {
       svg.classList.remove("dim");
     }
   };
-  const defaults = new Set(["exa", "parallel", "perplexity", "bing", "keenable"]);
+  const defaults = new Set(["exa", "parallel", "perplexity", "bing", "keenable-realtime"]);
   for (const x of [...entries].reverse()) {
     const hot = defaults.has(x.e);
     const g = el("g", { class: "series" + (hot ? "" : " cold"), tabindex: "0" });
