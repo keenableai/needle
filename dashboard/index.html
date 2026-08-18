@@ -788,8 +788,7 @@
     <div class="sub">request shapes pinned in git (src/keenbench/shared/search/); 5 results per query except <span class="vert" data-vert="scholar"></span> (10). Engines are live, unversioned APIs; provider-side changes surface as trend shifts.</div>
     <table>
       <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
-      <tr><td>keenable</td><td>Keenable search</td><td>query verbatim with site: kept; after:/before: → published_after:/published_before:; mode=pro</td></tr>
-      <tr><td>keenable-realtime</td><td>Keenable search</td><td>same as keenable but mode=realtime</td></tr>
+      <tr><td>keenable</td><td>Keenable search</td><td>query verbatim with site: kept; after:/before: → published_after:/published_before:; mode=realtime</td></tr>
       <tr><td>google/serper</td><td>Serper.dev (Google SERP)</td><td>query verbatim, num=min(k,100), gl=us, hl=en; knowledge-graph and answer-box entries fold into the ranking</td></tr>
       <tr><td>bing/searchapi</td><td>SearchApi.io, engine=bing</td><td>query verbatim, num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
       <tr><td>brave</td><td>Brave Web Search</td><td>count=min(k,20), country=us, search_lang=en, result_filter=web; site: kept in the query text, after:/before: → freshness window</td></tr>
@@ -885,7 +884,8 @@ function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
 
-const DISPLAY_NAMES = new Map([["google", "google/serper"], ["bing", "bing/searchapi"]]);
+const DISPLAY_NAMES = new Map([["keenable-realtime", "keenable"],
+  ["google", "google/serper"], ["bing", "bing/searchapi"]]);
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
 const VERTICALS = new Map([["news", "News"], ["finance", "Finance"],
