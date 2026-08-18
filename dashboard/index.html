@@ -1242,10 +1242,12 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const holder = document.getElementById(holderId);
   holder.replaceChildren();
   const benchRows = rows.filter((r) => r.bench === bench);
+  const ci = ciData?.benches?.[bench] || null;
   const entries = ENGINES.map((e) => {
     const er = benchRows.filter((r) => r.engine === e);
     const scored = er.filter((r) => r[metrics[0][0]] != null && r.num_scored > 0);
-    return { e, v: wmean(er, metrics[0][0]), n: scored.length,
+    const v = wmean(er, metrics[0][0]);
+    return { e, v: v == null ? null : ci?.[e]?.point ?? v, n: scored.length,
       q: scored.reduce((s, r) => s + (r.num_scored || 0), 0),
       lastT: scored.length ? new Date(scored.at(-1).ts) : null,
       extra: metrics.slice(1).map(([m, , weight]) => wmean(er, m, weight)) };
@@ -1260,7 +1262,6 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
   document.getElementById(subId).textContent =
     `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
-  const ci = ciData?.benches?.[bench] || null;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
