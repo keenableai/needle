@@ -121,6 +121,7 @@ class OpenRouterClient:
             send, attempts=self.retry_attempts, base_s=self.retry_base_s, retry_timeouts=False
         )
         if resp is None:
+            assert err is not None
             raise LLMClientError(*err)
         if resp.status_code != 200:
             raise LLMClientError("http_error", f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}")

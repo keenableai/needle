@@ -161,6 +161,7 @@ class HttpSearchClient:
             send, attempts=self.retry_attempts, base_s=self.retry_base_s
         )
         if resp is None:
+            assert err is not None
             return None, 0.0, {"error_type": err[0], "error_message": err[1]}
         return resp, elapsed_ms, None
 
