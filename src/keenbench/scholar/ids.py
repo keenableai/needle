@@ -1,5 +1,5 @@
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from keenbench.shared.search import SearchResult, titled_snippet
 
@@ -23,52 +23,46 @@ PMC_URL_RES = [
 DOI_RE = re.compile(r"(10\.\d{4,9}/[-._;()/:a-z0-9]+)", re.IGNORECASE)
 DOI_SUFFIX_RE = re.compile(r"/(full|pdf|epdf|html|meta|abstract|citations?)$", re.IGNORECASE)
 
+MATCH_FIELDS = ("arxiv", "doi", "pmid")
+
 
 @dataclass
 class PaperIds:
-    arxiv: str | None = None
-    doi: str | None = None
-    pmid: str | None = None
-    pmcid: str | None = None
+    arxiv: set[str] = field(default_factory=set)
+    doi: set[str] = field(default_factory=set)
+    pmid: set[str] = field(default_factory=set)
+    pmcid: set[str] = field(default_factory=set)
 
-    def as_match_dict(self) -> dict[str, str]:
-        ids = {"arxiv": self.arxiv, "doi": self.doi, "pmid": self.pmid}
-        return {k: v for k, v in ids.items() if v}
-
-
-def extract_arxiv(url: str, text: str) -> str | None:
-    for pat in (ARXIV_URL_RE, ARXIV_TEXT_RE, ARXIV_DOI_RE):
-        m = pat.search(url) or pat.search(text)
-        if m:
-            return m.group(1).lower()
-    return None
+    def as_match_dict(self) -> dict[str, list[str]]:
+        return {k: sorted(v) for k in MATCH_FIELDS if (v := getattr(self, k))}
 
 
-def extract_pmid(url: str, text: str) -> str | None:
-    for pat in PMID_URL_RES:
-        m = pat.search(url)
-        if m:
-            return m.group(1)
-    m = PMID_TEXT_RE.search(text)
-    return m.group(1) if m else None
+def extract_arxiv(url: str, text: str) -> set[str]:
+    return {
+        m.group(1).lower()
+        for pat in (ARXIV_URL_RE, ARXIV_TEXT_RE, ARXIV_DOI_RE)
+        for src in (url, text)
+        for m in pat.finditer(src)
+    }
 
 
-def extract_pmcid(url: str) -> str | None:
-    for pat in PMC_URL_RES:
-        m = pat.search(url)
-        if m:
-            return m.group(1)
-    return None
+def extract_pmid(url: str, text: str) -> set[str]:
+    return {m.group(1) for pat in PMID_URL_RES for m in pat.finditer(url)} | {
+        m.group(1) for m in PMID_TEXT_RE.finditer(text)
+    }
 
 
-def extract_doi(url: str, text: str) -> str | None:
-    for src in (url, text):
-        m = DOI_RE.search(src)
-        if m:
-            doi = m.group(1).rstrip(".)").rstrip(",")
-            doi = DOI_SUFFIX_RE.sub("", doi)
-            return doi.lower()
-    return None
+def extract_pmcid(url: str) -> set[str]:
+    return {m.group(1) for pat in PMC_URL_RES for m in pat.finditer(url)}
+
+
+def _clean_doi(raw: str) -> str:
+    doi = raw.rstrip(".)").rstrip(",")
+    return DOI_SUFFIX_RE.sub("", doi).lower()
+
+
+def extract_doi(url: str, text: str) -> set[str]:
+    return {_clean_doi(m.group(1)) for src in (url, text) for m in DOI_RE.finditer(src)}
 
 
 def extract_ids(result: SearchResult, *, snippet_chars: int) -> PaperIds:

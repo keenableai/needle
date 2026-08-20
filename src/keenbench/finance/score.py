@@ -47,14 +47,14 @@ def result_answers(query: GoldQuery, result: SearchResult, *, snippet_chars: int
     )
 
 
-def _scoreable(pq: dict) -> bool:
-    return pq["search_error"] is None and not (pq["judge_errors"] and pq["hit_rank"] is None)
+def _judge_uncertain(pq: dict) -> bool:
+    return bool(pq["judge_errors"]) and pq["hit_rank"] is None
 
 
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
-    scored = [pq for pq in per_query if _scoreable(pq)]
+    scored = [pq for pq in per_query if not _judge_uncertain(pq)]
     return {
-        **recall_summary(per_query, scored, latency),
+        **recall_summary(per_query, latency, scored),
         "judged_results": sum(pq["judged"] for pq in per_query),
         "judge_errors": sum(pq["judge_errors"] for pq in per_query),
         "judge_upgrades": sum(
@@ -69,7 +69,10 @@ def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
 
 
 def _ultimate(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
-    eligible_outs = [[e for e in entries if _scoreable(e)] for entries in query_outs]
+    eligible_outs = [
+        [e for e in entries if e["search_error"] is None and not _judge_uncertain(e)]
+        for entries in query_outs
+    ]
     pooled = [
         eligible or entries for eligible, entries in zip(eligible_outs, query_outs, strict=True)
     ]

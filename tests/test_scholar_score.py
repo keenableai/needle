@@ -26,9 +26,10 @@ class FakeEngine:
 
 
 def test_ids_match():
-    assert ids_match({"arxiv": "2506.12345"}, PaperIds(arxiv="2506.12345"))
-    assert ids_match({"doi": "10.1/x", "pmid": "9"}, PaperIds(pmid="9"))
-    assert not ids_match({"arxiv": "2506.12345"}, PaperIds(arxiv="2506.99999"))
+    assert ids_match({"arxiv": "2506.12345"}, PaperIds(arxiv={"2506.12345"}))
+    assert ids_match({"doi": "10.1/x", "pmid": "9"}, PaperIds(pmid={"9"}))
+    assert ids_match({"doi": "10.1/x"}, PaperIds(doi={"10.1/other", "10.1/x"}))
+    assert not ids_match({"arxiv": "2506.12345"}, PaperIds(arxiv={"2506.99999"}))
     assert not ids_match({"doi": "10.1/x"}, PaperIds())
 
 
@@ -71,14 +72,26 @@ async def test_recall_mrr_and_rank():
     }
 
 
-async def test_search_error_excluded():
+async def test_search_error_counts_as_miss():
     queries = [_gold("q1", "title", {"arxiv": "2506.00001"}, "2506.00001")]
     engine = FakeEngine("exa", {"q1": {"error": True}})
     report = await run_papers(queries, {"exa": engine}, num_results=5)
     e = report["engines"]["exa"]
-    assert e["num_scored"] == 0
+    assert e["num_scored"] == 1
     assert e["search_errors"] == 1
     assert e["recall_at_k"] == 0.0
+    assert e["mrr_at_k"] == 0.0
+    assert e["per_query"][0]["score"] == 0.0
+
+
+async def test_hit_on_second_id_in_snippet():
+    queries = [_gold("q1", "body", {"doi": "10.5678/gold"}, "gold")]
+    engine = FakeEngine(
+        "keenable",
+        {"q1": [_r("https://agg.example/list", snippet="cites 10.1234/other and 10.5678/gold")]},
+    )
+    report = await run_papers(queries, {"keenable": engine}, num_results=5)
+    assert report["engines"]["keenable"]["recall_at_k"] == 1.0
 
 
 async def test_title_and_body_reported_separately():
@@ -171,12 +184,13 @@ async def test_ultimate_pools_hits_across_engines():
     assert pq1["n_results"] == 3
 
 
-async def test_ultimate_unscored_when_all_engines_fail():
+async def test_ultimate_scores_zero_when_all_engines_fail():
     queries = [_gold("q1", "title", {"arxiv": "2506.00001"}, "2506.00001")]
     report = await run_papers(queries, {"e": FakeEngine("e", {"q1": {"error": True}})})
     ult = report["engines"]["ultimate"]
-    assert ult["num_scored"] == 0
+    assert ult["num_scored"] == 1
     assert ult["search_errors"] == 1
+    assert ult["recall_at_k"] == 0.0
 
 
 async def test_no_engines_no_ultimate():

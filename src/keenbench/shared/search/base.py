@@ -7,11 +7,13 @@ from typing import Any, Protocol
 
 import httpx
 
-MAX_ERROR_CHARS = 500
-RETRY_ATTEMPTS = 3
-RETRY_BASE_S = 1.0
-RETRY_MAX_S = 30.0
-RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
+from keenbench.shared.retry import (
+    MAX_ERROR_CHARS,
+    RETRY_ATTEMPTS,
+    RETRY_BASE_S,
+    send_with_retry,
+)
+
 USER_AGENT = "keenbench/0.1 (contact@keenable.ai)"
 
 
@@ -145,36 +147,23 @@ class HttpSearchClient:
     async def _send(
         self, method: str, url: str, **kwargs: Any
     ) -> tuple[httpx.Response | None, float, dict[str, str] | None]:
-        err: dict[str, str] | None = None
-        delay = self.retry_base_s
-        for attempt in range(self.retry_attempts):
-            if attempt:
-                await asyncio.sleep(delay)
-                delay = min(delay * 2, RETRY_MAX_S)
-            try:
-                async with self._sem:
-                    started = time.perf_counter()
-                    resp = await self._http().request(method, url, **kwargs)
-                    elapsed_ms = (time.perf_counter() - started) * 1000.0
-            except httpx.HTTPError as exc:
-                detail = str(exc)[:MAX_ERROR_CHARS]
-                message = f"{type(exc).__name__}: {detail}" if detail else type(exc).__name__
-                err = {"error_type": "transport", "error_message": message}
-                continue
-            if resp.status_code in RETRYABLE_STATUSES:
-                err = {
-                    "error_type": "http_error",
-                    "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
-                }
-                retry_after = resp.headers.get("retry-after")
-                if retry_after is not None:
-                    try:
-                        delay = min(max(float(retry_after), 0.0), RETRY_MAX_S)
-                    except ValueError:
-                        pass
-                continue
-            return resp, elapsed_ms, None
-        return None, 0.0, err
+        elapsed_ms = 0.0
+
+        async def send() -> httpx.Response:
+            nonlocal elapsed_ms
+            async with self._sem:
+                started = time.perf_counter()
+                resp = await self._http().request(method, url, **kwargs)
+                elapsed_ms = (time.perf_counter() - started) * 1000.0
+            return resp
+
+        resp, err = await send_with_retry(
+            send, attempts=self.retry_attempts, base_s=self.retry_base_s
+        )
+        if resp is None:
+            assert err is not None
+            return None, 0.0, {"error_type": err[0], "error_message": err[1]}
+        return resp, elapsed_ms, None
 
     async def _request_json(
         self, method: str, url: str, *, error_field: str | None = None, **kwargs: Any

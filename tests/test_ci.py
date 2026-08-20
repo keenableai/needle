@@ -22,7 +22,7 @@ def test_recall_summary_annotates_score():
         {"hit_rank": None, "search_error": None},
         {"hit_rank": None, "search_error": {"error_type": "x"}},
     ]
-    recall_summary(pqs, pqs[:2], None)
+    recall_summary(pqs, None, pqs[:2])
     assert [pq["score"] for pq in pqs] == [1.0, 0.0, None]
 
 

@@ -4,7 +4,13 @@ from typing import Any, Protocol
 
 import httpx
 
-MAX_ERROR_CHARS = 500
+from keenbench.shared.retry import (
+    MAX_ERROR_CHARS,
+    RETRY_ATTEMPTS,
+    RETRY_BASE_S,
+    send_with_retry,
+)
+
 TIMEOUT_S = 60.0
 DEFAULT_JUDGE_MODEL = "openai/gpt-5.6-terra"
 DEFAULT_LLM_MODEL = "openai/gpt-5.6-terra"
@@ -42,6 +48,9 @@ def _content_to_text(content: Any) -> str | None:
 
 
 class OpenRouterClient:
+    retry_attempts: int = RETRY_ATTEMPTS
+    retry_base_s: float = RETRY_BASE_S
+
     def __init__(
         self,
         *,
@@ -101,14 +110,19 @@ class OpenRouterClient:
         return text, None
 
     async def _request(self, body: dict[str, Any]) -> Any:
-        try:
-            resp = await self._http().post(
+        async def send() -> httpx.Response:
+            return await self._http().post(
                 f"{self.base_url}/chat/completions",
                 headers={"Authorization": f"Bearer {self.api_key}"},
                 json=body,
             )
-        except httpx.HTTPError as exc:
-            raise LLMClientError("transport", str(exc)[:MAX_ERROR_CHARS]) from exc
+
+        resp, err = await send_with_retry(
+            send, attempts=self.retry_attempts, base_s=self.retry_base_s, retry_timeouts=False
+        )
+        if resp is None:
+            assert err is not None
+            raise LLMClientError(*err)
         if resp.status_code != 200:
             raise LLMClientError("http_error", f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}")
         try:

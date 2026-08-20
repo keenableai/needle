@@ -108,9 +108,17 @@ def text_years(raw_text: str) -> set[int]:
     return {int(m) for m in YEAR_RE.findall(raw_text)}
 
 
-def text_amounts(raw_text: str) -> list[float]:
+def _year_like(match: re.Match) -> bool:
+    if any(match.group(g) for g in ("currency", "suffix", "sign_before", "sign_after")):
+        return False
+    return YEAR_RE.fullmatch(match.group("number")) is not None
+
+
+def text_amounts(raw_text: str, *, skip_year_like: bool = False) -> list[float]:
     out = []
     for match in AMOUNT_RE.finditer(raw_text):
+        if skip_year_like and _year_like(match):
+            continue
         suffix = match.group("suffix") or ""
         amount = float(match.group("number").replace(",", ""))
         amount *= AMOUNT_SCALES.get(suffix.lower(), 1.0)
@@ -235,7 +243,7 @@ def _match_exact_id(value: Any, aliases: tuple[str, ...], raw_text: str, url: st
 
 
 def _match_amount(value: Any, aliases: tuple[str, ...], raw_text: str, *, rel_tol: float) -> bool:
-    amounts = text_amounts(raw_text)
+    amounts = text_amounts(raw_text, skip_year_like=True)
     for form in _gold_forms(value, aliases):
         gold = parse_amount(form)
         if gold is None:

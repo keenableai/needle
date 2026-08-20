@@ -138,8 +138,9 @@ async def test_run_legal_classifies_misses():
     report = await run_legal([GOLD[0]], {"good": FakeEngine([hit]), "bad": FakeEngine([other])})
     assert report["engines"]["bad"]["misses_system_specific"] == 1
     errored = await run_legal([GOLD[0]], {"err": FakeEngine([], error={"error_type": "http"})})
-    assert errored["engines"]["err"]["num_scored"] == 0
+    assert errored["engines"]["err"]["num_scored"] == 1
     assert errored["engines"]["err"]["search_errors"] == 1
+    assert errored["engines"]["err"]["recall_at_k"] == 0.0
 
 
 async def test_run_legal_ultimate_row():

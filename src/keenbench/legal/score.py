@@ -143,12 +143,11 @@ def ids_match(gold: GoldLegal, found: LegalIds, *, result_text: str) -> bool:
 
 
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
-    scored = [pq for pq in per_query if pq["search_error"] is None]
     return {
-        **recall_summary(per_query, scored, latency),
-        "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
-        "by_syntax": group_recall(scored, lambda pq: pq["syntax"]),
-        "by_court": group_recall([pq for pq in scored if pq["court"]], lambda pq: pq["court"]),
+        **recall_summary(per_query, latency),
+        "by_bucket": group_recall(per_query, lambda pq: pq["bucket"]),
+        "by_syntax": group_recall(per_query, lambda pq: pq["syntax"]),
+        "by_court": group_recall([pq for pq in per_query if pq["court"]], lambda pq: pq["court"]),
     }
 
 
