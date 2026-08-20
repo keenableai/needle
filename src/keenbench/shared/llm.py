@@ -1,3 +1,4 @@
+import asyncio
 import json
 import os
 from typing import Any, Protocol
@@ -6,6 +7,10 @@ import httpx
 
 MAX_ERROR_CHARS = 500
 TIMEOUT_S = 60.0
+RETRY_ATTEMPTS = 3
+RETRY_BASE_S = 1.0
+RETRY_MAX_S = 30.0
+RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
 DEFAULT_JUDGE_MODEL = "openai/gpt-5.6-terra"
 DEFAULT_LLM_MODEL = "openai/gpt-5.6-terra"
 
@@ -42,6 +47,9 @@ def _content_to_text(content: Any) -> str | None:
 
 
 class OpenRouterClient:
+    retry_attempts: int = RETRY_ATTEMPTS
+    retry_base_s: float = RETRY_BASE_S
+
     def __init__(
         self,
         *,
@@ -101,20 +109,41 @@ class OpenRouterClient:
         return text, None
 
     async def _request(self, body: dict[str, Any]) -> Any:
-        try:
-            resp = await self._http().post(
-                f"{self.base_url}/chat/completions",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json=body,
-            )
-        except httpx.HTTPError as exc:
-            raise LLMClientError("transport", str(exc)[:MAX_ERROR_CHARS]) from exc
-        if resp.status_code != 200:
-            raise LLMClientError("http_error", f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}")
-        try:
-            payload = resp.json()
-        except (json.JSONDecodeError, ValueError) as exc:
-            raise LLMClientError("bad_json", str(exc)[:MAX_ERROR_CHARS]) from exc
-        if isinstance(payload, dict) and payload.get("error"):
-            raise LLMClientError("api_error", str(payload["error"])[:MAX_ERROR_CHARS])
-        return payload
+        err = LLMClientError("transport", "no attempts made")
+        delay = self.retry_base_s
+        for attempt in range(self.retry_attempts):
+            if attempt:
+                await asyncio.sleep(delay)
+                delay = min(delay * 2, RETRY_MAX_S)
+            try:
+                resp = await self._http().post(
+                    f"{self.base_url}/chat/completions",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json=body,
+                )
+            except httpx.HTTPError as exc:
+                err = LLMClientError("transport", str(exc)[:MAX_ERROR_CHARS])
+                continue
+            if resp.status_code in RETRYABLE_STATUSES:
+                err = LLMClientError(
+                    "http_error", f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}"
+                )
+                retry_after = resp.headers.get("retry-after")
+                if retry_after is not None:
+                    try:
+                        delay = min(max(float(retry_after), 0.0), RETRY_MAX_S)
+                    except ValueError:
+                        pass
+                continue
+            if resp.status_code != 200:
+                raise LLMClientError(
+                    "http_error", f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}"
+                )
+            try:
+                payload = resp.json()
+            except (json.JSONDecodeError, ValueError) as exc:
+                raise LLMClientError("bad_json", str(exc)[:MAX_ERROR_CHARS]) from exc
+            if isinstance(payload, dict) and payload.get("error"):
+                raise LLMClientError("api_error", str(payload["error"])[:MAX_ERROR_CHARS])
+            return payload
+        raise err

@@ -78,6 +78,16 @@ def test_money_two_percent_band():
     assert not gold_in_text("money", 416161000000, text="about $390 billion")
 
 
+def test_amount_match_skips_bare_years():
+    assert not gold_in_text("money", 2000, text="the fee schedule as of 2026")
+    assert not gold_in_text("numeric_band", 2000, text="annual report (2024)")
+    assert gold_in_text("money", 2000, text="a fee of $2,000")
+    assert gold_in_text("money", 2000, text="a fee of 2 thousand dollars")
+    assert gold_in_text("numeric_band", 2000, text="operates 2,024 stores")
+    assert text_amounts("(2024) annual report") == [2024.0]
+    assert text_amounts("(2024) annual report", skip_year_like=True) == []
+
+
 def test_numeric_band_requires_cue():
     cues = ("employee", "employees", "headcount")
     assert gold_in_text(

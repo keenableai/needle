@@ -93,6 +93,19 @@ async def test_run_ndcg_excludes_search_errors_from_mean():
     assert errored["search_error"]["error_type"] == "http_error"
 
 
+async def test_run_ndcg_search_error_scores_zero_when_pool_exists():
+    err = {"error_type": "http_error", "error_message": "503"}
+    good = FakeEngine([SearchResult(url="https://g1", title="GOODDOC one")])
+    broken = FakeEngine([], error=err)
+    report = await run_ndcg([q("q1")], {"good": good, "broken": broken}, FakeJudge())
+    b = report["engines"]["broken"]
+    assert b["search_errors"] == 1
+    assert b["num_scored"] == 1
+    assert b["mean_ndcg"] == 0.0
+    assert b["per_query"][0]["ndcg"] == 0.0
+    assert report["engines"]["good"]["mean_ndcg"] == pytest.approx(1.0)
+
+
 async def test_run_ndcg_excludes_queries_with_empty_pool():
     report = await run_ndcg([q("q1")], {"empty": FakeEngine([])}, FakeJudge())
     e = report["engines"]["empty"]
@@ -274,7 +287,7 @@ async def test_run_ndcg_ultimate_unscored_when_all_engines_fail():
     assert ult["per_query"][0]["search_error"]["error_type"] == "all_engines_failed"
 
 
-async def test_run_ndcg_ultimate_discards_failed_pooled_judgements():
+async def test_run_ndcg_pooled_judge_error_drops_query_for_all_engines():
     class FlakyJudge:
         async def complete(self, prompt, *, max_tokens, reasoning_effort, system=None):
             if "badhost" in prompt:
@@ -284,12 +297,11 @@ async def test_run_ndcg_ultimate_discards_failed_pooled_judgements():
     a = FakeEngine([SearchResult(url="https://goodhost/a", title="fine")])
     b = FakeEngine([SearchResult(url="https://badhost/b", title="broken")])
     report = await run_ndcg([q("q1")], {"a": a, "b": b}, FlakyJudge())
-    assert report["engines"]["a"]["num_scored"] == 1
-    ult = report["engines"]["ultimate"]
-    assert ult["num_scored"] == 1
-    assert ult["judge_errors"] == 0
-    assert ult["per_query"][0]["n_results"] == 1
-    assert ult["per_query"][0]["results"][0]["url"] == "https://goodhost/a"
+    assert report["engines"]["a"]["num_scored"] == 0
+    assert report["engines"]["a"]["per_query"][0]["ndcg"] is None
+    assert report["engines"]["b"]["num_scored"] == 0
+    assert report["engines"]["b"]["judge_errors"] == 1
+    assert report["engines"]["ultimate"]["num_scored"] == 0
 
 
 async def test_run_ndcg_no_engines_no_ultimate():

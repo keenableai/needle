@@ -23,14 +23,13 @@ class GoldPaper:
 
 def ids_match(gold: dict[str, str], found: PaperIds) -> bool:
     found_ids = found.as_match_dict()
-    return any(found_ids.get(k) == v for k, v in gold.items())
+    return any(v in found_ids.get(k, ()) for k, v in gold.items())
 
 
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
-    scored = [pq for pq in per_query if pq["search_error"] is None]
     return {
-        **recall_summary(per_query, scored, latency),
-        "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
+        **recall_summary(per_query, per_query, latency),
+        "by_bucket": group_recall(per_query, lambda pq: pq["bucket"]),
     }
 
 
@@ -58,12 +57,12 @@ async def run_papers(
         pq["n_results"] = len(results)
         found = [extract_ids(r, snippet_chars=snippet_chars) for r in results]
         if idconv is not None and "pmid" in query.ids:
-            need = [f.pmcid for f in found if f.pmcid and not f.pmid]
+            need = sorted({p for f in found if f.pmcid and not f.pmid for p in f.pmcid})
             if need:
                 mapping = await idconv.pmc_to_pmid(need)
                 for f in found:
                     if f.pmcid and not f.pmid:
-                        f.pmid = mapping.get(f.pmcid)
+                        f.pmid = {v for p in f.pmcid if (v := mapping.get(p))}
         matches = [ids_match(query.ids, f) for f in found]
         pq["results"] = build_match_rows(results, found, matches, snippet_chars=snippet_chars)
         pq["hit_rank"] = first_rank(matches)

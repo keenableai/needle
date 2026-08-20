@@ -58,6 +58,9 @@ def _score_query(
         "search_error": search_error,
     }
     if search_error is not None:
+        if idcg:
+            out["dcg"] = 0.0
+            out["ndcg"] = 0.0
         return out
     results = results or []
     out["n_results"] = len(results)
@@ -118,6 +121,13 @@ def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int
         [j for _, j in ordered],
         k=k,
         profile=run.profile,
+    )
+
+
+def _fully_judged(run: QueryRun) -> bool:
+    return all(
+        err is not None or all(j is not None for j in judgements)
+        for (_, err), judgements in zip(run.searches, run.judgements, strict=True)
     )
 
 
@@ -208,7 +218,10 @@ async def run_ndcg(
         _ultimate_query(query, run, num_results=num_results, k=k)
         for query, run in zip(queries, query_outs, strict=True)
     ]
-    idcgs = [pq["dcg"] or None for pq in ultimate_pqs]
+    idcgs = [
+        (pq["dcg"] or None) if _fully_judged(run) else None
+        for pq, run in zip(ultimate_pqs, query_outs, strict=True)
+    ]
     for pq, idcg in zip(ultimate_pqs, idcgs, strict=True):
         if idcg:
             pq["ndcg"] = 1.0
