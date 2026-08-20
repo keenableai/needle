@@ -37,7 +37,7 @@ def _pooled_idcg(report: dict, query: str, k: int) -> float | None:
         return None
     urls = [u for u, _ in best.values()]
     ratings = [r for _, r in best.values()]
-    order = oracle_order(urls, ratings, query_text=query)[:k]
+    order = oracle_order(ratings)[:k]
     penalized = apply_redundancy_penalties(
         [urls[i] for i in order], [ratings[i] for i in order], query_text=query
     )

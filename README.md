@@ -83,7 +83,7 @@ refuses evergreen content. `query_id` is deterministic from
 
 `run` judges each engine's results as returned — its own title and snippet —
 with an LLM relevance judge (Google "Needs Met" 0–4) and scores nDCG@5
-with redundancy penalties for duplicate URLs and repeated domains. The
+with a redundancy penalty for duplicate URLs. The
 ideal ranking is the pooled `ultimate` ordering — the best rating per
 deduplicated URL across all engines, oracle-ranked — so `ultimate` scores
 exactly 1 and queries where no engine found anything relevant are excluded.
@@ -216,9 +216,8 @@ scheduler can also drive them: the ranking harness is
 `keenbench.finance.score.run_answers`.
 
 Every bench report carries a synthetic `ultimate` engine: the pooled results
-of all engines per query, oracle-ranked — by judge rating
-(redundancy-penalty aware) on the judged benches, gold item first on the
-known-item benches. It is the nDCG ideal ranking on the judged benches and
+of all engines per query, oracle-ranked — by judge rating on the judged
+benches, gold item first on the known-item benches. It is the nDCG ideal ranking on the judged benches and
 the score ceiling for any single engine; the
 overlap and uniqueness stats exclude it.
 

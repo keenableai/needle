@@ -108,9 +108,8 @@ def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int
     if not judged:
         pooled = [r for r, _ in best.values()]
         return _score_query(query, pooled, None, [None] * len(pooled), k=k, profile=run.profile)
-    urls = [r.url for r, _ in judged]
     ratings = [j.rating for _, j in judged]
-    order = oracle_order(urls, ratings, query_text=query.text)
+    order = oracle_order(ratings)
     ordered = [judged[i] for i in order][:num_results]
     return _score_query(
         query,

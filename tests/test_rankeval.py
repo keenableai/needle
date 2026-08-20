@@ -171,7 +171,23 @@ async def test_run_ndcg_judges_identical_docs_once_across_engines():
     assert report["engines"]["b"]["per_query"][0]["ratings"] == [4]
 
 
-async def test_run_ndcg_applies_domain_redundancy_penalties():
+async def test_run_ndcg_penalizes_duplicate_urls():
+    results = [
+        SearchResult(url="https://ex.com/1", title="GOODDOC"),
+        SearchResult(url="https://www.ex.com/1/", title="GOODDOC"),
+        SearchResult(url="https://ex.com/2", title="GOODDOC"),
+    ]
+    report = await run_ndcg([q("q1")], {"e": FakeEngine(results)}, FakeJudge())
+    pq = report["engines"]["e"]["per_query"][0]
+    assert pq["ratings"] == [4, 4, 4]
+    assert pq["penalized_ratings"] == [4, 0, 4]
+    expected = 1.0 + 1.0 / math.log2(4)
+    assert pq["dcg"] == pytest.approx(expected)
+    ideal = 1.0 + 1.0 / math.log2(3)
+    assert pq["ndcg"] == pytest.approx(expected / ideal)
+
+
+async def test_run_ndcg_same_domain_results_not_penalized():
     results = [
         SearchResult(url="https://ex.com/1", title="GOODDOC"),
         SearchResult(url="https://ex.com/2", title="GOODDOC"),
@@ -179,10 +195,7 @@ async def test_run_ndcg_applies_domain_redundancy_penalties():
     ]
     report = await run_ndcg([q("q1")], {"e": FakeEngine(results)}, FakeJudge())
     pq = report["engines"]["e"]["per_query"][0]
-    assert pq["ratings"] == [4, 4, 4]
-    assert pq["penalized_ratings"] == [4, 3, 2]
-    expected = 1.0 + 0.667 / math.log2(3) + 0.117 / math.log2(4)
-    assert pq["dcg"] == pytest.approx(expected)
+    assert pq["penalized_ratings"] == [4, 4, 4]
     assert pq["ndcg"] == pytest.approx(1.0)
 
 
