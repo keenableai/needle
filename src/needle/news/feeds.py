@@ -11,6 +11,7 @@ import defusedxml.ElementTree as ET
 import httpx
 from defusedxml.common import DefusedXmlException
 
+from needle import APP_NAME, __version__
 from needle.shared.concurrency import bounded_gather
 
 DEFAULT_FEEDS_FILE = "feeds.default.toml"
@@ -43,7 +44,7 @@ SEED_SOURCES: tuple[SeedSource, ...] = _load_packaged_default()
 
 
 HTTP_TIMEOUT = httpx.Timeout(20.0, connect=10.0)
-USER_AGENT = "needle-news/0.1 (+https://github.com/keenableai/keenbench)"
+USER_AGENT = f"{APP_NAME}-news/{__version__} (+https://github.com/keenableai/keenbench)"
 
 NS = {
     "atom": "http://www.w3.org/2005/Atom",

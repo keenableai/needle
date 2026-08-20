@@ -82,12 +82,12 @@ class QueryProfile:
 
 @cache
 def judge_instructions() -> str:
-    return render_prompt("needle.shared", JUDGE_TEMPLATE)
+    return render_prompt(__package__, JUDGE_TEMPLATE)
 
 
 @cache
 def profile_instructions() -> str:
-    return render_prompt("needle.shared", PROFILE_TEMPLATE)
+    return render_prompt(__package__, PROFILE_TEMPLATE)
 
 
 def build_judge_input(
@@ -108,7 +108,7 @@ def build_judge_input(
             f"({len(tail)} characters) not shown ..."
         )
     return render_prompt(
-        "needle.shared",
+        __package__,
         JUDGE_INPUT_TEMPLATE,
         query=query,
         url=url,
@@ -288,7 +288,7 @@ async def judge_one(
 async def classify_query(
     llm: LLMClient, query: str, *, today: str
 ) -> tuple[QueryProfile | None, dict[str, str] | None]:
-    prompt = render_prompt("needle.shared", PROFILE_INPUT_TEMPLATE, query=query, today=today)
+    prompt = render_prompt(__package__, PROFILE_INPUT_TEMPLATE, query=query, today=today)
     return await complete_parsed(
         llm,
         prompt,

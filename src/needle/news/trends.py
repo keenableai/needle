@@ -10,11 +10,12 @@ import httpx
 from defusedxml.common import DefusedXmlException
 from rapidfuzz import fuzz
 
+from needle import APP_NAME, __version__
 from needle.news.feeds import HTTP_TIMEOUT, _text_of, published_age_seconds
 from needle.shared.concurrency import bounded_gather
 
 HT_NS = {"ht": "https://trends.google.com/trending/rss"}
-USER_AGENT = "Mozilla/5.0 (compatible; needle-news/0.1)"
+USER_AGENT = f"Mozilla/5.0 (compatible; {APP_NAME}-news/{__version__})"
 
 US_GEOS: tuple[str, ...] = (
     "US",

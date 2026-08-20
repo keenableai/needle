@@ -1,7 +1,7 @@
 [project]
 name = "needle"
 version = "0.1.0"
-description = "NEEDLE — a collection of search/retrieval benchmarks and query-stream generators from Keenable.ai. Each benchmark is a self-contained module under the needle package."
+description = "NEEDLE — search/retrieval benchmarks and query-stream generators from Keenable.ai"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }

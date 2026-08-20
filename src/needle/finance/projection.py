@@ -38,7 +38,7 @@ def doc_excerpt(text: str) -> str:
 
 def build_filingdoc_prompt(filing: Filing, text: str) -> str:
     return render_prompt(
-        "needle.finance",
+        __package__,
         FILING_QUERY_TEMPLATE,
         company=filing.company,
         form=filing.form,
