@@ -179,9 +179,7 @@ def parse_judgement(text: str | None) -> Judgement | None:
         label = RATING_LABELS[rating]
     reasoning = str(data.get("reasoning") or "")
     gates = {
-        name: value
-        for name in GATE_FIELDS
-        if (value := str(data.get(name) or "").strip().lower())
+        name: value for name in GATE_FIELDS if (value := str(data.get(name) or "").strip().lower())
     }
     return Judgement(rating=rating, label=label, reasoning=reasoning, gates=gates)
 
