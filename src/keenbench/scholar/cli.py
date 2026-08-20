@@ -11,6 +11,7 @@ from keenbench.shared.cli import (
     aclose_all,
     build_clients_or_exit,
     current_hour,
+    fmt_or_na,
     has_gold_ids,
     load_gold_rows,
     parse_known_csv,
@@ -147,10 +148,9 @@ class Scholar:
                 recall = e["by_bucket"].get(bucket, {}).get("recall_at_k")
                 if recall is not None:
                     bucket_strs.append(f"{bucket} = {recall:.3f}")
-            mrr_str = f"{e['mrr_at_k']:.4f}" if e["mrr_at_k"] is not None else "n/a"
             print(
                 f"  {name:10s} recall@{num_results} = {e['recall_at_k']:.4f}  "
-                f"MRR = {mrr_str}  "
+                f"MRR = {fmt_or_na(e['mrr_at_k'], 4)}  "
                 f"({', '.join(bucket_strs) or 'no buckets'}; "
                 f"{e['num_scored']}/{report['num_queries']} scored; "
                 f"{e['search_errors']} search errs; "

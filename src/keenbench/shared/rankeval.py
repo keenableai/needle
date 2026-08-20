@@ -81,7 +81,7 @@ def _score_query(
             "rating": j.rating if j is not None else None,
             "label": j.label if j is not None else None,
             "reasoning": j.reasoning if j is not None else None,
-            "gates": dict(j.gates) or None if j is not None else None,
+            "gates": (j.gates or None) if j is not None else None,
             "penalized": out["penalized_ratings"][i] if out["penalized_ratings"] else None,
         }
         for i, (r, j) in enumerate(zip(results, judgements, strict=True))

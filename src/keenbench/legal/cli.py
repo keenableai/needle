@@ -9,6 +9,7 @@ from keenbench.shared.cli import (
     aclose_all,
     build_clients_or_exit,
     current_hour,
+    fmt_or_na,
     has_gold_ids,
     load_gold_rows,
     parse_csv,
@@ -152,13 +153,10 @@ class Legal:
         for name, e in report["engines"].items():
             caselaw = e["by_bucket"].get("caselaw", {}).get("recall_at_k")
             code = e["by_bucket"].get("code", {}).get("recall_at_k")
-            caselaw_str = f"{caselaw:.3f}" if caselaw is not None else "n/a"
-            code_str = f"{code:.3f}" if code is not None else "n/a"
-            mrr_str = f"{e['mrr_at_k']:.4f}" if e["mrr_at_k"] is not None else "n/a"
             print(
                 f"  {name:10s} recall@{num_results} = {e['recall_at_k']:.4f}  "
-                f"MRR = {mrr_str}  "
-                f"(caselaw = {caselaw_str}, code = {code_str}; "
+                f"MRR = {fmt_or_na(e['mrr_at_k'], 4)}  "
+                f"(caselaw = {fmt_or_na(caselaw, 3)}, code = {fmt_or_na(code, 3)}; "
                 f"{e['num_scored']}/{report['num_queries']} scored; "
                 f"{e['search_errors']} search errs; "
                 f"misses: {e['misses_system_specific']} sys / {e['misses_universal']} univ)",

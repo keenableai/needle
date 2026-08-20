@@ -1,7 +1,7 @@
 import json
 import re
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cache
 from typing import TypeVar
 
@@ -67,7 +67,7 @@ class Judgement:
     rating: int
     label: str
     reasoning: str
-    gates: tuple[tuple[str, str], ...] = ()
+    gates: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -147,6 +147,10 @@ def _extract_fields_regex(content: str) -> dict[str, object] | None:
     )
     if reasoning_match:
         result["reasoning"] = reasoning_match.group(1).strip().strip("\"'")
+    for name in GATE_FIELDS:
+        gate_match = re.search(rf"^{name}:\s*(\S+)", content, re.MULTILINE)
+        if gate_match:
+            result[name] = gate_match.group(1).strip("\"'")
     return result
 
 
@@ -174,11 +178,11 @@ def parse_judgement(text: str | None) -> Judgement | None:
     if label not in VALID_LABELS:
         label = RATING_LABELS[rating]
     reasoning = str(data.get("reasoning") or "")
-    gates = tuple(
-        (field, value)
-        for field in GATE_FIELDS
-        if (value := str(data.get(field) or "").strip().lower())
-    )
+    gates = {
+        name: value
+        for name in GATE_FIELDS
+        if (value := str(data.get(name) or "").strip().lower())
+    }
     return Judgement(rating=rating, label=label, reasoning=reasoning, gates=gates)
 
 

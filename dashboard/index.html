@@ -942,6 +942,7 @@ function el(tag, attrs, text) {
 }
 
 const WINDOW_MS = 6 * 3600e3;
+const WEEK_MS = 7 * 86400e3;
 const ROLLING_MS = 7 * 86400e3;
 const ROLLING_NOTE = "7-day rolling mean";
 const PCT_NOTE = "% of ultimate's score";
@@ -1238,11 +1239,17 @@ function wmean(rows, metric, weightMetric = "num_scored") {
   return w ? sum / w : null;
 }
 
+let ciWindowCache = null;
 function ciWindowed(rows, bench) {
-  const ciRuns = ciData?.runs?.[bench] ? new Set(ciData.runs[bench]) : null;
-  const recent = inRange(rows, 7 * 86400e3);
-  const windowed = ciRuns ? recent.filter((r) => ciRuns.has(r.ts)) : recent;
-  return windowed.filter((r) => r.bench === bench);
+  if (ciWindowCache?.rows !== rows)
+    ciWindowCache = { rows, recent: inRange(rows, WEEK_MS), byBench: new Map() };
+  let out = ciWindowCache.byBench.get(bench);
+  if (!out) {
+    const ciRuns = ciData?.runs?.[bench] ? new Set(ciData.runs[bench]) : null;
+    out = ciWindowCache.recent.filter((r) => r.bench === bench && (!ciRuns || ciRuns.has(r.ts)));
+    ciWindowCache.byBench.set(bench, out);
+  }
+  return out;
 }
 
 function renderLeaderboard(holderId, subId, rows, bench, metrics) {
@@ -1822,7 +1829,7 @@ function renderQualityPrice(rows) {
 }
 
 function renderLatencySummary(rows) {
-  const week = inRange(rows, 7 * 86400e3);
+  const week = inRange(rows, WEEK_MS);
   const stats = ENGINES.map((e) => {
     const er = week.filter((r) => r.engine === e);
     const raw = er.flatMap((r) => r.lat_ms || []);
@@ -1993,9 +2000,13 @@ function renderOverlap(rows, uniqAgg) {
   graphHolder.replaceChildren();
   const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
   const pairs = new Map();
+  const seen = new Set();
   for (const r of rows) {
-    const agg = pairs.get(pairKey(r.a, r.b)) ||
-      { jsum: 0, n: 0, s3sum: 0, n3: 0, low2: 0, lowUrls: 0, nLow: 0 };
+    seen.add(r.a);
+    seen.add(r.b);
+    const key = pairKey(r.a, r.b);
+    let agg = pairs.get(key);
+    if (!agg) pairs.set(key, agg = { jsum: 0, n: 0, s3sum: 0, n3: 0, low2: 0, lowUrls: 0, nLow: 0 });
     agg.jsum += r.jaccard_sum;
     agg.n += r.num_queries;
     if (r.num_shared3 != null) {
@@ -2007,9 +2018,8 @@ function renderOverlap(rows, uniqAgg) {
       agg.lowUrls += r.low_shared_urls || 0;
       agg.nLow += r.num_queries;
     }
-    pairs.set(pairKey(r.a, r.b), agg);
   }
-  const engines = ENGINES.filter((e) => rows.some((r) => r.a === e || r.b === e));
+  const engines = ENGINES.filter((e) => seen.has(e));
   const rank = new Map(engines.map((e, i) => [e, i]));
   const famRank = (e) => rank.get(ENGINE_FAMILY.get(e) ?? e) ?? rank.get(e);
   engines.sort((a, b) => famRank(a) - famRank(b));
@@ -2266,10 +2276,11 @@ function resultBlock(r, headExtras, judgeChips = []) {
       box.appendChild(chips);
     }
     const text = el("span");
-    if (r.label) text.appendChild(el("span", { class: "label" }, r.label));
-    const failedGates = Object.keys(r.gates || {}).filter((g) => r.gates[g] === "fail");
-    if (failedGates.length) text.appendChild(el("span", { class: "label" }, ` · failed: ${failedGates.join(", ")}`));
-    if (r.reasoning) text.appendChild(document.createTextNode(`${r.label || failedGates.length ? " — " : ""}${r.reasoning}`));
+    const failed = Object.keys(r.gates || {}).filter((g) => r.gates[g] === "fail");
+    const lead = [r.label, failed.length ? `failed: ${failed.join(", ")}` : ""]
+      .filter(Boolean).join(" · ");
+    if (lead) text.appendChild(el("span", { class: "label" }, lead));
+    if (r.reasoning) text.appendChild(document.createTextNode(`${lead ? " — " : ""}${r.reasoning}`));
     box.appendChild(text);
     div.appendChild(box);
   }
