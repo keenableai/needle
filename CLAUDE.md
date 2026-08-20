@@ -20,8 +20,8 @@ the filtered artifact and evaluates it like news.
   live on the HF dataset `keenable-ai/keenbench-results`, and the dashboard
   fetches them directly from there.
 - `src/keenbench/shared/rankeval.py` shapes the per-result report fields
-  (`title`, `url`, `snippet`, `rating`, `penalized`, `label`, `reasoning`) —
-  keep the dashboard renderers in sync with it.
+  (`title`, `url`, `snippet`, `rating`, `penalized`, `label`, `reasoning`,
+  `gates`) — keep the dashboard renderers in sync with it.
 
 ## Verifying dashboard changes
 

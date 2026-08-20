@@ -173,7 +173,7 @@ async def test_ultimate_pools_hits_across_engines():
     report = await run_papers(queries, {"a": a, "b": b}, num_results=5)
     ult = report["engines"]["ultimate"]
     assert ult["recall_at_k"] == 0.5
-    assert ult["mrr_at_k"] == 0.5
+    assert ult["mrr_at_k"] is None
     assert ult["num_scored"] == 2
     assert ult["latency"] is None
     assert ult["misses_system_specific"] == 0
