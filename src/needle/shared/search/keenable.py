@@ -16,7 +16,7 @@ class KeenableClient(HttpSearchClient):
         api_key: str | None = None,
         base_url: str = "https://api.keenable.ai",
         mode: str = "pro",
-        app_title: str = "needle",
+        app_title: str = "keenbench",
         snippet_chars: int = 0,
         timeout_s: float = 30.0,
     ) -> None:

@@ -65,7 +65,7 @@ async def test_keenable_maps_fields_and_truncates(monkeypatch):
     assert results[0].published_date == "2026-07-01"
     assert calls["url"].endswith("/v1/search/public")
     assert calls["json"] == {"query": "hello", "mode": "pro"}
-    assert calls["headers"] == {"X-Keenable-Title": "needle"}
+    assert calls["headers"] == {"X-Keenable-Title": "keenbench"}
 
 
 @pytest.mark.parametrize("chars,expected", [(50, 180), (20000, 10000), (0, None)])
@@ -84,7 +84,7 @@ async def test_keenable_snippet_falls_back_to_description(monkeypatch):
     results, _ = await c.search("q")
     assert results[0].snippet == "db"
     assert calls["url"].endswith("/v1/search")
-    assert calls["headers"] == {"X-Keenable-Title": "needle", "X-API-Key": "k"}
+    assert calls["headers"] == {"X-Keenable-Title": "keenbench", "X-API-Key": "k"}
 
 
 async def test_exa_maps_fields_and_builds_body(monkeypatch):
