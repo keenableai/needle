@@ -51,14 +51,10 @@ def _judge_uncertain(pq: dict) -> bool:
     return bool(pq["judge_errors"]) and pq["hit_rank"] is None
 
 
-def _scoreable(pq: dict) -> bool:
-    return not _judge_uncertain(pq)
-
-
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
-    scored = [pq for pq in per_query if _scoreable(pq)]
+    scored = [pq for pq in per_query if not _judge_uncertain(pq)]
     return {
-        **recall_summary(per_query, scored, latency),
+        **recall_summary(per_query, latency, scored),
         "judged_results": sum(pq["judged"] for pq in per_query),
         "judge_errors": sum(pq["judge_errors"] for pq in per_query),
         "judge_upgrades": sum(

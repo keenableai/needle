@@ -23,6 +23,8 @@ PMC_URL_RES = [
 DOI_RE = re.compile(r"(10\.\d{4,9}/[-._;()/:a-z0-9]+)", re.IGNORECASE)
 DOI_SUFFIX_RE = re.compile(r"/(full|pdf|epdf|html|meta|abstract|citations?)$", re.IGNORECASE)
 
+MATCH_FIELDS = ("arxiv", "doi", "pmid")
+
 
 @dataclass
 class PaperIds:
@@ -32,8 +34,7 @@ class PaperIds:
     pmcid: set[str] = field(default_factory=set)
 
     def as_match_dict(self) -> dict[str, list[str]]:
-        ids = {"arxiv": self.arxiv, "doi": self.doi, "pmid": self.pmid}
-        return {k: sorted(v) for k, v in ids.items() if v}
+        return {k: sorted(v) for k in MATCH_FIELDS if (v := getattr(self, k))}
 
 
 def extract_arxiv(url: str, text: str) -> set[str]:

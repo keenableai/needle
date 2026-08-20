@@ -125,10 +125,7 @@ def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int
 
 
 def _fully_judged(run: QueryRun) -> bool:
-    return all(
-        err is not None or all(j is not None for j in judgements)
-        for (_, err), judgements in zip(run.searches, run.judgements, strict=True)
-    )
+    return all(j is not None for judgements in run.judgements for j in judgements)
 
 
 def _summarize(per_query: list[dict[str, Any]], *, latencies_ms: list[float]) -> dict[str, Any]:

@@ -56,8 +56,9 @@ def ultimate_per_query(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
 
 
 def recall_summary(
-    per_query: list[dict], scored: list[dict], latency: dict | None
+    per_query: list[dict], latency: dict | None, scored: list[dict] | None = None
 ) -> dict[str, Any]:
+    scored = per_query if scored is None else scored
     for pq in per_query:
         pq["score"] = None
     for pq in scored:

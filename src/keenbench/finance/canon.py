@@ -109,14 +109,9 @@ def text_years(raw_text: str) -> set[int]:
 
 
 def _year_like(match: re.Match) -> bool:
-    if match.group("currency") or match.group("suffix"):
+    if any(match.group(g) for g in ("currency", "suffix", "sign_before", "sign_after")):
         return False
-    if match.group("sign_before") or match.group("sign_after"):
-        return False
-    number = match.group("number")
-    if "," in number or "." in number:
-        return False
-    return YEAR_RE.fullmatch(number) is not None
+    return YEAR_RE.fullmatch(match.group("number")) is not None
 
 
 def text_amounts(raw_text: str, *, skip_year_like: bool = False) -> list[float]:
