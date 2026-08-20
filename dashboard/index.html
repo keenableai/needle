@@ -598,7 +598,7 @@
 
   <h2 class="section-title" id="sec-overlap">Index independence</h2>
   <p class="section-desc">Repeated overlap on junk or near-identical
-    lists suggests a shared upstream index (last 2 weeks, all
+    lists suggests a shared upstream index (all runs, all
     benchmarks).</p>
 
   <div class="card" id="card-def-suspicious">
@@ -617,8 +617,8 @@
         <var>U<sub>B</sub></var>(<var>q</var>)| ≥ 3.</p>
       <p>Each matrix cell shows the share of comparable queries (both
         searches succeeded and at least one returned a result) where the
-        pair shares suspiciously, pooled over all runs from the last 2
-        weeks. Engines that share <em>good</em> results show normal
+        pair shares suspiciously, pooled over all published runs.
+        Engines that share <em>good</em> results show normal
         ranking behavior. Engines that share junk, or 3+ URLs at once,
         possibly share an upstream index. Results on the known-answer
         verticals have no judgements, so only the second clause can
@@ -637,32 +637,32 @@
       <div class="tab-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-lowshared" role="tabpanel">
-      <h2>Suspicious sharing (last 2 weeks)</h2>
+      <h2>Suspicious sharing (all runs)</h2>
       <div class="sub" id="lowshared-sub"></div>
       <div class="overlap-matrix" id="lowshared-table"></div>
     </div>
     <div class="lb-panel" id="card-sharegraph" role="tabpanel">
-      <h2>Borrowing graph (last 2 weeks)</h2>
+      <h2>Borrowing graph (all runs)</h2>
       <div class="sub" id="sharegraph-sub"></div>
       <div id="sharegraph"></div>
     </div>
     <div class="lb-panel" id="card-overlap" role="tabpanel">
-      <h2>Shared result URLs (last 2 weeks)</h2>
+      <h2>Shared result URLs (all runs)</h2>
       <div class="sub" id="overlap-sub"></div>
       <div class="overlap-matrix" id="overlap-table"></div>
     </div>
     <div class="lb-panel" id="card-overlap3" role="tabpanel">
-      <h2>Queries sharing &ge;3 URLs (last 2 weeks)</h2>
+      <h2>Queries sharing &ge;3 URLs (all runs)</h2>
       <div class="sub" id="overlap3-sub"></div>
       <div class="overlap-matrix" id="overlap3-table"></div>
     </div>
     <div class="lb-panel" id="card-uniqueness" role="tabpanel">
-      <h2>Result uniqueness (last 2 weeks)</h2>
+      <h2>Result uniqueness (all runs)</h2>
       <div class="sub" id="uniqueness-sub"></div>
       <div id="uniqueness-table" class="bar-table"></div>
     </div>
     <div class="lb-panel" id="card-uniqueness-relevant" role="tabpanel">
-      <h2>Result uniqueness — relevant only (last 2 weeks)</h2>
+      <h2>Result uniqueness — relevant only (all runs)</h2>
       <div class="sub" id="uniqueness-relevant-sub"></div>
       <div id="uniqueness-relevant-table" class="bar-table"></div>
     </div>
@@ -1240,12 +1240,9 @@ function wmean(rows, metric, weightMetric = "num_scored") {
 
 function ciWindowed(rows, bench) {
   const ciRuns = ciData?.runs?.[bench] ? new Set(ciData.runs[bench]) : null;
-  const windowed = ciRuns ? rows.filter((r) => ciRuns.has(r.ts)) : inRange(rows, 7 * 86400e3);
+  const recent = inRange(rows, 7 * 86400e3);
+  const windowed = ciRuns ? recent.filter((r) => ciRuns.has(r.ts)) : recent;
   return windowed.filter((r) => r.bench === bench);
-}
-
-function windowNote(bench) {
-  return ciData?.runs?.[bench] ? `${ciData.window_days}-day CI window` : "last 7 days";
 }
 
 function renderLeaderboard(holderId, subId, rows, bench, metrics) {
@@ -1270,7 +1267,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const runs = Math.max(...entries.map((x) => x.n));
   const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
   document.getElementById(subId).textContent =
-    `mean of ${runs} run${runs === 1 ? "" : "s"}, ${windowNote(bench)} — latest ${fmtTime(lastT)} UTC`;
+    `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
@@ -1431,7 +1428,6 @@ function renderStandings(rows) {
     return;
   }
   const fmtPct = (v) => `${Math.round(v * 100)}%`;
-  const note = ciData?.runs ? `${ciData.window_days}-day CI window` : "last 7 days";
   const boot = bootstrapShares(rows);
   const nAx = STANDINGS_BENCHES.length;
   const best = [];
@@ -1475,8 +1471,8 @@ function renderStandings(rows) {
       ? `${Math.round(tied.at(-1).overall * 100)}–${Math.round(leader.overall * 100)}%`
       : fmtPct(best[0])));
     s1.appendChild(el("div", { class: "stat-cap" }, tied.length > 1
-      ? `${names} — statistically tied for best engine (95% CIs overlap), mean share of ultimate, ${note}`
-      : `${names} — best single engine, mean share of ultimate across the five verticals, ${note}${lc ? `; 95% CI ${fmtPct(lc.lo)}–${fmtPct(lc.hi)}` : ""}`));
+      ? `${names} — statistically tied for best engine (95% CIs overlap), mean share of ultimate, last 7 days`
+      : `${names} — best single engine, mean share of ultimate across the five verticals, last 7 days${lc ? `; 95% CI ${fmtPct(lc.lo)}–${fmtPct(lc.hi)}` : ""}`));
     if (boot.size) {
       s1.title = tied.map((x) => {
         const c = boot.get(x.e);
@@ -1606,7 +1602,7 @@ function renderStandings(rows) {
   }
 
   const ohdr = el("text", { x: 10, y: 18, "text-anchor": "start", class: "st-ult" },
-    `engine % — mean share of ultimate, ${note}`);
+    "engine % — 7-day mean share of ultimate");
   if (best[0] != null) {
     ohdr.appendChild(el("title", {}, `overall: best engine reaches ${fmtPct(best[0])} of ultimate — gap ${fmtPct(1 - best[0])}`));
   }
@@ -1945,7 +1941,6 @@ const RATING_BG = ["#EAF2FF", "#C7E0FF", "#74A6FF", "#005CFF", "#0D2C6A"];
 const RATING_INK = ["#2A2A2A", "#2A2A2A", "#2A2A2A", "#ffffff", "#ffffff"];
 
 let ENGINE_FAMILY = new Map();
-const OVERLAP_RANGE_MS = 14 * 86400e3;
 const OVERLAP_BG = ["#62BB78", "#C3EAC9", "#F7EFB5", "#FCA68E", "#D34517"];
 const OVERLAP_INK = ["#2A2A2A", "#2A2A2A", "#2A2A2A", "#2A2A2A", "#ffffff"];
 const OVERLAP_STEPS = [0.1, 0.2, 0.35, 0.5];
@@ -2018,7 +2013,7 @@ function renderOverlap(rows, uniqAgg) {
   const rank = new Map(engines.map((e, i) => [e, i]));
   const famRank = (e) => rank.get(ENGINE_FAMILY.get(e) ?? e) ?? rank.get(e);
   engines.sort((a, b) => famRank(a) - famRank(b));
-  const emptyMsg = "No overlap data in the last 2 weeks.";
+  const emptyMsg = "No overlap data yet.";
   if (engines.length < 2) {
     jaccardHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     shared3Holder.appendChild(el("div", { class: "empty" }, emptyMsg));
@@ -2204,7 +2199,7 @@ function renderUniquenessTable(agg, prefix, uKey, tKey, subText) {
   document.getElementById(`${prefix}-sub`).textContent = subText;
   const engines = ENGINES.filter((e) => agg.get(e)?.[tKey]);
   if (!engines.length) {
-    holder.appendChild(el("div", { class: "empty" }, "No uniqueness data in the last 2 weeks."));
+    holder.appendChild(el("div", { class: "empty" }, "No uniqueness data yet."));
     return;
   }
   engines.sort((a, b) => agg.get(b)[uKey] / agg.get(b)[tKey] - agg.get(a)[uKey] / agg.get(a)[tKey]);
@@ -2652,8 +2647,8 @@ async function main() {
   drawTrends(history);
   renderLatencySummary(history);
   renderAll();
-  const uniqAgg = uniquenessAgg(inRange(uniquenessRows, OVERLAP_RANGE_MS).filter((r) => !HIDDEN_ENGINES.has(r.engine)));
-  renderOverlap(inRange(overlapRows, OVERLAP_RANGE_MS).filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)), uniqAgg);
+  const uniqAgg = uniquenessAgg(uniquenessRows.filter((r) => !HIDDEN_ENGINES.has(r.engine)));
+  renderOverlap(overlapRows.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)), uniqAgg);
   renderUniqueness(uniqAgg);
   initRunBrowser();
   document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
