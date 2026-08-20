@@ -7,7 +7,6 @@ from typing import Any, Protocol
 
 import httpx
 
-from needle import APP_NAME, __version__
 from needle.shared.retry import (
     MAX_ERROR_CHARS,
     RETRY_ATTEMPTS,
@@ -15,7 +14,7 @@ from needle.shared.retry import (
     send_with_retry,
 )
 
-USER_AGENT = f"{APP_NAME}/{__version__} (contact@keenable.ai)"
+USER_AGENT = "needle/0.1 (contact@keenable.ai)"
 
 
 def latency_stats(latencies_ms: list[float]) -> dict[str, float | int | list[float]] | None:

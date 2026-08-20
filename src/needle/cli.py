@@ -1,7 +1,7 @@
 import fire
 from dotenv import load_dotenv
 
-from needle import APP_NAME, __version__
+from needle import __version__
 from needle.agentic_rare.cli import AgenticRare
 from needle.finance.cli import Finance
 from needle.legal.cli import Legal
@@ -18,12 +18,12 @@ class Needle:
         self.scholar = Scholar()
 
     def version(self) -> str:
-        return f"{APP_NAME} {__version__}"
+        return f"needle {__version__}"
 
 
 def main() -> None:
     load_dotenv()
-    fire.Fire(Needle, name=APP_NAME)
+    fire.Fire(Needle, name="needle")
 
 
 if __name__ == "__main__":

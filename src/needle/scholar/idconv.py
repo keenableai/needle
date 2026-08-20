@@ -1,6 +1,5 @@
 from typing import Any
 
-from needle import APP_NAME
 from needle.shared.search.base import USER_AGENT, HttpSearchClient
 
 IDCONV_ENDPOINT = "https://pmc.ncbi.nlm.nih.gov/tools/idconv/api/v1/articles/"
@@ -24,7 +23,7 @@ class IdConverter(HttpSearchClient):
             payload, err = await self._request_json(
                 "GET",
                 IDCONV_ENDPOINT,
-                params={"ids": ",".join(keys), "format": "json", "tool": APP_NAME},
+                params={"ids": ",".join(keys), "format": "json", "tool": "needle"},
             )
             if err is not None or not isinstance(payload, dict):
                 continue

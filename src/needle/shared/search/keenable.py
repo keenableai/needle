@@ -1,6 +1,5 @@
 from typing import Any
 
-from needle import APP_NAME
 from needle.shared.search.base import HttpSearchClient, SearchResult, clamped_chars
 from needle.shared.search.queryops import parse_ops
 
@@ -17,7 +16,7 @@ class KeenableClient(HttpSearchClient):
         api_key: str | None = None,
         base_url: str = "https://api.keenable.ai",
         mode: str = "pro",
-        app_title: str = APP_NAME,
+        app_title: str = "needle",
         snippet_chars: int = 0,
         timeout_s: float = 30.0,
     ) -> None:
