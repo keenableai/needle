@@ -1,6 +1,6 @@
 from datetime import UTC, datetime, timedelta, timezone
 
-from keenbench.shared.identity import canonicalize, query_hash, query_id
+from needle.shared.identity import canonicalize, query_hash, query_id
 
 
 def test_canonicalize_collapses_and_lowercases():

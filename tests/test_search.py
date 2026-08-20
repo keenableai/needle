@@ -4,7 +4,7 @@ from datetime import date
 import httpx
 import pytest
 
-from keenbench.shared.search import (
+from needle.shared.search import (
     BraveClient,
     CeramicClient,
     ExaClient,
@@ -21,9 +21,9 @@ from keenbench.shared.search import (
     latency_stats,
     search_all,
 )
-from keenbench.shared.search import base as search_base
-from keenbench.shared.search.factory import ENGINES
-from keenbench.shared.search.queryops import parse_ops
+from needle.shared.search import base as search_base
+from needle.shared.search.factory import ENGINES
+from needle.shared.search.queryops import parse_ops
 
 OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
 
@@ -65,7 +65,7 @@ async def test_keenable_maps_fields_and_truncates(monkeypatch):
     assert results[0].published_date == "2026-07-01"
     assert calls["url"].endswith("/v1/search/public")
     assert calls["json"] == {"query": "hello", "mode": "pro"}
-    assert calls["headers"] == {"X-Keenable-Title": "keenbench"}
+    assert calls["headers"] == {"X-Keenable-Title": "needle"}
 
 
 @pytest.mark.parametrize("chars,expected", [(50, 180), (20000, 10000), (0, None)])
@@ -84,7 +84,7 @@ async def test_keenable_snippet_falls_back_to_description(monkeypatch):
     results, _ = await c.search("q")
     assert results[0].snippet == "db"
     assert calls["url"].endswith("/v1/search")
-    assert calls["headers"] == {"X-Keenable-Title": "keenbench", "X-API-Key": "k"}
+    assert calls["headers"] == {"X-Keenable-Title": "needle", "X-API-Key": "k"}
 
 
 async def test_exa_maps_fields_and_builds_body(monkeypatch):

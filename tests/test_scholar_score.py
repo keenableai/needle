@@ -1,8 +1,8 @@
 import pytest
 
-from keenbench.scholar.ids import PaperIds
-from keenbench.scholar.score import GoldPaper, ids_match, run_papers
-from keenbench.shared.search import SearchResult
+from needle.scholar.ids import PaperIds
+from needle.scholar.score import GoldPaper, ids_match, run_papers
+from needle.shared.search import SearchResult
 
 
 def _r(url, title="", snippet=""):

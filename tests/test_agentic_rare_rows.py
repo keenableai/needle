@@ -1,8 +1,8 @@
 import json
 from datetime import UTC, datetime
 
-from keenbench.agentic_rare.cli import query_row
-from keenbench.shared.identity import query_hash
+from needle.agentic_rare.cli import query_row
+from needle.shared.identity import query_hash
 
 HOUR_TS = datetime(2026, 8, 6, 7, tzinfo=UTC)
 

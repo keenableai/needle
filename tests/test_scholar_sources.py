@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
-from keenbench.scholar.models import age_bucket, coarse_domain
-from keenbench.scholar.sources import (
+from needle.scholar.models import age_bucket, coarse_domain
+from needle.scholar.sources import (
     _norm_arxiv_id,
     _norm_doi,
     _parse_dt,

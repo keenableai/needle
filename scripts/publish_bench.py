@@ -4,10 +4,10 @@ from pathlib import Path
 
 import fire
 
-from keenbench.scholar.generate import QUERY_BUCKETS
-from keenbench.shared.ci import ci_payload, score_row, updated_scores
-from keenbench.shared.io import append_jsonl, load_jsonl, write_json, write_jsonl
-from keenbench.shared.overlap import FAMILIES, TS_FMT, overlap_rows, uniqueness_rows
+from needle.scholar.generate import QUERY_BUCKETS
+from needle.shared.ci import ci_payload, score_row, updated_scores
+from needle.shared.io import append_jsonl, load_jsonl, write_json, write_jsonl
+from needle.shared.overlap import FAMILIES, TS_FMT, overlap_rows, uniqueness_rows
 
 
 def _latency_fields(e: dict) -> dict:

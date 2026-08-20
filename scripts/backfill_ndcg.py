@@ -4,9 +4,9 @@ from pathlib import Path
 import fire
 import httpx
 
-from keenbench.shared.hf import resolve_base
-from keenbench.shared.io import load_jsonl, write_jsonl
-from keenbench.shared.metrics import dcg_at_k, normalize_url
+from needle.shared.hf import resolve_base
+from needle.shared.io import load_jsonl, write_jsonl
+from needle.shared.metrics import dcg_at_k, normalize_url
 
 ARTIFACTS = {
     "news": ("ndcg.json", "rbp.json"),

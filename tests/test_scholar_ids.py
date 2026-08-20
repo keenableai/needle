@@ -1,11 +1,11 @@
-from keenbench.scholar.ids import (
+from needle.scholar.ids import (
     extract_arxiv,
     extract_doi,
     extract_ids,
     extract_pmcid,
     extract_pmid,
 )
-from keenbench.shared.search import SearchResult
+from needle.shared.search import SearchResult
 
 
 def test_extract_arxiv_url_forms():

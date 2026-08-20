@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
-from keenbench.finance.generate import run_generate
-from keenbench.finance.models import display_name
+from needle.finance.generate import run_generate
+from needle.finance.models import display_name
 
 HOUR = datetime(2026, 7, 2, 14, tzinfo=UTC)
 

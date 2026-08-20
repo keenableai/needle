@@ -3,9 +3,9 @@ from datetime import UTC, datetime
 
 import pytest
 
-from keenbench.news.pipeline import run_trends
-from keenbench.news.projection import build_trend_prompt
-from keenbench.news.trends import (
+from needle.news.pipeline import run_trends
+from needle.news.projection import build_trend_prompt
+from needle.news.trends import (
     US_GEOS,
     GoogleTrendsRssProvider,
     NewsItem,

@@ -1,10 +1,10 @@
 import numpy as np
 import pytest
 
-from keenbench.shared.ci import ci_payload, score_row, updated_scores
-from keenbench.shared.identity import query_hash
-from keenbench.shared.rankeval import _summarize
-from keenbench.shared.recall import recall_summary
+from needle.shared.ci import ci_payload, score_row, updated_scores
+from needle.shared.identity import query_hash
+from needle.shared.rankeval import _summarize
+from needle.shared.recall import recall_summary
 
 
 def test_rankeval_summary_annotates_score():

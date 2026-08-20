@@ -2,14 +2,14 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from keenbench.scholar.generate import (
+from needle.scholar.generate import (
     ARXIV_DOMAINS,
     MAX_SUBWINDOWS,
     _subwindow_count,
     _subwindows,
     run_generate,
 )
-from keenbench.scholar.models import Paper
+from needle.scholar.models import Paper
 
 
 def test_subwindow_count_capped_by_bucket_span_days():

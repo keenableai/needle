@@ -1,14 +1,14 @@
-# keenbench
+# NEEDLE
 
 [![CI](https://github.com/keenableai/keenbench/actions/workflows/ci.yaml/badge.svg)](https://github.com/keenableai/keenbench/actions/workflows/ci.yaml)
 
 Search and retrieval benchmarks from [Keenable.ai](https://keenable.ai). A
 benchmark is a query set plus a scoring method. Each one is a module under
-`keenbench` with the same two subcommands:
+`needle` with the same two subcommands:
 
 ```bash
-keenbench <benchmark> generate ... --out queries.jsonl   # produce query rows (JSONL)
-keenbench <benchmark> run --queries queries.jsonl ...    # evaluate engines on them (JSON report)
+needle <benchmark> generate ... --out queries.jsonl   # produce query rows (JSONL)
+needle <benchmark> run --queries queries.jsonl ...    # evaluate engines on them (JSON report)
 ```
 
 | Benchmark | Queries | Scoring |
@@ -25,8 +25,8 @@ eval, with no gold of its own.
 
 ## Install
 
-Uses [uv](https://docs.astral.sh/uv/): `uv sync`, then `uv run keenbench ...`
-(or `uv tool install --editable .` for a global `keenbench`).
+Uses [uv](https://docs.astral.sh/uv/): `uv sync`, then `uv run needle ...`
+(or `uv tool install --editable .` for a global `needle`).
 
 ## Configuration
 
@@ -38,7 +38,7 @@ The CLI loads `.env` from the working directory (copy
 | `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`) and judging |
 | `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY` | one per engine, required when that engine is in `--engines` |
 | `KEENABLE_API_KEY` | optional — without it the CLI uses the keyless, rate-limited endpoint |
-| `KEENBENCH_LLM_MODEL`, `KEENBENCH_JUDGE_MODEL` | both default to `openai/gpt-5.6-terra`; `--llm-model` / `--judge-model` override |
+| `NEEDLE_LLM_MODEL`, `NEEDLE_JUDGE_MODEL` | both default to `openai/gpt-5.6-terra`; `--llm-model` / `--judge-model` override |
 
 All `run` commands share one interface:
 
@@ -67,8 +67,8 @@ Turns what trends right now into keyword queries; the bench scores how well
 each engine ranks results for them.
 
 ```bash
-keenbench news generate --source rss --out queries.jsonl    # or --source trending
-keenbench news run --queries queries.jsonl --limit 20 --out ndcg.json
+needle news generate --source rss --out queries.jsonl    # or --source trending
+needle news run --queries queries.jsonl --limit 20 --out ndcg.json
 ```
 
 `generate` builds one cohort from two sources. **RSS**: ~124 curated public
@@ -78,7 +78,7 @@ feeds, the newest item per feed within a freshness window (1h for most feeds,
 fuzzy-deduped, capped by traffic. An LLM projects each item into a query and
 refuses evergreen content. `query_id` is deterministic from
 `(query_text, hour_ts)`. The feed list lives in
-[`feeds.default.toml`](src/keenbench/news/configs/feeds.default.toml)
+[`feeds.default.toml`](src/needle/news/configs/feeds.default.toml)
 (override with `--feeds`; honor each publisher's ToS and rate limits).
 
 `run` judges each engine's results as returned — its own title and snippet —
@@ -99,8 +99,8 @@ The score asks whether top-K results *contain the answer*, not whether they
 hit one pinned URL.
 
 ```bash
-keenbench finance generate --max-companies 100 --per-company 1 --filingdoc-target 40 --out gold.jsonl
-keenbench finance run --queries gold.jsonl --judge --out report.json
+needle finance generate --max-companies 100 --per-company 1 --filingdoc-target 40 --out gold.jsonl
+needle finance run --queries gold.jsonl --judge --out report.json
 ```
 
 Three suites (`--suites`): **`finance`** — registry facts per company
@@ -138,8 +138,8 @@ isolates semantic retrieval. A paper stays only if all requested buckets
 pass, so buckets remain comparable; `--buckets` selects a subset.
 
 ```bash
-keenbench scholar generate --age-buckets 7d,30d,1y --per-cell 10 --out gold.jsonl
-keenbench scholar run --queries gold.jsonl --num-results 10 --out report.json
+needle scholar generate --age-buckets 7d,30d,1y --per-cell 10 --out gold.jsonl
+needle scholar run --queries gold.jsonl --num-results 10 --out report.json
 ```
 
 Gold comes from two suites (`--suites`): `arxiv` and `europepmc`, paired
@@ -157,8 +157,8 @@ graph, so it needs no expert annotation. ~50% of queries carry operator
 syntax.
 
 ```bash
-keenbench legal generate --per-court 4 --per-title 4 --out legal.jsonl
-keenbench legal run --queries legal.jsonl --out legal.json
+needle legal generate --per-court 4 --per-title 4 --out legal.jsonl
+needle legal run --queries legal.jsonl --out legal.json
 ```
 
 Two suites (`--suites`): **`caselaw`** — recent published opinions from the
@@ -177,8 +177,8 @@ A query producer plus a news-style eval for English rare-word queries.
 
 ```bash
 uv run python scripts/agentic_rare_filter.py --out rare_entity.parquet   # refresh the filtered artifact
-keenbench agentic_rare generate --limit 100 --out queries.jsonl
-keenbench agentic_rare run --limit 100 --out report.json
+needle agentic_rare generate --limit 100 --out queries.jsonl
+needle agentic_rare run --limit 100 --out report.json
 ```
 
 `scripts/agentic_rare_filter.py` reads a query stream
@@ -200,20 +200,20 @@ sampled query rows.
 
 ## Shared infrastructure
 
-`keenbench.shared.search` — a `SearchClient` protocol (errors-as-data
+`needle.shared.search` — a `SearchClient` protocol (errors-as-data
 `async search(query, *, num_results) -> (results, error)`) with clients for
 every engine above. The client parses out Google-style operators (`site:`,
 `after:`, `before:`) and translates each to the engine's best native
 mechanism; it drops unsupported ones rather than send them as literal
 tokens. To add an engine: subclass `HttpSearchClient`, map its response to
 `SearchResult`, add an `EngineSpec` to `ENGINES` in
-[`factory.py`](src/keenbench/shared/search/factory.py), and set the key env
+[`factory.py`](src/needle/shared/search/factory.py), and set the key env
 var — reports and the dashboard pick it up automatically.
 
 Pipelines are pure (inputs + clients in, rows/reports out), so a notebook or
 scheduler can also drive them: the ranking harness is
-`keenbench.shared.rankeval.run_ndcg`, the recall scorer
-`keenbench.finance.score.run_answers`.
+`needle.shared.rankeval.run_ndcg`, the recall scorer
+`needle.finance.score.run_answers`.
 
 Every bench report carries a synthetic `ultimate` engine: the pooled results
 of all engines per query, oracle-ranked — by judge rating on the judged

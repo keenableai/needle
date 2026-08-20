@@ -2,12 +2,12 @@ import json
 
 import pytest
 
-from keenbench.finance import cli as finance_cli
-from keenbench.finance.judge import build_answer_prompt, judge_answer, parse_verdict
-from keenbench.finance.score import GoldQuery, run_answers
-from keenbench.shared import cli as shared_cli
-from keenbench.shared.search import SearchResult
-from keenbench.shared.search import factory as search_factory
+from needle.finance import cli as finance_cli
+from needle.finance.judge import build_answer_prompt, judge_answer, parse_verdict
+from needle.finance.score import GoldQuery, run_answers
+from needle.shared import cli as shared_cli
+from needle.shared.search import SearchResult
+from needle.shared.search import factory as search_factory
 
 CEO_Q = GoldQuery(
     text="nvidia ceo",

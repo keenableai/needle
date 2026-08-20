@@ -2,11 +2,11 @@ import json
 
 import pytest
 
-from keenbench.finance import cli as finance_cli
-from keenbench.finance.score import GoldQuery, result_answers, run_answers
-from keenbench.shared.cli import load_gold_rows
-from keenbench.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult
-from keenbench.shared.search import factory as search_factory
+from needle.finance import cli as finance_cli
+from needle.finance.score import GoldQuery, result_answers, run_answers
+from needle.shared.cli import load_gold_rows
+from needle.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult
+from needle.shared.search import factory as search_factory
 
 
 def _load_gold_rows(path):

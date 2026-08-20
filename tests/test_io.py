@@ -1,6 +1,6 @@
 import json
 
-from keenbench.shared.io import write_jsonl
+from needle.shared.io import write_jsonl
 
 
 def test_write_jsonl_one_object_per_line(tmp_path):

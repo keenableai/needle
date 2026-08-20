@@ -1,12 +1,12 @@
 import pytest
 from jinja2 import UndefinedError
 
-from keenbench.shared.prompts import render_prompt
+from needle.shared.prompts import render_prompt
 
 
 def test_render_projection_prompt():
     out = render_prompt(
-        "keenbench.news",
+        "needle.news",
         "projection.jinja",
         today="2020-01-01",
         source_kind="rss_news",
@@ -21,4 +21,4 @@ def test_render_projection_prompt():
 
 def test_missing_var_raises():
     with pytest.raises(UndefinedError):
-        render_prompt("keenbench.news", "projection.jinja", today="x")
+        render_prompt("needle.news", "projection.jinja", today="x")

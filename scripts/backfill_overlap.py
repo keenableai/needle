@@ -5,9 +5,9 @@ from pathlib import Path
 import fire
 import httpx
 
-from keenbench.shared.hf import resolve_base
-from keenbench.shared.io import load_jsonl, write_jsonl
-from keenbench.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
+from needle.shared.hf import resolve_base
+from needle.shared.io import load_jsonl, write_jsonl
+from needle.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
 ARTIFACTS = (
     ("ndcg.json", "rbp.json"),

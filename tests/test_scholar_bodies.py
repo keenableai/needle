@@ -1,4 +1,4 @@
-from keenbench.scholar.bodies import html_body_text, jats_body_text
+from needle.scholar.bodies import html_body_text, jats_body_text
 
 HTML = """
 <html><head><title>Paper</title><style>p { color: red }</style></head>

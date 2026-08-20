@@ -1,7 +1,7 @@
 from datetime import date
 
-from keenbench.legal.models import Case, CodeSection
-from keenbench.legal.projection import (
+from needle.legal.models import Case, CodeSection
+from needle.legal.projection import (
     caption_parties,
     caption_query,
     caselaw_syntax_query,

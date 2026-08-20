@@ -2,9 +2,9 @@ from collections import Counter
 
 import fire
 
-from keenbench.agentic_rare.io import iter_rows, resolve_dataset, write_rows
-from keenbench.agentic_rare.rare_entity import filter_rows, load_lid, load_tokenizer
-from keenbench.shared.hf import DEFAULT_DATASET
+from needle.agentic_rare.io import iter_rows, resolve_dataset, write_rows
+from needle.agentic_rare.rare_entity import filter_rows, load_lid, load_tokenizer
+from needle.shared.hf import DEFAULT_DATASET
 
 DEFAULT_STREAM_PATH = "agentic/queries.parquet"
 DEFAULT_QUERY_FIELD = "query_text"

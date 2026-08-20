@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-from keenbench.shared.sampling import (
+from needle.shared.sampling import (
     sample_stratified,
     sample_uniform,
     seed_from_hour_ts,

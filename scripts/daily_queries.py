@@ -5,8 +5,8 @@ from pathlib import Path
 import fire
 import httpx
 
-from keenbench.shared.hf import dataset_name, resolve_base
-from keenbench.shared.io import read_jsonl, write_jsonl
+from needle.shared.hf import dataset_name, resolve_base
+from needle.shared.io import read_jsonl, write_jsonl
 
 OUT = "daily_queries.jsonl"
 WINDOW_HOURS = 24

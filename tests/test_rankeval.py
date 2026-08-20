@@ -2,8 +2,8 @@ import math
 
 import pytest
 
-from keenbench.shared.rankeval import EvalQuery, run_ndcg
-from keenbench.shared.search import SearchResult
+from needle.shared.rankeval import EvalQuery, run_ndcg
+from needle.shared.search import SearchResult
 
 TODAY = "2026-07-01"
 PROFILE_YAML = (

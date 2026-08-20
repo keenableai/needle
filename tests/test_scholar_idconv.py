@@ -1,4 +1,4 @@
-from keenbench.scholar.idconv import IdConverter
+from needle.scholar.idconv import IdConverter
 
 
 async def test_error_is_not_cached_and_allows_retry():
