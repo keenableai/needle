@@ -406,8 +406,8 @@
         have no single correct result, so we measure ranking quality. An
         LLM judge rates each result from 0 to 4. We report nDCG@5,
         normalized so that the pooled <em>ultimate</em> engine scores
-        exactly&nbsp;1, with penalties for duplicate URLs and repeated
-        domains. <span class="vert" data-vert="finance"></span> measures if the answer text reaches the
+        exactly&nbsp;1, with a penalty for duplicate
+        URLs. <span class="vert" data-vert="finance"></span> measures if the answer text reaches the
         agent: we scan the top-5 titles and snippets and report
         answer-recall@5 with MRR@5. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are
         known-item tasks: we match identifiers and report recall@10 and
@@ -747,7 +747,7 @@
       <p>We judge an engine on its own ranking, titles, and snippets. We do not fetch pages and we do not re-rank. We cap the evidence at the same snippet length for each engine, so engines that return more content get no extra signal to the judge or the answer matchers. We judge each distinct combination of URL, title, snippet, and date once per query. We use that rating again where the identical result occurs for other engines (A4 gives the full judging setup).</p>
       <p>We remove failed searches and judgements from the mean and report them as <code>search_errors</code> and <code>judge_errors</code>. An outage decreases <code>num_scored</code> and increases the error rate; it does not decrease the quality score.</p>
       <p>We make fresh <span class="vert" data-vert="news"></span> queries each hour and new known-answer queries each day from public sources (A1), so there is no fixed benchmark set to overfit. We archive the exact queries with each run (A6).</p>
-      <p>Each vertical also reports <em>ultimate</em>, a synthetic engine. It pools all engines' results per query and ranks them oracle-style: best judge rating first (redundancy-aware) on the judged verticals, and the gold item first on the known-answer verticals. Its score shows what one engine could get if it always returned the best results that the full field found. This separates "the engine ranked poorly" from "no engine found better results". We do not include <em>ultimate</em> in the overlap and uniqueness statistics.</p>
+      <p>Each vertical also reports <em>ultimate</em>, a synthetic engine. It pools all engines' results per query and ranks them oracle-style: best judge rating first on the judged verticals, and the gold item first on the known-answer verticals. Its score shows what one engine could get if it always returned the best results that the full field found. This separates "the engine ranked poorly" from "no engine found better results". We do not include <em>ultimate</em> in the overlap and uniqueness statistics.</p>
     </div>
   </div>
 
@@ -759,7 +759,7 @@
       <tr><td>nDCG@5</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>DCG over the top 5 results (Σ gain(rᵢ) / log₂(i + 1), with judge ratings mapped to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0), divided by the DCG of the ideal ranking: the pooled ultimate ordering of every engine's deduplicated results, so ultimate scores exactly 1. A query is scored only if every one of its results was judged (otherwise it is dropped from the mean and counted as judge errors) and only if the pooled ideal has any gain; queries where no engine found anything relevant are excluded.</td></tr>
       <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
-        <td>applied to ratings before scoring, on the engine and ideal sides alike: a duplicate URL −4 rating steps, the 2nd result from the same domain −1, the 3rd and later −2, all floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
+        <td>applied to engine ratings before scoring: a duplicate URL drops the rating to 0. The pooled ideal is already deduplicated, so no penalty applies there. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
         <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher, with an LLM-judge backstop for paraphrased answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@10, MRR@10</td><td><span class="vert" data-vert="scholar"></span></td>
@@ -2294,16 +2294,10 @@ const dcgAtK = (ratings, k) =>
 const TRACKING_PARAMS = new Set(["_hsenc", "_hsmi", "dclid", "epik", "fbclid",
   "gbraid", "gclid", "igshid", "mc_cid", "mc_eid", "mkt_tok", "msclkid", "msockid",
   "oly_anon_id", "oly_enc_id", "srsltid", "ttclid", "twclid", "vero_id", "wbraid", "yclid"]);
-const stripWww = (host) => host.startsWith("www.") ? host.slice(4) : host;
-
-function urlDomainOf(url) {
-  try { return stripWww(new URL(url).hostname.toLowerCase()); } catch { return ""; }
-}
-
 function normalizeUrl(url) {
   let parts;
   try { parts = new URL(url.trim()); } catch { return url; }
-  const host = stripWww(parts.hostname);
+  const host = parts.hostname.replace(/^www\./, "");
   let path = parts.pathname;
   try { path = decodeURIComponent(path); } catch {}
   path = path.replace(/\/+$/, "");
@@ -2312,44 +2306,6 @@ function normalizeUrl(url) {
     .sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0);
   const query = params.length ? `?${new URLSearchParams(params)}` : "";
   return `${host}${path}${query}`;
-}
-
-const HAS_SITE_OP = (queryText) => /\bsite:/.test((queryText || "").toLowerCase());
-const domainPenalty = (prior) => prior >= 2 ? 2 : prior === 1 ? 1 : 0;
-
-function oracleOrder(urls, ratings, queryText) {
-  const remaining = urls.map((_, i) => i).sort((a, b) => ratings[b] - ratings[a]);
-  if (HAS_SITE_OP(queryText)) return remaining;
-  const domains = urls.map(urlDomainOf);
-  const picked = [];
-  const counts = new Map();
-  const penalized = (i) => Math.max(0, ratings[i] - domainPenalty(counts.get(domains[i]) || 0));
-  while (remaining.length) {
-    let best = 0;
-    for (let j = 1; j < remaining.length; j++) {
-      if (penalized(remaining[j]) > penalized(remaining[best])) best = j;
-    }
-    const i = remaining.splice(best, 1)[0];
-    picked.push(i);
-    counts.set(domains[i], (counts.get(domains[i]) || 0) + 1);
-  }
-  return picked;
-}
-
-function penalizeRedundancy(urls, ratings, queryText) {
-  if (HAS_SITE_OP(queryText)) return [...ratings];
-  const seen = new Set();
-  const counts = new Map();
-  const out = [];
-  for (let i = 0; i < urls.length; i++) {
-    const domain = urlDomainOf(urls[i]);
-    const canonical = normalizeUrl(urls[i]);
-    const prior = counts.get(domain) || 0;
-    out.push(Math.max(0, ratings[i] - (seen.has(canonical) ? 4 : domainPenalty(prior))));
-    seen.add(canonical);
-    counts.set(domain, prior + 1);
-  }
-  return out;
 }
 
 function pooledIdcg(report, query, k) {
@@ -2361,17 +2317,12 @@ function pooledIdcg(report, query, k) {
         if (r.rating == null) continue;
         const norm = normalizeUrl(r.url);
         const cur = best.get(norm);
-        if (!cur || r.rating > cur[1]) best.set(norm, [r.url, r.rating]);
+        if (cur == null || r.rating > cur) best.set(norm, r.rating);
       }
     }
   }
   if (!best.size) return null;
-  const urls = [...best.values()].map((x) => x[0]);
-  const ratings = [...best.values()].map((x) => x[1]);
-  const order = oracleOrder(urls, ratings, query).slice(0, k);
-  const penalized = penalizeRedundancy(
-    order.map((i) => urls[i]), order.map((i) => ratings[i]), query);
-  return dcgAtK(penalized, k) || null;
+  return dcgAtK([...best.values()].sort((a, b) => b - a), k) || null;
 }
 
 function legacyNdcg(report) {
