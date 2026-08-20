@@ -1,0 +1,654 @@
+# Default needle news feed list (the built-in SEED_SOURCES).
+# Copy, edit, and pass with: needle news run --feeds feeds.default.toml
+#
+#   source_kind:    rss_news | rss_release | rss_blog | rss_paper | rss_social
+#                   (rss_paper gets a 168h freshness window; everything else 1h)
+#   topical_domain: sports | finance | tech | health | weather | local_civic |
+#                   entertainment | gaming | commerce | government | science |
+#                   education | travel | automotive | other
+
+
+# local_civic
+[[source]]
+url = "https://www.local10.com/arc/outboundfeeds/rss/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.seattletimes.com/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://chicago.suntimes.com/rss/index.xml"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://nypost.com/metro/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://rss.nytimes.com/services/xml/rss/nyt/NYRegion.xml"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://gothamist.com/feed"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.12news.com/feeds/syndication/rss/news/local"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.kxan.com/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://blockclubchicago.org/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.latimes.com/california/rss2.0.xml"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.westword.com/feed"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://missionlocal.org/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.cpr.org/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.dallasobserver.com/feed"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.nbcmiami.com/news/local/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.thecity.nyc/feed"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://newbostonpost.com/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.texasstandard.org/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.washingtoncitypaper.com/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.universalhub.com/rss.xml"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.phoenixnewtimes.com/feed"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.miaminewtimes.com/feed"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.bostonmagazine.com/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://sfist.com/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.wbez.org/rss"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://news.wttw.com/feed"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.texastribune.org/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://www.minnpost.com/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://denverite.com/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+[[source]]
+url = "https://voiceofsandiego.org/feed/"
+source_kind = "rss_news"
+topical_domain = "local_civic"
+
+
+# tech
+[[source]]
+url = "https://techcrunch.com/feed/"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://www.theverge.com/rss/index.xml"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://www.wired.com/feed/rss"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://www.engadget.com/rss.xml"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://gizmodo.com/rss"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://9to5mac.com/feed/"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://www.androidauthority.com/feed"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://feeds.macrumors.com/MacRumors-All"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://appleinsider.com/rss/news/"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://www.tomshardware.com/feeds/all"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://www.cnet.com/rss/news/"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://www.theregister.com/headlines.atom"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://thenextweb.com/feed/"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "http://feeds.mashable.com/Mashable"
+source_kind = "rss_news"
+topical_domain = "tech"
+
+[[source]]
+url = "https://hnrss.org/frontpage"
+source_kind = "rss_social"
+topical_domain = "tech"
+
+[[source]]
+url = "https://hnrss.org/best"
+source_kind = "rss_social"
+topical_domain = "tech"
+
+[[source]]
+url = "https://hnrss.org/show"
+source_kind = "rss_social"
+topical_domain = "tech"
+
+[[source]]
+url = "https://lobste.rs/rss"
+source_kind = "rss_social"
+topical_domain = "tech"
+
+[[source]]
+url = "https://dev.to/feed"
+source_kind = "rss_social"
+topical_domain = "tech"
+
+[[source]]
+url = "https://stackoverflow.com/feeds"
+source_kind = "rss_social"
+topical_domain = "tech"
+
+
+# finance
+[[source]]
+url = "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+[[source]]
+url = "https://finance.yahoo.com/news/rssindex"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+[[source]]
+url = "https://feeds.content.dowjones.io/public/rss/mw_topstories"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+[[source]]
+url = "https://seekingalpha.com/feed.xml"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+[[source]]
+url = "https://www.thestreet.com/.rss/full/"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+[[source]]
+url = "https://www.forbes.com/business/feed/"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+[[source]]
+url = "https://fortune.com/feed"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+[[source]]
+url = "https://www.inc.com/rss/"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+[[source]]
+url = "https://www.nerdwallet.com/blog/feed/"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+[[source]]
+url = "https://www.investing.com/rss/news.rss"
+source_kind = "rss_news"
+topical_domain = "finance"
+
+
+# entertainment
+[[source]]
+url = "https://variety.com/feed/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://www.hollywoodreporter.com/feed/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://deadline.com/feed/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://www.thewrap.com/feed/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://screenrant.com/feed/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://collider.com/feed/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://decider.com/feed/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://pitchfork.com/rss/news/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://www.rollingstone.com/feed/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "http://consequenceofsound.net/feed"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://www.comingsoon.net/feed"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://tvline.com/feed/"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+[[source]]
+url = "https://www.indiewire.com/feed"
+source_kind = "rss_news"
+topical_domain = "entertainment"
+
+
+# sports
+[[source]]
+url = "https://sports.yahoo.com/rss/"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+[[source]]
+url = "https://www.espn.com/espn/rss/news"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+[[source]]
+url = "https://profootballtalk.nbcsports.com/feed/"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+[[source]]
+url = "https://www.espn.com/espn/rss/nfl/news"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+[[source]]
+url = "https://www.espn.com/espn/rss/nba/news"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+[[source]]
+url = "https://www.espn.com/espn/rss/mlb/news"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+[[source]]
+url = "https://www.cbssports.com/rss/headlines/nba/"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+[[source]]
+url = "https://www.cbssports.com/rss/headlines/nfl/"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+[[source]]
+url = "https://defector.com/feed"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+[[source]]
+url = "https://www.sbnation.com/rss/index.xml"
+source_kind = "rss_news"
+topical_domain = "sports"
+
+
+# gaming
+[[source]]
+url = "https://www.polygon.com/rss/index.xml"
+source_kind = "rss_news"
+topical_domain = "gaming"
+
+[[source]]
+url = "https://www.eurogamer.net/feed"
+source_kind = "rss_news"
+topical_domain = "gaming"
+
+[[source]]
+url = "https://feeds.ign.com/ign/games-all"
+source_kind = "rss_news"
+topical_domain = "gaming"
+
+[[source]]
+url = "https://www.pcgamer.com/rss/"
+source_kind = "rss_news"
+topical_domain = "gaming"
+
+[[source]]
+url = "https://kotaku.com/rss"
+source_kind = "rss_news"
+topical_domain = "gaming"
+
+[[source]]
+url = "https://www.gamespot.com/feeds/mashup/"
+source_kind = "rss_news"
+topical_domain = "gaming"
+
+[[source]]
+url = "https://www.destructoid.com/feed/"
+source_kind = "rss_news"
+topical_domain = "gaming"
+
+[[source]]
+url = "https://www.rockpapershotgun.com/feed/news"
+source_kind = "rss_news"
+topical_domain = "gaming"
+
+
+# health
+[[source]]
+url = "https://www.statnews.com/feed/"
+source_kind = "rss_news"
+topical_domain = "health"
+
+[[source]]
+url = "https://feeds.npr.org/1128/rss.xml"
+source_kind = "rss_news"
+topical_domain = "health"
+
+[[source]]
+url = "https://www.medpagetoday.com/rss/headlines.xml"
+source_kind = "rss_news"
+topical_domain = "health"
+
+[[source]]
+url = "https://www.endpts.com/feed/"
+source_kind = "rss_news"
+topical_domain = "health"
+
+[[source]]
+url = "https://kffhealthnews.org/feed/"
+source_kind = "rss_news"
+topical_domain = "health"
+
+
+# science
+[[source]]
+url = "https://phys.org/rss-feed/"
+source_kind = "rss_news"
+topical_domain = "science"
+
+[[source]]
+url = "https://www.space.com/feeds/all"
+source_kind = "rss_news"
+topical_domain = "science"
+
+[[source]]
+url = "https://scitechdaily.com/feed/"
+source_kind = "rss_news"
+topical_domain = "science"
+
+[[source]]
+url = "https://rss.nytimes.com/services/xml/rss/nyt/Science.xml"
+source_kind = "rss_news"
+topical_domain = "science"
+
+[[source]]
+url = "https://www.nasa.gov/news-release/feed/"
+source_kind = "rss_news"
+topical_domain = "science"
+
+[[source]]
+url = "https://www.livescience.com/feeds/all"
+source_kind = "rss_news"
+topical_domain = "science"
+
+[[source]]
+url = "https://export.arxiv.org/rss/cs.IR"
+source_kind = "rss_paper"
+topical_domain = "science"
+
+[[source]]
+url = "https://export.arxiv.org/rss/cs.CL"
+source_kind = "rss_paper"
+topical_domain = "science"
+
+[[source]]
+url = "https://export.arxiv.org/rss/cs.LG"
+source_kind = "rss_paper"
+topical_domain = "science"
+
+
+# government
+[[source]]
+url = "https://feeds.npr.org/1014/rss.xml"
+source_kind = "rss_news"
+topical_domain = "government"
+
+[[source]]
+url = "https://thehill.com/news/feed/"
+source_kind = "rss_news"
+topical_domain = "government"
+
+
+# commerce
+[[source]]
+url = "https://www.producthunt.com/feed"
+source_kind = "rss_release"
+topical_domain = "commerce"
+
+[[source]]
+url = "https://www.howtogeek.com/feed/"
+source_kind = "rss_news"
+topical_domain = "commerce"
+
+[[source]]
+url = "https://www.makeuseof.com/feed/"
+source_kind = "rss_news"
+topical_domain = "commerce"
+
+[[source]]
+url = "https://www.gearpatrol.com/feed/"
+source_kind = "rss_news"
+topical_domain = "commerce"
+
+[[source]]
+url = "https://petapixel.com/feed/"
+source_kind = "rss_news"
+topical_domain = "commerce"
+
+[[source]]
+url = "https://www.thekitchn.com/main.rss"
+source_kind = "rss_news"
+topical_domain = "commerce"
+
+[[source]]
+url = "https://www.nytimes.com/wirecutter/feed/"
+source_kind = "rss_news"
+topical_domain = "commerce"
+
+
+# automotive
+[[source]]
+url = "https://www.caranddriver.com/rss/all.xml"
+source_kind = "rss_news"
+topical_domain = "automotive"
+
+[[source]]
+url = "https://electrek.co/feed/"
+source_kind = "rss_news"
+topical_domain = "automotive"
+
+[[source]]
+url = "https://jalopnik.com/rss"
+source_kind = "rss_news"
+topical_domain = "automotive"
+
+
+# education
+[[source]]
+url = "https://www.the74million.org/feed/"
+source_kind = "rss_news"
+topical_domain = "education"
+
+[[source]]
+url = "https://www.insidehighered.com/rss.xml"
+source_kind = "rss_news"
+topical_domain = "education"
+
+[[source]]
+url = "https://www.k12dive.com/feeds/news/"
+source_kind = "rss_news"
+topical_domain = "education"
+
+
+# travel
+[[source]]
+url = "https://onemileatatime.com/feed/"
+source_kind = "rss_news"
+topical_domain = "travel"
+
+[[source]]
+url = "https://www.cntraveler.com/feed/rss"
+source_kind = "rss_news"
+topical_domain = "travel"
+
+[[source]]
+url = "https://skift.com/feed/"
+source_kind = "rss_news"
+topical_domain = "travel"
+
+[[source]]
+url = "https://viewfromthewing.com/feed/"
+source_kind = "rss_news"
+topical_domain = "travel"

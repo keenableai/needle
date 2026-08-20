@@ -2,14 +2,14 @@ from datetime import UTC, datetime
 
 import pytest
 
-from keenbench.news.models import build_query_row
-from keenbench.news.pipeline import _rss_provenance, run_rss
-from keenbench.news.projection import (
+from needle.news.models import build_query_row
+from needle.news.pipeline import _rss_provenance, run_rss
+from needle.news.projection import (
     build_projection_prompt,
     clean_projection,
     project_batch,
 )
-from keenbench.shared.sampling import sample_stratified
+from needle.shared.sampling import sample_stratified
 
 TODAY = "2026-07-01"
 
@@ -71,7 +71,7 @@ def test_build_projection_prompt_uses_explicit_today():
 
 
 async def test_run_rss_end_to_end(monkeypatch):
-    import keenbench.news.pipeline as pipeline
+    import needle.news.pipeline as pipeline
 
     fake_items = [
         {

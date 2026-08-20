@@ -3,8 +3,8 @@ from datetime import UTC, datetime, timedelta
 import defusedxml.ElementTree as ET
 import pytest
 
-from keenbench.news import feeds as feeds_mod
-from keenbench.news.feeds import (
+from needle.news import feeds as feeds_mod
+from needle.news.feeds import (
     SEED_SOURCES,
     SeedSource,
     _fetch_one,

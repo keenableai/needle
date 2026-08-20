@@ -1,6 +1,6 @@
 import pytest
 
-from keenbench.finance.canon import (
+from needle.finance.canon import (
     FIELD_TYPES,
     gold_in_text,
     registrable_domain,

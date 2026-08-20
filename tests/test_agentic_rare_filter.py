@@ -1,4 +1,4 @@
-from keenbench.agentic_rare.rare_entity import (
+from needle.agentic_rare.rare_entity import (
     filter_rows,
     hard_words_for,
     is_eligible,
@@ -103,7 +103,7 @@ def test_filter_rows_end_to_end():
 
 
 def test_dedup_by_ngrams_collapses_templated_prefixes():
-    from keenbench.agentic_rare.rare_entity import dedup_by_ngrams
+    from needle.agentic_rare.rare_entity import dedup_by_ngrams
 
     rows = [
         {"query": "regional europe united kingdom scotland aaa"},

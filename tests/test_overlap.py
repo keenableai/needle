@@ -1,4 +1,4 @@
-from keenbench.shared.overlap import overlap_rows, uniqueness_rows
+from needle.shared.overlap import overlap_rows, uniqueness_rows
 
 
 def _report(per_query_by_engine):

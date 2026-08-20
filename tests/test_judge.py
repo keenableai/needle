@@ -1,4 +1,4 @@
-from keenbench.shared.judge import (
+from needle.shared.judge import (
     PARSE_RETRY_SUFFIX,
     QueryProfile,
     build_judge_input,

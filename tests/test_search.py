@@ -4,7 +4,7 @@ from datetime import date
 import httpx
 import pytest
 
-from keenbench.shared.search import (
+from needle.shared.search import (
     BraveClient,
     CeramicClient,
     ExaClient,
@@ -21,9 +21,9 @@ from keenbench.shared.search import (
     latency_stats,
     search_all,
 )
-from keenbench.shared.search import base as search_base
-from keenbench.shared.search.factory import ENGINES
-from keenbench.shared.search.queryops import parse_ops
+from needle.shared.search import base as search_base
+from needle.shared.search.factory import ENGINES
+from needle.shared.search.queryops import parse_ops
 
 OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
 

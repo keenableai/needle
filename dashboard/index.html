@@ -604,7 +604,7 @@
   <div class="card" id="card-def-suspicious">
     <h2>Definition: suspicious sharing</h2>
     <div class="sub">the pairwise test behind the matrix and the borrowing graph
-      (src/keenbench/shared/overlap.py)</div>
+      (src/needle/shared/overlap.py)</div>
     <div class="prose defn">
       <p>Let <var>U<sub>A</sub></var>(<var>q</var>) be the normalized URLs
         engine <var>A</var> returned for query <var>q</var>, and
@@ -753,7 +753,7 @@
 
   <div class="card" id="app-metrics">
     <h2>A3 — metric definitions</h2>
-    <div class="sub">src/keenbench/shared/metrics.py and per-bench score.py</div>
+    <div class="sub">src/needle/shared/metrics.py and per-bench score.py</div>
     <table>
       <tr><th>metric</th><th>benches</th><th>definition</th></tr>
       <tr><td>nDCG@5</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
@@ -778,14 +778,14 @@
       <p>We judge with <code>openai/gpt-5.6-terra</code> via OpenRouter, temperature 0, one pointwise call per document. We record the model for each run as <code>judge_model</code> in its archived report. The judgement browser shows it when you select a run, so judge changes stay visible in the history.</p>
       <p>The judge does not see the engine identity. The prompt contains the query, the document title, the URL, the published date, and the snippet — not the engine name. We judge each distinct combination of URL, title, snippet, and date once per query and use that rating again where the identical result occurs for other engines. We judge the same URL with a different snippet separately, with the same blind judge and rubric.</p>
       <p>A judge preference for a snippet style would be a shared bias across engines. We publish the per-result reasoning with each run, so you can audit this.</p>
-      <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard gates for a wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/keenbench/shared/prompts/judgement.jinja.</p>
+      <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard gates for a wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/needle/shared/prompts/judgement.jinja.</p>
       <p>Known limitation: we operate NEEDLE ourselves, and we did not yet do a systematic human-agreement audit of the judge. But you can check the numbers: the judge is blind and shared across engines, each rating includes its reasoning, and we publish the queries, prompts, and raw results. Thus anyone can score any rating again.</p>
     </div>
   </div>
 
   <div class="card" id="app-engines">
     <h2>A5 — engine configuration</h2>
-    <div class="sub">request shapes pinned in git (src/keenbench/shared/search/); 5 results per query except <span class="vert" data-vert="scholar"></span> (10). Engines are live, unversioned APIs; provider-side changes surface as trend shifts.</div>
+    <div class="sub">request shapes pinned in git (src/needle/shared/search/); 5 results per query except <span class="vert" data-vert="scholar"></span> (10). Engines are live, unversioned APIs; provider-side changes surface as trend shifts.</div>
     <table>
       <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
       <tr><td>Keenable</td><td>Keenable search</td><td>query verbatim with site: kept; after:/before: → published_after:/published_before:; mode=realtime</td></tr>

@@ -1,11 +1,11 @@
-from keenbench.legal.score import (
+from needle.legal.score import (
     GoldLegal,
     extract_legal_ids,
     ids_match,
     norm_citation,
     run_legal,
 )
-from keenbench.shared.search import SearchResult
+from needle.shared.search import SearchResult
 
 
 def _r(url: str, title: str = "", snippet: str = "") -> SearchResult:

@@ -1,4 +1,4 @@
-# keenbench
+# NEEDLE
 
 Hourly search-engine benchmarks; full docs in README.md. Four benches:
 news (hourly, nDCG@5, LLM judge), finance (daily, answer-recall@5 +
@@ -7,7 +7,7 @@ known-item papers, recall@10 + MRR@10 by arXiv/DOI/PMID match), and legal
 (daily, known-item caselaw/CFR, recall@5 + MRR@5 by citation/docket/URL
 match). agentic_rare is a query producer, not a bench: `scripts/agentic_rare_filter.py`
 filters a query stream for English rare-word queries (BERT WordPiece +
-fastText language ID), and `keenbench agentic_rare generate` / `run` samples
+fastText language ID), and `needle agentic_rare generate` / `run` samples
 the filtered artifact and evaluates it like news.
 
 ## Layout
@@ -19,7 +19,7 @@ the filtered artifact and evaluates it like news.
   `families.json`; the full per-run artifacts (`ndcg.json`, `recall.json`)
   live on the HF dataset `keenable-ai/keenbench-results`, and the dashboard
   fetches them directly from there.
-- `src/keenbench/shared/rankeval.py` shapes the per-result report fields
+- `src/needle/shared/rankeval.py` shapes the per-result report fields
   (`title`, `url`, `snippet`, `rating`, `penalized`, `label`, `reasoning`,
   `gates`) — keep the dashboard renderers in sync with it.
 

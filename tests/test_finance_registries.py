@@ -1,4 +1,4 @@
-from keenbench.finance.registries import (
+from needle.finance.registries import (
     GleifClient,
     SecClient,
     WikidataClient,
@@ -100,7 +100,7 @@ async def test_sec_tickers_parses_and_caches(monkeypatch):
     ]
     assert await c.tickers(limit=1) == rows[:1]
     assert len(calls) == 1
-    assert c.default_headers["User-Agent"].startswith("keenbench/")
+    assert c.default_headers["User-Agent"].startswith("needle/")
 
 
 async def test_sec_companyfacts_extracts_us_gaap(monkeypatch):

@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from keenbench.shared.metrics import (
+from needle.shared.metrics import (
     NDCG_K,
     apply_redundancy_penalties,
     dcg_at_k,

@@ -2,7 +2,7 @@ import json
 
 import httpx
 
-from keenbench.shared.llm import OpenRouterClient
+from needle.shared.llm import OpenRouterClient
 
 
 def _capture(seen, *, finish_reason="stop", content="hello"):

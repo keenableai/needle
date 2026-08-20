@@ -4,8 +4,8 @@ import os
 import pytest
 from dotenv import dotenv_values
 
-from keenbench.shared.judge import RATING_LABELS, classify_query, judge_one
-from keenbench.shared.llm import OpenRouterClient, resolve_judge_model
+from needle.shared.judge import RATING_LABELS, classify_query, judge_one
+from needle.shared.llm import OpenRouterClient, resolve_judge_model
 
 API_KEY = os.environ.get("OPENROUTER_API_KEY") or dotenv_values().get("OPENROUTER_API_KEY")
 

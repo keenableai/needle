@@ -80,8 +80,8 @@ jobs:
         continue-on-error: true
         timeout-minutes: 50
         run: |
-          uv run keenbench news generate --source rss --out fresh.jsonl
-          uv run keenbench news run --queries fresh.jsonl --limit 20 \
+          uv run needle news generate --source rss --out fresh.jsonl
+          uv run needle news run --queries fresh.jsonl --limit 20 \
             --engines "$ENGINES" --out ndcg.json
 
       - name: finance (daily schedule, dispatch opt-in, or gold bootstrap)
@@ -96,9 +96,9 @@ jobs:
             exit 0
           fi
           mkdir -p site-data/data
-          uv run keenbench finance generate --max-companies 100 --per-company 1 \
+          uv run needle finance generate --max-companies 100 --per-company 1 \
             --filingdoc-target 40 --out site-data/data/gold.jsonl
-          uv run keenbench finance run --queries site-data/data/gold.jsonl \
+          uv run needle finance run --queries site-data/data/gold.jsonl \
             --limit 120 --engines "$ENGINES" --judge --out recall.json
 
       - name: agentic_rare (daily schedule or dispatch opt-in)
@@ -112,7 +112,7 @@ jobs:
             echo "skipping agentic_rare"
             exit 0
           fi
-          uv run keenbench agentic_rare run --limit 100 \
+          uv run needle agentic_rare run --limit 100 \
             --engines "$ENGINES" --queries-out agentic_rare.jsonl --out agentic_rare.json
 
       - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
@@ -127,9 +127,9 @@ jobs:
             exit 0
           fi
           mkdir -p site-data/data
-          uv run keenbench scholar generate --age-buckets 7d,30d,1y --per-cell 7 \
+          uv run needle scholar generate --age-buckets 7d,30d,1y --per-cell 7 \
             --out site-data/data/scholar.jsonl
-          uv run keenbench scholar run --queries site-data/data/scholar.jsonl \
+          uv run needle scholar run --queries site-data/data/scholar.jsonl \
             --engines "$ENGINES" --num-results 10 --out scholar.json
 
       - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
@@ -144,9 +144,9 @@ jobs:
             exit 0
           fi
           mkdir -p site-data/data
-          uv run keenbench legal generate --per-court 4 --per-title 4 \
+          uv run needle legal generate --per-court 4 --per-title 4 \
             --out site-data/data/legal.jsonl
-          uv run keenbench legal run --queries site-data/data/legal.jsonl \
+          uv run needle legal run --queries site-data/data/legal.jsonl \
             --engines "$ENGINES" --out legal.json
 
       - name: Collect bench outcomes

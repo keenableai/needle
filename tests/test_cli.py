@@ -3,12 +3,12 @@ from datetime import UTC, datetime
 
 import pytest
 
-from keenbench.agentic_rare import cli as agentic_rare_cli
-from keenbench.news import cli as news_cli
-from keenbench.shared import cli as shared_cli
-from keenbench.shared.llm import OpenRouterClient, _content_to_text
-from keenbench.shared.search import DEFAULT_SNIPPET_CHARS
-from keenbench.shared.search import factory as search_factory
+from needle.agentic_rare import cli as agentic_rare_cli
+from needle.news import cli as news_cli
+from needle.shared import cli as shared_cli
+from needle.shared.llm import OpenRouterClient, _content_to_text
+from needle.shared.search import DEFAULT_SNIPPET_CHARS
+from needle.shared.search import factory as search_factory
 
 
 def test_run_rejects_unsupported_source():

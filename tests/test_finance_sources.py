@@ -1,4 +1,4 @@
-from keenbench.finance.sources import html_text, quarterly_facts
+from needle.finance.sources import html_text, quarterly_facts
 
 
 def _fact(val, start, end, fy, fp, form="10-Q"):

@@ -1,4 +1,4 @@
-from keenbench.scholar.projection import (
+from needle.scholar.projection import (
     body_has_bad_anchor,
     body_query_ok,
     clean_body_query,

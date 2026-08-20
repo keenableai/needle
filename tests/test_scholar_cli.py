@@ -1,7 +1,7 @@
 import json
 
-from keenbench.scholar.cli import _gold_paper
-from keenbench.shared.cli import has_gold_ids, load_gold_rows
+from needle.scholar.cli import _gold_paper
+from needle.shared.cli import has_gold_ids, load_gold_rows
 
 
 def _load_gold_rows(path):
