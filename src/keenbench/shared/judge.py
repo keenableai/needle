@@ -31,7 +31,17 @@ DOMAIN_RE = re.compile(r"\b(health|legal|financial|academic|tech|news|commerce|j
 OPERATOR_VALUES = {"true": True, "yes": True, "1": True, "false": False, "no": False, "0": False}
 
 RATING_LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
-VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
+VALID_LABELS = frozenset({"FailsM", "SM", "HM", "FullyM"})
+GATE_FIELDS = (
+    "document_integrity_check",
+    "document_spirit_condition",
+    "document_coverage_condition",
+    "document_completeness_condition",
+    "freshness_gate",
+    "staleness_gate",
+    "domain_gate",
+    "search_operators_gate",
+)
 
 FENCE_PATTERNS = (
     re.compile(r"[ \t]*```(?:ya?ml|json)[ \t]*\n(.*?)\n[ \t]*```", re.DOTALL | re.IGNORECASE),
@@ -57,6 +67,7 @@ class Judgement:
     rating: int
     label: str
     reasoning: str
+    gates: tuple[tuple[str, str], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -163,7 +174,12 @@ def parse_judgement(text: str | None) -> Judgement | None:
     if label not in VALID_LABELS:
         label = RATING_LABELS[rating]
     reasoning = str(data.get("reasoning") or "")
-    return Judgement(rating=rating, label=label, reasoning=reasoning)
+    gates = tuple(
+        (field, value)
+        for field in GATE_FIELDS
+        if (value := str(data.get(field) or "").strip().lower())
+    )
+    return Judgement(rating=rating, label=label, reasoning=reasoning, gates=gates)
 
 
 def _clean_line(raw: object) -> str:

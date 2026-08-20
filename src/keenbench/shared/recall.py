@@ -139,6 +139,7 @@ async def run_known_item_eval(
         engines_out[name] = summary(per_query, latency_stats(engines[name].latencies_ms))
     if engine_names:
         engines_out[ULTIMATE] = summary(ultimate_fn(query_outs, cap=num_results), None)
+        engines_out[ULTIMATE]["mrr_at_k"] = None
 
     classify_misses(query_outs, engine_names, engines_out)
 

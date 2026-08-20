@@ -1238,12 +1238,20 @@ function wmean(rows, metric, weightMetric = "num_scored") {
   return w ? sum / w : null;
 }
 
+function ciWindowed(rows, bench) {
+  const ciRuns = ciData?.runs?.[bench] ? new Set(ciData.runs[bench]) : null;
+  const windowed = ciRuns ? rows.filter((r) => ciRuns.has(r.ts)) : inRange(rows, 7 * 86400e3);
+  return windowed.filter((r) => r.bench === bench);
+}
+
+function windowNote(bench) {
+  return ciData?.runs?.[bench] ? `${ciData.window_days}-day CI window` : "last 7 days";
+}
+
 function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const holder = document.getElementById(holderId);
   holder.replaceChildren();
-  const ciRuns = ciData?.runs?.[bench] ? new Set(ciData.runs[bench]) : null;
-  const windowed = ciRuns ? rows.filter((r) => ciRuns.has(r.ts)) : inRange(rows, 7 * 86400e3);
-  const benchRows = windowed.filter((r) => r.bench === bench);
+  const benchRows = ciWindowed(rows, bench);
   const ci = ciData?.benches?.[bench] || null;
   const entries = ENGINES.map((e) => {
     const er = benchRows.filter((r) => r.engine === e);
@@ -1262,7 +1270,7 @@ function renderLeaderboard(holderId, subId, rows, bench, metrics) {
   const runs = Math.max(...entries.map((x) => x.n));
   const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
   document.getElementById(subId).textContent =
-    `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
+    `mean of ${runs} run${runs === 1 ? "" : "s"}, ${windowNote(bench)} — latest ${fmtTime(lastT)} UTC`;
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, "engine"));
@@ -1323,12 +1331,12 @@ const STANDINGS_BENCHES = [
   ["legal", "recall", "recall@5"],
 ];
 function shareEntries(rows) {
-  const week = inRange(rows, 7 * 86400e3);
-  const ult = STANDINGS_BENCHES.map(([bench, metric]) =>
-    wmean(week.filter((r) => r.bench === bench && r.engine === ULTIMATE_ENGINE), metric));
+  const benchRows = STANDINGS_BENCHES.map(([bench]) => ciWindowed(rows, bench));
+  const ult = STANDINGS_BENCHES.map(([, metric], i) =>
+    wmean(benchRows[i].filter((r) => r.engine === ULTIMATE_ENGINE), metric));
   const entries = ENGINES.filter((e) => e !== ULTIMATE_ENGINE).map((e) => {
-    const shares = STANDINGS_BENCHES.map(([bench, metric], i) => {
-      const v = wmean(week.filter((r) => r.bench === bench && r.engine === e), metric);
+    const shares = STANDINGS_BENCHES.map(([, metric], i) => {
+      const v = wmean(benchRows[i].filter((r) => r.engine === e), metric);
       return v == null || !ult[i] ? null : { v, share: v / ult[i] };
     });
     const have = shares.filter(Boolean);
@@ -1356,13 +1364,12 @@ function bootstrapShares(rows) {
   const idx = new Map(ENGINES.map((e, i) => [e, i]));
   const ultI = idx.get(ULTIMATE_ENGINE);
   if (ultI == null) return out;
-  const week = inRange(rows, 7 * 86400e3);
   const nE = ENGINES.length;
   const benchRuns = STANDINGS_BENCHES.map(([bench, metric]) => {
     const byTs = new Map();
-    for (const r of week) {
+    for (const r of ciWindowed(rows, bench)) {
       const ei = idx.get(r.engine);
-      if (ei == null || r.bench !== bench || r[metric] == null || !(r.num_scored > 0)) continue;
+      if (ei == null || r[metric] == null || !(r.num_scored > 0)) continue;
       let run = byTs.get(r.ts);
       if (!run) byTs.set(r.ts, run = []);
       run.push(ei, r[metric], r.num_scored);
@@ -1424,6 +1431,7 @@ function renderStandings(rows) {
     return;
   }
   const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const note = ciData?.runs ? `${ciData.window_days}-day CI window` : "last 7 days";
   const boot = bootstrapShares(rows);
   const nAx = STANDINGS_BENCHES.length;
   const best = [];
@@ -1467,8 +1475,8 @@ function renderStandings(rows) {
       ? `${Math.round(tied.at(-1).overall * 100)}–${Math.round(leader.overall * 100)}%`
       : fmtPct(best[0])));
     s1.appendChild(el("div", { class: "stat-cap" }, tied.length > 1
-      ? `${names} — statistically tied for best engine (95% CIs overlap), mean share of ultimate, last 7 days`
-      : `${names} — best single engine, mean share of ultimate across the five verticals, last 7 days${lc ? `; 95% CI ${fmtPct(lc.lo)}–${fmtPct(lc.hi)}` : ""}`));
+      ? `${names} — statistically tied for best engine (95% CIs overlap), mean share of ultimate, ${note}`
+      : `${names} — best single engine, mean share of ultimate across the five verticals, ${note}${lc ? `; 95% CI ${fmtPct(lc.lo)}–${fmtPct(lc.hi)}` : ""}`));
     if (boot.size) {
       s1.title = tied.map((x) => {
         const c = boot.get(x.e);
@@ -1598,7 +1606,7 @@ function renderStandings(rows) {
   }
 
   const ohdr = el("text", { x: 10, y: 18, "text-anchor": "start", class: "st-ult" },
-    "engine % — 7-day mean share of ultimate");
+    `engine % — mean share of ultimate, ${note}`);
   if (best[0] != null) {
     ohdr.appendChild(el("title", {}, `overall: best engine reaches ${fmtPct(best[0])} of ultimate — gap ${fmtPct(1 - best[0])}`));
   }
@@ -2264,7 +2272,9 @@ function resultBlock(r, headExtras, judgeChips = []) {
     }
     const text = el("span");
     if (r.label) text.appendChild(el("span", { class: "label" }, r.label));
-    if (r.reasoning) text.appendChild(document.createTextNode(`${r.label ? " — " : ""}${r.reasoning}`));
+    const failedGates = Object.keys(r.gates || {}).filter((g) => r.gates[g] === "fail");
+    if (failedGates.length) text.appendChild(el("span", { class: "label" }, ` · failed: ${failedGates.join(", ")}`));
+    if (r.reasoning) text.appendChild(document.createTextNode(`${r.label || failedGates.length ? " — " : ""}${r.reasoning}`));
     box.appendChild(text);
     div.appendChild(box);
   }

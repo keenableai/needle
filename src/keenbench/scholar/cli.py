@@ -147,9 +147,10 @@ class Scholar:
                 recall = e["by_bucket"].get(bucket, {}).get("recall_at_k")
                 if recall is not None:
                     bucket_strs.append(f"{bucket} = {recall:.3f}")
+            mrr_str = f"{e['mrr_at_k']:.4f}" if e["mrr_at_k"] is not None else "n/a"
             print(
                 f"  {name:10s} recall@{num_results} = {e['recall_at_k']:.4f}  "
-                f"MRR = {e['mrr_at_k']:.4f}  "
+                f"MRR = {mrr_str}  "
                 f"({', '.join(bucket_strs) or 'no buckets'}; "
                 f"{e['num_scored']}/{report['num_queries']} scored; "
                 f"{e['search_errors']} search errs; "
