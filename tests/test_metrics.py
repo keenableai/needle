@@ -8,7 +8,6 @@ from keenbench.shared.metrics import (
     dcg_at_k,
     gain,
     normalize_url,
-    oracle_order,
 )
 
 
@@ -63,24 +62,13 @@ def test_normalize_url_percent_encoding():
 
 
 def test_penalties_duplicate_url_only():
-    urls = [
-        "https://a.com/1",
-        "https://a.com/2",
-        "https://a.com/3",
-        "https://b.com/1",
-        "https://a.com/1",
-    ]
-    out = apply_redundancy_penalties(urls, [4, 4, 4, 4, 4])
-    assert out == [4, 4, 4, 4, 0]
+    urls = ["https://a.com/1", "https://a.com/2", "https://a.com/1"]
+    assert apply_redundancy_penalties(urls, [4, 4, 4]) == [4, 4, 0]
 
 
 def test_penalties_url_variants_count_as_duplicates():
     urls = ["https://a.com/1", "http://www.a.com/1/"]
     assert apply_redundancy_penalties(urls, [4, 4]) == [4, 0]
-
-
-def test_penalties_floor_at_zero():
-    assert apply_redundancy_penalties(["https://a.com/1", "https://a.com/1"], [4, 3]) == [4, 0]
 
 
 def test_penalties_site_queries_exempt():
@@ -92,8 +80,3 @@ def test_penalties_site_queries_exempt():
 def test_penalties_website_word_not_exempt():
     urls = ["https://a.com/1", "https://a.com/1"]
     assert apply_redundancy_penalties(urls, [4, 4], query_text="acme website: details") == [4, 0]
-
-
-def test_oracle_order_sorts_by_rating():
-    assert oracle_order([2, 4, 3]) == [1, 2, 0]
-    assert oracle_order([3, 4, 4]) == [1, 2, 0]

@@ -406,8 +406,8 @@
         have no single correct result, so we measure ranking quality. An
         LLM judge rates each result from 0 to 4. We report nDCG@5,
         normalized so that the pooled <em>ultimate</em> engine scores
-        exactly&nbsp;1, with penalties for duplicate URLs and repeated
-        domains. <span class="vert" data-vert="finance"></span> measures if the answer text reaches the
+        exactly&nbsp;1, with a penalty for duplicate
+        URLs. <span class="vert" data-vert="finance"></span> measures if the answer text reaches the
         agent: we scan the top-5 titles and snippets and report
         answer-recall@5 with MRR@5. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are
         known-item tasks: we match identifiers and report recall@10 and
@@ -759,7 +759,7 @@
       <tr><td>nDCG@5</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>DCG over the top 5 results (Σ gain(rᵢ) / log₂(i + 1), with judge ratings mapped to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0), divided by the DCG of the ideal ranking: the pooled ultimate ordering of every engine's deduplicated results, so ultimate scores exactly 1. A query is scored only if every one of its results was judged (otherwise it is dropped from the mean and counted as judge errors) and only if the pooled ideal has any gain; queries where no engine found anything relevant are excluded.</td></tr>
       <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
-        <td>applied to ratings before scoring, on the engine and ideal sides alike: a duplicate URL −4 rating steps, floored at 0. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
+        <td>applied to engine ratings before scoring: a duplicate URL drops the rating to 0. The pooled ideal is already deduplicated, so no penalty applies there. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
         <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher, with an LLM-judge backstop for paraphrased answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@10, MRR@10</td><td><span class="vert" data-vert="scholar"></span></td>
@@ -2294,12 +2294,10 @@ const dcgAtK = (ratings, k) =>
 const TRACKING_PARAMS = new Set(["_hsenc", "_hsmi", "dclid", "epik", "fbclid",
   "gbraid", "gclid", "igshid", "mc_cid", "mc_eid", "mkt_tok", "msclkid", "msockid",
   "oly_anon_id", "oly_enc_id", "srsltid", "ttclid", "twclid", "vero_id", "wbraid", "yclid"]);
-const stripWww = (host) => host.startsWith("www.") ? host.slice(4) : host;
-
 function normalizeUrl(url) {
   let parts;
   try { parts = new URL(url.trim()); } catch { return url; }
-  const host = stripWww(parts.hostname);
+  const host = parts.hostname.replace(/^www\./, "");
   let path = parts.pathname;
   try { path = decodeURIComponent(path); } catch {}
   path = path.replace(/\/+$/, "");
@@ -2308,24 +2306,6 @@ function normalizeUrl(url) {
     .sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0);
   const query = params.length ? `?${new URLSearchParams(params)}` : "";
   return `${host}${path}${query}`;
-}
-
-const HAS_SITE_OP = (queryText) => /\bsite:/.test((queryText || "").toLowerCase());
-
-function oracleOrder(ratings) {
-  return ratings.map((_, i) => i).sort((a, b) => ratings[b] - ratings[a]);
-}
-
-function penalizeRedundancy(urls, ratings, queryText) {
-  if (HAS_SITE_OP(queryText)) return [...ratings];
-  const seen = new Set();
-  const out = [];
-  for (let i = 0; i < urls.length; i++) {
-    const canonical = normalizeUrl(urls[i]);
-    out.push(Math.max(0, ratings[i] - (seen.has(canonical) ? 4 : 0)));
-    seen.add(canonical);
-  }
-  return out;
 }
 
 function pooledIdcg(report, query, k) {
@@ -2337,17 +2317,12 @@ function pooledIdcg(report, query, k) {
         if (r.rating == null) continue;
         const norm = normalizeUrl(r.url);
         const cur = best.get(norm);
-        if (!cur || r.rating > cur[1]) best.set(norm, [r.url, r.rating]);
+        if (cur == null || r.rating > cur) best.set(norm, r.rating);
       }
     }
   }
   if (!best.size) return null;
-  const urls = [...best.values()].map((x) => x[0]);
-  const ratings = [...best.values()].map((x) => x[1]);
-  const order = oracleOrder(ratings).slice(0, k);
-  const penalized = penalizeRedundancy(
-    order.map((i) => urls[i]), order.map((i) => ratings[i]), query);
-  return dcgAtK(penalized, k) || null;
+  return dcgAtK([...best.values()].sort((a, b) => b - a), k) || null;
 }
 
 function legacyNdcg(report) {

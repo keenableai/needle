@@ -15,7 +15,6 @@ from keenbench.shared.metrics import (
     apply_redundancy_penalties,
     dcg_at_k,
     normalize_url,
-    oracle_order,
 )
 from keenbench.shared.recall import ULTIMATE
 from keenbench.shared.search import SearchClient, SearchResult, latency_stats, search_all
@@ -108,9 +107,7 @@ def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int
     if not judged:
         pooled = [r for r, _ in best.values()]
         return _score_query(query, pooled, None, [None] * len(pooled), k=k, profile=run.profile)
-    ratings = [j.rating for _, j in judged]
-    order = oracle_order(ratings)
-    ordered = [judged[i] for i in order][:num_results]
+    ordered = sorted(judged, key=lambda rj: -rj[1].rating)[:num_results]
     return _score_query(
         query,
         [r for r, _ in ordered],

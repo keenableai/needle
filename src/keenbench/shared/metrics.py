@@ -31,8 +31,6 @@ TRACKING_PARAMS = {
 
 GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
 
-DUPLICATE_URL_PENALTY = 4
-
 SITE_OPERATOR_RE = re.compile(r"\bsite:")
 
 
@@ -65,15 +63,10 @@ def apply_redundancy_penalties(
     out: list[int] = []
     for url, rating in zip(urls, ratings, strict=True):
         canonical = normalize_url(url)
-        penalty = DUPLICATE_URL_PENALTY if canonical in seen_urls else 0
-        out.append(max(0, rating - penalty))
+        out.append(0 if canonical in seen_urls else rating)
         seen_urls.add(canonical)
     return out
 
 
 def dcg_at_k(ratings: Sequence[int], *, k: int = NDCG_K) -> float:
     return sum(gain(r) / math.log2(i + 2) for i, r in enumerate(ratings[:k]))
-
-
-def oracle_order(ratings: Sequence[int]) -> list[int]:
-    return sorted(range(len(ratings)), key=lambda i: -ratings[i])

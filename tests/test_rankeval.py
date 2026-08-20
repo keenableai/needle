@@ -187,18 +187,6 @@ async def test_run_ndcg_penalizes_duplicate_urls():
     assert pq["ndcg"] == pytest.approx(expected / ideal)
 
 
-async def test_run_ndcg_same_domain_results_not_penalized():
-    results = [
-        SearchResult(url="https://ex.com/1", title="GOODDOC"),
-        SearchResult(url="https://ex.com/2", title="GOODDOC"),
-        SearchResult(url="https://ex.com/3", title="GOODDOC"),
-    ]
-    report = await run_ndcg([q("q1")], {"e": FakeEngine(results)}, FakeJudge())
-    pq = report["engines"]["e"]["per_query"][0]
-    assert pq["penalized_ratings"] == [4, 4, 4]
-    assert pq["ndcg"] == pytest.approx(1.0)
-
-
 async def test_run_ndcg_reports_latency():
     timed = FakeEngine([])
     timed.latencies_ms = [100.0, 300.0]

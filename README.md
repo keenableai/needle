@@ -82,11 +82,11 @@ refuses evergreen content. `query_id` is deterministic from
 (override with `--feeds`; honor each publisher's ToS and rate limits).
 
 `run` judges each engine's results as returned — its own title and snippet —
-with an LLM relevance judge (Google "Needs Met" 0–4) and scores nDCG@5
-with a redundancy penalty for duplicate URLs. The
-ideal ranking is the pooled `ultimate` ordering — the best rating per
-deduplicated URL across all engines, oracle-ranked — so `ultimate` scores
-exactly 1 and queries where no engine found anything relevant are excluded.
+with an LLM relevance judge (Google "Needs Met" 0–4) and scores nDCG@5 with
+a redundancy penalty for duplicate URLs. The ideal ranking is the pooled
+`ultimate` ordering — the best rating per deduplicated URL across all
+engines, oracle-ranked — so `ultimate` scores exactly 1 and queries where
+no engine found anything relevant are excluded.
 The judge rates results identical across engines once.
 `--snippet-chars` keeps judge evidence uniform across engines. `--queries`
 also accepts plain text, one query per line.
@@ -217,9 +217,9 @@ scheduler can also drive them: the ranking harness is
 
 Every bench report carries a synthetic `ultimate` engine: the pooled results
 of all engines per query, oracle-ranked — by judge rating on the judged
-benches, gold item first on the known-item benches. It is the nDCG ideal ranking on the judged benches and
-the score ceiling for any single engine; the
-overlap and uniqueness stats exclude it.
+benches, gold item first on the known-item benches. It is the nDCG ideal
+ranking on the judged benches and the score ceiling for any single engine;
+the overlap and uniqueness stats exclude it.
 
 ## Continuous benchmarks
 

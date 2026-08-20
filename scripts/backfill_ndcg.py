@@ -6,12 +6,7 @@ import httpx
 
 from keenbench.shared.hf import resolve_base
 from keenbench.shared.io import load_jsonl, write_jsonl
-from keenbench.shared.metrics import (
-    apply_redundancy_penalties,
-    dcg_at_k,
-    normalize_url,
-    oracle_order,
-)
+from keenbench.shared.metrics import dcg_at_k, normalize_url
 
 ARTIFACTS = {
     "news": ("ndcg.json", "rbp.json"),
@@ -21,7 +16,7 @@ LEGACY_BENCH = {"freshstream": "news", "rarestream": "agentic_rare"}
 
 
 def _pooled_idcg(report: dict, query: str, k: int) -> float | None:
-    best: dict[str, tuple[str, int]] = {}
+    best: dict[str, int] = {}
     for e in report["engines"].values():
         for pq in e["per_query"]:
             if pq["query"] != query or pq["search_error"] is not None:
@@ -31,17 +26,11 @@ def _pooled_idcg(report: dict, query: str, k: int) -> float | None:
                 if rating is None:
                     continue
                 norm = normalize_url(r["url"])
-                if norm not in best or rating > best[norm][1]:
-                    best[norm] = (r["url"], rating)
+                if norm not in best or rating > best[norm]:
+                    best[norm] = rating
     if not best:
         return None
-    urls = [u for u, _ in best.values()]
-    ratings = [r for _, r in best.values()]
-    order = oracle_order(ratings)[:k]
-    penalized = apply_redundancy_penalties(
-        [urls[i] for i in order], [ratings[i] for i in order], query_text=query
-    )
-    return dcg_at_k(penalized, k=k) or None
+    return dcg_at_k(sorted(best.values(), reverse=True), k=k) or None
 
 
 def report_ndcg(report: dict) -> dict[str, float]:
