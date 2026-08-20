@@ -11,6 +11,7 @@ from keenbench.shared.cli import (
     aclose_all,
     build_clients_or_exit,
     current_hour,
+    fmt_or_na,
     has_gold_ids,
     load_gold_rows,
     parse_known_csv,
@@ -149,7 +150,7 @@ class Scholar:
                     bucket_strs.append(f"{bucket} = {recall:.3f}")
             print(
                 f"  {name:10s} recall@{num_results} = {e['recall_at_k']:.4f}  "
-                f"MRR = {e['mrr_at_k']:.4f}  "
+                f"MRR = {fmt_or_na(e['mrr_at_k'], 4)}  "
                 f"({', '.join(bucket_strs) or 'no buckets'}; "
                 f"{e['num_scored']}/{report['num_queries']} scored; "
                 f"{e['search_errors']} search errs; "

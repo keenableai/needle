@@ -277,7 +277,7 @@ async def test_run_answers_ultimate_pools_hits_across_engines():
     report = await run_answers([CEO_Q], {"bad": bad, "good": good})
     ult = report["engines"]["ultimate"]
     assert ult["recall_at_k"] == 1.0
-    assert ult["mrr_at_k"] == 1.0
+    assert ult["mrr_at_k"] is None
     pq = ult["per_query"][0]
     assert pq["hit_rank"] == 1
     assert pq["results"][0]["url"] == "https://b.com"

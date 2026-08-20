@@ -150,7 +150,7 @@ async def test_run_legal_ultimate_row():
     )
     ult = report["engines"]["ultimate"]
     assert ult["recall_at_k"] == 1.0
-    assert ult["mrr_at_k"] == 1.0
+    assert ult["mrr_at_k"] is None
     pq = ult["per_query"][0]
     assert pq["hit_rank"] == 1
     assert pq["results"][0]["url"] == hit.url

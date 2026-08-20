@@ -43,6 +43,10 @@ def as_obj(value: object) -> object:
     return value
 
 
+def fmt_or_na(value: float | None, digits: int) -> str:
+    return f"{value:.{digits}f}" if value is not None else "n/a"
+
+
 def has_gold_ids(gold: dict) -> bool:
     ids = gold.get("ids")
     return isinstance(ids, dict) and bool(ids)

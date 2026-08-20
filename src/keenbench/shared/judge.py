@@ -1,7 +1,7 @@
 import json
 import re
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cache
 from typing import TypeVar
 
@@ -31,7 +31,17 @@ DOMAIN_RE = re.compile(r"\b(health|legal|financial|academic|tech|news|commerce|j
 OPERATOR_VALUES = {"true": True, "yes": True, "1": True, "false": False, "no": False, "0": False}
 
 RATING_LABELS = {0: "FailsM", 1: "FailsM", 2: "SM", 3: "HM", 4: "FullyM"}
-VALID_LABELS = frozenset({"FailsM", "SM", "MM", "HM", "FullyM"})
+VALID_LABELS = frozenset({"FailsM", "SM", "HM", "FullyM"})
+GATE_FIELDS = (
+    "document_integrity_check",
+    "document_spirit_condition",
+    "document_coverage_condition",
+    "document_completeness_condition",
+    "freshness_gate",
+    "staleness_gate",
+    "domain_gate",
+    "search_operators_gate",
+)
 
 FENCE_PATTERNS = (
     re.compile(r"[ \t]*```(?:ya?ml|json)[ \t]*\n(.*?)\n[ \t]*```", re.DOTALL | re.IGNORECASE),
@@ -57,6 +67,7 @@ class Judgement:
     rating: int
     label: str
     reasoning: str
+    gates: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -136,6 +147,10 @@ def _extract_fields_regex(content: str) -> dict[str, object] | None:
     )
     if reasoning_match:
         result["reasoning"] = reasoning_match.group(1).strip().strip("\"'")
+    for name in GATE_FIELDS:
+        gate_match = re.search(rf"^{name}:\s*(\S+)", content, re.MULTILINE)
+        if gate_match:
+            result[name] = gate_match.group(1).strip("\"'")
     return result
 
 
@@ -163,7 +178,10 @@ def parse_judgement(text: str | None) -> Judgement | None:
     if label not in VALID_LABELS:
         label = RATING_LABELS[rating]
     reasoning = str(data.get("reasoning") or "")
-    return Judgement(rating=rating, label=label, reasoning=reasoning)
+    gates = {
+        name: value for name in GATE_FIELDS if (value := str(data.get(name) or "").strip().lower())
+    }
+    return Judgement(rating=rating, label=label, reasoning=reasoning, gates=gates)
 
 
 def _clean_line(raw: object) -> str:

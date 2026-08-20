@@ -13,6 +13,7 @@ from keenbench.shared.cli import (
     as_obj,
     build_clients_or_exit,
     current_hour,
+    fmt_or_na,
     load_gold_rows,
     parse_known_csv,
     require_openrouter_client,
@@ -206,15 +207,13 @@ class Finance:
         for name, e in report["engines"].items():
             filings = e["by_bucket"].get("filings", {}).get("recall_at_k")
             filingdoc = e["by_bucket"].get("filingdoc", {}).get("recall_at_k")
-            filings_str = f"{filings:.3f}" if filings is not None else "n/a"
-            filingdoc_str = f"{filingdoc:.3f}" if filingdoc is not None else "n/a"
             extras = f"{e['search_errors']} search errs"
             if model:
                 extras += f"; {e['judge_upgrades']} judge upgrades, {e['judge_errors']} judge errs"
             print(
                 f"  {name:10s} answer-recall@{num_results} = {e['recall_at_k']:.4f}  "
-                f"MRR = {e['mrr_at_k']:.4f}  "
-                f"(filings = {filings_str}, filingdoc = {filingdoc_str}; "
+                f"MRR = {fmt_or_na(e['mrr_at_k'], 4)}  "
+                f"(filings = {fmt_or_na(filings, 3)}, filingdoc = {fmt_or_na(filingdoc, 3)}; "
                 f"{e['num_scored']}/{report['num_queries']} scored; {extras})",
                 file=sys.stderr,
             )

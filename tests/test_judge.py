@@ -68,6 +68,44 @@ def test_parse_derives_label_when_invalid():
     assert j.rating == 4 and j.label == "FullyM"
 
 
+def test_parse_corrects_undefined_mm_label():
+    j = parse_judgement("rating: 3\nlabel: MM\nreasoning: r")
+    assert j.rating == 3 and j.label == "HM"
+
+
+def test_parse_keeps_gate_fields():
+    j = parse_judgement(
+        "reasoning: r\n"
+        "document_integrity_check: pass\n"
+        "document_spirit_condition: fail\n"
+        "freshness_gate: NA\n"
+        "rating: 2\n"
+        "label: SM"
+    )
+    assert j.gates == {
+        "document_integrity_check": "pass",
+        "document_spirit_condition": "fail",
+        "freshness_gate": "na",
+    }
+
+
+def test_parse_without_gate_fields_yields_empty_gates():
+    j = parse_judgement("rating: 3\nlabel: HM\nreasoning: r")
+    assert j.gates == {}
+
+
+def test_regex_fallback_keeps_gates():
+    j = parse_judgement(
+        "reasoning: broken: nested: colons\n"
+        "document_coverage_condition: fail\n"
+        "staleness_gate: pass\n"
+        "rating: 2\n"
+        "label: SM"
+    )
+    assert j is not None and j.rating == 2
+    assert j.gates == {"document_coverage_condition": "fail", "staleness_gate": "pass"}
+
+
 def test_parse_falls_back_to_json():
     j = parse_judgement('{\n\t"rating": 3,\n\t"label": "HM",\n\t"reasoning": "r"\n}')
     assert j is not None and j.rating == 3 and j.label == "HM"
