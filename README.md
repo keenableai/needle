@@ -1,6 +1,6 @@
 # NEEDLE
 
-[![CI](https://github.com/keenableai/keenbench/actions/workflows/ci.yaml/badge.svg)](https://github.com/keenableai/keenbench/actions/workflows/ci.yaml)
+[![CI](https://github.com/keenableai/needle/actions/workflows/ci.yaml/badge.svg)](https://github.com/keenableai/needle/actions/workflows/ci.yaml)
 
 Search and retrieval benchmarks from [Keenable.ai](https://keenable.ai). A
 benchmark is a query set plus a scoring method. Each one is a module under
@@ -231,7 +231,7 @@ a daily bench also runs off-schedule when a manual dispatch selects it or
 when its gold file is missing. Each run appends summary rows
 (`history.jsonl`), engine-pair URL overlap (`overlap.jsonl`), and per-engine
 unique-URL counts (`uniqueness.jsonl`) to `gh-pages`; the dashboard at
-<https://super-journey-4z52474.pages.github.io/> renders them. Each run also
+<https://keenableai.github.io/needle/> renders them. Each run also
 archives full artifacts to the HF dataset
 [`keenable-ai/keenbench-results`](https://huggingface.co/datasets/keenable-ai/keenbench-results)
 and refreshes `daily_queries.jsonl` at the dataset root: a rolling window of
