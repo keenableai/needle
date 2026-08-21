@@ -91,16 +91,16 @@
   header { margin-bottom: 20px; position: relative; }
   header a { color: inherit; }
   .header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 6px; }
-  .header-actions button {
+  .header-actions button, .header-actions a {
     display: flex; align-items: center; justify-content: center;
     height: 30px; padding: 0 10px;
     background: var(--surface-1); border: 1px solid var(--grid); border-radius: 0;
-    color: var(--text-secondary); cursor: pointer;
+    color: var(--text-secondary); cursor: pointer; text-decoration: none;
     font: 500 11px var(--font-utility); letter-spacing: -0.004em;
     transition: color 0.12s var(--ease), border-color 0.12s var(--ease), transform 0.12s var(--ease);
   }
-  .header-actions button:hover { color: var(--text-primary); border-color: var(--baseline); }
-  .header-actions button:active { transform: scale(0.94); }
+  .header-actions button:hover, .header-actions a:hover { color: var(--text-primary); border-color: var(--baseline); }
+  .header-actions button:active, .header-actions a:active { transform: scale(0.94); }
 
   td .key {
     display: inline-block; width: 14px; height: 3px; border-radius: 2px;
@@ -147,7 +147,8 @@
   #card-independence .lb-tabs button { flex: 1 1 auto; }
   .lb-panel { display: none; }
   .chart-host { position: relative; }
-  .chart-host svg { height: auto; }
+  .chart-host svg { height: auto; cursor: crosshair; touch-action: pan-y; }
+  .chart-host .zoom-sel { fill: var(--keenable-blue); opacity: 0.15; }
   .lb-panel.active { display: block; }
   .lb-panel h2 { display: none; }
   .lb-panel .sub { margin: 10px 0 6px; }
@@ -361,6 +362,7 @@
 <div class="wrap">
   <header id="top">
     <div class="header-actions">
+      <a href="https://github.com/keenableai/needle" title="Source on GitHub" aria-label="Source on GitHub"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
       <button id="export-md" title="Open the current tables as Markdown">MD</button>
       <button id="export-pdf" title="Print / save as PDF">PDF</button>
     </div>
@@ -401,7 +403,7 @@
         there is no fixed set to overfit.
         <a href="#app-protocol">A2</a> gives the full comparison
         protocol; we keep the benchmarks in
-        <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>.</p>
+        <a href="https://github.com/keenableai/needle">keenableai/needle</a>.</p>
       <p id="sec-metrics"><b>Metrics.</b> <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> queries
         have no single correct result, so we measure ranking quality. An
         LLM judge rates each result from 0 to 4. We report nDCG@5,
@@ -675,7 +677,7 @@
 
   <h2 class="section-title" id="sec-appendix">Appendix — methodology &amp; configuration</h2>
   <p class="section-desc">We pin everything below in
-    <a href="https://github.com/keenableai/keenbench">keenableai/keenbench</a>;
+    <a href="https://github.com/keenableai/needle">keenableai/needle</a>;
     you can compute each number on this page again from the archived
     artifacts (A6).</p>
 
@@ -818,7 +820,7 @@
         <td>data/ on this site (gh-pages)</td></tr>
       <tr><td>prompts &amp; scoring code</td>
         <td>judge prompt (shared/prompts/judgement.jinja), metric implementations, engine clients</td>
-        <td><a href="https://github.com/keenableai/keenbench">GitHub: keenableai/keenbench</a></td></tr>
+        <td><a href="https://github.com/keenableai/needle">GitHub: keenableai/needle</a></td></tr>
     </table>
   </div>
 
@@ -941,6 +943,7 @@ function el(tag, attrs, text) {
   return node;
 }
 
+const TREND_START = Date.parse("2026-08-01T00:00:00Z");
 const WINDOW_MS = 6 * 3600e3;
 const WEEK_MS = 7 * 86400e3;
 const ROLLING_MS = 7 * 86400e3;
@@ -1006,13 +1009,19 @@ function drawChart(card, series, opts) {
   card.classList.add("chart-host");
   card._mdRows = null;
   card._sel ??= new Set();
-  const active = ENGINES.filter((e) => series[e].length);
+  const allActive = ENGINES.filter((e) => series[e].length);
+  const zoom = card._zoom;
+  const vis = {};
+  for (const e of allActive) {
+    vis[e] = zoom ? series[e].filter((p) => p.t.getTime() >= zoom[0] && p.t.getTime() <= zoom[1]) : series[e];
+  }
+  const active = allActive.filter((e) => vis[e].length);
   if (!active.length) {
     card.appendChild(el("div", { class: "empty" }, opts.empty || "No data yet — first scheduled run pending."));
     return;
   }
   const fmt = (v) => `${v.toFixed(1)}%`;
-  const byT = new Map(active.map((e) => [e, new Map(series[e].map((p) => [p.t.getTime(), p.v]))]));
+  const byT = new Map(active.map((e) => [e, new Map(vis[e].map((p) => [p.t.getTime(), p.v]))]));
   const stamps = [...new Set(active.flatMap((e) => [...byT.get(e).keys()]))].sort((a, b) => a - b);
   card._mdRows = () => {
     const rows = [["time (UTC)", ...active.map(displayName)]];
@@ -1027,10 +1036,11 @@ function drawChart(card, series, opts) {
   const W = 860, H = 220;
   const M = { top: 12, right: 92, bottom: 26, left: 40 };
   const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
-  let t0 = stamps[0], t1 = stamps[stamps.length - 1];
+  let t0 = zoom ? zoom[0] : stamps[0], t1 = zoom ? zoom[1] : stamps[stamps.length - 1];
   if (t0 === t1) { t0 -= 3600e3; t1 += 3600e3; }
   const x = (t) => M.left + ((t - t0) / (t1 - t0)) * iw;
-  const y = (v) => M.top + (1 - v / opts.max) * ih;
+  const yMax = Math.max(100, ...active.map((e) => Math.max(...vis[e].map((p) => p.v)))) * 1.05;
+  const y = (v) => M.top + (1 - v / yMax) * ih;
 
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, tabindex: "0", role: "img", "aria-label": opts.label });
 
@@ -1045,14 +1055,14 @@ function drawChart(card, series, opts) {
     svg.appendChild(el("text", { x: x(t), y: H - 8, "text-anchor": i === 0 ? "start" : i === nTicks - 1 ? "end" : "middle", class: "axis-text" }, fmtTime(new Date(t))));
   }
 
-  const byLast = [...active].sort((a, b) => series[b].at(-1).v - series[a].at(-1).v);
+  const byLast = [...active].sort((a, b) => vis[b].at(-1).v - vis[a].at(-1).v);
   const sel = active.filter((e) => card._sel.has(e));
   const highlight = new Set(sel.length ? sel : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
   if (!sel.length) highlight.add(HOME_ENGINE);
   highlight.add(ULTIMATE_ENGINE);
   const endLabels = [];
   for (const e of [...active].sort((a, b) => highlight.has(a) - highlight.has(b))) {
-    const pts = series[e];
+    const pts = vis[e];
     const hot = highlight.has(e);
     const d = pts.map((p, i) => `${i ? "L" : "M"}${x(p.t.getTime()).toFixed(1)},${y(p.v).toFixed(1)}`).join("");
     svg.appendChild(el("path", { d, fill: "none", stroke: hot ? colorOf(e) : "var(--baseline)", "stroke-width": hot ? 2 : 1.25, "stroke-linejoin": "round", "stroke-linecap": "round" }));
@@ -1076,6 +1086,9 @@ function drawChart(card, series, opts) {
     hoverDots[e] = el("circle", { r: 4, fill: colorOf(e), stroke: "var(--surface-1)", "stroke-width": 2, visibility: "hidden" });
     svg.appendChild(hoverDots[e]);
   }
+
+  const selRect = el("rect", { y: M.top, height: ih, class: "zoom-sel", visibility: "hidden" });
+  svg.appendChild(selRect);
 
   const tip = el("div", { class: "tooltip" });
   card.appendChild(tip);
@@ -1118,7 +1131,45 @@ function drawChart(card, series, opts) {
     for (const e of active) hoverDots[e].setAttribute("visibility", "hidden");
   }
   let focusIdx = stamps.length - 1;
+  let dragStart = null;
+  const svgX = (ev) => {
+    const rect = svg.getBoundingClientRect();
+    return Math.max(M.left, Math.min(M.left + iw, ((ev.clientX - rect.left) / rect.width) * W));
+  };
+  const endDrag = () => {
+    dragStart = null;
+    selRect.setAttribute("visibility", "hidden");
+  };
+  svg.addEventListener("pointerdown", (ev) => {
+    if (ev.button !== 0) return;
+    dragStart = svgX(ev);
+    svg.setPointerCapture(ev.pointerId);
+  });
+  svg.addEventListener("pointerup", (ev) => {
+    if (dragStart == null) return;
+    const a = Math.min(dragStart, svgX(ev)), b = Math.max(dragStart, svgX(ev));
+    endDrag();
+    if (b - a < 8) return;
+    const toT = (px) => t0 + ((px - M.left) / iw) * (t1 - t0);
+    const za = toT(a), zb = toT(b);
+    if (stamps.filter((s) => s >= za && s <= zb).length < 2) return;
+    card._zoom = [za, zb];
+    drawChart(card, series, opts);
+  });
+  svg.addEventListener("pointercancel", endDrag);
+  svg.addEventListener("dblclick", () => {
+    if (!card._zoom) return;
+    card._zoom = null;
+    drawChart(card, series, opts);
+  });
   svg.addEventListener("pointermove", (ev) => {
+    if (dragStart != null) {
+      const cur = svgX(ev);
+      const a = Math.min(dragStart, cur), b = Math.max(dragStart, cur);
+      selRect.setAttribute("x", a);
+      selRect.setAttribute("width", b - a);
+      selRect.setAttribute("visibility", b - a > 3 ? "visible" : "hidden");
+    }
     const rect = svg.getBoundingClientRect();
     const t = t0 + (((ev.clientX - rect.left) / rect.width) * W - M.left) / iw * (t1 - t0);
     let best = 0;
@@ -1142,7 +1193,7 @@ function drawChart(card, series, opts) {
   card.insertBefore(svg, legend);
   if (!legend) {
     legend = el("div", { class: "legend" });
-    for (const e of active) {
+    for (const e of allActive) {
       const btn = el("button", { type: "button" });
       btn.append(engineKey(e), document.createTextNode(displayName(e)));
       if (e === ULTIMATE_ENGINE) {
@@ -1158,7 +1209,7 @@ function drawChart(card, series, opts) {
     }
     card.appendChild(legend);
   }
-  active.forEach((e, i) => {
+  allActive.forEach((e, i) => {
     const btn = legend.children[i];
     if (btn.disabled) return;
     const on = card._sel.has(e);
@@ -1177,18 +1228,16 @@ function drawSlice(cardId, series, empty) {
   const rolled = rollingMean(series);
   const ult = new Map((rolled[ULTIMATE_ENGINE] || []).map((p) => [p.t.getTime(), p.v]));
   const pct = {};
-  let maxV = 100;
   for (const e of ENGINES) {
     pct[e] = [];
     for (const p of rolled[e]) {
+      if (p.t.getTime() < TREND_START) continue;
       const u = ult.get(p.t.getTime());
       if (!u) continue;
-      const v = (p.v / u) * 100;
-      if (v > maxV) maxV = v;
-      pct[e].push({ t: p.t, v });
+      pct[e].push({ t: p.t, v: (p.v / u) * 100 });
     }
   }
-  drawChart(card, pct, { max: maxV * 1.05, empty,
+  drawChart(card, pct, { empty,
     label: `${title} per engine, ${PCT_NOTE}, ${ROLLING_NOTE}` });
 }
 
@@ -1699,10 +1748,10 @@ function renderStandings(rows) {
   holder.appendChild(svg);
 }
 
-const PRICES_ASOF = "2026-08-11";
+const PRICES_ASOF = "2026-08-21";
 const PRICES = new Map([
-  ["keenable", { usd: 1.00, plan: "pay-as-you-go" }],
-  ["keenable-realtime", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["keenable", { usd: 2.00, plan: "pay-as-you-go" }],
+  ["keenable-realtime", { usd: 2.00, plan: "pay-as-you-go" }],
   ["google", { usd: 0.30, plan: "Serper Ultimate — $3,750 / 12.5M credits" }],
   ["bing", { usd: 1.00, plan: "SearchApi.io Octo 5M — $5,000/mo" }],
   ["brave", { usd: 5.00, plan: "flat rate" }],
