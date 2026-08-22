@@ -9421,5 +9421,13 @@
       "ndcg.json",
       "recall.json"
     ]
+  },
+  {
+    "id": "2026-08-22T0200Z",
+    "ts": "2026-08-22T02:00Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "ndcg.json"
+    ]
   }
 ]
