@@ -1,0 +1,71 @@
+[project]
+name = "needle"
+version = "0.1.1"
+description = "NEEDLE — search/retrieval benchmarks and query-stream generators from Keenable.ai"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Keenable.ai" }]
+keywords = ["search", "retrieval", "benchmark", "eval", "queries", "rss", "trends"]
+dependencies = [
+    "httpx>=0.27",
+    "defusedxml>=0.7",
+    "fire>=0.6",
+    "python-dotenv>=1.0",
+    "jinja2>=3.1",
+    "pyyaml>=6.0",
+    "rapidfuzz>=3.14.5",
+    "tldextract>=5.3.1",
+    "tokenizers>=0.23.1",
+    "fasttext-predict>=0.9.2.4",
+    "wordfreq>=3.1.1",
+    "huggingface-hub>=1.22.0",
+    "numpy>=1.26",
+    "pyarrow>=24.0.0",
+]
+
+[project.scripts]
+needle = "needle.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8", "pytest-asyncio>=0.23", "ruff>=0.6", "mypy>=1.11"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/needle"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = ["integration: end-to-end tests that call the real judge LLM"]
+addopts = "-m 'not integration'"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "W",    # pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "UP",   # pyupgrade
+]
+ignore = [
+    "E501", # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["needle"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_return_any = false
+warn_unused_ignores = false

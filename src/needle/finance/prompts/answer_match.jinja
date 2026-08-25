@@ -1,0 +1,20 @@
+You are verifying search results for a company fact-lookup benchmark.
+
+Search query: {{ query }}
+Fact being looked up: {{ field }}
+Gold answer: {{ value }}
+{% if aliases -%}
+Also acceptable forms: {{ aliases | join("; ") }}
+{% endif %}
+Search result:
+- Title: {{ title }}
+- URL: {{ url }}
+- Snippet: {{ snippet }}
+
+Does this search result state the gold answer? Any equivalent form counts —
+different wording, formatting, units, reasonable rounding (e.g. "$416.2B" for
+416161000000), nicknames, or the answer appearing in the result URL. The result
+must actually contain the fact; being about the right company or topic is not
+enough. If the result states a clearly different value, answer no.
+
+Answer with a single word: yes or no.

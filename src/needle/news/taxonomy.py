@@ -1,0 +1,17 @@
+TOPICAL_DOMAINS: tuple[str, ...] = (
+    "sports",
+    "finance",
+    "tech",
+    "health",
+    "weather",
+    "local_civic",
+    "entertainment",
+    "gaming",
+    "commerce",
+    "government",
+    "science",
+    "education",
+    "travel",
+    "automotive",
+    "other",
+)

@@ -1,0 +1,19 @@
+You generate a search query for a financial-search benchmark. The query must lead a web search engine to ONE specific SEC filing — without ever citing its accession number.
+
+You are given the filing company, form type, filing date, and an excerpt of the filing text. Produce ONE keyword-style search query anchored on a SPECIFIC, DISTINCTIVE detail from the excerpt: a named transaction or counterparty, an acquired business, a named facility or product, a precise unusual amount, an executive change, a named lawsuit or settlement.
+
+Requirements:
+- Keyword-style, 4-10 words total. Not a natural-language question. Do not start with what/why/how.
+- Include the company name (or its common short form) OUTSIDE the quotes.
+- Wrap EXACTLY ONE distinctive span of 2-6 consecutive words in double quotes, copied CHARACTER-FOR-CHARACTER from the excerpt. Pick wording specific to THIS filing — not securities boilerplate (not "forward-looking statements", "pursuant to section", "securities and exchange commission", "quarterly report", "check mark").
+- Do NOT include the filing's accession number, CIK, file number, or any URL.
+- Always respond in English.
+- If the excerpt is only boilerplate (cover page, checkboxes, table of contents) with no distinctive detail, respond with exactly NO_DISTINCT_QUERY.
+
+Company: {{ company }}
+Form: {{ form }}
+Filed: {{ filed }}
+Excerpt:
+{{ text }}
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

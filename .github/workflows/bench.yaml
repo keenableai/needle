@@ -1,0 +1,233 @@
+name: Bench
+
+on:
+  schedule:
+    - cron: "17 0 * * *"
+    - cron: "17 6 * * *"
+    - cron: "17 12 * * *"
+    - cron: "17 18 * * *"
+    - cron: "17 1-5,7-11,13-17,19-23 * * *"
+  workflow_dispatch:
+    inputs:
+      finance:
+        description: "Also run finance (regenerates gold)"
+        type: boolean
+        default: false
+      agentic_rare:
+        description: "Also run agentic_rare (rare-entity nDCG eval)"
+        type: boolean
+        default: false
+      scholar:
+        description: "Also run scholar (regenerates gold)"
+        type: boolean
+        default: false
+      legal:
+        description: "Also run legal (regenerates gold)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: bench
+
+env:
+  PYTHON_VERSION: "3.11"
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+  EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+  KEENABLE_API_KEY: ${{ secrets.KEENABLE_API_KEY }}
+  SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+  SEARCHAPI_API_KEY: ${{ secrets.SEARCHAPI_API_KEY }}
+  BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+  PARALLEL_API_KEY: ${{ secrets.PARALLEL_API_KEY }}
+  TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+  PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+  OCTEN_API_KEY: ${{ secrets.OCTEN_API_KEY }}
+  CERAMIC_API_KEY: ${{ secrets.CERAMIC_API_KEY }}
+  YOU_API_KEY: ${{ secrets.YOU_API_KEY }}
+  HF_TOKEN: ${{ secrets.HF_TOKEN }}
+  HF_DATASET: keenable-ai/needle-results
+  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,parallel-turbo,parallel,tavily,perplexity,octen,ceramic,you
+
+jobs:
+  bench:
+    name: Run benchmarks
+    runs-on: gke-use5-amd64
+    timeout-minutes: 300
+    outputs:
+      failed: ${{ steps.outcomes.outputs.failed }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site-data
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: news (hourly)
+        id: news
+        continue-on-error: true
+        timeout-minutes: 50
+        run: |
+          uv run needle news generate --source rss --out fresh.jsonl
+          uv run needle news run --queries fresh.jsonl --limit 20 \
+            --engines "$ENGINES" --out ndcg.json
+
+      - name: finance (daily schedule, dispatch opt-in, or gold bootstrap)
+        id: finance
+        continue-on-error: true
+        timeout-minutes: 120
+        env:
+          RUN_FINANCE: ${{ github.event.schedule == '17 0 * * *' || inputs.finance == true }}
+        run: |
+          if [ "$RUN_FINANCE" != "true" ] && [ -s site-data/data/gold.jsonl ]; then
+            echo "skipping finance"
+            exit 0
+          fi
+          mkdir -p site-data/data
+          uv run needle finance generate --max-companies 100 --per-company 1 \
+            --filingdoc-target 40 --out site-data/data/gold.jsonl
+          uv run needle finance run --queries site-data/data/gold.jsonl \
+            --limit 120 --engines "$ENGINES" --judge --out recall.json
+
+      - name: agentic_rare (daily schedule or dispatch opt-in)
+        id: agentic_rare
+        continue-on-error: true
+        timeout-minutes: 120
+        env:
+          RUN_AGENTIC_RARE: ${{ github.event.schedule == '17 6 * * *' || inputs.agentic_rare == true }}
+        run: |
+          if [ "$RUN_AGENTIC_RARE" != "true" ]; then
+            echo "skipping agentic_rare"
+            exit 0
+          fi
+          uv run needle agentic_rare run --limit 100 \
+            --engines "$ENGINES" --queries-out agentic_rare.jsonl --out agentic_rare.json
+
+      - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
+        id: scholar
+        continue-on-error: true
+        timeout-minutes: 120
+        env:
+          RUN_SCHOLAR: ${{ github.event.schedule == '17 12 * * *' || inputs.scholar == true }}
+        run: |
+          if [ "$RUN_SCHOLAR" != "true" ] && [ -s site-data/data/scholar.jsonl ]; then
+            echo "skipping scholar"
+            exit 0
+          fi
+          mkdir -p site-data/data
+          uv run needle scholar generate --age-buckets 7d,30d,1y --per-cell 7 \
+            --out site-data/data/scholar.jsonl
+          uv run needle scholar run --queries site-data/data/scholar.jsonl \
+            --engines "$ENGINES" --num-results 10 --out scholar.json
+
+      - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
+        id: legal
+        continue-on-error: true
+        timeout-minutes: 120
+        env:
+          RUN_LEGAL: ${{ github.event.schedule == '17 18 * * *' || inputs.legal == true }}
+        run: |
+          if [ "$RUN_LEGAL" != "true" ] && [ -s site-data/data/legal.jsonl ]; then
+            echo "skipping legal"
+            exit 0
+          fi
+          mkdir -p site-data/data
+          uv run needle legal generate --per-court 4 --per-title 4 \
+            --out site-data/data/legal.jsonl
+          uv run needle legal run --queries site-data/data/legal.jsonl \
+            --engines "$ENGINES" --out legal.json
+
+      - name: Collect bench outcomes
+        id: outcomes
+        run: |
+          failed=""
+          if [ "${{ steps.news.outcome }}" = "failure" ]; then failed="$failed news"; fi
+          if [ "${{ steps.finance.outcome }}" = "failure" ]; then failed="$failed finance"; fi
+          if [ "${{ steps.agentic_rare.outcome }}" = "failure" ]; then failed="$failed agentic_rare"; fi
+          if [ "${{ steps.scholar.outcome }}" = "failure" ]; then failed="$failed scholar"; fi
+          if [ "${{ steps.legal.outcome }}" = "failure" ]; then failed="$failed legal"; fi
+          echo "failed=${failed# }" >> "$GITHUB_OUTPUT"
+
+      - name: Publish
+        run: |
+          TS=$(date -u +%Y-%m-%dT%H:%MZ)
+          echo "TS=$TS" >> "$GITHUB_ENV"
+          base_args="--site site-data --runs-out staged --ts $TS"
+          args="$base_args"
+          if [ -s ndcg.json ]; then
+            args="$args --ndcg ndcg.json --fresh fresh.jsonl"
+          fi
+          if [ -s recall.json ]; then
+            args="$args --recall recall.json --gold site-data/data/gold.jsonl"
+          fi
+          if [ -s agentic_rare.json ]; then
+            args="$args --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl"
+          fi
+          if [ -s scholar.json ]; then
+            args="$args --scholar scholar.json --scholar-queries site-data/data/scholar.jsonl"
+          fi
+          if [ -s legal.json ]; then
+            args="$args --legal legal.json --legal-queries site-data/data/legal.jsonl"
+          fi
+          if [ "$args" = "$base_args" ]; then
+            echo "no reports to publish"
+            exit 0
+          fi
+          uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
+          uv run python scripts/publish_bench.py $args
+          uvx --from huggingface_hub hf upload "$HF_DATASET" staged runs \
+            --repo-type dataset --commit-message "bench: $TS"
+          cp dashboard/index.html site-data/index.html
+          touch site-data/.nojekyll
+          cd site-data
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "bench: $TS" || echo "nothing to publish"
+          git push
+
+      - name: Update daily queries
+        run: |
+          args=""
+          if [ -s ndcg.json ]; then args="$args --news fresh.jsonl --news_report ndcg.json"; fi
+          if [ -s recall.json ]; then args="$args --finance site-data/data/gold.jsonl --finance_report recall.json"; fi
+          if [ -s scholar.json ]; then args="$args --scholar site-data/data/scholar.jsonl --scholar_report scholar.json"; fi
+          if [ -s legal.json ]; then args="$args --legal site-data/data/legal.jsonl --legal_report legal.json"; fi
+          if [ -s agentic_rare.json ]; then args="$args --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl"; fi
+          if [ -z "$args" ]; then
+            echo "no daily queries to update"
+            exit 0
+          fi
+          uv run python scripts/daily_queries.py update --ts "$TS" $args
+          uvx --from huggingface_hub hf upload "$HF_DATASET" daily_queries.jsonl daily_queries.jsonl \
+            --repo-type dataset --commit-message "daily queries: $TS"
+
+  deploy-pages:
+    needs: bench
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy-pages.yaml
+
+  check:
+    name: Fail on bench errors
+    needs: bench
+    if: needs.bench.outputs.failed != ''
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "failed benches: ${{ needs.bench.outputs.failed }}"
+          exit 1

@@ -1,0 +1,55 @@
+Classify a web search query for the Needs Met rating framework. Your classification is passed verbatim to every per-document judgement for this query, so all documents are judged against the same query interpretation. The sections below are shared with the per-document judge. References like 2/SM or 3+ are ratings on the judge's 0-4 Needs Met scale (0-1 FailsM, 2 SM, 3 HM, 4 FullyM); they describe how the judge uses each classification. Be decisive.
+
+## Query analysis
+
+### MAIN vs AUXILIARY aspects classification
+
+For each key aspect implied by the query (its objective, sub-questions, and the kind of source it calls for) we have 2 gradations:
+- MAIN: Directly answers the query's primary objective. Foundational facts the user needs.
+- AUX: Supporting details, statistics, context that enhances but doesn't define the answer.
+
+Aspects describe what a document must cover, never the answer itself. Write "the identity of the author", not the author's name. Do not answer the query from your own knowledge: the judge scores documents against their own content, and a wrong precomputed answer would corrupt every judgement for this query.
+
+List 1-3 MAIN aspects, each the single minimal fact a document must contain to answer the query. If one aspect would fully satisfy the user, list only that one. Dates, venues, candidates, outcomes, and secondary qualifiers are AUX unless the query explicitly asks for them.
+
+### Query type classification
+
+Query types:
+{% include "query_types.jinja" %}
+### Search operator extraction
+
+Parse the query for explicit search operators. These are hard constraints the user typed deliberately. They are not optional concepts.
+
+- Exact-phrase: any span inside double quotes "...". Each quoted span is a separate required string.
+- site:domain = the document URL host must equal or be a subdomain of `domain`.
+
+### Content archetype classification
+
+Classify the query's expected content to determine staleness evaluation:
+{% include "content_archetypes.jinja" %}
+### Domain classification
+
+Classify the query into one of these domains, or "other" if none fits:
+- "health": Medical and health queries.
+- "legal": Law, regulations, caselaw.
+- "financial": Companies, tickers, markets, personal finance.
+- "academic": Science, research, formulas.
+- "tech": Software, hardware, troubleshooting.
+- "news": Current events and reporting.
+- "commerce": Products and shopping.
+- "jobs": Job listings and hiring.
+
+## Output
+
+Respond with ONLY a YAML block. No text before or after.
+
+```yaml
+query_type: <broad|specific|list>
+query_domain: <health|legal|financial|academic|tech|news|commerce|jobs|other>
+query_search_operators_exist: <yes|no>
+query_main_aspects:
+  - "<MAIN aspect>"
+query_aux_aspects:
+  - "<AUX aspect>"
+query_content_archetype: <ephemeral|persistent|evergreen>
+```

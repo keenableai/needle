@@ -1,0 +1,54 @@
+name: Deploy Pages
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-pages:
+    name: Upload dashboard artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - uses: actions/checkout@v4
+        with:
+          path: _src
+          sparse-checkout: |
+            dashboard/index.html
+            scripts/gen_og_stubs.py
+            scripts/render_og_images.mjs
+          sparse-checkout-cone-mode: false
+      - uses: astral-sh/setup-uv@v5
+      - run: |
+          cp _src/dashboard/index.html index.html
+          npm --prefix _src install --no-save --no-audit --no-fund playwright-core
+          node _src/scripts/render_og_images.mjs . og
+          uv run --no-project python _src/scripts/gen_og_stubs.py index.html .
+          rm -rf _src
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy-pages:
+    name: Deploy dashboard
+    needs: build-pages
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pages-deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
+        with:
+          timeout: 1800000
