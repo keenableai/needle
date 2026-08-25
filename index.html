@@ -1,0 +1,2943 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEEDLE — search engine benchmarks</title>
+<meta name="description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NEEDLE">
+<meta property="og:title" content="NEEDLE — search engine benchmarks">
+<meta property="og:description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta property="og:url" content="https://keenableai.github.io/needle/">
+<meta property="og:image" content="https://keenableai.github.io/needle/og/card-standings.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEVMaXEAYP8AXP8AXP8AXP8AXP8AXP8AXP8AXf8AXv8AXP8AXP8AXP////8qKiqArf8UQ5Zgmf/m6/Qbbv88P0UEV+mampq30f+/v78aPXo4f/8MTsF8gIdOg95fX189a72nQrWLAAAADHRSTlMAEJ9Bae+Ev98iz7BHKf9kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAAHESURBVHja7VbHlsMgDDTV4I7T2+7//+U6AVPlkuS2z3OUZwYJhEWWbdiwAYSkWLCqYkXJiQ0SWpoglfNymlcexIuOuPCDBZ2Wk4CpLTLKgCAIhCsAAgpiBBUPUicg5Hd6wCHUX5VS110o2Q0x5WIiqqLwmG1fv9B6cnXSsV6NkTLQc4+q5f35+HCeRl7X5+P9YIL+WUinb7X8p2kurqJ+lO+bATcdZV4RONY/iQe7vtU3GuYLBxK4aua98RMY9S/bJ/aHKAUccXsv0TEpY6vRRbtgj1Bp5vG5SpJA/WMNTBH5eAUs9+QMLpHpgH0Tp4DiM6ydwS0yDQ2MvbnwuWshjUfXdfYMVDvit3MINqGoPgXWBuxjA9POH+vHY/jagH1rsPpXwkQewtyGMnWmKE0rJ1M/Yx4vRP3mGP9AZGYYRFwJuIq5gYJCLo0uiDOdRDiOMuBs8PxAI2kCUQ0LEzFIwRbmpVAsjWSS9EaYQrk41Dlg4N1SvmiABLCYZOsNHLmAGgRnbzggwEGsetuIdGJZB/KGQzh2TTBf98DiLN0xxNO8ZpLAIt1zid9wGHoKF1UZdS6iQxDL9W9FBHGl3B7RG/4z/gBHkkudWe+2TgAAAABJRU5ErkJggg==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@300;400;500&family=TASA+Orbiter:wght@400..800&family=STIX+Two+Text:ital@0;1&display=swap">
+<style>
+  :root {
+    --measure: 760px;
+    color-scheme: light;
+    --keenable-white: #FFFFFF;
+    --keenable-black: #2A2A2A;
+    --keenable-blue: #005CFF;
+    --keenable-orange: #F25F34;
+    --surface-1: #FFFFFF;
+    --surface-sunken: #F9F9F9;
+    --page: #FFFFFF;
+    --text-primary: #2A2A2A;
+    --text-secondary: #646464;
+    --text-muted: #8D8D8D;
+    --grid: #DDDDDD;
+    --baseline: #BBBBBB;
+    --border: #DDDDDD;
+    --track: #F0F0F0;
+    --link: #0A57E8;
+    --expressive: #F25F34;
+    --expressive-text: #D34517;
+    --home-tint: #EAF2FF;
+    --delta-up: #0A57E8;
+    --ease: cubic-bezier(0.4, 0, 0.2, 1);
+    --font-display: "Stack Sans", "Stack Sans Headline", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-body: "Stack Sans", "Stack Sans Headline", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --font-utility: "TASA Orbiter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --series-1: #005CFF;
+    --series-2: #74A6FF;
+    --series-3: #009798;
+    --series-4: #10602D;
+    --series-5: #7F4188;
+    --series-6: #994920;
+    --series-7: #CD7E5A;
+    --series-8: #563E98;
+    --series-9: #8877C8;
+    --series-10: #A63C72;
+    --series-11: #6F8433;
+    --series-12: #814800;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--text-primary);
+    font: 400 14px/1.5 var(--font-body);
+    letter-spacing: 0.010em;
+    counter-reset: sec;
+  }
+  a { color: var(--link); }
+  .wrap { max-width: calc(var(--measure) + 40px); margin: 0 auto; padding: 28px 20px 56px; }
+  .brand { display: inline-block; margin: 4px 0 34px; }
+  .brand svg { display: block; height: 22px; width: auto; }
+  header h1 {
+    font-family: var(--font-display); font-size: 38px; font-weight: 400;
+    line-height: 0.92; letter-spacing: 0.010em; margin: 0 0 14px; text-wrap: balance;
+  }
+  header p { margin: 4px 0 0; color: var(--text-secondary); }
+  .fm p, .fm ul { max-width: var(--measure); }
+  .fm .hook {
+    font-size: 15px; font-weight: 500; color: var(--text-primary);
+    margin: 12px 0 8px;
+  }
+  .fm p {
+    margin: 0 0 10px; font-size: 14px; font-weight: 300; line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .fm ul { margin: 0 0 12px; padding-left: 18px; }
+  .fm li {
+    font-size: 14px; font-weight: 300; line-height: 1.6; margin-bottom: 4px;
+    color: var(--text-secondary);
+  }
+  .fm b { font-weight: 500; color: var(--text-primary); }
+  .fm h3 {
+    font-size: 14px; font-weight: 500; color: var(--text-primary);
+    margin: 12px 0 3px;
+  }
+  .fm .lastrun { font-weight: 400; color: var(--text-primary); }
+  .fm .lastrun #updated { font-weight: 500; }
+  .fm .cadence { font-weight: 300; color: var(--text-muted); }
+  header { margin-bottom: 20px; position: relative; }
+  header a { color: inherit; }
+  .header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 6px; }
+  .header-actions button, .header-actions a {
+    display: flex; align-items: center; justify-content: center;
+    height: 30px; padding: 0 10px;
+    background: var(--surface-1); border: 1px solid var(--grid); border-radius: 0;
+    color: var(--text-secondary); cursor: pointer; text-decoration: none;
+    font: 500 11px var(--font-utility); letter-spacing: -0.004em;
+    transition: color 0.12s var(--ease), border-color 0.12s var(--ease), transform 0.12s var(--ease);
+  }
+  .header-actions button:hover, .header-actions a:hover { color: var(--text-primary); border-color: var(--baseline); }
+  .header-actions button:active, .header-actions a:active { transform: scale(0.94); }
+
+  .chart-tools { display: flex; gap: 6px; position: absolute; top: 14px; right: 18px; }
+  .chart-tools button {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--surface-1); border: 1px solid var(--grid); border-radius: 0;
+    color: var(--text-muted); cursor: pointer; padding: 4px 7px;
+    transition: color 0.12s var(--ease), border-color 0.12s var(--ease);
+  }
+  .chart-tools button svg { display: block; }
+  .chart-tools button:hover { color: var(--text-primary); border-color: var(--baseline); }
+  .card, .lb-panel { scroll-margin-top: 16px; }
+
+  td .key {
+    display: inline-block; width: 14px; height: 3px; border-radius: 2px;
+    vertical-align: middle; margin-right: 6px;
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center; margin: 6px 0 4px; color: var(--text-secondary); font-size: 12px; }
+  .legend .key { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 6px; }
+  .key-logo {
+    width: 14px; height: 14px; object-fit: contain;
+    vertical-align: -2px; margin-right: 6px;
+    transition: opacity 0.12s var(--ease);
+  }
+  .legend button {
+    display: inline-flex; align-items: center; padding: 2px 7px;
+    background: none; border: 1px solid transparent; border-radius: 0;
+    color: inherit; cursor: pointer; font: inherit;
+    transition: border-color 0.12s var(--ease), color 0.12s var(--ease);
+  }
+  .legend button:hover:not(:disabled) { border-color: var(--grid); }
+  .legend button:disabled { cursor: default; }
+  .legend button[aria-pressed="true"] { border-color: var(--keenable-blue); color: var(--text-primary); }
+
+  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .lb-tabs {
+    position: relative; display: flex;
+    background: none; border-bottom: 1px solid var(--grid);
+    border-radius: 0; padding: 0; margin-bottom: 10px;
+  }
+  .lb-tabs button {
+    position: relative; z-index: 1; flex: 1 1 0; min-width: 0;
+    font: inherit; font-size: 13px; font-weight: 400;
+    padding: 8px 8px 9px; cursor: pointer;
+    color: var(--text-secondary); background: none; border: none; border-radius: 0;
+    transition: color 0.12s var(--ease);
+  }
+  .lb-tabs button:hover { color: var(--text-primary); }
+  .lb-tabs button.active { color: var(--text-primary); }
+  #lb-ind, .tab-ind {
+    position: absolute; top: 0; left: 0; height: 2px;
+    background: var(--keenable-blue);
+    transition: transform 0.22s var(--ease), width 0.22s var(--ease);
+  }
+  #card-independence .lb-tabs button { flex: 1 1 auto; }
+  .lb-panel { display: none; }
+  .chart-host { position: relative; }
+  .chart-host svg { height: auto; cursor: crosshair; touch-action: pan-y; }
+  .chart-host .zoom-sel { fill: var(--keenable-blue); opacity: 0.15; }
+  .lb-panel.active { display: block; }
+  .lb-panel h2 { display: none; }
+  .lb-panel .sub { margin: 10px 0 6px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+  .section-title {
+    font-family: var(--font-display); font-size: 30px; font-weight: 400;
+    line-height: 0.9; letter-spacing: 0.010em;
+    color: var(--text-primary); margin: 64px 0 10px; padding-top: 18px;
+    border-top: 1px solid var(--grid); scroll-margin-top: 16px;
+  }
+  .section-title::before {
+    counter-increment: sec; content: counter(sec, decimal-leading-zero);
+    display: block; margin-bottom: 12px;
+    font: 500 12px/1 var(--font-utility); letter-spacing: -0.004em;
+    color: var(--text-muted);
+  }
+  .section-desc { color: var(--text-secondary); font-size: 13px; font-weight: 300; line-height: 1.6; margin: 0 0 14px; }
+  .hint { border-bottom: 1px dotted var(--text-muted); cursor: help; }
+
+  #toc { display: none; }
+  @media (min-width: 1440px) {
+    #toc {
+      display: block; position: fixed; top: 28px; width: 150px;
+      left: calc((100vw - 1080px) / 2 - 172px);
+      font-size: 13px; line-height: 1.5;
+    }
+    #toc .toc-head {
+      font: 500 11px var(--font-utility); letter-spacing: -0.004em;
+      color: var(--text-muted); margin-bottom: 8px;
+    }
+    #toc ul { list-style: none; margin: 0; padding: 0; }
+    #toc ul ul { margin: 3px 0 3px 12px; }
+    #toc li { margin: 5px 0; }
+    #toc a { color: var(--text-secondary); text-decoration: none; }
+    #toc a:hover { color: var(--text-primary); }
+  }
+  .card {
+    background: var(--surface-1); border: 1px solid var(--grid);
+    border-radius: 0; padding: 16px 18px 10px; margin-bottom: 14px;
+    position: relative;
+  }
+  .card h2 { font-family: var(--font-display); font-size: 16px; font-weight: 500; margin: 0; }
+  .card .sub { color: var(--text-muted); font-size: 12px; line-height: 1.6; margin: 2px 0 8px; }
+  .card .sub a { color: inherit; }
+  .card svg { display: block; width: 100%; }
+  .card svg:focus { outline: 2px solid var(--keenable-blue); outline-offset: 2px; }
+  .empty { color: var(--text-muted); padding: 32px 0 40px; text-align: center; }
+
+  .stats { display: flex; gap: 48px; flex-wrap: wrap; margin: 18px 0 8px; }
+  .stat-num {
+    display: block; font-family: var(--font-display); font-size: 72px;
+    font-weight: 300; line-height: 0.9; letter-spacing: 0.010em;
+    color: var(--text-primary); font-variant-numeric: tabular-nums;
+  }
+  .stat-num.gap { color: var(--expressive); }
+  .stat-cap {
+    font: 400 12px/1.6 var(--font-utility); letter-spacing: -0.004em;
+    color: var(--text-secondary); margin-top: 8px; max-width: 250px;
+  }
+
+  .tooltip {
+    position: absolute; pointer-events: none; display: none; z-index: 2;
+    background: var(--surface-1); border: 1px solid var(--grid);
+    border-radius: 0; padding: 8px 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    font-size: 12px; min-width: 130px;
+  }
+  .tooltip .when { color: var(--text-muted); margin-bottom: 4px; }
+  .tooltip .row { display: flex; align-items: center; gap: 6px; }
+  .tooltip .row .key { width: 12px; height: 3px; flex: none; }
+  .tooltip .row .val { font-weight: 500; }
+  .tooltip .row .name { color: var(--text-secondary); }
+
+  .home { background: var(--home-tint); }
+  tr.ultimate td { color: var(--text-muted); font-style: italic; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--grid); }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.ci-col { color: var(--text-muted); white-space: nowrap; }
+  .slower { color: var(--text-muted); font-size: 11px; }
+  th.ci-col { cursor: help; }
+  th { color: var(--text-secondary); font: 500 12px/1.6 var(--font-utility); letter-spacing: -0.004em; }
+  tr:last-child td { border-bottom: none; }
+  .best { font-weight: 500; color: #0E0E0E; }
+
+  details { margin-top: 14px; }
+  summary { cursor: pointer; color: var(--text-secondary); }
+  svg text { letter-spacing: normal; }
+  .axis-text { fill: var(--text-muted); font-family: var(--font-utility); font-size: 11px; letter-spacing: -0.004em; font-variant-numeric: tabular-nums; }
+  .end-label { fill: var(--text-secondary); font-family: var(--font-body); font-size: 11.5px; }
+
+  .runbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0 12px; }
+  .runbar select {
+    font: inherit; color: var(--text-primary); background: var(--surface-1);
+    border: 1px solid var(--grid); border-radius: 0; padding: 4px 8px;
+  }
+  .qrow { border: 1px solid var(--grid); border-radius: 0; margin: 8px 0; }
+  .qrow > summary {
+    list-style: none; display: flex; gap: 10px; align-items: baseline;
+    padding: 8px 12px; color: var(--text-primary);
+  }
+  .qrow > summary::-webkit-details-marker { display: none; }
+  .qrow > summary .score { margin-left: auto; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .qrow[open] > summary { border-bottom: 1px solid var(--grid); }
+  .result { padding: 10px 12px; border-bottom: 1px solid var(--grid); }
+  .result:last-child { border-bottom: none; }
+  .result .head { display: flex; gap: 8px; align-items: baseline; }
+  .result .title { font-weight: 500; }
+  .result .title a { color: inherit; }
+  .result .host { color: var(--text-muted); font-size: 12px; }
+  .result .snippet { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
+  .result .judgement {
+    display: flex; gap: 8px; align-items: baseline;
+    margin-top: 8px; padding: 7px 10px;
+    background: var(--surface-sunken); border: 1px solid var(--grid); border-radius: 0;
+    font-size: 13px; color: var(--text-secondary);
+  }
+  .result .judgement .label { font-weight: 500; color: var(--text-primary); }
+  .chip {
+    display: inline-block; min-width: 20px; text-align: center; border-radius: 0;
+    border: 1px solid var(--grid); color: var(--text-secondary);
+    font: 500 11px/1.5 var(--font-utility); letter-spacing: -0.004em;
+    padding: 1px 5px; flex: none;
+  }
+  .chips { display: inline-flex; gap: 3px; }
+  .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
+  .miss-marker { color: var(--text-muted); font-size: 12px; }
+
+  .overlap-matrix, #fields-table, #history-table, .bar-table, #prices-table,
+  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
+  #app-queries, #app-metrics, #app-engines, #app-data { overflow-x: auto; }
+  #card-standings { max-width: var(--measure); }
+  #standings .st-layout { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  #standings .st-layout svg { flex: 1 1 380px; min-width: 0; width: auto; height: auto; display: block; }
+  #standings .st-table { width: auto; flex: none; font-size: 12.5px; margin-top: 8px; }
+  #standings .st-table th, #standings .st-table td { padding: 4px 8px; white-space: nowrap; }
+  #standings .st-table .st-key { padding: 4px 0 4px 8px; }
+  #standings .st-table td.st-key svg { display: block; }
+  #standings .st-table tr { cursor: pointer; }
+  #standings .st-table tr:hover td { color: var(--text-primary); }
+  #standings .st-table tr.cold td { opacity: 0.4; }
+  #latency-dumbbell svg { width: 100%; height: auto; display: block; }
+  #standings { padding: 4px 0 8px; overflow-x: auto; }
+  #standings .series { transition: opacity 0.18s ease; }
+  #standings .series.cold { opacity: 0.15; }
+  #standings svg.dim .series:not(.hot) { opacity: 0.1; }
+  #standings svg .series.hot { opacity: 1; }
+  #standings .series:focus { outline: none; }
+  @media (max-width: 720px) {
+    #standings .stats { justify-content: center; text-align: center; }
+    #standings .stat-cap { margin-left: auto; margin-right: auto; }
+    #standings .st-layout { justify-content: center; }
+  }
+  #standings .st-col { fill: var(--text-secondary); font-size: 12px; font-weight: 500; text-anchor: middle; }
+  #standings .st-gap { fill: var(--expressive-text); font-family: var(--font-utility); font-size: 10px; font-weight: 600; letter-spacing: -0.004em; text-anchor: middle; font-variant-numeric: tabular-nums; }
+  #card-quality-price { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
+  #quality-price { padding: 4px 0 8px; overflow-x: auto; }
+  #quality-price svg { height: auto; }
+  #quality-price .qp-name { fill: var(--text-primary); font-size: 12px; }
+  #quality-price .qp-name.home-name { fill: var(--keenable-blue); }
+  #quality-price .qp-tick { fill: var(--text-primary); fill-opacity: 0.32; font-family: var(--font-utility); font-size: 11px; letter-spacing: -0.004em; font-variant-numeric: tabular-nums; }
+  #quality-price .qp-axis { fill: var(--text-primary); font-family: var(--font-utility); font-size: 12px; letter-spacing: -0.004em; }
+  #quality-price .qp-axis .dim { fill: var(--text-muted); }
+  .prose { color: var(--text-secondary); font-size: 14px; font-weight: 300; line-height: 1.6; }
+  .prose p { margin: 0 0 10px; max-width: 90ch; }
+  .defn var, .defn .eq { font-family: "STIX Two Text", "STIX Two Math", "Cambria Math", "Times New Roman", serif; font-size: 15px; }
+  .defn .eq { text-align: center; color: var(--text-primary); margin: 12px 0; }
+  .defn b { color: var(--text-primary); font-weight: 500; }
+  .overlap-matrix { padding: 10px 0 14px; }
+  .overlap-matrix table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; font-size: 11px; }
+  .overlap-matrix th, .overlap-matrix td { border-bottom: none; }
+  .overlap-matrix td:first-child { white-space: nowrap; padding: 0 4px 0 2px; }
+  .overlap-matrix th.col { vertical-align: bottom; text-align: center; padding: 2px 0; font-weight: 500; }
+  .overlap-matrix th.col span { writing-mode: vertical-rl; rotate: 180deg; }
+  .overlap-matrix td.overlap-cell {
+    width: 26px; min-width: 26px; height: 26px; padding: 0;
+    border-radius: 0; text-align: center; font-variant-numeric: tabular-nums;
+    font-family: var(--font-utility); letter-spacing: -0.004em;
+  }
+  .bar-table td, .bar-table th { white-space: nowrap; padding: 6px 8px; }
+  .bar-table .bar-track {
+    display: inline-block; width: 100px; height: 8px; border-radius: 0;
+    background: var(--track); vertical-align: middle; margin-right: 8px;
+  }
+  .bar-table .bar-fill { display: block; height: 100%; border-radius: 0; }
+  #sharegraph svg { max-width: 460px; margin: 0 auto; }
+  #sharegraph .sg-edge { stroke: var(--text-muted); }
+  #sharegraph .sg-arrow { fill: var(--text-primary); }
+  #sharegraph .sg-label {
+    fill: var(--text-secondary); font-family: var(--font-utility); font-size: 11px;
+    letter-spacing: -0.004em; font-variant-numeric: tabular-nums;
+    text-anchor: middle; paint-order: stroke; stroke: var(--surface-1); stroke-width: 3px;
+  }
+  #sharegraph .sg-name { fill: var(--text-primary); font-size: 12px; font-weight: 500; }
+
+  @media print {
+    .header-actions, .chart-tools, #toc, .runbar, #run-detail, #history-details, .lb-tabs { display: none; }
+    #card-runs .sub a::after { content: " (" attr(href) ")"; }
+    .lb-panel { display: block; }
+    .lb-panel h2 { display: block; }
+    .card, .lb-panel { break-inside: avoid; }
+    .card:has(.lb-panel), .lb-panel:has(.lb-panel) { break-inside: auto; }
+    .card svg { max-width: 100%; height: auto; }
+    .overlap-cell, .bar-track, .bar-fill, .key, .home {
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+  }
+</style>
+</head>
+<body>
+<nav id="toc" aria-label="Contents">
+  <div class="toc-head">Contents</div>
+  <ul>
+    <li><a href="#top">Overview</a></li>
+    <li><a href="#sec-results">Quality results</a></li>
+    <li><a href="#sec-trends">Slices over time</a></li>
+    <li><a href="#sec-price">Quality vs price</a></li>
+    <li><a href="#sec-latency">Search latency</a></li>
+    <li><a href="#sec-overlap">Index independence</a></li>
+    <li><a href="#sec-appendix">Appendix</a></li>
+  </ul>
+</nav>
+<div class="wrap">
+  <header id="top">
+    <div class="header-actions">
+      <a href="https://github.com/keenableai/needle" title="Source on GitHub" aria-label="Source on GitHub"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
+      <button id="export-md" title="Open the current tables as Markdown">MD</button>
+      <button id="export-pdf" title="Print / save as PDF">PDF</button>
+    </div>
+    <a class="brand" href="https://keenable.ai" aria-label="Keenable"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 737.122 134" width="737.122" height="134" role="img" aria-label="Keenable"><g fill="#2A2A2A"><path transform="translate(0,0)" d="M 0 128.576 L 0 0 L 20.043 0 L 20.043 128.576 L 0 128.576 Z M 19.854 63.153 L 76.011 0 L 99.646 0 L 37.249 69.204 L 38.195 55.968 L 101.348 128.576 L 75.633 128.576 L 19.854 63.153 Z"></path><path transform="translate(288.14,31.387)" d="M 84.803 38.006 L 84.803 97.188 L 65.895 97.188 L 65.895 42.543 C 65.895 38.258 64.824 34.35 62.681 30.82 C 60.601 27.228 57.796 24.392 54.267 22.312 C 50.737 20.169 46.798 19.097 42.449 19.097 C 38.1 19.097 34.129 20.169 30.537 22.312 C 27.007 24.392 24.171 27.228 22.028 30.82 C 19.948 34.35 18.908 38.258 18.908 42.543 L 18.908 97.188 L 0 97.188 L 0 2.647 L 18.908 2.647 L 18.908 13.047 C 22.186 9.013 26.251 5.83 31.104 3.498 C 35.957 1.166 41.22 0 46.892 0 C 53.888 0 60.254 1.702 65.99 5.105 C 71.725 8.509 76.295 13.078 79.698 18.814 C 83.102 24.549 84.803 30.946 84.803 38.006 Z"></path><path transform="translate(384.394,31.387)" d="M 79.698 2.647 L 98.606 2.647 L 98.606 97.188 L 79.698 97.188 L 78.847 83.007 C 76.074 87.986 72.261 92.02 67.408 95.108 C 62.618 98.134 56.945 99.646 50.39 99.646 C 43.394 99.646 36.84 98.354 30.726 95.77 C 24.675 93.123 19.318 89.499 14.654 84.898 C 10.053 80.234 6.46 74.845 3.876 68.731 C 1.292 62.618 0 56.094 0 49.161 C 0 42.354 1.261 35.989 3.782 30.064 C 6.303 24.139 9.801 18.94 14.276 14.465 C 18.751 9.927 23.95 6.397 29.875 3.876 C 35.8 1.292 42.134 0 48.878 0 C 55.811 0 61.924 1.607 67.219 4.822 C 72.576 7.973 76.988 12.07 80.454 17.112 L 79.698 2.647 Z M 49.918 81.4 C 55.59 81.4 60.538 79.982 64.761 77.146 C 69.047 74.309 72.355 70.528 74.687 65.801 C 77.019 61.011 78.185 55.716 78.185 49.918 C 78.185 43.993 76.988 38.667 74.593 33.94 C 72.261 29.15 68.983 25.369 64.761 22.595 C 60.538 19.759 55.59 18.341 49.918 18.341 C 44.308 18.341 39.172 19.759 34.507 22.595 C 29.843 25.432 26.156 29.245 23.446 34.035 C 20.736 38.825 19.381 44.119 19.381 49.918 C 19.381 55.779 20.768 61.105 23.541 65.895 C 26.377 70.622 30.096 74.404 34.697 77.24 C 39.361 80.013 44.434 81.4 49.918 81.4 Z"></path><path transform="translate(504,0.713)" d="M 48.878 30.675 C 58.08 30.675 66.431 32.912 73.931 37.387 C 81.494 41.862 87.514 47.881 91.988 55.444 C 96.463 62.945 98.701 71.296 98.701 80.498 C 98.701 87.368 97.409 93.828 94.825 99.879 C 92.241 105.866 88.648 111.161 84.047 115.762 C 79.509 120.3 74.215 123.861 68.164 126.445 C 62.177 129.029 55.748 130.321 48.878 130.321 C 42.134 130.321 36.241 128.777 31.199 125.689 C 26.156 122.537 22.06 118.472 18.908 113.493 L 18.908 127.863 L 0 127.863 L 0 0 L 18.908 0 L 18.908 47.503 C 22.06 42.524 26.156 38.49 31.199 35.402 C 36.241 32.25 42.134 30.675 48.878 30.675 Z M 48.689 111.98 C 54.361 111.98 59.498 110.562 64.099 107.726 C 68.763 104.889 72.482 101.076 75.255 96.286 C 78.028 91.496 79.415 86.233 79.415 80.498 C 79.415 74.573 77.996 69.247 75.16 64.52 C 72.387 59.73 68.668 55.949 64.004 53.176 C 59.34 50.339 54.235 48.921 48.689 48.921 C 43.079 48.921 38.132 50.371 33.846 53.27 C 29.623 56.106 26.345 59.919 24.013 64.71 C 21.681 69.437 20.515 74.699 20.515 80.498 C 20.515 86.359 21.681 91.685 24.013 96.475 C 26.408 101.202 29.717 104.984 33.94 107.82 C 38.163 110.593 43.079 111.98 48.689 111.98 Z"></path><path transform="translate(613,0.713)" d="M 0 127.863 L 0 0 L 18.908 0 L 18.908 127.863 L 0 127.863 Z"></path><path transform="translate(642.839,31.71)" d="M 47.271 99.646 C 38.573 99.646 30.631 97.409 23.446 92.934 C 16.324 88.459 10.62 82.471 6.334 74.971 C 2.111 67.408 0 59.057 0 49.918 C 0 42.985 1.229 36.524 3.687 30.537 C 6.145 24.486 9.517 19.192 13.803 14.654 C 18.152 10.053 23.194 6.46 28.93 3.876 C 34.665 1.292 40.779 0 47.271 0 C 54.456 0 61.074 1.481 67.124 4.443 C 73.175 7.406 78.343 11.503 82.629 16.734 C 86.915 21.965 90.066 28.016 92.083 34.886 C 94.1 41.693 94.73 48.909 93.974 56.536 L 20.232 56.536 C 21.051 61.137 22.69 65.265 25.148 68.92 C 27.606 72.513 30.726 75.381 34.507 77.524 C 38.289 79.604 42.543 80.675 47.271 80.738 C 52.25 80.738 56.756 79.478 60.79 76.956 C 64.887 74.435 68.227 71 70.811 66.651 L 90.003 71.095 C 86.221 79.478 80.518 86.348 72.891 91.705 C 65.265 96.999 56.725 99.646 47.271 99.646 Z M 19.57 42.071 L 74.877 42.071 C 74.309 37.407 72.702 33.152 70.055 29.308 C 67.471 25.463 64.193 22.406 60.223 20.137 C 56.252 17.868 51.935 16.734 47.271 16.734 C 42.607 16.734 38.321 17.868 34.413 20.137 C 30.505 22.343 27.259 25.369 24.675 29.213 C 22.091 33.058 20.389 37.344 19.57 42.071 Z"></path></g><g transform="translate(99.081,31.71)"><path fill="#005CFF" d="M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z"></path><path fill="#2A2A2A" transform="translate(51.255,21.698)" d="M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z"></path></g><g transform="translate(180.218,31.71)"><path fill="#005CFF" d="M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z"></path><path fill="#2A2A2A" transform="translate(49.161,21.698)" d="M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z"></path></g></svg></a>
+    <h1>NEEDLE: Which search API moves the needle for AI&nbsp;agents?</h1>
+    <div class="fm">
+      <p class="lastrun"><span id="updated"></span>
+        <span class="cadence">News runs each hour; all other suites run
+        each day. Times are UTC.</span></p>
+      <p>NEEDLE (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
+        <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is a
+        live open-source search benchmark. It compares search engines with
+        queries that model agent behavior. The five verticals match
+        the use cases we see each day in Keenable's own search
+        traffic:</p>
+      <ul>
+        <li><b><span class="vert" data-vert="scholar"></span>:</b> expert literature searches: find a specific
+          paper from a degraded title, a full-text detail, or a
+          tip-of-the-tongue description</li>
+        <li><b><span class="vert" data-vert="news"></span>:</b> breaking and developing stories; new queries
+          each hour from curated RSS feeds and Google Trends</li>
+        <li><b><span class="vert" data-vert="finance"></span>:</b> everyday company and SEC-filing lookups with
+          known answers from public registries</li>
+        <li><b><span class="vert" data-vert="agentic_rare"></span>:</b> obscure, long-tail entities; rare-word
+          queries sampled from the
+          <a href="https://dl.acm.org/doi/10.1145/3805712.3809627">DeepResearchGym</a>,
+          <a href="https://arxiv.org/abs/2603.20278">OpenResearcher</a>, and
+          <a href="https://arxiv.org/abs/2604.04949">LRAT</a>
+          agentic search logs</li>
+        <li><b><span class="vert" data-vert="legal"></span>:</b> find a specific court opinion or section of the
+          Code of Federal Regulations</li>
+      </ul>
+      <p><b>Methodology.</b> Each engine in a run receives the same query
+        text. We score each engine on the ranking, titles, and snippets
+        it returned. We do not fetch pages and we do not re-rank. The
+        judge does not see the engine name. We make new query sets from
+        public sources, <span class="vert" data-vert="news"></span> each hour and the rest each day, so
+        there is no fixed set to overfit.
+        <a href="#app-protocol">Appendix C</a> gives the full comparison
+        protocol. <b>The benchmark is open source: the
+        <a href="https://github.com/keenableai/needle">keenableai/needle</a>
+        repo is public, every run executes in plain GitHub Actions, and
+        we welcome contributions.</b></p>
+      <p id="sec-metrics"><b>Metrics.</b> <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> queries
+        have no single correct result, so we measure ranking quality. An
+        LLM judge rates each result from 0 to 4. We report nDCG@5,
+        normalized so that the pooled <em>ultimate</em> engine scores
+        exactly&nbsp;1, with a penalty for duplicate
+        URLs. <span class="vert" data-vert="finance"></span> measures if the answer text reaches the
+        agent: we scan the top-5 titles and snippets and report
+        answer-recall@5 with MRR@5. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are
+        known-item tasks: we match identifiers and report recall@10 and
+        recall@5 with MRR. <a href="#app-metrics">Appendix D</a> gives the exact
+        definitions.</p>
+      <p><b>The <em>ultimate</em> ceiling.</b> The italicized row in
+        each leaderboard is <em>ultimate</em>, a synthetic engine. It
+        pools all engines' results per query and ranks them by their relevance labels
+        (<a href="#app-protocol">Appendix C</a>). The standings radar plots each
+        engine as a share of <em>ultimate</em>.</p>
+
+    </div>
+  </header>
+
+  <h2 class="section-title" id="sec-results">Quality results</h2>
+  <div class="card" id="card-standings" data-tools>
+    <h2>Standings — all verticals</h2>
+    <div class="sub">share of <em>ultimate</em> (all engines pooled, the
+      outer ring) per vertical, farther out is better; click a table row to
+      toggle an engine &middot;
+      <span class="hint" title="The hatched band is performance no single engine currently captures; the orange % is the gap between today's best engine and ultimate.">hatched band?</span></div>
+    <div id="standings"></div>
+  </div>
+
+  <div class="card" id="card-leaderboards" data-tools>
+    <h2 id="sec-leaderboards">7-day leaderboards</h2>
+    <div class="sub">Query-weighted 7-day means with a 95% CI;
+      <span class="hint" title="title, body, clue, and tot for Scholar; filings and filingdoc for Finance; caselaw and code for Legal">suite columns</span>
+      split the score.</div>
+    <div class="lb-tabs" id="lb-tabs" role="tablist" aria-label="Bench leaderboards">
+      <button role="tab" aria-selected="true" class="active" data-panel="card-lb-overall">Overall</button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-scholar"><span class="vert" data-vert="scholar"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-fresh"><span class="vert" data-vert="news"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-company"><span class="vert" data-vert="finance"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-rare"><span class="vert" data-vert="agentic_rare"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-legal"><span class="vert" data-vert="legal"></span></button>
+      <div id="lb-ind" aria-hidden="true"></div>
+    </div>
+    <div class="lb-panel active" id="card-lb-overall" role="tabpanel">
+      <h2>Overall — 7-day mean</h2>
+      <div class="sub" id="lb-overall-sub"></div>
+      <div id="lb-overall"></div>
+    </div>
+    <div class="lb-panel" id="card-lb-scholar" role="tabpanel">
+      <h2><span class="vert" data-vert="scholar"></span> — 7-day mean</h2>
+      <div class="sub" id="lb-scholar-sub"></div>
+      <div id="lb-scholar"></div>
+    </div>
+    <div class="lb-panel" id="card-lb-fresh" role="tabpanel">
+      <h2><span class="vert" data-vert="news"></span> — 7-day mean</h2>
+      <div class="sub" id="lb-fresh-sub"></div>
+      <div id="lb-fresh"></div>
+    </div>
+    <div class="lb-panel" id="card-lb-company" role="tabpanel">
+      <h2><span class="vert" data-vert="finance"></span> — 7-day mean</h2>
+      <div class="sub" id="lb-company-sub"></div>
+      <div id="lb-company"></div>
+    </div>
+    <div class="lb-panel" id="card-lb-rare" role="tabpanel">
+      <h2><span class="vert" data-vert="agentic_rare"></span> — 7-day mean</h2>
+      <div class="sub" id="lb-rare-sub"></div>
+      <div id="lb-rare"></div>
+    </div>
+    <div class="lb-panel" id="card-lb-legal" role="tabpanel">
+      <h2><span class="vert" data-vert="legal"></span> — 7-day mean</h2>
+      <div class="sub" id="lb-legal-sub"></div>
+      <div id="lb-legal"></div>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="sec-trends">Slices over time</h2>
+  <div class="card" id="card-trends" data-tools>
+    <h2>Slice trends — all verticals</h2>
+    <div class="sub">The same slices as the leaderboards, plotted
+      over the full history: each engine's score as
+      <span class="hint" title="an engine at 75% achieves 75% of the pooled ultimate engine's score at that time">% of <em>ultimate</em></span>,
+      smoothed with a 7-day rolling mean. Click legend names to highlight
+      engines.</div>
+    <div class="lb-tabs" role="tablist" aria-label="Slice trends">
+      <button role="tab" aria-selected="true" class="active" data-panel="trend-scholar"><span class="vert" data-vert="scholar"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-news"><span class="vert" data-vert="news"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-finance"><span class="vert" data-vert="finance"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-rare"><span class="vert" data-vert="agentic_rare"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-legal"><span class="vert" data-vert="legal"></span></button>
+      <div class="tab-ind" aria-hidden="true"></div>
+    </div>
+    <div class="lb-panel active" id="trend-scholar" role="tabpanel">
+      <div class="lb-tabs" role="tablist" aria-label="Scholar slices">
+        <button role="tab" aria-selected="true" class="active" data-panel="trend-scholar-recall">overview</button>
+        <button role="tab" aria-selected="false" data-panel="trend-scholar-title">title</button>
+        <button role="tab" aria-selected="false" data-panel="trend-scholar-body">body</button>
+        <button role="tab" aria-selected="false" data-panel="trend-scholar-clue">clue</button>
+        <button role="tab" aria-selected="false" data-panel="trend-scholar-tot">tot</button>
+        <div class="tab-ind" aria-hidden="true"></div>
+      </div>
+      <div class="lb-panel active" id="trend-scholar-recall" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — recall@10 over time</h2>
+        <div class="sub">recall@10, gold papers per run across all query types</div>
+      </div>
+      <div class="lb-panel" id="trend-scholar-title" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — title-query recall@10 over time</h2>
+        <div class="sub">recall@10 on papers found by their (degraded) title</div>
+      </div>
+      <div class="lb-panel" id="trend-scholar-body" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — body-query recall@10 over time</h2>
+        <div class="sub">recall@10 on papers found by a full-text-only detail</div>
+      </div>
+      <div class="lb-panel" id="trend-scholar-clue" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — clue-query recall@10 over time</h2>
+        <div class="sub">recall@10 on papers found by a natural-language question over full-text-only facts</div>
+      </div>
+      <div class="lb-panel" id="trend-scholar-tot" role="tabpanel">
+        <h2><span class="vert" data-vert="scholar"></span> — tip-of-the-tongue recall@10 over time</h2>
+        <div class="sub">recall@10 on papers found from a hedged, half-remembered description</div>
+      </div>
+    </div>
+    <div class="lb-panel" id="trend-news" role="tabpanel">
+      <h2><span class="vert" data-vert="news"></span> — nDCG@5 over time</h2>
+      <div class="sub">20 fresh queries per run, mean nDCG over all queries in each 6-hour window</div>
+    </div>
+    <div class="lb-panel" id="trend-finance" role="tabpanel">
+      <div class="lb-tabs" role="tablist" aria-label="Finance slices">
+        <button role="tab" aria-selected="true" class="active" data-panel="trend-finance-recall">overview</button>
+        <button role="tab" aria-selected="false" data-panel="trend-finance-mrr">MRR</button>
+        <button role="tab" aria-selected="false" data-panel="trend-finance-filings">filings</button>
+        <button role="tab" aria-selected="false" data-panel="trend-finance-filingdoc">filingdoc</button>
+        <div class="tab-ind" aria-hidden="true"></div>
+      </div>
+      <div class="lb-panel active" id="trend-finance-recall" role="tabpanel">
+        <h2><span class="vert" data-vert="finance"></span> — answer-recall@5 over time</h2>
+        <div class="sub">answer-recall@5, gold queries per run across all suites</div>
+      </div>
+      <div class="lb-panel" id="trend-finance-mrr" role="tabpanel">
+        <h2><span class="vert" data-vert="finance"></span> — MRR@5 over time</h2>
+        <div class="sub">MRR@5, same runs as recall</div>
+      </div>
+      <div class="lb-panel" id="trend-finance-filings" role="tabpanel">
+        <h2><span class="vert" data-vert="finance"></span> — filings recall@5 over time</h2>
+        <div class="sub">recall@5 on quarterly facts (net income, operating income, diluted EPS) in top-5 snippets</div>
+      </div>
+      <div class="lb-panel" id="trend-finance-filingdoc" role="tabpanel">
+        <h2><span class="vert" data-vert="finance"></span> — filingdoc recall@5 over time</h2>
+        <div class="sub">recall@5 on SEC filings found by a distinctive detail (accession identity)</div>
+      </div>
+    </div>
+    <div class="lb-panel" id="trend-rare" role="tabpanel">
+      <h2><span class="vert" data-vert="agentic_rare"></span> — nDCG@5 over time</h2>
+      <div class="sub">100 rare-entity queries per daily run</div>
+    </div>
+    <div class="lb-panel" id="trend-legal" role="tabpanel">
+      <div class="lb-tabs" role="tablist" aria-label="Legal slices">
+        <button role="tab" aria-selected="true" class="active" data-panel="trend-legal-recall">overview</button>
+        <button role="tab" aria-selected="false" data-panel="trend-legal-caselaw">caselaw</button>
+        <button role="tab" aria-selected="false" data-panel="trend-legal-code">code</button>
+        <div class="tab-ind" aria-hidden="true"></div>
+      </div>
+      <div class="lb-panel active" id="trend-legal-recall" role="tabpanel">
+        <h2><span class="vert" data-vert="legal"></span> — recall@5 over time</h2>
+        <div class="sub">recall@5, gold documents per run across both suites</div>
+      </div>
+      <div class="lb-panel" id="trend-legal-caselaw" role="tabpanel">
+        <h2><span class="vert" data-vert="legal"></span> — caselaw recall@5 over time</h2>
+        <div class="sub">recall@5 on federal court opinions found by caption-style queries</div>
+      </div>
+      <div class="lb-panel" id="trend-legal-code" role="tabpanel">
+        <h2><span class="vert" data-vert="legal"></span> — code recall@5 over time</h2>
+        <div class="sub">recall@5 on CFR sections found from their regulatory substance</div>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="section-title" id="sec-price">Quality vs price</h2>
+  <div class="card" id="card-quality-price" data-tools>
+    <h2>Overall quality vs price</h2>
+    <div class="sub">7-day mean share of ultimate vs lowest public price per 1,000 queries</div>
+    <div id="quality-price"></div>
+  </div>
+  <div class="card" id="card-prices" data-tools>
+    <h2>Price per 1,000 queries</h2>
+    <div class="sub" id="prices-sub"></div>
+    <div id="prices-table"></div>
+  </div>
+
+  <h2 class="section-title" id="sec-latency">Search latency</h2>
+  <p class="section-desc">Agents wait on each search call, so latency
+    adds directly to task time.</p>
+  <div class="card" id="card-latency-dumbbell" data-tools>
+    <h2>Search latency — last 7 days</h2>
+    <div class="sub">p50 (filled) to p95 (open), successful calls, log
+      scale; hover for values (<a href="#app-protocol">Appendix C</a>)</div>
+    <div id="latency-dumbbell"></div>
+  </div>
+
+  <h2 class="section-title" id="sec-overlap">Index independence</h2>
+  <p class="section-desc">Repeated overlap on junk or near-identical
+    lists suggests a shared upstream index (all runs, all
+    benchmarks).</p>
+
+  <div class="card" id="card-def-suspicious">
+    <h2>Definition: suspicious sharing</h2>
+    <div class="sub">the pairwise test behind the matrix and the borrowing graph
+      (src/needle/shared/overlap.py)</div>
+    <div class="prose defn">
+      <p>Let <var>U<sub>A</sub></var>(<var>q</var>) be the normalized URLs
+        engine <var>A</var> returned for query <var>q</var>, and
+        <var>L<sub>A</sub></var>(<var>q</var>) ⊆
+        <var>U<sub>A</sub></var>(<var>q</var>) those judged below HM. Engines
+        <var>A</var> and <var>B</var> <em>share suspiciously</em> on
+        <var>q</var> when</p>
+      <p class="eq">|<var>L<sub>A</sub></var>(<var>q</var>) ∩
+        <var>L<sub>B</sub></var>(<var>q</var>)| ≥ 1&emsp;or&emsp;|<var>U<sub>A</sub></var>(<var>q</var>) ∩
+        <var>U<sub>B</sub></var>(<var>q</var>)| ≥ 3.</p>
+      <p>Each matrix cell shows the share of comparable queries (both
+        searches succeeded and at least one returned a result) where the
+        pair shares suspiciously, pooled over all published runs.
+        Engines that share <em>good</em> results show normal
+        ranking behavior. Engines that share junk, or 3+ URLs at once,
+        possibly share an upstream index. Results on the known-answer
+        verticals have no judgements, so only the second clause can
+        apply.</p>
+    </div>
+  </div>
+
+  <div class="card" id="card-independence" data-tools>
+    <h2>Index independence — three views</h2>
+    <div class="sub">suspicious-sharing matrix, borrowing graph, and per-engine
+      result uniqueness</div>
+    <div class="lb-tabs" role="tablist" aria-label="Index independence views">
+      <button role="tab" aria-selected="true" class="active" data-panel="card-lowshared">suspicious sharing</button>
+      <button role="tab" aria-selected="false" data-panel="card-sharegraph">borrowing graph</button>
+      <button role="tab" aria-selected="false" data-panel="card-uniqueness">uniqueness</button>
+      <div class="tab-ind" aria-hidden="true"></div>
+    </div>
+    <div class="lb-panel active" id="card-lowshared" role="tabpanel">
+      <h2>Suspicious sharing (all runs)</h2>
+      <div class="sub" id="lowshared-sub"></div>
+      <div class="overlap-matrix" id="lowshared-table"></div>
+    </div>
+    <div class="lb-panel" id="card-sharegraph" role="tabpanel">
+      <h2>Borrowing graph (all runs)</h2>
+      <div class="sub" id="sharegraph-sub"></div>
+      <div id="sharegraph"></div>
+    </div>
+    <div class="lb-panel" id="card-uniqueness" role="tabpanel">
+      <h2>Result uniqueness (since Aug 1)</h2>
+      <div class="sub">share of an engine's URLs that no other engine family
+        returned for the same query and that are relevant (judged HM/FullyM
+        on the judged verticals, the known-item gold hit on the known-answer
+        verticals); the URLs column counts unique relevant URLs / all URLs
+        the engine returned; same-family engines (Exa/Exa-instant,
+        Parallel/Parallel-turbo) do not count against each other</div>
+      <div id="uniqueness-table" class="bar-table"></div>
+    </div>
+  </div>
+
+  <details id="history-details">
+    <summary>Table view — all runs in range</summary>
+    <div class="card" id="history-table" style="margin-top:8px"></div>
+  </details>
+
+  <h2 class="section-title" id="sec-appendix">Appendix — methodology &amp; configuration</h2>
+  <p class="section-desc">We pin everything below in
+    <a href="https://github.com/keenableai/needle">keenableai/needle</a>;
+    you can compute each number on this page again from the archived
+    artifacts (Appendix G).</p>
+
+  <div class="card" id="card-runs">
+    <h2>Appendix A — judgement browser</h2>
+    <div class="sub">pick a benchmark, then a run, to inspect each query;
+      full runs on the
+      <a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF dataset</a></div>
+    <div class="runbar">
+      <select id="run-bench" aria-label="Benchmark"></select>
+      <select id="run-select" aria-label="Run"></select>
+      <select id="run-engine" aria-label="Engine"></select>
+      <select id="run-page" aria-label="Page" hidden></select>
+    </div>
+    <div id="run-detail"></div>
+  </div>
+
+  <div class="card" id="app-queries">
+    <h2>Appendix B — query generation</h2>
+    <div class="sub">how we build each slice's queries (per-bench
+      generate.py); the exact rows every run used are archived (Appendix G)</div>
+    <div class="prose">
+      <p>We make each query set fresh from public sources:
+        <span class="vert" data-vert="news"></span> each hour, the other verticals each day.</p>
+      <p>For <span class="vert" data-vert="scholar"></span> we sample papers
+        from arXiv (computer, physical, life, and social sciences) and
+        Europe PMC (health sciences). Four age bands reach from the last
+        week back to approximately five years. Each paper gives one
+        query per slice, so the four <span class="vert" data-vert="scholar"></span> slices rank engines on
+        the same papers. The gaps between the slices are the point:
+        title vs body isolates full-text indexing, body vs clue isolates
+        keyword-vs-prose handling, and tot isolates semantic
+        retrieval.</p>
+      <p>We leak-check each LLM-written <span class="vert" data-vert="scholar"></span> query: at least two
+        content words must not appear in the title or the abstract. We
+        keep a paper only if each slice produced a valid query. The
+        known-item and tip-of-the-tongue framing follows Exa's
+        <a href="https://exa.ai/blog/publications-search">"SOTA Search
+        Over Academic Publications"</a> (Jul 2026).</p>
+      <p>The <span class="vert" data-vert="agentic_rare"></span>
+        stream merges search queries from three public agent-trajectory
+        releases: the anonymized DeepResearchGym logs (14M+ search
+        requests from real agentic clients;
+        <a href="https://dl.acm.org/doi/10.1145/3805712.3809627">"Agentic
+        Search in the Wild"</a>, SIGIR '26), the
+        <a href="https://arxiv.org/abs/2603.20278">OpenResearcher</a>
+        deep-research trajectories (TIGER-AI-Lab, 2026), and
+        <a href="https://arxiv.org/abs/2604.04949">LRAT-Train</a>
+        ("Learning to Retrieve from Agent Trajectories", SIGIR '26).</p>
+    </div>
+    <table>
+      <tr><th>vertical</th><th>slice</th><th>query construction</th></tr>
+      <tr><td><span class="vert" data-vert="scholar"></span></td><td>title</td>
+        <td>the paper's title, lowercased with LaTeX and punctuation stripped; plain known-item lookup, answerable from metadata</td></tr>
+      <tr><td><span class="vert" data-vert="scholar"></span></td><td>body</td>
+        <td>a keyword query (3–8 words) anchored on a globally distinctive detail that appears in the full text but not in the title or abstract (a named method, cohort, instrument, or an unusual measured value); answerable only by engines that index the paper body</td></tr>
+      <tr><td><span class="vert" data-vert="scholar"></span></td><td>clue</td>
+        <td>a natural-language question built from 2–3 precise factual clues taken from the body, the way a researcher re-finds a paper from remembered specifics</td></tr>
+      <tr><td><span class="vert" data-vert="scholar"></span></td><td>tot</td>
+        <td>a hedged, half-remembered description with every specific blurred: approximate quantities, no names the paper introduces, at most two content words reused from the title</td></tr>
+      <tr><td><span class="vert" data-vert="news"></span></td><td>fresh</td>
+        <td>the newest item per feed from ~124 curated RSS feeds within a freshness window, merged with Google Trends RSS across all 52 US geos (fuzzy-deduped, capped by traffic); an LLM projects each item into a keyword query and refuses evergreen content</td></tr>
+      <tr><td><span class="vert" data-vert="finance"></span></td><td>finance / finance_nl</td>
+        <td>registry facts per company (CEO, founding year, HQ country, website, employees, LEI) from Wikidata and GLEIF, ticker from SEC, asked as a keyword query and, where a template exists, as a natural-language variant</td></tr>
+      <tr><td><span class="vert" data-vert="finance"></span></td><td>filings</td>
+        <td>single-quarter 10-Q facts (net income, operating income, diluted EPS) from SEC XBRL, companies stratified by market cap; half the queries are quoted phrases</td></tr>
+      <tr><td><span class="vert" data-vert="finance"></span></td><td>filingdoc</td>
+        <td>known-item SEC-filing retrieval; the gold answer is the filing's accession number; half the queries carry operator syntax (site:, "quoted", after:/before:)</td></tr>
+      <tr><td><span class="vert" data-vert="agentic_rare"></span></td><td>rare-entity</td>
+        <td>sampled from the merged DeepResearchGym + OpenResearcher + LRAT-Train query stream, keeping queries where BERT WordPiece splits a word into 5+ subwords or maps it to [UNK]; fastText language ID gates for English, an n-gram cap drops near-copies, and each run samples stratified by query length</td></tr>
+      <tr><td><span class="vert" data-vert="legal"></span></td><td>caselaw</td>
+        <td>recent published opinions from the CourtListener API across 14 federal courts, one caption-style query per case; gold is the reporter citation, docket number with party tokens, and cluster id</td></tr>
+      <tr><td><span class="vert" data-vert="legal"></span></td><td>code</td>
+        <td>eCFR sections; an LLM projects each section into a query about its regulatory substance with one verbatim quoted span, rejected if it leaks the citation; gold is the "title CFR section" citation</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="app-protocol">
+    <h2>Appendix C — comparison protocol</h2>
+    <div class="sub">the fairness rules behind every number on this page</div>
+    <div class="prose">
+      <p>We send each engine in a run the same query text. We pin the per-engine request shapes in git (Appendix F). The runner sends requests in sequence, one call at a time across the whole run. Thus the latency percentiles are comparable across engines, and no engine gets concurrent load. Engines see the live web minutes apart in a run, not at the same instant.</p>
+      <p>We judge an engine on its own ranking, titles, and snippets. We do not fetch pages and we do not re-rank. We cap the evidence at the same snippet length for each engine, so engines that return more content get no extra signal to the judge or the answer matchers. We judge each distinct combination of URL, title, snippet, and date once per query. We use that rating again where the identical result occurs for other engines (Appendix E gives the full judging setup).</p>
+      <p>We remove failed searches and judgements from the mean and report them as <code>search_errors</code> and <code>judge_errors</code>. An outage decreases <code>num_scored</code> and increases the error rate; it does not decrease the quality score.</p>
+      <p>We make fresh <span class="vert" data-vert="news"></span> queries each hour and new known-answer queries each day from public sources (Appendix B), so there is no fixed benchmark set to overfit. We archive the exact queries with each run (Appendix G).</p>
+      <p>Each vertical also reports <em>ultimate</em>, a synthetic engine. It pools all engines' results per query and ranks them oracle-style: best judge rating first on the judged verticals, and the gold item first on the known-answer verticals. Its score shows what one engine could get if it always returned the best results that the full field found. This separates "the engine ranked poorly" from "no engine found better results". We do not include <em>ultimate</em> in the overlap and uniqueness statistics.</p>
+    </div>
+  </div>
+
+  <div class="card" id="app-metrics">
+    <h2>Appendix D — metric definitions</h2>
+    <div class="sub">src/needle/shared/metrics.py and per-bench score.py</div>
+    <table>
+      <tr><th>metric</th><th>benches</th><th>definition</th></tr>
+      <tr><td>recall@10, MRR@10</td><td><span class="vert" data-vert="scholar"></span></td>
+        <td>known-item: the gold paper identified in the top 10 by arXiv&nbsp;ID / DOI / PMID match.</td></tr>
+      <tr><td>nDCG@5</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
+        <td>DCG over the top 5 results (Σ gain(rᵢ) / log₂(i + 1), with judge ratings mapped to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0), divided by the DCG of the ideal ranking: the pooled ultimate ordering of every engine's deduplicated results, so ultimate scores exactly 1. A query is scored only if every one of its results was judged (otherwise it is dropped from the mean and counted as judge errors) and only if the pooled ideal has any gain; queries where no engine found anything relevant are excluded.</td></tr>
+      <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
+        <td>applied to engine ratings before scoring: a duplicate URL drops the rating to 0. The pooled ideal is already deduplicated, so no penalty applies there. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
+      <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
+        <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher, with an LLM-judge backstop for paraphrased answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
+      <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
+        <td>known-item: the gold opinion or CFR section identified by citation, docket (with a party-token check), CFR citation, or URL match.</td></tr>
+      <tr><td>latency p50 / p95</td><td>all</td>
+        <td>percentiles over per-call durations of successful search API calls, pooled across queries in the window; runs published without per-call samples contribute their per-run percentiles instead. Failed calls carry no latency sample and show up in the error rate.</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="app-judge">
+    <h2>Appendix E — LLM judge</h2>
+    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; <span class="vert" data-vert="finance"></span> fallback matcher only; <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are deterministic</div>
+    <div class="prose">
+      <p>We judge with <code>openai/gpt-5.6-terra</code> via OpenRouter, temperature 0, one pointwise call per document. We record the model for each run as <code>judge_model</code> in its archived report. The judgement browser shows it when you select a run, so judge changes stay visible in the history.</p>
+      <p>The judge does not see the engine identity. The prompt contains the query, the document title, the URL, the published date, and the snippet — not the engine name. We judge each distinct combination of URL, title, snippet, and date once per query and use that rating again where the identical result occurs for other engines. We judge the same URL with a different snippet separately, with the same blind judge and rubric.</p>
+      <p>A judge preference for a snippet style would be a shared bias across engines. We publish the per-result reasoning with each run, so you can audit this.</p>
+      <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard gates for a wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/needle/shared/prompts/judgement.jinja.</p>
+      <p>Known limitation: we operate NEEDLE ourselves, and we did not yet do a systematic human-agreement audit of the judge. But you can check the numbers: the judge is blind and shared across engines, each rating includes its reasoning, and we publish the queries, prompts, and raw results. Thus anyone can score any rating again.</p>
+    </div>
+  </div>
+
+  <div class="card" id="app-engines">
+    <h2>Appendix F — engine configuration</h2>
+    <div class="sub">request shapes pinned in git (src/needle/shared/search/); k = 5 results per query except <span class="vert" data-vert="scholar"></span> (10). Engines are live, unversioned APIs; provider-side changes surface as trend shifts.</div>
+    <p>Every run builds each client with the same snippet budget of 2,000 characters. Keenable and Exa accept a request-side length parameter, so they get it in the request (snippet_max_length=2000, highlights.maxCharacters=2000). The other engines have no such parameter; we clip whatever they return to the same 2,000 characters before judging and answer matching (Appendix C). Requests time out at 30 s (60 s for Perplexity and Parallel) and retry up to 3 times with exponential backoff on transport errors, 429, and 5xx.</p>
+    <table>
+      <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
+      <tr><td>Keenable</td><td>Keenable POST /v1/search</td><td>mode=realtime, snippet_max_length=2000; query verbatim with site: kept in the text, after:/before: → published_after:/published_before: tokens; no count parameter — we keep the first k results</td></tr>
+      <tr><td>google/serper</td><td>Serper.dev (Google SERP) POST /search</td><td>q = query verbatim (operators kept as text), num=min(k,100), gl=us, hl=en; knowledge-graph and answer-box entries fold into the ranking</td></tr>
+      <tr><td>bing/searchapi</td><td>SearchApi.io GET /search</td><td>engine=bing, q = query verbatim (operators kept as text), num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
+      <tr><td>brave</td><td>Brave GET /web/search</td><td>q = query text with site: kept, clipped to 50 words / 400 chars; count=min(k,20), country=us, search_lang=en, result_filter=web; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD</td></tr>
+      <tr><td>exa</td><td>Exa POST /search</td><td>type=auto, numResults=k, contents.highlights.maxCharacters=2000; site: → includeDomains, after:/before: → startPublishedDate/endPublishedDate (full-day UTC bounds)</td></tr>
+      <tr><td>exa-instant</td><td>Exa POST /search</td><td>same as exa but type=instant</td></tr>
+      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=basic, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
+      <tr><td>parallel-turbo</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=turbo</td></tr>
+      <tr><td>perplexity</td><td>Perplexity POST /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → search_after_date_filter/search_before_date_filter (MM/DD/YYYY)</td></tr>
+      <tr><td>tavily</td><td>Tavily POST /search</td><td>search_depth=basic, max_results=min(k,20); site: → include_domains, after:/before: → start_date/end_date (ISO dates)</td></tr>
+      <tr><td>you</td><td>You.com POST /v1/search</td><td>count=min(k,100); site: → include_domains, after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; web and news sections merge, deduplicated by URL</td></tr>
+    </table>
+  </div>
+
+  <div class="card" id="app-data">
+    <h2>Appendix G — raw artifacts</h2>
+    <div class="sub">everything you need to re-score a run from scratch</div>
+    <table>
+      <tr><th>artifact</th><th>contents</th><th>where</th></tr>
+      <tr><td>per-run reports</td>
+        <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results)</td>
+        <td><a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF: keenable-ai/needle-results</a>, runs/&lt;run-id&gt;/</td></tr>
+      <tr><td>query files</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
+        <td>same run folder</td></tr>
+      <tr><td>dashboard aggregates</td>
+        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, runs.json, ci_scores.jsonl, ci.json</td>
+        <td>data/ on this site (gh-pages)</td></tr>
+      <tr><td>prompts &amp; scoring code</td>
+        <td>judge prompt (shared/prompts/judgement.jinja), metric implementations, engine clients</td>
+        <td><a href="https://github.com/keenableai/needle">GitHub: keenableai/needle</a></td></tr>
+    </table>
+  </div>
+
+
+</div>
+
+<script>
+"use strict";
+const RUNS_BASE = "https://huggingface.co/datasets/keenable-ai/needle-results/resolve/main/runs";
+
+let ENGINES = [];
+const ENGINE_SLOT = new Map();
+const HIDDEN_ENGINES = new Set(["ceramic", "octen", "keenable"]);
+
+function registerEngines(names) {
+  for (const name of names) {
+    if (!HIDDEN_ENGINES.has(name) && !ENGINE_SLOT.has(name)) {
+      ENGINE_SLOT.set(name, ENGINE_SLOT.size);
+      ENGINES.push(name);
+    }
+  }
+}
+
+registerEngines(["keenable-realtime", "google", "bing", "brave",
+  "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity", "tavily", "you"]);
+
+function colorOf(engine) {
+  if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
+  const slot = ENGINE_SLOT.get(engine);
+  return slot == null || slot >= 12 ? "var(--text-muted)" : `var(--series-${slot + 1})`;
+}
+const MARKER_SHAPES = ["circle", "square", "diamond", "up", "down"];
+function markerEl(engine, x, y, r) {
+  const shape = MARKER_SHAPES[(ENGINE_SLOT.get(engine) ?? 0) % MARKER_SHAPES.length];
+  const attrs = { fill: colorOf(engine), stroke: "var(--surface-1)", "stroke-width": 2 };
+  if (shape === "circle") return el("circle", { cx: x, cy: y, r, ...attrs });
+  const n = (v) => v.toFixed(1);
+  const d = shape === "square"
+    ? `M${n(x - r)},${n(y - r)}H${n(x + r)}V${n(y + r)}H${n(x - r)}Z`
+    : shape === "diamond"
+    ? `M${n(x)},${n(y - r - 1.5)}L${n(x + r + 1.5)},${n(y)}L${n(x)},${n(y + r + 1.5)}L${n(x - r - 1.5)},${n(y)}Z`
+    : shape === "up"
+    ? `M${n(x)},${n(y - r - 1)}L${n(x + r + 1)},${n(y + r)}L${n(x - r - 1)},${n(y + r)}Z`
+    : `M${n(x)},${n(y + r + 1)}L${n(x + r + 1)},${n(y - r)}L${n(x - r - 1)},${n(y - r)}Z`;
+  return el("path", { d, ...attrs });
+}
+
+const HOME_ENGINE = "keenable-realtime";
+const ULTIMATE_ENGINE = "ultimate";
+function markHome(node, engine) {
+  if (engine === HOME_ENGINE) node.classList.add("home");
+}
+
+const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable"],
+  ["google", "google/serper"], ["bing", "bing/searchapi"]]);
+const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
+
+const VERTICALS = new Map([["news", "News"], ["finance", "Finance"],
+  ["scholar", "Scholar"], ["agentic_rare", "AgenticRare"], ["legal", "Legal"]]);
+const verticalName = (b) => VERTICALS.get(b) ?? b;
+
+const ENGINE_LOGOS = new Map([
+  ["keenable", "data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 177.922 102.29%22 width%3D%22177.922%22 height%3D%22102.29%22 role%3D%22img%22 aria-label%3D%22Keenable icon%22%3E%3Cg transform%3D%22translate(0,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(51.255,21.698)%22 d%3D%22M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3Cg transform%3D%22translate(81.137,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(49.16,21.698)%22 d%3D%22M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E"], ["keenable-realtime", "data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 177.922 102.29%22 width%3D%22177.922%22 height%3D%22102.29%22 role%3D%22img%22 aria-label%3D%22Keenable icon%22%3E%3Cg transform%3D%22translate(0,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(51.255,21.698)%22 d%3D%22M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3Cg transform%3D%22translate(81.137,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(49.16,21.698)%22 d%3D%22M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E"],
+  ["google", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAApVBMVEVHcEz4+Pj8/Pz9/f38/Pz59/by8/Pz8/T7+/v9/f309PX29/fy8vP29/f///84qlfsUENHiPT8wBLrTD88rFpJivNEhvUqp006g/T7/PvT4P3rRjjqPSzg8Ojva1uWz6T7ugWWt/j4xcH+78jA4slxv4T85eTtW0v61tRctGaDrPdSj/YtffRmmvb1p6L+3I790mKuuUHykIg+nZ3G2Pv0lCs8o3o82clfAAAADnRSTlMAoetQ0/wdM7c/jGYSeQFEN8MAAAMjSURBVFiF5VdZm6IwEBQURBFQRGOGwxOvUWd0dvf//7QNEpLOAeLDPm09+QFV6erudGKn888wsgeeYTiOYXgD+2227TqmD2A67jsi3Z6vgdNtSXdNHf0ZRxuJgXb1Cr3BK77RRC9gNNLtxuVpEA3ZHLymF6i10W3H9/2aXKp8a38k2FvtFPrSR/tbNp7GSRLH4+y2l172Vf4IC19sDkk8HRNMCeI4OWyE13ikCAj532Qlu1IgSLIj/KIn8z349sHphE8l4uQBv/EkAzB1WTwGmDIkGbQpmnBA8g5Tkc4kEiEPTk0FLJk/1fPFSoAAMmA/TsZZdiCV1PFhCDZ/emP+ieWNRUzj/SYjEgrf9/mmGPIEMH6cgeY5Zhq+P2QCbILgRyWQ3IRv8VFmE5iqg+2KplDi16Dy4LInX2H4bIL40UDjcJUahAS/SeEPuIHG4cgp2K4KhdVBlzEdTHkffj0FwhVs2Q8FKXuH5Tb8LgXCb7DKZSHhcuYvy2bkkzCk2AKBxYxjUmB+fSmwahb45AbL8dptKzApBWZcoPuehUlNBG0tTCoBXxIAVaACX0DgMmegCkoS+TijfRDegcB5XeFcKixAGelYqw4OXHZieEepLwD7he31orSwZs8t2spsouOnQBQEua/BtYzg8sGeVLOdzxOShHtEgHYq/xcNYMZPumq08yxuV/egEIiCVObjTzUFbKyywuJTyScuZIVrGcBkwR1gNtL4tWSHIqqAlpCe0vWFncAvK+BYyGkIJA+nHXWL0xz9zJUUwoOBn6wWEyBBRPmSID8hFAR/ZnMpA/B8BXcLZuKZCVQgKEEUFmAfiLeMHlQIGD8gP4OIChAbk1QfgHi9ogqBjAj9gATIVy1wOvpphBR2EUEES+t0JHBzpPNzVQGhJZz1WOZ3+sJRQAqHRHoudBbW3LKESw6RWJ4Qw2kpNaan8uGeqjR2yyd2ysYY6vj6izbWHXK1F+5hqyMR16xfwG2hgN16PqlF7b+VCqYm/2/YaAq/gu3USmCn3V8327A0Gtgy2v/zG7mOqIEtx1Uv6M3oe0bPtAjMnuG9ytz/jb8i8rQexpJ/GAAAAABJRU5ErkJggg=="], ["bing", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABuklEQVRYhe2WsXXCMBCG/xMNpbIBmSB0aa0wQDJBkgmINrDZwDgLQCZIBuDJKdN5gzCCShrrUhiwCNiI95wq/quz/XP3cZLOBnr1+u+iUKPUJoIrHwBxD2C0vV2AuACJmU3V+k8ApDYSjBjMuj0Tp1sQ2xmA1EbCuRygm8B8BQSpSyBE61NGfFCckUOQgqArm90RBCkAS+8XY7CLQ4sDLR2Q2ozg+Nujmdlskpz0TlcJQHXhqgt5CEBzB1xZFyNaNBUHAJtNEjDqgs49hBRvB4CoW08HbT6tAc3qC7rvAADjXRDYzsKLR10A7CW1kec8lx6/EIC1F4+bTDtJbSLvsmjyXQDAH/uw5PNHy5XP+5ioAwAh3uuEiOTUNEJUz8ST5581eX+rfRJOVylAL7WbFyCxtKnKt/tijJJjEKK9h5Hb1zvVDYA2Eo4NAvbAr7SJzVRQF1pPgU2VrcYtz89m8gcROGlbsmCAHYTNJhqCrlHNfX+DrQGeQ5Cq2s7evw6DCP4eCNXRe+HMcgy6Bth8veXD20cCKNreioa3z9h8LT9P+YMm4aWqXlyHy9Hk/ROAYwgOngu9ev0//QDmCZ48wX3K8AAAAABJRU5ErkJggg=="], ["brave", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAUVBMVEVHcEz/QAD/QQD/////SgD/QwD/OQD/PAD/PgD/KwD/MAD/RwD/KAD/QQD/UAD/OwD/IQD/TQT/NgD/VAn/7un/29P/bU3/jXX/q5r/xLf/CwAIaoj2AAAACnRSTlMAYAv/3qwghzrR7UleYgAAA+lJREFUWIWdV9mi6iAMdGmtUihbocv/f+gNhbCVnuO50QerZhiGIYTbrRXv0QXzwSGUUuTd/Ot1PvMAPAKo17f5r1G2GBD1+C7/0fl0jxAZAIXPdwCQ32bwBYLj2If8mgGBF+3Dn5oxdNMku06G8RsMCKEfQin9DE3mE4SEwPSzBh6DUkEbc+l0BJCZBtwH5lOX7yBOCJ2OAJwFBkwRZi2nRIUpwNDkAgHyA8Co18VCAldEruYJYRYmIGMXdlkDBUFFieDGDwBsdknztq7HBx9mXc3xaHZkIESfAfQaGajt+WOsO+aLfCleyGBcfs5/Pq1AhEc1Bwcw2t/yn08uPECp4nAAyHH+HcDsXsR7YxXYIcBszLZtpkpzX3khDxkqBu9DAy+AsZS6hR8X1HPeLHGq7bs1KEOlwQD5wAATVq04mJAw/0jBSooKjQs7724KxSq4CWiWrSCYh4+M+LUXnFO1ZHNadgfwyWfgCMhy1qti2n8CG6/lbweASCUu2KCSeyNhUa2oFA0AmQjTMYXqbzMN4y6ihq6nAFaenJlLF2wiiLLuJfRMTiLe/TKWPrQ0ABpR/DArv4y5k15+GQuELawiZIhchNltbgdQOHHymylHkDw+SKLT92NzL/RhOyeEVfG4M8GI0SNShIJSFtY7FhSGWZrxuPgLwRXF3QwA5VH5mLCk4bgrYXrzTlzHyMCKWNJuZaSiigMbCXV0tJZBGdRBxAUr2rksD6kqK7TDQo9DQQmcC1TEUJVrCfyGxrIe/WS0YozY9Lyng6E+6x9TBMjNAPLl+0iGcwGUvNURTyZW1GVdmHAVOIX+BDBEEfMdMSuWPzoRPMD9BPCODPJ8ybnOnxGANtqdyCD53sDZzJRMHLYwhfPZCtEHgOTmTbnTmal0WqGI9CzB7XEPAFNwkrEE6qqWFApqWMlF4OF6lgC2dOwPnJuNhdLOXSU1i3MPfJqPfM+g2ebI2KEwNhKwYCzjCxR2wV1zEBi0m60+b3E4yY9ZN7jr0pBBs0e63VOLM7KlOiVnS32HdPRI7a73lTHg1UHgdpZrkgKDZj7UNQSAt6oaBSgEKjK46jf7TAOmbN7iMOp6ZWTQlgDcnDEYwULRkmBAbBMPBpdte9FojiydTKFbDwyuO+YhZwDvo5SC/qnRPBi0bOjjIXMG4CelZ8NUvC94BuQyH6yQGPgbCyekaHUdgx+vPkPJoLqxHAyuJ4AcEoOxui+4+PXq9eou7wvw/nxzbRrwvsCq+wJRVw6q4t21GXy+vve5e9P5zvTl8IHEiQH/w8UVSeQa/Gl4JIEyct79dfhAAhn8x/CBxMHgP4f3MbDuF+v+A4tzcSbr/fGlAAAAAElFTkSuQmCC"],
+  ["exa", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"], ["exa-instant", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"],
+  ["parallel", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEX///8dHBoAAAASEQ5eXl3x8fGysbGBgYAZGBbPz88pKCbJycgbGhgVFBLX19Z7e3oLCANLSkm7u7uQkJCHh4Zqamlvb27h4eFDQkH5+fk8OzowMC5RUVCampmmpqXBwcCxW53tAAABoklEQVRYhc2X2RaCIBBAZVxwIylTMZf+/y+zzGPDYpAPed84hxmYhWHG8wy02UiDW0pIJ+prlISmfXqaQQAAZzkhJI99Pi3E0NhKt2P3lJ54yi8wgFtkdzotrjNlyv0XbNYRAwxuhgTVTA8rFycVC+UKtbPjgNwLulKUFhJnjHjFdQFqVaCsET1niJggoFDk0Qk89sk2Ska0eFmBCss/gWzTA2Gr4Il3Xs5wcHxfhyBMMFlr2hnpKWW3LpG4Z5iLJgRPuBTKnM/yo7LzSw6syTC/zES6QNIZbgCQYwVMOLlggssaT45xaE4SB02m0EzDU4yfaBQYYzARS8Do1d9itQmn3lBIVOCbkZWzQLWg6QMzKS5cHDpHB49U4vpLmP6KjQmuTtwdxn2J5FONnY6prLL7MR0ay5J2MXFXnPoqqrvL+u6PpY2km0aG801fm4rt56rLoi2U791R/v9sN1m727wBlxrCvqWAMnpQXLuEa6ursN1sV84edG/3D8bw29D149j3MXh2ePBkEFu9P+Poe7YfOjXDd28/fL/vgcb/k7GzfwA4QDbEYc0sKAAAAABJRU5ErkJggg=="], ["parallel-turbo", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEX///8dHBoAAAASEQ5eXl3x8fGysbGBgYAZGBbPz88pKCbJycgbGhgVFBLX19Z7e3oLCANLSkm7u7uQkJCHh4Zqamlvb27h4eFDQkH5+fk8OzowMC5RUVCampmmpqXBwcCxW53tAAABoklEQVRYhc2X2RaCIBBAZVxwIylTMZf+/y+zzGPDYpAPed84hxmYhWHG8wy02UiDW0pIJ+prlISmfXqaQQAAZzkhJI99Pi3E0NhKt2P3lJ54yi8wgFtkdzotrjNlyv0XbNYRAwxuhgTVTA8rFycVC+UKtbPjgNwLulKUFhJnjHjFdQFqVaCsET1niJggoFDk0Qk89sk2Ska0eFmBCss/gWzTA2Gr4Il3Xs5wcHxfhyBMMFlr2hnpKWW3LpG4Z5iLJgRPuBTKnM/yo7LzSw6syTC/zES6QNIZbgCQYwVMOLlggssaT45xaE4SB02m0EzDU4yfaBQYYzARS8Do1d9itQmn3lBIVOCbkZWzQLWg6QMzKS5cHDpHB49U4vpLmP6KjQmuTtwdxn2J5FONnY6prLL7MR0ay5J2MXFXnPoqqrvL+u6PpY2km0aG801fm4rt56rLoi2U791R/v9sN1m727wBlxrCvqWAMnpQXLuEa6ursN1sV84edG/3D8bw29D149j3MXh2ePBkEFu9P+Poe7YfOjXDd28/fL/vgcb/k7GzfwA4QDbEYc0sKAAAAABJRU5ErkJggg=="],
+  ["perplexity", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAASFBMVEUAAAAAAAD9/fqXl5UAAAAAAAD///8HBwcAAAAAAADy8vCnp6X4+PXU1NKLi4pBQUDDw8Hk5OGenpwmJiWRkZB2dnRbW1qxsa/SbbTeAAAACnRSTlME////0jT//vOEODX2gQAAAoJJREFUWIWll9u2qyAMRYV2R6t4v/3/n54EBAPWgoc8dDQIUwjJQoqiKD7vqhSPrazen4Lsr3o+2Fr1h4CM8UjA+eeMF+JTvPMA77wV0Br+I/7cyiJoWHrfVWrx+veeixYCGli5+wJ4cX+FJgrwRrwubhwgYbgDDPgwASBhnL8B5pGepcxAgtqugE3pRwkx2PFN0IWADhvHPSUGOJbWuvuAXcemSwSIBQBaDmixYRHpANHXAHVvAdZ7AKAtA8wpDVglHFv7BECdYcK1LBPwtnSAmbiU+DvaAnkG0JmHxjJz+QVQoI1GWFPSmGtwT9UXQM07uu4BwLbX3wFtYKMZP4btd4BzXsZmAuAyxj54oO4Avrxh9Ry74IuMKNMAlAcL/nSLq4xHAKoem4nAJSIRgNUjN1sLG+5DvT0BoPiY6jmqEZNSntIUB1D4zJxtOZOcuYyMAmjNrfl7KlJLgeiTAFyYmSaSTJn9jAA87eaq3FhR/gmYmaIGANJVCVMEQK9heecfLKuZQgTw62gzepAB6CIA/J0ur+TnOQIwBrfVKIdhGCUHUEbyKsAwjtjpVlCMZJ0AymBpctoB5K0iWU08AXSckrmjVh+Qt5rYk80siJTR+o3SCQrGYJ91xy8AY2cQSUda5DVUBYsDxM4FBzAVoXfhTO4HgOOEN3mw2/JKB9C0acePRJqOAk8FnBVlM7EzspgG6HplBJEBtCyqPg0wKHDJc9YCndVqSAFILuKsmPS64l9pE6VO61yvGtuU78Qp90t18lcZ6EGTEoOOu+HXehcH+AdxCBBrDBBcYC4AMfuuCK88vluW8/z7TlRGLl3lZU6BVfnXvuyLZ/bVN//ynXn9/wfurDA/lO1fuwAAAABJRU5ErkJggg=="], ["tavily", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEMklEQVRYhcWXXVCUVRjHf+e8uyzI4rvDgqPxNXwbHzcK2YzaFNYFgnbn1FVTjWNidduQNXIbU0rjmGmWQobZRaVeOOMQ0Ea22ER+DBe5DMiIAirDtm3Ygu97unj5kI+FhYX6z7w37zznPP/zPOf5n+cRGRkZoBRAJvAGsB1IA1YBNkAQHRTwCBgBbgMXgaNAD4Bt3HkpcBh4ahkczoQA7IA+/hUCW4G3gV81l65nAieAp1fAeThCqUAx0KK5dL0a2PUfOX8cKUBIAuWLda6UQlmpiwYCKJdYF25RWLMmmbi4uOUgkSaB+EitDcOguKiQhlMneOvNvWiaFi2BeBtWqS0IpRROp5Oqqj08WVTME6kpeL1XaP3REw0RmyTC/CtTsXPHdrZtew6MMXSXi6qqPSS53dGkQshIrEzTJDsni927XyfG4bB+GgabNpXy0su7EGLpBRQhAUVpaQnZ2VkTqmktttl54fkyEhKcS46C5tL1moWMhBAMDQ3h83XhTkxkXWoKD0dG+Oz45zQ2nuXWrd4lOYcIIyCEYGBgkMYzZ7np8wGSUCjE9+cu4Gn7GdM0V5bABAmbzYaUE0sEmqahyYi3iI7AYrAYpVw8ASEBDTQt7O2Pj19FcnJSREQiEqFJ30LQ8VsHd/r6cDgcBINBlFIYhjFpo5TitVdf4cWdlTR82ci3350jEAiEFSuRkZ4ecf2YponbnUhRUSHd3T3cv/+AgoL1xMXFTlanEIJ9+/ayZeszjI0+xNPq4cgnx+j4/erSCBiGMRnqpKQkag7sp7KiHI+njXeq36fuYC0lJRumRcFut0+dWNN4cO8edXWHOf3V17P2nzcFUko2btzAn34/w8N+amreo3JHBUJqrNZ1YmMdxK9OwB7rxM4UAUxjSrBMRVJyMvn5eUgpZ5VsWAKmaZKWlsqhjz4gFAoxMDjI5i2bEVLS29NDbe2HhP4J0dzUgveyd9plKyt7lty8XBCCwbv91DecpvHMN9OiuTABpcjNyWHturXEOBzk5ueBUvR29/Du/gNc/qUdKSUHD308a63T6SQrM5Omph84cvQ4165dB5izasISEEBBwXrr8RkPm2manDzVgOentskcyxlCpJTii5P1NLe04vW2Ewj8Ne9zHVYHHI4YCgsLph5MIZD2GCoqynG7E8PWtxACn6+LS5eaCAb/XrBXsGH17dNio5QiIWE1mVlZgMRUimAgQH//AB0dVxkdHZ1305lRmQfKhjU02GeeYmRkhPPnL9Du9XLjRid/3PTR13cHv9+PaZpR9QCP4ZHISE8fBlxz0gMYVzohBFLK5XI8Ab/EGpfmhGDqFdTm0f4ocFtizWpR99dLgAIuSuAY0P4/EGgHPtVcuj4MXMea1VJY+RFNAVewhtNOzaXrAHeBZmAMa4J1ABqWTizXeB4EuoB6oBroRAj+BajZemNynEWXAAAAAElFTkSuQmCC"], ["you", "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAEAAQAMBEQACEQEDEQH/xAAbAAABBQEBAAAAAAAAAAAAAAAAAwQFBgcBAv/EADUQAAEDAwEECAQFBQAAAAAAAAECAwQABRExBhITIRQiQXGBkaHBUVJTYTIzsbPRFTZEVOH/xAAaAQACAwEBAAAAAAAAAAAAAAAAAwECBAUG/8QAKBEAAgIBBAECBgMAAAAAAAAAAAECAxEEEiExUTJBBRM0UoGxImGh/9oADAMBAAIRAxEAPwDbKsQFABQAhKmxYeOlPobzoFHmfCrwrnP0rJDaQRZsaWD0Z9DmNQk8x4UTrnD1LAJpi9UJCgAoAKAG0+4RLe1xJj6Wx2A6q7hqaZXVOx4gskNpdlTuW17z+W7ejgI+ovBWfDQetdOrQRjzZyLdmeiJhNuXGe20p08R5WC4sknTtrTY1VBtLhFVyxaQ25b5zjSXTxGVY30HHlVItWwTx2S+GTVu2mdbwicnip+dPJQ9jWS3Rp8w4LKfkssSZHmN78Z1Kx2gajvHZWCcJQeJIYnkWqgDK9Tv6bapMwAFTaeqDoVE4HqRTqKvm2qHkiTwsmVvSXpTyn5DinHVnKlKPM16SMIwW2KwjLnJ6SqoaAmtlG1PXyNujkjK1fYAfzjzrHrGo0sZDliu0iFM3yTvcgshaT8QQP8AvlVdK91KJl2MUqpzRA4jvuMOJcZWULTooUuUVJYZKZfrdJ6ZCZkYwVp5gfHQ+tcayGybiOTyiL23ONl5ve3+4mtPw/6mP5/TKWelmdW+DMnlYhR1vFGN7c7M6fpXetthX63gzpN9EpG2avLywnoSmx2qcUEge/lWWesoSzuLKEi77P2RqzsK63EkOfmOY5dw+361yNTqXfLwkPjHaer7Zm7qykhXDkN/gcxyx8D9qjT6h0v+glHJU3LBdWVlJiqWPmbUCDXSWqpkuxe1nU2i5/6TvlUPUVfcG1lxsTTjFpYaeQUOJ3spOo6xrl6iSlY2hseiP26/tWb3tfuJrR8O+pj+f0ylvoZm9uuky3FZgyFMlzAVugc8aa99d+2iu3G9ZwZoya6JWLtZeWXAoy+KO1DiEkHyGfWss9Bp2sbcF1ZIvezt9ZvUdRCeHIb/ADG858R9q42q0sqJeUx8J7jt/vbNnZTlPEkOflt5x4n7VGm00r34SJlLaVBzaW6vL3uk8MfK2gAD3rqLR0xXQrezqb9dD/mueQ/ih6Wn7SdzLpYH3ZNojvPrK3Fb2VHt6xFcnURULXFdDYvKC/W83SzyoSSAp1HUJ03gQRnxAo01vybYz8ETjujgx19h6I+tiS0pp1BwpCxgivVxlGcd0XlGNprs6hVDQJk/sZIWztFECDyc3m1D4gg+4B8Kw6+Cenln2G1vEhTayQt7aGXvnk2QhI+AAHvk+NU0UEqI49wm/wCRGIVWhoqOorbsh5DLCFOOKOEpTqaXNqKzLosuTTLVEMG3MRiQVNp6xHxPM+prz90/mWORoSwsDqlEjK52mDdWuHOjodx+FWik9x1FOpvspeYPBWUVLso152Flxd521r6U19JWA4PZXp3V2aPikJ8WrD8+wiVLXRG7KpW3tPBbdQpDiXSFJUMEHdOorRrWnppNeCtfrQptIFubTTW20KWtTuEpSMknA0FV0uFpot+CZ+pkxZ9jpT+65cl9Hb+mnBcPsPXurJf8RhHivl/4XjW/cuVvt0S3N7kNhLedVaqV3nU1yrLp2vM2OSS6HVKJCgAoAKAEHoUV6Q1IdjtqfaOW3CnrJ8avGycYuKfDIws5BmHGYfdkNMNpedOXHAnrK7zRKycoqLfCDCXIvVCQoAKAP//Z"],
+]);
+
+function engineKey(engine) {
+  const logo = ENGINE_LOGOS.get(engine);
+  if (logo) return el("img", { class: "key-logo", src: logo, alt: "" });
+  const key = el("span", { class: "key" });
+  key.style.background = colorOf(engine);
+  return key;
+}
+
+function engineCell(engine, cls = "") {
+  const td = el("td", { class: cls });
+  td.append(engineKey(engine), document.createTextNode(displayName(engine)));
+  return td;
+}
+let history = [];
+let ciData = null;
+
+const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
+const fmtMs = (v) => v == null ? "–" : v >= 1000 ? `${(v / 1000).toFixed(v >= 9950 ? 0 : 1)} s` : `${Math.round(v)} ms`;
+
+const FMT_TIME = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "UTC" });
+const fmtTime = (d) => FMT_TIME.format(d);
+
+function pctl(values, p) {
+  const s = [...values].sort((a, b) => a - b);
+  return s[Math.max(0, Math.ceil(p * s.length) - 1)];
+}
+
+function inRange(rows, ms) {
+  const cutoff = Date.now() - ms;
+  return rows.filter((r) => new Date(r.ts).getTime() >= cutoff);
+}
+
+function el(tag, attrs, text) {
+  const ns = "http://www.w3.org/2000/svg";
+  const node = ["svg", "path", "line", "circle", "text", "tspan", "g", "title", "defs", "pattern", "rect", "mask", "marker", "image", "foreignObject"].includes(tag)
+    ? document.createElementNS(ns, tag) : document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) node.setAttribute(k, v);
+  if (text != null) node.textContent = text;
+  return node;
+}
+
+const TREND_START = Date.parse("2026-08-01T00:00:00Z");
+const WINDOW_MS = 6 * 3600e3;
+const WEEK_MS = 7 * 86400e3;
+const ROLLING_MS = 7 * 86400e3;
+const ROLLING_NOTE = "7-day rolling mean";
+const PCT_NOTE = "% of ultimate's score";
+
+function seriesFor(bench, metric, rows) {
+  const out = {};
+  for (const e of ENGINES) out[e] = [];
+  for (const r of rows) {
+    if (r.bench === bench && r[metric] != null && r.num_scored > 0 && out[r.engine]) {
+      out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
+    }
+  }
+  for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
+  return out;
+}
+
+function rollingMean(series) {
+  const out = {};
+  for (const e of ENGINES) {
+    const pts = series[e], ts = pts.map((p) => p.t.getTime());
+    out[e] = pts.map((p, i) => {
+      let sum = 0, n = 0;
+      for (let j = i; j >= 0 && ts[i] - ts[j] <= ROLLING_MS; j--) { sum += pts[j].v; n++; }
+      return { t: p.t, v: sum / n };
+    });
+  }
+  return out;
+}
+
+function newsSeries(rows) {
+  const byEngine = new Map(ENGINES.map((e) => [e, new Map()]));
+  for (const r of rows) {
+    const buckets = byEngine.get(r.engine);
+    if (!buckets || r.bench !== "news" || r.ndcg == null || !(r.num_scored > 0)) continue;
+    const b = Math.floor(new Date(r.ts).getTime() / WINDOW_MS) * WINDOW_MS;
+    const agg = buckets.get(b) || { sum: 0, n: 0 };
+    agg.sum += r.ndcg * r.num_scored;
+    agg.n += r.num_scored;
+    buckets.set(b, agg);
+  }
+  const out = {};
+  for (const [e, buckets] of byEngine) {
+    out[e] = [...buckets]
+      .sort(([a], [b]) => a - b)
+      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
+  }
+  return out;
+}
+
+function stackLabels(labels, lo, hi, gap) {
+  labels.sort((a, b) => a.yPos - b.yPos);
+  for (const l of labels) { l.labelY = Math.max(l.yPos, lo); lo = l.labelY + gap; }
+  for (let i = labels.length - 1; i >= 0; i--) {
+    labels[i].labelY = Math.min(labels[i].labelY, hi);
+    hi = labels[i].labelY - gap;
+  }
+}
+
+function drawChart(card, series, opts) {
+  card.querySelectorAll("svg[role=img], .tooltip, .empty").forEach((n) => n.remove());
+  card.classList.add("chart-host");
+  card._mdRows = null;
+  card._sel ??= new Set();
+  const allActive = ENGINES.filter((e) => series[e].length);
+  const zoom = card._zoom;
+  const vis = {};
+  for (const e of allActive) {
+    vis[e] = zoom ? series[e].filter((p) => p.t.getTime() >= zoom[0] && p.t.getTime() <= zoom[1]) : series[e];
+  }
+  const active = allActive.filter((e) => vis[e].length);
+  if (!active.length) {
+    card.appendChild(el("div", { class: "empty" }, opts.empty || "No data yet — first scheduled run pending."));
+    return;
+  }
+  const fmt = (v) => `${v.toFixed(1)}%`;
+  const byT = new Map(active.map((e) => [e, new Map(vis[e].map((p) => [p.t.getTime(), p.v]))]));
+  const stamps = [...new Set(active.flatMap((e) => [...byT.get(e).keys()]))].sort((a, b) => a - b);
+  card._mdRows = () => {
+    const rows = [["time (UTC)", ...active.map(displayName)]];
+    for (const t of stamps) {
+      rows.push([fmtTime(new Date(t)), ...active.map((e) => {
+        const v = byT.get(e).get(t);
+        return v == null ? "–" : fmt(v);
+      })]);
+    }
+    return rows;
+  };
+  const W = 860, H = 220;
+  const M = { top: 12, right: 92, bottom: 26, left: 40 };
+  const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
+  let t0 = zoom ? zoom[0] : stamps[0], t1 = zoom ? zoom[1] : stamps[stamps.length - 1];
+  if (t0 === t1) { t0 -= 3600e3; t1 += 3600e3; }
+  const x = (t) => M.left + ((t - t0) / (t1 - t0)) * iw;
+  const yMax = Math.max(100, ...active.map((e) => Math.max(...vis[e].map((p) => p.v)))) * 1.05;
+  const y = (v) => M.top + (1 - v / yMax) * ih;
+
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, tabindex: "0", role: "img", "aria-label": opts.label });
+
+  for (const gv of [0, 25, 50, 75, 100]) {
+    if (gv) svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(gv), y2: y(gv), stroke: "var(--grid)", "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: M.left - 6, y: y(gv) + 3, "text-anchor": "end", class: "axis-text" }, `${gv}%`));
+  }
+  svg.appendChild(el("line", { x1: M.left, x2: M.left + iw, y1: y(0), y2: y(0), stroke: "var(--baseline)", "stroke-width": 1 }));
+  const nTicks = 5;
+  for (let i = 0; i < nTicks; i++) {
+    const t = t0 + ((t1 - t0) * i) / (nTicks - 1);
+    svg.appendChild(el("text", { x: x(t), y: H - 8, "text-anchor": i === 0 ? "start" : i === nTicks - 1 ? "end" : "middle", class: "axis-text" }, fmtTime(new Date(t))));
+  }
+
+  const byLast = [...active].sort((a, b) => vis[b].at(-1).v - vis[a].at(-1).v);
+  const sel = active.filter((e) => card._sel.has(e));
+  const highlight = new Set(sel.length ? sel : byLast.filter((e) => e !== ULTIMATE_ENGINE).slice(0, 3));
+  if (!sel.length) highlight.add(HOME_ENGINE);
+  highlight.add(ULTIMATE_ENGINE);
+  const endLabels = [];
+  for (const e of [...active].sort((a, b) => highlight.has(a) - highlight.has(b))) {
+    const pts = vis[e];
+    const hot = highlight.has(e);
+    const d = pts.map((p, i) => `${i ? "L" : "M"}${x(p.t.getTime()).toFixed(1)},${y(p.v).toFixed(1)}`).join("");
+    svg.appendChild(el("path", { d, fill: "none", stroke: hot ? colorOf(e) : "var(--baseline)", "stroke-width": hot ? 2 : 1.25, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    if (!hot) continue;
+    const last = pts[pts.length - 1];
+    svg.appendChild(markerEl(e, x(last.t.getTime()), y(last.v), 4));
+    endLabels.push({ e, yPos: y(last.v), xPos: x(last.t.getTime()) });
+  }
+  stackLabels(endLabels, M.top + 4, M.top + ih, 13);
+  for (const l of endLabels) {
+    if (Math.abs(l.labelY - l.yPos) > 3) {
+      svg.appendChild(el("line", { x1: l.xPos + 5, y1: l.yPos, x2: l.xPos + 11, y2: l.labelY, stroke: "var(--baseline)", "stroke-width": 1 }));
+    }
+    svg.appendChild(el("text", { x: l.xPos + 13, y: l.labelY + 4, class: "end-label" }, displayName(l.e)));
+  }
+
+  const cross = el("line", { y1: M.top, y2: M.top + ih, stroke: "var(--baseline)", "stroke-width": 1, visibility: "hidden" });
+  svg.appendChild(cross);
+  const hoverDots = {};
+  for (const e of active) {
+    hoverDots[e] = el("circle", { r: 4, fill: colorOf(e), stroke: "var(--surface-1)", "stroke-width": 2, visibility: "hidden" });
+    svg.appendChild(hoverDots[e]);
+  }
+
+  const selRect = el("rect", { y: M.top, height: ih, class: "zoom-sel", visibility: "hidden" });
+  svg.appendChild(selRect);
+
+  const tip = el("div", { class: "tooltip" });
+  card.appendChild(tip);
+
+  function showAt(t) {
+    cross.setAttribute("x1", x(t)); cross.setAttribute("x2", x(t));
+    cross.setAttribute("visibility", "visible");
+    tip.replaceChildren();
+    tip.appendChild(el("div", { class: "when" }, fmtTime(new Date(t))));
+    const atT = [];
+    for (const e of active) {
+      const v = byT.get(e).get(t);
+      hoverDots[e].setAttribute("visibility", v == null ? "hidden" : "visible");
+      if (v == null) continue;
+      hoverDots[e].setAttribute("cx", x(t)); hoverDots[e].setAttribute("cy", y(v));
+      atT.push({ e, v });
+    }
+    atT.sort((a, b) => b.v - a.v);
+    for (const { e, v } of atT) {
+      const row = el("div", { class: "row" });
+      row.append(engineKey(e), el("span", { class: "val" }, fmt(v)), el("span", { class: "name" }, displayName(e)));
+      tip.appendChild(row);
+    }
+    tip.style.display = "block";
+    const rect = card.getBoundingClientRect();
+    const px = (x(t) / W) * rect.width;
+    tip.style.left = Math.min(px + 14, rect.width - tip.offsetWidth - 8) + "px";
+    tip.style.top = "36px";
+  }
+  let shownIdx = -1;
+  function showIdx(i) {
+    if (i === shownIdx) return;
+    shownIdx = i;
+    showAt(stamps[i]);
+  }
+  function hide() {
+    shownIdx = -1;
+    cross.setAttribute("visibility", "hidden");
+    tip.style.display = "none";
+    for (const e of active) hoverDots[e].setAttribute("visibility", "hidden");
+  }
+  let focusIdx = stamps.length - 1;
+  let dragStart = null;
+  const svgX = (ev) => {
+    const rect = svg.getBoundingClientRect();
+    return Math.max(M.left, Math.min(M.left + iw, ((ev.clientX - rect.left) / rect.width) * W));
+  };
+  const endDrag = () => {
+    dragStart = null;
+    selRect.setAttribute("visibility", "hidden");
+  };
+  svg.addEventListener("pointerdown", (ev) => {
+    if (ev.button !== 0) return;
+    dragStart = svgX(ev);
+    svg.setPointerCapture(ev.pointerId);
+  });
+  svg.addEventListener("pointerup", (ev) => {
+    if (dragStart == null) return;
+    const a = Math.min(dragStart, svgX(ev)), b = Math.max(dragStart, svgX(ev));
+    endDrag();
+    if (b - a < 8) return;
+    const toT = (px) => t0 + ((px - M.left) / iw) * (t1 - t0);
+    const za = toT(a), zb = toT(b);
+    if (stamps.filter((s) => s >= za && s <= zb).length < 2) return;
+    card._zoom = [za, zb];
+    drawChart(card, series, opts);
+  });
+  svg.addEventListener("pointercancel", endDrag);
+  svg.addEventListener("dblclick", () => {
+    if (!card._zoom) return;
+    card._zoom = null;
+    drawChart(card, series, opts);
+  });
+  svg.addEventListener("pointermove", (ev) => {
+    if (dragStart != null) {
+      const cur = svgX(ev);
+      const a = Math.min(dragStart, cur), b = Math.max(dragStart, cur);
+      selRect.setAttribute("x", a);
+      selRect.setAttribute("width", b - a);
+      selRect.setAttribute("visibility", b - a > 3 ? "visible" : "hidden");
+    }
+    const rect = svg.getBoundingClientRect();
+    const t = t0 + (((ev.clientX - rect.left) / rect.width) * W - M.left) / iw * (t1 - t0);
+    let best = 0;
+    for (let i = 1; i < stamps.length; i++) {
+      if (Math.abs(stamps[i] - t) < Math.abs(stamps[best] - t)) best = i;
+    }
+    focusIdx = best;
+    showIdx(best);
+  });
+  svg.addEventListener("pointerleave", hide);
+  svg.addEventListener("focus", () => showIdx(focusIdx));
+  svg.addEventListener("blur", hide);
+  svg.addEventListener("keydown", (ev) => {
+    if (ev.key === "ArrowLeft") focusIdx = Math.max(0, focusIdx - 1);
+    else if (ev.key === "ArrowRight") focusIdx = Math.min(stamps.length - 1, focusIdx + 1);
+    else return;
+    ev.preventDefault();
+    showIdx(focusIdx);
+  });
+  let legend = card.querySelector(".legend");
+  card.insertBefore(svg, legend);
+  if (!legend) {
+    legend = el("div", { class: "legend" });
+    for (const e of allActive) {
+      const btn = el("button", { type: "button" });
+      btn.append(engineKey(e), document.createTextNode(displayName(e)));
+      if (e === ULTIMATE_ENGINE) {
+        btn.disabled = true;
+        btn.title = "always highlighted";
+      } else {
+        btn.addEventListener("click", () => {
+          if (!card._sel.delete(e)) card._sel.add(e);
+          drawChart(card, series, opts);
+        });
+      }
+      legend.appendChild(btn);
+    }
+    card.appendChild(legend);
+  }
+  allActive.forEach((e, i) => {
+    const btn = legend.children[i];
+    if (btn.disabled) return;
+    const on = card._sel.has(e);
+    btn.setAttribute("aria-pressed", on);
+    btn.title = on ? `stop highlighting ${displayName(e)}` : `highlight ${displayName(e)} in this chart`;
+    const key = btn.firstChild;
+    if (key.tagName === "IMG") key.style.opacity = highlight.has(e) ? 1 : 0.35;
+    else key.style.background = highlight.has(e) ? colorOf(e) : "var(--baseline)";
+  });
+}
+
+function drawSlice(cardId, series, empty) {
+  const card = document.getElementById(cardId);
+  card.querySelector(".sub").textContent += `; ${PCT_NOTE}, ${ROLLING_NOTE}`;
+  const title = card.querySelector("h2").textContent.replace(/\s+/g, " ").trim();
+  const rolled = rollingMean(series);
+  const ult = new Map((rolled[ULTIMATE_ENGINE] || []).map((p) => [p.t.getTime(), p.v]));
+  const pct = {};
+  for (const e of ENGINES) {
+    pct[e] = [];
+    for (const p of rolled[e]) {
+      if (p.t.getTime() < TREND_START) continue;
+      const u = ult.get(p.t.getTime());
+      if (!u) continue;
+      pct[e].push({ t: p.t, v: (p.v / u) * 100 });
+    }
+  }
+  drawChart(card, pct, { empty,
+    label: `${title} per engine, ${PCT_NOTE}, ${ROLLING_NOTE}` });
+}
+
+const TREND_SLICES = [
+  ["trend-rare", "agentic_rare", "ndcg"],
+  ["trend-finance-recall", "finance", "recall"],
+  ["trend-finance-mrr", "finance", "mrr"],
+  ["trend-finance-filings", "finance", "filings_recall"],
+  ["trend-finance-filingdoc", "finance", "filingdoc_recall"],
+  ["trend-scholar-recall", "scholar", "recall"],
+  ["trend-scholar-title", "scholar", "title_recall"],
+  ["trend-scholar-body", "scholar", "body_recall"],
+  ["trend-scholar-clue", "scholar", "clue_recall"],
+  ["trend-scholar-tot", "scholar", "tot_recall"],
+  ["trend-legal-recall", "legal", "recall"],
+  ["trend-legal-caselaw", "legal", "caselaw_recall"],
+  ["trend-legal-code", "legal", "code_recall"],
+];
+
+let drawAllTrends = null;
+
+function drawTrends(rows) {
+  const pending = new Map([["trend-news", () => drawSlice("trend-news", newsSeries(rows))]]);
+  for (const [id, bench, metric] of TREND_SLICES) {
+    pending.set(id, () => drawSlice(id, seriesFor(bench, metric, rows),
+      `No ${verticalName(bench)} data yet — collected daily.`));
+  }
+  const flush = (all) => {
+    for (const [id, draw] of pending) {
+      if (!all && document.getElementById(id).closest(".lb-panel:not(.active)")) continue;
+      pending.delete(id);
+      draw();
+    }
+  };
+  document.getElementById("card-trends").addEventListener("click", () => flush(false));
+  drawAllTrends = () => flush(true);
+  flush(false);
+}
+
+function wmean(rows, metric, weightMetric = "num_scored") {
+  let sum = 0, w = 0;
+  for (const r of rows) {
+    const weight = r[weightMetric];
+    if (r[metric] == null || !Number.isFinite(weight) || weight <= 0) continue;
+    sum += r[metric] * weight;
+    w += weight;
+  }
+  return w ? sum / w : null;
+}
+
+let ciWindowCache = null;
+function ciWindowed(rows, bench) {
+  if (ciWindowCache?.rows !== rows)
+    ciWindowCache = { rows, recent: inRange(rows, WEEK_MS), byBench: new Map() };
+  let out = ciWindowCache.byBench.get(bench);
+  if (!out) {
+    const ciRuns = ciData?.runs?.[bench] ? new Set(ciData.runs[bench]) : null;
+    out = ciWindowCache.recent.filter((r) => r.bench === bench && (!ciRuns || ciRuns.has(r.ts)));
+    ciWindowCache.byBench.set(bench, out);
+  }
+  return out;
+}
+
+function renderLeaderboard(holderId, subId, rows, bench, metrics) {
+  const holder = document.getElementById(holderId);
+  holder.replaceChildren();
+  const benchRows = ciWindowed(rows, bench);
+  const ci = ciData?.benches?.[bench] || null;
+  const entries = ENGINES.map((e) => {
+    const er = benchRows.filter((r) => r.engine === e);
+    const scored = er.filter((r) => r[metrics[0][0]] != null && r.num_scored > 0);
+    return { e, v: wmean(er, metrics[0][0]), n: scored.length,
+      lastT: scored.length ? new Date(scored.at(-1).ts) : null,
+      extra: metrics.slice(1).map(([m, , weight]) => wmean(er, m, weight)) };
+  }).filter((x) => x.v != null);
+  if (!entries.length) {
+    document.getElementById(subId).textContent = "";
+    holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
+    return;
+  }
+  entries.sort((a, b) => b.v - a.v);
+  const runs = Math.max(...entries.map((x) => x.n));
+  const lastT = new Date(Math.max(...entries.map((x) => x.lastT.getTime())));
+  document.getElementById(subId).textContent =
+    `mean of ${runs} run${runs === 1 ? "" : "s"}, last 7 days — latest ${fmtTime(lastT)} UTC`;
+  const table = el("table");
+  const head = el("tr");
+  head.appendChild(el("th", {}, "engine"));
+  head.appendChild(el("th", { class: "num" }, metrics[0][1]));
+  if (ci) {
+    const th = el("th", { class: "num ci-col" }, "95% CI");
+    th.title = `${Math.round((ciData.confidence || 0.95) * 100)}% bootstrap interval on the ${metrics[0][1]} column (${ciData.method}, ${ciData.resamples} resamples, ${ciData.window_days}-day window ending ${ciData.window_end})`;
+    head.appendChild(th);
+  }
+  for (const [, label] of metrics.slice(1)) head.appendChild(el("th", { class: "num" }, label));
+  table.appendChild(head);
+  for (const x of entries) {
+    const tr = el("tr");
+    markHome(tr, x.e);
+    if (x.e === ULTIMATE_ENGINE) tr.classList.add("ultimate");
+    tr.appendChild(engineCell(x.e));
+    tr.appendChild(el("td", { class: "num" }, fmt3(x.v)));
+    if (ci) {
+      const c = ci[x.e];
+      tr.appendChild(el("td", { class: "num ci-col" },
+        c ? `[${fmt3(c.lo)}, ${fmt3(c.hi)}]` : "–"));
+    }
+    for (const v of x.extra) tr.appendChild(el("td", { class: "num" }, v == null ? "–" : fmt3(v)));
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
+function renderOverallLeaderboard(rows) {
+  const holder = document.getElementById("lb-overall");
+  const sub = document.getElementById("lb-overall-sub");
+  holder.replaceChildren();
+  const { entries } = shareEntries(rows);
+  if (!entries.length) {
+    sub.textContent = "";
+    holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
+    return;
+  }
+  const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const fmtPct1 = (v) => `${(v * 100).toFixed(1)}%`;
+  const boot = bootstrapShares(rows);
+  sub.textContent = `mean share of ultimate across ${STANDINGS_BENCHES.length} verticals, last 7 days`;
+  const table = el("table");
+  const head = el("tr");
+  head.appendChild(el("th", {}, "engine"));
+  head.appendChild(el("th", { class: "num" }, "of ultimate"));
+  const th = el("th", { class: "num ci-col" }, "95% CI");
+  th.title = `95% bootstrap interval on the overall share (run-level bootstrap, ${BOOT_RESAMPLES} resamples, 7-day window)`;
+  head.appendChild(th);
+  table.appendChild(head);
+  for (const x of entries) {
+    const tr = el("tr");
+    markHome(tr, x.e);
+    tr.appendChild(engineCell(x.e));
+    tr.appendChild(el("td", { class: "num" }, fmtPct(x.overall)));
+    const c = boot.get(x.e);
+    tr.appendChild(el("td", { class: "num ci-col" },
+      c ? `[${fmtPct1(c.lo)}, ${fmtPct1(c.hi)}]` : "–"));
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
+function renderLeaderboards(rows) {
+  renderOverallLeaderboard(rows);
+  renderLeaderboard("lb-scholar", "lb-scholar-sub", rows, "scholar", [
+    ["recall", "recall@10"],
+    ["title_recall", "title", "title_n"],
+    ["body_recall", "body", "body_n"],
+    ["clue_recall", "clue", "clue_n"],
+    ["tot_recall", "tot", "tot_n"],
+  ]);
+  renderLeaderboard("lb-fresh", "lb-fresh-sub", rows, "news", [["ndcg", "nDCG@5"]]);
+  renderLeaderboard("lb-company", "lb-company-sub", rows, "finance", [
+    ["recall", "recall@5"],
+    ["filings_recall", "filings", "filings_n"],
+    ["filingdoc_recall", "filingdoc", "filingdoc_n"],
+  ]);
+  renderLeaderboard("lb-rare", "lb-rare-sub", rows, "agentic_rare", [["ndcg", "nDCG@5"]]);
+  renderLeaderboard("lb-legal", "lb-legal-sub", rows, "legal", [
+    ["recall", "recall@5"],
+    ["caselaw_recall", "caselaw", "caselaw_n"],
+    ["code_recall", "code", "code_n"],
+  ]);
+}
+
+const STANDINGS_BENCHES = [
+  ["scholar", "recall", "recall@10"],
+  ["news", "ndcg", "nDCG@5"],
+  ["finance", "recall", "recall@5"],
+  ["agentic_rare", "ndcg", "nDCG@5"],
+  ["legal", "recall", "recall@5"],
+];
+function shareEntries(rows) {
+  const benchRows = STANDINGS_BENCHES.map(([bench]) => ciWindowed(rows, bench));
+  const ult = STANDINGS_BENCHES.map(([, metric], i) =>
+    wmean(benchRows[i].filter((r) => r.engine === ULTIMATE_ENGINE), metric));
+  const entries = ENGINES.filter((e) => e !== ULTIMATE_ENGINE).map((e) => {
+    const shares = STANDINGS_BENCHES.map(([, metric], i) => {
+      const v = wmean(benchRows[i].filter((r) => r.engine === e), metric);
+      return v == null || !ult[i] ? null : { v, share: v / ult[i] };
+    });
+    const have = shares.filter(Boolean);
+    return { e, shares,
+      overall: have.length ? have.reduce((s, x) => s + x.share, 0) / have.length : null };
+  }).filter((x) => x.overall != null);
+  entries.sort((a, b) => b.overall - a.overall);
+  return { ult, entries };
+}
+
+function mulberry32(seed) {
+  let a = seed | 0;
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const BOOT_RESAMPLES = 2000;
+
+let bootShareCache = null;
+function bootstrapShares(rows) {
+  if (bootShareCache?.rows !== rows)
+    bootShareCache = { rows, out: computeBootstrapShares(rows) };
+  return bootShareCache.out;
+}
+
+function computeBootstrapShares(rows) {
+  const out = new Map();
+  const idx = new Map(ENGINES.map((e, i) => [e, i]));
+  const ultI = idx.get(ULTIMATE_ENGINE);
+  if (ultI == null) return out;
+  const nE = ENGINES.length;
+  const benchRuns = STANDINGS_BENCHES.map(([bench, metric]) => {
+    const byTs = new Map();
+    for (const r of ciWindowed(rows, bench)) {
+      const ei = idx.get(r.engine);
+      if (ei == null || r[metric] == null || !(r.num_scored > 0)) continue;
+      let run = byTs.get(r.ts);
+      if (!run) byTs.set(r.ts, run = []);
+      run.push(ei, r[metric], r.num_scored);
+    }
+    return [...byTs.values()];
+  });
+  const rand = mulberry32(1926);
+  const sums = new Float64Array(nE), wts = new Float64Array(nE);
+  const benchSamples = STANDINGS_BENCHES.map(() => Array.from({ length: nE }, () => []));
+  const overallSamples = Array.from({ length: nE }, () => []);
+  for (let it = 0; it < BOOT_RESAMPLES; it++) {
+    const acc = new Float64Array(nE), accN = new Float64Array(nE);
+    benchRuns.forEach((runs, bi) => {
+      if (!runs.length) return;
+      sums.fill(0);
+      wts.fill(0);
+      for (let k = 0; k < runs.length; k++) {
+        const run = runs[(rand() * runs.length) | 0];
+        for (let j = 0; j < run.length; j += 3) {
+          sums[run[j]] += run[j + 1] * run[j + 2];
+          wts[run[j]] += run[j + 2];
+        }
+      }
+      if (!wts[ultI]) return;
+      const u = sums[ultI] / wts[ultI];
+      if (!u) return;
+      for (let ei = 0; ei < nE; ei++) {
+        if (!wts[ei] || ei === ultI) continue;
+        const share = sums[ei] / wts[ei] / u;
+        benchSamples[bi][ei].push(share);
+        acc[ei] += share;
+        accN[ei]++;
+      }
+    });
+    for (let ei = 0; ei < nE; ei++) {
+      if (accN[ei]) overallSamples[ei].push(acc[ei] / accN[ei]);
+    }
+  }
+  for (let ei = 0; ei < nE; ei++) {
+    if (ENGINES[ei] === ULTIMATE_ENGINE || !overallSamples[ei].length) continue;
+    out.set(ENGINES[ei], {
+      lo: pctl(overallSamples[ei], 0.025),
+      hi: pctl(overallSamples[ei], 0.975),
+      benches: benchSamples.map((b) => b[ei].length
+        ? { lo: pctl(b[ei], 0.025), hi: pctl(b[ei], 0.975) }
+        : null),
+    });
+  }
+  return out;
+}
+function renderStandings(rows) {
+  const card = document.getElementById("card-standings");
+  const holder = document.getElementById("standings");
+  holder.replaceChildren();
+  card._mdRows = null;
+  const { ult, entries } = shareEntries(rows);
+  if (!entries.length) {
+    holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
+    return;
+  }
+  const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const boot = bootstrapShares(rows);
+  const nAx = STANDINGS_BENCHES.length;
+  const best = [];
+  for (let i = 0; i <= nAx; i++) {
+    let m = null;
+    for (const x of entries) {
+      const s = i === 0 ? x.overall : x.shares[i - 1]?.share;
+      if (s != null && (m == null || s > m)) m = s;
+    }
+    best.push(m);
+  }
+  card._mdRows = () => [
+    ["engine", "overall", "overall 95% CI", ...STANDINGS_BENCHES.map(([b]) => verticalName(b))],
+    ["ultimate (raw)", "100%", "", ...ult.map((u) => u == null ? "–" : fmt3(u))],
+    ["gap to ultimate", best[0] == null ? "–" : `−${Math.round((1 - best[0]) * 100)}%`, "",
+      ...best.slice(1).map((m) => m == null ? "–" : `−${Math.round((1 - m) * 100)}%`)],
+    ...entries.map((x) => {
+      const c = boot.get(x.e);
+      return [displayName(x.e), fmtPct(x.overall),
+        c ? `[${fmtPct(c.lo)}, ${fmtPct(c.hi)}]` : "–",
+        ...x.shares.map((s) => s ? fmtPct(s.share) : "–")];
+    }),
+  ];
+
+  const W = 640;
+  const R = 240;
+  const cx = W / 2, cy = R + 36;
+  const ang = (i) => -Math.PI / 2 + (2 * Math.PI * i) / nAx;
+  const pt = (i, v) => [cx + R * v * Math.cos(ang(i)), cy + R * v * Math.sin(ang(i))];
+  const poly = (pts) => pts.map(([px, py], j) => `${j ? "L" : "M"}${px.toFixed(1)},${py.toFixed(1)}`).join("") + "Z";
+  const ringD = (v) => poly(Array.from({ length: nAx }, (_, i) => pt(i, v)));
+
+  const maxS = Math.max(...Array.from({ length: nAx }, (_, i) => Math.sin(ang(i))));
+  const H = cy + maxS * (R + 14) + 24;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
+    "aria-label": "Engine standings across all verticals as share of the ultimate ceiling" });
+
+  for (const gv of [0.25, 0.5, 0.75]) {
+    svg.appendChild(el("path", { d: ringD(gv), fill: "none", stroke: "var(--grid)", "stroke-width": 1 }));
+  }
+  for (let i = 0; i < nAx; i++) {
+    const [px, py] = pt(i, 1);
+    svg.appendChild(el("line", { x1: cx, y1: cy, x2: px, y2: py, stroke: "var(--grid)", "stroke-width": 1 }));
+  }
+  const defs = el("defs", {});
+  const arrow = el("marker", { id: "st-arrow", viewBox: "0 0 8 8", refX: 7, refY: 4,
+    markerWidth: 5, markerHeight: 5, orient: "auto" });
+  arrow.appendChild(el("path", { d: "M0,0L8,4L0,8Z", fill: "var(--expressive-text)" }));
+  defs.appendChild(arrow);
+  const benchBest = best.slice(1);
+  if (benchBest.every((m) => m != null)) {
+    const pat = el("pattern", { id: "st-hatch", width: 7, height: 7,
+      patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+    pat.appendChild(el("rect", { width: 7, height: 7, fill: "var(--expressive)", "fill-opacity": 0.02 }));
+    pat.appendChild(el("line", { x1: 0.5, y1: 0, x2: 0.5, y2: 7, stroke: "var(--expressive)", "stroke-opacity": 0.18, "stroke-width": 1 }));
+    defs.appendChild(pat);
+    const mask = el("mask", { id: "st-unclaimed", maskUnits: "userSpaceOnUse" });
+    mask.appendChild(el("path", { d: ringD(1), fill: "#fff" }));
+    for (const x of entries) {
+      const pts = x.shares.flatMap((s, i) => s ? [pt(i, s.share)] : []);
+      if (pts.length > 2) mask.appendChild(el("path", { d: poly(pts), fill: "#000" }));
+    }
+    defs.appendChild(mask);
+    svg.appendChild(el("path", { d: ringD(1), fill: "url(#st-hatch)", mask: "url(#st-unclaimed)" }));
+  }
+  svg.appendChild(defs);
+  svg.appendChild(el("path", { d: ringD(1), fill: "none", stroke: "var(--baseline)", "stroke-width": 1 }));
+  for (const gv of [0.25, 0.5, 0.75]) {
+    svg.appendChild(el("text", { x: cx + 4, y: cy - R * gv - 3, class: "axis-text" }, `${fmtPct(gv)} of ultimate`));
+  }
+  svg.appendChild(el("text", { x: cx + 4, y: cy - R - 3, class: "axis-text" }, "100% = ultimate"));
+
+  for (const [i, [bench]] of STANDINGS_BENCHES.entries()) {
+    const c = Math.cos(ang(i)), s = Math.sin(ang(i));
+    const tx = cx + (R + 14) * c, ty = cy + (R + 14) * s;
+    const anchor = `text-anchor:${c > 0.3 ? "start" : c < -0.3 ? "end" : "middle"}`;
+    const ly = s < -0.5 ? ty - 6 : s > 0.5 ? ty + 12 : ty + 4;
+    svg.appendChild(el("text", { x: tx, y: ly, style: anchor, class: "st-col vert" }, verticalName(bench)));
+    if (best[i + 1] != null) {
+      const gap = 1 - best[i + 1];
+      const [ax, ay] = pt(i, best[i + 1]), [bx, by] = pt(i, 1);
+      const gt = el("text", { x: (ax + bx) / 2 - s * 9, y: (ay + by) / 2 + c * 9 + 3,
+        class: "st-gap" }, `−${Math.round(gap * 100)}%`);
+      gt.appendChild(el("title", {}, `${verticalName(bench)}: best engine reaches ${fmtPct(best[i + 1])} of ultimate — gap ${fmtPct(gap)}`));
+      svg.appendChild(gt);
+    }
+  }
+
+  const gaps = benchBest.map((m) => (m == null ? null : 1 - m));
+  let gi = null;
+  for (let i = 0; i < nAx; i++) {
+    if (gaps[i] != null && (gi == null || gaps[i] > gaps[gi])) gi = i;
+  }
+  if (gi != null) {
+    const nb = [(gi + 1) % nAx, (gi + nAx - 1) % nAx]
+      .filter((j) => gaps[j] != null).sort((a, b) => gaps[b] - gaps[a])[0];
+    const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+    const inner = nb == null ? pt(gi, best[gi + 1]) : mid(pt(gi, best[gi + 1]), pt(nb, best[nb + 1]));
+    const outer = nb == null ? pt(gi, 1) : mid(pt(gi, 1), pt(nb, 1));
+    const tgt = mid(inner, outer);
+    const dl = Math.hypot(outer[0] - cx, outer[1] - cy);
+    const lp = [outer[0] + ((outer[0] - cx) / dl) * 52, outer[1] + ((outer[1] - cy) / dl) * 52];
+    const al = Math.hypot(tgt[0] - lp[0], tgt[1] - lp[1]);
+    const u = [(tgt[0] - lp[0]) / al, (tgt[1] - lp[1]) / al];
+    const off = Math.min(42 / (Math.abs(u[0]) || 1e-9), 12 / (Math.abs(u[1]) || 1e-9)) + 3;
+    const gg = el("g", {});
+    gg.appendChild(el("line", { x1: lp[0] + u[0] * off, y1: lp[1] + u[1] * off, x2: tgt[0], y2: tgt[1],
+      stroke: "var(--expressive-text)", "stroke-width": 1.2, "marker-end": "url(#st-arrow)" }));
+    gg.appendChild(el("text", { x: lp[0], y: lp[1] + 5, class: "st-gap",
+      style: "font-size:15px" }, "the gap"));
+    if (best[0] != null)
+      gg.appendChild(el("text", { x: lp[0], y: lp[1] + 21, class: "st-gap",
+        style: "font-size:13px" }, `−${Math.round((1 - best[0]) * 100)}%`));
+    gg.appendChild(el("title", {}, "the hatched band: the share of ultimate that no single engine reaches"));
+    svg.appendChild(gg);
+  }
+
+  const series = new Map();
+  let hotG = null;
+  const setHot = (g) => {
+    if (hotG === g) return;
+    if (hotG) hotG.classList.remove("hot");
+    hotG = g;
+    if (g) {
+      svg.classList.add("dim");
+      g.classList.add("hot");
+      svg.appendChild(g);
+    } else {
+      svg.classList.remove("dim");
+    }
+  };
+  const defaults = new Set(entries.slice(0, 3).map((x) => x.e));
+  for (const x of [...entries].reverse()) {
+    const hot = defaults.has(x.e);
+    const g = el("g", { class: "series" + (hot ? "" : " cold"), tabindex: "0" });
+    const pts = [];
+    for (const [i, s] of x.shares.entries()) {
+      if (s) pts.push([...pt(i, s.share), i, s.share]);
+    }
+    g.appendChild(el("path", { d: poly(pts), fill: "none", stroke: colorOf(x.e),
+      "stroke-width": hot ? 2 : 1.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+    const bc = boot.get(x.e);
+    for (const [, , i] of pts) {
+      const ci = bc?.benches[i];
+      if (!ci) continue;
+      const [wx1, wy1] = pt(i, Math.min(ci.lo, 1));
+      const [wx2, wy2] = pt(i, Math.min(ci.hi, 1));
+      g.appendChild(el("line", { x1: wx1, y1: wy1, x2: wx2, y2: wy2,
+        stroke: colorOf(x.e), "stroke-width": 2.5, "stroke-opacity": 0.4,
+        "stroke-linecap": "round" }));
+    }
+    for (const [px, py, i, share] of pts) {
+      const dot = markerEl(x.e, px, py, 4);
+      const [bench, , label] = STANDINGS_BENCHES[i];
+      const c = ciData?.benches?.[bench]?.[x.e];
+      dot.appendChild(el("title", {}, `${displayName(x.e)} · ${verticalName(bench)}: `
+        + `${fmtPct(share)} of ultimate · raw ${label} ${fmt3(x.shares[i].v)} vs ultimate ${fmt3(ult[i])}`
+        + (benchBest[i] != null ? ` · best engine ${fmtPct(benchBest[i])}` : "")
+        + (bc?.benches[i] ? ` · share 95% CI ${fmtPct(bc.benches[i].lo)}–${fmtPct(bc.benches[i].hi)}` : "")
+        + (c ? ` · 7-day mean ${fmt3(c.point)}, 95% CI [${fmt3(c.lo)}, ${fmt3(c.hi)}]` : "")));
+      g.appendChild(dot);
+    }
+    series.set(x.e, { g, pts });
+    svg.appendChild(g);
+    g.addEventListener("focus", () => setHot(g));
+    g.addEventListener("blur", () => setHot(null));
+  }
+
+  const segDist = (mx, my, [ax, ay], [bx, by]) => {
+    const dx = bx - ax, dy = by - ay;
+    const t = Math.max(0, Math.min(1, ((mx - ax) * dx + (my - ay) * dy) / (dx * dx + dy * dy || 1)));
+    return Math.hypot(mx - ax - t * dx, my - ay - t * dy);
+  };
+  const distTo = (pts, mx, my) => {
+    let d = Infinity;
+    for (let j = 0; j < pts.length; j++) {
+      d = Math.min(d, segDist(mx, my, pts[j], pts[(j + 1) % pts.length]));
+    }
+    return d;
+  };
+  svg.addEventListener("pointermove", (ev) => {
+    const p = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(svg.getScreenCTM().inverse());
+    let best = null, bestD = 24;
+    for (const s of series.values()) {
+      const d = distTo(s.pts, p.x, p.y);
+      if (d < bestD) { bestD = d; best = s.g; }
+    }
+    setHot(best);
+  });
+  svg.addEventListener("pointerleave", () => setHot(null));
+
+  const table = el("table", { class: "st-table" });
+  const head = el("tr");
+  head.appendChild(el("th", { class: "st-key" }));
+  head.appendChild(el("th", {}, "engine"));
+  head.appendChild(el("th", { class: "num" }, "of ultimate"));
+  table.appendChild(head);
+  for (const x of entries) {
+    const { g } = series.get(x.e);
+    const tr = el("tr", { class: defaults.has(x.e) ? "" : "cold" });
+    markHome(tr, x.e);
+    const c = boot.get(x.e);
+    tr.title = `${displayName(x.e)} — ${fmtPct(x.overall)} mean share of ultimate over ${x.shares.filter(Boolean).length} verticals`
+      + (c ? `; 95% CI ${fmtPct(c.lo)}–${fmtPct(c.hi)}` : "") + " — click to toggle";
+    const keyTd = el("td", { class: "st-key" });
+    const sw = el("svg", { width: 16, height: 16, viewBox: "0 0 16 16", "aria-hidden": "true" });
+    sw.appendChild(markerEl(x.e, 8, 8, 4));
+    keyTd.appendChild(sw);
+    tr.appendChild(keyTd);
+    tr.appendChild(engineCell(x.e));
+    tr.appendChild(el("td", { class: "num" }, fmtPct(x.overall)));
+    tr.addEventListener("click", () => {
+      const cold = g.classList.toggle("cold");
+      tr.classList.toggle("cold", cold);
+    });
+    tr.addEventListener("pointerenter", () => setHot(g));
+    tr.addEventListener("pointerleave", () => setHot(null));
+    table.appendChild(tr);
+  }
+  const layout = el("div", { class: "st-layout" });
+  layout.append(table, svg);
+  holder.appendChild(layout);
+}
+
+const PRICES_ASOF = "2026-08-21";
+const PRICES = new Map([
+  ["keenable", { usd: 1.00, plan: "Frontier Tier — at 100 RPS+" }],
+  ["keenable-realtime", { usd: 1.00, plan: "Frontier Tier — at 100 RPS+" }],
+  ["google", { usd: 0.30, plan: "Serper Ultimate — $3,750 / 12.5M credits" }],
+  ["bing", { usd: 1.00, plan: "SearchApi.io Octo 5M — $5,000/mo" }],
+  ["brave", { usd: 5.00, plan: "flat rate" }],
+  ["exa", { usd: 7.00, plan: "pay-as-you-go" }],
+  ["exa-instant", { usd: 7.00, plan: "pay-as-you-go" }],
+  ["parallel", { usd: 5.00, plan: "pay-as-you-go" }],
+  ["parallel-turbo", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["perplexity", { usd: 5.00, plan: "flat rate" }],
+  ["tavily", { usd: 5.00, plan: "Growth — $500/mo / 100k credits" }],
+  ["you", { usd: 5.00, plan: "Web Search API plan" }],
+  ["octen", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["ceramic", { usd: 0.05, plan: "pay-as-you-go" }],
+]);
+const fmtUsd = (v) => `$${v.toFixed(2)}`;
+
+function renderPriceTable() {
+  const holder = document.getElementById("prices-table");
+  holder.replaceChildren();
+  document.getElementById("prices-sub").textContent =
+    `biggest self-serve tier, no enterprise quotes; collected ${PRICES_ASOF}`;
+  const engines = ENGINES.filter((e) => PRICES.has(e))
+    .sort((a, b) => PRICES.get(a).usd - PRICES.get(b).usd || a.localeCompare(b));
+  if (!engines.length) {
+    holder.appendChild(el("div", { class: "empty" }, "No engines yet."));
+    return;
+  }
+  const table = el("table");
+  const head = el("tr");
+  head.appendChild(el("th", {}, "engine"));
+  head.appendChild(el("th", { class: "num" }, "$ / 1k queries"));
+  head.appendChild(el("th", {}, "plan"));
+  table.appendChild(head);
+  for (const e of engines) {
+    const p = PRICES.get(e);
+    const tr = el("tr");
+    markHome(tr, e);
+    tr.appendChild(engineCell(e));
+    tr.appendChild(el("td", { class: "num" }, fmtUsd(p.usd)));
+    tr.appendChild(el("td", {}, p.plan));
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
+function renderQualityPrice(rows) {
+  const card = document.getElementById("card-quality-price");
+  const holder = document.getElementById("quality-price");
+  holder.replaceChildren();
+  card._mdRows = null;
+  const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const pts = shareEntries(rows).entries.flatMap((x) => {
+    const p = PRICES.get(x.e);
+    return p ? [{ e: x.e, usd: p.usd, q: x.overall, plan: p.plan }] : [];
+  });
+  if (!pts.length) {
+    holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
+    return;
+  }
+  card._mdRows = () => [
+    ["engine", "$ / 1k queries", "overall"],
+    ...pts.map((p) => [displayName(p.e), fmtUsd(p.usd), fmtPct(p.q)]),
+  ];
+  const narrow = matchMedia("(max-width: 640px)").matches;
+  const W = narrow ? 560 : 860, H = narrow ? 440 : 460;
+  const M = { top: 16, right: 24, bottom: 56, left: 60 };
+  const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
+  const xTop = Math.ceil(Math.max(...pts.map((p) => p.usd))) + 1;
+  const qs = pts.map((p) => p.q);
+  const yLo = Math.max(0, Math.floor((Math.min(...qs) - 0.04) * 20) / 20);
+  const yHi = Math.min(1, Math.ceil((Math.max(...qs) + 0.04) * 20) / 20);
+  const yStep = yHi - yLo <= 0.3 ? 0.05 : 0.1;
+  const X = (v) => M.left + (v / xTop) * iw;
+  const Y = (v) => M.top + (1 - (v - yLo) / (yHi - yLo)) * ih;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
+    "aria-label": "Overall quality as share of ultimate vs price per 1,000 queries" });
+  const mx = X(xTop / 2), my = Y((yLo + yHi) / 2);
+  const defs = el("defs", {});
+  const dots = el("pattern", { id: "qp-dots", width: 24, height: 24,
+    patternUnits: "userSpaceOnUse", x: M.left + 8, y: M.top + 8 });
+  dots.appendChild(el("circle", { cx: 2, cy: 2, r: 1.4,
+    fill: "var(--text-primary)", "fill-opacity": 0.16 }));
+  defs.appendChild(dots);
+  svg.appendChild(defs);
+  svg.appendChild(el("rect", { x: M.left, y: M.top, width: mx - M.left, height: my - M.top,
+    fill: "var(--keenable-blue)", "fill-opacity": 0.05 }));
+  svg.appendChild(el("rect", { x: mx, y: my, width: M.left + iw - mx, height: M.top + ih - my,
+    fill: "#FF7E38", "fill-opacity": 0.08 }));
+  svg.appendChild(el("rect", { x: M.left, y: M.top, width: iw, height: ih, fill: "url(#qp-dots)" }));
+  svg.appendChild(el("rect", { x: M.left, y: M.top, width: iw, height: ih,
+    fill: "none", stroke: "var(--grid)", "stroke-width": 1 }));
+  for (let gv = Math.ceil(yLo / yStep) * yStep; gv <= yHi + 1e-9; gv += yStep) {
+    svg.appendChild(el("text", { x: M.left + 6, y: Math.min(Y(gv) + 14, M.top + ih - 22),
+      class: "qp-tick" }, fmtPct(gv)));
+  }
+  for (let v = 0; v <= xTop; v++) {
+    const edge = v === xTop;
+    svg.appendChild(el("text", { x: X(v) + (edge ? -3 : 3), y: M.top + ih - 7,
+      "text-anchor": edge ? "end" : "start", class: "qp-tick" }, `$${v}`));
+  }
+  const yT = el("text", { x: 16, y: M.top + ih / 2, "text-anchor": "middle",
+    transform: `rotate(-90 16 ${M.top + ih / 2})`, class: "qp-axis" });
+  yT.appendChild(el("tspan", {}, "Overall quality"));
+  yT.appendChild(el("tspan", { class: "dim" }, " — 7-day mean share of ultimate"));
+  svg.appendChild(yT);
+  const xT = el("text", { x: M.left + iw / 2, y: H - 12, "text-anchor": "middle", class: "qp-axis" });
+  xT.appendChild(el("tspan", {}, "Price, $ per 1k queries"));
+  xT.appendChild(el("tspan", { class: "dim" }, " — lowest public tier"));
+  svg.appendChild(xT);
+  const items = pts.map((p) => ({ ...p, px: X(p.usd), yPos: Y(p.q), right: X(p.usd) < M.left + iw - 130 }));
+  const clusters = new Map();
+  for (const it of items) {
+    const k = `${it.usd}|${it.right}`;
+    clusters.set(k, [...(clusters.get(k) || []), it]);
+  }
+  for (const group of clusters.values()) stackLabels(group, M.top + 12, M.top + ih - 10, 18);
+  for (const it of items) {
+    const g = el("g");
+    g.appendChild(el("title", {},
+      `${displayName(it.e)} — ${fmtPct(it.q)} of ultimate at ${fmtUsd(it.usd)} / 1k queries (${it.plan})`));
+    const home = it.e === HOME_ENGINE;
+    const s = it.right ? 1 : -1;
+    if (Math.abs(it.labelY - it.yPos) > 4) {
+      g.appendChild(el("line", { x1: it.px, y1: it.yPos + Math.sign(it.labelY - it.yPos) * 6,
+        x2: it.px, y2: it.labelY, stroke: "var(--baseline)", "stroke-width": 1 }));
+    }
+    g.appendChild(el("circle", { cx: it.px, cy: it.yPos, r: 5,
+      fill: home ? "var(--keenable-blue)" : "var(--text-primary)" }));
+    const logo = ENGINE_LOGOS.get(it.e);
+    if (logo) {
+      g.appendChild(el("image", { href: logo, x: it.right ? it.px - 27 : it.px + 11,
+        y: it.labelY - 8, width: 16, height: 16 }));
+    }
+    g.appendChild(el("text", { x: it.px + s * 11, y: it.labelY + 4,
+      "text-anchor": it.right ? "start" : "end",
+      class: "qp-name" + (home ? " home-name" : "") }, displayName(it.e)));
+    svg.appendChild(g);
+  }
+  holder.appendChild(svg);
+}
+
+function renderLatencySummary(rows) {
+  const week = inRange(rows, WEEK_MS);
+  const stats = ENGINES.map((e) => {
+    const er = week.filter((r) => r.engine === e);
+    const raw = er.flatMap((r) => r.lat_ms || []);
+    const fallback = er.filter((r) => !r.lat_ms?.length);
+    const p50s = fallback.map((r) => r.p50_ms).filter((v) => v != null);
+    const p95s = fallback.map((r) => r.p95_ms).filter((v) => v != null);
+    const errors = er.reduce((s, r) => s + (r.search_errors || 0), 0);
+    const queries = er.reduce((s, r) => s + (r.num_queries || 0), 0);
+    if (!raw.length && !p50s.length) return null;
+    return {
+      e,
+      p50: pctl([...raw, ...p50s], 0.5),
+      p95: raw.length || p95s.length ? pctl([...raw, ...p95s], 0.95) : null,
+      err: queries ? errors / queries : null,
+      n: raw.length,
+    };
+  }).filter(Boolean);
+  const card = document.getElementById("card-latency-dumbbell");
+  card._mdRows = null;
+  const holderD = document.getElementById("latency-dumbbell");
+  holderD.replaceChildren();
+  const xs = stats.filter((x) => x.p50 != null && x.p95 != null)
+    .sort((a, b) => a.p50 - b.p50);
+  if (!xs.length) {
+    holderD.appendChild(el("div", { class: "empty" }, "No latency data yet — collected from new runs."));
+    return;
+  }
+  card._mdRows = () => [
+    ["engine", "p50", "p95", "errors"],
+    ...xs.map((x) => [displayName(x.e), fmtMs(x.p50), fmtMs(x.p95),
+      x.err == null ? "–" : `${(x.err * 100).toFixed(1)}%`]),
+  ];
+  const W = 720, LBL = 138, PADR = 24, ROW = 26, TOP = 24;
+  const innerW = W - LBL - PADR;
+  const fastest = { p50: xs[0].p50, p95: Math.min(...xs.map((x) => x.p95)) };
+  const rowInfo = (x) => {
+    const parts = [
+      `${displayName(x.e)} — p50 ${fmtMs(x.p50)} (${(x.p50 / fastest.p50).toFixed(1)}× fastest)`,
+      `p95 ${fmtMs(x.p95)} (${(x.p95 / fastest.p95).toFixed(1)}× fastest)`,
+      `tail ${(x.p95 / x.p50).toFixed(1)}×`,
+      x.n ? `${x.n} calls` : "per-run percentiles",
+    ];
+    if (x.err != null) parts.push(`${(x.err * 100).toFixed(1)}% errors`);
+    return parts.join(" · ");
+  };
+
+  const lo = fastest.p50 * 0.9, hi = Math.max(...xs.map((x) => x.p95)) * 1.12;
+  const lx = (v) => LBL + ((Math.log10(v) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo))) * innerW;
+  const H = TOP + xs.length * ROW + 30;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
+    "aria-label": "Dumbbell chart of p50 to p95 search latency per engine" });
+  let tick = 250;
+  while (tick / 2 > lo) tick /= 2;
+  for (let t = tick; t <= hi; t *= 2) {
+    svg.appendChild(el("line", { x1: lx(t), y1: TOP, x2: lx(t), y2: TOP + xs.length * ROW,
+      stroke: "var(--grid)", "stroke-width": 1 }));
+    svg.appendChild(el("text", { x: lx(t), y: TOP - 9, "text-anchor": "middle",
+      class: "axis-text", "font-size": 10 }, fmtMs(t)));
+  }
+  xs.forEach((x, i) => {
+    const y = TOP + i * ROW + ROW / 2;
+    const g = el("g");
+    g.appendChild(el("title", {}, rowInfo(x)));
+    if (x.e === HOME_ENGINE) {
+      g.appendChild(el("rect", { x: 0, y: y - ROW / 2, width: W, height: ROW,
+        fill: "var(--home-tint)" }));
+    }
+    g.appendChild(el("text", { x: LBL - 30, y: y + 3.5, "text-anchor": "end",
+      "font-size": 11.5, fill: "var(--text-primary)",
+      "font-weight": x.e === HOME_ENGINE ? 500 : 400 }, displayName(x.e)));
+    const logo = ENGINE_LOGOS.get(x.e);
+    if (logo) g.appendChild(el("image", { href: logo, x: LBL - 24, y: y - 8, width: 16, height: 16 }));
+    g.appendChild(el("line", { x1: lx(x.p50), y1: y, x2: lx(x.p95), y2: y,
+      stroke: colorOf(x.e), "stroke-width": 2, "stroke-opacity": 0.55,
+      "stroke-linecap": "round" }));
+    g.appendChild(el("circle", { cx: lx(x.p50), cy: y, r: 4.2, fill: colorOf(x.e) }));
+    g.appendChild(el("circle", { cx: lx(x.p95), cy: y, r: 4.2,
+      fill: "var(--surface-1)", stroke: colorOf(x.e), "stroke-width": 1.8 }));
+    svg.appendChild(g);
+  });
+  const ly = TOP + xs.length * ROW + 18;
+  svg.appendChild(el("circle", { cx: LBL, cy: ly - 3.5, r: 4.2, fill: "var(--text-secondary)" }));
+  svg.appendChild(el("text", { x: LBL + 9, y: ly, class: "axis-text", "font-size": 10.5 }, "p50"));
+  svg.appendChild(el("circle", { cx: LBL + 44, cy: ly - 3.5, r: 4.2,
+    fill: "var(--surface-1)", stroke: "var(--text-secondary)", "stroke-width": 1.8 }));
+  svg.appendChild(el("text", { x: LBL + 53, y: ly, class: "axis-text", "font-size": 10.5 }, "p95"));
+  holderD.appendChild(svg);
+}
+
+function renderHistoryTable(rows) {
+  const holder = document.getElementById("history-table");
+  holder.replaceChildren();
+  const table = el("table");
+  const head = el("tr");
+  for (const h of ["time (UTC)", "benchmark", "engine", "metric", "value", "p50", "p95", "scored", "errors"]) {
+    head.appendChild(el("th", { class: ["value", "p50", "p95", "scored", "errors"].includes(h) ? "num" : "" }, h));
+  }
+  table.appendChild(head);
+  for (const r of [...rows].reverse()) {
+    const k = r.bench === "scholar" ? 10 : 5;
+    const metrics = ["news", "agentic_rare"].includes(r.bench)
+      ? [["nDCG@5", r.ndcg]]
+      : [[`recall@${k}`, r.recall], [`MRR@${k}`, r.mrr]];
+    for (const [name, v] of metrics) {
+      const tr = el("tr");
+      markHome(tr, r.engine);
+      tr.appendChild(el("td", {}, fmtTime(new Date(r.ts))));
+      tr.appendChild(el("td", {}, verticalName(r.bench)));
+      tr.appendChild(el("td", {}, displayName(r.engine)));
+      tr.appendChild(el("td", {}, name));
+      tr.appendChild(el("td", { class: "num" }, fmt3(v)));
+      tr.appendChild(el("td", { class: "num" }, fmtMs(r.p50_ms)));
+      tr.appendChild(el("td", { class: "num" }, fmtMs(r.p95_ms)));
+      tr.appendChild(el("td", { class: "num" }, `${r.num_scored}/${r.num_queries}`));
+      tr.appendChild(el("td", { class: "num" }, String((r.search_errors || 0) + (r.judge_errors || 0))));
+      table.appendChild(tr);
+    }
+  }
+  holder.appendChild(table);
+}
+
+const RATING_BG = ["#EAF2FF", "#C7E0FF", "#74A6FF", "#005CFF", "#0D2C6A"];
+const RATING_INK = ["#2A2A2A", "#2A2A2A", "#2A2A2A", "#ffffff", "#ffffff"];
+
+let ENGINE_FAMILY = new Map();
+const OVERLAP_BG = ["#62BB78", "#C3EAC9", "#F7EFB5", "#FCA68E", "#D34517"];
+const OVERLAP_INK = ["#2A2A2A", "#2A2A2A", "#2A2A2A", "#2A2A2A", "#ffffff"];
+const LOWSHARED_STEPS = [0.05, 0.12, 0.25, 0.5];
+const overlapStep = (v) => {
+  const i = LOWSHARED_STEPS.findIndex((t) => v < t);
+  return i === -1 ? 4 : i;
+};
+
+function overlapMatrix(holder, engines, cellFor) {
+  const table = el("table");
+  const head = el("tr");
+  head.appendChild(el("th", {}, ""));
+  for (const e of engines) {
+    const th = el("th", { class: "col" });
+    markHome(th, e);
+    th.appendChild(el("span", {}, displayName(e)));
+    head.appendChild(th);
+  }
+  table.appendChild(head);
+  for (const a of engines) {
+    const tr = el("tr");
+    const nameCell = engineCell(a);
+    markHome(nameCell, a);
+    tr.appendChild(nameCell);
+    for (const b of engines) {
+      const cell = a === b ? null : cellFor(a, b);
+      const td = el("td", { class: "overlap-cell" }, cell ? cell.text : "–");
+      if (cell) {
+        td.style.background = OVERLAP_BG[cell.step];
+        td.style.color = OVERLAP_INK[cell.step];
+        td.title = cell.title;
+      }
+      tr.appendChild(td);
+    }
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
+function renderOverlap(rows, uniqAgg) {
+  const lowHolder = document.getElementById("lowshared-table");
+  const graphHolder = document.getElementById("sharegraph");
+  lowHolder.replaceChildren();
+  graphHolder.replaceChildren();
+  const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
+  const pairs = new Map();
+  const seen = new Set();
+  for (const r of rows) {
+    seen.add(r.a);
+    seen.add(r.b);
+    const key = pairKey(r.a, r.b);
+    let agg = pairs.get(key);
+    if (!agg) pairs.set(key, agg = { low2: 0, lowUrls: 0, nLow: 0 });
+    if (r.num_suspect != null) {
+      agg.low2 += r.num_suspect;
+      agg.lowUrls += r.low_shared_urls || 0;
+      agg.nLow += r.num_queries;
+    }
+  }
+  const engines = ENGINES.filter((e) => seen.has(e));
+  const rank = new Map(engines.map((e, i) => [e, i]));
+  const famRank = (e) => rank.get(ENGINE_FAMILY.get(e) ?? e) ?? rank.get(e);
+  engines.sort((a, b) => famRank(a) - famRank(b));
+  const emptyMsg = "No overlap data yet.";
+  if (engines.length < 2) {
+    lowHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
+    graphHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
+    return;
+  }
+  document.getElementById("lowshared-sub").textContent =
+    "share of queries where the pair shares a below-HM URL or 3+ URLs of any rating";
+  overlapMatrix(lowHolder, engines, (a, b) => {
+    const agg = pairs.get(pairKey(a, b));
+    if (!agg || !agg.nLow) return null;
+    const v = agg.low2 / agg.nLow;
+    return {
+      text: `${Math.round(v * 100)}%`,
+      step: overlapStep(v),
+      title: `${displayName(a)} ∩ ${displayName(b)}: ${agg.low2} of ${agg.nLow} queries share a low-relevance URL or 3+ URLs (${agg.lowUrls} junk URLs total)`,
+    };
+  });
+  renderSharingGraph(graphHolder, engines, pairs, uniqAgg);
+}
+
+const GRAPH_MIN_SHARE = 0.3;
+const GRAPH_TIE_GAP = 0.05;
+
+function renderSharingGraph(holder, engines, pairs, uniqAgg) {
+  const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  document.getElementById("sharegraph-sub").textContent =
+    `pairs at ${fmtPct(GRAPH_MIN_SHARE)}+ suspicious sharing; arrows point from the likely source (less-unique engine), width tracks the share`;
+  const uniqPct = (e) => {
+    const u = uniqAgg.get(e);
+    return u?.total ? u.unique / u.total : null;
+  };
+  const edges = [];
+  for (const [key, agg] of pairs) {
+    if (!agg.nLow) continue;
+    const share = agg.low2 / agg.nLow;
+    if (share < GRAPH_MIN_SHARE) continue;
+    const [a, b] = key.split("|");
+    const ua = uniqPct(a), ub = uniqPct(b);
+    if (ua == null || ub == null) continue;
+    const [borrower, source] = ua >= ub ? [a, b] : [b, a];
+    edges.push({ borrower, source, share, tie: Math.abs(ua - ub) < GRAPH_TIE_GAP });
+  }
+  const card = holder.closest(".lb-panel, .card");
+  card._mdRows = null;
+  if (!edges.length) {
+    holder.appendChild(el("div", { class: "empty" }, `No pairs above ${fmtPct(GRAPH_MIN_SHARE)} yet.`));
+    return;
+  }
+  card._mdRows = () => [
+    ["source", "dir", "borrower", "share of queries", "source uniqueness", "borrower uniqueness"],
+    ...edges.map((d) => [displayName(d.source), d.tie ? "↔" : "→", displayName(d.borrower), fmtPct(d.share),
+      fmtPct(uniqPct(d.source)), fmtPct(uniqPct(d.borrower))]),
+  ];
+  const adj = new Map();
+  for (const d of edges) {
+    for (const [x, y] of [[d.borrower, d.source], [d.source, d.borrower]]) {
+      adj.set(x, [...(adj.get(x) || []), [y, d.share]]);
+    }
+  }
+  const nodes = [];
+  const seen = new Set();
+  const visit = (e) => {
+    if (seen.has(e)) return;
+    seen.add(e);
+    nodes.push(e);
+    for (const [n] of [...adj.get(e)].sort((x, y) => y[1] - x[1])) visit(n);
+  };
+  for (const e of [...adj.keys()].sort((a, b) => adj.get(b).length - adj.get(a).length)) visit(e);
+  const center = engines.includes(HOME_ENGINE) ? HOME_ENGINE : null;
+  const ringNodes = nodes.filter((e) => e !== center);
+  const ringIso = engines.filter((e) => !seen.has(e) && e !== center);
+  const total = ringNodes.length + ringIso.length;
+  const ring = [];
+  for (let s = 0, ci = 0, ii = 0; s < total; s++) {
+    if (Math.floor(((s + 1) * ringIso.length) / total) > ii) ring.push(ringIso[ii++]);
+    else ring.push(ringNodes[ci++]);
+  }
+  const W = 460, H = 330, cx = W / 2, cy = H / 2, PAD = 20;
+  const R = H / 2 - 50;
+  const pos = new Map(ring.map((e, i) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / ring.length;
+    return [e, { x: cx + R * Math.cos(ang), y: cy + R * Math.sin(ang), ang }];
+  }));
+  if (center) pos.set(center, { x: cx, y: cy, ang: null });
+  const svg = el("svg", { viewBox: `${-PAD} 0 ${W + 2 * PAD} ${H}`, role: "img" });
+  const arrowAt = (tipX, tipY, ux, uy) => {
+    const bx = tipX - ux * 13, by = tipY - uy * 13;
+    return el("path", {
+      d: `M${tipX},${tipY} L${bx - uy * 5.5},${by + ux * 5.5} L${bx + ux * 3.5},${by + uy * 3.5} L${bx + uy * 5.5},${by - ux * 5.5} Z`,
+      class: "sg-arrow",
+    });
+  };
+  for (const d of edges) {
+    const p1 = pos.get(d.source), p2 = pos.get(d.borrower);
+    const ux = (p2.x - p1.x) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    const uy = (p2.y - p1.y) / Math.hypot(p2.x - p1.x, p2.y - p1.y);
+    const trim = 11, back = trim + 10;
+    const line = el("line", {
+      x1: p1.x + ux * (d.tie ? back : trim), y1: p1.y + uy * (d.tie ? back : trim),
+      x2: p2.x - ux * back, y2: p2.y - uy * back,
+      class: "sg-edge",
+      "stroke-width": (1.5 + (d.share - GRAPH_MIN_SHARE) * 3).toFixed(1),
+    });
+    const g = el("g");
+    g.appendChild(arrowAt(p2.x - ux * trim, p2.y - uy * trim, ux, uy));
+    if (d.tie) g.appendChild(arrowAt(p1.x + ux * trim, p1.y + uy * trim, -ux, -uy));
+    g.appendChild(el("title", {}, `${displayName(d.source)} → ${displayName(d.borrower)}: suspicious sharing on ${fmtPct(d.share)} of queries; uniqueness ${displayName(d.source)} ${fmtPct(uniqPct(d.source))} vs ${displayName(d.borrower)} ${fmtPct(uniqPct(d.borrower))}${d.tie ? " — direction unclear" : ""}`));
+    g.appendChild(line);
+    const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+    const sgn = (cx - mx) * -uy + (cy - my) * ux >= 0 ? 1 : -1;
+    g.appendChild(el("text", {
+      x: mx - uy * 11 * sgn, y: my + ux * 11 * sgn + 4,
+      class: "sg-label",
+    }, fmtPct(d.share)));
+    svg.appendChild(g);
+  }
+  for (const [e, p] of pos) {
+    const g = el("g");
+    const u = uniqPct(e);
+    g.appendChild(el("title", {}, u == null ? displayName(e) : `${displayName(e)}: ${fmtPct(u)} unique URLs`));
+    const logo = ENGINE_LOGOS.get(e);
+    if (logo) g.appendChild(el("image", { href: logo, x: p.x - 9, y: p.y - 9, width: 18, height: 18 }));
+    else g.appendChild(el("circle", { cx: p.x, cy: p.y, r: 7, fill: colorOf(e) }));
+    if (p.ang == null) {
+      g.appendChild(el("text", { x: p.x, y: p.y + 24, "text-anchor": "middle",
+        class: "sg-name" }, displayName(e)));
+    } else {
+      const c = Math.cos(p.ang);
+      g.appendChild(el("text", {
+        x: cx + (R + 15) * Math.cos(p.ang), y: cy + (R + 15) * Math.sin(p.ang) + 4,
+        "text-anchor": c > 0.35 ? "start" : c < -0.35 ? "end" : "middle",
+        class: "sg-name",
+      }, displayName(e)));
+    }
+    svg.appendChild(g);
+  }
+  holder.appendChild(svg);
+}
+
+function uniquenessAgg(rows) {
+  const agg = new Map();
+  for (const r of rows) {
+    if (Date.parse(r.ts) < TREND_START) continue;
+    const e = agg.get(r.engine) || { unique: 0, total: 0, relUnique: 0, relDen: 0 };
+    e.unique += r.unique_urls;
+    e.total += r.total_urls;
+    if (r.unique_relevant_urls != null) {
+      e.relUnique += r.unique_relevant_urls;
+      e.relDen += r.total_urls;
+    }
+    agg.set(r.engine, e);
+  }
+  return agg;
+}
+
+function renderUniqueness(agg) {
+  const holder = document.getElementById("uniqueness-table");
+  holder.replaceChildren();
+  const engines = ENGINES.filter((e) => agg.get(e)?.relDen);
+  if (!engines.length) {
+    holder.appendChild(el("div", { class: "empty" }, "No uniqueness data yet."));
+    return;
+  }
+  engines.sort((a, b) => agg.get(b).relUnique / agg.get(b).relDen - agg.get(a).relUnique / agg.get(a).relDen);
+  const table = el("table");
+  const head = el("tr");
+  for (const h of ["engine", "", "unique", "URLs"]) head.appendChild(el("th", {}, h));
+  table.appendChild(head);
+  for (const e of engines) {
+    const unique = agg.get(e).relUnique;
+    const total = agg.get(e).relDen;
+    const pct = unique / total;
+    const tr = el("tr");
+    markHome(tr, e);
+    const nameCell = engineCell(e);
+    const barCell = el("td");
+    const track = el("span", { class: "bar-track" });
+    const fill = el("span", { class: "bar-fill" });
+    fill.style.width = `${Math.round(pct * 100)}%`;
+    fill.style.background = colorOf(e);
+    track.appendChild(fill);
+    barCell.appendChild(track);
+    tr.append(nameCell, barCell, el("td", {}, `${Math.round(pct * 100)}%`), el("td", {}, `${unique.toLocaleString()} / ${total.toLocaleString()}`));
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+}
+
+function ratingChip(rating, title) {
+  const chip = el("span", { class: "chip" }, rating == null ? "?" : String(rating));
+  chip.style.background = rating == null ? "var(--track)" : RATING_BG[rating];
+  chip.style.color = rating == null ? "var(--text-secondary)" : RATING_INK[rating];
+  chip.style.borderColor = "transparent";
+  if (title) chip.title = title;
+  return chip;
+}
+
+async function fetchJson(url) {
+  const resp = await fetch(url, { cache: "no-store" });
+  if (!resp.ok) throw new Error(`${url}: ${resp.status}`);
+  return resp.json();
+}
+
+function host(url) {
+  try { return new URL(url).hostname; } catch { return url; }
+}
+
+function resultBlock(r, headExtras, judgeChips = []) {
+  const div = el("div", { class: "result" });
+  const head = el("div", { class: "head" });
+  for (const node of headExtras) head.appendChild(node);
+  const title = el("span", { class: "title" });
+  const a = el("a", { href: r.url, rel: "noopener noreferrer", target: "_blank" });
+  a.textContent = r.title || r.url;
+  title.appendChild(a);
+  head.appendChild(title);
+  head.appendChild(el("span", { class: "host" }, host(r.url)));
+  div.appendChild(head);
+  if (r.snippet) div.appendChild(el("div", { class: "snippet" }, r.snippet));
+  if (judgeChips.length || r.reasoning) {
+    const box = el("div", { class: "judgement" });
+    if (judgeChips.length) {
+      const chips = el("span", { class: "chips" });
+      for (const c of judgeChips) chips.appendChild(c);
+      box.appendChild(chips);
+    }
+    const text = el("span");
+    const failed = Object.keys(r.gates || {}).filter((g) => r.gates[g] === "fail");
+    const lead = [r.label, failed.length ? `failed: ${failed.join(", ")}` : ""]
+      .filter(Boolean).join(" · ");
+    if (lead) text.appendChild(el("span", { class: "label" }, lead));
+    if (r.reasoning) text.appendChild(document.createTextNode(`${lead ? " — " : ""}${r.reasoning}`));
+    box.appendChild(text);
+    div.appendChild(box);
+  }
+  return div;
+}
+
+const NDCG_GAIN = { 4: 1, 3: 0.667, 2: 0.117 };
+const dcgAtK = (ratings, k) =>
+  (ratings || []).slice(0, k).reduce((s, r, i) => s + (NDCG_GAIN[r] || 0) / Math.log2(i + 2), 0);
+
+const TRACKING_PARAMS = new Set(["_hsenc", "_hsmi", "dclid", "epik", "fbclid",
+  "gbraid", "gclid", "igshid", "mc_cid", "mc_eid", "mkt_tok", "msclkid", "msockid",
+  "oly_anon_id", "oly_enc_id", "srsltid", "ttclid", "twclid", "vero_id", "wbraid", "yclid"]);
+function normalizeUrl(url) {
+  let parts;
+  try { parts = new URL(url.trim()); } catch { return url; }
+  const host = parts.hostname.replace(/^www\./, "");
+  let path = parts.pathname;
+  try { path = decodeURIComponent(path); } catch {}
+  path = path.replace(/\/+$/, "");
+  const params = [...parts.searchParams.entries()]
+    .filter(([key]) => !key.startsWith("utm_") && !TRACKING_PARAMS.has(key))
+    .sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] < b[1] ? -1 : a[1] > b[1] ? 1 : 0);
+  const query = params.length ? `?${new URLSearchParams(params)}` : "";
+  return `${host}${path}${query}`;
+}
+
+function pooledIdcg(report, query, k) {
+  const best = new Map();
+  for (const e of Object.values(report.engines || {})) {
+    for (const pq of e.per_query || []) {
+      if (pq.query !== query || pq.search_error != null) continue;
+      for (const r of pq.results || []) {
+        if (r.rating == null) continue;
+        const norm = normalizeUrl(r.url);
+        const cur = best.get(norm);
+        if (cur == null || r.rating > cur) best.set(norm, r.rating);
+      }
+    }
+  }
+  if (!best.size) return null;
+  return dcgAtK([...best.values()].sort((a, b) => b - a), k) || null;
+}
+
+function legacyNdcg(report) {
+  const k = report.k ?? report.num_results ?? 5;
+  const ultimate = report.engines?.ultimate;
+  const idcg = new Map();
+  for (const pq of ultimate?.per_query || []) {
+    if (pq.rbp != null) idcg.set(pq.query, dcgAtK(pq.penalized_ratings, k));
+  }
+  return (pq) => {
+    if (!pq.penalized_ratings) return null;
+    let ideal = idcg.get(pq.query);
+    if (ideal === undefined && !ultimate) {
+      ideal = pooledIdcg(report, pq.query, k);
+      idcg.set(pq.query, ideal);
+    }
+    return ideal ? dcgAtK(pq.penalized_ratings, k) / ideal : null;
+  };
+}
+
+function renderNewsRun(holder, per, legacy) {
+  for (const pq of per) {
+    const row = el("details", { class: "qrow" });
+    const summary = el("summary");
+    summary.appendChild(el("span", {}, pq.query));
+    const chips = el("span", { class: "chips" });
+    for (const r of pq.ratings || []) chips.appendChild(ratingChip(r));
+    summary.appendChild(chips);
+    summary.appendChild(el("span", { class: "score" },
+      pq.search_error ? "search error" : `nDCG ${fmt3(pq.ndcg ?? legacy(pq))}`));
+    row.appendChild(summary);
+    for (const r of pq.results || []) {
+      const chips = [ratingChip(r.rating, "judge rating")];
+      if (r.penalized != null && r.penalized !== r.rating) {
+        chips.push(ratingChip(r.penalized, "after redundancy penalty"));
+      }
+      row.appendChild(resultBlock(r, [], chips));
+    }
+    if (pq.search_error) {
+      row.appendChild(el("div", { class: "result" }, `search error: ${pq.search_error.error_type}`));
+    }
+    holder.appendChild(row);
+  }
+}
+
+function renderFinanceRun(holder, per) {
+  for (const pq of per) {
+    const row = el("details", { class: "qrow" });
+    const summary = el("summary");
+    summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
+    if (pq.syntax && pq.syntax !== "plain") summary.appendChild(el("span", { class: "chip" }, pq.syntax));
+    if (pq.tier) summary.appendChild(el("span", { class: "chip" }, pq.tier));
+    summary.appendChild(el("span", {}, pq.query));
+    summary.appendChild(el("span", { class: "host" }, `gold: ${pq.value ?? "–"}`));
+    summary.appendChild(el("span", { class: "score" },
+      pq.search_error ? "search error"
+        : pq.hit_rank ? `hit @${pq.hit_rank}` : "miss"));
+    row.appendChild(summary);
+    (pq.results || []).forEach((r, i) => {
+      const rank = i + 1;
+      const mark = rank === pq.hit_rank
+        ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
+        : el("span", { class: "miss-marker" }, `#${rank}`);
+      row.appendChild(resultBlock(r, [mark]));
+    });
+    holder.appendChild(row);
+  }
+}
+
+function renderKnownItemRun(holder, per, goldKey) {
+  for (const pq of per) {
+    const row = el("details", { class: "qrow" });
+    const summary = el("summary");
+    summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
+    if (pq.syntax && pq.syntax !== "plain") summary.appendChild(el("span", { class: "chip" }, pq.syntax));
+    summary.appendChild(el("span", {}, pq.query));
+    if (pq[goldKey]) summary.appendChild(el("span", { class: "host" }, `gold: ${pq[goldKey]}`));
+    summary.appendChild(el("span", { class: "score" },
+      pq.search_error ? "search error"
+        : pq.hit_rank ? `hit @${pq.hit_rank}` : "miss"));
+    row.appendChild(summary);
+    (pq.results || []).forEach((r, i) => {
+      const rank = i + 1;
+      const mark = rank === pq.hit_rank
+        ? el("span", { class: "hit-marker" }, `#${rank} ✓`)
+        : el("span", { class: "miss-marker" }, `#${rank}`);
+      const block = resultBlock(r, [mark]);
+      const ids = Object.entries(r.ids || {}).map(([k, v]) => `${k}:${v}`).join(" ");
+      if (ids) block.querySelector(".head").appendChild(el("span", { class: "host" }, ids));
+      row.appendChild(block);
+    });
+    holder.appendChild(row);
+  }
+}
+
+const LEGACY_BENCH = { freshstream: "news", companyfill: "finance", rarestream: "agentic_rare" };
+const RUN_ARTIFACT = { scholar: ["scholar.json"], news: ["ndcg.json", "rbp.json"], finance: ["recall.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], legal: ["legal.json"] };
+const BENCHES = Object.keys(RUN_ARTIFACT);
+
+let runDetailSeq = 0;
+const RUN_PAGE_SIZE = 20;
+let reportCache = { url: null, data: null };
+
+function fetchReport(url) {
+  if (reportCache.url !== url) {
+    reportCache = { url, data: fetchJson(url) };
+    reportCache.data.catch(() => {
+      if (reportCache.url === url) reportCache = { url: null, data: null };
+    });
+  }
+  return reportCache.data;
+}
+
+async function renderRunDetail(runs) {
+  const seq = ++runDetailSeq;
+  const holder = document.getElementById("run-detail");
+  const runSel = document.getElementById("run-select");
+  const benchSel = document.getElementById("run-bench");
+  const engineSel = document.getElementById("run-engine");
+  const pageSel = document.getElementById("run-page");
+  holder.replaceChildren();
+  const run = runs.find((r) => r.id === runSel.value);
+  if (!run) {
+    pageSel.hidden = true;
+    holder.appendChild(el("div", { class: "empty" }, "No archived runs yet."));
+    return;
+  }
+  const artifact = RUN_ARTIFACT[benchSel.value].find((a) => run.artifacts.includes(a));
+  if (!artifact) {
+    pageSel.hidden = true;
+    holder.appendChild(el("div", { class: "empty" }, `This run has no ${benchSel.value} results.`));
+    return;
+  }
+  holder.appendChild(el("div", { class: "empty" }, "Loading…"));
+  try {
+    const report = await fetchReport(`${RUNS_BASE}/${run.id}/${artifact}`);
+    if (seq !== runDetailSeq) return;
+    const available = Object.keys(report.engines || {}).filter((e) => !HIDDEN_ENGINES.has(e));
+    const current = engineSel.value;
+    engineSel.replaceChildren();
+    for (const e of available) engineSel.appendChild(el("option", { value: e }, displayName(e)));
+    engineSel.value = available.includes(current) ? current : available[0] || "";
+    const per = report.engines[engineSel.value]?.per_query || [];
+    const pages = Math.ceil(per.length / RUN_PAGE_SIZE);
+    const key = `${benchSel.value}|${run.id}|${engineSel.value}`;
+    const page = key === pageSel.dataset.key
+      ? Math.max(0, Math.min(Number(pageSel.value) || 0, pages - 1))
+      : 0;
+    pageSel.replaceChildren();
+    for (let i = 0; i < pages; i++) {
+      const lo = i * RUN_PAGE_SIZE + 1;
+      const hi = Math.min((i + 1) * RUN_PAGE_SIZE, per.length);
+      pageSel.appendChild(el("option", { value: String(i) }, `${lo}–${hi} of ${per.length}`));
+    }
+    pageSel.value = String(page);
+    pageSel.dataset.key = key;
+    pageSel.hidden = pages <= 1;
+    const slice = per.slice(page * RUN_PAGE_SIZE, (page + 1) * RUN_PAGE_SIZE);
+    holder.replaceChildren();
+    if (benchSel.value === "finance") renderFinanceRun(holder, slice);
+    else if (benchSel.value === "scholar") renderKnownItemRun(holder, slice, "paper_key");
+    else if (benchSel.value === "legal") renderKnownItemRun(holder, slice, "case_key");
+    else renderNewsRun(holder, slice, legacyNdcg(report));
+    if (!holder.children.length) {
+      holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
+    } else {
+      const cfg = [];
+      if (report.judge_model) cfg.push(`judge ${report.judge_model}`);
+      if (report.num_results) cfg.push(`top-${report.num_results} requested`);
+      if (cfg.length) holder.prepend(el("div", { class: "sub" }, cfg.join(" · ")));
+    }
+  } catch (err) {
+    if (seq !== runDetailSeq) return;
+    pageSel.hidden = true;
+    holder.replaceChildren();
+    holder.appendChild(el("div", { class: "empty" }, `Could not load run: ${err.message}`));
+  }
+}
+
+async function initRunBrowser() {
+  const runSel = document.getElementById("run-select");
+  const benchSel = document.getElementById("run-bench");
+  const engineSel = document.getElementById("run-engine");
+  const pageSel = document.getElementById("run-page");
+  let runs = [];
+  try { runs = await fetchJson("data/runs.json"); } catch {}
+  runs = [...runs].reverse();
+  for (const b of BENCHES) {
+    benchSel.appendChild(el("option", { value: b }, verticalName(b)));
+  }
+  for (const e of ENGINES) engineSel.appendChild(el("option", { value: e }, displayName(e)));
+
+  function populateRuns() {
+    const artifacts = RUN_ARTIFACT[benchSel.value];
+    const matching = runs.filter((r) => artifacts.some((a) => r.artifacts.includes(a)));
+    runSel.replaceChildren();
+    for (const r of matching) {
+      runSel.appendChild(el("option", { value: r.id }, `${fmtTime(new Date(r.ts))} UTC`));
+    }
+    runSel.disabled = matching.length === 0;
+  }
+
+  populateRuns();
+  benchSel.addEventListener("change", () => { populateRuns(); renderRunDetail(runs); });
+  runSel.addEventListener("change", () => renderRunDetail(runs));
+  engineSel.addEventListener("change", () => renderRunDetail(runs));
+  pageSel.addEventListener("change", () => renderRunDetail(runs));
+  renderRunDetail(runs);
+}
+
+function refreshHistoryTable() {
+  if (document.getElementById("history-details").open) {
+    renderHistoryTable(history);
+  }
+}
+
+function renderAll() {
+  renderStandings(history);
+  renderQualityPrice(history);
+  renderPriceTable();
+  refreshHistoryTable();
+}
+
+function rowsToMarkdown(rows) {
+  const esc = (c) => String(c).replace(/\s+/g, " ").trim().replace(/\|/g, "\\|");
+  const lines = [`| ${rows[0].map(esc).join(" | ")} |`, `| ${rows[0].map(() => "---").join(" | ")} |`];
+  for (const r of rows.slice(1)) lines.push(`| ${r.map(esc).join(" | ")} |`);
+  return lines.join("\n");
+}
+
+function buildMarkdown() {
+  drawAllTrends?.();
+  const clean = (s) => s.replace(/\s+/g, " ").trim();
+  const subText = (node) => {
+    if (!node) return "";
+    const copy = node.cloneNode(true);
+    for (const h of copy.querySelectorAll(".hint[title]")) {
+      h.textContent = `${h.textContent} (${h.getAttribute("title")})`;
+    }
+    return clean(copy.textContent);
+  };
+  const lines = ["# NEEDLE — search engine benchmarks"];
+  const updated = document.getElementById("updated").textContent;
+  if (updated) lines.push("", updated);
+  for (const card of document.querySelectorAll(".wrap .card, .wrap .lb-panel")) {
+    if (card.closest("#card-runs")) {
+      if (card.id === "card-runs") {
+        lines.push("", `## ${card.querySelector("h2").textContent}`,
+          "", subText(card.querySelector(".sub")) +
+          " (https://huggingface.co/datasets/keenable-ai/needle-results)");
+      }
+      continue;
+    }
+    if (card.querySelector(".lb-panel")) continue;
+    const table = card.querySelector("table");
+    let rows = card._mdRows?.() ?? (table
+      ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
+      : null);
+    if (rows) {
+      const keep = rows[0].map((_, i) => rows.some((r) => clean(r[i])));
+      rows = rows.map((r) => r.filter((_, i) => keep[i]));
+    }
+    const prose = rows ? [] : [...card.querySelectorAll(".prose p")];
+    if (!rows && !prose.length) continue;
+    lines.push("", `## ${card.querySelector("h2").textContent}`);
+    const sub = subText(card.querySelector(".sub"));
+    if (sub) lines.push("", sub);
+    if (rows) lines.push("", rowsToMarkdown(rows));
+    else for (const p of prose) lines.push("", clean(p.textContent).replace(/\|/g, "\\|"));
+  }
+  return lines.join("\n") + "\n";
+}
+
+const EXPORT_PROPS = ["fill", "fill-opacity", "stroke", "stroke-width", "stroke-dasharray",
+  "stroke-linecap", "stroke-linejoin", "stroke-opacity", "opacity", "font-family", "font-size",
+  "font-weight", "letter-spacing", "text-anchor", "font-variant-numeric", "visibility", "display"];
+
+function inlineStyles(src, dst, props) {
+  const cs = getComputedStyle(src);
+  dst.setAttribute("style", [...(props || cs)].filter((p) => !p.startsWith("--"))
+    .map((p) => `${p}:${cs.getPropertyValue(p)}`).join(";"));
+  for (let i = 0; i < src.children.length; i++) inlineStyles(src.children[i], dst.children[i], props);
+}
+
+function chartLegendItems(panel) {
+  const items = [];
+  for (const row of panel.querySelectorAll(".legend button")) {
+    const key = row.querySelector(".key-logo, .key");
+    if (!key) continue;
+    items.push({
+      logo: key.classList.contains("key-logo") ? key.getAttribute("src") : null,
+      color: getComputedStyle(key).backgroundColor,
+      label: row.textContent.replace(/\s+/g, " ").trim(),
+    });
+  }
+  return items;
+}
+
+function sideTableFo(table, x, y) {
+  const r = table.getBoundingClientRect();
+  const clone = table.cloneNode(true);
+  inlineStyles(table, clone);
+  clone.style.margin = "0";
+  const fo = el("foreignObject", { x, y, width: Math.ceil(r.width), height: Math.ceil(r.height) });
+  fo.appendChild(clone);
+  return fo;
+}
+
+function chartExportSvg(panel) {
+  const src = panel.querySelector("svg[role=img]");
+  if (!src) return null;
+  const vb = src.viewBox.baseVal;
+  const clone = src.cloneNode(true);
+  inlineStyles(src, clone, EXPORT_PROPS);
+  clone.setAttribute("width", vb.width);
+  clone.setAttribute("height", vb.height);
+  const table = panel.querySelector(".st-table");
+  if (table) {
+    const gap = 16, pad = 8;
+    const fo = sideTableFo(table, pad, pad);
+    const tw = +fo.getAttribute("width"), th = +fo.getAttribute("height");
+    const W = pad + tw + gap + vb.width;
+    const H = Math.max(vb.height, th + pad * 2);
+    const out = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H });
+    out.appendChild(el("rect", { x: 0, y: 0, width: W, height: H, fill: panelBg(panel) }));
+    clone.setAttribute("x", pad + tw + gap);
+    out.append(fo, clone);
+    return out;
+  }
+  const items = chartLegendItems(panel);
+  const rowH = 20, pad = 10, colW = 180;
+  const perRow = Math.max(1, Math.floor(vb.width / colW));
+  const H = vb.height + (items.length ? pad + Math.ceil(items.length / perRow) * rowH : 0);
+  const out = el("svg", { viewBox: `0 0 ${vb.width} ${H}`, width: vb.width, height: H });
+  const cs = getComputedStyle(panel.closest(".card") || document.body);
+  out.appendChild(el("rect", { x: 0, y: 0, width: vb.width, height: H, fill: panelBg(panel) }));
+  out.appendChild(clone);
+  items.forEach((it, i) => {
+    const x = 10 + (i % perRow) * colW;
+    const y = vb.height + pad + Math.floor(i / perRow) * rowH;
+    if (it.logo) out.appendChild(el("image", { href: it.logo, x, y: y - 2, width: 13, height: 13 }));
+    else out.appendChild(el("rect", { x, y: y + 4, width: 13, height: 3, fill: it.color }));
+    out.appendChild(el("text", { x: x + 19, y: y + 9,
+      style: `font-family:${cs.fontFamily};font-size:12px;fill:${cs.color}` }, it.label));
+  });
+  return out;
+}
+
+function panelBg(panel) {
+  const bg = getComputedStyle(panel.closest(".card") || document.body).backgroundColor;
+  return !bg || bg === "rgba(0, 0, 0, 0)" ? getComputedStyle(document.body).backgroundColor : bg;
+}
+
+function tableExportSvg(panel) {
+  const table = panel.querySelector("table");
+  if (!table) return null;
+  const pad = 12;
+  const fo = sideTableFo(table, pad, pad);
+  const W = +fo.getAttribute("width") + pad * 2;
+  const H = +fo.getAttribute("height") + pad * 2;
+  const out = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H });
+  out.appendChild(el("rect", { x: 0, y: 0, width: W, height: H, fill: panelBg(panel) }));
+  out.appendChild(fo);
+  return out;
+}
+
+const HEADER_PROPS = ["font-family", "font-size", "font-weight", "font-style", "line-height",
+  "letter-spacing", "color", "margin"];
+
+function exportHeader(panel, w) {
+  const parts = [panel.querySelector("h2"), panel.querySelector(".sub")]
+    .filter((n) => n?.textContent.trim());
+  if (!parts.length) return null;
+  const div = el("div");
+  for (const n of parts) {
+    const clone = n.cloneNode(true);
+    inlineStyles(n, clone, HEADER_PROPS);
+    clone.style.display = "block";
+    div.appendChild(clone);
+  }
+  const base = `width:${w}px;overflow:hidden`;
+  div.setAttribute("style", `${base};position:absolute;left:-9999px`);
+  document.body.appendChild(div);
+  const h = div.offsetHeight;
+  div.remove();
+  div.setAttribute("style", base);
+  return { div, h };
+}
+
+function downloadChartPng(panel, name) {
+  const chart = chartExportSvg(panel) || tableExportSvg(panel);
+  if (!chart) return;
+  const vb = chart.viewBox.baseVal;
+  const pad = 12;
+  const hw = vb.width - pad * 2;
+  const head = exportHeader(panel, hw);
+  let out = chart;
+  if (head) {
+    const top = pad + head.h + 8;
+    const H = vb.height + top;
+    out = el("svg", { viewBox: `0 0 ${vb.width} ${H}`, width: vb.width, height: H });
+    out.appendChild(el("rect", { x: 0, y: 0, width: vb.width, height: H, fill: panelBg(panel) }));
+    const fo = el("foreignObject", { x: pad, y: pad, width: hw, height: head.h });
+    fo.appendChild(head.div);
+    out.appendChild(fo);
+    chart.setAttribute("y", top);
+    out.appendChild(chart);
+  }
+  const xml = new XMLSerializer().serializeToString(out);
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = out.viewBox.baseVal.width * 2;
+    canvas.height = out.viewBox.baseVal.height * 2;
+    canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      const a = el("a", { href: URL.createObjectURL(blob), download: `${name}.png` });
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    });
+  };
+  img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(xml)}`;
+}
+
+const ICON_LINK = "M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71";
+const ICON_DOWNLOAD = "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3";
+const ICON_CHECK = "M20 6L9 17l-4-4";
+
+function toolIcon(d) {
+  const svg = el("svg", { viewBox: "0 0 24 24", width: 13, height: 13, fill: "none",
+    stroke: "currentColor", "stroke-width": 2, "stroke-linecap": "round",
+    "stroke-linejoin": "round", "aria-hidden": "true" });
+  svg.appendChild(el("path", { d }));
+  return svg;
+}
+
+function activePanel(card) {
+  let p = card, n;
+  while ((n = p.querySelector(":scope > .lb-panel.active"))) p = n;
+  return p;
+}
+
+function initChartTools() {
+  for (const card of document.querySelectorAll(".card[data-tools]")) {
+    const tools = el("div", { class: "chart-tools" });
+    const link = el("button", { type: "button", title: "Copy a direct link to this chart" });
+    link.appendChild(toolIcon(ICON_LINK));
+    link.addEventListener("click", () => {
+      const id = activePanel(card).id;
+      window.history.replaceState(null, "", `#${id}`);
+      navigator.clipboard?.writeText(new URL(`${id}/`, location.href).href).catch(() => {});
+      link.replaceChildren(toolIcon(ICON_CHECK));
+      setTimeout(() => link.replaceChildren(toolIcon(ICON_LINK)), 1200);
+    });
+    const dl = el("button", { type: "button", title: "Download this chart as a PNG" });
+    dl.appendChild(toolIcon(ICON_DOWNLOAD));
+    dl.addEventListener("click", () => {
+      const panel = activePanel(card);
+      downloadChartPng(panel, `needle-${panel.id.replace(/^card-/, "")}`);
+    });
+    tools.append(link, dl);
+    card.appendChild(tools);
+  }
+}
+
+function revealHash() {
+  const target = location.hash.length > 1 && document.getElementById(location.hash.slice(1));
+  if (!target) return;
+  for (let p = target.closest(".lb-panel:not(.active)"); p;
+       p = target.closest(".lb-panel:not(.active)")) {
+    const btn = document.querySelector(`[data-panel="${p.id}"]`);
+    if (!btn) break;
+    btn.click();
+  }
+  (target.closest(".card") || target).scrollIntoView();
+}
+window.addEventListener("hashchange", revealHash);
+
+document.getElementById("export-md").addEventListener("click", () => {
+  const blob = new Blob([buildMarkdown()], { type: "text/plain;charset=utf-8" });
+  window.open(URL.createObjectURL(blob));
+});
+document.getElementById("export-pdf").addEventListener("click", () => window.print());
+window.addEventListener("beforeprint", () => drawAllTrends?.());
+
+for (const n of document.querySelectorAll("[data-vert]")) {
+  n.textContent = verticalName(n.dataset.vert);
+}
+
+for (const bar of document.querySelectorAll(".lb-tabs")) {
+  const holder = bar.parentElement;
+  const buttons = [...bar.querySelectorAll("button")];
+  const ind = bar.querySelector(".tab-ind, #lb-ind");
+  const move = () => {
+    const btn = bar.querySelector("button.active");
+    ind.style.width = `${btn.offsetWidth}px`;
+    ind.style.transform = `translate(${btn.offsetLeft}px, ${btn.offsetTop + btn.offsetHeight - 2}px)`;
+  };
+  for (const btn of buttons) {
+    btn.addEventListener("click", () => {
+      for (const b of buttons) {
+        b.classList.toggle("active", b === btn);
+        b.setAttribute("aria-selected", String(b === btn));
+      }
+      for (const p of holder.querySelectorAll(":scope > .lb-panel"))
+        p.classList.toggle("active", p.id === btn.dataset.panel);
+      move();
+    });
+  }
+  move();
+  new ResizeObserver(move).observe(bar);
+}
+
+async function main() {
+  const fetchRows = (url) =>
+    fetch(url, { cache: "no-store" })
+      .then((r) => (r.ok ? r.text() : ""))
+      .catch(() => "")
+      .then((text) => text.split("\n").filter(Boolean).map((l) => JSON.parse(l)));
+  const [histRows, overlapRows, uniquenessRows, families, ci] = await Promise.all([
+    fetchRows("data/history.jsonl"),
+    fetchRows("data/overlap.jsonl"),
+    fetchRows("data/uniqueness.jsonl"),
+    fetchJson("data/families.json").catch(() => ({})),
+    fetchJson("data/ci.json").catch(() => null),
+  ]);
+  ciData = ci;
+  ENGINE_FAMILY = new Map(Object.entries(families));
+  for (const r of histRows) r.bench = LEGACY_BENCH[r.bench] || r.bench;
+  history = histRows.filter((r) => BENCHES.includes(r.bench) && !HIDDEN_ENGINES.has(r.engine));
+  registerEngines(history.map((r) => r.engine));
+
+  if (history.length) {
+    const lastTs = history[history.length - 1].ts;
+    document.getElementById("updated").textContent = `Last run: ${fmtTime(new Date(lastTs))} UTC.`;
+  }
+
+  renderLeaderboards(history);
+  drawTrends(history);
+  renderLatencySummary(history);
+  renderAll();
+  const uniqAgg = uniquenessAgg(uniquenessRows.filter((r) => !HIDDEN_ENGINES.has(r.engine)));
+  renderOverlap(overlapRows.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)), uniqAgg);
+  renderUniqueness(uniqAgg);
+  initRunBrowser();
+  initChartTools();
+  revealHash();
+  document.getElementById("history-details").addEventListener("toggle", refreshHistoryTable);
+}
+main();
+</script>
+</body>
+</html>
