@@ -171,7 +171,11 @@
   .lb-panel.active { display: block; }
   .lb-panel h2 { display: none; }
   .lb-panel .sub { margin: 10px 0 6px; }
-  @media (max-width: 720px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 720px) {
+    .grid2 { grid-template-columns: minmax(0, 1fr); }
+    .lb-tabs { flex-wrap: wrap; }
+    .lb-tabs button { flex: 1 1 auto; white-space: nowrap; }
+  }
   .section-title {
     font-family: var(--font-display); font-size: 30px; font-weight: 400;
     line-height: 0.9; letter-spacing: 0.010em;
