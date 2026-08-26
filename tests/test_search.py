@@ -608,7 +608,7 @@ def test_factory_builds_engine_variants(monkeypatch):
     assert clients["exa"].search_type == "auto"
     assert clients["exa-instant"].search_type == "instant"
     assert isinstance(clients["parallel-turbo"], ParallelClient)
-    assert clients["parallel"].mode == "basic"
+    assert clients["parallel"].mode == "advanced"
     assert clients["parallel-turbo"].mode == "turbo"
 
 

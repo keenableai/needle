@@ -100,7 +100,7 @@ ENGINES: dict[str, EngineSpec] = {
     ),
     "brave": EngineSpec(key_env="BRAVE_API_KEY", key_required=True, build=_build_brave),
     "parallel": EngineSpec(
-        key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("basic")
+        key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("advanced")
     ),
     "parallel-turbo": EngineSpec(
         key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("turbo")
