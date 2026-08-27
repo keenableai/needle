@@ -341,6 +341,16 @@
   #quality-price .qp-tick { fill: var(--text-primary); fill-opacity: 0.32; font-family: var(--font-utility); font-size: 11px; letter-spacing: -0.004em; font-variant-numeric: tabular-nums; }
   #quality-price .qp-axis { fill: var(--text-primary); font-family: var(--font-utility); font-size: 12px; letter-spacing: -0.004em; }
   #quality-price .qp-axis .dim { fill: var(--text-muted); }
+  #quality-price .qp-hit { fill: none; pointer-events: all; }
+  #quality-price .qp-mark { transition: opacity 0.12s var(--ease); }
+  #quality-price svg.qp-hot .qp-mark { opacity: 0.4; }
+  #quality-price svg.qp-hot .qp-mark.is-hot { opacity: 1; }
+  .qp-tip { min-width: 172px; }
+  .qp-tip .head { display: flex; align-items: center; font-weight: 500; margin-bottom: 6px; }
+  .qp-tip .head.home-name { color: var(--keenable-blue); }
+  .qp-tip .row { justify-content: space-between; gap: 16px; line-height: 1.7; }
+  .qp-tip .row .val { font-variant-numeric: tabular-nums; }
+  .qp-tip .plan { color: var(--text-muted); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--grid); }
   .prose { color: var(--text-secondary); font-size: 14px; font-weight: 300; line-height: 1.6; }
   .prose p { margin: 0 0 10px; max-width: 90ch; }
   .defn var, .defn .eq { font-family: "STIX Two Text", "STIX Two Math", "Cambria Math", "Times New Roman", serif; font-size: 15px; }
@@ -647,7 +657,7 @@
   <h2 class="section-title" id="sec-price">Quality vs price</h2>
   <div class="card" id="card-quality-price" data-tools>
     <h2>Overall quality vs price</h2>
-    <div class="sub">7-day mean share of ultimate vs lowest public price per 1,000 queries</div>
+    <div class="sub" id="quality-price-sub"></div>
     <div id="quality-price"></div>
   </div>
   <div class="card" id="card-prices" data-tools>
@@ -1871,12 +1881,31 @@ function renderPriceTable() {
   holder.appendChild(table);
 }
 
+const QUALITY_PRICE_SUB =
+  "7-day mean share of ultimate vs lowest public price per 1,000 queries";
+
+function measuredSpan(rows, engines) {
+  let lo = Infinity, hi = -Infinity;
+  for (const [bench] of STANDINGS_BENCHES) {
+    for (const r of ciWindowed(rows, bench)) {
+      if (!engines.has(r.engine)) continue;
+      const t = new Date(r.ts).getTime();
+      if (t < lo) lo = t;
+      if (t > hi) hi = t;
+    }
+  }
+  return hi < lo ? null : [new Date(lo), new Date(hi)];
+}
+
 function renderQualityPrice(rows) {
   const card = document.getElementById("card-quality-price");
   const holder = document.getElementById("quality-price");
   holder.replaceChildren();
+  card.querySelectorAll(".tooltip").forEach((n) => n.remove());
   card._mdRows = null;
   const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const sub = document.getElementById("quality-price-sub");
+  sub.textContent = QUALITY_PRICE_SUB;
   const pts = shareEntries(rows).entries.flatMap((x) => {
     const p = PRICES.get(x.e);
     return p ? [{ e: x.e, usd: p.usd, q: x.overall, plan: p.plan }] : [];
@@ -1885,6 +1914,8 @@ function renderQualityPrice(rows) {
     holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
     return;
   }
+  const span = measuredSpan(rows, new Set(pts.map((p) => p.e)));
+  if (span) sub.textContent += `; ${fmtTime(span[0])} – ${fmtTime(span[1])} UTC`;
   card._mdRows = () => [
     ["engine", "$ / 1k queries", "overall"],
     ...pts.map((p) => [displayName(p.e), fmtUsd(p.usd), fmtPct(p.q)]),
@@ -1943,9 +1974,7 @@ function renderQualityPrice(rows) {
   }
   for (const group of clusters.values()) stackLabels(group, M.top + 12, M.top + ih - 10, 18);
   for (const it of items) {
-    const g = el("g");
-    g.appendChild(el("title", {},
-      `${displayName(it.e)} — ${fmtPct(it.q)} of ultimate at ${fmtUsd(it.usd)} / 1k queries (${it.plan})`));
+    const g = el("g", { class: "qp-mark" });
     const home = it.e === HOME_ENGINE;
     const s = it.right ? 1 : -1;
     if (Math.abs(it.labelY - it.yPos) > 4) {
@@ -1959,12 +1988,59 @@ function renderQualityPrice(rows) {
       g.appendChild(el("image", { href: logo, x: it.right ? it.px - 27 : it.px + 11,
         y: it.labelY - 8, width: 16, height: 16 }));
     }
-    g.appendChild(el("text", { x: it.px + s * 11, y: it.labelY + 4,
+    it.label = el("text", { x: it.px + s * 11, y: it.labelY + 4,
       "text-anchor": it.right ? "start" : "end",
-      class: "qp-name" + (home ? " home-name" : "") }, displayName(it.e)));
+      class: "qp-name" + (home ? " home-name" : "") }, displayName(it.e));
+    g.appendChild(it.label);
+    it.g = g;
+    it.hasLogo = Boolean(logo);
     svg.appendChild(g);
   }
+  const halo = el("circle", { r: 10, fill: "none", stroke: "var(--keenable-blue)",
+    "stroke-width": 1.5, "stroke-opacity": 0.6, visibility: "hidden" });
+  svg.appendChild(halo);
   holder.appendChild(svg);
+
+  const tip = el("div", { class: "tooltip qp-tip" });
+  card.appendChild(tip);
+  const tipRow = (name, val) => {
+    const row = el("div", { class: "row" });
+    row.append(el("span", { class: "name" }, name), el("span", { class: "val" }, val));
+    return row;
+  };
+  function showTip(it) {
+    const head = el("div", { class: "head" + (it.e === HOME_ENGINE ? " home-name" : "") });
+    head.append(engineKey(it.e), document.createTextNode(displayName(it.e)));
+    tip.replaceChildren(head, tipRow("quality", `${fmtPct(it.q)} of ultimate`),
+      tipRow("price", `${fmtUsd(it.usd)} / 1k queries`), el("div", { class: "plan" }, it.plan));
+    tip.style.display = "block";
+    halo.setAttribute("cx", it.px);
+    halo.setAttribute("cy", it.yPos);
+    halo.setAttribute("visibility", "visible");
+    svg.classList.add("qp-hot");
+    for (const other of items) other.g.classList.toggle("is-hot", other === it);
+    const scale = svg.getBoundingClientRect().width / W;
+    const left = holder.offsetLeft - holder.scrollLeft + it.px * scale + 16;
+    tip.style.left = Math.max(8, Math.min(left, card.clientWidth - tip.offsetWidth - 8)) + "px";
+    tip.style.top = holder.offsetTop + it.yPos * scale + 14 + "px";
+  }
+  function hideTip() {
+    tip.style.display = "none";
+    halo.setAttribute("visibility", "hidden");
+    svg.classList.remove("qp-hot");
+    for (const it of items) it.g.classList.remove("is-hot");
+  }
+  for (const it of items) {
+    const tw = it.label.getComputedTextLength();
+    const x0 = it.right ? (it.hasLogo ? it.px - 27 : it.px + 11) : it.px - 11 - tw;
+    const x1 = it.right ? it.px + 11 + tw : (it.hasLogo ? it.px + 27 : it.px - 11);
+    it.g.appendChild(el("rect", { class: "qp-hit", x: x0, y: it.labelY - 10,
+      width: Math.max(x1 - x0, 1), height: 20 }));
+    it.g.appendChild(el("circle", { class: "qp-hit", cx: it.px, cy: it.yPos, r: 11 }));
+    it.g.addEventListener("pointerenter", () => showTip(it));
+    it.g.addEventListener("pointerleave", hideTip);
+  }
+  svg.addEventListener("pointerleave", hideTip);
 }
 
 function renderLatencySummary(rows) {
