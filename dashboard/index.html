@@ -873,6 +873,7 @@
 
   <div class="card" id="app-cite">
     <h2>Citation</h2>
+    <div class="chart-tools"><button id="cite-copy" title="Copy BibTeX to clipboard" style="font: 500 11px var(--font-utility); letter-spacing: -0.004em">Copy</button></div>
     <div class="sub">if you use NEEDLE in your work, please cite</div>
     <pre style="margin:8px 0 0; overflow-x:auto; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text-secondary)">@misc{needle2026,
   author = {Styskin, Andrey and Petri, Matthias and Gusev, Ilya},
@@ -2887,6 +2888,11 @@ document.getElementById("export-md").addEventListener("click", () => {
   window.open(URL.createObjectURL(blob));
 });
 document.getElementById("export-pdf").addEventListener("click", () => window.print());
+document.getElementById("cite-copy").addEventListener("click", async (e) => {
+  await navigator.clipboard.writeText(document.querySelector("#app-cite pre").textContent);
+  e.target.textContent = "Copied";
+  setTimeout(() => { e.target.textContent = "Copy"; }, 1200);
+});
 window.addEventListener("beforeprint", () => drawAllTrends?.());
 
 for (const n of document.querySelectorAll("[data-vert]")) {
