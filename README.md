@@ -57,7 +57,7 @@ Every engine issues one request at a time, so latency samples are comparable
 across engines. Per-engine tuning uses env vars: `TAVILY_DEPTH`; the engine
 entry fixes Keenable's, Exa's, and Parallel's modes (`keenable` = pro,
 `keenable-realtime` = realtime, `exa` = auto, `exa-instant` = instant,
-`parallel` = basic, `parallel-turbo` = turbo). The mean skips queries whose
+`parallel` = advanced, `parallel-turbo` = turbo). The mean skips queries whose
 search or judging failed
 (via `num_scored`; the report lists `search_errors` / `judge_errors`) and
 does not score them as zero.
