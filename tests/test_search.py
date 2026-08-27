@@ -113,17 +113,34 @@ async def test_exa_maps_fields_and_builds_body(monkeypatch):
         "query": "hi",
         "numResults": 5,
         "type": "auto",
-        "contents": {"text": True},
+        "contents": {"highlights": {"maxCharacters": 10000}},
     }
     assert calls["headers"] == {"x-api-key": "x"}
 
 
-async def test_exa_omits_contents_when_text_disabled(monkeypatch):
-    c = ExaClient(api_key="x", include_text=False)
+async def test_exa_omits_contents_when_highlights_and_text_disabled(monkeypatch):
+    c = ExaClient(api_key="x", highlights=False, include_text=False)
     fake, calls = _canned({"results": []})
     monkeypatch.setattr(c, "_request_json", fake)
     await c.search("hi")
     assert "contents" not in calls["json"]
+
+
+@pytest.mark.parametrize("chars,expected", [(500, 500), (20000, 10000), (0, 10000)])
+async def test_exa_clamps_highlight_chars(monkeypatch, chars, expected):
+    c = ExaClient(api_key="x", highlight_chars=chars)
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+    await c.search("hi")
+    assert calls["json"]["contents"] == {"highlights": {"maxCharacters": expected}}
+
+
+async def test_exa_uses_text_when_highlights_disabled(monkeypatch):
+    c = ExaClient(api_key="x", highlights=False, include_text=True)
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+    await c.search("hi")
+    assert calls["json"]["contents"] == {"text": True}
 
 
 async def test_exa_highlights_mode(monkeypatch):
@@ -134,6 +151,19 @@ async def test_exa_highlights_mode(monkeypatch):
     results, err = await c.search("hi")
     assert calls["json"]["contents"] == {"highlights": {"maxCharacters": 500}}
     assert results[0].snippet == "one\ntwo"
+
+
+async def test_exa_translates_query_operators(monkeypatch):
+    c = ExaClient(api_key="x")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search(OPS_QUERY)
+
+    assert calls["json"]["query"] == "acme filing"
+    assert calls["json"]["includeDomains"] == ["sec.gov"]
+    assert calls["json"]["startPublishedDate"] == "2026-06-01T00:00:00.000Z"
+    assert calls["json"]["endPublishedDate"] == "2026-06-30T23:59:59.999Z"
 
 
 async def test_searchapi_maps_kg_answer_box_and_organic(monkeypatch):

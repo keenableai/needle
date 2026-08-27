@@ -1,7 +1,10 @@
 from typing import Any
 
-from needle.shared.search.base import HttpSearchClient, SearchResult
+from needle.shared.search.base import HttpSearchClient, SearchResult, clamped_chars
 from needle.shared.search.queryops import parse_ops
+
+MIN_HIGHLIGHT_CHARS = 1
+MAX_HIGHLIGHT_CHARS = 10000
 
 
 class ExaClient(HttpSearchClient):
@@ -14,12 +17,14 @@ class ExaClient(HttpSearchClient):
         api_key: str,
         search_type: str = "auto",
         include_text: bool = True,
+        highlights: bool = True,
         highlight_chars: int = 0,
         timeout_s: float = 30.0,
     ) -> None:
         super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.search_type = search_type
         self.include_text = include_text
+        self.highlights = highlights
         self.highlight_chars = highlight_chars
 
     async def search(
@@ -37,8 +42,15 @@ class ExaClient(HttpSearchClient):
             body["startPublishedDate"] = f"{ops.after.isoformat()}T00:00:00.000Z"
         if ops.before:
             body["endPublishedDate"] = f"{ops.before.isoformat()}T23:59:59.999Z"
-        if self.highlight_chars > 0:
-            body["contents"] = {"highlights": {"maxCharacters": self.highlight_chars}}
+        if self.highlights:
+            body["contents"] = {
+                "highlights": {
+                    "maxCharacters": clamped_chars(
+                        self.highlight_chars, MIN_HIGHLIGHT_CHARS, MAX_HIGHLIGHT_CHARS
+                    )
+                    or MAX_HIGHLIGHT_CHARS
+                }
+            }
         elif self.include_text:
             body["contents"] = {"text": True}
         payload, err = await self._request_json(
