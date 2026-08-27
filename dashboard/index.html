@@ -657,7 +657,7 @@
   <h2 class="section-title" id="sec-price">Quality vs price</h2>
   <div class="card" id="card-quality-price" data-tools>
     <h2>Overall quality vs price</h2>
-    <div class="sub">7-day mean share of ultimate vs lowest public price per 1,000 queries</div>
+    <div class="sub" id="quality-price-sub"></div>
     <div id="quality-price"></div>
   </div>
   <div class="card" id="card-prices" data-tools>
@@ -1881,6 +1881,22 @@ function renderPriceTable() {
   holder.appendChild(table);
 }
 
+const QUALITY_PRICE_SUB =
+  "7-day mean share of ultimate vs lowest public price per 1,000 queries";
+
+function measuredSpan(rows, engines) {
+  let lo = Infinity, hi = -Infinity;
+  for (const [bench] of STANDINGS_BENCHES) {
+    for (const r of ciWindowed(rows, bench)) {
+      if (!engines.has(r.engine)) continue;
+      const t = new Date(r.ts).getTime();
+      if (t < lo) lo = t;
+      if (t > hi) hi = t;
+    }
+  }
+  return hi < lo ? null : [new Date(lo), new Date(hi)];
+}
+
 function renderQualityPrice(rows) {
   const card = document.getElementById("card-quality-price");
   const holder = document.getElementById("quality-price");
@@ -1888,6 +1904,8 @@ function renderQualityPrice(rows) {
   card.querySelectorAll(".tooltip").forEach((n) => n.remove());
   card._mdRows = null;
   const fmtPct = (v) => `${Math.round(v * 100)}%`;
+  const sub = document.getElementById("quality-price-sub");
+  sub.textContent = QUALITY_PRICE_SUB;
   const pts = shareEntries(rows).entries.flatMap((x) => {
     const p = PRICES.get(x.e);
     return p ? [{ e: x.e, usd: p.usd, q: x.overall, plan: p.plan }] : [];
@@ -1896,6 +1914,8 @@ function renderQualityPrice(rows) {
     holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
     return;
   }
+  const span = measuredSpan(rows, new Set(pts.map((p) => p.e)));
+  if (span) sub.textContent += `; ${fmtTime(span[0])} – ${fmtTime(span[1])} UTC`;
   card._mdRows = () => [
     ["engine", "$ / 1k queries", "overall"],
     ...pts.map((p) => [displayName(p.e), fmtUsd(p.usd), fmtPct(p.q)]),
