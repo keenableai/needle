@@ -66,9 +66,14 @@
     counter-reset: sec;
   }
   a { color: var(--link); }
-  .wrap { max-width: calc(var(--measure) + 40px); margin: 0 auto; padding: 28px 20px 56px; }
-  .brand { display: inline-block; margin: 4px 0 34px; }
-  .brand svg { display: block; height: 22px; width: auto; }
+  .wrap { max-width: calc(var(--measure) + 40px); margin: 0 auto; padding: 63px 20px 56px; }
+  .brand {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+    display: block; margin: 0; padding: 12px 20px;
+    background: var(--page); border-bottom: 1px solid var(--grid);
+    pointer-events: none;
+  }
+  .brand svg { display: block; height: 22px; width: auto; pointer-events: auto; }
   header h1 {
     font-family: var(--font-display); font-size: 38px; font-weight: 400;
     line-height: 0.92; letter-spacing: 0.010em; margin: 0 0 14px; text-wrap: balance;
@@ -98,7 +103,7 @@
   .fm .cadence { font-weight: 300; color: var(--text-muted); }
   header { margin-bottom: 20px; position: relative; }
   header a { color: inherit; }
-  .header-actions { position: absolute; top: 0; right: 0; display: flex; gap: 6px; }
+  .header-actions { position: fixed; top: 8px; right: 20px; z-index: 61; display: flex; gap: 6px; }
   .header-actions button, .header-actions a {
     display: flex; align-items: center; justify-content: center;
     height: 30px; padding: 0 10px;
@@ -119,7 +124,7 @@
   }
   .chart-tools button svg { display: block; }
   .chart-tools button:hover { color: var(--text-primary); border-color: var(--baseline); }
-  .card, .lb-panel { scroll-margin-top: 16px; }
+  .card, .lb-panel { scroll-margin-top: 63px; }
 
   td .key {
     display: inline-block; width: 14px; height: 3px; border-radius: 2px;
@@ -180,7 +185,7 @@
     font-family: var(--font-display); font-size: 30px; font-weight: 400;
     line-height: 0.9; letter-spacing: 0.010em;
     color: var(--text-primary); margin: 64px 0 10px; padding-top: 18px;
-    border-top: 1px solid var(--grid); scroll-margin-top: 16px;
+    border-top: 1px solid var(--grid); scroll-margin-top: 63px;
   }
   .section-title::before {
     counter-increment: sec; content: counter(sec, decimal-leading-zero);
@@ -194,7 +199,7 @@
   #toc { display: none; }
   @media (min-width: 1440px) {
     #toc {
-      display: block; position: fixed; top: 28px; width: 150px;
+      display: block; position: fixed; top: 75px; width: 150px;
       left: calc((100vw - 1080px) / 2 - 172px);
       font-size: 13px; line-height: 1.5;
     }
@@ -386,6 +391,8 @@
 
   @media print {
     .header-actions, .chart-tools, #toc, .runbar, #run-detail, #history-details, .lb-tabs { display: none; }
+    .brand { position: static; padding: 0; margin: 4px 0 34px; border-bottom: none; }
+    .wrap { padding-top: 28px; }
     #card-runs .sub a::after { content: " (" attr(href) ")"; }
     .lb-panel { display: block; }
     .lb-panel h2 { display: block; }
