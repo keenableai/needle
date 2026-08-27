@@ -343,14 +343,31 @@
   .overlap-matrix { padding: 10px 0 14px; }
   .overlap-matrix table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; font-size: 11px; }
   .overlap-matrix th, .overlap-matrix td { border-bottom: none; }
-  .overlap-matrix td:first-child { white-space: nowrap; padding: 0 4px 0 2px; }
-  .overlap-matrix th.col { vertical-align: bottom; text-align: center; padding: 2px 0; font-weight: 500; }
-  .overlap-matrix th.col span { writing-mode: vertical-rl; rotate: 180deg; }
+  .overlap-matrix td:first-child { white-space: nowrap; padding: 0 8px 0 2px; }
+  .overlap-matrix th.col { vertical-align: bottom; text-align: center; padding: 2px 0 6px; font-weight: 500; }
+  .overlap-matrix th.col .col-head {
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0;
+    min-height: 18px;
+  }
+  .overlap-matrix th.col .key-logo,
+  .overlap-matrix th.col .key,
+  .overlap-matrix td.row-logo .key-logo,
+  .overlap-matrix td.row-logo .key { margin: 0; width: 16px; height: 16px; }
+  .overlap-matrix td.row-logo { width: 22px; padding: 0 4px 0 6px; text-align: center; }
+  .overlap-matrix td:first-child .key-logo,
+  .overlap-matrix td:first-child .key { width: 16px; height: 16px; }
   .overlap-matrix td.overlap-cell {
-    width: 26px; min-width: 26px; height: 26px; padding: 0;
+    width: 28px; min-width: 28px; height: 28px; padding: 0;
     border-radius: 0; text-align: center; font-variant-numeric: tabular-nums;
     font-family: var(--font-utility); letter-spacing: -0.004em;
   }
+  .overlap-matrix .hl-axis { background: color-mix(in srgb, var(--keenable-blue) 12%, transparent); }
+  .overlap-matrix td.overlap-cell.hl-cross { outline: 1.5px solid var(--text-primary); outline-offset: -1px; }
+  .overlap-pair {
+    min-height: 1.3em; margin: 2px 0 0; text-align: center;
+    color: var(--text-secondary); font-size: 12px;
+  }
+  .overlap-pair b { color: var(--text-primary); font-weight: 500; }
   .bar-table td, .bar-table th { white-space: nowrap; padding: 6px 8px; }
   .bar-table .bar-track {
     display: inline-block; width: 100px; height: 8px; border-radius: 0;
@@ -684,6 +701,7 @@
       <h2>Suspicious sharing (all runs)</h2>
       <div class="sub" id="lowshared-sub"></div>
       <div class="overlap-matrix" id="lowshared-table"></div>
+      <div class="overlap-pair" id="lowshared-pair" aria-live="polite"></div>
     </div>
     <div class="lb-panel" id="card-sharegraph" role="tabpanel">
       <h2>Borrowing graph (all runs)</h2>
@@ -869,6 +887,19 @@
         <td>judge prompt (shared/prompts/judgement.jinja), metric implementations, engine clients</td>
         <td><a href="https://github.com/keenableai/needle">GitHub: keenableai/needle</a></td></tr>
     </table>
+  </div>
+
+  <div class="card" id="app-cite">
+    <h2>Citation</h2>
+    <div class="chart-tools"><button id="cite-copy" title="Copy BibTeX to clipboard" style="font: 500 11px var(--font-utility); letter-spacing: -0.004em">Copy</button></div>
+    <div class="sub">if you use NEEDLE in your work, please cite</div>
+    <pre style="margin:8px 0 0; overflow-x:auto; font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--text-secondary)">@misc{needle2026,
+  author = {Styskin, Andrey and Petri, Matthias and Gusev, Ilya},
+  title  = {{NEEDLE}: A Live Open-Source Search Benchmark for {AI} Agents},
+  year   = {2026},
+  url    = {https://keenableai.github.io/needle/},
+  note   = {Contact: andrey@keenable.ai, matthias@keenable.ai, ilya.gusev@keenable.ai}
+}</pre>
   </div>
 
 
@@ -2066,31 +2097,89 @@ function overlapMatrix(holder, engines, cellFor) {
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, ""));
+  const colHeads = [];
   for (const e of engines) {
-    const th = el("th", { class: "col" });
+    const th = el("th", { class: "col", title: displayName(e) });
     markHome(th, e);
-    th.appendChild(el("span", {}, displayName(e)));
+    const wrap = el("div", { class: "col-head" });
+    wrap.append(engineKey(e));
+    th.appendChild(wrap);
+    th.setAttribute("aria-label", displayName(e));
     head.appendChild(th);
+    colHeads.push(th);
   }
+  head.appendChild(el("th", {}, ""));
   table.appendChild(head);
-  for (const a of engines) {
+  const rowHeads = [];
+  const cells = [];
+  const scored = [];
+  for (const [i, a] of engines.entries()) {
     const tr = el("tr");
     const nameCell = engineCell(a);
     markHome(nameCell, a);
     tr.appendChild(nameCell);
-    for (const b of engines) {
+    rowHeads.push(nameCell);
+    const rowCells = [];
+    for (const [j, b] of engines.entries()) {
       const cell = a === b ? null : cellFor(a, b);
       const td = el("td", { class: "overlap-cell" }, cell ? cell.text : "–");
       if (cell) {
         td.style.background = OVERLAP_BG[cell.step];
         td.style.color = OVERLAP_INK[cell.step];
         td.title = cell.title;
+        if (j > i) scored.push({ a, b, text: cell.text, step: cell.step });
       }
+      td.addEventListener("pointerenter", () => highlightOverlap(i, j, cell));
+      td.addEventListener("pointerleave", () => highlightOverlap(-1, -1, null));
       tr.appendChild(td);
+      rowCells.push(td);
     }
+    const endLogo = el("td", { class: "row-logo", title: displayName(a) });
+    markHome(endLogo, a);
+    endLogo.appendChild(engineKey(a));
+    tr.appendChild(endLogo);
     table.appendChild(tr);
+    cells.push(rowCells);
   }
+  const pairEl = holder.parentElement?.querySelector(".overlap-pair");
+  const showDefaultPair = () => {
+    if (!pairEl) return;
+    pairEl.replaceChildren();
+    const top = scored.sort((x, y) => parseFloat(y.text) - parseFloat(x.text)).slice(0, 3);
+    if (!top.length) return;
+    pairEl.append(document.createTextNode("highest: "));
+    top.forEach((p, i) => {
+      if (i) pairEl.append(document.createTextNode(", "));
+      pairEl.append(
+        el("b", {}, displayName(p.a)),
+        document.createTextNode(" × "),
+        el("b", {}, displayName(p.b)),
+        document.createTextNode(` ${p.text}`),
+      );
+    });
+  };
+  const highlightOverlap = (ri, cj, cell) => {
+    for (const n of [...colHeads, ...rowHeads]) n.classList.remove("hl-axis");
+    for (const row of cells) for (const td of row) td.classList.remove("hl-cross");
+    if (ri < 0) {
+      showDefaultPair();
+      return;
+    }
+    rowHeads[ri]?.classList.add("hl-axis");
+    colHeads[cj]?.classList.add("hl-axis");
+    cells[ri]?.[cj]?.classList.add("hl-cross");
+    if (pairEl && ri !== cj) {
+      pairEl.replaceChildren();
+      pairEl.append(
+        el("b", {}, displayName(engines[ri])),
+        document.createTextNode(" × "),
+        el("b", {}, displayName(engines[cj])),
+        document.createTextNode(cell ? ` — ${cell.text} of queries share suspiciously` : " — no comparable queries"),
+      );
+    }
+  };
   holder.appendChild(table);
+  showDefaultPair();
 }
 
 function renderOverlap(rows, uniqAgg) {
@@ -2875,6 +2964,11 @@ document.getElementById("export-md").addEventListener("click", () => {
   window.open(URL.createObjectURL(blob));
 });
 document.getElementById("export-pdf").addEventListener("click", () => window.print());
+document.getElementById("cite-copy").addEventListener("click", async (e) => {
+  await navigator.clipboard.writeText(document.querySelector("#app-cite pre").textContent);
+  e.target.textContent = "Copied";
+  setTimeout(() => { e.target.textContent = "Copy"; }, 1200);
+});
 window.addEventListener("beforeprint", () => drawAllTrends?.());
 
 for (const n of document.querySelectorAll("[data-vert]")) {
