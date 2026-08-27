@@ -22,6 +22,8 @@ def test_overlap_rows_pairs():
     assert set(by_pair) == {("e1", "e2"), ("e1", "e3"), ("e2", "e3")}
     r12 = by_pair[("e1", "e2")]
     assert r12["num_queries"] == 2
+    assert r12["shared_urls"] == 1
+    assert r12["union_urls"] == 5
     assert r12["ts"] == "2026-07-02T10:00Z"
 
 
