@@ -390,6 +390,17 @@
     background: var(--track); vertical-align: middle; margin-right: 8px;
   }
   .bar-table .bar-fill { display: block; height: 100%; border-radius: 0; }
+  @media (max-width: 560px) {
+    .overlap-matrix table { border-spacing: 1px; font-size: 10px; }
+    .overlap-matrix td:first-child { padding: 0 3px 0 1px; }
+    .overlap-matrix td:first-child .ename { display: none; }
+    .overlap-matrix th:last-child, .overlap-matrix td.row-logo { display: none; }
+    .overlap-matrix td.overlap-cell { width: 21px; min-width: 21px; height: 24px; }
+    .bar-table { font-size: 12px; }
+    .bar-table td, .bar-table th { padding: 6px 4px; }
+    .bar-table td:last-child, .bar-table th:last-child { white-space: normal; }
+    .bar-table .bar-track { width: 36px; margin-right: 5px; }
+  }
   #sharegraph svg { max-width: 460px; margin: 0 auto; }
   #sharegraph .sg-edge { stroke: var(--text-muted); }
   #sharegraph .sg-arrow { fill: var(--text-primary); }
@@ -1006,7 +1017,7 @@ function engineKey(engine) {
 
 function engineCell(engine, cls = "") {
   const td = el("td", { class: cls });
-  td.append(engineKey(engine), document.createTextNode(displayName(engine)));
+  td.append(engineKey(engine), el("span", { class: "ename" }, displayName(engine)));
   return td;
 }
 let history = [];
