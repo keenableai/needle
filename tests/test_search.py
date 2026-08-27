@@ -8,6 +8,7 @@ from needle.shared.search import (
     BraveClient,
     CeramicClient,
     ExaClient,
+    FirecrawlClient,
     KeenableClient,
     OctenClient,
     ParallelClient,
@@ -342,6 +343,48 @@ async def test_tavily_maps_fields_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_firecrawl_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "success": True,
+        "data": {
+            "web": [
+                {"url": "https://a", "title": "A", "description": "da", "position": 1},
+                {"url": "https://b", "title": "B", "description": "db", "position": 2},
+                {"title": "no url"},
+            ]
+        },
+    }
+    c = FirecrawlClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(OPS_QUERY, num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].title == "A"
+    assert results[0].snippet == "da"
+    assert calls["method"] == "POST"
+    assert calls["url"] == "https://api.firecrawl.dev/v2/search"
+    assert calls["json"] == {
+        "query": "acme filing site:sec.gov",
+        "limit": 5,
+        "sources": ["web"],
+        "tbs": "cdr:1,cd_min:6/1/2026,cd_max:6/30/2026",
+    }
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_firecrawl_clamps_limit_and_skips_tbs_without_dates(monkeypatch):
+    c = FirecrawlClient(api_key="k")
+    fake, calls = _canned({"success": True, "data": {"web": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=200)
+    assert err is None
+    assert results == []
+    assert calls["json"] == {"query": "hi", "limit": 100, "sources": ["web"]}
+
+
 async def test_octen_maps_fields_and_builds_body(monkeypatch):
     payload = {
         "data": {
@@ -572,8 +615,20 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("OCTEN_API_KEY", "ok")
     monkeypatch.setenv("CERAMIC_API_KEY", "ck")
     monkeypatch.setenv("YOU_API_KEY", "yk")
+    monkeypatch.setenv("FIRECRAWL_API_KEY", "fk")
     clients = build_search_clients(
-        ["google", "bing", "brave", "parallel", "tavily", "perplexity", "octen", "ceramic", "you"]
+        [
+            "google",
+            "bing",
+            "brave",
+            "parallel",
+            "tavily",
+            "perplexity",
+            "octen",
+            "ceramic",
+            "you",
+            "firecrawl",
+        ]
     )
     assert isinstance(clients["google"], SerperClient)
     assert clients["google"].engine == "google"
@@ -591,6 +646,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["ceramic"].api_key == "ck"
     assert isinstance(clients["you"], YouClient)
     assert clients["you"].api_key == "yk"
+    assert isinstance(clients["firecrawl"], FirecrawlClient)
+    assert clients["firecrawl"].api_key == "fk"
 
 
 def test_factory_builds_engine_variants(monkeypatch):
