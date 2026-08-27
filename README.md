@@ -248,6 +248,18 @@ uv sync
 uv run pytest   # deterministic, no network
 ```
 
+## Citation
+
+```bibtex
+@misc{needle2026,
+  author = {Styskin, Andrey and Petri, Matthias and Gusev, Ilya},
+  title  = {NEEDLE: A Live Open-Source Search Benchmark for AI Agents},
+  year   = {2026},
+  url    = {https://keenableai.github.io/needle/},
+  note   = {Contact: andrey@keenable.ai, matthias@keenable.ai, ilya.gusev@keenable.ai}
+}
+```
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
