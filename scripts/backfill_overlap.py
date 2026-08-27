@@ -38,7 +38,7 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
     runs_base = f"{resolve_base(dataset)}/runs"
     overlap = load_jsonl(data / "overlap.jsonl")
     uniqueness = load_jsonl(data / "uniqueness.jsonl")
-    overlap_done = _done(overlap, ("num_suspect", "low_shared_urls"))
+    overlap_done = _done(overlap, ("num_suspect", "low_shared_urls", "shared_urls", "union_urls"))
     uniqueness_done = _done(uniqueness, ("unique_relevant_urls",))
     cutoff = (
         (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT) if hours is not None else ""
