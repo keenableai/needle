@@ -707,11 +707,12 @@
   </div>
 
   <div class="card" id="card-independence" data-tools>
-    <h2>Index independence — three views</h2>
-    <div class="sub">suspicious-sharing matrix, borrowing graph, and per-engine
-      result uniqueness</div>
+    <h2>Index independence — four views</h2>
+    <div class="sub">suspicious-sharing matrix, URL-intersection matrix,
+      borrowing graph, and per-engine result uniqueness</div>
     <div class="lb-tabs" role="tablist" aria-label="Index independence views">
       <button role="tab" aria-selected="true" class="active" data-panel="card-lowshared">suspicious sharing</button>
+      <button role="tab" aria-selected="false" data-panel="card-urlshare">URL intersection</button>
       <button role="tab" aria-selected="false" data-panel="card-sharegraph">borrowing graph</button>
       <button role="tab" aria-selected="false" data-panel="card-uniqueness">uniqueness</button>
       <div class="tab-ind" aria-hidden="true"></div>
@@ -721,6 +722,12 @@
       <div class="sub" id="lowshared-sub"></div>
       <div class="overlap-matrix" id="lowshared-table"></div>
       <div class="overlap-pair" id="lowshared-pair" aria-live="polite"></div>
+    </div>
+    <div class="lb-panel" id="card-urlshare" role="tabpanel">
+      <h2>URL intersection</h2>
+      <div class="sub" id="urlshare-sub"></div>
+      <div class="overlap-matrix" id="urlshare-table"></div>
+      <div class="overlap-pair" id="urlshare-pair" aria-live="polite"></div>
     </div>
     <div class="lb-panel" id="card-sharegraph" role="tabpanel">
       <h2>Borrowing graph (all runs)</h2>
@@ -2178,7 +2185,7 @@ const overlapStep = (v) => {
   return i === -1 ? 4 : i;
 };
 
-function overlapMatrix(holder, engines, cellFor) {
+function overlapMatrix(holder, engines, cellFor, pairNote = "of queries share suspiciously") {
   const table = el("table");
   const head = el("tr");
   head.appendChild(el("th", {}, ""));
@@ -2259,7 +2266,7 @@ function overlapMatrix(holder, engines, cellFor) {
         el("b", {}, displayName(engines[ri])),
         document.createTextNode(" × "),
         el("b", {}, displayName(engines[cj])),
-        document.createTextNode(cell ? ` — ${cell.text} of queries share suspiciously` : " — no comparable queries"),
+        document.createTextNode(cell ? ` — ${cell.text} ${pairNote}` : " — no comparable queries"),
       );
     }
   };
@@ -2269,8 +2276,10 @@ function overlapMatrix(holder, engines, cellFor) {
 
 function renderOverlap(rows, uniqAgg) {
   const lowHolder = document.getElementById("lowshared-table");
+  const shareHolder = document.getElementById("urlshare-table");
   const graphHolder = document.getElementById("sharegraph");
   lowHolder.replaceChildren();
+  shareHolder.replaceChildren();
   graphHolder.replaceChildren();
   const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
   const pairs = new Map();
@@ -2280,11 +2289,15 @@ function renderOverlap(rows, uniqAgg) {
     seen.add(r.b);
     const key = pairKey(r.a, r.b);
     let agg = pairs.get(key);
-    if (!agg) pairs.set(key, agg = { low2: 0, lowUrls: 0, nLow: 0 });
+    if (!agg) pairs.set(key, agg = { low2: 0, lowUrls: 0, nLow: 0, shared: 0, union: 0 });
     if (r.num_suspect != null) {
       agg.low2 += r.num_suspect;
       agg.lowUrls += r.low_shared_urls || 0;
       agg.nLow += r.num_queries;
+    }
+    if (r.union_urls != null) {
+      agg.shared += r.shared_urls;
+      agg.union += r.union_urls;
     }
   }
   const engines = ENGINES.filter((e) => seen.has(e));
@@ -2294,11 +2307,12 @@ function renderOverlap(rows, uniqAgg) {
   const emptyMsg = "No overlap data yet.";
   if (engines.length < 2) {
     lowHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
+    shareHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     graphHolder.appendChild(el("div", { class: "empty" }, emptyMsg));
     return;
   }
   document.getElementById("lowshared-sub").textContent =
-    "share of queries where the pair shares a below-HM URL or 3+ URLs of any rating";
+    "share of queries where the pair shares an irrelevant URL or 3+ URLs of any rating";
   overlapMatrix(lowHolder, engines, (a, b) => {
     const agg = pairs.get(pairKey(a, b));
     if (!agg || !agg.nLow) return null;
@@ -2309,6 +2323,18 @@ function renderOverlap(rows, uniqAgg) {
       title: `${displayName(a)} ∩ ${displayName(b)}: ${agg.low2} of ${agg.nLow} queries share a low-relevance URL or 3+ URLs (${agg.lowUrls} junk URLs total)`,
     };
   });
+  document.getElementById("urlshare-sub").textContent =
+    "pooled Jaccard: shared URLs / union of the pair's URLs over comparable queries, ignoring ratings (runs since 2026-08-27)";
+  overlapMatrix(shareHolder, engines, (a, b) => {
+    const agg = pairs.get(pairKey(a, b));
+    if (!agg || !agg.union) return null;
+    const v = agg.shared / agg.union;
+    return {
+      text: `${Math.round(v * 100)}%`,
+      step: overlapStep(v),
+      title: `${displayName(a)} ∩ ${displayName(b)}: ${agg.shared} shared of ${agg.union} pooled URLs`,
+    };
+  }, "of pooled URLs shared");
   renderSharingGraph(graphHolder, engines, pairs, uniqAgg);
 }
 
