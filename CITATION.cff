@@ -2,8 +2,8 @@ cff-version: 1.2.0
 message: "If you use NEEDLE in your work, please cite it as below."
 type: software
 title: "NEEDLE: a live search and retrieval benchmark"
-version: 0.1.1
-date-released: 2026-08-25
+version: 0.1.4
+date-released: 2026-08-27
 doi: 10.5281/zenodo.22095155
 url: "https://github.com/keenableai/needle"
 repository-code: "https://github.com/keenableai/needle"
