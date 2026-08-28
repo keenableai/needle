@@ -24,6 +24,7 @@ FAMILIES = {
     "keenable-realtime": "keenable",
     "exa-instant": "exa",
     "parallel-turbo": "parallel",
+    "brave-llmcontext": "brave",
 }
 
 

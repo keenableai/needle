@@ -6,6 +6,7 @@ import pytest
 
 from needle.shared.search import (
     BraveClient,
+    BraveLlmContextClient,
     CeramicClient,
     ExaClient,
     KeenableClient,
@@ -299,6 +300,124 @@ async def test_brave_maps_fields(monkeypatch):
     assert results[0].published_date == "2026-06-30T00:00:00"
     assert calls["params"]["count"] == 20
     assert calls["headers"]["X-Subscription-Token"] == "k"
+
+
+async def test_brave_llmcontext_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "grounding": {
+            "generic": [
+                {"url": "https://a", "title": "A", "snippets": ["one", "", "two"]},
+                {"url": "https://b", "title": "", "snippets": []},
+                {"title": "no url"},
+            ],
+            "map": [],
+        },
+        "sources": {
+            "https://a": {
+                "title": "A",
+                "hostname": "a",
+                "age": [
+                    "Tuesday, June 30, 2026",
+                    "2026-06-30",
+                    "2 days ago",
+                    "2026-06-30T09:15:00Z",
+                ],
+            },
+            "https://b": {"age": None},
+        },
+    }
+    c = BraveLlmContextClient(api_key="k", snippet_chars=2000)
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].snippet == "one\ntwo"
+    assert results[0].published_date == "2026-06-30T09:15:00Z"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert results[1].published_date is None
+    assert calls["method"] == "POST"
+    assert calls["url"] == "https://api.search.brave.com/res/v1/llm/context"
+    assert calls["json"] == {
+        "q": "hi",
+        "country": "us",
+        "search_lang": "en",
+        "maximum_number_of_urls": 5,
+        "maximum_number_of_tokens_per_url": 769,
+    }
+    assert calls["headers"] == {"Accept": "application/json", "X-Subscription-Token": "k"}
+
+
+@pytest.mark.parametrize(
+    "age,expected",
+    [
+        (["Friday, August 14, 2026", "2026-08-14", "13 days ago"], "2026-08-14"),
+        (["Friday, August 14, 2026", "13 days ago"], None),
+        ([None, 20260814, "NOT A DATE", "12T34"], None),
+    ],
+)
+async def test_brave_llmcontext_published_date_prefers_parseable_iso(monkeypatch, age, expected):
+    payload = {
+        "grounding": {"generic": [{"url": "https://a", "snippets": ["s"]}]},
+        "sources": {"https://a": {"age": age}},
+    }
+    c = BraveLlmContextClient(api_key="k")
+    fake, _ = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, _ = await c.search("hi")
+    assert results[0].published_date == expected
+
+
+@pytest.mark.parametrize("chars,expected", [(2000, 769), (500, 512), (40000, 8192), (0, None)])
+async def test_brave_llmcontext_clamps_token_budget(monkeypatch, chars, expected):
+    c = BraveLlmContextClient(api_key="k", snippet_chars=chars)
+    fake, calls = _canned({"grounding": {"generic": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+    await c.search("hi")
+    assert calls["json"].get("maximum_number_of_tokens_per_url") == expected
+
+
+async def test_brave_llmcontext_clamps_max_urls(monkeypatch):
+    c = BraveLlmContextClient(api_key="k")
+    fake, calls = _canned({"grounding": {"generic": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+    await c.search("hi", num_results=60)
+    assert calls["json"]["maximum_number_of_urls"] == 50
+
+
+async def test_brave_llmcontext_sends_sites_as_goggle_not_query_text(monkeypatch):
+    c = BraveLlmContextClient(api_key="k")
+    fake, calls = _canned({"grounding": {"generic": []}})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search("acme site:sec.gov site:nasdaq.com")
+    assert calls["json"]["q"] == "acme"
+    assert calls["json"]["goggles"] == "$discard\n$site=sec.gov\n$site=nasdaq.com"
+
+    await c.search("acme")
+    assert "goggles" not in calls["json"]
+
+
+async def test_brave_llmcontext_tolerates_malformed_payload(monkeypatch):
+    payload = {
+        "grounding": {"generic": [None, "junk", {"url": "https://a"}, 7]},
+        "sources": "not a dict",
+    }
+    c = BraveLlmContextClient(api_key="k")
+    fake, _ = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi")
+    assert err is None
+    assert [r.url for r in results] == ["https://a"]
+    assert results[0].published_date is None
+
+    fake, _ = _canned("not a dict")
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi")
+    assert err is None
+    assert results == []
 
 
 async def test_parallel_joins_excerpts_and_builds_body(monkeypatch):
@@ -596,8 +715,18 @@ def test_factory_builds_new_engines(monkeypatch):
 def test_factory_builds_engine_variants(monkeypatch):
     monkeypatch.setenv("EXA_API_KEY", "ek")
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
+    monkeypatch.setenv("BRAVE_API_KEY", "bk")
     clients = build_search_clients(
-        ["keenable", "keenable-realtime", "exa", "exa-instant", "parallel", "parallel-turbo"],
+        [
+            "keenable",
+            "keenable-realtime",
+            "exa",
+            "exa-instant",
+            "parallel",
+            "parallel-turbo",
+            "brave",
+            "brave-llmcontext",
+        ],
         snippet_chars=500,
     )
     assert isinstance(clients["keenable-realtime"], KeenableClient)
@@ -610,6 +739,8 @@ def test_factory_builds_engine_variants(monkeypatch):
     assert isinstance(clients["parallel-turbo"], ParallelClient)
     assert clients["parallel"].mode == "advanced"
     assert clients["parallel-turbo"].mode == "turbo"
+    assert isinstance(clients["brave-llmcontext"], BraveLlmContextClient)
+    assert clients["brave-llmcontext"].snippet_chars == 500
 
 
 def test_factory_requires_key(monkeypatch):
@@ -889,6 +1020,16 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             {"web": {"results": []}},
             "params",
             {"q": "acme filing site:sec.gov", "freshness": "2026-06-01to2026-06-30"},
+        ),
+        (
+            lambda: BraveLlmContextClient(api_key="k"),
+            {"grounding": {"generic": []}},
+            "json",
+            {
+                "q": "acme filing",
+                "goggles": "$discard\n$site=sec.gov",
+                "freshness": "2026-06-01to2026-06-30",
+            },
         ),
         (
             lambda: ExaClient(api_key="k"),

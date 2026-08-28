@@ -8,7 +8,7 @@ from needle.shared.search.base import (
     search_all,
     titled_snippet,
 )
-from needle.shared.search.brave import BraveClient
+from needle.shared.search.brave import BraveClient, BraveLlmContextClient
 from needle.shared.search.ceramic import CeramicClient
 from needle.shared.search.exa import ExaClient
 from needle.shared.search.factory import build_search_clients
@@ -23,6 +23,7 @@ from needle.shared.search.you import YouClient
 
 __all__ = [
     "BraveClient",
+    "BraveLlmContextClient",
     "CeramicClient",
     "DEFAULT_SNIPPET_CHARS",
     "ExaClient",
