@@ -33,6 +33,7 @@ class BraveClient(HttpSearchClient):
             "country": "us",
             "search_lang": "en",
             "result_filter": "web",
+            "text_decorations": "false",
         }
         if fresh := freshness_window(ops):
             params["freshness"] = fresh
@@ -49,7 +50,8 @@ class BraveClient(HttpSearchClient):
             SearchResult(
                 url=r["url"],
                 title=r.get("title"),
-                snippet=r.get("description"),
+                snippet="\n".join(filter(None, r.get("extra_snippets") or []))
+                or r.get("description"),
                 published_date=r.get("page_age"),
             )
             for r in raw_results[:num_results]

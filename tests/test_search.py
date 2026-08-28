@@ -283,8 +283,11 @@ async def test_brave_maps_fields(monkeypatch):
                     "url": "https://a",
                     "title": "A",
                     "description": "da",
+                    "extra_snippets": ["one", "", "two"],
                     "page_age": "2026-06-30T00:00:00",
                 },
+                {"url": "https://b", "title": "B", "description": "db"},
+                {"url": "https://c", "title": "C", "description": "dc", "extra_snippets": []},
                 {"title": "no url"},
             ]
         }
@@ -295,10 +298,13 @@ async def test_brave_maps_fields(monkeypatch):
 
     results, err = await c.search("hi", num_results=30)
     assert err is None
-    assert len(results) == 1
-    assert results[0].snippet == "da"
+    assert [r.url for r in results] == ["https://a", "https://b", "https://c"]
+    assert results[0].snippet == "one\ntwo"
+    assert results[1].snippet == "db"
+    assert results[2].snippet == "dc"
     assert results[0].published_date == "2026-06-30T00:00:00"
     assert calls["params"]["count"] == 20
+    assert calls["params"]["text_decorations"] == "false"
     assert calls["headers"]["X-Subscription-Token"] == "k"
 
 
