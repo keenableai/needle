@@ -1771,15 +1771,6 @@ function renderStandings(rows) {
     g.appendChild(el("path", { d: poly(pts), fill: "none", stroke: colorOf(x.e),
       "stroke-width": hot ? 2 : 1.5, "stroke-linejoin": "round", "stroke-linecap": "round" }));
     const bc = boot.get(x.e);
-    for (const [, , i] of pts) {
-      const ci = bc?.benches[i];
-      if (!ci) continue;
-      const [wx1, wy1] = pt(i, Math.min(ci.lo, 1));
-      const [wx2, wy2] = pt(i, Math.min(ci.hi, 1));
-      g.appendChild(el("line", { x1: wx1, y1: wy1, x2: wx2, y2: wy2,
-        stroke: colorOf(x.e), "stroke-width": 2.5, "stroke-opacity": 0.4,
-        "stroke-linecap": "round" }));
-    }
     for (const [px, py, i, share] of pts) {
       const dot = markerEl(x.e, px, py, 4);
       const [bench, , label] = STANDINGS_BENCHES[i];
