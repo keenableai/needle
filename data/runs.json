@@ -3341,8 +3341,7 @@
     "id": "2026-07-19T1941Z",
     "ts": "2026-07-19T19:41Z",
     "artifacts": [
-      "fresh.jsonl",
-      "rbp.json"
+      "fresh.jsonl"
     ]
   },
   {
@@ -7826,8 +7825,7 @@
     "artifacts": [
       "fresh.jsonl",
       "legal.json",
-      "legal.jsonl",
-      "ndcg.json"
+      "legal.jsonl"
     ]
   },
   {
