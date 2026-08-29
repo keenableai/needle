@@ -232,20 +232,6 @@
         ]
       }
     },
-    "exa-instant": {
-      "mean_ndcg": 0.0,
-      "num_scored": 91,
-      "search_errors": 100,
-      "judge_errors": 0,
-      "latency": null
-    },
-    "exa": {
-      "mean_ndcg": 0.0,
-      "num_scored": 91,
-      "search_errors": 100,
-      "judge_errors": 0,
-      "latency": null
-    },
     "google": {
       "mean_ndcg": 0.31258062268187203,
       "num_scored": 91,

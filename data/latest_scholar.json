@@ -695,60 +695,6 @@
       "misses_system_specific": 30,
       "misses_universal": 37
     },
-    "exa-instant": {
-      "recall_at_k": 0.0,
-      "mrr_at_k": 0.0,
-      "num_scored": 312,
-      "search_errors": 312,
-      "latency": null,
-      "by_bucket": {
-        "body": {
-          "n": 78,
-          "recall_at_k": 0.0
-        },
-        "clue": {
-          "n": 78,
-          "recall_at_k": 0.0
-        },
-        "title": {
-          "n": 78,
-          "recall_at_k": 0.0
-        },
-        "tot": {
-          "n": 78,
-          "recall_at_k": 0.0
-        }
-      },
-      "misses_system_specific": 0,
-      "misses_universal": 0
-    },
-    "exa": {
-      "recall_at_k": 0.0,
-      "mrr_at_k": 0.0,
-      "num_scored": 312,
-      "search_errors": 312,
-      "latency": null,
-      "by_bucket": {
-        "body": {
-          "n": 78,
-          "recall_at_k": 0.0
-        },
-        "clue": {
-          "n": 78,
-          "recall_at_k": 0.0
-        },
-        "title": {
-          "n": 78,
-          "recall_at_k": 0.0
-        },
-        "tot": {
-          "n": 78,
-          "recall_at_k": 0.0
-        }
-      },
-      "misses_system_specific": 0,
-      "misses_universal": 0
-    },
     "google": {
       "recall_at_k": 0.44871794871794873,
       "mrr_at_k": 0.3902904965404965,
