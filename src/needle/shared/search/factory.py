@@ -3,7 +3,7 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
 from needle.shared.search.base import SearchClient
-from needle.shared.search.brave import BraveClient
+from needle.shared.search.brave import BraveClient, BraveLlmContextClient
 from needle.shared.search.ceramic import CeramicClient
 from needle.shared.search.exa import ExaClient
 from needle.shared.search.firecrawl import FirecrawlClient
@@ -57,6 +57,10 @@ def _build_brave(api_key: str | None, snippet_chars: int) -> SearchClient:
     return BraveClient(api_key=api_key or "")
 
 
+def _build_brave_llmcontext(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return BraveLlmContextClient(api_key=api_key or "", snippet_chars=snippet_chars)
+
+
 def _build_parallel(mode: str) -> Callable[[str | None, int], SearchClient]:
     def build(api_key: str | None, snippet_chars: int) -> SearchClient:
         return ParallelClient(api_key=api_key or "", mode=mode)
@@ -104,6 +108,9 @@ ENGINES: dict[str, EngineSpec] = {
         key_env="SEARCHAPI_API_KEY", key_required=True, build=_build_searchapi("bing")
     ),
     "brave": EngineSpec(key_env="BRAVE_API_KEY", key_required=True, build=_build_brave),
+    "brave-llmcontext": EngineSpec(
+        key_env="BRAVE_API_KEY", key_required=True, build=_build_brave_llmcontext
+    ),
     "parallel": EngineSpec(
         key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("advanced")
     ),

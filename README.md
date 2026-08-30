@@ -49,15 +49,16 @@ All `run` commands share one interface:
 | `--out` | `-` | report path; `-` = stdout |
 | `--engines` | `keenable,exa` | comma-separated engine list |
 | `--num-results` | `5` | top-K fetched and scored per engine |
-| `--snippet-chars` | `2000` | uniform cap on per-result evidence text (`0` = no cap), so engines that return more text get no free evidence; also sent as the snippet-length request budget to engines that accept one (keenable, exa, ceramic), clamped to each API's range |
+| `--snippet-chars` | `2000` | uniform cap on per-result evidence text (`0` = no cap), so engines that return more text get no free evidence; also sent as the snippet-length request budget to engines that accept one (keenable, exa, ceramic, and brave-llmcontext as an equivalent token budget), clamped to each API's range |
 | `--limit` / `--sample` / `--seed` | `0` / `stratified` / `0` | deterministic sample of N queries |
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
 Every engine issues one request at a time, so latency samples are comparable
 across engines. Per-engine tuning uses env vars: `TAVILY_DEPTH`; the engine
-entry fixes Keenable's, Exa's, and Parallel's modes (`keenable` = pro,
-`keenable-realtime` = realtime, `exa` = auto, `exa-instant` = instant,
-`parallel` = advanced, `parallel-turbo` = turbo). The mean skips queries whose
+entry fixes Keenable's, Exa's, and Parallel's modes and Brave's endpoint
+(`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
+`exa-instant` = instant, `parallel` = advanced, `parallel-turbo` = turbo,
+`brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). The mean skips queries whose
 search or judging failed
 (via `num_scored`; the report lists `search_errors` / `judge_errors`) and
 does not score them as zero.
