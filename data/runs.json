@@ -10789,5 +10789,15 @@
       "fresh.jsonl",
       "ndcg.json"
     ]
+  },
+  {
+    "id": "2026-08-30T0749Z",
+    "ts": "2026-08-30T07:49Z",
+    "artifacts": [
+      "agentic_rare.json",
+      "agentic_rare.jsonl",
+      "fresh.jsonl",
+      "ndcg.json"
+    ]
   }
 ]
