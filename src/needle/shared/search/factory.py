@@ -7,6 +7,7 @@ from needle.shared.search.brave import BraveClient, BraveLlmContextClient
 from needle.shared.search.ceramic import CeramicClient
 from needle.shared.search.exa import ExaClient
 from needle.shared.search.firecrawl import FirecrawlClient
+from needle.shared.search.kagi import KagiClient
 from needle.shared.search.keenable import KeenableClient
 from needle.shared.search.octen import OctenClient
 from needle.shared.search.parallel import ParallelClient
@@ -97,6 +98,10 @@ def _build_firecrawl(api_key: str | None, snippet_chars: int) -> SearchClient:
     return FirecrawlClient(api_key=api_key or "")
 
 
+def _build_kagi(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return KagiClient(api_key=api_key or "")
+
+
 ENGINES: dict[str, EngineSpec] = {
     "keenable": EngineSpec(
         key_env="KEENABLE_API_KEY", key_required=False, build=_build_keenable("pro")
@@ -131,6 +136,7 @@ ENGINES: dict[str, EngineSpec] = {
     "ceramic": EngineSpec(key_env="CERAMIC_API_KEY", key_required=True, build=_build_ceramic),
     "you": EngineSpec(key_env="YOU_API_KEY", key_required=True, build=_build_you),
     "firecrawl": EngineSpec(key_env="FIRECRAWL_API_KEY", key_required=True, build=_build_firecrawl),
+    "kagi": EngineSpec(key_env="KAGI_API_KEY", key_required=True, build=_build_kagi),
 }
 
 

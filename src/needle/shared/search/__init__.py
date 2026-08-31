@@ -13,6 +13,7 @@ from needle.shared.search.ceramic import CeramicClient
 from needle.shared.search.exa import ExaClient
 from needle.shared.search.factory import build_search_clients
 from needle.shared.search.firecrawl import FirecrawlClient
+from needle.shared.search.kagi import KagiClient
 from needle.shared.search.keenable import KeenableClient
 from needle.shared.search.octen import OctenClient
 from needle.shared.search.parallel import ParallelClient
@@ -31,6 +32,7 @@ __all__ = [
     "ExaClient",
     "FirecrawlClient",
     "HttpSearchClient",
+    "KagiClient",
     "KeenableClient",
     "OctenClient",
     "ParallelClient",

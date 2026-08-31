@@ -10,6 +10,7 @@ from needle.shared.search import (
     CeramicClient,
     ExaClient,
     FirecrawlClient,
+    KagiClient,
     KeenableClient,
     OctenClient,
     ParallelClient,
@@ -541,6 +542,61 @@ async def test_firecrawl_clamps_limit_and_skips_tbs_without_dates(monkeypatch):
     assert calls["json"] == {"query": "hi", "limit": 100, "sources": ["web"]}
 
 
+async def test_kagi_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "meta": {"trace": "t-1"},
+        "data": {
+            "search": [
+                {
+                    "url": "https://a",
+                    "title": "A &amp; Co",
+                    "snippet": "<strong>sa</strong> text",
+                    "time": "2026-07-01T00:00:00Z",
+                },
+                {"url": "https://b", "title": "", "snippet": ""},
+                {"title": "no url"},
+            ],
+            "news": [
+                {"url": "https://a", "title": "dup"},
+                {"url": "https://n", "title": "N", "snippet": "sn"},
+            ],
+            "related_search": [{"url": "https://skip", "title": "skipped"}],
+        },
+    }
+    c = KagiClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(OPS_QUERY, num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b", "https://n"]
+    assert results[0].title == "A & Co"
+    assert results[0].snippet == "sa text"
+    assert results[0].published_date == "2026-07-01T00:00:00Z"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert calls["method"] == "POST"
+    assert calls["url"] == "https://kagi.com/api/v1/search"
+    assert calls["json"] == {
+        "query": "acme filing",
+        "limit": 5,
+        "lens": {"sites_included": ["sec.gov"]},
+        "filters": {"after": "2026-06-01", "before": "2026-06-30"},
+    }
+    assert calls["headers"] == {"Authorization": "Bot k"}
+
+
+async def test_kagi_truncates_and_tolerates_null_data(monkeypatch):
+    c = KagiClient(api_key="k")
+    fake, calls = _canned({"meta": {}, "data": None})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=2000)
+    assert err is None
+    assert results == []
+    assert calls["json"] == {"query": "hi", "limit": 1024}
+
+
 async def test_octen_maps_fields_and_builds_body(monkeypatch):
     payload = {
         "data": {
@@ -815,6 +871,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("YOU_API_KEY", "yk")
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fk")
     monkeypatch.setenv("TINYFISH_API_KEY", "tfk")
+    monkeypatch.setenv("KAGI_API_KEY", "kk")
     clients = build_search_clients(
         [
             "google",
@@ -828,6 +885,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "you",
             "firecrawl",
             "tinyfish",
+            "kagi",
         ]
     )
     assert isinstance(clients["google"], SerperClient)
@@ -850,6 +908,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["firecrawl"].api_key == "fk"
     assert isinstance(clients["tinyfish"], TinyFishClient)
     assert clients["tinyfish"].api_key == "tfk"
+    assert isinstance(clients["kagi"], KagiClient)
+    assert clients["kagi"].api_key == "kk"
 
 
 def test_factory_builds_engine_variants(monkeypatch):
