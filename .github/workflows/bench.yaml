@@ -49,9 +49,10 @@ env:
   CERAMIC_API_KEY: ${{ secrets.CERAMIC_API_KEY }}
   YOU_API_KEY: ${{ secrets.YOU_API_KEY }}
   FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+  TINYFISH_API_KEY: ${{ secrets.TINYFISH_API_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/needle-results
-  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,perplexity,octen,ceramic,you,firecrawl
+  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,perplexity,octen,ceramic,you,firecrawl,tinyfish
 
 jobs:
   bench:

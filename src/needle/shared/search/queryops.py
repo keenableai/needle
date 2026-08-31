@@ -31,6 +31,10 @@ def freshness_window(ops: QueryOps) -> str | None:
     return f"{lo.isoformat()}to{hi.isoformat()}"
 
 
+def clipped_text(text: str, max_chars: int) -> str:
+    return text[:max_chars].rsplit(" ", 1)[0] if len(text) > max_chars else text
+
+
 def parse_ops(query: str) -> QueryOps:
     text_parts: list[str] = []
     sites: list[str] = []
