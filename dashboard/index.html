@@ -1955,7 +1955,7 @@ function renderQualityPrice(rows) {
   const yHi = Math.min(1, Math.ceil((Math.max(...qs) + 0.04) * 20) / 20);
   const yStep = yHi - yLo <= 0.3 ? 0.05 : 0.1;
   const xPad = 30;
-  const X = (v) => M.left + xPad + (v / xTop) * (iw - xPad);
+  const X = (v) => M.left + xPad + Math.sqrt(v / xTop) * (iw - xPad);
   const Y = (v) => M.top + (1 - (v - yLo) / (yHi - yLo)) * ih;
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
     "aria-label": "Overall quality as share of ultimate vs price per 1,000 queries" });
@@ -1978,7 +1978,13 @@ function renderQualityPrice(rows) {
     svg.appendChild(el("text", { x: M.left + 6, y: Math.min(Y(gv) + 14, M.top + ih - 22),
       class: "qp-tick" }, fmtPct(gv)));
   }
-  for (let v = 0; v <= xTop; v++) {
+  const xTicks = [0];
+  for (let v = 1; v < xTop; v++) {
+    if (X(v) - X(xTicks[xTicks.length - 1]) >= 48) xTicks.push(v);
+  }
+  if (X(xTop) - X(xTicks[xTicks.length - 1]) < 40) xTicks.pop();
+  xTicks.push(xTop);
+  for (const v of xTicks) {
     const edge = v === xTop;
     svg.appendChild(el("text", { x: X(v) + (edge ? -3 : 3), y: M.top + ih - 7,
       "text-anchor": edge ? "end" : "start", class: "qp-tick" }, `$${v}`));
@@ -1992,44 +1998,72 @@ function renderQualityPrice(rows) {
   xT.appendChild(el("tspan", {}, "Price, $ per 1k queries"));
   xT.appendChild(el("tspan", { class: "dim" }, " — lowest public tier"));
   svg.appendChild(xT);
-  const items = pts.map((p) => ({ ...p, px: X(p.usd), yPos: Y(p.q), right: X(p.usd) < M.left + iw - 130 }));
-  const clusters = [];
-  for (const side of [true, false]) {
-    const row = items.filter((it) => it.right === side).sort((a, b) => a.px - b.px);
-    let group = null;
-    for (const it of row) {
-      if (group && it.px - group[group.length - 1].px < 90) group.push(it);
-      else clusters.push(group = [it]);
-    }
-  }
-  for (const group of clusters) stackLabels(group, M.top + 12, M.top + ih - 10, 18);
+  const items = pts.map((p) => ({ ...p, px: X(p.usd), yPos: Y(p.q), labelY: Y(p.q) }));
   for (const it of items) {
     const g = el("g", { class: "qp-mark" });
     const home = it.e === HOME_ENGINE;
-    const s = it.right ? 1 : -1;
-    if (Math.abs(it.labelY - it.yPos) > 4) {
-      g.appendChild(el("line", { x1: it.px, y1: it.yPos + Math.sign(it.labelY - it.yPos) * 6,
-        x2: it.px, y2: it.labelY, stroke: "var(--baseline)", "stroke-width": 1 }));
-    }
     g.appendChild(el("circle", { cx: it.px, cy: it.yPos, r: 5,
       fill: home ? "var(--keenable-blue)" : "var(--text-primary)" }));
     const logo = ENGINE_LOGOS.get(it.e);
-    if (logo) {
-      g.appendChild(el("image", { href: logo, x: it.right ? it.px - 27 : it.px + 11,
-        y: it.labelY - 8, width: 16, height: 16 }));
-    }
-    it.label = el("text", { x: it.px + s * 11, y: it.labelY + 4,
-      "text-anchor": it.right ? "start" : "end",
-      class: "qp-name" + (home ? " home-name" : "") }, displayName(it.e));
+    it.logo = logo ? el("image", { href: logo, width: 16, height: 16 }) : null;
+    if (it.logo) g.appendChild(it.logo);
+    it.label = el("text", { class: "qp-name" + (home ? " home-name" : "") }, displayName(it.e));
     g.appendChild(it.label);
     it.g = g;
-    it.hasLogo = Boolean(logo);
     svg.appendChild(g);
   }
   const halo = el("circle", { r: 10, fill: "none", stroke: "var(--keenable-blue)",
     "stroke-width": 1.5, "stroke-opacity": 0.6, visibility: "hidden" });
   svg.appendChild(halo);
   holder.appendChild(svg);
+  for (const it of items) {
+    const tw = it.label.getComputedTextLength();
+    it.right = it.px + 11 + tw <= M.left + iw - 6;
+    it.label.setAttribute("text-anchor", it.right ? "start" : "end");
+    it.x0 = it.right ? (it.logo ? it.px - 27 : it.px + 11) : it.px - 11 - tw;
+    it.x1 = it.right ? it.px + 11 + tw : (it.logo ? it.px + 27 : it.px - 11);
+  }
+  const yMin = M.top + 12, yMax = M.top + ih - 16;
+  for (let pass = 0; pass < 200; pass++) {
+    let moved = false;
+    for (let i = 0; i < items.length; i++) {
+      const a = items[i];
+      for (let j = 0; j < items.length; j++) {
+        if (i === j) continue;
+        const b = items[j];
+        if (j > i && a.x0 < b.x1 && b.x0 < a.x1) {
+          const d = 18 - Math.abs(a.labelY - b.labelY);
+          if (d > 0.5) {
+            const s = a.labelY <= b.labelY ? 1 : -1;
+            a.labelY -= s * d / 2;
+            b.labelY += s * d / 2;
+            moved = true;
+          }
+        }
+        if (b.px > a.x0 - 6 && b.px < a.x1 + 6 && Math.abs(b.px - a.px) > 5) {
+          const d = 15 - Math.abs(a.labelY - b.yPos);
+          if (d > 0.5) {
+            a.labelY += a.labelY >= b.yPos ? d : -d;
+            moved = true;
+          }
+        }
+      }
+      a.labelY = Math.max(yMin, Math.min(yMax, a.labelY));
+    }
+    if (!moved) break;
+  }
+  for (const it of items) {
+    if (Math.abs(it.labelY - it.yPos) > 5) {
+      it.g.insertBefore(el("line", { x1: it.px, y1: it.yPos + Math.sign(it.labelY - it.yPos) * 6,
+        x2: it.px, y2: it.labelY, stroke: "var(--baseline)", "stroke-width": 1 }), it.g.firstChild);
+    }
+    it.label.setAttribute("x", it.px + (it.right ? 11 : -11));
+    it.label.setAttribute("y", it.labelY + 4);
+    if (it.logo) {
+      it.logo.setAttribute("x", it.right ? it.px - 27 : it.px + 11);
+      it.logo.setAttribute("y", it.labelY - 8);
+    }
+  }
 
   const tip = el("div", { class: "tooltip qp-tip" });
   card.appendChild(tip);
@@ -2061,11 +2095,8 @@ function renderQualityPrice(rows) {
     for (const it of items) it.g.classList.remove("is-hot");
   }
   for (const it of items) {
-    const tw = it.label.getComputedTextLength();
-    const x0 = it.right ? (it.hasLogo ? it.px - 27 : it.px + 11) : it.px - 11 - tw;
-    const x1 = it.right ? it.px + 11 + tw : (it.hasLogo ? it.px + 27 : it.px - 11);
-    it.g.appendChild(el("rect", { class: "qp-hit", x: x0, y: it.labelY - 10,
-      width: Math.max(x1 - x0, 1), height: 20 }));
+    it.g.appendChild(el("rect", { class: "qp-hit", x: it.x0, y: it.labelY - 10,
+      width: Math.max(it.x1 - it.x0, 1), height: 20 }));
     it.g.appendChild(el("circle", { class: "qp-hit", cx: it.px, cy: it.yPos, r: 11 }));
     it.g.addEventListener("pointerenter", () => showTip(it));
     it.g.addEventListener("pointerleave", hideTip);
