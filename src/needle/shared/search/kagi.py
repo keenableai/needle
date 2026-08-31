@@ -10,7 +10,7 @@ TAG_RE = re.compile(r"<[^>]+>")
 
 
 def _clean(value: Any) -> str | None:
-    if not isinstance(value, str) or not value:
+    if not isinstance(value, str):
         return None
     return html.unescape(TAG_RE.sub("", value)) or None
 
