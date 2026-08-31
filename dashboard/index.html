@@ -904,6 +904,7 @@
       <tr><td>parallel-turbo</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=turbo</td></tr>
       <tr><td>perplexity</td><td>Perplexity POST /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → search_after_date_filter/search_before_date_filter (MM/DD/YYYY)</td></tr>
       <tr><td>tavily</td><td>Tavily POST /search</td><td>search_depth=basic, max_results=min(k,20); site: → include_domains, after:/before: → start_date/end_date (ISO dates)</td></tr>
+      <tr><td>tinyfish</td><td>TinyFish GET api.search.tinyfish.ai</td><td>query = query text clipped to 2,000 chars; no count parameter — we keep the first k results; site: → include_domains (comma-separated), after:/before: → after_date/before_date (ISO dates)</td></tr>
       <tr><td>you</td><td>You.com POST /v1/search</td><td>count=min(k,100); site: → include_domains, after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; web and news sections merge, deduplicated by URL</td></tr>
       <tr><td>firecrawl</td><td>Firecrawl POST /v2/search</td><td>limit=min(k,100), sources=[web]; site: kept in the query text, after:/before: → tbs=cdr:1,cd_min:M/D/YYYY,cd_max:M/D/YYYY</td></tr>
     </table>
@@ -963,7 +964,8 @@ function registerEngines(names) {
 }
 
 registerEngines(["keenable-realtime", "google", "bing", "brave", "brave-llmcontext",
-  "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity", "tavily", "you", "firecrawl"]);
+  "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity", "tavily", "you", "firecrawl",
+  "tinyfish"]);
 
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
@@ -1863,6 +1865,7 @@ const PRICES = new Map([
   ["you", { usd: 5.00, plan: "Web Search API plan" }],
   ["firecrawl", { usd: 1.20, plan: "Scale — $599/mo / 1M credits, 2 credits per search" }],
   ["octen", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["tinyfish", { usd: 0.00, plan: "free" }],
   ["ceramic", { usd: 0.05, plan: "pay-as-you-go" }],
 ]);
 const fmtUsd = (v) => `$${v.toFixed(2)}`;
