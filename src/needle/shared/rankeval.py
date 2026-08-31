@@ -197,11 +197,15 @@ async def run_ndcg(
             profile=asdict(profile) if profile is not None else None,
         )
 
-    searches_by_query = await search_all(
-        engines, [q.text for q in queries], num_results=num_results, concurrent=concurrent_search
+    searches_by_query, profiles = await asyncio.gather(
+        search_all(
+            engines,
+            [q.text for q in queries],
+            num_results=num_results,
+            concurrent_search=concurrent_search,
+        ),
+        asyncio.gather(*[classify(q) for q in queries]),
     )
-
-    profiles = await asyncio.gather(*[classify(q) for q in queries])
     query_outs = await asyncio.gather(
         *[
             judge_query(query, searches, profile)

@@ -105,22 +105,23 @@ async def search_all(
     texts: list[str],
     *,
     num_results: int,
-    concurrent: bool = False,
+    concurrent_search: bool = False,
 ) -> list[list[tuple[list[SearchResult] | None, dict[str, str] | None]]]:
-    if not concurrent:
+    if not concurrent_search:
         return [
             [await client.search(text, num_results=num_results) for client in engines.values()]
             for text in texts
         ]
-    flat = await asyncio.gather(
-        *[
-            client.search(text, num_results=num_results)
-            for text in texts
-            for client in engines.values()
-        ]
+    return list(
+        await asyncio.gather(
+            *[
+                asyncio.gather(
+                    *[client.search(text, num_results=num_results) for client in engines.values()]
+                )
+                for text in texts
+            ]
+        )
     )
-    n = len(engines)
-    return [list(flat[i * n : (i + 1) * n]) for i in range(len(texts))]
 
 
 class HttpSearchClient:

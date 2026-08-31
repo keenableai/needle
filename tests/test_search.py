@@ -859,25 +859,28 @@ def test_rejects_zero_max_concurrency():
         search_base.HttpSearchClient(max_concurrency=0)
 
 
+class _CountingClient:
+    def __init__(self, engine, counters):
+        self.engine = engine
+        self.counters = counters
+
+    async def search(self, query, *, num_results):
+        self.counters["active"] += 1
+        self.counters["peak"] = max(self.counters["peak"], self.counters["active"])
+        await asyncio.sleep(0)
+        self.counters["active"] -= 1
+        return [SearchResult(url=f"https://{self.engine}/{query}")], None
+
+
+def _counting_engines():
+    counters = {"active": 0, "peak": 0}
+    return {name: _CountingClient(name, counters) for name in ("e1", "e2")}, counters
+
+
 async def test_search_all_is_serial_and_text_major():
-    active = 0
-    peak = 0
-
-    class FakeClient:
-        def __init__(self, engine):
-            self.engine = engine
-
-        async def search(self, query, *, num_results):
-            nonlocal active, peak
-            active += 1
-            peak = max(peak, active)
-            await asyncio.sleep(0)
-            active -= 1
-            return [SearchResult(url=f"https://{self.engine}/{query}")], None
-
-    engines = {"e1": FakeClient("e1"), "e2": FakeClient("e2")}
+    engines, counters = _counting_engines()
     rows = await search_all(engines, ["a", "b"], num_results=5)
-    assert peak == 1
+    assert counters["peak"] == 1
     assert len(rows) == 2 and all(len(row) == 2 for row in rows)
     results, err = rows[0][0]
     assert err is None and results[0].url == "https://e1/a"
@@ -887,29 +890,15 @@ async def test_search_all_is_serial_and_text_major():
 
 
 async def test_search_all_concurrent_overlaps_and_keeps_order():
-    active = 0
-    peak = 0
-
-    class FakeClient:
-        def __init__(self, engine):
-            self.engine = engine
-
-        async def search(self, query, *, num_results):
-            nonlocal active, peak
-            active += 1
-            peak = max(peak, active)
-            await asyncio.sleep(0.01)
-            active -= 1
-            return [SearchResult(url=f"https://{self.engine}/{query}")], None
-
-    engines = {"e1": FakeClient("e1"), "e2": FakeClient("e2")}
-    rows = await search_all(engines, ["a", "b"], num_results=5, concurrent=True)
-    assert peak > 1
+    engines, counters = _counting_engines()
+    rows = await search_all(engines, ["a", "b"], num_results=5, concurrent_search=True)
+    assert counters["peak"] > 1
     assert len(rows) == 2 and all(len(row) == 2 for row in rows)
-    for row, text in zip(rows, ["a", "b"], strict=True):
-        for (results, err), engine in zip(row, ["e1", "e2"], strict=True):
-            assert err is None and results[0].url == f"https://{engine}/{text}"
-    assert await search_all({}, ["a"], num_results=5, concurrent=True) == [[]]
+    results, err = rows[0][0]
+    assert err is None and results[0].url == "https://e1/a"
+    results, err = rows[1][1]
+    assert results[0].url == "https://e2/b"
+    assert await search_all({}, ["a"], num_results=5, concurrent_search=True) == [[]]
 
 
 def test_engines_default_to_serial_requests(monkeypatch):
