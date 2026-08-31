@@ -4,6 +4,8 @@ from pathlib import Path
 
 import fire
 import httpx
+from huggingface_hub import HfApi
+from huggingface_hub.errors import HfHubHTTPError
 
 from needle.shared.hf import dataset_name, resolve_base
 from needle.shared.io import read_jsonl, write_jsonl
@@ -62,19 +64,12 @@ def update(
     legal_report: str | None = None,
     agentic_rare: str | None = None,
     agentic_rare_queries: str | None = None,
+    retries: int = 5,
 ) -> None:
     run_id = ts.replace(":", "")
     cutoff = (datetime.strptime(run_id, RUN_ID_FMT) - timedelta(hours=WINDOW_HOURS)).strftime(
         RUN_ID_FMT
     )
-    with httpx.Client(timeout=120.0, follow_redirects=True) as client:
-        resp = client.get(f"{resolve_base(dataset)}/{OUT}")
-    if resp.status_code == 404:
-        rows = []
-    else:
-        resp.raise_for_status()
-        rows = read_jsonl(resp.text)
-    rows = [r for r in rows if r["run_id"] != run_id and r["run_id"] >= cutoff]
     paths = {
         "news": (news, news_report),
         "finance": (finance, finance_report),
@@ -82,14 +77,43 @@ def update(
         "scholar": (scholar, scholar_report),
         "legal": (legal, legal_report),
     }
-    for bench, (queries_path, report_path) in paths.items():
-        if queries_path and report_path:
-            report = json.loads(Path(report_path).read_text(encoding="utf-8"))
-            queries_text = Path(queries_path).read_text(encoding="utf-8")
-            rows.extend(_bench_rows(run_id, bench, queries_text, report))
-    if agentic_rare and not agentic_rare_queries:
-        rows.extend(_rare_rows(run_id, json.loads(Path(agentic_rare).read_text(encoding="utf-8"))))
-    _finish(rows, out)
+    name = dataset_name(dataset)
+    api = HfApi()
+    for attempt in range(retries):
+        sha = api.repo_info(name, repo_type="dataset").sha
+        with httpx.Client(timeout=120.0, follow_redirects=True) as client:
+            resp = client.get(f"{resolve_base(dataset, revision=sha)}/{OUT}")
+        if resp.status_code == 404:
+            rows = []
+        else:
+            resp.raise_for_status()
+            rows = read_jsonl(resp.text)
+        rows = [r for r in rows if r["run_id"] != run_id and r["run_id"] >= cutoff]
+        for bench, (queries_path, report_path) in paths.items():
+            if queries_path and report_path:
+                report = json.loads(Path(report_path).read_text(encoding="utf-8"))
+                queries_text = Path(queries_path).read_text(encoding="utf-8")
+                rows.extend(_bench_rows(run_id, bench, queries_text, report))
+        if agentic_rare and not agentic_rare_queries:
+            rows.extend(
+                _rare_rows(run_id, json.loads(Path(agentic_rare).read_text(encoding="utf-8")))
+            )
+        _finish(rows, out)
+        try:
+            api.upload_file(
+                path_or_fileobj=out,
+                path_in_repo=OUT,
+                repo_id=name,
+                repo_type="dataset",
+                commit_message=f"daily queries: {ts}",
+                parent_commit=sha,
+            )
+            return
+        except HfHubHTTPError as e:
+            status = e.response.status_code if e.response is not None else None
+            if status in (409, 412) and attempt < retries - 1:
+                continue
+            raise
 
 
 def backfill(out: str = OUT, dataset: str | None = None, hours: int = WINDOW_HOURS) -> None:
