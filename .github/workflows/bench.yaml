@@ -117,7 +117,7 @@ jobs:
       - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
         id: scholar
         continue-on-error: true
-        timeout-minutes: 180
+        timeout-minutes: 240
         env:
           RUN_SCHOLAR: ${{ github.event.schedule == '17 12 * * *' || inputs.scholar == true }}
         run: |
