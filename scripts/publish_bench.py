@@ -1,5 +1,6 @@
 import json
-from datetime import UTC, datetime
+import sys
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import fire
@@ -133,10 +134,17 @@ def publish(
     legal_queries: str | None = None,
     ts: str | None = None,
 ) -> None:
-    ts = ts or datetime.now(UTC).strftime(TS_FMT)
-    run_id = ts.replace(":", "")
     data = Path(site) / "data"
     data.mkdir(parents=True, exist_ok=True)
+    index_path = data / "runs.json"
+    runs = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []
+    if ts is None:
+        taken = {r.get("id") for r in runs}
+        t = datetime.now(UTC)
+        while t.strftime(TS_FMT).replace(":", "") in taken:
+            t += timedelta(minutes=1)
+        ts = t.strftime(TS_FMT)
+    run_id = ts.replace(":", "")
     write_json(FAMILIES, str(data / "families.json"))
     run_dir = Path(runs_out) / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -171,9 +179,14 @@ def publish(
     ):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
+    for path, name in (
+        (gold, "gold.jsonl"),
+        (scholar_queries, "scholar.jsonl"),
+        (legal_queries, "legal.jsonl"),
+    ):
+        if path:
+            (data / name).write_bytes(Path(path).read_bytes())
 
-    index_path = data / "runs.json"
-    runs = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else []
     republish = any(r.get("id") == run_id for r in runs)
 
     _publish_rows(data / "history.jsonl", rows, ts, republish)
@@ -188,7 +201,8 @@ def publish(
     runs = [r for r in runs if r.get("id") != run_id]
     runs.append({"id": run_id, "ts": ts, "artifacts": sorted(p.name for p in run_dir.iterdir())})
     write_json(runs, str(index_path))
-    print(f"appended {len(rows)} rows at {ts}; staged {run_id}")
+    print(ts)
+    print(f"appended {len(rows)} rows at {ts}; staged {run_id}", file=sys.stderr)
 
 
 if __name__ == "__main__":

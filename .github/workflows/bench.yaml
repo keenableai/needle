@@ -31,9 +31,6 @@ permissions:
   pages: write
   id-token: write
 
-concurrency:
-  group: bench
-
 env:
   PYTHON_VERSION: "3.11"
   OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -97,10 +94,9 @@ jobs:
             echo "skipping finance"
             exit 0
           fi
-          mkdir -p site-data/data
           uv run needle finance generate --max-companies 100 --per-company 1 \
-            --filingdoc-target 40 --out site-data/data/gold.jsonl
-          uv run needle finance run --queries site-data/data/gold.jsonl \
+            --filingdoc-target 40 --out gold.jsonl
+          uv run needle finance run --queries gold.jsonl \
             --limit 120 --engines "$ENGINES" --judge --out recall.json
 
       - name: agentic_rare (daily schedule or dispatch opt-in)
@@ -128,10 +124,9 @@ jobs:
             echo "skipping scholar"
             exit 0
           fi
-          mkdir -p site-data/data
           uv run needle scholar generate --age-buckets 7d,30d,1y --per-cell 7 \
-            --out site-data/data/scholar.jsonl
-          uv run needle scholar run --queries site-data/data/scholar.jsonl \
+            --out scholar.jsonl
+          uv run needle scholar run --queries scholar.jsonl \
             --engines "$ENGINES" --num-results 10 --out scholar.json
 
       - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
@@ -145,10 +140,9 @@ jobs:
             echo "skipping legal"
             exit 0
           fi
-          mkdir -p site-data/data
           uv run needle legal generate --per-court 4 --per-title 4 \
-            --out site-data/data/legal.jsonl
-          uv run needle legal run --queries site-data/data/legal.jsonl \
+            --out legal.jsonl
+          uv run needle legal run --queries legal.jsonl \
             --engines "$ENGINES" --out legal.json
 
       - name: Collect bench outcomes
@@ -164,60 +158,75 @@ jobs:
 
       - name: Publish
         run: |
-          TS=$(date -u +%Y-%m-%dT%H:%MZ)
-          echo "TS=$TS" >> "$GITHUB_ENV"
-          base_args="--site site-data --runs-out staged --ts $TS"
+          base_args="--site site-data --runs-out staged"
           args="$base_args"
           if [ -s ndcg.json ]; then
             args="$args --ndcg ndcg.json --fresh fresh.jsonl"
           fi
           if [ -s recall.json ]; then
-            args="$args --recall recall.json --gold site-data/data/gold.jsonl"
+            args="$args --recall recall.json --gold gold.jsonl"
           fi
           if [ -s agentic_rare.json ]; then
             args="$args --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl"
           fi
           if [ -s scholar.json ]; then
-            args="$args --scholar scholar.json --scholar-queries site-data/data/scholar.jsonl"
+            args="$args --scholar scholar.json --scholar-queries scholar.jsonl"
           fi
           if [ -s legal.json ]; then
-            args="$args --legal legal.json --legal-queries site-data/data/legal.jsonl"
+            args="$args --legal legal.json --legal-queries legal.jsonl"
           fi
           if [ "$args" = "$base_args" ]; then
             echo "no reports to publish"
             exit 0
           fi
-          uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
-          uv run python scripts/publish_bench.py $args
-          uvx --from huggingface_hub hf upload "$HF_DATASET" staged runs \
-            --repo-type dataset --commit-message "bench: $TS"
-          cp dashboard/index.html site-data/index.html
-          touch site-data/.nojekyll
-          cd site-data
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "bench: $TS" || echo "nothing to publish"
-          git push
+          git -C site-data config user.name "github-actions[bot]"
+          git -C site-data config user.email "github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git -C site-data fetch origin gh-pages
+            git -C site-data reset --hard FETCH_HEAD
+            git -C site-data clean -fd
+            rm -rf staged
+            uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
+            TS=$(uv run python scripts/publish_bench.py $args)
+            cp dashboard/index.html site-data/index.html
+            touch site-data/.nojekyll
+            git -C site-data add -A
+            git -C site-data commit -m "bench: $TS"
+            if git -C site-data push origin HEAD:gh-pages; then
+              for i in 1 2 3; do
+                if uv run hf upload "$HF_DATASET" staged runs \
+                  --repo-type dataset --commit-message "bench: $TS"; then
+                  echo "TS=$TS" >> "$GITHUB_ENV"
+                  exit 0
+                fi
+                sleep 10
+              done
+              echo "hf upload failed; runs.json references missing artifacts for $TS"
+              exit 1
+            fi
+            echo "push rejected, retrying"
+          done
+          echo "publish failed after 5 attempts"
+          exit 1
 
       - name: Update daily queries
         run: |
           args=""
           if [ -s ndcg.json ]; then args="$args --news fresh.jsonl --news_report ndcg.json"; fi
-          if [ -s recall.json ]; then args="$args --finance site-data/data/gold.jsonl --finance_report recall.json"; fi
-          if [ -s scholar.json ]; then args="$args --scholar site-data/data/scholar.jsonl --scholar_report scholar.json"; fi
-          if [ -s legal.json ]; then args="$args --legal site-data/data/legal.jsonl --legal_report legal.json"; fi
+          if [ -s recall.json ]; then args="$args --finance gold.jsonl --finance_report recall.json"; fi
+          if [ -s scholar.json ]; then args="$args --scholar scholar.jsonl --scholar_report scholar.json"; fi
+          if [ -s legal.json ]; then args="$args --legal legal.jsonl --legal_report legal.json"; fi
           if [ -s agentic_rare.json ]; then args="$args --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl"; fi
           if [ -z "$args" ]; then
             echo "no daily queries to update"
             exit 0
           fi
           uv run python scripts/daily_queries.py update --ts "$TS" $args
-          uvx --from huggingface_hub hf upload "$HF_DATASET" daily_queries.jsonl daily_queries.jsonl \
-            --repo-type dataset --commit-message "daily queries: $TS"
 
   deploy-pages:
     needs: bench
+    concurrency:
+      group: pages
     permissions:
       contents: read
       pages: write
