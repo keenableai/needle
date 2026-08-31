@@ -56,6 +56,7 @@
     --series-11: #6F8433;
     --series-12: #814800;
     --series-13: #B3322B;
+    --series-14: #8A7500;
   }
   * { box-sizing: border-box; }
   body {
@@ -967,10 +968,11 @@ registerEngines(["keenable-realtime", "google", "bing", "brave", "brave-llmconte
   "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity", "tavily", "you", "firecrawl",
   "tinyfish"]);
 
+const SERIES_COUNT = 14;
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
   const slot = ENGINE_SLOT.get(engine);
-  return slot == null || slot >= 13 ? "var(--text-muted)" : `var(--series-${slot + 1})`;
+  return slot == null || slot >= SERIES_COUNT ? "var(--text-muted)" : `var(--series-${slot + 1})`;
 }
 const MARKER_SHAPES = ["circle", "square", "diamond", "up", "down"];
 function markerEl(engine, x, y, r) {

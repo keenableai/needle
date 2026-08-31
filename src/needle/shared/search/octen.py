@@ -1,7 +1,7 @@
 from typing import Any
 
 from needle.shared.search.base import HttpSearchClient, SearchResult
-from needle.shared.search.queryops import parse_ops
+from needle.shared.search.queryops import clipped_text, parse_ops
 
 MAX_QUERY_CHARS = 500
 
@@ -20,11 +20,8 @@ class OctenClient(HttpSearchClient):
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
         ops = parse_ops(query)
-        text = ops.text
-        if len(text) > MAX_QUERY_CHARS:
-            text = text[:MAX_QUERY_CHARS].rsplit(" ", 1)[0]
         body: dict[str, Any] = {
-            "query": text,
+            "query": clipped_text(ops.text, MAX_QUERY_CHARS),
             "count": num_results,
             "highlight": {"enable": True, "max_tokens": self.highlight_max_tokens},
         }

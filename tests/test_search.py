@@ -610,26 +610,17 @@ async def test_ceramic_maps_fields_and_builds_body(monkeypatch):
 
 async def test_tinyfish_maps_fields_and_builds_params(monkeypatch):
     payload = {
-        "query": "acme filing",
         "results": [
-            {
-                "position": 1,
-                "url": "https://a",
-                "title": "A",
-                "snippet": "sa",
-                "date": "Jun 9, 2026",
-            },
-            {"position": 2, "url": "https://b", "title": "", "snippet": ""},
-            {"position": 3, "title": "no url"},
-        ],
-        "total_results": 3,
-        "page": 0,
+            {"url": "https://a", "title": "A", "snippet": "sa", "date": "Jun 9, 2026"},
+            {"url": "https://b", "title": "", "snippet": ""},
+            {"title": "no url"},
+        ]
     }
     c = TinyFishClient(api_key="k")
     fake, calls = _canned(payload)
     monkeypatch.setattr(c, "_request_json", fake)
 
-    results, err = await c.search(OPS_QUERY, num_results=5)
+    results, err = await c.search("hi", num_results=5)
     assert err is None
     assert [r.url for r in results] == ["https://a", "https://b"]
     assert results[0].snippet == "sa"
@@ -639,12 +630,7 @@ async def test_tinyfish_maps_fields_and_builds_params(monkeypatch):
     assert results[1].published_date is None
     assert calls["method"] == "GET"
     assert calls["url"] == "https://api.search.tinyfish.ai"
-    assert calls["params"] == {
-        "query": "acme filing",
-        "include_domains": "sec.gov",
-        "after_date": "2026-06-01",
-        "before_date": "2026-06-30",
-    }
+    assert calls["params"] == {"query": "hi"}
     assert calls["headers"] == {"X-API-Key": "k"}
 
 
@@ -1264,6 +1250,17 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             {"result": {"results": []}},
             "json",
             {"query": "acme filing"},
+        ),
+        (
+            lambda: TinyFishClient(api_key="k"),
+            {"results": []},
+            "params",
+            {
+                "query": "acme filing",
+                "include_domains": "sec.gov",
+                "after_date": "2026-06-01",
+                "before_date": "2026-06-30",
+            },
         ),
         (
             lambda: YouClient(api_key="k"),
