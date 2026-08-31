@@ -886,6 +886,32 @@ async def test_search_all_is_serial_and_text_major():
     assert await search_all({}, ["a", "b"], num_results=5) == [[], []]
 
 
+async def test_search_all_concurrent_overlaps_and_keeps_order():
+    active = 0
+    peak = 0
+
+    class FakeClient:
+        def __init__(self, engine):
+            self.engine = engine
+
+        async def search(self, query, *, num_results):
+            nonlocal active, peak
+            active += 1
+            peak = max(peak, active)
+            await asyncio.sleep(0.01)
+            active -= 1
+            return [SearchResult(url=f"https://{self.engine}/{query}")], None
+
+    engines = {"e1": FakeClient("e1"), "e2": FakeClient("e2")}
+    rows = await search_all(engines, ["a", "b"], num_results=5, concurrent=True)
+    assert peak > 1
+    assert len(rows) == 2 and all(len(row) == 2 for row in rows)
+    for row, text in zip(rows, ["a", "b"], strict=True):
+        for (results, err), engine in zip(row, ["e1", "e2"], strict=True):
+            assert err is None and results[0].url == f"https://{engine}/{text}"
+    assert await search_all({}, ["a"], num_results=5, concurrent=True) == [[]]
+
+
 def test_engines_default_to_serial_requests(monkeypatch):
     for spec in ENGINES.values():
         monkeypatch.setenv(spec.key_env, "k")
