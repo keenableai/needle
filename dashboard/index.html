@@ -339,8 +339,6 @@
   #card-quality-price { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
   #quality-price { padding: 4px 0 8px; overflow-x: auto; }
   #quality-price svg { height: auto; }
-  #quality-price .qp-name { fill: var(--text-primary); font-size: 12px; }
-  #quality-price .qp-name.home-name { fill: var(--keenable-blue); }
   #quality-price .qp-tick { fill: var(--text-primary); fill-opacity: 0.32; font-family: var(--font-utility); font-size: 11px; letter-spacing: -0.004em; font-variant-numeric: tabular-nums; }
   #quality-price .qp-axis { fill: var(--text-primary); font-family: var(--font-utility); font-size: 12px; letter-spacing: -0.004em; }
   #quality-price .qp-axis .dim { fill: var(--text-muted); }
@@ -1998,70 +1996,43 @@ function renderQualityPrice(rows) {
   xT.appendChild(el("tspan", {}, "Price, $ per 1k queries"));
   xT.appendChild(el("tspan", { class: "dim" }, " — lowest public tier"));
   svg.appendChild(xT);
-  const items = pts.map((p) => ({ ...p, px: X(p.usd), yPos: Y(p.q), labelY: Y(p.q) }));
-  for (const it of items) {
-    const g = el("g", { class: "qp-mark" });
-    const home = it.e === HOME_ENGINE;
-    g.appendChild(el("circle", { cx: it.px, cy: it.yPos, r: 5,
-      fill: home ? "var(--keenable-blue)" : "var(--text-primary)" }));
-    const logo = ENGINE_LOGOS.get(it.e);
-    it.logo = logo ? el("image", { href: logo, width: 16, height: 16 }) : null;
-    if (it.logo) g.appendChild(it.logo);
-    it.label = el("text", { class: "qp-name" + (home ? " home-name" : "") }, displayName(it.e));
-    g.appendChild(it.label);
-    it.g = g;
-    svg.appendChild(g);
-  }
-  const halo = el("circle", { r: 10, fill: "none", stroke: "var(--keenable-blue)",
-    "stroke-width": 1.5, "stroke-opacity": 0.6, visibility: "hidden" });
-  svg.appendChild(halo);
-  holder.appendChild(svg);
-  for (const it of items) {
-    const tw = it.label.getComputedTextLength();
-    it.off = it.logo ? 31 : 11;
-    it.right = it.px + it.off + tw <= M.left + iw - 6;
-    it.label.setAttribute("text-anchor", it.right ? "start" : "end");
-    it.x0 = it.right ? it.px + 11 : it.px - it.off - tw;
-    it.x1 = it.right ? it.px + it.off + tw : it.px - 11;
-  }
-  const yMin = M.top + 12, yMax = M.top + ih - 16;
+  const items = pts.map((p) => ({ ...p, px: X(p.usd), yPos: Y(p.q) }));
   const order = [...items].sort((a, b) => a.yPos - b.yPos || a.px - b.px);
   const placed = [];
-  const clash = (it, y) => {
-    for (const o of placed) {
-      if (it.x0 < o.x1 && o.x0 < it.x1 && Math.abs(y - o.labelY) < 18) return true;
-    }
-    for (const o of items) {
-      if (o !== it && o.px > it.x0 - 6 && o.px < it.x1 + 6 &&
-          Math.abs(o.px - it.px) > 5 && Math.abs(y - o.yPos) < 14) return true;
-    }
-    return false;
-  };
   for (const it of order) {
-    it.labelY = it.yPos;
-    for (let k = 0; k <= 24; k++) {
-      const cand = it.yPos + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 6;
-      if (cand < yMin || cand > yMax) continue;
-      if (!clash(it, cand)) {
-        it.labelY = cand;
+    it.cy = it.yPos;
+    for (let k = 0; k <= 20; k++) {
+      const cand = it.yPos + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 5;
+      if (cand < M.top + 10 || cand > M.top + ih - 10) continue;
+      if (placed.every((o) => Math.abs(o.px - it.px) >= 17 || Math.abs(o.cy - cand) >= 17)) {
+        it.cy = cand;
         break;
       }
     }
-    it.labelY = Math.max(yMin, Math.min(yMax, it.labelY));
     placed.push(it);
   }
   for (const it of items) {
-    if (Math.abs(it.labelY - it.yPos) > 5) {
-      it.g.insertBefore(el("line", { x1: it.px, y1: it.yPos + Math.sign(it.labelY - it.yPos) * 6,
-        x2: it.px, y2: it.labelY, stroke: "var(--baseline)", "stroke-width": 1 }), it.g.firstChild);
+    const g = el("g", { class: "qp-mark" });
+    const home = it.e === HOME_ENGINE;
+    const logo = ENGINE_LOGOS.get(it.e);
+    if (home) {
+      g.appendChild(el("circle", { cx: it.px, cy: it.cy, r: 14,
+        fill: "none", stroke: "var(--keenable-blue)", "stroke-width": 1.5 }));
     }
-    it.label.setAttribute("x", it.px + (it.right ? it.off : -it.off));
-    it.label.setAttribute("y", it.labelY + 4);
-    if (it.logo) {
-      it.logo.setAttribute("x", it.right ? it.px + 11 : it.px - 27);
-      it.logo.setAttribute("y", it.labelY - 8);
+    if (logo) {
+      g.appendChild(el("image", { href: logo, x: it.px - 9, y: it.cy - 9,
+        width: 18, height: 18 }));
+    } else {
+      g.appendChild(el("circle", { cx: it.px, cy: it.cy, r: 5,
+        fill: home ? "var(--keenable-blue)" : "var(--text-primary)" }));
     }
+    it.g = g;
+    svg.appendChild(g);
   }
+  const halo = el("circle", { r: 14, fill: "none", stroke: "var(--keenable-blue)",
+    "stroke-width": 1.5, "stroke-opacity": 0.6, visibility: "hidden" });
+  svg.appendChild(halo);
+  holder.appendChild(svg);
 
   const tip = el("div", { class: "tooltip qp-tip" });
   card.appendChild(tip);
@@ -2077,7 +2048,7 @@ function renderQualityPrice(rows) {
       tipRow("price", `${fmtUsd(it.usd)} / 1k queries`), el("div", { class: "plan" }, it.plan));
     tip.style.display = "block";
     halo.setAttribute("cx", it.px);
-    halo.setAttribute("cy", it.yPos);
+    halo.setAttribute("cy", it.cy);
     halo.setAttribute("visibility", "visible");
     svg.classList.add("qp-hot");
     for (const other of items) other.g.classList.toggle("is-hot", other === it);
@@ -2093,9 +2064,7 @@ function renderQualityPrice(rows) {
     for (const it of items) it.g.classList.remove("is-hot");
   }
   for (const it of items) {
-    it.g.appendChild(el("rect", { class: "qp-hit", x: it.x0, y: it.labelY - 10,
-      width: Math.max(it.x1 - it.x0, 1), height: 20 }));
-    it.g.appendChild(el("circle", { class: "qp-hit", cx: it.px, cy: it.yPos, r: 11 }));
+    it.g.appendChild(el("circle", { class: "qp-hit", cx: it.px, cy: it.cy, r: 12 }));
     it.g.addEventListener("pointerenter", () => showTip(it));
     it.g.addEventListener("pointerleave", hideTip);
   }
