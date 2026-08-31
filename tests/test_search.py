@@ -19,6 +19,7 @@ from needle.shared.search import (
     SearchResult,
     SerperClient,
     TavilyClient,
+    TinyFishClient,
     YouClient,
     build_search_clients,
     latency_stats,
@@ -663,6 +664,48 @@ async def test_ceramic_maps_fields_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_tinyfish_maps_fields_and_builds_params(monkeypatch):
+    payload = {
+        "results": [
+            {"url": "https://a", "title": "A", "snippet": "sa", "date": "Jun 9, 2026"},
+            {"url": "https://b", "title": "", "snippet": ""},
+            {"title": "no url"},
+        ]
+    }
+    c = TinyFishClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].snippet == "sa"
+    assert results[0].published_date == "Jun 9, 2026"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert results[1].published_date is None
+    assert calls["method"] == "GET"
+    assert calls["url"] == "https://api.search.tinyfish.ai"
+    assert calls["params"] == {"query": "hi"}
+    assert calls["headers"] == {"X-API-Key": "k"}
+
+
+async def test_tinyfish_clips_query_chars(monkeypatch):
+    c = TinyFishClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    long_query = " ".join(f"word{i}" for i in range(400))
+    await c.search(long_query)
+    sent = calls["params"]["query"]
+    assert len(sent) <= 2000
+    assert long_query.startswith(sent)
+    assert not sent.endswith(" ")
+
+    await c.search("hi")
+    assert calls["params"] == {"query": "hi"}
+
+
 async def test_octen_clips_query_chars(monkeypatch):
     c = OctenClient(api_key="k")
     fake, calls = _canned({"data": {"results": []}})
@@ -827,6 +870,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("CERAMIC_API_KEY", "ck")
     monkeypatch.setenv("YOU_API_KEY", "yk")
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fk")
+    monkeypatch.setenv("TINYFISH_API_KEY", "tfk")
     monkeypatch.setenv("KAGI_API_KEY", "kk")
     clients = build_search_clients(
         [
@@ -840,6 +884,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "ceramic",
             "you",
             "firecrawl",
+            "tinyfish",
             "kagi",
         ]
     )
@@ -861,6 +906,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["you"].api_key == "yk"
     assert isinstance(clients["firecrawl"], FirecrawlClient)
     assert clients["firecrawl"].api_key == "fk"
+    assert isinstance(clients["tinyfish"], TinyFishClient)
+    assert clients["tinyfish"].api_key == "tfk"
     assert isinstance(clients["kagi"], KagiClient)
     assert clients["kagi"].api_key == "kk"
 
@@ -1263,6 +1310,17 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             {"result": {"results": []}},
             "json",
             {"query": "acme filing"},
+        ),
+        (
+            lambda: TinyFishClient(api_key="k"),
+            {"results": []},
+            "params",
+            {
+                "query": "acme filing",
+                "include_domains": "sec.gov",
+                "after_date": "2026-06-01",
+                "before_date": "2026-06-30",
+            },
         ),
         (
             lambda: YouClient(api_key="k"),

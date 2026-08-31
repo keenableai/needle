@@ -1,5 +1,6 @@
 import importlib.util
 import json
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -87,3 +88,23 @@ def test_publish_writes_ci_files(tmp_path):
     ci = json.loads((site / "data" / "ci.json").read_text(encoding="utf-8"))
     assert ci["window_end"] == "2026-08-17T00:00Z"
     assert ci["benches"]["news"]["e"]["point"] == pytest.approx(0.5)
+
+
+def test_publish_auto_ts_skips_taken_minute(tmp_path, monkeypatch, capsys):
+    site = tmp_path / "site"
+    (site / "data").mkdir(parents=True)
+    (site / "data" / "runs.json").write_text(
+        json.dumps([{"id": "2026-08-17T0000Z", "ts": "2026-08-17T00:00Z", "artifacts": []}]),
+        encoding="utf-8",
+    )
+
+    class FrozenDatetime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(2026, 8, 17, 0, 0, tzinfo=tz)
+
+    monkeypatch.setattr(publish_bench, "datetime", FrozenDatetime)
+    publish_bench.publish(site=str(site), runs_out=str(tmp_path / "runs"))
+    assert capsys.readouterr().out.strip() == "2026-08-17T00:01Z"
+    ids = [r["id"] for r in json.loads((site / "data" / "runs.json").read_text(encoding="utf-8"))]
+    assert ids == ["2026-08-17T0000Z", "2026-08-17T0001Z"]
