@@ -187,18 +187,21 @@ jobs:
             rm -rf staged
             uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
             TS=$(uv run python scripts/publish_bench.py $args)
-            if ! uv run hf upload "$HF_DATASET" staged runs \
-              --repo-type dataset --commit-message "bench: $TS"; then
-              echo "hf upload failed, retrying"
-              continue
-            fi
             cp dashboard/index.html site-data/index.html
             touch site-data/.nojekyll
             git -C site-data add -A
             git -C site-data commit -m "bench: $TS"
             if git -C site-data push origin HEAD:gh-pages; then
-              echo "TS=$TS" >> "$GITHUB_ENV"
-              exit 0
+              for i in 1 2 3; do
+                if uv run hf upload "$HF_DATASET" staged runs \
+                  --repo-type dataset --commit-message "bench: $TS"; then
+                  echo "TS=$TS" >> "$GITHUB_ENV"
+                  exit 0
+                fi
+                sleep 10
+              done
+              echo "hf upload failed; runs.json references missing artifacts for $TS"
+              exit 1
             fi
             echo "push rejected, retrying"
           done
@@ -221,6 +224,8 @@ jobs:
 
   deploy-pages:
     needs: bench
+    concurrency:
+      group: pages
     permissions:
       contents: read
       pages: write
