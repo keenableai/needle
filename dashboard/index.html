@@ -1955,7 +1955,7 @@ function renderQualityPrice(rows) {
   const yHi = Math.min(1, Math.ceil((Math.max(...qs) + 0.04) * 20) / 20);
   const yStep = yHi - yLo <= 0.3 ? 0.05 : 0.1;
   const xPad = 30;
-  const X = (v) => M.left + xPad + Math.sqrt(v / xTop) * (iw - xPad);
+  const X = (v) => M.left + xPad + (v / xTop) * (iw - xPad);
   const Y = (v) => M.top + (1 - (v - yLo) / (yHi - yLo)) * ih;
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
     "aria-label": "Overall quality as share of ultimate vs price per 1,000 queries" });
@@ -2018,49 +2018,47 @@ function renderQualityPrice(rows) {
   holder.appendChild(svg);
   for (const it of items) {
     const tw = it.label.getComputedTextLength();
-    it.right = it.px + 11 + tw <= M.left + iw - 6;
+    it.off = it.logo ? 31 : 11;
+    it.right = it.px + it.off + tw <= M.left + iw - 6;
     it.label.setAttribute("text-anchor", it.right ? "start" : "end");
-    it.x0 = it.right ? (it.logo ? it.px - 27 : it.px + 11) : it.px - 11 - tw;
-    it.x1 = it.right ? it.px + 11 + tw : (it.logo ? it.px + 27 : it.px - 11);
+    it.x0 = it.right ? it.px + 11 : it.px - it.off - tw;
+    it.x1 = it.right ? it.px + it.off + tw : it.px - 11;
   }
   const yMin = M.top + 12, yMax = M.top + ih - 16;
-  for (let pass = 0; pass < 200; pass++) {
-    let moved = false;
-    for (let i = 0; i < items.length; i++) {
-      const a = items[i];
-      for (let j = 0; j < items.length; j++) {
-        if (i === j) continue;
-        const b = items[j];
-        if (j > i && a.x0 < b.x1 && b.x0 < a.x1) {
-          const d = 18 - Math.abs(a.labelY - b.labelY);
-          if (d > 0.5) {
-            const s = a.labelY <= b.labelY ? 1 : -1;
-            a.labelY -= s * d / 2;
-            b.labelY += s * d / 2;
-            moved = true;
-          }
-        }
-        if (b.px > a.x0 - 6 && b.px < a.x1 + 6 && Math.abs(b.px - a.px) > 5) {
-          const d = 15 - Math.abs(a.labelY - b.yPos);
-          if (d > 0.5) {
-            a.labelY += a.labelY >= b.yPos ? d : -d;
-            moved = true;
-          }
-        }
-      }
-      a.labelY = Math.max(yMin, Math.min(yMax, a.labelY));
+  const order = [...items].sort((a, b) => a.yPos - b.yPos || a.px - b.px);
+  const placed = [];
+  const clash = (it, y) => {
+    for (const o of placed) {
+      if (it.x0 < o.x1 && o.x0 < it.x1 && Math.abs(y - o.labelY) < 18) return true;
     }
-    if (!moved) break;
+    for (const o of items) {
+      if (o !== it && o.px > it.x0 - 6 && o.px < it.x1 + 6 &&
+          Math.abs(o.px - it.px) > 5 && Math.abs(y - o.yPos) < 14) return true;
+    }
+    return false;
+  };
+  for (const it of order) {
+    it.labelY = it.yPos;
+    for (let k = 0; k <= 24; k++) {
+      const cand = it.yPos + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 6;
+      if (cand < yMin || cand > yMax) continue;
+      if (!clash(it, cand)) {
+        it.labelY = cand;
+        break;
+      }
+    }
+    it.labelY = Math.max(yMin, Math.min(yMax, it.labelY));
+    placed.push(it);
   }
   for (const it of items) {
     if (Math.abs(it.labelY - it.yPos) > 5) {
       it.g.insertBefore(el("line", { x1: it.px, y1: it.yPos + Math.sign(it.labelY - it.yPos) * 6,
         x2: it.px, y2: it.labelY, stroke: "var(--baseline)", "stroke-width": 1 }), it.g.firstChild);
     }
-    it.label.setAttribute("x", it.px + (it.right ? 11 : -11));
+    it.label.setAttribute("x", it.px + (it.right ? it.off : -it.off));
     it.label.setAttribute("y", it.labelY + 4);
     if (it.logo) {
-      it.logo.setAttribute("x", it.right ? it.px - 27 : it.px + 11);
+      it.logo.setAttribute("x", it.right ? it.px + 11 : it.px - 27);
       it.logo.setAttribute("y", it.labelY - 8);
     }
   }
