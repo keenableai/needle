@@ -1954,7 +1954,8 @@ function renderQualityPrice(rows) {
   const yLo = Math.max(0, Math.floor((Math.min(...qs) - 0.04) * 20) / 20);
   const yHi = Math.min(1, Math.ceil((Math.max(...qs) + 0.04) * 20) / 20);
   const yStep = yHi - yLo <= 0.3 ? 0.05 : 0.1;
-  const X = (v) => M.left + (v / xTop) * iw;
+  const xPad = 30;
+  const X = (v) => M.left + xPad + (v / xTop) * (iw - xPad);
   const Y = (v) => M.top + (1 - (v - yLo) / (yHi - yLo)) * ih;
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
     "aria-label": "Overall quality as share of ultimate vs price per 1,000 queries" });
@@ -1992,12 +1993,16 @@ function renderQualityPrice(rows) {
   xT.appendChild(el("tspan", { class: "dim" }, " — lowest public tier"));
   svg.appendChild(xT);
   const items = pts.map((p) => ({ ...p, px: X(p.usd), yPos: Y(p.q), right: X(p.usd) < M.left + iw - 130 }));
-  const clusters = new Map();
-  for (const it of items) {
-    const k = `${it.usd}|${it.right}`;
-    clusters.set(k, [...(clusters.get(k) || []), it]);
+  const clusters = [];
+  for (const side of [true, false]) {
+    const row = items.filter((it) => it.right === side).sort((a, b) => a.px - b.px);
+    let group = null;
+    for (const it of row) {
+      if (group && it.px - group[group.length - 1].px < 90) group.push(it);
+      else clusters.push(group = [it]);
+    }
   }
-  for (const group of clusters.values()) stackLabels(group, M.top + 12, M.top + ih - 10, 18);
+  for (const group of clusters) stackLabels(group, M.top + 12, M.top + ih - 10, 18);
   for (const it of items) {
     const g = el("g", { class: "qp-mark" });
     const home = it.e === HOME_ENGINE;
