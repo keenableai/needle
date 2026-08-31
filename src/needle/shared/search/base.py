@@ -101,12 +101,27 @@ class SearchClient(Protocol):
 
 
 async def search_all(
-    engines: dict[str, "SearchClient"], texts: list[str], *, num_results: int
+    engines: dict[str, "SearchClient"],
+    texts: list[str],
+    *,
+    num_results: int,
+    concurrent_search: bool = False,
 ) -> list[list[tuple[list[SearchResult] | None, dict[str, str] | None]]]:
-    return [
-        [await client.search(text, num_results=num_results) for client in engines.values()]
-        for text in texts
-    ]
+    if not concurrent_search:
+        return [
+            [await client.search(text, num_results=num_results) for client in engines.values()]
+            for text in texts
+        ]
+    return list(
+        await asyncio.gather(
+            *[
+                asyncio.gather(
+                    *[client.search(text, num_results=num_results) for client in engines.values()]
+                )
+                for text in texts
+            ]
+        )
+    )
 
 
 class HttpSearchClient:

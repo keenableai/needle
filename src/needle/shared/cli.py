@@ -143,6 +143,7 @@ def run_ndcg_eval(
     snippet_chars: int = DEFAULT_SNIPPET_CHARS,
     judge_model: str | None = None,
     judge_concurrency: int = 8,
+    concurrent_search: bool = False,
 ) -> None:
     clients = build_clients_or_exit(engines, snippet_chars=snippet_chars)
     model = resolve_judge_model(judge_model)
@@ -158,6 +159,7 @@ def run_ndcg_eval(
                 k=num_results,
                 judge_concurrency=judge_concurrency,
                 max_content_chars=snippet_chars or DEFAULT_MAX_CONTENT_CHARS,
+                concurrent_search=concurrent_search,
             )
         finally:
             await aclose_all(judge, *clients.values())
