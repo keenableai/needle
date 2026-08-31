@@ -185,29 +185,17 @@ jobs:
             git -C site-data reset --hard FETCH_HEAD
             git -C site-data clean -fd
             rm -rf staged
-            TS=$(date -u +%Y-%m-%dT%H:%MZ)
-            if [ -f site-data/data/runs.json ] && grep -q "\"${TS//:/}\"" site-data/data/runs.json; then
-              sleep 61
-              TS=$(date -u +%Y-%m-%dT%H:%MZ)
-            fi
-            mkdir -p site-data/data
-            for f in gold.jsonl scholar.jsonl legal.jsonl; do
-              if [ -s "$f" ]; then cp "$f" "site-data/data/$f"; fi
-            done
             uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
-            uv run python scripts/publish_bench.py $args --ts "$TS"
-            for i in 1 2 3; do
-              if uvx --from huggingface_hub hf upload "$HF_DATASET" staged runs \
-                --repo-type dataset --commit-message "bench: $TS"; then
-                break
-              fi
-              if [ "$i" = 3 ]; then exit 1; fi
-              sleep $((RANDOM % 20 + 5))
-            done
+            TS=$(uv run python scripts/publish_bench.py $args)
+            if ! uv run hf upload "$HF_DATASET" staged runs \
+              --repo-type dataset --commit-message "bench: $TS"; then
+              echo "hf upload failed, retrying"
+              continue
+            fi
             cp dashboard/index.html site-data/index.html
             touch site-data/.nojekyll
             git -C site-data add -A
-            git -C site-data commit -m "bench: $TS" || echo "nothing to publish"
+            git -C site-data commit -m "bench: $TS"
             if git -C site-data push origin HEAD:gh-pages; then
               echo "TS=$TS" >> "$GITHUB_ENV"
               exit 0
