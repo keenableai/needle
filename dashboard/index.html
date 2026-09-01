@@ -392,11 +392,16 @@
   }
   .bar-table .bar-fill { display: block; height: 100%; border-radius: 0; }
   @media (max-width: 560px) {
-    .overlap-matrix table { border-spacing: 1px; font-size: 10px; }
+    .overlap-matrix table { border-spacing: 1px; font-size: 9px; }
     .overlap-matrix td:first-child { padding: 0 3px 0 1px; }
     .overlap-matrix td:first-child .ename { display: none; }
     .overlap-matrix th:last-child, .overlap-matrix td.row-logo { display: none; }
-    .overlap-matrix td.overlap-cell { width: 21px; min-width: 21px; height: 21px; }
+    .overlap-matrix td.overlap-cell { width: 16px; min-width: 16px; height: 16px; padding: 0; }
+    .overlap-matrix td.overlap-cell .pct { display: none; }
+    .overlap-matrix th.col .key-logo,
+    .overlap-matrix th.col .key,
+    .overlap-matrix td:first-child .key-logo,
+    .overlap-matrix td:first-child .key { width: 13px; height: 13px; }
     .bar-table { font-size: 12px; }
     .bar-table td, .bar-table th { padding: 6px 4px; }
     .bar-table td:last-child, .bar-table th:last-child { white-space: normal; }
@@ -2235,8 +2240,9 @@ function overlapMatrix(holder, engines, cellFor, pairNote = "of queries share su
     const rowCells = [];
     for (const [j, b] of engines.entries()) {
       const cell = a === b ? null : cellFor(a, b);
-      const td = el("td", { class: "overlap-cell" }, cell ? cell.text : "–");
+      const td = el("td", { class: "overlap-cell" }, cell ? cell.text.replace(/%$/, "") : "–");
       if (cell) {
+        if (cell.text.endsWith("%")) td.appendChild(el("span", { class: "pct" }, "%"));
         td.style.background = OVERLAP_BG[cell.step];
         td.style.color = OVERLAP_INK[cell.step];
         td.title = cell.title;
