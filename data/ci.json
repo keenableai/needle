@@ -2,7 +2,7 @@
   "confidence": 0.95,
   "resamples": 10000,
   "window_days": 7,
-  "window_end": "2026-09-06T16:34Z",
+  "window_end": "2026-09-06T17:30Z",
   "method": "percentile cluster bootstrap, wider of query and run clustering",
   "runs": {
     "agentic_rare": [
@@ -201,7 +201,8 @@
       "2026-09-06T13:32Z",
       "2026-09-06T14:33Z",
       "2026-09-06T15:32Z",
-      "2026-09-06T16:34Z"
+      "2026-09-06T16:34Z",
+      "2026-09-06T17:30Z"
     ],
     "scholar": [
       "2026-08-31T02:35Z",
@@ -507,89 +508,89 @@
     },
     "news": {
       "bing": {
-        "point": 0.3879,
+        "point": 0.388,
         "lo": 0.38,
         "hi": 0.3957
       },
       "brave": {
-        "point": 0.6143,
-        "lo": 0.6021,
-        "hi": 0.6259
+        "point": 0.6146,
+        "lo": 0.6027,
+        "hi": 0.6267
       },
       "brave-llmcontext": {
         "point": 0.6483,
         "lo": 0.6354,
-        "hi": 0.6614
-      },
-      "ceramic": {
-        "point": 0.0748,
-        "lo": 0.0687,
-        "hi": 0.0809
-      },
-      "exa": {
-        "point": 0.6677,
-        "lo": 0.6556,
-        "hi": 0.6795
-      },
-      "exa-instant": {
-        "point": 0.5124,
-        "lo": 0.4989,
-        "hi": 0.5259
-      },
-      "firecrawl": {
-        "point": 0.332,
-        "lo": 0.3224,
-        "hi": 0.3418
-      },
-      "google": {
-        "point": 0.3362,
-        "lo": 0.3271,
-        "hi": 0.3451
-      },
-      "kagi": {
-        "point": 0.4274,
-        "lo": 0.4185,
-        "hi": 0.4361
-      },
-      "keenable": {
-        "point": 0.6674,
-        "lo": 0.656,
-        "hi": 0.6787
-      },
-      "keenable-realtime": {
-        "point": 0.6492,
-        "lo": 0.6373,
         "hi": 0.6612
       },
+      "ceramic": {
+        "point": 0.075,
+        "lo": 0.069,
+        "hi": 0.0812
+      },
+      "exa": {
+        "point": 0.668,
+        "lo": 0.6563,
+        "hi": 0.6796
+      },
+      "exa-instant": {
+        "point": 0.5125,
+        "lo": 0.4989,
+        "hi": 0.526
+      },
+      "firecrawl": {
+        "point": 0.3323,
+        "lo": 0.3227,
+        "hi": 0.342
+      },
+      "google": {
+        "point": 0.3368,
+        "lo": 0.3281,
+        "hi": 0.3458
+      },
+      "kagi": {
+        "point": 0.4275,
+        "lo": 0.4187,
+        "hi": 0.4365
+      },
+      "keenable": {
+        "point": 0.6672,
+        "lo": 0.656,
+        "hi": 0.6785
+      },
+      "keenable-realtime": {
+        "point": 0.6491,
+        "lo": 0.6373,
+        "hi": 0.661
+      },
       "octen": {
-        "point": 0.4561,
-        "lo": 0.442,
-        "hi": 0.4701
+        "point": 0.4563,
+        "lo": 0.4424,
+        "hi": 0.4706
       },
       "parallel": {
-        "point": 0.4805,
-        "lo": 0.4706,
+        "point": 0.4808,
+        "lo": 0.471,
         "hi": 0.4905
       },
       "parallel-turbo": {
-        "point": 0.3539,
+        "point": 0.354,
         "lo": 0.3419,
-        "hi": 0.366
+        "hi": 0.3662
       },
       "perplexity": {
-        "point": 0.4848,
-        "lo": 0.4611,
-        "hi": 0.5059
+        "point": 0.4851,
+        "lo": 0.4622,
+        "hi": 0.506
       },
       "tavily": {
-        "point": 0.3449,
-        "lo": 0.3336,
-        "hi": 0.3562
+        "point": 0.3448,
+        "lo": 0.3337,
+        "hi": 0.3561
       },
       "tinyfish": {
-        "point": 0.3368,
-        "lo": 0.3263,
-        "hi": 0.3465
+        "point": 0.3364,
+        "lo": 0.3259,
+        "hi": 0.3463
       },
       "ultimate": {
         "point": 1.0,
@@ -597,9 +598,9 @@
         "hi": 1.0
       },
       "you": {
-        "point": 0.6011,
-        "lo": 0.5889,
-        "hi": 0.6132
+        "point": 0.6015,
+        "lo": 0.5891,
+        "hi": 0.6139
       }
     },
     "scholar": {
