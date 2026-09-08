@@ -12685,5 +12685,15 @@
       "fresh.jsonl",
       "ndcg.json"
     ]
+  },
+  {
+    "id": "2026-09-08T1958Z",
+    "ts": "2026-09-08T19:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "legal.json",
+      "legal.jsonl",
+      "ndcg.json"
+    ]
   }
 ]
