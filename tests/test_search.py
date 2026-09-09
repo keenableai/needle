@@ -632,6 +632,8 @@ async def test_octen_maps_fields_and_builds_body(monkeypatch):
         "query": "hi",
         "count": 5,
         "highlight": {"enable": True, "max_tokens": 512},
+        "language": ["en"],
+        "safesearch": "off",
     }
     assert calls["headers"] == {"X-Api-Key": "k"}
 

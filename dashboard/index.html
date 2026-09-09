@@ -914,6 +914,7 @@
       <tr><td>you</td><td>You.com POST /v1/search</td><td>count=min(k,100); site: → include_domains, after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; web and news sections merge, deduplicated by URL</td></tr>
       <tr><td>firecrawl</td><td>Firecrawl POST /v2/search</td><td>limit=min(k,100), sources=[web]; site: kept in the query text, after:/before: → tbs=cdr:1,cd_min:M/D/YYYY,cd_max:M/D/YYYY</td></tr>
       <tr><td>kagi</td><td>Kagi POST /api/v1/search</td><td>query = query text, limit=min(k,1024); site: → lens.sites_included, after:/before: → filters.after/filters.before (ISO dates); search and news sections merge, deduplicated by URL; HTML markup stripped from titles and snippets</td></tr>
+      <tr><td>octen</td><td>Octen POST /search</td><td>query = query text clipped to 500 chars, count=k, language=[en], safesearch=off, highlight.enable=true with max_tokens=512; site: → include_domains, after:/before: → start_time/end_time (full-day UTC bounds); highlight is the snippet</td></tr>
     </table>
   </div>
 
