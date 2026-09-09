@@ -58,6 +58,7 @@
     --series-13: #B3322B;
     --series-14: #8A7500;
     --series-15: #0F6E8C;
+    --series-16: #C2185B;
   }
   * { box-sizing: border-box; }
   body {
@@ -958,7 +959,7 @@ const RUNS_BASE = "https://huggingface.co/datasets/keenable-ai/needle-results/re
 
 let ENGINES = [];
 const ENGINE_SLOT = new Map();
-const HIDDEN_ENGINES = new Set(["ceramic", "octen", "keenable"]);
+const HIDDEN_ENGINES = new Set(["ceramic", "keenable"]);
 
 function registerEngines(names) {
   for (const name of names) {
@@ -971,9 +972,9 @@ function registerEngines(names) {
 
 registerEngines(["keenable-realtime", "google", "bing", "brave", "brave-llmcontext",
   "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity", "tavily", "you", "firecrawl",
-  "tinyfish", "kagi"]);
+  "tinyfish", "kagi", "octen"]);
 
-const SERIES_COUNT = 15;
+const SERIES_COUNT = 16;
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
   const slot = ENGINE_SLOT.get(engine);
