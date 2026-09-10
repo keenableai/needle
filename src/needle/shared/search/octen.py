@@ -24,6 +24,8 @@ class OctenClient(HttpSearchClient):
             "query": clipped_text(ops.text, MAX_QUERY_CHARS),
             "count": num_results,
             "highlight": {"enable": True, "max_tokens": self.highlight_max_tokens},
+            "language": ["en"],
+            "safesearch": "off",
         }
         if ops.sites:
             body["include_domains"] = list(ops.sites)
