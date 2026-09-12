@@ -102,9 +102,6 @@
       --series-15: #3FA3C4;
       --series-16: #E85A8C;
     }
-    [data-theme="dark"] :is(.key-logo, svg image) {
-      filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7));
-    }
   }
   * { box-sizing: border-box; }
   body {
@@ -1072,8 +1069,25 @@ const ENGINE_LOGOS = new Map([
   ["octen", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABuVBMVEUAAAADmlYEmFUEmVUDmVUHllUEmFUEl1YEmVYEmVUEmVUAgIADmVYEmFUEmlYDmFUDl1UEmFYEmFUDmFYAmVkFmVgEmFYDmFUFmFgEmVcFmFYFllUDmFYEmFUA/4AGmlMDmFUDmVYAv4ADmFUGm1cEmFUFmlcDmFcGnFcDmVcFm1cEmFQDmFUCmVcDmFYAmVUFmFcAk1gAAAAGllMAm1sEl1UEmlgEmlYDmFYDmFYDmFYDmFYHlVUIl1gGmlkEmFUGm1kDmFUEmFYEmVUFmVcEmVQEl1YDl1YEmFUDmFYDmFUDmVUGmFUDmlcEmVYEmVYEmFUDmVUAnVgAqlUDmFUDmFYHnFUVqlUDl1UEmFUPlloDmFUDmFcDmFYDmVUDmVYEmFYGmFYGmlcEmFgDm1gAmVUApFsDmVUDmVUDmVYDmVYDl1UJlVgDmFUDl1UAlVUEmVUDmVYDmVYEl1gAtm0DmFUDmFULn1UDmVYEmVYDmFUQn2ADmFUMl1EDmlUDmFYDmFUDmFcRmVUDmFYEmFYEmVYDmFYAlloDmVYEmVUDllUDmFYEmFYDmVUDmFYEmFUEmFUDmFX////LIkzyAAAAkXRSTlMAU8nLwCe6drt4tgKsRURX6tCzpBQ3j2M0h2gzr40CK62UBJwpkDWfLJM4fPNw9x4vGgEuHLs6iOjr/akkICvSLvbT0md/gFaB7u/gKkl/QdX+Ggb53yQM+9oR9U+mqOXBXFhDVw8Oou+qp2Ad/PYMPKCbQAf0/hhQr1QQ7RZOsq5SD/F5ypcRtMhOSse2lMt+JXg62gAAAAFiS0dEkpYE7yAAAAAHdElNRQfqCQkTHDTSsAt+AAABT0lEQVQ4y72S5VNCURDFjz4bBX2iItiBqFhgd6JidwfY3d3dcf9jl3HEubw7wzfOh7Ozu7+9NRfwjfz8JV4BgTwQxDwVzAMhCiDUGxCmUgDhEep/aSKj5GgtD8RwI7FUieMBHQfEU0XvCRgS5MQkJKfIqWliIJ08A5nkRjGQRW5CNnmOGMhlzKxFHmP5BWJAVagrAixWXbHikCWUlnK3KOMBfXlFZVV1zb9q63iAVN+geG4eQKM3oEkBNP82DC22Vldsa7fz6uhEl627B72M9fWLP9rAIGN2DNFiw2JghFqjGCO3ioFxak1gcmp6ZtbhdDFzjvkFYFHjUFNicjqXlldW11zk+gZjm1vYpoEdYJfCHvYPGDs0/q1lp9oRjsll4ITCKc7Ize7Nzim7wCX5FXBN4Qa35Hdu4P5BerTg6Vl6eQXe3qUP+q+f0tc3fKMfaOm0O9NUMnUAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMDktMDlUMTk6Mjg6NTIrMDA6MDDzC6KXAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTA5LTA5VDE5OjI4OjUyKzAwOjAwglYaKwAAAABJRU5ErkJggg=="],
 ]);
 
-function engineKey(engine) {
+const isDarkTheme = () => document.documentElement.dataset.theme === "dark";
+const LOGO_DARK = new Map([[ENGINE_LOGOS.get("keenable"), ENGINE_LOGOS.get("keenable").replaceAll("%232A2A2A", "%23E6E6E6")]]);
+const LOGO_LIGHT = new Map([...LOGO_DARK].map(([light, dark]) => [dark, light]));
+function themedLogo(src, dark = isDarkTheme()) {
+  return (dark ? LOGO_DARK : LOGO_LIGHT).get(src) ?? src;
+}
+function engineLogo(engine) {
   const logo = ENGINE_LOGOS.get(engine);
+  return logo && themedLogo(logo);
+}
+function applyLogoTheme(dark = isDarkTheme()) {
+  for (const node of document.querySelectorAll("img.key-logo, svg image")) {
+    const attr = node.tagName === "IMG" ? "src" : "href";
+    node.setAttribute(attr, themedLogo(node.getAttribute(attr), dark));
+  }
+}
+
+function engineKey(engine) {
+  const logo = engineLogo(engine);
   if (logo) return el("img", { class: "key-logo", src: logo, alt: "" });
   const key = el("span", { class: "key" });
   key.style.background = colorOf(engine);
@@ -2071,7 +2085,7 @@ function renderQualityPrice(rows) {
   for (const it of items) {
     const g = el("g", { class: "qp-mark" });
     const home = it.e === HOME_ENGINE;
-    const logo = ENGINE_LOGOS.get(it.e);
+    const logo = engineLogo(it.e);
     if (home) {
       g.appendChild(el("circle", { cx: it.px, cy: it.cy, r: 14,
         fill: "none", stroke: "var(--keenable-blue)", "stroke-width": 1.5 }));
@@ -2200,7 +2214,7 @@ function renderLatencySummary(rows) {
     g.appendChild(el("text", { x: LBL - 30, y: y + 3.5, "text-anchor": "end",
       "font-size": 11.5, fill: "var(--text-primary)",
       "font-weight": x.e === HOME_ENGINE ? 500 : 400 }, displayName(x.e)));
-    const logo = ENGINE_LOGOS.get(x.e);
+    const logo = engineLogo(x.e);
     if (logo) g.appendChild(el("image", { href: logo, x: LBL - 24, y: y - 8, width: 16, height: 16 }));
     g.appendChild(el("line", { x1: lx(x.p50), y1: y, x2: lx(x.p95), y2: y,
       stroke: colorOf(x.e), "stroke-width": 2, "stroke-opacity": 0.55,
@@ -2517,7 +2531,7 @@ function renderSharingGraph(holder, engines, pairs, uniqAgg) {
     const g = el("g");
     const u = uniqPct(e);
     g.appendChild(el("title", {}, u == null ? displayName(e) : `${displayName(e)}: ${fmtPct(u)} unique URLs`));
-    const logo = ENGINE_LOGOS.get(e);
+    const logo = engineLogo(e);
     if (logo) g.appendChild(el("image", { href: logo, x: p.x - 9, y: p.y - 9, width: 18, height: 18 }));
     else g.appendChild(el("circle", { cx: p.x, cy: p.y, r: 7, fill: colorOf(e) }));
     if (p.ang == null) {
@@ -3163,13 +3177,15 @@ themeToggle.addEventListener("click", () => {
   document.documentElement.dataset.theme = theme;
   try { localStorage.setItem("theme", theme); } catch {}
   syncThemeToggle();
+  applyLogoTheme();
 });
 document.getElementById("cite-copy").addEventListener("click", async (e) => {
   await navigator.clipboard.writeText(document.querySelector("#app-cite pre").textContent);
   e.target.textContent = "Copied";
   setTimeout(() => { e.target.textContent = "Copy"; }, 1200);
 });
-window.addEventListener("beforeprint", () => drawAllTrends?.());
+window.addEventListener("beforeprint", () => { applyLogoTheme(false); drawAllTrends?.(); });
+window.addEventListener("afterprint", () => applyLogoTheme());
 
 const topbar = document.querySelector(".topbar");
 new IntersectionObserver(([e]) => topbar.classList.toggle("stuck", e.intersectionRatio < 1),
