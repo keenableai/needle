@@ -3,6 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  try {
+    const t = localStorage.getItem("theme");
+    if (t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.dataset.theme = "dark";
+    }
+  } catch {}
+</script>
 <title>NEEDLE — search engine benchmarks</title>
 <meta name="description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
 <meta property="og:type" content="website">
@@ -16,14 +24,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@300;400;500&family=TASA+Orbiter:wght@400..800&family=STIX+Two+Text:ital@0;1&display=swap">
-<script>
-  try {
-    const t = localStorage.getItem("theme");
-    if (t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches)) {
-      document.documentElement.dataset.theme = "dark";
-    }
-  } catch {}
-</script>
 <style>
   :root {
     --measure: 760px;
@@ -70,40 +70,41 @@
     --series-15: #0F6E8C;
     --series-16: #C2185B;
   }
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --surface-1: #1C1C1C;
-    --surface-sunken: #161616;
-    --page: #111111;
-    --text-primary: #E6E6E6;
-    --text-strong: #FFFFFF;
-    --text-secondary: #A6A6A6;
-    --text-muted: #7A7A7A;
-    --grid: #333333;
-    --baseline: #555555;
-    --border: #333333;
-    --track: #2A2A2A;
-    --link: #74A6FF;
-    --expressive-text: #FF8A65;
-    --home-tint: #142543;
-    --delta-up: #74A6FF;
-    --shadow: rgba(0, 0, 0, 0.5);
-    --series-1: #3D7DFF;
-    --series-3: #2FBFBF;
-    --series-4: #4FB06E;
-    --series-5: #B06BBA;
-    --series-6: #C77A4E;
-    --series-8: #9A86D9;
-    --series-10: #D46A9F;
-    --series-11: #9DB25A;
-    --series-12: #C98A3A;
-    --series-13: #E0605A;
-    --series-14: #C2A93A;
-    --series-15: #3FA3C4;
-    --series-16: #E85A8C;
-  }
-  :root[data-theme="dark"] .key-logo, :root[data-theme="dark"] svg image {
-    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7));
+  @media screen {
+    [data-theme="dark"] {
+      color-scheme: dark;
+      --surface-1: #1C1C1C;
+      --surface-sunken: #161616;
+      --page: #111111;
+      --text-primary: #E6E6E6;
+      --text-strong: #FFFFFF;
+      --text-secondary: #A6A6A6;
+      --text-muted: #7A7A7A;
+      --grid: #333333;
+      --baseline: #555555;
+      --track: #2A2A2A;
+      --link: #74A6FF;
+      --expressive-text: #FF8A65;
+      --home-tint: #142543;
+      --delta-up: #74A6FF;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --series-1: #3D7DFF;
+      --series-3: #2FBFBF;
+      --series-4: #4FB06E;
+      --series-5: #B06BBA;
+      --series-6: #C77A4E;
+      --series-8: #9A86D9;
+      --series-10: #D46A9F;
+      --series-11: #9DB25A;
+      --series-12: #C98A3A;
+      --series-13: #E0605A;
+      --series-14: #C2A93A;
+      --series-15: #3FA3C4;
+      --series-16: #E85A8C;
+    }
+    [data-theme="dark"] :is(.key-logo, svg image) {
+      filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7));
+    }
   }
   * { box-sizing: border-box; }
   body {
@@ -164,10 +165,8 @@
   }
   .header-actions button:hover, .header-actions a:hover { color: var(--text-primary); border-color: var(--baseline); }
   .header-actions button:active, .header-actions a:active { transform: scale(0.94); }
-  #theme-toggle { padding: 0 8px; }
-  #theme-toggle svg { display: block; }
-  #theme-toggle .sun, :root[data-theme="dark"] #theme-toggle .moon { display: none; }
-  :root[data-theme="dark"] #theme-toggle .sun { display: block; }
+  #theme-toggle .sun, [data-theme="dark"] #theme-toggle .moon { display: none; }
+  [data-theme="dark"] #theme-toggle .sun { display: block; }
 
   .chart-tools { display: flex; gap: 6px; position: absolute; top: 14px; right: 18px; }
   .chart-tools button {
@@ -3165,16 +3164,7 @@ document.getElementById("cite-copy").addEventListener("click", async (e) => {
   e.target.textContent = "Copied";
   setTimeout(() => { e.target.textContent = "Copy"; }, 1200);
 });
-let printTheme = null;
-window.addEventListener("beforeprint", () => {
-  printTheme = document.documentElement.dataset.theme;
-  document.documentElement.dataset.theme = "light";
-  drawAllTrends?.();
-});
-window.addEventListener("afterprint", () => {
-  if (printTheme) document.documentElement.dataset.theme = printTheme;
-  else delete document.documentElement.dataset.theme;
-});
+window.addEventListener("beforeprint", () => drawAllTrends?.());
 
 const topbar = document.querySelector(".topbar");
 new IntersectionObserver(([e]) => topbar.classList.toggle("stuck", e.intersectionRatio < 1),
