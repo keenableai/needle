@@ -8,6 +8,8 @@ from needle.shared.search import (
     BraveClient,
     BraveLlmContextClient,
     CeramicClient,
+    ChatGptSearchClient,
+    ClaudeSearchClient,
     ExaClient,
     FirecrawlClient,
     KagiClient,
@@ -23,6 +25,7 @@ from needle.shared.search import (
     YouClient,
     build_search_clients,
     latency_stats,
+    llmsearch,
     search_all,
 )
 from needle.shared.search import base as search_base
@@ -30,6 +33,10 @@ from needle.shared.search.factory import ENGINES
 from needle.shared.search.queryops import parse_ops
 
 OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
+DATED_PROMPT = (
+    "acme filing Only use sources published after 2026-06-01. "
+    "Only use sources published before 2026-06-30."
+)
 
 
 def _canned(payload):
@@ -861,6 +868,191 @@ async def test_perplexity_maps_results_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_claude_search_ranks_cited_urls(monkeypatch):
+    payload = {
+        "content": [
+            {"type": "server_tool_use", "name": "web_search", "input": {"query": "hi"}},
+            {
+                "type": "web_search_tool_result",
+                "content": [
+                    {
+                        "type": "web_search_result",
+                        "url": "https://x",
+                        "title": "X",
+                        "page_age": "1 d",
+                    },
+                    {
+                        "type": "web_search_result",
+                        "url": "https://a",
+                        "title": "A",
+                        "page_age": "2 d",
+                    },
+                    {"type": "web_search_result", "url": "https://b", "title": "B"},
+                ],
+            },
+            {
+                "type": "text",
+                "text": "first",
+                "citations": [
+                    {
+                        "type": "web_search_result_location",
+                        "url": "https://a",
+                        "title": "A",
+                        "cited_text": "qa1",
+                    },
+                    {
+                        "type": "web_search_result_location",
+                        "url": "https://b",
+                        "title": "B",
+                        "cited_text": "qb",
+                    },
+                ],
+            },
+            {
+                "type": "text",
+                "text": "second",
+                "citations": [
+                    {"type": "web_search_result_location", "url": "https://a", "cited_text": "qa2"}
+                ],
+            },
+        ]
+    }
+    monkeypatch.setenv("NEEDLE_CLAUDE_SEARCH_MODEL", "claude-test")
+    c = ClaudeSearchClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].snippet == "qa1 qa2"
+    assert results[0].published_date == "2 d"
+    assert results[1].published_date is None
+    assert calls["url"] == "https://api.anthropic.com/v1/messages"
+    assert calls["headers"] == {"x-api-key": "k", "anthropic-version": "2023-06-01"}
+    body = calls["json"]
+    assert body["model"] == "claude-test"
+    assert body["messages"] == [{"role": "user", "content": "hi"}]
+    assert body["tools"] == [{"type": "web_search_20250305", "name": "web_search", "max_uses": 1}]
+
+
+async def test_claude_search_tool_error_is_api_error(monkeypatch):
+    payload = {
+        "content": [
+            {
+                "type": "web_search_tool_result",
+                "content": {
+                    "type": "web_search_tool_result_error",
+                    "error_code": "too_many_requests",
+                },
+            }
+        ]
+    }
+    c = ClaudeSearchClient(api_key="k")
+    fake, _ = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi")
+    assert results is None
+    assert err == {"error_type": "api_error", "error_message": "too_many_requests"}
+
+
+async def test_claude_search_no_search_is_empty(monkeypatch):
+    c = ClaudeSearchClient(api_key="k")
+    fake, _ = _canned({"content": [{"type": "text", "text": "2 + 2 = 4"}]})
+    monkeypatch.setattr(c, "_request_json", fake)
+    assert await c.search("2+2") == ([], None)
+
+
+async def test_chatgpt_search_ranks_cited_urls(monkeypatch):
+    text = "Alpha is up. Beta is down. Alpha again."
+    payload = {
+        "output": [
+            {"type": "web_search_call", "status": "completed", "action": {"type": "search"}},
+            {
+                "type": "message",
+                "content": [
+                    {
+                        "type": "output_text",
+                        "text": text,
+                        "annotations": [
+                            {
+                                "type": "url_citation",
+                                "start_index": 26,
+                                "end_index": 39,
+                                "url": "https://a",
+                                "title": "A2",
+                            },
+                            {
+                                "type": "url_citation",
+                                "start_index": 0,
+                                "end_index": 12,
+                                "url": "https://a",
+                                "title": "A",
+                            },
+                            {
+                                "type": "url_citation",
+                                "start_index": 13,
+                                "end_index": 26,
+                                "url": "https://b",
+                                "title": "B",
+                            },
+                        ],
+                    }
+                ],
+            },
+        ]
+    }
+    monkeypatch.setenv("NEEDLE_CHATGPT_SEARCH_MODEL", "gpt-test")
+    c = ChatGptSearchClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [(r.url, r.title, r.snippet) for r in results] == [
+        ("https://a", "A", "Alpha is up."),
+        ("https://b", "B", "Beta is down."),
+    ]
+    assert calls["url"] == "https://api.openai.com/v1/responses"
+    assert calls["error_field"] == "error"
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+    body = calls["json"]
+    assert body["model"] == "gpt-test"
+    assert body["input"] == "hi"
+    assert body["tools"] == [{"type": "web_search", "search_context_size": "low"}]
+    assert body["tool_choice"] == {"type": "web_search"}
+
+
+async def test_chatgpt_search_caps_results(monkeypatch):
+    payload = {
+        "output": [
+            {
+                "type": "message",
+                "content": [
+                    {
+                        "type": "output_text",
+                        "text": "abc",
+                        "annotations": [
+                            {
+                                "type": "url_citation",
+                                "start_index": i,
+                                "end_index": i + 1,
+                                "url": f"https://{i}",
+                            }
+                            for i in range(3)
+                        ],
+                    }
+                ],
+            }
+        ]
+    }
+    c = ChatGptSearchClient(api_key="k")
+    fake, _ = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, _ = await c.search("hi", num_results=2)
+    assert [r.url for r in results] == ["https://0", "https://1"]
+
+
 def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("SERPER_API_KEY", "gk")
     monkeypatch.setenv("SEARCHAPI_API_KEY", "sk")
@@ -874,8 +1066,12 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fk")
     monkeypatch.setenv("TINYFISH_API_KEY", "tfk")
     monkeypatch.setenv("KAGI_API_KEY", "kk")
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "ak")
+    monkeypatch.setenv("OPENAI_API_KEY", "oak")
     clients = build_search_clients(
         [
+            "claude-search",
+            "chatgpt-search",
             "google",
             "bing",
             "brave",
@@ -903,6 +1099,10 @@ def test_factory_builds_new_engines(monkeypatch):
     assert isinstance(clients["octen"], OctenClient)
     assert clients["octen"].api_key == "ok"
     assert isinstance(clients["ceramic"], CeramicClient)
+    assert isinstance(clients["claude-search"], ClaudeSearchClient)
+    assert clients["claude-search"].api_key == "ak"
+    assert isinstance(clients["chatgpt-search"], ChatGptSearchClient)
+    assert clients["chatgpt-search"].api_key == "oak"
     assert clients["ceramic"].api_key == "ck"
     assert isinstance(clients["you"], YouClient)
     assert clients["you"].api_key == "yk"
@@ -1335,6 +1535,44 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             },
         ),
         (lambda: SerperClient(api_key="k"), {"organic": []}, "json", {"q": OPS_QUERY}),
+        (
+            lambda: ClaudeSearchClient(api_key="k", model="m"),
+            {"content": []},
+            "json",
+            {
+                "model": "m",
+                "max_tokens": 1024,
+                "system": llmsearch.SYSTEM_PROMPT,
+                "messages": [{"role": "user", "content": DATED_PROMPT}],
+                "tools": [
+                    {
+                        "type": "web_search_20250305",
+                        "name": "web_search",
+                        "max_uses": 1,
+                        "allowed_domains": ["sec.gov"],
+                    }
+                ],
+            },
+        ),
+        (
+            lambda: ChatGptSearchClient(api_key="k", model="m"),
+            {"output": []},
+            "json",
+            {
+                "model": "m",
+                "reasoning": {"effort": "low"},
+                "instructions": llmsearch.SYSTEM_PROMPT,
+                "input": DATED_PROMPT,
+                "tools": [
+                    {
+                        "type": "web_search",
+                        "search_context_size": "low",
+                        "filters": {"allowed_domains": ["sec.gov"]},
+                    }
+                ],
+                "tool_choice": {"type": "web_search"},
+            },
+        ),
     ],
 )
 async def test_clients_translate_operators(monkeypatch, make_client, payload, field, expected):
