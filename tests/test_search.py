@@ -20,6 +20,7 @@ from needle.shared.search import (
     SerperClient,
     TavilyClient,
     TinyFishClient,
+    YepClient,
     YouClient,
     build_search_clients,
     latency_stats,
@@ -861,6 +862,79 @@ async def test_perplexity_maps_results_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_yep_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "success": True,
+        "request_id": "req-1",
+        "results": [
+            {
+                "url": "https://a",
+                "title": "A",
+                "description": "da",
+                "highlights": ["ha", "", "hb"],
+                "published_date": "2026-07-01",
+            },
+            {"url": "https://b", "name": "B", "snippet": "sb", "datePublished": "2026-07-02"},
+            {"title": "no url"},
+        ],
+    }
+    c = YepClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(OPS_QUERY, num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].title == "A"
+    assert results[0].snippet == "ha\nhb"
+    assert results[0].published_date == "2026-07-01"
+    assert results[1].title == "B"
+    assert results[1].snippet == "sb"
+    assert results[1].published_date == "2026-07-02"
+    assert calls["method"] == "POST"
+    assert calls["url"] == "https://platform.yep.com/api/search"
+    assert calls["json"] == {
+        "query": "acme filing",
+        "type": "highlights",
+        "limit": 5,
+        "language": ["en"],
+        "include_domains": "sec.gov",
+        "start_published_date": "2026-06-01",
+        "end_published_date": "2026-06-30",
+    }
+    assert calls["headers"] == {"Authorization": "Bearer k", "Content-Type": "application/json"}
+    assert calls["error_field"] == "error"
+
+
+async def test_yep_clamps_limit_and_uses_highlights(monkeypatch):
+    c = YepClient(api_key="k")
+    fake, calls = _canned({"results": [{"url": "https://a", "highlights": ["one", "two"]}]})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=200)
+    assert err is None
+    assert results[0].snippet == "one\ntwo"
+    assert calls["json"] == {
+        "query": "hi",
+        "type": "highlights",
+        "limit": 100,
+        "language": ["en"],
+    }
+
+
+async def test_yep_converts_site_filters_to_root_domains(monkeypatch):
+    c = YepClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(
+        "hi site:docs.github.com site:github.com site:shop.example.com.au"
+    )
+    assert err is None
+    assert results == []
+    assert calls["json"]["include_domains"] == "github.com,example.com.au"
+
+
 def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("SERPER_API_KEY", "gk")
     monkeypatch.setenv("SEARCHAPI_API_KEY", "sk")
@@ -874,6 +948,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fk")
     monkeypatch.setenv("TINYFISH_API_KEY", "tfk")
     monkeypatch.setenv("KAGI_API_KEY", "kk")
+    monkeypatch.setenv("YEP_API_KEY", "yk")
     clients = build_search_clients(
         [
             "google",
@@ -888,6 +963,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "firecrawl",
             "tinyfish",
             "kagi",
+            "yep",
         ]
     )
     assert isinstance(clients["google"], SerperClient)
@@ -912,6 +988,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["tinyfish"].api_key == "tfk"
     assert isinstance(clients["kagi"], KagiClient)
     assert clients["kagi"].api_key == "kk"
+    assert isinstance(clients["yep"], YepClient)
+    assert clients["yep"].api_key == "yk"
 
 
 def test_factory_builds_engine_variants(monkeypatch):

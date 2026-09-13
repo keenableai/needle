@@ -16,6 +16,7 @@ from needle.shared.search.searchapi import SearchApiClient
 from needle.shared.search.serper import SerperClient
 from needle.shared.search.tavily import TavilyClient
 from needle.shared.search.tinyfish import TinyFishClient
+from needle.shared.search.yep import YepClient
 from needle.shared.search.you import YouClient
 
 
@@ -94,6 +95,10 @@ def _build_you(api_key: str | None, snippet_chars: int) -> SearchClient:
     return YouClient(api_key=api_key or "")
 
 
+def _build_yep(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return YepClient(api_key=api_key or "")
+
+
 def _build_firecrawl(api_key: str | None, snippet_chars: int) -> SearchClient:
     return FirecrawlClient(api_key=api_key or "")
 
@@ -135,6 +140,7 @@ ENGINES: dict[str, EngineSpec] = {
     "octen": EngineSpec(key_env="OCTEN_API_KEY", key_required=True, build=_build_octen),
     "ceramic": EngineSpec(key_env="CERAMIC_API_KEY", key_required=True, build=_build_ceramic),
     "you": EngineSpec(key_env="YOU_API_KEY", key_required=True, build=_build_you),
+    "yep": EngineSpec(key_env="YEP_API_KEY", key_required=True, build=_build_yep),
     "firecrawl": EngineSpec(key_env="FIRECRAWL_API_KEY", key_required=True, build=_build_firecrawl),
     "kagi": EngineSpec(key_env="KAGI_API_KEY", key_required=True, build=_build_kagi),
 }
