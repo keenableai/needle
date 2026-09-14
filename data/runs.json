@@ -13867,5 +13867,15 @@
       "fresh.jsonl",
       "ndcg.json"
     ]
+  },
+  {
+    "id": "2026-09-14T1658Z",
+    "ts": "2026-09-14T16:58Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "ndcg.json",
+      "scholar.json",
+      "scholar.jsonl"
+    ]
   }
 ]
