@@ -126,9 +126,12 @@ def build_clients_or_exit(
     engines: str | tuple[str, ...],
     *,
     snippet_chars: int,
+    max_concurrency: int = 1,
 ) -> dict[str, SearchClient]:
     try:
-        return build_search_clients(parse_csv(engines), snippet_chars=snippet_chars)
+        return build_search_clients(
+            parse_csv(engines), snippet_chars=snippet_chars, max_concurrency=max_concurrency
+        )
     except ValueError as exc:
         raise SystemExit(f"error: {exc}") from exc
 

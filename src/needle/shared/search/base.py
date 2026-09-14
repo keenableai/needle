@@ -149,6 +149,11 @@ class HttpSearchClient:
         self._client: httpx.AsyncClient | None = None
         self._sem = asyncio.Semaphore(max_concurrency)
 
+    def set_max_concurrency(self, max_concurrency: int) -> None:
+        if max_concurrency < 1:
+            raise ValueError("max_concurrency must be >= 1")
+        self._sem = asyncio.Semaphore(max_concurrency)
+
     def _http(self) -> httpx.AsyncClient:
         if self._client is None:
             self._client = httpx.AsyncClient(timeout=self.timeout_s, headers=self.default_headers)

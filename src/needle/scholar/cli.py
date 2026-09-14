@@ -106,6 +106,7 @@ class Scholar:
         sample: str = "stratified",
         seed: int | None = None,
         resolve_pmcids: bool = True,
+        search_concurrency: int = 1,
     ) -> None:
         rows = load_gold_rows(queries, bench="scholar", gold_ok=has_gold_ids)
         rows = sample_or_exit(
@@ -119,7 +120,10 @@ class Scholar:
         )
         gold_papers = [_gold_paper(r) for r in rows]
 
-        clients = build_clients_or_exit(engines, snippet_chars=snippet_chars)
+        search_concurrency = max(1, search_concurrency)
+        clients = build_clients_or_exit(
+            engines, snippet_chars=snippet_chars, max_concurrency=search_concurrency
+        )
         need_idconv = resolve_pmcids and any("pmid" in g.ids for g in gold_papers)
         idconv = IdConverter() if need_idconv else None
 
@@ -131,6 +135,7 @@ class Scholar:
                     num_results=num_results,
                     snippet_chars=snippet_chars,
                     idconv=idconv,
+                    concurrent_search=search_concurrency > 1,
                 )
             finally:
                 await aclose_all(*clients.values(), idconv)

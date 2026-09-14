@@ -158,7 +158,7 @@ pass, so buckets remain comparable; `--buckets` selects a subset.
 
 ```bash
 needle scholar generate --age-buckets 7d,30d,1y --per-cell 10 --out gold.jsonl
-needle scholar run --queries gold.jsonl --num-results 10 --out report.json
+needle scholar run --queries gold.jsonl --num-results 10 --search-concurrency 2 --out report.json
 ```
 
 Gold comes from two suites (`--suites`): `arxiv` and `europepmc`, paired

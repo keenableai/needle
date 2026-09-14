@@ -105,7 +105,7 @@ jobs:
       - name: agentic_rare (daily schedule or dispatch opt-in)
         id: agentic_rare
         continue-on-error: true
-        timeout-minutes: 120
+        timeout-minutes: 240
         env:
           RUN_AGENTIC_RARE: ${{ github.event.schedule == '17 6 * * *' || inputs.agentic_rare == true }}
         run: |
@@ -130,7 +130,7 @@ jobs:
           uv run needle scholar generate --age-buckets 7d,30d,1y --per-cell 7 \
             --out scholar.jsonl
           uv run needle scholar run --queries scholar.jsonl \
-            --engines "$ENGINES" --num-results 10 --out scholar.json
+            --engines "$ENGINES" --num-results 10 --search-concurrency 2 --out scholar.json
 
       - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
         id: legal
