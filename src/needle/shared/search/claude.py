@@ -2,7 +2,13 @@ import os
 from typing import Any
 
 from needle.shared.search.base import HttpSearchClient, SearchResult
-from needle.shared.search.llmsearch import SYSTEM_PROMPT, cited_then_hits, user_prompt
+from needle.shared.search.llmsearch import (
+    MAX_OUTPUT_TOKENS,
+    SYSTEM_PROMPT,
+    hits_with_rows,
+    parse_rows,
+    user_prompt,
+)
 from needle.shared.search.queryops import parse_ops
 
 
@@ -10,7 +16,7 @@ class ClaudeSearchClient(HttpSearchClient):
     engine = "claude-search"
     base_url = "https://api.anthropic.com"
 
-    def __init__(self, *, api_key: str, model: str | None = None, timeout_s: float = 120.0) -> None:
+    def __init__(self, *, api_key: str, model: str | None = None, timeout_s: float = 180.0) -> None:
         super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.model = model or os.environ.get("NEEDLE_CLAUDE_SEARCH_MODEL", "claude-sonnet-5")
 
@@ -23,7 +29,7 @@ class ClaudeSearchClient(HttpSearchClient):
             tool["allowed_domains"] = list(ops.sites)
         body = {
             "model": self.model,
-            "max_tokens": 1024,
+            "max_tokens": MAX_OUTPUT_TOKENS,
             "system": SYSTEM_PROMPT,
             "messages": [{"role": "user", "content": user_prompt(ops)}],
             "tools": [tool],
@@ -37,14 +43,14 @@ class ClaudeSearchClient(HttpSearchClient):
         if err is not None:
             return None, err
         blocks = payload.get("content") if isinstance(payload, dict) else None
-        return _cited_results(blocks if isinstance(blocks, list) else [], num_results)
+        return _results(blocks if isinstance(blocks, list) else [], num_results)
 
 
-def _cited_results(
+def _results(
     blocks: list[Any], num_results: int
 ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
     hits: list[SearchResult] = []
-    cited: dict[str, dict[str, Any]] = {}
+    text: list[str] = []
     searched = False
     tool_error: str | None = None
     for block in blocks:
@@ -64,22 +70,7 @@ def _cited_results(
                         )
                     )
         elif block.get("type") == "text":
-            for c in block.get("citations") or []:
-                if not isinstance(c, dict) or not c.get("url"):
-                    continue
-                entry = cited.setdefault(c["url"], {"title": c.get("title"), "quotes": []})
-                if c.get("cited_text"):
-                    entry["quotes"].append(c["cited_text"])
+            text.append(block.get("text") or "")
     if tool_error and not searched:
         return None, {"error_type": "api_error", "error_message": tool_error}
-    page_age = {h.url: h.published_date for h in hits if h.published_date}
-    cited_results = [
-        SearchResult(
-            url=url,
-            title=entry["title"],
-            snippet=" ".join(entry["quotes"]) or None,
-            published_date=page_age.get(url),
-        )
-        for url, entry in cited.items()
-    ]
-    return cited_then_hits(cited_results, hits, num_results), None
+    return hits_with_rows(hits, parse_rows("".join(text)), num_results), None

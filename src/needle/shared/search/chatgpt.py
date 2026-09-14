@@ -1,9 +1,15 @@
 import os
 from typing import Any
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from needle.shared.search.base import HttpSearchClient, SearchResult
-from needle.shared.search.llmsearch import SYSTEM_PROMPT, cited_then_hits, user_prompt
+from needle.shared.search.llmsearch import (
+    MAX_OUTPUT_TOKENS,
+    SYSTEM_PROMPT,
+    hits_with_rows,
+    parse_rows,
+    strip_utm,
+    user_prompt,
+)
 from needle.shared.search.queryops import parse_ops
 
 
@@ -11,7 +17,7 @@ class ChatGptSearchClient(HttpSearchClient):
     engine = "chatgpt-search"
     base_url = "https://api.openai.com"
 
-    def __init__(self, *, api_key: str, model: str | None = None, timeout_s: float = 120.0) -> None:
+    def __init__(self, *, api_key: str, model: str | None = None, timeout_s: float = 180.0) -> None:
         super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.model = model or os.environ.get("NEEDLE_CHATGPT_SEARCH_MODEL", "gpt-5.5")
 
@@ -25,6 +31,7 @@ class ChatGptSearchClient(HttpSearchClient):
         body = {
             "model": self.model,
             "reasoning": {"effort": "low"},
+            "max_output_tokens": MAX_OUTPUT_TOKENS,
             "instructions": SYSTEM_PROMPT,
             "input": user_prompt(ops),
             "tools": [tool],
@@ -42,7 +49,7 @@ class ChatGptSearchClient(HttpSearchClient):
             return None, err
         output = payload.get("output") if isinstance(payload, dict) else None
         output = output if isinstance(output, list) else []
-        return cited_then_hits(_cited(output), _hits(output), num_results), None
+        return hits_with_rows(_hits(output), parse_rows(_text(output)), num_results), None
 
 
 def _hits(output: list[Any]) -> list[SearchResult]:
@@ -54,43 +61,16 @@ def _hits(output: list[Any]) -> list[SearchResult]:
         sources = action.get("sources") if isinstance(action, dict) else None
         for src in sources or []:
             if isinstance(src, dict) and src.get("url"):
-                hits.append(SearchResult(url=_strip_utm(src["url"])))
+                hits.append(SearchResult(url=strip_utm(src["url"])))
     return hits
 
 
-def _cited(output: list[Any]) -> list[SearchResult]:
-    seen: dict[str, SearchResult] = {}
+def _text(output: list[Any]) -> str:
+    parts: list[str] = []
     for item in output:
         if not isinstance(item, dict) or item.get("type") != "message":
             continue
         for part in item.get("content") or []:
-            if not isinstance(part, dict) or part.get("type") != "output_text":
-                continue
-            text = part.get("text") or ""
-            citations = [
-                a
-                for a in part.get("annotations") or []
-                if isinstance(a, dict) and a.get("type") == "url_citation" and a.get("url")
-            ]
-            citations.sort(key=lambda a: a.get("start_index") or 0)
-            prev_end = 0
-            for a in citations:
-                end = a.get("end_index") or prev_end
-                snippet = text[prev_end:end].strip()
-                prev_end = max(prev_end, end)
-                url = _strip_utm(a["url"])
-                if url not in seen:
-                    seen[url] = SearchResult(
-                        url=url, title=a.get("title"), snippet=snippet.replace("**", "") or None
-                    )
-    return list(seen.values())
-
-
-def _strip_utm(url: str) -> str:
-    parts = urlsplit(url)
-    kept = [
-        (k, v)
-        for k, v in parse_qsl(parts.query, keep_blank_values=True)
-        if not k.startswith("utm_")
-    ]
-    return urlunsplit(parts._replace(query=urlencode(kept)))
+            if isinstance(part, dict) and part.get("type") == "output_text":
+                parts.append(part.get("text") or "")
+    return "".join(parts)

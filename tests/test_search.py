@@ -868,7 +868,14 @@ async def test_perplexity_maps_results_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
-async def test_claude_search_ranks_cited_urls(monkeypatch):
+CLAUDE_JSON = (
+    '```json\n[{"url": "https://a", "title": "A json", "snippet": "sa"},'
+    ' {"url": "https://b", "snippet": "sb"},'
+    ' {"url": "https://ghost", "title": "G", "snippet": "sg"}]\n```'
+)
+
+
+async def test_claude_search_ranks_tool_hits_with_json_snippets(monkeypatch):
     payload = {
         "content": [
             {"type": "server_tool_use", "name": "web_search", "input": {"query": "hi"}},
@@ -877,44 +884,21 @@ async def test_claude_search_ranks_cited_urls(monkeypatch):
                 "content": [
                     {
                         "type": "web_search_result",
-                        "url": "https://x",
-                        "title": "X",
-                        "page_age": "1 d",
-                    },
-                    {
-                        "type": "web_search_result",
                         "url": "https://a",
                         "title": "A",
                         "page_age": "2 d",
                     },
                     {"type": "web_search_result", "url": "https://b", "title": "B"},
-                ],
-            },
-            {
-                "type": "text",
-                "text": "first",
-                "citations": [
                     {
-                        "type": "web_search_result_location",
-                        "url": "https://a",
-                        "title": "A",
-                        "cited_text": "qa1",
-                    },
-                    {
-                        "type": "web_search_result_location",
-                        "url": "https://b",
-                        "title": "B",
-                        "cited_text": "qb",
+                        "type": "web_search_result",
+                        "url": "https://x",
+                        "title": "X",
+                        "page_age": "1 d",
                     },
                 ],
             },
-            {
-                "type": "text",
-                "text": "second",
-                "citations": [
-                    {"type": "web_search_result_location", "url": "https://a", "cited_text": "qa2"}
-                ],
-            },
+            {"type": "text", "text": CLAUDE_JSON[:40]},
+            {"type": "text", "text": CLAUDE_JSON[40:]},
         ]
     }
     monkeypatch.setenv("NEEDLE_CLAUDE_SEARCH_MODEL", "claude-test")
@@ -924,19 +908,36 @@ async def test_claude_search_ranks_cited_urls(monkeypatch):
 
     results, err = await c.search("hi", num_results=5)
     assert err is None
-    assert [r.url for r in results] == ["https://a", "https://b", "https://x"]
-    assert results[0].snippet == "qa1 qa2"
-    assert results[0].published_date == "2 d"
-    assert results[1].published_date is None
-    assert results[2].title == "X"
-    assert results[2].snippet is None
-    assert results[2].published_date == "1 d"
+    assert [(r.url, r.title, r.snippet, r.published_date) for r in results] == [
+        ("https://a", "A", "sa", "2 d"),
+        ("https://b", "B", "sb", None),
+        ("https://x", "X", None, "1 d"),
+    ]
     assert calls["url"] == "https://api.anthropic.com/v1/messages"
     assert calls["headers"] == {"x-api-key": "k", "anthropic-version": "2023-06-01"}
     body = calls["json"]
     assert body["model"] == "claude-test"
+    assert body["max_tokens"] == 32000
     assert body["messages"] == [{"role": "user", "content": "hi"}]
     assert body["tools"] == [{"type": "web_search_20250305", "name": "web_search", "max_uses": 1}]
+
+
+async def test_claude_search_bad_json_keeps_hits(monkeypatch):
+    payload = {
+        "content": [
+            {
+                "type": "web_search_tool_result",
+                "content": [{"type": "web_search_result", "url": "https://a", "title": "A"}],
+            },
+            {"type": "text", "text": '[{"url": "https://a", '},
+        ]
+    }
+    c = ClaudeSearchClient(api_key="k")
+    fake, _ = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi", num_results=2)
+    assert err is None
+    assert [(r.url, r.title, r.snippet) for r in results] == [("https://a", "A", None)]
 
 
 async def test_claude_search_tool_error_is_api_error(monkeypatch):
@@ -973,13 +974,7 @@ async def test_claude_search_ignores_tool_error_after_a_search(monkeypatch):
                     "error_code": "max_uses_exceeded",
                 },
             },
-            {
-                "type": "text",
-                "text": "t",
-                "citations": [
-                    {"type": "web_search_result_location", "url": "https://a", "title": "A"}
-                ],
-            },
+            {"type": "text", "text": '[{"url": "https://a", "snippet": "sa"}]'},
         ]
     }
     c = ClaudeSearchClient(api_key="k")
@@ -987,7 +982,7 @@ async def test_claude_search_ignores_tool_error_after_a_search(monkeypatch):
     monkeypatch.setattr(c, "_request_json", fake)
     results, err = await c.search("hi")
     assert err is None
-    assert [r.url for r in results] == ["https://a"]
+    assert [(r.url, r.snippet) for r in results] == [("https://a", "sa")]
 
 
 async def test_claude_search_no_search_is_empty(monkeypatch):
@@ -997,8 +992,7 @@ async def test_claude_search_no_search_is_empty(monkeypatch):
     assert await c.search("2+2") == ([], None)
 
 
-async def test_chatgpt_search_ranks_cited_urls(monkeypatch):
-    text = "Alpha is up. Beta is down. Alpha again."
+async def test_chatgpt_search_ranks_sources_with_json_snippets(monkeypatch):
     payload = {
         "output": [
             {
@@ -1007,9 +1001,10 @@ async def test_chatgpt_search_ranks_cited_urls(monkeypatch):
                 "action": {
                     "type": "search",
                     "sources": [
+                        {"type": "url", "url": "https://a?utm_source=openai"},
                         {"type": "url", "url": "https://b"},
-                        {"type": "url", "url": "https://c?utm_source=openai"},
-                        {"type": "url", "url": "https://d"},
+                        {"type": "url", "url": "https://a"},
+                        {"type": "url", "url": "https://c"},
                     ],
                 },
             },
@@ -1018,30 +1013,10 @@ async def test_chatgpt_search_ranks_cited_urls(monkeypatch):
                 "content": [
                     {
                         "type": "output_text",
-                        "text": text,
-                        "annotations": [
-                            {
-                                "type": "url_citation",
-                                "start_index": 26,
-                                "end_index": 39,
-                                "url": "https://a",
-                                "title": "A2",
-                            },
-                            {
-                                "type": "url_citation",
-                                "start_index": 0,
-                                "end_index": 12,
-                                "url": "https://a",
-                                "title": "A",
-                            },
-                            {
-                                "type": "url_citation",
-                                "start_index": 13,
-                                "end_index": 26,
-                                "url": "https://b",
-                                "title": "B",
-                            },
-                        ],
+                        "text": '[{"url": "https://a?utm_source=openai", "title": "A", "snippet": "sa"},'
+                        ' {"url": "https://c", "title": "C", "snippet": "sc"},'
+                        ' {"url": "https://ghost", "title": "G", "snippet": "sg"}]',
+                        "annotations": [],
                     }
                 ],
             },
@@ -1052,80 +1027,36 @@ async def test_chatgpt_search_ranks_cited_urls(monkeypatch):
     fake, calls = _canned(payload)
     monkeypatch.setattr(c, "_request_json", fake)
 
-    results, err = await c.search("hi", num_results=3)
+    results, err = await c.search("hi", num_results=5)
     assert err is None
     assert [(r.url, r.title, r.snippet) for r in results] == [
-        ("https://a", "A", "Alpha is up."),
-        ("https://b", "B", "Beta is down."),
-        ("https://c", None, None),
+        ("https://a", "A", "sa"),
+        ("https://b", None, None),
+        ("https://c", "C", "sc"),
     ]
     assert calls["url"] == "https://api.openai.com/v1/responses"
     assert calls["error_field"] == "error"
     assert calls["headers"] == {"Authorization": "Bearer k"}
     body = calls["json"]
     assert body["model"] == "gpt-test"
+    assert body["max_output_tokens"] == 32000
     assert body["input"] == "hi"
     assert body["tools"] == [{"type": "web_search", "search_context_size": "low"}]
     assert body["tool_choice"] == {"type": "web_search"}
     assert body["include"] == ["web_search_call.action.sources"]
 
 
-async def test_chatgpt_search_strips_utm_and_markdown(monkeypatch):
-    payload = {
-        "output": [
-            {
-                "type": "message",
-                "content": [
-                    {
-                        "type": "output_text",
-                        "text": "The **Fed** held.",
-                        "annotations": [
-                            {
-                                "type": "url_citation",
-                                "start_index": 0,
-                                "end_index": 17,
-                                "url": "https://x.gov/a.htm?id=3&utm_source=openai",
-                            },
-                            {
-                                "type": "url_citation",
-                                "start_index": 0,
-                                "end_index": 17,
-                                "url": "https://x.gov/a.htm?id=3",
-                            },
-                        ],
-                    }
-                ],
-            }
-        ]
-    }
-    c = ChatGptSearchClient(api_key="k")
-    fake, _ = _canned(payload)
-    monkeypatch.setattr(c, "_request_json", fake)
-    results, _ = await c.search("hi")
-    assert [(r.url, r.snippet) for r in results] == [("https://x.gov/a.htm?id=3", "The Fed held.")]
-
-
 async def test_chatgpt_search_caps_results(monkeypatch):
     payload = {
         "output": [
             {
-                "type": "message",
-                "content": [
-                    {
-                        "type": "output_text",
-                        "text": "abc",
-                        "annotations": [
-                            {
-                                "type": "url_citation",
-                                "start_index": i,
-                                "end_index": i + 1,
-                                "url": f"https://{i}",
-                            }
-                            for i in range(3)
-                        ],
-                    }
-                ],
-            }
+                "type": "web_search_call",
+                "action": {
+                    "type": "search",
+                    "sources": [{"url": f"https://{i}"} for i in range(3)],
+                },
+            },
+            {"type": "message", "content": [{"type": "output_text", "text": "[]"}]},
         ]
     }
     c = ChatGptSearchClient(api_key="k")
@@ -1623,7 +1554,7 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             "json",
             {
                 "model": "m",
-                "max_tokens": 1024,
+                "max_tokens": 32000,
                 "system": llmsearch.SYSTEM_PROMPT,
                 "messages": [{"role": "user", "content": DATED_PROMPT}],
                 "tools": [
@@ -1643,6 +1574,7 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             {
                 "model": "m",
                 "reasoning": {"effort": "low"},
+                "max_output_tokens": 32000,
                 "instructions": llmsearch.SYSTEM_PROMPT,
                 "input": DATED_PROMPT,
                 "tools": [

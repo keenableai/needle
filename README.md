@@ -64,16 +64,19 @@ search or judging failed
 (via `num_scored`; the report lists `search_errors` / `judge_errors`) and
 does not score them as zero.
 
-`claude-search` and `chatgpt-search` are answer engines, not search APIs: the
-client asks the model to search and answer. Results are the URLs the answer
-cites, in first-citation order, followed by the remaining search hits in the
-order the tool returned them. Claude runs one search per query
-(`max_uses=1`); cited results carry the cited page text as snippet, uncited
-hits carry title and page age only. ChatGPT runs `gpt-5.5` at low reasoning
-with the search tool forced; cited results carry the answer sentence the
-citation supports, uncited hits are bare URLs from the tool's source list. `site:` maps to each
-tool's domain allow-list; `after:`/`before:` go into the prompt as plain
-text since neither tool has a date filter.
+`claude-search` and `chatgpt-search` go through a model's server-side web
+search tool, since neither vendor exposes the search index directly. The
+prompt asks the model to search once and reply with a JSON array of every
+result it received, in order, with the snippet copied verbatim (up to 500
+characters). Rank is the tool's own result order (Claude's
+`web_search_tool_result` blocks, ChatGPT's `web_search_call.action.sources`);
+the JSON supplies title and snippet for each URL, and JSON rows whose URL is
+not among the tool's hits are dropped. If the JSON fails to parse the hits
+still count, with title and page age from Claude and bare URLs from ChatGPT.
+Claude runs one search per query (`max_uses=1`); ChatGPT runs `gpt-5.5` at
+low reasoning with the search tool forced. Output is capped at 32k tokens.
+`site:` maps to each tool's domain allow-list; `after:`/`before:` go into the
+prompt as plain text since neither tool has a date filter.
 
 ## news
 
