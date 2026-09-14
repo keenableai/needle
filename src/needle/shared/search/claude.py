@@ -2,7 +2,7 @@ import os
 from typing import Any
 
 from needle.shared.search.base import HttpSearchClient, SearchResult
-from needle.shared.search.llmsearch import SYSTEM_PROMPT, user_prompt
+from needle.shared.search.llmsearch import SYSTEM_PROMPT, cited_then_hits, user_prompt
 from needle.shared.search.queryops import parse_ops
 
 
@@ -43,7 +43,7 @@ class ClaudeSearchClient(HttpSearchClient):
 def _cited_results(
     blocks: list[Any], num_results: int
 ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
-    page_age: dict[str, str] = {}
+    hits: list[SearchResult] = []
     cited: dict[str, dict[str, Any]] = {}
     searched = False
     tool_error: str | None = None
@@ -57,8 +57,12 @@ def _cited_results(
                 continue
             searched = True
             for r in content if isinstance(content, list) else []:
-                if isinstance(r, dict) and r.get("url") and r.get("page_age"):
-                    page_age[r["url"]] = r["page_age"]
+                if isinstance(r, dict) and r.get("url"):
+                    hits.append(
+                        SearchResult(
+                            url=r["url"], title=r.get("title"), published_date=r.get("page_age")
+                        )
+                    )
         elif block.get("type") == "text":
             for c in block.get("citations") or []:
                 if not isinstance(c, dict) or not c.get("url"):
@@ -68,7 +72,8 @@ def _cited_results(
                     entry["quotes"].append(c["cited_text"])
     if tool_error and not searched:
         return None, {"error_type": "api_error", "error_message": tool_error}
-    results = [
+    page_age = {h.url: h.published_date for h in hits if h.published_date}
+    cited_results = [
         SearchResult(
             url=url,
             title=entry["title"],
@@ -77,4 +82,4 @@ def _cited_results(
         )
         for url, entry in cited.items()
     ]
-    return results[:num_results], None
+    return cited_then_hits(cited_results, hits, num_results), None

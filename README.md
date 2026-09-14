@@ -65,12 +65,13 @@ search or judging failed
 does not score them as zero.
 
 `claude-search` and `chatgpt-search` are answer engines, not search APIs: the
-client asks the model to search and answer, and the results are the URLs the
-answer cites, ranked by first citation. Uncited search hits are dropped, so
-these engines return fewer results than `--num-results`. Claude runs one
-search per query (`max_uses=1`) and the snippet is the cited page text;
-ChatGPT runs `gpt-5.5` at low reasoning with the search tool forced, and the
-snippet is the answer sentence the citation supports. `site:` maps to each
+client asks the model to search and answer. Results are the URLs the answer
+cites, in first-citation order, followed by the remaining search hits in the
+order the tool returned them. Claude runs one search per query
+(`max_uses=1`); cited results carry the cited page text as snippet, uncited
+hits carry title and page age only. ChatGPT runs `gpt-5.5` at low reasoning
+with the search tool forced; cited results carry the answer sentence the
+citation supports, uncited hits are bare URLs from the tool's source list. `site:` maps to each
 tool's domain allow-list; `after:`/`before:` go into the prompt as plain
 text since neither tool has a date filter.
 

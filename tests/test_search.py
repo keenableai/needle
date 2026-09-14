@@ -924,10 +924,13 @@ async def test_claude_search_ranks_cited_urls(monkeypatch):
 
     results, err = await c.search("hi", num_results=5)
     assert err is None
-    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert [r.url for r in results] == ["https://a", "https://b", "https://x"]
     assert results[0].snippet == "qa1 qa2"
     assert results[0].published_date == "2 d"
     assert results[1].published_date is None
+    assert results[2].title == "X"
+    assert results[2].snippet is None
+    assert results[2].published_date == "1 d"
     assert calls["url"] == "https://api.anthropic.com/v1/messages"
     assert calls["headers"] == {"x-api-key": "k", "anthropic-version": "2023-06-01"}
     body = calls["json"]
@@ -998,7 +1001,18 @@ async def test_chatgpt_search_ranks_cited_urls(monkeypatch):
     text = "Alpha is up. Beta is down. Alpha again."
     payload = {
         "output": [
-            {"type": "web_search_call", "status": "completed", "action": {"type": "search"}},
+            {
+                "type": "web_search_call",
+                "status": "completed",
+                "action": {
+                    "type": "search",
+                    "sources": [
+                        {"type": "url", "url": "https://b"},
+                        {"type": "url", "url": "https://c?utm_source=openai"},
+                        {"type": "url", "url": "https://d"},
+                    ],
+                },
+            },
             {
                 "type": "message",
                 "content": [
@@ -1038,11 +1052,12 @@ async def test_chatgpt_search_ranks_cited_urls(monkeypatch):
     fake, calls = _canned(payload)
     monkeypatch.setattr(c, "_request_json", fake)
 
-    results, err = await c.search("hi", num_results=5)
+    results, err = await c.search("hi", num_results=3)
     assert err is None
     assert [(r.url, r.title, r.snippet) for r in results] == [
         ("https://a", "A", "Alpha is up."),
         ("https://b", "B", "Beta is down."),
+        ("https://c", None, None),
     ]
     assert calls["url"] == "https://api.openai.com/v1/responses"
     assert calls["error_field"] == "error"
@@ -1052,6 +1067,7 @@ async def test_chatgpt_search_ranks_cited_urls(monkeypatch):
     assert body["input"] == "hi"
     assert body["tools"] == [{"type": "web_search", "search_context_size": "low"}]
     assert body["tool_choice"] == {"type": "web_search"}
+    assert body["include"] == ["web_search_call.action.sources"]
 
 
 async def test_chatgpt_search_strips_utm_and_markdown(monkeypatch):
@@ -1637,6 +1653,7 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
                     }
                 ],
                 "tool_choice": {"type": "web_search"},
+                "include": ["web_search_call.action.sources"],
             },
         ),
     ],

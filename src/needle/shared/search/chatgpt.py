@@ -3,7 +3,7 @@ from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from needle.shared.search.base import HttpSearchClient, SearchResult
-from needle.shared.search.llmsearch import SYSTEM_PROMPT, user_prompt
+from needle.shared.search.llmsearch import SYSTEM_PROMPT, cited_then_hits, user_prompt
 from needle.shared.search.queryops import parse_ops
 
 
@@ -29,6 +29,7 @@ class ChatGptSearchClient(HttpSearchClient):
             "input": user_prompt(ops),
             "tools": [tool],
             "tool_choice": {"type": "web_search"},
+            "include": ["web_search_call.action.sources"],
         }
         payload, err = await self._request_json(
             "POST",
@@ -40,10 +41,24 @@ class ChatGptSearchClient(HttpSearchClient):
         if err is not None:
             return None, err
         output = payload.get("output") if isinstance(payload, dict) else None
-        return _cited_results(output if isinstance(output, list) else [])[:num_results], None
+        output = output if isinstance(output, list) else []
+        return cited_then_hits(_cited(output), _hits(output), num_results), None
 
 
-def _cited_results(output: list[Any]) -> list[SearchResult]:
+def _hits(output: list[Any]) -> list[SearchResult]:
+    hits: list[SearchResult] = []
+    for item in output:
+        if not isinstance(item, dict) or item.get("type") != "web_search_call":
+            continue
+        action = item.get("action")
+        sources = action.get("sources") if isinstance(action, dict) else None
+        for src in sources or []:
+            if isinstance(src, dict) and src.get("url"):
+                hits.append(SearchResult(url=_strip_utm(src["url"])))
+    return hits
+
+
+def _cited(output: list[Any]) -> list[SearchResult]:
     seen: dict[str, SearchResult] = {}
     for item in output:
         if not isinstance(item, dict) or item.get("type") != "message":
