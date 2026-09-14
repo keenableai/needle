@@ -45,16 +45,17 @@ def _cited_results(
 ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
     page_age: dict[str, str] = {}
     cited: dict[str, dict[str, Any]] = {}
+    searched = False
+    tool_error: str | None = None
     for block in blocks:
         if not isinstance(block, dict):
             continue
         if block.get("type") == "web_search_tool_result":
             content = block.get("content")
             if isinstance(content, dict):
-                return None, {
-                    "error_type": "api_error",
-                    "error_message": str(content.get("error_code")),
-                }
+                tool_error = str(content.get("error_code"))
+                continue
+            searched = True
             for r in content if isinstance(content, list) else []:
                 if isinstance(r, dict) and r.get("url") and r.get("page_age"):
                     page_age[r["url"]] = r["page_age"]
@@ -65,6 +66,8 @@ def _cited_results(
                 entry = cited.setdefault(c["url"], {"title": c.get("title"), "quotes": []})
                 if c.get("cited_text"):
                     entry["quotes"].append(c["cited_text"])
+    if tool_error and not searched:
+        return None, {"error_type": "api_error", "error_message": tool_error}
     results = [
         SearchResult(
             url=url,

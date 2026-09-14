@@ -956,6 +956,37 @@ async def test_claude_search_tool_error_is_api_error(monkeypatch):
     assert err == {"error_type": "api_error", "error_message": "too_many_requests"}
 
 
+async def test_claude_search_ignores_tool_error_after_a_search(monkeypatch):
+    payload = {
+        "content": [
+            {
+                "type": "web_search_tool_result",
+                "content": [{"type": "web_search_result", "url": "https://a", "title": "A"}],
+            },
+            {
+                "type": "web_search_tool_result",
+                "content": {
+                    "type": "web_search_tool_result_error",
+                    "error_code": "max_uses_exceeded",
+                },
+            },
+            {
+                "type": "text",
+                "text": "t",
+                "citations": [
+                    {"type": "web_search_result_location", "url": "https://a", "title": "A"}
+                ],
+            },
+        ]
+    }
+    c = ClaudeSearchClient(api_key="k")
+    fake, _ = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi")
+    assert err is None
+    assert [r.url for r in results] == ["https://a"]
+
+
 async def test_claude_search_no_search_is_empty(monkeypatch):
     c = ClaudeSearchClient(api_key="k")
     fake, _ = _canned({"content": [{"type": "text", "text": "2 + 2 = 4"}]})
