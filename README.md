@@ -37,7 +37,7 @@ The CLI loads `.env` from the working directory (copy
 | Variable | Purpose |
 | --- | --- |
 | `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`) and judging |
-| `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY`, `FIRECRAWL_API_KEY`, `TINYFISH_API_KEY`, `KAGI_API_KEY` | one per engine, required when that engine is in `--engines` |
+| `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY`, `FIRECRAWL_API_KEY`, `TINYFISH_API_KEY`, `KAGI_API_KEY`, `ANTHROPIC_API_KEY` (`claude-search`), `OPENAI_API_KEY` (`chatgpt-search`) | one per engine, required when that engine is in `--engines` |
 | `KEENABLE_API_KEY` | optional — without it the CLI uses the keyless, rate-limited endpoint |
 | `NEEDLE_LLM_MODEL`, `NEEDLE_JUDGE_MODEL` | both default to `openai/gpt-5.6-terra`; `--llm-model` / `--judge-model` override |
 
@@ -54,7 +54,8 @@ All `run` commands share one interface:
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
 Every engine issues one request at a time, so latency samples are comparable
-across engines. Per-engine tuning uses env vars: `TAVILY_DEPTH`; the engine
+across engines. Per-engine tuning uses env vars: `TAVILY_DEPTH`, `NEEDLE_CLAUDE_SEARCH_MODEL`
+(default `claude-sonnet-5`), `NEEDLE_CHATGPT_SEARCH_MODEL` (default `gpt-5.5`); the engine
 entry fixes Keenable's, Exa's, and Parallel's modes and Brave's endpoint
 (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
 `exa-instant` = instant, `parallel` = advanced, `parallel-turbo` = turbo,
@@ -62,6 +63,22 @@ entry fixes Keenable's, Exa's, and Parallel's modes and Brave's endpoint
 search or judging failed
 (via `num_scored`; the report lists `search_errors` / `judge_errors`) and
 does not score them as zero.
+
+`claude-search` and `chatgpt-search` go through a model's server-side web
+search tool, since neither vendor exposes the search index directly. The
+prompt asks the model to search once and reply with a JSON array of every
+result it received, in order, with the snippet copied verbatim (up to 500
+characters). Rank is the tool's own result order (Claude's
+`web_search_tool_result` blocks, ChatGPT's `web_search_call.action.sources`);
+the JSON supplies title and snippet for each URL, and JSON rows whose URL is
+not among the tool's hits are dropped. If the JSON fails to parse the hits
+still count, with title and page age from Claude and bare URLs from ChatGPT.
+Claude runs one search per query (`max_uses=1`); ChatGPT runs `gpt-5.5` at
+low reasoning with the search tool forced. Output is capped at 32k tokens.
+The prompt also tells the model to pass the query to the search tool
+verbatim, operators included, so `site:`/`after:`/`before:` reach the
+underlying engine as text; `site:` is additionally set as the tool's domain
+allow-list.
 
 ## news
 

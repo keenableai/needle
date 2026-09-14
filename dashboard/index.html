@@ -69,6 +69,8 @@
     --series-14: #8A7500;
     --series-15: #0F6E8C;
     --series-16: #C2185B;
+    --series-17: #7B1FA2;
+    --series-18: #00897B;
   }
   @media screen {
     [data-theme="dark"] {
@@ -101,6 +103,8 @@
       --series-14: #C2A93A;
       --series-15: #3FA3C4;
       --series-16: #E85A8C;
+      --series-17: #B26BE0;
+      --series-18: #2FA88F;
     }
   }
   * { box-sizing: border-box; }
@@ -942,7 +946,7 @@
   <div class="card" id="app-engines">
     <h2>Appendix F — engine configuration</h2>
     <div class="sub">request shapes pinned in git (src/needle/shared/search/); k = 5 results per query except <span class="vert" data-vert="scholar"></span> (10). Engines are live, unversioned APIs; provider-side changes surface as trend shifts.</div>
-    <p>Every run builds each client with the same snippet budget of 2,000 characters. Keenable, Exa, Ceramic and brave-llmcontext accept a request-side length parameter, so they get it in the request (snippet_max_length=2000, highlights.maxCharacters=2000, maxDescriptionLength=2000, and for brave-llmcontext the equivalent per-URL token budget). The other engines have no such parameter; we clip whatever they return to the same 2,000 characters before judging and answer matching (Appendix C). Requests time out at 30 s (60 s for Perplexity and Parallel) and retry up to 3 times with exponential backoff on transport errors, 429, and 5xx.</p>
+    <p>Every run builds each client with the same snippet budget of 2,000 characters. Keenable, Exa, Ceramic and brave-llmcontext accept a request-side length parameter, so they get it in the request (snippet_max_length=2000, highlights.maxCharacters=2000, maxDescriptionLength=2000, and for brave-llmcontext the equivalent per-URL token budget). The other engines have no such parameter; we clip whatever they return to the same 2,000 characters before judging and answer matching (Appendix C). Requests time out at 30 s (60 s for Perplexity and Parallel, 180 s for claude-search and chatgpt-search) and retry up to 3 times with exponential backoff on transport errors, 429, and 5xx.</p>
     <table>
       <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
       <tr><td>Keenable</td><td>Keenable POST /v1/search</td><td>mode=realtime, snippet_max_length=2000; query verbatim with site: kept in the text, after:/before: → published_after:/published_before: tokens; no count parameter — we keep the first k results</td></tr>
@@ -961,6 +965,8 @@
       <tr><td>firecrawl</td><td>Firecrawl POST /v2/search</td><td>limit=min(k,100), sources=[web]; site: kept in the query text, after:/before: → tbs=cdr:1,cd_min:M/D/YYYY,cd_max:M/D/YYYY</td></tr>
       <tr><td>kagi</td><td>Kagi POST /api/v1/search</td><td>query = query text, limit=min(k,1024); site: → lens.sites_included, after:/before: → filters.after/filters.before (ISO dates); search and news sections merge, deduplicated by URL; HTML markup stripped from titles and snippets</td></tr>
       <tr><td>octen</td><td>Octen POST /search</td><td>query = query text clipped to 500 chars, count=k, language=[en], safesearch=off, highlight.enable=true with max_tokens=512; site: → include_domains, after:/before: → start_time/end_time (full-day UTC bounds); highlight is the snippet</td></tr>
+      <tr><td>claude-search</td><td>Anthropic POST /v1/messages</td><td>model=claude-sonnet-5, max_tokens=32000, tools=[web_search_20250305 with max_uses=1], system prompt asks for a JSON array of every search result with the snippet copied verbatim (≤500 chars); rank = web_search_tool_result order, title/snippet from the JSON row with the same URL, published_date = page_age; the prompt tells the model to pass the query to the tool verbatim (operators kept as text), site: also → allowed_domains</td></tr>
+      <tr><td>chatgpt-search</td><td>OpenAI POST /v1/responses</td><td>model=gpt-5.5, reasoning.effort=low, max_output_tokens=32000, tools=[web_search with search_context_size=low], tool_choice forces the search, include=web_search_call.action.sources, same system prompt; rank = action.sources order, title/snippet from the JSON row with the same URL (utm_ parameters stripped); the prompt tells the model to pass the query to the tool verbatim (operators kept as text), site: also → filters.allowed_domains</td></tr>
     </table>
   </div>
 
@@ -1019,9 +1025,9 @@ function registerEngines(names) {
 
 registerEngines(["keenable-realtime", "google", "bing", "brave", "brave-llmcontext",
   "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity", "tavily", "you", "firecrawl",
-  "tinyfish", "kagi", "octen"]);
+  "tinyfish", "kagi", "octen", "claude-search", "chatgpt-search"]);
 
-const SERIES_COUNT = 16;
+const SERIES_COUNT = 18;
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
   const slot = ENGINE_SLOT.get(engine);
@@ -1943,6 +1949,8 @@ const PRICES = new Map([
   ["octen", { usd: 1.00, plan: "pay-as-you-go" }],
   ["tinyfish", { usd: 0.00, plan: "free" }],
   ["ceramic", { usd: 0.05, plan: "pay-as-you-go" }],
+  ["claude-search", { usd: 10.00, plan: "web search tool — $10 / 1k searches, plus tokens" }],
+  ["chatgpt-search", { usd: 10.00, plan: "web_search tool — $10 / 1k calls, plus tokens" }],
 ]);
 const fmtUsd = (v) => `$${v.toFixed(2)}`;
 
