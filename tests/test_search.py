@@ -33,10 +33,6 @@ from needle.shared.search.factory import ENGINES
 from needle.shared.search.queryops import parse_ops
 
 OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
-DATED_PROMPT = (
-    "acme filing Only use sources published after 2026-06-01. "
-    "Only use sources published before 2026-06-30."
-)
 
 
 def _canned(payload):
@@ -1556,7 +1552,7 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
                 "model": "m",
                 "max_tokens": 32000,
                 "system": llmsearch.SYSTEM_PROMPT,
-                "messages": [{"role": "user", "content": DATED_PROMPT}],
+                "messages": [{"role": "user", "content": OPS_QUERY}],
                 "tools": [
                     {
                         "type": "web_search_20250305",
@@ -1576,7 +1572,7 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
                 "reasoning": {"effort": "low"},
                 "max_output_tokens": 32000,
                 "instructions": llmsearch.SYSTEM_PROMPT,
-                "input": DATED_PROMPT,
+                "input": OPS_QUERY,
                 "tools": [
                     {
                         "type": "web_search",

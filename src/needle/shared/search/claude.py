@@ -7,7 +7,6 @@ from needle.shared.search.llmsearch import (
     SYSTEM_PROMPT,
     hits_with_rows,
     parse_rows,
-    user_prompt,
 )
 from needle.shared.search.queryops import parse_ops
 
@@ -31,7 +30,7 @@ class ClaudeSearchClient(HttpSearchClient):
             "model": self.model,
             "max_tokens": MAX_OUTPUT_TOKENS,
             "system": SYSTEM_PROMPT,
-            "messages": [{"role": "user", "content": user_prompt(ops)}],
+            "messages": [{"role": "user", "content": query}],
             "tools": [tool],
         }
         payload, err = await self._request_json(

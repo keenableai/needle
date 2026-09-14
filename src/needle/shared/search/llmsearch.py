@@ -4,26 +4,18 @@ from typing import Any
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from needle.shared.search.base import SearchResult
-from needle.shared.search.queryops import QueryOps
 
 MAX_OUTPUT_TOKENS = 32000
 SNIPPET_CHARS = 500
 SYSTEM_PROMPT = (
-    "Search the web for the user's query exactly once. Then reply with only a JSON array, "
-    "no prose and no code fence: one object per search result you received, in the order "
-    "received, with keys url, title, snippet. Copy the snippet text verbatim from the "
-    f"search result, up to {SNIPPET_CHARS} characters; do not paraphrase or summarize."
+    "Call the web search tool exactly once, passing the user's message verbatim as the "
+    "query: do not rewrite, shorten, or drop any part of it, including operators such as "
+    "site: or after:. Then reply with only a JSON array, no prose and no code fence: one "
+    "object per search result you received, in the order received, with keys url, title, "
+    f"snippet. Copy the snippet text verbatim from the search result, up to {SNIPPET_CHARS} "
+    "characters; do not paraphrase or summarize."
 )
 _FENCE = re.compile(r"^```(?:json)?|```$", re.M)
-
-
-def user_prompt(ops: QueryOps) -> str:
-    parts = [ops.text]
-    if ops.after:
-        parts.append(f"Only use sources published after {ops.after.isoformat()}.")
-    if ops.before:
-        parts.append(f"Only use sources published before {ops.before.isoformat()}.")
-    return " ".join(parts)
 
 
 def strip_utm(url: str) -> str:

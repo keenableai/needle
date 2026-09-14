@@ -8,7 +8,6 @@ from needle.shared.search.llmsearch import (
     hits_with_rows,
     parse_rows,
     strip_utm,
-    user_prompt,
 )
 from needle.shared.search.queryops import parse_ops
 
@@ -33,7 +32,7 @@ class ChatGptSearchClient(HttpSearchClient):
             "reasoning": {"effort": "low"},
             "max_output_tokens": MAX_OUTPUT_TOKENS,
             "instructions": SYSTEM_PROMPT,
-            "input": user_prompt(ops),
+            "input": query,
             "tools": [tool],
             "tool_choice": {"type": "web_search"},
             "include": ["web_search_call.action.sources"],

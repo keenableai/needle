@@ -75,8 +75,10 @@ not among the tool's hits are dropped. If the JSON fails to parse the hits
 still count, with title and page age from Claude and bare URLs from ChatGPT.
 Claude runs one search per query (`max_uses=1`); ChatGPT runs `gpt-5.5` at
 low reasoning with the search tool forced. Output is capped at 32k tokens.
-`site:` maps to each tool's domain allow-list; `after:`/`before:` go into the
-prompt as plain text since neither tool has a date filter.
+The prompt also tells the model to pass the query to the search tool
+verbatim, operators included, so `site:`/`after:`/`before:` reach the
+underlying engine as text; `site:` is additionally set as the tool's domain
+allow-list.
 
 ## news
 
