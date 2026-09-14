@@ -99,6 +99,8 @@ class SearchClient(Protocol):
 
     async def aclose(self) -> None: ...
 
+    def set_max_concurrency(self, max_concurrency: int) -> None: ...
+
 
 async def search_all(
     engines: dict[str, "SearchClient"],
