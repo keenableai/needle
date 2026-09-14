@@ -122,10 +122,14 @@ async def run_known_item_eval(
     snippet_chars: int,
     ultimate_fn: Callable[..., list[dict]] = ultimate_per_query,
     extra: dict[str, Any] | None = None,
+    concurrent_search: bool = False,
 ) -> dict[str, Any]:
     engine_names = list(engines)
     searches_by_query = await search_all(
-        engines, [q.text for q in queries], num_results=num_results
+        engines,
+        [q.text for q in queries],
+        num_results=num_results,
+        concurrent_search=concurrent_search,
     )
     query_outs = await asyncio.gather(
         *[

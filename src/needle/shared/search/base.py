@@ -99,6 +99,8 @@ class SearchClient(Protocol):
 
     async def aclose(self) -> None: ...
 
+    def set_max_concurrency(self, max_concurrency: int) -> None: ...
+
 
 async def search_all(
     engines: dict[str, "SearchClient"],
@@ -147,6 +149,11 @@ class HttpSearchClient:
         self.timeout_s = timeout_s
         self.latencies_ms: list[float] = []
         self._client: httpx.AsyncClient | None = None
+        self._sem = asyncio.Semaphore(max_concurrency)
+
+    def set_max_concurrency(self, max_concurrency: int) -> None:
+        if max_concurrency < 1:
+            raise ValueError("max_concurrency must be >= 1")
         self._sem = asyncio.Semaphore(max_concurrency)
 
     def _http(self) -> httpx.AsyncClient:

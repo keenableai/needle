@@ -1226,6 +1226,13 @@ def test_engines_default_to_serial_requests(monkeypatch):
         assert client._sem._value == 1, name
 
 
+def test_build_search_clients_sets_max_concurrency(monkeypatch):
+    for spec in ENGINES.values():
+        monkeypatch.setenv(spec.key_env, "k")
+    for name, client in build_search_clients(list(ENGINES), max_concurrency=2).items():
+        assert client._sem._value == 2, name
+
+
 async def test_max_concurrency_caps_in_flight(monkeypatch):
     active = 0
     peak = 0

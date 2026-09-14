@@ -155,7 +155,7 @@ ENGINES: dict[str, EngineSpec] = {
 
 
 def build_search_clients(
-    names: Iterable[str], *, snippet_chars: int = 0
+    names: Iterable[str], *, snippet_chars: int = 0, max_concurrency: int = 1
 ) -> dict[str, SearchClient]:
     clients: dict[str, SearchClient] = {}
     for name in names:
@@ -165,7 +165,10 @@ def build_search_clients(
         api_key = os.environ.get(spec.key_env)
         if spec.key_required and not api_key:
             raise ValueError(f"{spec.key_env} is not set (needed for the {name} engine)")
-        clients[name] = spec.build(api_key, snippet_chars)
+        client = spec.build(api_key, snippet_chars)
+        if max_concurrency > 1:
+            client.set_max_concurrency(max_concurrency)
+        clients[name] = client
     if not clients:
         raise ValueError("no engines selected")
     return clients

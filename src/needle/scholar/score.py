@@ -39,6 +39,7 @@ async def run_papers(
     num_results: int = 5,
     snippet_chars: int = DEFAULT_SNIPPET_CHARS,
     idconv: IdConverter | None = None,
+    concurrent_search: bool = False,
 ) -> dict[str, Any]:
     async def eval_engine(query: GoldPaper, results: list[SearchResult] | None, err: Any) -> dict:
         pq: dict[str, Any] = {
@@ -73,4 +74,5 @@ async def run_papers(
         _summary,
         num_results=num_results,
         snippet_chars=snippet_chars,
+        concurrent_search=concurrent_search,
     )
