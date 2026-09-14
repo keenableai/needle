@@ -1,5 +1,6 @@
 import os
 from typing import Any
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from needle.shared.search.base import HttpSearchClient, SearchResult
 from needle.shared.search.llmsearch import SYSTEM_PROMPT, user_prompt
@@ -62,8 +63,19 @@ def _cited_results(output: list[Any]) -> list[SearchResult]:
                 end = a.get("end_index") or prev_end
                 snippet = text[prev_end:end].strip()
                 prev_end = max(prev_end, end)
-                if a["url"] not in seen:
-                    seen[a["url"]] = SearchResult(
-                        url=a["url"], title=a.get("title"), snippet=snippet or None
+                url = _strip_utm(a["url"])
+                if url not in seen:
+                    seen[url] = SearchResult(
+                        url=url, title=a.get("title"), snippet=snippet.replace("**", "") or None
                     )
     return list(seen.values())
+
+
+def _strip_utm(url: str) -> str:
+    parts = urlsplit(url)
+    kept = [
+        (k, v)
+        for k, v in parse_qsl(parts.query, keep_blank_values=True)
+        if not k.startswith("utm_")
+    ]
+    return urlunsplit(parts._replace(query=urlencode(kept)))

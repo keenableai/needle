@@ -1054,6 +1054,41 @@ async def test_chatgpt_search_ranks_cited_urls(monkeypatch):
     assert body["tool_choice"] == {"type": "web_search"}
 
 
+async def test_chatgpt_search_strips_utm_and_markdown(monkeypatch):
+    payload = {
+        "output": [
+            {
+                "type": "message",
+                "content": [
+                    {
+                        "type": "output_text",
+                        "text": "The **Fed** held.",
+                        "annotations": [
+                            {
+                                "type": "url_citation",
+                                "start_index": 0,
+                                "end_index": 17,
+                                "url": "https://x.gov/a.htm?id=3&utm_source=openai",
+                            },
+                            {
+                                "type": "url_citation",
+                                "start_index": 0,
+                                "end_index": 17,
+                                "url": "https://x.gov/a.htm?id=3",
+                            },
+                        ],
+                    }
+                ],
+            }
+        ]
+    }
+    c = ChatGptSearchClient(api_key="k")
+    fake, _ = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, _ = await c.search("hi")
+    assert [(r.url, r.snippet) for r in results] == [("https://x.gov/a.htm?id=3", "The Fed held.")]
+
+
 async def test_chatgpt_search_caps_results(monkeypatch):
     payload = {
         "output": [
