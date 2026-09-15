@@ -12,6 +12,7 @@ from needle.shared.search import (
     ClaudeSearchClient,
     ExaClient,
     FirecrawlClient,
+    JinaClient,
     KagiClient,
     KeenableClient,
     OctenClient,
@@ -600,6 +601,55 @@ async def test_kagi_truncates_and_tolerates_null_data(monkeypatch):
     assert calls["json"] == {"query": "hi", "limit": 1024}
 
 
+async def test_jina_maps_fields_and_builds_request(monkeypatch):
+    payload = {
+        "code": 200,
+        "data": [
+            {
+                "title": "A",
+                "url": "https://a",
+                "description": "da",
+                "date": "2 hours ago",
+                "content": "",
+            },
+            {"title": "", "url": "https://b", "description": ""},
+            {"title": "no url"},
+            "junk",
+        ],
+    }
+    c = JinaClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(OPS_QUERY, num_results=50)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].title == "A"
+    assert results[0].snippet == "da"
+    assert results[0].published_date == "2 hours ago"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert results[1].published_date is None
+    assert calls["method"] == "GET"
+    assert calls["url"] == "https://s.jina.ai/"
+    assert calls["params"] == {"q": OPS_QUERY, "num": 20}
+    assert calls["headers"] == {
+        "Authorization": "Bearer k",
+        "Accept": "application/json",
+        "X-Respond-With": "no-content",
+    }
+
+
+async def test_jina_tolerates_null_data(monkeypatch):
+    c = JinaClient(api_key="k")
+    fake, _ = _canned({"data": None, "code": 400})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi")
+    assert err is None
+    assert results == []
+
+
 async def test_octen_maps_fields_and_builds_body(monkeypatch):
     payload = {
         "data": {
@@ -1075,6 +1125,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("FIRECRAWL_API_KEY", "fk")
     monkeypatch.setenv("TINYFISH_API_KEY", "tfk")
     monkeypatch.setenv("KAGI_API_KEY", "kk")
+    monkeypatch.setenv("JINA_API_KEY", "jk")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "ak")
     monkeypatch.setenv("OPENAI_API_KEY", "oak")
     clients = build_search_clients(
@@ -1093,6 +1144,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "firecrawl",
             "tinyfish",
             "kagi",
+            "jina",
         ]
     )
     assert isinstance(clients["google"], SerperClient)
@@ -1121,6 +1173,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["tinyfish"].api_key == "tfk"
     assert isinstance(clients["kagi"], KagiClient)
     assert clients["kagi"].api_key == "kk"
+    assert isinstance(clients["jina"], JinaClient)
+    assert clients["jina"].api_key == "jk"
 
 
 def test_factory_builds_engine_variants(monkeypatch):
@@ -1551,6 +1605,7 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             },
         ),
         (lambda: SerperClient(api_key="k"), {"organic": []}, "json", {"q": OPS_QUERY}),
+        (lambda: JinaClient(api_key="k"), {"data": []}, "params", {"q": OPS_QUERY, "num": 10}),
         (
             lambda: ClaudeSearchClient(api_key="k", model="m"),
             {"content": []},
