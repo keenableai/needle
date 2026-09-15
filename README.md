@@ -37,7 +37,7 @@ The CLI loads `.env` from the working directory (copy
 | Variable | Purpose |
 | --- | --- |
 | `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`) and judging |
-| `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY`, `FIRECRAWL_API_KEY`, `TINYFISH_API_KEY`, `KAGI_API_KEY`, `ANTHROPIC_API_KEY` (`claude-search`), `OPENAI_API_KEY` (`chatgpt-search`) | one per engine, required when that engine is in `--engines` |
+| `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY`, `FIRECRAWL_API_KEY`, `TINYFISH_API_KEY`, `KAGI_API_KEY`, `JINA_API_KEY`, `ANTHROPIC_API_KEY` (`claude-search`), `OPENAI_API_KEY` (`chatgpt-search`) | one per engine, required when that engine is in `--engines` |
 | `KEENABLE_API_KEY` | optional — without it the CLI uses the keyless, rate-limited endpoint |
 | `NEEDLE_LLM_MODEL`, `NEEDLE_JUDGE_MODEL` | both default to `openai/gpt-5.6-terra`; `--llm-model` / `--judge-model` override |
 
@@ -49,7 +49,7 @@ All `run` commands share one interface:
 | `--out` | `-` | report path; `-` = stdout |
 | `--engines` | `keenable,exa` | comma-separated engine list |
 | `--num-results` | `5` | top-K fetched and scored per engine |
-| `--snippet-chars` | `2000` | uniform cap on per-result evidence text (`0` = no cap), so engines that return more text get no free evidence; also sent as the snippet-length request budget to engines that accept one (keenable, exa, ceramic, and brave-llmcontext as an equivalent token budget), clamped to each API's range |
+| `--snippet-chars` | `2000` | uniform cap on per-result evidence text (`0` = no cap), so engines that return more text get no free evidence; also sent as the snippet-length request budget to engines that accept one (keenable, exa, ceramic, and brave-llmcontext as an equivalent token budget), clamped to each API's range; jina has no such parameter, so the client clips the fetched page text to this budget before it reaches the report |
 | `--limit` / `--sample` / `--seed` | `0` / `stratified` / `0` | deterministic sample of N queries |
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
