@@ -14077,5 +14077,15 @@
       "legal.jsonl",
       "ndcg.json"
     ]
+  },
+  {
+    "id": "2026-09-15T1228Z",
+    "ts": "2026-09-15T12:28Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "gold.jsonl",
+      "ndcg.json",
+      "recall.json"
+    ]
   }
 ]
