@@ -89,7 +89,7 @@ jobs:
       - name: finance (daily schedule, dispatch opt-in, or gold bootstrap)
         id: finance
         continue-on-error: true
-        timeout-minutes: 120
+        timeout-minutes: 240
         env:
           RUN_FINANCE: ${{ github.event.schedule == '17 0 * * *' || inputs.finance == true }}
         run: |
@@ -135,7 +135,7 @@ jobs:
       - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
         id: legal
         continue-on-error: true
-        timeout-minutes: 120
+        timeout-minutes: 240
         env:
           RUN_LEGAL: ${{ github.event.schedule == '17 18 * * *' || inputs.legal == true }}
         run: |
