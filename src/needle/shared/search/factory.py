@@ -106,7 +106,7 @@ def _build_kagi(api_key: str | None, snippet_chars: int) -> SearchClient:
 
 
 def _build_jina(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return JinaClient(api_key=api_key or "")
+    return JinaClient(api_key=api_key or "", snippet_chars=snippet_chars)
 
 
 def _build_claude(api_key: str | None, snippet_chars: int) -> SearchClient:

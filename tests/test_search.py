@@ -609,35 +609,44 @@ async def test_jina_maps_fields_and_builds_request(monkeypatch):
                 "title": "A",
                 "url": "https://a",
                 "description": "da",
-                "date": "2 hours ago",
-                "content": "",
+                "date": "Aug 19, 2026",
+                "publishedTime": "Wed, 19 Aug 2026 18:00:38 GMT",
+                "content": "page text " * 10,
             },
-            {"title": "", "url": "https://b", "description": ""},
+            {"title": "B", "url": "https://b", "description": "db", "date": "2 hours ago"},
+            {"title": "", "url": "https://c", "description": "", "content": ""},
             {"title": "no url"},
             "junk",
         ],
     }
-    c = JinaClient(api_key="k")
+    c = JinaClient(api_key="k", snippet_chars=20)
     fake, calls = _canned(payload)
     monkeypatch.setattr(c, "_request_json", fake)
 
     results, err = await c.search(OPS_QUERY, num_results=50)
     assert err is None
-    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert [r.url for r in results] == ["https://a", "https://b", "https://c"]
     assert results[0].title == "A"
-    assert results[0].snippet == "da"
-    assert results[0].published_date == "2 hours ago"
-    assert results[1].title is None
-    assert results[1].snippet is None
-    assert results[1].published_date is None
+    assert results[0].snippet == "page text page text "
+    assert results[0].published_date == "Wed, 19 Aug 2026 18:00:38 GMT"
+    assert results[1].snippet == "db"
+    assert results[1].published_date == "2 hours ago"
+    assert results[2].title is None
+    assert results[2].snippet is None
+    assert results[2].published_date is None
     assert calls["method"] == "GET"
     assert calls["url"] == "https://s.jina.ai/"
     assert calls["params"] == {"q": OPS_QUERY, "num": 20}
-    assert calls["headers"] == {
-        "Authorization": "Bearer k",
-        "Accept": "application/json",
-        "X-Respond-With": "no-content",
-    }
+    assert calls["headers"] == {"Authorization": "Bearer k", "Accept": "application/json"}
+
+
+async def test_jina_uncapped_keeps_full_content(monkeypatch):
+    c = JinaClient(api_key="k")
+    fake, _ = _canned({"data": [{"url": "https://a", "content": "x" * 5000}]})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, _ = await c.search("hi")
+    assert len(results[0].snippet) == 5000
 
 
 async def test_jina_tolerates_null_data(monkeypatch):
@@ -1175,12 +1184,14 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["kagi"].api_key == "kk"
     assert isinstance(clients["jina"], JinaClient)
     assert clients["jina"].api_key == "jk"
+    assert clients["jina"].snippet_chars == 0
 
 
 def test_factory_builds_engine_variants(monkeypatch):
     monkeypatch.setenv("EXA_API_KEY", "ek")
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
     monkeypatch.setenv("BRAVE_API_KEY", "bk")
+    monkeypatch.setenv("JINA_API_KEY", "jk")
     clients = build_search_clients(
         [
             "keenable",
@@ -1191,6 +1202,7 @@ def test_factory_builds_engine_variants(monkeypatch):
             "parallel-turbo",
             "brave",
             "brave-llmcontext",
+            "jina",
         ],
         snippet_chars=500,
     )
@@ -1206,6 +1218,7 @@ def test_factory_builds_engine_variants(monkeypatch):
     assert clients["parallel-turbo"].mode == "turbo"
     assert isinstance(clients["brave-llmcontext"], BraveLlmContextClient)
     assert clients["brave-llmcontext"].snippet_chars == 500
+    assert clients["jina"].snippet_chars == 500
 
 
 def test_factory_requires_key(monkeypatch):
