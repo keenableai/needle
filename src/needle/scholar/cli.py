@@ -6,7 +6,7 @@ from needle.scholar.idconv import IdConverter
 from needle.scholar.models import AGE_BUCKETS
 from needle.scholar.projection import LLM_BUCKETS
 from needle.scholar.score import GoldPaper, run_papers
-from needle.scholar.sources import ArxivClient, EuropePmcClient
+from needle.scholar.sources import ArxivClient, EuropePmcClient, SourceError
 from needle.shared.cli import (
     aclose_all,
     build_clients_or_exit,
@@ -80,20 +80,30 @@ class Scholar:
             finally:
                 await aclose_all(arxiv, europepmc, llm)
 
-        rows, stats = asyncio.run(_go())
+        try:
+            rows, stats = asyncio.run(_go())
+        except SourceError as exc:
+            raise SystemExit(f"error: scholar generate: {exc}") from exc
         write_jsonl([serialize_row(r) for r in rows], out)
         rows_str = ", ".join(f"{b}={stats.rows.get(b, 0)}" for b in bucket_names)
         drops_str = ", ".join(f"{k}={v}" for k, v in sorted(stats.drops.items())) or "none"
+        source_str = ", ".join(
+            f"{s}={stats.source_errors.get(s, 0)}/{n}"
+            for s, n in sorted(stats.source_requests.items())
+        )
         print(
             f"scholar: {sum(stats.rows.values())} queries from {stats.papers} paired "
             f"papers ({rows_str}; {stats.candidates} candidates; "
             f"generic_title={stats.generic_title}; drops: {drops_str}; "
-            f"short_cells={stats.short_cells})",
+            f"short_cells={stats.short_cells}; source errors: {source_str})",
             file=sys.stderr,
         )
         if stats.drop_samples:
             samples = "; ".join(f"{k}: {v}" for k, v in sorted(stats.drop_samples.items()))
             print(f"scholar first drop errors: {samples}", file=sys.stderr)
+        if stats.source_error_samples:
+            samples = "; ".join(f"{k}: {v}" for k, v in sorted(stats.source_error_samples.items()))
+            print(f"scholar first source errors: {samples}", file=sys.stderr)
 
     def run(
         self,

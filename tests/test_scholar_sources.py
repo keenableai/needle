@@ -1,7 +1,13 @@
 from datetime import UTC, datetime
 
+import httpx
+import pytest
+
 from needle.scholar.models import age_bucket, coarse_domain
 from needle.scholar.sources import (
+    ArxivClient,
+    EuropePmcClient,
+    SourceError,
     _norm_arxiv_id,
     _norm_doi,
     _parse_dt,
@@ -136,3 +142,40 @@ def test_age_bucket():
     assert age_bucket(datetime(2025, 9, 1, tzinfo=UTC), now=now) == "1y"
     assert age_bucket(datetime(2020, 1, 1, tzinfo=UTC), now=now) == "older"
     assert age_bucket(datetime(2026, 7, 3, tzinfo=UTC), now=now) == "7d"
+
+
+def _sending(response=None, err=None):
+    async def _send(method, url, **kwargs):
+        return response, 0.0, err
+
+    return _send
+
+
+async def test_arxiv_search_raises_on_transport_error():
+    client = ArxivClient(delay_s=0)
+    client._send = _sending(err={"error_type": "transport", "error_message": "ReadTimeout"})
+    with pytest.raises(SourceError, match="arxiv: transport: ReadTimeout"):
+        await client.search_domain("computer science", from_date="2026-06-01", to_date="2026-06-02")
+
+
+async def test_arxiv_search_raises_on_http_error():
+    client = ArxivClient(delay_s=0)
+    client._send = _sending(response=httpx.Response(503, text="busy"))
+    with pytest.raises(SourceError, match="arxiv: http_error: 503"):
+        await client.search_domain("computer science", from_date="2026-06-01", to_date="2026-06-02")
+
+
+async def test_arxiv_search_parses_ok_response():
+    client = ArxivClient(delay_s=0)
+    client._send = _sending(response=httpx.Response(200, text=ATOM))
+    papers = await client.search_domain(
+        "computer science", from_date="2026-06-01", to_date="2026-06-02"
+    )
+    assert [p.arxiv_id for p in papers] == ["2506.12345", "hep-th/9901001"]
+
+
+async def test_europepmc_recent_raises_on_http_error():
+    client = EuropePmcClient()
+    client._send = _sending(response=httpx.Response(500, text="oops"))
+    with pytest.raises(SourceError, match="europepmc: http_error: 500"):
+        await client.recent(from_date="2026-06-01", to_date="2026-06-02", n=5, seed=0)
