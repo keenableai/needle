@@ -1,0 +1,52 @@
+name: Publish bench run
+inputs:
+  args:
+    description: "publish_bench.py report arguments"
+    required: true
+  daily_args:
+    description: "daily_queries.py update arguments"
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        ARGS: ${{ inputs.args }}
+        DAILY_ARGS: ${{ inputs.daily_args }}
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        git -C site-data config user.name "github-actions[bot]"
+        git -C site-data config user.email "github-actions[bot]@users.noreply.github.com"
+        for attempt in 1 2 3 4 5; do
+          git -C site-data fetch origin gh-pages
+          git -C site-data reset --hard FETCH_HEAD
+          git -C site-data clean -fd
+          rm -rf staged
+          uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
+          TS=$(uv run python scripts/publish_bench.py --site site-data --runs-out staged $ARGS)
+          cp dashboard/index.html site-data/index.html
+          touch site-data/.nojekyll
+          git -C site-data add -A
+          git -C site-data commit -m "bench: $TS"
+          if git -C site-data push origin HEAD:gh-pages; then
+            for i in 1 2 3; do
+              if uv run hf upload "$HF_DATASET" staged runs \
+                --repo-type dataset --commit-message "bench: $TS"; then
+                uv run python scripts/daily_queries.py update --ts "$TS" $DAILY_ARGS
+                curl --fail -sS -X POST \
+                  -H "Authorization: Bearer $GITHUB_TOKEN" \
+                  -H "Accept: application/vnd.github+json" \
+                  "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/workflows/deploy-pages.yaml/dispatches" \
+                  -d "{\"ref\":\"$GITHUB_REF_NAME\"}"
+                exit 0
+              fi
+              sleep 10
+            done
+            echo "hf upload failed; runs.json references missing artifacts for $TS"
+            exit 1
+          fi
+          echo "push rejected, retrying"
+          sleep $((attempt * 10))
+        done
+        echo "publish failed after 5 attempts"
+        exit 1

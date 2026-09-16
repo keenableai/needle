@@ -28,11 +28,9 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
+  actions: write
 
 env:
-  PYTHON_VERSION: "3.11"
   OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
   EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
   KEENABLE_API_KEY: ${{ secrets.KEENABLE_API_KEY }}
@@ -56,193 +54,136 @@ env:
   ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,claude-search,chatgpt-search
 
 jobs:
-  bench:
-    name: Run benchmarks
-    runs-on: gke-use5-amd64
-    timeout-minutes: 360
+  plan:
+    name: Plan daily benches
+    runs-on: ubuntu-latest
     outputs:
-      failed: ${{ steps.outcomes.outputs.failed }}
+      finance: ${{ steps.plan.outputs.finance }}
+      agentic_rare: ${{ steps.plan.outputs.agentic_rare }}
+      scholar: ${{ steps.plan.outputs.scholar }}
+      legal: ${{ steps.plan.outputs.legal }}
     steps:
-      - uses: actions/checkout@v4
-
       - uses: actions/checkout@v4
         with:
           ref: gh-pages
-          path: site-data
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: uv sync
-
-      - name: news (hourly)
-        id: news
-        continue-on-error: true
-        timeout-minutes: 50
+          sparse-checkout: |
+            data/gold.jsonl
+            data/scholar.jsonl
+            data/legal.jsonl
+          sparse-checkout-cone-mode: false
+      - id: plan
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+          FINANCE: ${{ inputs.finance }}
+          AGENTIC_RARE: ${{ inputs.agentic_rare }}
+          SCHOLAR: ${{ inputs.scholar }}
+          LEGAL: ${{ inputs.legal }}
         run: |
+          want() {
+            if [ "$SCHEDULE" = "$1" ] || [ "$2" = "true" ]; then echo true
+            elif [ -n "$3" ] && [ ! -s "$3" ]; then echo true
+            else echo false
+            fi
+          }
+          {
+            echo "finance=$(want '17 0 * * *' "$FINANCE" data/gold.jsonl)"
+            echo "agentic_rare=$(want '17 6 * * *' "$AGENTIC_RARE" '')"
+            echo "scholar=$(want '17 12 * * *' "$SCHOLAR" data/scholar.jsonl)"
+            echo "legal=$(want '17 18 * * *' "$LEGAL" data/legal.jsonl)"
+          } >> "$GITHUB_OUTPUT"
+
+  news:
+    runs-on: gke-use5-amd64
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          site-data: true
+      - run: |
           uv run needle news generate --source rss --out fresh.jsonl
           uv run needle news run --queries fresh.jsonl --limit 20 \
             --engines "$ENGINES" --out ndcg.json
+      - uses: ./.github/actions/publish
+        with:
+          args: --ndcg ndcg.json --fresh fresh.jsonl
+          daily_args: --news fresh.jsonl --news_report ndcg.json
 
-      - name: finance (daily schedule, dispatch opt-in, or gold bootstrap)
-        id: finance
-        continue-on-error: true
-        timeout-minutes: 240
-        env:
-          RUN_FINANCE: ${{ github.event.schedule == '17 0 * * *' || inputs.finance == true }}
-        run: |
-          if [ "$RUN_FINANCE" != "true" ] && [ -s site-data/data/gold.jsonl ]; then
-            echo "skipping finance"
-            exit 0
-          fi
+  finance:
+    needs: plan
+    if: needs.plan.outputs.finance == 'true'
+    runs-on: gke-use5-amd64
+    timeout-minutes: 270
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          site-data: true
+      - run: |
           uv run needle finance generate --max-companies 100 --per-company 1 \
             --filingdoc-target 40 --out gold.jsonl
           uv run needle finance run --queries gold.jsonl \
             --limit 120 --engines "$ENGINES" --judge --out recall.json
+      - uses: ./.github/actions/publish
+        with:
+          args: --recall recall.json --gold gold.jsonl
+          daily_args: --finance gold.jsonl --finance_report recall.json
 
-      - name: agentic_rare (daily schedule or dispatch opt-in)
-        id: agentic_rare
-        continue-on-error: true
-        timeout-minutes: 240
-        env:
-          RUN_AGENTIC_RARE: ${{ github.event.schedule == '17 6 * * *' || inputs.agentic_rare == true }}
-        run: |
-          if [ "$RUN_AGENTIC_RARE" != "true" ]; then
-            echo "skipping agentic_rare"
-            exit 0
-          fi
+  agentic_rare:
+    needs: plan
+    if: needs.plan.outputs.agentic_rare == 'true'
+    runs-on: gke-use5-amd64
+    timeout-minutes: 270
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          site-data: true
+      - run: |
           uv run needle agentic_rare run --limit 100 \
             --engines "$ENGINES" --queries-out agentic_rare.jsonl --out agentic_rare.json
+      - uses: ./.github/actions/publish
+        with:
+          args: --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl
+          daily_args: --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl
 
-      - name: scholar (daily schedule, dispatch opt-in, or gold bootstrap)
-        id: scholar
-        continue-on-error: true
-        timeout-minutes: 300
-        env:
-          RUN_SCHOLAR: ${{ github.event.schedule == '17 12 * * *' || inputs.scholar == true }}
-        run: |
-          if [ "$RUN_SCHOLAR" != "true" ] && [ -s site-data/data/scholar.jsonl ]; then
-            echo "skipping scholar"
-            exit 0
-          fi
+  scholar:
+    needs: plan
+    if: needs.plan.outputs.scholar == 'true'
+    runs-on: gke-use5-amd64
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          site-data: true
+      - run: |
           uv run needle scholar generate --age-buckets 7d,30d,1y --per-cell 7 \
             --out scholar.jsonl
           uv run needle scholar run --queries scholar.jsonl \
             --engines "$ENGINES" --num-results 10 --search-concurrency 2 --out scholar.json
+      - uses: ./.github/actions/publish
+        with:
+          args: --scholar scholar.json --scholar-queries scholar.jsonl
+          daily_args: --scholar scholar.jsonl --scholar_report scholar.json
 
-      - name: legal (daily schedule, dispatch opt-in, or gold bootstrap)
-        id: legal
-        continue-on-error: true
-        timeout-minutes: 240
-        env:
-          RUN_LEGAL: ${{ github.event.schedule == '17 18 * * *' || inputs.legal == true }}
-        run: |
-          if [ "$RUN_LEGAL" != "true" ] && [ -s site-data/data/legal.jsonl ]; then
-            echo "skipping legal"
-            exit 0
-          fi
+  legal:
+    needs: plan
+    if: needs.plan.outputs.legal == 'true'
+    runs-on: gke-use5-amd64
+    timeout-minutes: 270
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          site-data: true
+      - run: |
           uv run needle legal generate --per-court 4 --per-title 4 \
             --out legal.jsonl
           uv run needle legal run --queries legal.jsonl \
             --engines "$ENGINES" --out legal.json
+      - uses: ./.github/actions/publish
+        with:
+          args: --legal legal.json --legal-queries legal.jsonl
+          daily_args: --legal legal.jsonl --legal_report legal.json
 
-      - name: Collect bench outcomes
-        id: outcomes
-        run: |
-          failed=""
-          if [ "${{ steps.news.outcome }}" = "failure" ]; then failed="$failed news"; fi
-          if [ "${{ steps.finance.outcome }}" = "failure" ]; then failed="$failed finance"; fi
-          if [ "${{ steps.agentic_rare.outcome }}" = "failure" ]; then failed="$failed agentic_rare"; fi
-          if [ "${{ steps.scholar.outcome }}" = "failure" ]; then failed="$failed scholar"; fi
-          if [ "${{ steps.legal.outcome }}" = "failure" ]; then failed="$failed legal"; fi
-          echo "failed=${failed# }" >> "$GITHUB_OUTPUT"
-
-      - name: Publish
-        run: |
-          base_args="--site site-data --runs-out staged"
-          args="$base_args"
-          if [ -s ndcg.json ]; then
-            args="$args --ndcg ndcg.json --fresh fresh.jsonl"
-          fi
-          if [ -s recall.json ]; then
-            args="$args --recall recall.json --gold gold.jsonl"
-          fi
-          if [ -s agentic_rare.json ]; then
-            args="$args --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl"
-          fi
-          if [ -s scholar.json ]; then
-            args="$args --scholar scholar.json --scholar-queries scholar.jsonl"
-          fi
-          if [ -s legal.json ]; then
-            args="$args --legal legal.json --legal-queries legal.jsonl"
-          fi
-          if [ "$args" = "$base_args" ]; then
-            echo "no reports to publish"
-            exit 0
-          fi
-          git -C site-data config user.name "github-actions[bot]"
-          git -C site-data config user.email "github-actions[bot]@users.noreply.github.com"
-          for attempt in 1 2 3 4 5; do
-            git -C site-data fetch origin gh-pages
-            git -C site-data reset --hard FETCH_HEAD
-            git -C site-data clean -fd
-            rm -rf staged
-            uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
-            TS=$(uv run python scripts/publish_bench.py $args)
-            cp dashboard/index.html site-data/index.html
-            touch site-data/.nojekyll
-            git -C site-data add -A
-            git -C site-data commit -m "bench: $TS"
-            if git -C site-data push origin HEAD:gh-pages; then
-              for i in 1 2 3; do
-                if uv run hf upload "$HF_DATASET" staged runs \
-                  --repo-type dataset --commit-message "bench: $TS"; then
-                  echo "TS=$TS" >> "$GITHUB_ENV"
-                  exit 0
-                fi
-                sleep 10
-              done
-              echo "hf upload failed; runs.json references missing artifacts for $TS"
-              exit 1
-            fi
-            echo "push rejected, retrying"
-          done
-          echo "publish failed after 5 attempts"
-          exit 1
-
-      - name: Update daily queries
-        run: |
-          args=""
-          if [ -s ndcg.json ]; then args="$args --news fresh.jsonl --news_report ndcg.json"; fi
-          if [ -s recall.json ]; then args="$args --finance gold.jsonl --finance_report recall.json"; fi
-          if [ -s scholar.json ]; then args="$args --scholar scholar.jsonl --scholar_report scholar.json"; fi
-          if [ -s legal.json ]; then args="$args --legal legal.jsonl --legal_report legal.json"; fi
-          if [ -s agentic_rare.json ]; then args="$args --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl"; fi
-          if [ -z "$args" ]; then
-            echo "no daily queries to update"
-            exit 0
-          fi
-          uv run python scripts/daily_queries.py update --ts "$TS" $args
-
-  deploy-pages:
-    needs: bench
-    concurrency:
-      group: pages
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    uses: ./.github/workflows/deploy-pages.yaml
-
-  check:
-    name: Fail on bench errors
-    needs: bench
-    if: needs.bench.outputs.failed != ''
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "failed benches: ${{ needs.bench.outputs.failed }}"
-          exit 1

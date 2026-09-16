@@ -17,6 +17,9 @@ from needle.shared.retry import (
 USER_AGENT = "needle/0.1 (contact@keenable.ai)"
 
 
+KEEPALIVE_EXPIRY_S = 300.0
+
+
 def latency_stats(latencies_ms: list[float]) -> dict[str, float | int | list[float]] | None:
     if not latencies_ms:
         return None
@@ -158,7 +161,15 @@ class HttpSearchClient:
 
     def _http(self) -> httpx.AsyncClient:
         if self._client is None:
-            self._client = httpx.AsyncClient(timeout=self.timeout_s, headers=self.default_headers)
+            self._client = httpx.AsyncClient(
+                timeout=self.timeout_s,
+                headers=self.default_headers,
+                limits=httpx.Limits(
+                    max_connections=100,
+                    max_keepalive_connections=20,
+                    keepalive_expiry=KEEPALIVE_EXPIRY_S,
+                ),
+            )
         return self._client
 
     async def aclose(self) -> None:

@@ -1,0 +1,19 @@
+name: Setup
+inputs:
+  site-data:
+    description: "Also check out gh-pages into site-data"
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v5
+      with:
+        python-version: "3.11"
+        enable-cache: true
+    - run: uv sync
+      shell: bash
+    - if: inputs.site-data == 'true'
+      uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+        path: site-data
