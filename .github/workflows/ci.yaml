@@ -9,27 +9,15 @@ on:
 permissions:
   contents: read
 
-env:
-  PYTHON_VERSION: "3.11"
-
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: uv sync
-
+      - uses: ./.github/actions/setup
       - name: Ruff lint
         run: uv run ruff check src tests --output-format=github
-
       - name: Ruff format check
         run: uv run ruff format --check src tests
 
@@ -38,15 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: uv sync
-
+      - uses: ./.github/actions/setup
       - name: Mypy
         run: uv run mypy src
 
@@ -55,15 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: uv sync
-
+      - uses: ./.github/actions/setup
       - name: Pytest
         run: uv run pytest
 
@@ -72,15 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-
-      - name: Install dependencies
-        run: uv sync
-
+      - uses: ./.github/actions/setup
       - name: Pytest
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}

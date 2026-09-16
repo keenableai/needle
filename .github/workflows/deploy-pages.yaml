@@ -9,6 +9,9 @@ permissions:
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+
 jobs:
   build-pages:
     name: Upload dashboard artifact
@@ -42,8 +45,6 @@ jobs:
     name: Deploy dashboard
     needs: build-pages
     runs-on: ubuntu-latest
-    concurrency:
-      group: pages-deploy
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

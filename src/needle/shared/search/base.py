@@ -164,7 +164,11 @@ class HttpSearchClient:
             self._client = httpx.AsyncClient(
                 timeout=self.timeout_s,
                 headers=self.default_headers,
-                limits=httpx.Limits(keepalive_expiry=KEEPALIVE_EXPIRY_S),
+                limits=httpx.Limits(
+                    max_connections=100,
+                    max_keepalive_connections=20,
+                    keepalive_expiry=KEEPALIVE_EXPIRY_S,
+                ),
             )
         return self._client
 

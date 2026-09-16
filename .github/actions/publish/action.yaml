@@ -9,10 +9,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - id: publish
-      shell: bash
+    - shell: bash
       env:
         ARGS: ${{ inputs.args }}
+        DAILY_ARGS: ${{ inputs.daily_args }}
+        GITHUB_TOKEN: ${{ github.token }}
       run: |
         git -C site-data config user.name "github-actions[bot]"
         git -C site-data config user.email "github-actions[bot]@users.noreply.github.com"
@@ -31,7 +32,12 @@ runs:
             for i in 1 2 3; do
               if uv run hf upload "$HF_DATASET" staged runs \
                 --repo-type dataset --commit-message "bench: $TS"; then
-                echo "ts=$TS" >> "$GITHUB_OUTPUT"
+                uv run python scripts/daily_queries.py update --ts "$TS" $DAILY_ARGS
+                curl --fail -sS -X POST \
+                  -H "Authorization: Bearer $GITHUB_TOKEN" \
+                  -H "Accept: application/vnd.github+json" \
+                  "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/workflows/deploy-pages.yaml/dispatches" \
+                  -d "{\"ref\":\"$GITHUB_REF_NAME\"}"
                 exit 0
               fi
               sleep 10
@@ -40,10 +46,7 @@ runs:
             exit 1
           fi
           echo "push rejected, retrying"
+          sleep $((attempt * 10))
         done
         echo "publish failed after 5 attempts"
         exit 1
-    - shell: bash
-      env:
-        DAILY_ARGS: ${{ inputs.daily_args }}
-      run: uv run python scripts/daily_queries.py update --ts "${{ steps.publish.outputs.ts }}" $DAILY_ARGS

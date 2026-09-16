@@ -28,8 +28,7 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
+  actions: write
 
 env:
   OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
@@ -92,19 +91,15 @@ jobs:
             echo "scholar=$(want '17 12 * * *' "$SCHOLAR" data/scholar.jsonl)"
             echo "legal=$(want '17 18 * * *' "$LEGAL" data/legal.jsonl)"
           } >> "$GITHUB_OUTPUT"
-          cat "$GITHUB_OUTPUT"
 
   news:
-    name: news
     runs-on: gke-use5-amd64
     timeout-minutes: 80
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: site-data
       - uses: ./.github/actions/setup
+        with:
+          site-data: true
       - run: |
           uv run needle news generate --source rss --out fresh.jsonl
           uv run needle news run --queries fresh.jsonl --limit 20 \
@@ -115,18 +110,15 @@ jobs:
           daily_args: --news fresh.jsonl --news_report ndcg.json
 
   finance:
-    name: finance
     needs: plan
     if: needs.plan.outputs.finance == 'true'
     runs-on: gke-use5-amd64
     timeout-minutes: 270
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: site-data
       - uses: ./.github/actions/setup
+        with:
+          site-data: true
       - run: |
           uv run needle finance generate --max-companies 100 --per-company 1 \
             --filingdoc-target 40 --out gold.jsonl
@@ -138,18 +130,15 @@ jobs:
           daily_args: --finance gold.jsonl --finance_report recall.json
 
   agentic_rare:
-    name: agentic_rare
     needs: plan
     if: needs.plan.outputs.agentic_rare == 'true'
     runs-on: gke-use5-amd64
     timeout-minutes: 270
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: site-data
       - uses: ./.github/actions/setup
+        with:
+          site-data: true
       - run: |
           uv run needle agentic_rare run --limit 100 \
             --engines "$ENGINES" --queries-out agentic_rare.jsonl --out agentic_rare.json
@@ -159,18 +148,15 @@ jobs:
           daily_args: --agentic_rare agentic_rare.json --agentic_rare_queries agentic_rare.jsonl
 
   scholar:
-    name: scholar
     needs: plan
     if: needs.plan.outputs.scholar == 'true'
     runs-on: gke-use5-amd64
     timeout-minutes: 330
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: site-data
       - uses: ./.github/actions/setup
+        with:
+          site-data: true
       - run: |
           uv run needle scholar generate --age-buckets 7d,30d,1y --per-cell 7 \
             --out scholar.jsonl
@@ -182,18 +168,15 @@ jobs:
           daily_args: --scholar scholar.jsonl --scholar_report scholar.json
 
   legal:
-    name: legal
     needs: plan
     if: needs.plan.outputs.legal == 'true'
     runs-on: gke-use5-amd64
     timeout-minutes: 270
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-          path: site-data
       - uses: ./.github/actions/setup
+        with:
+          site-data: true
       - run: |
           uv run needle legal generate --per-court 4 --per-title 4 \
             --out legal.jsonl
@@ -204,13 +187,3 @@ jobs:
           args: --legal legal.json --legal-queries legal.jsonl
           daily_args: --legal legal.jsonl --legal_report legal.json
 
-  deploy-pages:
-    needs: [news, finance, agentic_rare, scholar, legal]
-    if: ${{ !cancelled() && contains(needs.*.result, 'success') }}
-    concurrency:
-      group: pages
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    uses: ./.github/workflows/deploy-pages.yaml
