@@ -49,11 +49,13 @@ env:
   TINYFISH_API_KEY: ${{ secrets.TINYFISH_API_KEY }}
   KAGI_API_KEY: ${{ secrets.KAGI_API_KEY }}
   JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
+  YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
+  YANDEX_FOLDER_ID: ${{ secrets.YANDEX_FOLDER_ID }}
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/needle-results
-  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,claude-search,chatgpt-search
+  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,yandex,claude-search,chatgpt-search
 
 jobs:
   bench:

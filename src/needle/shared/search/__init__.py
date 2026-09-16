@@ -25,6 +25,7 @@ from needle.shared.search.searchapi import SearchApiClient
 from needle.shared.search.serper import SerperClient
 from needle.shared.search.tavily import TavilyClient
 from needle.shared.search.tinyfish import TinyFishClient
+from needle.shared.search.yandex import YandexClient
 from needle.shared.search.you import YouClient
 
 __all__ = [
@@ -49,6 +50,7 @@ __all__ = [
     "SerperClient",
     "TavilyClient",
     "TinyFishClient",
+    "YandexClient",
     "YouClient",
     "build_search_clients",
     "capped_snippet",
