@@ -365,11 +365,11 @@
   #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
   #app-queries, #app-metrics, #app-engines, #app-data { overflow-x: auto; }
   #card-standings { max-width: var(--measure); }
-  #standings .st-layout { display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  #standings .st-layout { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
   #standings .st-layout svg { flex: 1 1 380px; min-width: 0; width: auto; height: auto; display: block; }
-  #standings .st-table { width: auto; flex: none; font-size: 12.5px; margin-top: 8px; }
-  #standings .st-table th, #standings .st-table td { padding: 4px 8px; white-space: nowrap; }
-  #standings .st-table .st-key { padding: 4px 0 4px 8px; }
+  #standings .st-table { width: auto; flex: none; font-size: 12px; margin-top: 8px; }
+  #standings .st-table th, #standings .st-table td { padding: 2px 8px; white-space: nowrap; line-height: 1.5; }
+  #standings .st-table .st-key { padding: 2px 0 2px 8px; }
   #standings .st-table td.st-key svg { display: block; }
   #standings .st-table tr { cursor: pointer; }
   #standings .st-table tr:hover td { color: var(--text-primary); }
@@ -1744,7 +1744,7 @@ function renderStandings(rows) {
     }),
   ];
 
-  const W = 640;
+  const W = 560;
   const R = 240;
   const cx = W / 2, cy = R + 36;
   const ang = (i) => -Math.PI / 2 + (2 * Math.PI * i) / nAx;
@@ -1753,7 +1753,7 @@ function renderStandings(rows) {
   const ringD = (v) => poly(Array.from({ length: nAx }, (_, i) => pt(i, v)));
 
   const maxS = Math.max(...Array.from({ length: nAx }, (_, i) => Math.sin(ang(i))));
-  const H = cy + maxS * (R + 14) + 24;
+  const H = cy + maxS * (R + 14) + 18;
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, role: "img",
     "aria-label": "Engine standings across all verticals as share of the ultimate ceiling" });
 
@@ -1952,7 +1952,7 @@ const PRICES = new Map([
   ["you", { usd: 5.00, plan: "Web Search API plan" }],
   ["firecrawl", { usd: 1.20, plan: "Scale — $599/mo / 1M credits, 2 credits per search" }],
   ["kagi", { usd: 12.00, plan: "pay-as-you-go" }],
-  ["jina", { usd: 3.40, plan: "≈68k tokens per 5-result search at $0.05 / 1M tokens; varies with page length" }],
+  ["jina", { usd: 3.40, plan: "$0.05 / 1M tokens, ≈68k tokens per search" }],
   ["octen", { usd: 1.00, plan: "pay-as-you-go" }],
   ["tinyfish", { usd: 0.00, plan: "free" }],
   ["ceramic", { usd: 0.05, plan: "pay-as-you-go" }],
