@@ -87,15 +87,11 @@ class Scholar:
         write_jsonl([serialize_row(r) for r in rows], out)
         rows_str = ", ".join(f"{b}={stats.rows.get(b, 0)}" for b in bucket_names)
         drops_str = ", ".join(f"{k}={v}" for k, v in sorted(stats.drops.items())) or "none"
-        source_str = ", ".join(
-            f"{s}={stats.source_errors.get(s, 0)}/{n}"
-            for s, n in sorted(stats.source_requests.items())
-        )
         print(
             f"scholar: {sum(stats.rows.values())} queries from {stats.papers} paired "
             f"papers ({rows_str}; {stats.candidates} candidates; "
             f"generic_title={stats.generic_title}; drops: {drops_str}; "
-            f"short_cells={stats.short_cells}; source errors: {source_str})",
+            f"short_cells={stats.short_cells}; {stats.source_summary()})",
             file=sys.stderr,
         )
         if stats.drop_samples:

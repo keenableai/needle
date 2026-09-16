@@ -54,18 +54,26 @@ class GenStats:
     source_errors: dict[str, int] = field(default_factory=dict)
     source_error_samples: dict[str, str] = field(default_factory=dict)
 
-    def record_source(self, suite: str, error: SourceError | None) -> None:
-        self.source_requests[suite] = self.source_requests.get(suite, 0) + 1
-        if error is not None:
-            self.source_errors[suite] = self.source_errors.get(suite, 0) + 1
-            self.source_error_samples.setdefault(suite, str(error)[:200])
+    def source_summary(self) -> str:
+        counts = ", ".join(
+            f"{s}={self.source_errors.get(s, 0)}/{n}"
+            for s, n in sorted(self.source_requests.items())
+        )
+        return f"source errors: {counts}"
 
-    def failing_sources(self) -> list[str]:
-        return [
-            suite
-            for suite, errors in self.source_errors.items()
-            if errors > MAX_SOURCE_ERROR_RATE * self.source_requests[suite]
-        ]
+    def record_source_error(self, suite: str, error: SourceError) -> None:
+        errors = self.source_errors[suite] = self.source_errors.get(suite, 0) + 1
+        sample = self.source_error_samples.setdefault(suite, str(error)[:200])
+        planned = self.source_requests[suite]
+        if errors > MAX_SOURCE_ERROR_RATE * planned:
+            raise SourceError(
+                f"{suite}: {errors}/{planned} requests failed ({sample}); "
+                f"aborting to avoid a skewed gold set; {self.source_summary()}"
+            ) from error
+
+
+def _suite(domain: str) -> str:
+    return "europepmc" if domain == HEALTH_DOMAIN else "arxiv"
 
 
 def _subwindow_count(bucket: str, n: int) -> int:
@@ -123,7 +131,6 @@ async def _cell_candidates(
 ) -> list[Paper]:
     windows = _subwindows(bucket, now=now, count=_subwindow_count(bucket, n))
     per = max(1, -(-n // len(windows)))
-    suite = "europepmc" if domain == HEALTH_DOMAIN else "arxiv"
     lists: list[list[Paper]] = []
     for wi, (from_date, to_date) in enumerate(windows):
         try:
@@ -137,9 +144,8 @@ async def _cell_candidates(
                 seed=seed + wi,
             )
         except SourceError as exc:
-            stats.record_source(suite, exc)
+            stats.record_source_error(_suite(domain), exc)
             continue
-        stats.record_source(suite, None)
         lists.append(papers)
     return interleave(lists)
 
@@ -190,6 +196,11 @@ async def run_generate(
     cells = [(d, a) for d in domains for a in age_buckets]
 
     stats = GenStats()
+    for domain, bucket in cells:
+        windows = _subwindow_count(bucket, per_cell * OVERSAMPLE)
+        stats.source_requests[_suite(domain)] = (
+            stats.source_requests.get(_suite(domain), 0) + windows
+        )
     candidate_lists = await bounded_gather(
         cells,
         lambda cell: _cell_candidates(
@@ -204,15 +215,6 @@ async def run_generate(
         ),
         concurrency=4,
     )
-    failing = stats.failing_sources()
-    if failing:
-        detail = "; ".join(
-            f"{s}: {stats.source_errors[s]}/{stats.source_requests[s]} requests failed "
-            f"({stats.source_error_samples[s]})"
-            for s in failing
-        )
-        raise SourceError(f"source unavailable, refusing to emit a skewed gold set: {detail}")
-
     seen_keys: set[str] = set()
     candidates: list[Candidate] = []
     for cell, papers in zip(cells, candidate_lists, strict=True):
