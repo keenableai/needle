@@ -91,6 +91,7 @@ def test_publish_writes_ci_files(tmp_path):
     run_dir = tmp_path / "runs" / "2026-08-17T0000Z"
     slim = json.loads((run_dir / "ndcg.json").read_text(encoding="utf-8"))
     assert "per_query" not in slim["engines"]["e"]
+    assert slim["engines"]["e"]["per_query_path"] == "ndcg/e.json"
     per_engine = json.loads((run_dir / "ndcg" / "e.json").read_text(encoding="utf-8"))
     assert per_engine["per_query"] == report["engines"]["e"]["per_query"]
     runs = json.loads((site / "data" / "runs.json").read_text(encoding="utf-8"))

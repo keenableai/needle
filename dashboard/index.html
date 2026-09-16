@@ -2847,8 +2847,8 @@ async function renderRunDetail(runs) {
     for (const e of available) engineSel.appendChild(el("option", { value: e }, displayName(e)));
     engineSel.value = available.includes(current) ? current : available[0] || "";
     let entry = report.engines[engineSel.value];
-    if (entry && !entry.per_query) {
-      entry = await fetchEngineReport(`${base}/${artifact.replace(/\.json$/, "")}/${engineSel.value}.json`);
+    if (entry?.per_query_path) {
+      entry = await fetchEngineReport(`${base}/${entry.per_query_path}`);
       if (seq !== runDetailSeq) return;
     }
     const per = entry?.per_query || [];
@@ -2917,8 +2917,8 @@ async function initRunBrowser() {
   engineSel.addEventListener("change", () => renderRunDetail(runs));
   pageSel.addEventListener("change", () => renderRunDetail(runs));
   const card = document.getElementById("card-runs");
-  const observer = new IntersectionObserver((entries) => {
-    if (!entries.some((e) => e.isIntersecting)) return;
+  const observer = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
     observer.disconnect();
     renderRunDetail(runs);
   }, { rootMargin: "400px" });

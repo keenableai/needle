@@ -112,13 +112,14 @@ def slim_report(report: dict) -> dict:
 
 
 def write_run_report(report: dict, path: Path) -> None:
-    path.write_text(json.dumps(slim_report(report), ensure_ascii=False), encoding="utf-8")
+    slim = slim_report(report)
+    for name, e in slim["engines"].items():
+        e["per_query_path"] = f"{path.stem}/{name}.json"
+    write_json(slim, str(path), indent=None)
     engine_dir = path.with_suffix("")
     engine_dir.mkdir(exist_ok=True)
     for name, e in report["engines"].items():
-        (engine_dir / f"{name}.json").write_text(
-            json.dumps(e, ensure_ascii=False), encoding="utf-8"
-        )
+        write_json(e, str(engine_dir / f"{name}.json"), indent=None)
 
 
 def _publish_rows(path: Path, new_rows: list[dict], ts: str, republish: bool) -> None:

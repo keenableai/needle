@@ -84,7 +84,7 @@ def backfill(site: str, dataset: str | None = None) -> None:
                 artifact = next((a for a in names if a in run["artifacts"]), None)
                 if artifact is None:
                     continue
-                means = report_ndcg(fetch_report(client, runs_base, run["id"], artifact))
+                means = report_ndcg(fetch_report(client, runs_base, run["id"], artifact, limit=0))
                 n_runs += 1
                 for row in rows:
                     if "ndcg" in row or row["engine"] not in means:
