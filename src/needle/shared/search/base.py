@@ -126,6 +126,10 @@ async def search_all(
     )
 
 
+class SourceError(Exception):
+    pass
+
+
 class HttpSearchClient:
     engine: str = ""
     base_url: str = ""
@@ -213,8 +217,19 @@ class HttpSearchClient:
         self.latencies_ms.append(elapsed_ms)
         return payload, None
 
+    async def _request_text(
+        self, url: str, *, params: dict[str, Any] | None = None
+    ) -> tuple[str | None, dict[str, str] | None]:
+        resp, _, err = await self._send("GET", url, params=params, follow_redirects=True)
+        if resp is None:
+            return None, err
+        if resp.status_code != 200:
+            return None, {
+                "error_type": "http_error",
+                "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
+            }
+        return resp.text, None
+
     async def _get_text(self, url: str, *, params: dict[str, Any] | None = None) -> str | None:
-        resp, _, _ = await self._send("GET", url, params=params, follow_redirects=True)
-        if resp is None or resp.status_code != 200:
-            return None
-        return resp.text
+        text, _ = await self._request_text(url, params=params)
+        return text

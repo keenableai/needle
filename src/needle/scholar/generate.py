@@ -1,5 +1,6 @@
 import asyncio
 import random
+from collections import Counter
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
 from typing import Any
@@ -14,10 +15,12 @@ from needle.scholar.projection import (
     query_ok,
     title_is_specific,
 )
-from needle.scholar.sources import ArxivClient, EuropePmcClient, SourceError
+from needle.scholar.sources import ArxivClient, EuropePmcClient
 from needle.shared.concurrency import bounded_gather
 from needle.shared.llm import LLMClient
+from needle.shared.retry import MAX_ERROR_CHARS
 from needle.shared.sampling import interleave
+from needle.shared.search.base import SourceError
 
 ARXIV_DOMAINS = (
     "computer science",
@@ -32,6 +35,7 @@ MAX_SUBWINDOWS = 24
 ARXIV_WINDOW_POOL = 20
 ARXIV_MAX_RESULTS = 1000
 MAX_SOURCE_ERROR_RATE = 0.2
+MIN_SOURCE_REQUESTS = 10
 
 
 @dataclass(frozen=True)
@@ -50,26 +54,22 @@ class GenStats:
     drop_samples: dict[str, str] = field(default_factory=dict)
     generic_title: int = 0
     short_cells: int = 0
-    source_requests: dict[str, int] = field(default_factory=dict)
-    source_errors: dict[str, int] = field(default_factory=dict)
+    source_requests: Counter[str] = field(default_factory=Counter)
+    source_errors: Counter[str] = field(default_factory=Counter)
     source_error_samples: dict[str, str] = field(default_factory=dict)
 
     def source_summary(self) -> str:
         counts = ", ".join(
-            f"{s}={self.source_errors.get(s, 0)}/{n}"
-            for s, n in sorted(self.source_requests.items())
+            f"{s}={self.source_errors[s]}/{n}" for s, n in sorted(self.source_requests.items())
         )
         return f"source errors: {counts}"
 
-    def record_source_error(self, suite: str, error: SourceError) -> None:
-        errors = self.source_errors[suite] = self.source_errors.get(suite, 0) + 1
-        sample = self.source_error_samples.setdefault(suite, str(error)[:200])
-        planned = self.source_requests[suite]
-        if errors > MAX_SOURCE_ERROR_RATE * planned:
+    def check_source(self, suite: str) -> None:
+        n = self.source_requests[suite]
+        if n >= MIN_SOURCE_REQUESTS and self.source_errors[suite] > MAX_SOURCE_ERROR_RATE * n:
             raise SourceError(
-                f"{suite}: {errors}/{planned} requests failed ({sample}); "
-                f"aborting to avoid a skewed gold set; {self.source_summary()}"
-            ) from error
+                f"{suite} is failing ({self.source_error_samples[suite]}); {self.source_summary()}"
+            )
 
 
 def _suite(domain: str) -> str:
@@ -131,8 +131,11 @@ async def _cell_candidates(
 ) -> list[Paper]:
     windows = _subwindows(bucket, now=now, count=_subwindow_count(bucket, n))
     per = max(1, -(-n // len(windows)))
+    suite = _suite(domain)
     lists: list[list[Paper]] = []
     for wi, (from_date, to_date) in enumerate(windows):
+        stats.check_source(suite)
+        stats.source_requests[suite] += 1
         try:
             papers = await _window_papers(
                 domain,
@@ -144,7 +147,9 @@ async def _cell_candidates(
                 seed=seed + wi,
             )
         except SourceError as exc:
-            stats.record_source_error(_suite(domain), exc)
+            stats.source_errors[suite] += 1
+            stats.source_error_samples.setdefault(suite, str(exc)[:MAX_ERROR_CHARS])
+            stats.check_source(suite)
             continue
         lists.append(papers)
     return interleave(lists)
@@ -196,11 +201,6 @@ async def run_generate(
     cells = [(d, a) for d in domains for a in age_buckets]
 
     stats = GenStats()
-    for domain, bucket in cells:
-        windows = _subwindow_count(bucket, per_cell * OVERSAMPLE)
-        stats.source_requests[_suite(domain)] = (
-            stats.source_requests.get(_suite(domain), 0) + windows
-        )
     candidate_lists = await bounded_gather(
         cells,
         lambda cell: _cell_candidates(

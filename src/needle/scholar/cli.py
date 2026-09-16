@@ -6,7 +6,7 @@ from needle.scholar.idconv import IdConverter
 from needle.scholar.models import AGE_BUCKETS
 from needle.scholar.projection import LLM_BUCKETS
 from needle.scholar.score import GoldPaper, run_papers
-from needle.scholar.sources import ArxivClient, EuropePmcClient, SourceError
+from needle.scholar.sources import ArxivClient, EuropePmcClient
 from needle.shared.cli import (
     aclose_all,
     build_clients_or_exit,
@@ -22,6 +22,7 @@ from needle.shared.cli import (
 from needle.shared.io import serialize_row, write_json, write_jsonl
 from needle.shared.llm import resolve_llm_model
 from needle.shared.search import DEFAULT_SNIPPET_CHARS
+from needle.shared.search.base import SourceError
 
 KNOWN_SUITES = ("arxiv", "europepmc")
 

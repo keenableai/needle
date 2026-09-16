@@ -11,8 +11,7 @@ from defusedxml.common import DefusedXmlException
 
 from needle.scholar.bodies import html_body_text, jats_body_text
 from needle.scholar.models import Paper, coarse_domain
-from needle.shared.retry import MAX_ERROR_CHARS
-from needle.shared.search.base import USER_AGENT, HttpSearchClient
+from needle.shared.search.base import USER_AGENT, HttpSearchClient, SourceError
 
 ARXIV_API = "https://export.arxiv.org/api/query"
 ARXIV_HTML = "https://arxiv.org/html/{arxiv_id}"
@@ -117,12 +116,8 @@ def parse_epmc_result(rec: dict[str, Any]) -> Paper | None:
     )
 
 
-class SourceError(Exception):
-    pass
-
-
 class ScholarClient(HttpSearchClient):
-    suite = ""
+    suite: str
     default_headers = {"User-Agent": USER_AGENT}
     retry_attempts = 4
     retry_base_s = 2.0
@@ -135,18 +130,11 @@ class ScholarClient(HttpSearchClient):
         return SourceError(f"{self.suite}: {err['error_type']}: {err['error_message']}")
 
     async def _fetch_text(self, url: str, *, params: dict[str, Any] | None = None) -> str:
-        resp, _, err = await self._send("GET", url, params=params, follow_redirects=True)
-        if resp is None:
-            assert err is not None
+        text, err = await self._request_text(url, params=params)
+        if err is not None:
             raise self._source_error(err)
-        if resp.status_code != 200:
-            raise self._source_error(
-                {
-                    "error_type": "http_error",
-                    "error_message": f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}",
-                }
-            )
-        return resp.text
+        assert text is not None
+        return text
 
 
 class ArxivClient(ScholarClient):

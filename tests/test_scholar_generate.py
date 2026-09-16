@@ -10,7 +10,7 @@ from needle.scholar.generate import (
     run_generate,
 )
 from needle.scholar.models import Paper
-from needle.scholar.sources import SourceError
+from needle.shared.search.base import SourceError
 
 
 def test_subwindow_count_capped_by_bucket_span_days():
@@ -283,7 +283,9 @@ async def test_sporadic_source_errors_are_counted_not_fatal():
 async def test_failing_source_aborts_generate():
     papers = [_paper(i, "computer science", NOW - timedelta(days=1)) for i in range(6)]
     arxiv = FakeArxiv({"computer science": papers}, {}, fail_every=2)
-    with pytest.raises(SourceError, match=r"arxiv: 5/24 requests failed .*503.*europepmc=0/6"):
+    with pytest.raises(
+        SourceError, match=r"arxiv is failing \(.*503.*source errors: arxiv=\d+/\d+"
+    ):
         await run_generate(
             arxiv=arxiv,
             europepmc=FakeEuropePmc(),
