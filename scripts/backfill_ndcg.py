@@ -4,7 +4,7 @@ from pathlib import Path
 import fire
 import httpx
 
-from needle.shared.hf import resolve_base
+from needle.shared.hf import fetch_report, resolve_base
 from needle.shared.io import load_jsonl, write_jsonl
 from needle.shared.metrics import dcg_at_k, normalize_url
 
@@ -84,9 +84,7 @@ def backfill(site: str, dataset: str | None = None) -> None:
                 artifact = next((a for a in names if a in run["artifacts"]), None)
                 if artifact is None:
                     continue
-                resp = client.get(f"{runs_base}/{run['id']}/{artifact}")
-                resp.raise_for_status()
-                means = report_ndcg(resp.json())
+                means = report_ndcg(fetch_report(client, runs_base, run["id"], artifact, limit=0))
                 n_runs += 1
                 for row in rows:
                     if "ndcg" in row or row["engine"] not in means:

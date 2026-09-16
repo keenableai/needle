@@ -5,7 +5,7 @@ from pathlib import Path
 import fire
 import httpx
 
-from needle.shared.hf import resolve_base
+from needle.shared.hf import fetch_report, resolve_base
 from needle.shared.io import load_jsonl, write_jsonl
 from needle.shared.overlap import TS_FMT, overlap_rows, uniqueness_rows
 
@@ -58,9 +58,7 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
                 artifact = next((a for a in group if a in run["artifacts"]), None)
                 if artifact is None:
                     continue
-                resp = client.get(f"{runs_base}/{run['id']}/{artifact}")
-                resp.raise_for_status()
-                report = resp.json()
+                report = fetch_report(client, runs_base, run["id"], artifact)
                 if want_overlap:
                     new_overlap.extend(overlap_rows(report, ts=run["ts"]))
                 if want_uniqueness:

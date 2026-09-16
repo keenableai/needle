@@ -43,8 +43,8 @@ def load_jsonl(path: str | Path) -> list[dict]:
     return read_jsonl(p.read_text(encoding="utf-8")) if p.exists() else []
 
 
-def write_json(obj: Any, out: str) -> None:
-    text = json.dumps(obj, ensure_ascii=False, indent=2)
+def write_json(obj: Any, out: str, indent: int | None = 2) -> None:
+    text = json.dumps(obj, ensure_ascii=False, indent=indent)
     if out == "-":
         print(text)
     else:

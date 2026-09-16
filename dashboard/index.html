@@ -2801,17 +2801,20 @@ const BENCHES = Object.keys(RUN_ARTIFACT);
 
 let runDetailSeq = 0;
 const RUN_PAGE_SIZE = 20;
-let reportCache = { url: null, data: null };
-
-function fetchReport(url) {
-  if (reportCache.url !== url) {
-    reportCache = { url, data: fetchJson(url) };
-    reportCache.data.catch(() => {
-      if (reportCache.url === url) reportCache = { url: null, data: null };
-    });
-  }
-  return reportCache.data;
+function memoFetch() {
+  let cache = { url: null, data: null };
+  return (url) => {
+    if (cache.url !== url) {
+      cache = { url, data: fetchJson(url) };
+      cache.data.catch(() => {
+        if (cache.url === url) cache = { url: null, data: null };
+      });
+    }
+    return cache.data;
+  };
 }
+const fetchReport = memoFetch();
+const fetchEngineReport = memoFetch();
 
 async function renderRunDetail(runs) {
   const seq = ++runDetailSeq;
@@ -2835,14 +2838,20 @@ async function renderRunDetail(runs) {
   }
   holder.appendChild(el("div", { class: "empty" }, "Loading…"));
   try {
-    const report = await fetchReport(`${RUNS_BASE}/${run.id}/${artifact}`);
+    const base = `${RUNS_BASE}/${run.id}`;
+    const report = await fetchReport(`${base}/${artifact}`);
     if (seq !== runDetailSeq) return;
     const available = Object.keys(report.engines || {}).filter((e) => !HIDDEN_ENGINES.has(e));
     const current = engineSel.value;
     engineSel.replaceChildren();
     for (const e of available) engineSel.appendChild(el("option", { value: e }, displayName(e)));
     engineSel.value = available.includes(current) ? current : available[0] || "";
-    const per = report.engines[engineSel.value]?.per_query || [];
+    let entry = report.engines[engineSel.value];
+    if (entry?.per_query_path) {
+      entry = await fetchEngineReport(`${base}/${entry.per_query_path}`);
+      if (seq !== runDetailSeq) return;
+    }
+    const per = entry?.per_query || [];
     const pages = Math.ceil(per.length / RUN_PAGE_SIZE);
     const key = `${benchSel.value}|${run.id}|${engineSel.value}`;
     const page = key === pageSel.dataset.key
@@ -2907,7 +2916,13 @@ async function initRunBrowser() {
   runSel.addEventListener("change", () => renderRunDetail(runs));
   engineSel.addEventListener("change", () => renderRunDetail(runs));
   pageSel.addEventListener("change", () => renderRunDetail(runs));
-  renderRunDetail(runs);
+  const card = document.getElementById("card-runs");
+  const observer = new IntersectionObserver(([e]) => {
+    if (!e.isIntersecting) return;
+    observer.disconnect();
+    renderRunDetail(runs);
+  }, { rootMargin: "400px" });
+  observer.observe(card);
 }
 
 function refreshHistoryTable() {

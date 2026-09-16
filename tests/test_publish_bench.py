@@ -88,6 +88,14 @@ def test_publish_writes_ci_files(tmp_path):
     ci = json.loads((site / "data" / "ci.json").read_text(encoding="utf-8"))
     assert ci["window_end"] == "2026-08-17T00:00Z"
     assert ci["benches"]["news"]["e"]["point"] == pytest.approx(0.5)
+    run_dir = tmp_path / "runs" / "2026-08-17T0000Z"
+    slim = json.loads((run_dir / "ndcg.json").read_text(encoding="utf-8"))
+    assert "per_query" not in slim["engines"]["e"]
+    assert slim["engines"]["e"]["per_query_path"] == "ndcg/e.json"
+    per_engine = json.loads((run_dir / "ndcg" / "e.json").read_text(encoding="utf-8"))
+    assert per_engine["per_query"] == report["engines"]["e"]["per_query"]
+    runs = json.loads((site / "data" / "runs.json").read_text(encoding="utf-8"))
+    assert runs[0]["artifacts"] == ["ndcg.json"]
 
 
 def test_publish_auto_ts_skips_taken_minute(tmp_path, monkeypatch, capsys):
