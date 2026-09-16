@@ -111,6 +111,16 @@ def slim_report(report: dict) -> dict:
     return slim
 
 
+def write_run_report(report: dict, path: Path) -> None:
+    path.write_text(json.dumps(slim_report(report), ensure_ascii=False), encoding="utf-8")
+    engine_dir = path.with_suffix("")
+    engine_dir.mkdir(exist_ok=True)
+    for name, e in report["engines"].items():
+        (engine_dir / f"{name}.json").write_text(
+            json.dumps(e, ensure_ascii=False), encoding="utf-8"
+        )
+
+
 def _publish_rows(path: Path, new_rows: list[dict], ts: str, republish: bool) -> None:
     if republish and path.exists():
         kept = [row for row in load_jsonl(path) if row["ts"] != ts]
@@ -162,14 +172,13 @@ def publish(
     ):
         if not path:
             continue
-        raw = Path(path).read_text(encoding="utf-8")
-        report = json.loads(raw)
+        report = json.loads(Path(path).read_text(encoding="utf-8"))
         rows.extend(to_rows(report, ts))
         overlap.extend(overlap_rows(report, ts=ts))
         uniqueness.extend(uniqueness_rows(report, ts=ts))
         score_rows.append(score_row(report, bench, ts))
         write_json(slim_report(report), str(data / f"latest_{bench}.json"))
-        (run_dir / archive_name).write_text(raw, encoding="utf-8")
+        write_run_report(report, run_dir / archive_name)
     for path, archive_name in (
         (fresh, "fresh.jsonl"),
         (gold, "gold.jsonl"),
@@ -199,7 +208,13 @@ def publish(
         write_json(ci_payload(scores, max(r["ts"] for r in scores)), str(data / "ci.json"))
 
     runs = [r for r in runs if r.get("id") != run_id]
-    runs.append({"id": run_id, "ts": ts, "artifacts": sorted(p.name for p in run_dir.iterdir())})
+    runs.append(
+        {
+            "id": run_id,
+            "ts": ts,
+            "artifacts": sorted(p.name for p in run_dir.iterdir() if p.is_file()),
+        }
+    )
     write_json(runs, str(index_path))
     print(ts)
     print(f"appended {len(rows)} rows at {ts}; staged {run_id}", file=sys.stderr)

@@ -7,7 +7,7 @@ import httpx
 from huggingface_hub import HfApi
 from huggingface_hub.errors import EntryNotFoundError, HfHubHTTPError
 
-from needle.shared.hf import dataset_name, resolve_base
+from needle.shared.hf import dataset_name, fetch_report, resolve_base
 from needle.shared.io import load_jsonl, read_jsonl, write_jsonl
 
 OUT = "daily_queries.jsonl"
@@ -142,13 +142,15 @@ def backfill(out: str = OUT, dataset: str | None = None, hours: int = WINDOW_HOU
             for bench, queries_name, report_names in BENCHES:
                 report_name = next((n for n in report_names if n in names), None)
                 if queries_name in names and report_name is not None:
-                    report = fetch(f"runs/{run_id}/{report_name}").json()
+                    report = fetch_report(client, f"{base}/runs", run_id, report_name)
                     queries_text = fetch(f"runs/{run_id}/{queries_name}").text
                     rows.extend(_bench_rows(run_id, bench, queries_text, report))
             if "agentic_rare.jsonl" not in names:
                 rare = next((n for n in RARE_REPORTS if n in names), None)
                 if rare:
-                    rows.extend(_rare_rows(run_id, fetch(f"runs/{run_id}/{rare}").json()))
+                    rows.extend(
+                        _rare_rows(run_id, fetch_report(client, f"{base}/runs", run_id, rare))
+                    )
     _finish(rows, out)
 
 

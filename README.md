@@ -253,6 +253,8 @@ unique-URL counts (`uniqueness.jsonl`) to `gh-pages`; the dashboard at
 <https://keenableai.github.io/needle/> renders them. Each run also
 archives full artifacts to the HF dataset
 [`keenable-ai/needle-results`](https://huggingface.co/datasets/keenable-ai/needle-results)
+(a slim `<bench>.json` per run plus `<bench>/<engine>.json` with each
+engine's per-query results)
 and refreshes `daily_queries.jsonl` at the dataset root: a rolling window of
 the queries evaluated by runs from the last 24 hours
 (`scripts/daily_queries.py`; `backfill` rebuilds it from the archive). The

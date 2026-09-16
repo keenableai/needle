@@ -16,9 +16,11 @@ the filtered artifact and evaluates it like news.
   page, vanilla JS, no build step; the bench workflow deploys it to gh-pages.
 - Dashboard data: `scripts/publish_bench.py` publishes `data/history.jsonl`,
   `overlap.jsonl`, `uniqueness.jsonl`, `latest_*.json`, `runs.json`, and
-  `families.json`; the full per-run artifacts (`ndcg.json`, `recall.json`)
-  live on the HF dataset `keenable-ai/needle-results`, and the dashboard
-  fetches them directly from there.
+  `families.json`; per-run artifacts live on the HF dataset
+  `keenable-ai/needle-results` as a slim `<bench>.json` (no `per_query`)
+  plus `<bench>/<engine>.json` with that engine's `per_query`; the dashboard
+  fetches them directly from there, and `needle.shared.hf.fetch_report`
+  merges them back for scripts. Runs before 2026-09-16 hold one full file.
 - `src/needle/shared/rankeval.py` shapes the per-result report fields
   (`title`, `url`, `snippet`, `rating`, `penalized`, `label`, `reasoning`,
   `gates`) — keep the dashboard renderers in sync with it.
