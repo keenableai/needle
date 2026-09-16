@@ -1,0 +1,49 @@
+name: Publish bench run
+inputs:
+  args:
+    description: "publish_bench.py report arguments"
+    required: true
+  daily_args:
+    description: "daily_queries.py update arguments"
+    required: true
+runs:
+  using: composite
+  steps:
+    - id: publish
+      shell: bash
+      env:
+        ARGS: ${{ inputs.args }}
+      run: |
+        git -C site-data config user.name "github-actions[bot]"
+        git -C site-data config user.email "github-actions[bot]@users.noreply.github.com"
+        for attempt in 1 2 3 4 5; do
+          git -C site-data fetch origin gh-pages
+          git -C site-data reset --hard FETCH_HEAD
+          git -C site-data clean -fd
+          rm -rf staged
+          uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
+          TS=$(uv run python scripts/publish_bench.py --site site-data --runs-out staged $ARGS)
+          cp dashboard/index.html site-data/index.html
+          touch site-data/.nojekyll
+          git -C site-data add -A
+          git -C site-data commit -m "bench: $TS"
+          if git -C site-data push origin HEAD:gh-pages; then
+            for i in 1 2 3; do
+              if uv run hf upload "$HF_DATASET" staged runs \
+                --repo-type dataset --commit-message "bench: $TS"; then
+                echo "ts=$TS" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              sleep 10
+            done
+            echo "hf upload failed; runs.json references missing artifacts for $TS"
+            exit 1
+          fi
+          echo "push rejected, retrying"
+        done
+        echo "publish failed after 5 attempts"
+        exit 1
+    - shell: bash
+      env:
+        DAILY_ARGS: ${{ inputs.daily_args }}
+      run: uv run python scripts/daily_queries.py update --ts "${{ steps.publish.outputs.ts }}" $DAILY_ARGS

@@ -1,0 +1,9 @@
+name: Setup
+runs:
+  using: composite
+  steps:
+    - uses: astral-sh/setup-uv@v5
+      with:
+        python-version: "3.11"
+    - run: uv sync
+      shell: bash

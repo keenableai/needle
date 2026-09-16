@@ -247,7 +247,9 @@ engines: news hourly (`--limit 20`); daily with fresh gold — finance 00:17
 UTC (`--limit 120 --judge`), agentic_rare 06:17 (`--limit 100`), scholar
 12:17 (`--per-cell 7`), legal 18:17. Gold lives on `gh-pages` between runs;
 a daily bench also runs off-schedule when a manual dispatch selects it or
-when its gold file is missing. Each run appends summary rows
+when its gold file is missing. Each bench is its own job and publishes its
+own run, so a slow daily bench never delays the hourly news result. Each
+run appends summary rows
 (`history.jsonl`), engine-pair URL overlap (`overlap.jsonl`), and per-engine
 unique-URL counts (`uniqueness.jsonl`) to `gh-pages`; the dashboard at
 <https://keenableai.github.io/needle/> renders them. Each run also
