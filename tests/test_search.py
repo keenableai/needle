@@ -1,4 +1,5 @@
 import asyncio
+import base64
 from datetime import date
 
 import httpx
@@ -23,6 +24,7 @@ from needle.shared.search import (
     SerperClient,
     TavilyClient,
     TinyFishClient,
+    YandexClient,
     YouClient,
     build_search_clients,
     latency_stats,
@@ -659,6 +661,115 @@ async def test_jina_tolerates_null_data(monkeypatch):
     assert results == []
 
 
+YANDEX_XML = """<?xml version="1.0" encoding="utf-8"?>
+<yandexsearch version="1.0">
+<request><query>acme filing</query></request>
+<response date="20260916T100000">
+<results><grouping attr="" mode="flat" groups-on-page="20" docs-in-group="1">
+<group>
+<doc id="1"><url>https://a</url><title>Acme <hlword>filing</hlword> 2026</title>
+<modtime>20260615T120000</modtime><headline>hl</headline>
+<passages><passage>first <hlword>filing</hlword> passage</passage><passage>second passage</passage></passages></doc>
+</group>
+<group><doc id="2"><url>https://b</url><title></title><headline>only headline</headline></doc></group>
+<group><doc id="3"><title>no url</title></doc></group>
+</grouping></results>
+</response>
+</yandexsearch>"""
+
+
+def _yandex_payload(xml):
+    return {"rawData": base64.b64encode(xml.encode()).decode()}
+
+
+async def test_yandex_maps_fields_and_builds_body(monkeypatch):
+    c = YandexClient(api_key="k", folder_id="f")
+    fake, calls = _canned(_yandex_payload(YANDEX_XML))
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(OPS_QUERY, num_results=150)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].title == "Acme filing 2026"
+    assert results[0].snippet == "first filing passage second passage"
+    assert results[0].published_date == "20260615T120000"
+    assert results[1].title is None
+    assert results[1].snippet == "only headline"
+    assert results[1].published_date is None
+    assert calls["method"] == "POST"
+    assert calls["url"] == "https://searchapi.api.cloud.yandex.net/v2/web/search"
+    assert calls["headers"] == {"Authorization": "Api-Key k"}
+    body = calls["json"]
+    assert body["folderId"] == "f"
+    assert body["query"]["queryText"] == "acme filing site:sec.gov date:20260601..20260630"
+    assert body["query"]["searchType"] == "SEARCH_TYPE_COM"
+    assert body["groupSpec"] == {
+        "groupMode": "GROUP_MODE_FLAT",
+        "groupsOnPage": 100,
+        "docsInGroup": 1,
+    }
+    assert body["responseFormat"] == "FORMAT_XML"
+
+
+def test_yandex_query_text_operators_and_clip():
+    from needle.shared.search.yandex import query_text
+
+    assert query_text("hi after:2026-06-01") == "hi date:>=20260601"
+    assert query_text("hi before:2026-06-30") == "hi date:<=20260630"
+    assert query_text("hi site:a.com site:b.org") == "hi (site:a.com | site:b.org)"
+    long = " ".join(["word"] * 100) + " site:sec.gov"
+    out = query_text(long)
+    assert len(out) <= 400
+    assert out.endswith(" site:sec.gov")
+
+
+async def test_yandex_no_results_error_is_empty(monkeypatch):
+    xml = """<yandexsearch><response><error code="15">Nothing found</error></response></yandexsearch>"""
+    c = YandexClient(api_key="k", folder_id="f")
+    fake, _ = _canned(_yandex_payload(xml))
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi")
+    assert err is None
+    assert results == []
+
+
+async def test_yandex_other_error_is_reported(monkeypatch):
+    xml = """<yandexsearch><response><error code="42">Bad key</error></response></yandexsearch>"""
+    c = YandexClient(api_key="k", folder_id="f")
+    fake, _ = _canned(_yandex_payload(xml))
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi")
+    assert results is None
+    assert err == {"error_type": "api_error", "error_message": "42: Bad key"}
+
+
+async def test_yandex_bad_raw_data(monkeypatch):
+    c = YandexClient(api_key="k", folder_id="f")
+    fake, _ = _canned({"rawData": "not base64 xml!!"})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi")
+    assert results is None
+    assert err["error_type"] == "bad_xml"
+
+
+async def test_yandex_missing_raw_data(monkeypatch):
+    c = YandexClient(api_key="k", folder_id="f")
+    fake, _ = _canned({})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    assert await c.search("hi") == ([], None)
+
+
+def test_yandex_requires_folder_id(monkeypatch):
+    monkeypatch.setenv("YANDEX_API_KEY", "k")
+    monkeypatch.delenv("YANDEX_FOLDER_ID", raising=False)
+    with pytest.raises(ValueError, match="YANDEX_FOLDER_ID"):
+        build_search_clients(["yandex"])
+
+
 async def test_octen_maps_fields_and_builds_body(monkeypatch):
     payload = {
         "data": {
@@ -1289,6 +1400,7 @@ async def test_search_all_concurrent_overlaps_and_keeps_order():
 def test_engines_default_to_serial_requests(monkeypatch):
     for spec in ENGINES.values():
         monkeypatch.setenv(spec.key_env, "k")
+    monkeypatch.setenv("YANDEX_FOLDER_ID", "f")
     for name, client in build_search_clients(list(ENGINES)).items():
         assert client._sem._value == 1, name
 
@@ -1296,6 +1408,7 @@ def test_engines_default_to_serial_requests(monkeypatch):
 def test_build_search_clients_sets_max_concurrency(monkeypatch):
     for spec in ENGINES.values():
         monkeypatch.setenv(spec.key_env, "k")
+    monkeypatch.setenv("YANDEX_FOLDER_ID", "f")
     for name, client in build_search_clients(list(ENGINES), max_concurrency=2).items():
         assert client._sem._value == 2, name
 

@@ -19,6 +19,7 @@ from needle.shared.search.searchapi import SearchApiClient
 from needle.shared.search.serper import SerperClient
 from needle.shared.search.tavily import TavilyClient
 from needle.shared.search.tinyfish import TinyFishClient
+from needle.shared.search.yandex import YandexClient
 from needle.shared.search.you import YouClient
 
 
@@ -109,6 +110,13 @@ def _build_jina(api_key: str | None, snippet_chars: int) -> SearchClient:
     return JinaClient(api_key=api_key or "", snippet_chars=snippet_chars)
 
 
+def _build_yandex(api_key: str | None, snippet_chars: int) -> SearchClient:
+    folder_id = os.environ.get("YANDEX_FOLDER_ID")
+    if not folder_id:
+        raise ValueError("YANDEX_FOLDER_ID is not set (needed for the yandex engine)")
+    return YandexClient(api_key=api_key or "", folder_id=folder_id)
+
+
 def _build_claude(api_key: str | None, snippet_chars: int) -> SearchClient:
     return ClaudeSearchClient(api_key=api_key or "")
 
@@ -153,6 +161,7 @@ ENGINES: dict[str, EngineSpec] = {
     "firecrawl": EngineSpec(key_env="FIRECRAWL_API_KEY", key_required=True, build=_build_firecrawl),
     "kagi": EngineSpec(key_env="KAGI_API_KEY", key_required=True, build=_build_kagi),
     "jina": EngineSpec(key_env="JINA_API_KEY", key_required=True, build=_build_jina),
+    "yandex": EngineSpec(key_env="YANDEX_API_KEY", key_required=True, build=_build_yandex),
     "claude-search": EngineSpec(
         key_env="ANTHROPIC_API_KEY", key_required=True, build=_build_claude
     ),
