@@ -34,8 +34,7 @@ OVERSAMPLE = 3
 MAX_SUBWINDOWS = 24
 ARXIV_WINDOW_POOL = 20
 ARXIV_MAX_RESULTS = 1000
-MAX_SOURCE_ERROR_RATE = 0.2
-MIN_SOURCE_REQUESTS = 10
+SOURCE_ABORT_RATE = {"arxiv": 0.2}
 
 
 @dataclass(frozen=True)
@@ -65,8 +64,8 @@ class GenStats:
         return f"source errors: {counts}"
 
     def check_source(self, suite: str) -> None:
-        n = self.source_requests[suite]
-        if n >= MIN_SOURCE_REQUESTS and self.source_errors[suite] > MAX_SOURCE_ERROR_RATE * n:
+        rate = SOURCE_ABORT_RATE.get(suite)
+        if rate is not None and self.source_errors[suite] > rate * self.source_requests[suite]:
             raise SourceError(
                 f"{suite} is failing ({self.source_error_samples[suite]}); {self.source_summary()}"
             )
@@ -120,22 +119,19 @@ async def _window_papers(
 
 async def _cell_candidates(
     domain: str,
-    bucket: str,
+    windows: list[tuple[str, str]],
     *,
     arxiv: ArxivClient | None,
     europepmc: EuropePmcClient | None,
     n: int,
     seed: int,
-    now: datetime,
     stats: GenStats,
 ) -> list[Paper]:
-    windows = _subwindows(bucket, now=now, count=_subwindow_count(bucket, n))
     per = max(1, -(-n // len(windows)))
     suite = _suite(domain)
     lists: list[list[Paper]] = []
     for wi, (from_date, to_date) in enumerate(windows):
         stats.check_source(suite)
-        stats.source_requests[suite] += 1
         try:
             papers = await _window_papers(
                 domain,
@@ -148,7 +144,8 @@ async def _cell_candidates(
             )
         except SourceError as exc:
             stats.source_errors[suite] += 1
-            stats.source_error_samples.setdefault(suite, str(exc)[:MAX_ERROR_CHARS])
+            sample = " ".join(str(exc).split())[:MAX_ERROR_CHARS]
+            stats.source_error_samples.setdefault(suite, sample)
             stats.check_source(suite)
             continue
         lists.append(papers)
@@ -199,18 +196,21 @@ async def run_generate(
     if europepmc is not None:
         domains.append(HEALTH_DOMAIN)
     cells = [(d, a) for d in domains for a in age_buckets]
+    n = per_cell * OVERSAMPLE
+    cell_windows = [_subwindows(a, now=now, count=_subwindow_count(a, n)) for _, a in cells]
 
     stats = GenStats()
+    for (domain, _), windows in zip(cells, cell_windows, strict=True):
+        stats.source_requests[_suite(domain)] += len(windows)
     candidate_lists = await bounded_gather(
-        cells,
-        lambda cell: _cell_candidates(
-            cell[0],
-            cell[1],
+        list(zip(cells, cell_windows, strict=True)),
+        lambda item: _cell_candidates(
+            item[0][0],
+            item[1],
             arxiv=arxiv,
             europepmc=europepmc,
-            n=per_cell * OVERSAMPLE,
+            n=n,
             seed=seed,
-            now=now,
             stats=stats,
         ),
         concurrency=4,
