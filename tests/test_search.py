@@ -1,5 +1,5 @@
 import asyncio
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 
 import httpx
 import pytest
@@ -10,6 +10,7 @@ from needle.shared.search import (
     CeramicClient,
     ChatGptSearchClient,
     ClaudeSearchClient,
+    ContextDevClient,
     ExaClient,
     FirecrawlClient,
     JinaClient,
@@ -30,6 +31,7 @@ from needle.shared.search import (
     search_all,
 )
 from needle.shared.search import base as search_base
+from needle.shared.search.context import _freshness
 from needle.shared.search.factory import ENGINES
 from needle.shared.search.queryops import parse_ops
 
@@ -659,6 +661,100 @@ async def test_jina_tolerates_null_data(monkeypatch):
     assert results == []
 
 
+async def test_context_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "results": [
+            {"url": "https://a", "title": "A", "description": "da", "relevance": "high"},
+            {"url": "https://b", "title": "", "description": ""},
+            {"title": "no url"},
+            "junk",
+        ],
+        "query": "acme filing",
+    }
+    c = ContextDevClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(OPS_QUERY, num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].title == "A"
+    assert results[0].snippet == "da"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert calls["method"] == "POST"
+    assert calls["url"] == "https://api.context.dev/v1/web/search"
+    assert calls["json"] == {
+        "query": "acme filing",
+        "numResults": 10,
+        "country": "us",
+        "queryFanout": False,
+        "includeDomains": ["sec.gov"],
+    }
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_context_clamps_num_results_and_clips_query(monkeypatch):
+    c = ContextDevClient(api_key="k")
+    fake, calls = _canned({"results": None})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=200)
+    assert err is None
+    assert results == []
+    assert calls["json"]["numResults"] == 100
+    assert "includeDomains" not in calls["json"]
+    assert "freshness" not in calls["json"]
+
+    long_query = " ".join(f"word{i}" for i in range(100))
+    await c.search(long_query)
+    sent = calls["json"]["query"]
+    assert len(sent) <= 500
+    assert long_query.startswith(sent)
+    assert not sent.endswith(" ")
+
+
+async def test_context_maps_recent_after_to_freshness(monkeypatch):
+    c = ContextDevClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    after = (datetime.now(UTC).date() - timedelta(days=3)).isoformat()
+    await c.search(f"hello after:{after}")
+    assert calls["json"]["freshness"] == "last_week"
+    assert "includeDomains" not in calls["json"]
+
+
+@pytest.mark.parametrize(
+    "now, after, expected",
+    [
+        (datetime(2026, 9, 17, 15, 30, tzinfo=UTC), "2026-09-18", None),
+        (datetime(2026, 9, 17, 15, 30, tzinfo=UTC), "2026-09-17", "last_24_hours"),
+        (datetime(2026, 9, 17, 15, 30, tzinfo=UTC), "2026-09-16", "last_week"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2026-09-16", "last_24_hours"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2026-09-16", "last_week"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2026-09-10", "last_week"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2026-09-10", "last_month"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2026-08-17", "last_month"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2026-08-17", "last_year"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2025-09-16", "last_year"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2025-09-16", None),
+    ],
+)
+def test_context_freshness_covers_after_midnight(now, after, expected):
+    assert _freshness(parse_ops(f"hello after:{after}"), now=now) == expected
+
+
+async def test_context_omits_freshness_for_future_after(monkeypatch):
+    c = ContextDevClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    after = (datetime.now(UTC).date() + timedelta(days=1)).isoformat()
+    await c.search(f"hello after:{after}")
+    assert "freshness" not in calls["json"]
+
+
 async def test_octen_maps_fields_and_builds_body(monkeypatch):
     payload = {
         "data": {
@@ -1135,6 +1231,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("TINYFISH_API_KEY", "tfk")
     monkeypatch.setenv("KAGI_API_KEY", "kk")
     monkeypatch.setenv("JINA_API_KEY", "jk")
+    monkeypatch.setenv("CONTEXT_DEV_API_KEY", "cdk")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "ak")
     monkeypatch.setenv("OPENAI_API_KEY", "oak")
     clients = build_search_clients(
@@ -1154,6 +1251,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "tinyfish",
             "kagi",
             "jina",
+            "context",
         ]
     )
     assert isinstance(clients["google"], SerperClient)
@@ -1185,6 +1283,9 @@ def test_factory_builds_new_engines(monkeypatch):
     assert isinstance(clients["jina"], JinaClient)
     assert clients["jina"].api_key == "jk"
     assert clients["jina"].snippet_chars == 0
+    assert isinstance(clients["context"], ContextDevClient)
+    assert clients["context"].api_key == "cdk"
+    assert clients["context"].engine == "context"
 
 
 def test_factory_builds_engine_variants(monkeypatch):
