@@ -80,7 +80,14 @@ class FakeArxiv:
 
 
 class FakeEuropePmc:
+    def __init__(self, fail=False):
+        self._fail = fail
+        self.calls = 0
+
     async def recent(self, *, from_date, to_date, n, seed):
+        self.calls += 1
+        if self._fail:
+            raise SourceError("europepmc: http_error: 503: <html>\n down\n</html>")
         return []
 
 
@@ -119,11 +126,18 @@ class FakeLLM:
 
 
 async def _run(
-    fake_arxiv, llm, *, age_buckets=("7d",), per_cell=2, seed=0, buckets=("title", "body")
+    fake_arxiv,
+    llm,
+    *,
+    europepmc=None,
+    age_buckets=("7d",),
+    per_cell=2,
+    seed=0,
+    buckets=("title", "body"),
 ):
     return await run_generate(
         arxiv=fake_arxiv,
-        europepmc=None,
+        europepmc=europepmc,
         llm=llm,
         hour_ts=HOUR,
         now=NOW,
@@ -280,24 +294,25 @@ async def test_sporadic_source_errors_are_counted_not_fatal():
     assert "503" in stats.source_error_samples["arxiv"]
 
 
-async def test_failing_source_aborts_generate():
+async def test_failing_arxiv_aborts_generate():
     papers = [_paper(i, "computer science", NOW - timedelta(days=1)) for i in range(6)]
     arxiv = FakeArxiv({"computer science": papers}, {}, fail_every=2)
-    with pytest.raises(
-        SourceError, match=r"arxiv is failing \(.*503.*source errors: arxiv=\d+/\d+"
-    ):
-        await run_generate(
-            arxiv=arxiv,
-            europepmc=FakeEuropePmc(),
-            llm=None,
-            hour_ts=HOUR,
-            now=NOW,
-            age_buckets=("7d",),
-            per_cell=2,
-            seed=0,
-            buckets=("title",),
-        )
+    with pytest.raises(SourceError, match=r"arxiv is failing \(.*503.*arxiv=5/24, europepmc=\d/6"):
+        await _run(arxiv, None, europepmc=FakeEuropePmc(), buckets=("title",))
     assert arxiv.search_calls < 24
+
+
+async def test_failing_europepmc_is_reported_not_fatal():
+    papers = [_paper(i, "computer science", NOW - timedelta(days=1)) for i in range(6)]
+    arxiv = FakeArxiv({"computer science": papers}, {})
+    europepmc = FakeEuropePmc(fail=True)
+    rows, stats = await _run(arxiv, None, europepmc=europepmc, buckets=("title",))
+    assert rows
+    assert europepmc.calls == 6
+    assert stats.source_errors["europepmc"] == 6
+    assert (
+        stats.source_error_samples["europepmc"] == "europepmc: http_error: 503: <html> down </html>"
+    )
 
 
 if __name__ == "__main__":
