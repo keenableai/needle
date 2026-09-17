@@ -11,7 +11,7 @@ from defusedxml.common import DefusedXmlException
 
 from needle.scholar.bodies import html_body_text, jats_body_text
 from needle.scholar.models import Paper, coarse_domain
-from needle.shared.search.base import USER_AGENT, HttpSearchClient
+from needle.shared.search.base import USER_AGENT, HttpSearchClient, SourceError
 
 ARXIV_API = "https://export.arxiv.org/api/query"
 ARXIV_HTML = "https://arxiv.org/html/{arxiv_id}"
@@ -117,6 +117,7 @@ def parse_epmc_result(rec: dict[str, Any]) -> Paper | None:
 
 
 class ScholarClient(HttpSearchClient):
+    suite: str
     default_headers = {"User-Agent": USER_AGENT}
     retry_attempts = 4
     retry_base_s = 2.0
@@ -125,8 +126,20 @@ class ScholarClient(HttpSearchClient):
         kwargs.setdefault("max_concurrency", 8)
         super().__init__(**kwargs)
 
+    def _source_error(self, err: dict[str, str]) -> SourceError:
+        return SourceError(f"{self.suite}: {err['error_type']}: {err['error_message']}")
+
+    async def _fetch_text(self, url: str, *, params: dict[str, Any] | None = None) -> str:
+        text, err = await self._request_text(url, params=params)
+        if err is not None:
+            raise self._source_error(err)
+        assert text is not None
+        return text
+
 
 class ArxivClient(ScholarClient):
+    suite = "arxiv"
+
     def __init__(self, *, delay_s: float = 3.0, **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self.delay_s = delay_s
@@ -150,9 +163,11 @@ class ArxivClient(ScholarClient):
             wait = self._last_api + self.delay_s - time.monotonic()
             if wait > 0:
                 await asyncio.sleep(wait)
-            text = await self._get_text(ARXIV_API, params=params)
-            self._last_api = time.monotonic()
-        return parse_arxiv_atom(text or "")
+            try:
+                text = await self._fetch_text(ARXIV_API, params=params)
+            finally:
+                self._last_api = time.monotonic()
+        return parse_arxiv_atom(text)
 
     async def body(self, arxiv_id: str) -> str | None:
         html = await self._get_text(ARXIV_HTML.format(arxiv_id=arxiv_id))
@@ -162,6 +177,8 @@ class ArxivClient(ScholarClient):
 
 
 class EuropePmcClient(ScholarClient):
+    suite = "europepmc"
+
     async def recent(self, *, from_date: str, to_date: str, n: int, seed: int) -> list[Paper]:
         params = {
             "query": (
@@ -173,8 +190,10 @@ class EuropePmcClient(ScholarClient):
             "pageSize": min(1000, max(n * 5, 50)),
         }
         payload, err = await self._request_json("GET", EUROPEPMC_SEARCH, params=params)
-        if err is not None or not isinstance(payload, dict):
-            return []
+        if err is not None:
+            raise self._source_error(err)
+        if not isinstance(payload, dict):
+            raise self._source_error({"error_type": "bad_json", "error_message": "not an object"})
         records = ((payload.get("resultList") or {}).get("result")) or []
         papers = []
         for rec in records:

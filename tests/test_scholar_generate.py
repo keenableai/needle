@@ -10,6 +10,7 @@ from needle.scholar.generate import (
     run_generate,
 )
 from needle.scholar.models import Paper
+from needle.shared.search.base import SourceError
 
 
 def test_subwindow_count_capped_by_bucket_span_days():
@@ -58,19 +59,29 @@ def _paper(n: int, domain: str, published: datetime) -> Paper:
 
 
 class FakeArxiv:
-    def __init__(self, by_domain, bodies):
+    def __init__(self, by_domain, bodies, fail_every=0):
         self._by_domain = by_domain
         self._bodies = bodies
+        self._fail_every = fail_every
         self.body_calls = 0
+        self.search_calls = 0
         self.max_results_seen = []
 
     async def search_domain(self, domain, *, from_date, to_date, max_results):
+        self.search_calls += 1
         self.max_results_seen.append(max_results)
+        if self._fail_every and self.search_calls % self._fail_every == 0:
+            raise SourceError("arxiv: http_error: 503: down")
         return list(self._by_domain.get(domain, []))
 
     async def body(self, arxiv_id):
         self.body_calls += 1
         return self._bodies.get(arxiv_id)
+
+
+class FakeEuropePmc:
+    async def recent(self, *, from_date, to_date, n, seed):
+        return []
 
 
 BUCKET_MARKERS = {
@@ -255,6 +266,38 @@ async def test_short_cell_reported():
     _, stats = await _run(arxiv, llm, per_cell=5)
     assert stats.papers == 1
     assert stats.short_cells == len(ARXIV_DOMAINS)
+
+
+async def test_sporadic_source_errors_are_counted_not_fatal():
+    papers = [_paper(i, "computer science", NOW - timedelta(days=1)) for i in range(6)]
+    bodies = {p.arxiv_id: f"body {p.arxiv_id}" for p in papers}
+    arxiv = FakeArxiv({"computer science": papers}, bodies, fail_every=10)
+    llm = FakeLLM({p.arxiv_id: f"distinct anchor beta {p.arxiv_id}" for p in papers})
+    rows, stats = await _run(arxiv, llm, per_cell=2)
+    assert rows
+    assert stats.source_requests["arxiv"] == arxiv.search_calls
+    assert stats.source_errors["arxiv"] == arxiv.search_calls // 10
+    assert "503" in stats.source_error_samples["arxiv"]
+
+
+async def test_failing_source_aborts_generate():
+    papers = [_paper(i, "computer science", NOW - timedelta(days=1)) for i in range(6)]
+    arxiv = FakeArxiv({"computer science": papers}, {}, fail_every=2)
+    with pytest.raises(
+        SourceError, match=r"arxiv is failing \(.*503.*source errors: arxiv=\d+/\d+"
+    ):
+        await run_generate(
+            arxiv=arxiv,
+            europepmc=FakeEuropePmc(),
+            llm=None,
+            hour_ts=HOUR,
+            now=NOW,
+            age_buckets=("7d",),
+            per_cell=2,
+            seed=0,
+            buckets=("title",),
+        )
+    assert arxiv.search_calls < 24
 
 
 if __name__ == "__main__":

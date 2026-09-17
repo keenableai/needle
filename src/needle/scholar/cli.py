@@ -22,6 +22,7 @@ from needle.shared.cli import (
 from needle.shared.io import serialize_row, write_json, write_jsonl
 from needle.shared.llm import resolve_llm_model
 from needle.shared.search import DEFAULT_SNIPPET_CHARS
+from needle.shared.search.base import SourceError
 
 KNOWN_SUITES = ("arxiv", "europepmc")
 
@@ -80,7 +81,10 @@ class Scholar:
             finally:
                 await aclose_all(arxiv, europepmc, llm)
 
-        rows, stats = asyncio.run(_go())
+        try:
+            rows, stats = asyncio.run(_go())
+        except SourceError as exc:
+            raise SystemExit(f"error: scholar generate: {exc}") from exc
         write_jsonl([serialize_row(r) for r in rows], out)
         rows_str = ", ".join(f"{b}={stats.rows.get(b, 0)}" for b in bucket_names)
         drops_str = ", ".join(f"{k}={v}" for k, v in sorted(stats.drops.items())) or "none"
@@ -88,12 +92,15 @@ class Scholar:
             f"scholar: {sum(stats.rows.values())} queries from {stats.papers} paired "
             f"papers ({rows_str}; {stats.candidates} candidates; "
             f"generic_title={stats.generic_title}; drops: {drops_str}; "
-            f"short_cells={stats.short_cells})",
+            f"short_cells={stats.short_cells}; {stats.source_summary()})",
             file=sys.stderr,
         )
         if stats.drop_samples:
             samples = "; ".join(f"{k}: {v}" for k, v in sorted(stats.drop_samples.items()))
             print(f"scholar first drop errors: {samples}", file=sys.stderr)
+        if stats.source_error_samples:
+            samples = "; ".join(f"{k}: {v}" for k, v in sorted(stats.source_error_samples.items()))
+            print(f"scholar first source errors: {samples}", file=sys.stderr)
 
     def run(
         self,

@@ -1,5 +1,6 @@
 import asyncio
 import random
+from collections import Counter
 from dataclasses import dataclass, field, replace
 from datetime import datetime, timedelta
 from typing import Any
@@ -17,7 +18,9 @@ from needle.scholar.projection import (
 from needle.scholar.sources import ArxivClient, EuropePmcClient
 from needle.shared.concurrency import bounded_gather
 from needle.shared.llm import LLMClient
+from needle.shared.retry import MAX_ERROR_CHARS
 from needle.shared.sampling import interleave
+from needle.shared.search.base import SourceError
 
 ARXIV_DOMAINS = (
     "computer science",
@@ -31,6 +34,8 @@ OVERSAMPLE = 3
 MAX_SUBWINDOWS = 24
 ARXIV_WINDOW_POOL = 20
 ARXIV_MAX_RESULTS = 1000
+MAX_SOURCE_ERROR_RATE = 0.2
+MIN_SOURCE_REQUESTS = 10
 
 
 @dataclass(frozen=True)
@@ -49,6 +54,26 @@ class GenStats:
     drop_samples: dict[str, str] = field(default_factory=dict)
     generic_title: int = 0
     short_cells: int = 0
+    source_requests: Counter[str] = field(default_factory=Counter)
+    source_errors: Counter[str] = field(default_factory=Counter)
+    source_error_samples: dict[str, str] = field(default_factory=dict)
+
+    def source_summary(self) -> str:
+        counts = ", ".join(
+            f"{s}={self.source_errors[s]}/{n}" for s, n in sorted(self.source_requests.items())
+        )
+        return f"source errors: {counts}"
+
+    def check_source(self, suite: str) -> None:
+        n = self.source_requests[suite]
+        if n >= MIN_SOURCE_REQUESTS and self.source_errors[suite] > MAX_SOURCE_ERROR_RATE * n:
+            raise SourceError(
+                f"{suite} is failing ({self.source_error_samples[suite]}); {self.source_summary()}"
+            )
+
+
+def _suite(domain: str) -> str:
+    return "europepmc" if domain == HEALTH_DOMAIN else "arxiv"
 
 
 def _subwindow_count(bucket: str, n: int) -> int:
@@ -68,6 +93,31 @@ def _subwindows(bucket: str, *, now: datetime, count: int) -> list[tuple[str, st
     return windows
 
 
+async def _window_papers(
+    domain: str,
+    *,
+    arxiv: ArxivClient | None,
+    europepmc: EuropePmcClient | None,
+    from_date: str,
+    to_date: str,
+    per: int,
+    seed: int,
+) -> list[Paper]:
+    if domain == HEALTH_DOMAIN:
+        assert europepmc is not None
+        return await europepmc.recent(from_date=from_date, to_date=to_date, n=per, seed=seed)
+    assert arxiv is not None
+    papers = await arxiv.search_domain(
+        domain,
+        from_date=from_date,
+        to_date=to_date,
+        max_results=min(per * ARXIV_WINDOW_POOL, ARXIV_MAX_RESULTS),
+    )
+    if len(papers) > per:
+        papers = random.Random(seed).sample(papers, per)
+    return papers
+
+
 async def _cell_candidates(
     domain: str,
     bucket: str,
@@ -77,28 +127,31 @@ async def _cell_candidates(
     n: int,
     seed: int,
     now: datetime,
+    stats: GenStats,
 ) -> list[Paper]:
     windows = _subwindows(bucket, now=now, count=_subwindow_count(bucket, n))
     per = max(1, -(-n // len(windows)))
+    suite = _suite(domain)
     lists: list[list[Paper]] = []
     for wi, (from_date, to_date) in enumerate(windows):
-        if domain == HEALTH_DOMAIN:
-            if europepmc is not None:
-                lists.append(
-                    await europepmc.recent(
-                        from_date=from_date, to_date=to_date, n=per, seed=seed + wi
-                    )
-                )
-        elif arxiv is not None:
-            papers = await arxiv.search_domain(
+        stats.check_source(suite)
+        stats.source_requests[suite] += 1
+        try:
+            papers = await _window_papers(
                 domain,
+                arxiv=arxiv,
+                europepmc=europepmc,
                 from_date=from_date,
                 to_date=to_date,
-                max_results=min(per * ARXIV_WINDOW_POOL, ARXIV_MAX_RESULTS),
+                per=per,
+                seed=seed + wi,
             )
-            if len(papers) > per:
-                papers = random.Random(seed + wi).sample(papers, per)
-            lists.append(papers)
+        except SourceError as exc:
+            stats.source_errors[suite] += 1
+            stats.source_error_samples.setdefault(suite, str(exc)[:MAX_ERROR_CHARS])
+            stats.check_source(suite)
+            continue
+        lists.append(papers)
     return interleave(lists)
 
 
@@ -147,6 +200,7 @@ async def run_generate(
         domains.append(HEALTH_DOMAIN)
     cells = [(d, a) for d in domains for a in age_buckets]
 
+    stats = GenStats()
     candidate_lists = await bounded_gather(
         cells,
         lambda cell: _cell_candidates(
@@ -157,11 +211,10 @@ async def run_generate(
             n=per_cell * OVERSAMPLE,
             seed=seed,
             now=now,
+            stats=stats,
         ),
         concurrency=4,
     )
-
-    stats = GenStats()
     seen_keys: set[str] = set()
     candidates: list[Candidate] = []
     for cell, papers in zip(cells, candidate_lists, strict=True):
