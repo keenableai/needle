@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from needle.shared.search.base import HttpSearchClient, SearchResult
@@ -9,17 +9,21 @@ MIN_NUM = 10
 MAX_NUM = 100
 
 
-def _freshness(ops: QueryOps) -> str | None:
+def _freshness(ops: QueryOps, now: datetime | None = None) -> str | None:
     if ops.before or not ops.after:
         return None
-    days = (datetime.now(UTC).date() - ops.after).days
-    if days <= 1:
+    current = now or datetime.now(UTC)
+    start = datetime(ops.after.year, ops.after.month, ops.after.day, tzinfo=UTC)
+    if start > current:
+        return None
+    elapsed = current - start
+    if elapsed <= timedelta(hours=24):
         return "last_24_hours"
-    if days <= 7:
+    if elapsed <= timedelta(days=7):
         return "last_week"
-    if days <= 31:
+    if elapsed <= timedelta(days=31):
         return "last_month"
-    if days <= 366:
+    if elapsed <= timedelta(days=366):
         return "last_year"
     return None
 

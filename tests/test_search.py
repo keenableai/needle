@@ -31,6 +31,7 @@ from needle.shared.search import (
     search_all,
 )
 from needle.shared.search import base as search_base
+from needle.shared.search.context import _freshness
 from needle.shared.search.factory import ENGINES
 from needle.shared.search.queryops import parse_ops
 
@@ -722,6 +723,36 @@ async def test_context_maps_recent_after_to_freshness(monkeypatch):
     await c.search(f"hello after:{after}")
     assert calls["json"]["freshness"] == "last_week"
     assert "includeDomains" not in calls["json"]
+
+
+@pytest.mark.parametrize(
+    "now, after, expected",
+    [
+        (datetime(2026, 9, 17, 15, 30, tzinfo=UTC), "2026-09-18", None),
+        (datetime(2026, 9, 17, 15, 30, tzinfo=UTC), "2026-09-17", "last_24_hours"),
+        (datetime(2026, 9, 17, 15, 30, tzinfo=UTC), "2026-09-16", "last_week"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2026-09-16", "last_24_hours"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2026-09-16", "last_week"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2026-09-10", "last_week"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2026-09-10", "last_month"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2026-08-17", "last_month"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2026-08-17", "last_year"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2025-09-16", "last_year"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2025-09-16", None),
+    ],
+)
+def test_context_freshness_covers_after_midnight(now, after, expected):
+    assert _freshness(parse_ops(f"hello after:{after}"), now=now) == expected
+
+
+async def test_context_omits_freshness_for_future_after(monkeypatch):
+    c = ContextDevClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    after = (datetime.now(UTC).date() + timedelta(days=1)).isoformat()
+    await c.search(f"hello after:{after}")
+    assert "freshness" not in calls["json"]
 
 
 async def test_octen_maps_fields_and_builds_body(monkeypatch):
