@@ -1,0 +1,66 @@
+name: auto-approve
+
+# Approval bridge for the team's code-review policy (SOC 2 / Vanta "GitHub
+# code changes were approved or provided justification"): every PR is reviewed
+# automatically by Qodo, findings are advisory, human approval is not
+# mandated. Qodo's review lives in a comment, invisible to GitHub's approval
+# model — this workflow makes the review visible: when Qodo posts a completed
+# review, the PR gets an APPROVED review whose body records Qodo's verdict.
+# The approval attests "an automated review happened", NOT "the code is clean".
+# A PR merged before Qodo finishes gets no approval.
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+# Qodo edits its persistent review comment on every re-review; when edits land
+# in a burst, only the newest matters.
+concurrency:
+  group: auto-approve-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  approve:
+    name: Approve on Qodo review
+    # Exact-login match: '[' is illegal in GitHub logins, so the [bot] suffix
+    # is unforgeable — a prefix match would accept lookalike user accounts.
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.user.login == 'qodo-code-review[bot]' &&
+      github.event.comment.user.type == 'Bot' &&
+      contains(github.event.comment.body, 'Code Review by Qodo')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      # Plain gh, not a marketplace action: both auto-approve actions are
+      # unusable here (fork paywalls private repos; original fails the org's
+      # verified-creators actions policy).
+      - name: Approve with the Qodo verdict
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BODY: ${{ github.event.comment.body }}
+          COMMENT_URL: ${{ github.event.comment.html_url }}
+          REPO: ${{ github.repository }}
+          NUM: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          # Dedupe: comment edits re-fire this job; approve each head commit once.
+          head_sha=$(gh api "repos/$REPO/pulls/$NUM" --jq .head.sha)
+          dup=$(gh api "repos/$REPO/pulls/$NUM/reviews?per_page=100" --paginate \
+            --jq "[.[] | select(.user.login==\"github-actions[bot]\" and .state==\"APPROVED\" and .commit_id==\"$head_sha\")] | length")
+          if [ "$dup" -gt 0 ]; then
+            echo "Head $head_sha already carries an auto-approval; nothing to do."
+            exit 0
+          fi
+          # Quote whatever verdict categories the comment carries, without
+          # encoding Qodo's taxonomy (it changes between releases). A parse
+          # miss must be visible, not silently degraded.
+          verdict=$(printf '%s' "$BODY" | grep -oE '<code>[^<]*\([0-9]+\)</code>' | sed 's/<[^>]*>//g' | paste -sd ', ' -) || true
+          if [ -z "$verdict" ]; then
+            echo "::warning::No verdict categories parsed from the Qodo comment — its format may have changed; approving with a link only."
+            verdict="see the review comment"
+          fi
+          gh pr review "$NUM" --repo "$REPO" --approve \
+            --body "Auto-approved: Qodo review completed — ${verdict}. Findings are advisory per team policy; verdict source: ${COMMENT_URL} [auto-approve.yml]"
