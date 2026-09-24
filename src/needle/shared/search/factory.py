@@ -73,8 +73,11 @@ def _build_parallel(mode: str) -> Callable[[str | None, int], SearchClient]:
     return build
 
 
-def _build_perplexity(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return PerplexityClient(api_key=api_key or "")
+def _build_perplexity(search_type: str | None) -> Callable[[str | None, int], SearchClient]:
+    def build(api_key: str | None, snippet_chars: int) -> SearchClient:
+        return PerplexityClient(api_key=api_key or "", search_type=search_type)
+
+    return build
 
 
 def _build_octen(api_key: str | None, snippet_chars: int) -> SearchClient:
@@ -143,7 +146,10 @@ ENGINES: dict[str, EngineSpec] = {
         key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("turbo")
     ),
     "perplexity": EngineSpec(
-        key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity
+        key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity(None)
+    ),
+    "perplexity-fast": EngineSpec(
+        key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity("fast")
     ),
     "tavily": EngineSpec(key_env="TAVILY_API_KEY", key_required=True, build=_build_tavily),
     "tinyfish": EngineSpec(key_env="TINYFISH_API_KEY", key_required=True, build=_build_tinyfish),

@@ -923,6 +923,21 @@ async def test_perplexity_maps_results_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_perplexity_fast_sets_search_type(monkeypatch):
+    c = PerplexityClient(api_key="k", search_type="fast")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert (results, err) == ([], None)
+    assert calls["json"] == {
+        "query": "hi",
+        "max_results": 5,
+        "search_context_size": "low",
+        "search_type": "fast",
+    }
+
+
 CLAUDE_JSON = (
     '```json\n[{"url": "https://a", "title": "A json", "snippet": "sa"},'
     ' {"url": "https://b", "snippet": "sb"},'
@@ -1147,6 +1162,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "parallel",
             "tavily",
             "perplexity",
+            "perplexity-fast",
             "octen",
             "ceramic",
             "you",
@@ -1166,6 +1182,10 @@ def test_factory_builds_new_engines(monkeypatch):
     assert isinstance(clients["tavily"], TavilyClient)
     assert isinstance(clients["perplexity"], PerplexityClient)
     assert clients["perplexity"].api_key == "xk"
+    assert clients["perplexity"].search_type is None
+    assert isinstance(clients["perplexity-fast"], PerplexityClient)
+    assert clients["perplexity-fast"].api_key == "xk"
+    assert clients["perplexity-fast"].search_type == "fast"
     assert isinstance(clients["octen"], OctenClient)
     assert clients["octen"].api_key == "ok"
     assert isinstance(clients["ceramic"], CeramicClient)
