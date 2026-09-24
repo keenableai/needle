@@ -1,6 +1,7 @@
 import asyncio
 import json
 import math
+import ssl
 import time
 from dataclasses import dataclass
 from typing import Any, Protocol
@@ -137,6 +138,7 @@ class HttpSearchClient:
     engine: str = ""
     base_url: str = ""
     default_headers: dict[str, str] = {}
+    ssl_context: ssl.SSLContext | bool = True
     retry_attempts: int = RETRY_ATTEMPTS
     retry_base_s: float = RETRY_BASE_S
 
@@ -168,6 +170,7 @@ class HttpSearchClient:
             self._client = httpx.AsyncClient(
                 timeout=self.timeout_s,
                 headers=self.default_headers,
+                verify=self.ssl_context,
                 limits=httpx.Limits(
                     max_connections=100,
                     max_keepalive_connections=20,
