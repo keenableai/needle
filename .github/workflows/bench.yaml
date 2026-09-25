@@ -52,7 +52,7 @@ env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/needle-results
-  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,claude-search,chatgpt-search
+  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,perplexity-fast,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,claude-search,chatgpt-search
 
 jobs:
   plan:

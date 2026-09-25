@@ -56,9 +56,10 @@ All `run` commands share one interface:
 Every engine issues one request at a time, so latency samples are comparable
 across engines. Per-engine tuning uses env vars: `TAVILY_DEPTH`, `NEEDLE_CLAUDE_SEARCH_MODEL`
 (default `claude-sonnet-5`), `NEEDLE_CHATGPT_SEARCH_MODEL` (default `gpt-5.5`); the engine
-entry fixes Keenable's, Exa's, and Parallel's modes and Brave's endpoint
-(`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
+entry fixes Keenable's, Exa's, Parallel's and Perplexity's modes and Brave's
+endpoint (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
 `exa-instant` = instant, `parallel` = advanced, `parallel-turbo` = turbo,
+`perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
 `brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). The mean skips queries whose
 search or judging failed
 (via `num_scored`; the report lists `search_errors` / `judge_errors`) and
