@@ -73,6 +73,7 @@
     --series-18: #00897B;
     --series-19: #D84315;
     --series-20: #455A64;
+    --series-21: #283593;
   }
   @media screen {
     [data-theme="dark"] {
@@ -109,6 +110,7 @@
       --series-18: #2FA88F;
       --series-19: #FF7043;
       --series-20: #90A4AE;
+      --series-21: #7986CB;
     }
   }
   * { box-sizing: border-box; }
@@ -1034,7 +1036,7 @@ registerEngines(["keenable-realtime", "google", "bing", "brave", "brave-llmconte
   "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity-fast", "perplexity", "tavily", "you", "firecrawl",
   "tinyfish", "kagi", "jina", "context", "octen", "claude-search", "chatgpt-search"]);
 
-const SERIES_COUNT = 20;
+const SERIES_COUNT = 21;
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
   const slot = ENGINE_SLOT.get(engine);
