@@ -7,6 +7,7 @@ from needle.shared.search.brave import BraveClient, BraveLlmContextClient
 from needle.shared.search.ceramic import CeramicClient
 from needle.shared.search.chatgpt import ChatGptSearchClient
 from needle.shared.search.claude import ClaudeSearchClient
+from needle.shared.search.context import ContextDevClient
 from needle.shared.search.exa import ExaClient
 from needle.shared.search.firecrawl import FirecrawlClient
 from needle.shared.search.jina import JinaClient
@@ -112,6 +113,10 @@ def _build_jina(api_key: str | None, snippet_chars: int) -> SearchClient:
     return JinaClient(api_key=api_key or "", snippet_chars=snippet_chars)
 
 
+def _build_context(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return ContextDevClient(api_key=api_key or "")
+
+
 def _build_claude(api_key: str | None, snippet_chars: int) -> SearchClient:
     return ClaudeSearchClient(api_key=api_key or "")
 
@@ -159,6 +164,7 @@ ENGINES: dict[str, EngineSpec] = {
     "firecrawl": EngineSpec(key_env="FIRECRAWL_API_KEY", key_required=True, build=_build_firecrawl),
     "kagi": EngineSpec(key_env="KAGI_API_KEY", key_required=True, build=_build_kagi),
     "jina": EngineSpec(key_env="JINA_API_KEY", key_required=True, build=_build_jina),
+    "context": EngineSpec(key_env="CONTEXT_DEV_API_KEY", key_required=True, build=_build_context),
     "claude-search": EngineSpec(
         key_env="ANTHROPIC_API_KEY", key_required=True, build=_build_claude
     ),
