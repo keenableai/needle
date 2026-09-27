@@ -2,7 +2,7 @@
   "confidence": 0.95,
   "resamples": 10000,
   "window_days": 7,
-  "window_end": "2026-09-27T13:44Z",
+  "window_end": "2026-09-27T14:28Z",
   "method": "percentile cluster bootstrap, wider of query and run clustering",
   "runs": {
     "agentic_rare": [
@@ -209,7 +209,8 @@
       "2026-09-24T23:22Z",
       "2026-09-25T14:59Z",
       "2026-09-26T13:14Z",
-      "2026-09-26T14:39Z"
+      "2026-09-26T14:39Z",
+      "2026-09-27T14:28Z"
     ]
   },
   "benches": {
@@ -703,124 +704,124 @@
     },
     "scholar": {
       "bing": {
-        "point": 0.4859,
-        "lo": 0.4603,
-        "hi": 0.5124
-      },
-      "brave": {
-        "point": 0.5523,
-        "lo": 0.5268,
-        "hi": 0.578
-      },
-      "brave-llmcontext": {
-        "point": 0.5664,
-        "lo": 0.5409,
-        "hi": 0.5916
-      },
-      "ceramic": {
-        "point": 0.0074,
-        "lo": 0.0028,
-        "hi": 0.0127
-      },
-      "chatgpt-search": {
-        "point": 0.3532,
-        "lo": 0.3286,
-        "hi": 0.3781
-      },
-      "claude-search": {
-        "point": 0.5851,
-        "lo": 0.5603,
-        "hi": 0.6124
-      },
-      "context": {
-        "point": 0.0,
-        "lo": 0.0,
-        "hi": 0.0
-      },
-      "exa": {
-        "point": 0.5898,
-        "lo": 0.5644,
-        "hi": 0.6149
-      },
-      "exa-instant": {
-        "point": 0.5302,
-        "lo": 0.5041,
-        "hi": 0.5561
-      },
-      "firecrawl": {
-        "point": 0.5013,
-        "lo": 0.4757,
-        "hi": 0.528
-      },
-      "google": {
-        "point": 0.498,
-        "lo": 0.4667,
-        "hi": 0.524
-      },
-      "jina": {
-        "point": 0.504,
-        "lo": 0.4724,
-        "hi": 0.5306
-      },
-      "kagi": {
-        "point": 0.6334,
-        "lo": 0.6029,
-        "hi": 0.6584
-      },
-      "keenable": {
-        "point": 0.754,
-        "lo": 0.7319,
-        "hi": 0.7756
-      },
-      "keenable-realtime": {
-        "point": 0.7534,
-        "lo": 0.7315,
-        "hi": 0.7748
-      },
-      "octen": {
-        "point": 0.1629,
-        "lo": 0.144,
-        "hi": 0.1819
-      },
-      "parallel": {
-        "point": 0.6079,
-        "lo": 0.5826,
-        "hi": 0.6328
-      },
-      "parallel-turbo": {
-        "point": 0.3063,
-        "lo": 0.2756,
-        "hi": 0.3319
-      },
-      "perplexity": {
-        "point": 0.4497,
-        "lo": 0.4242,
-        "hi": 0.4755
-      },
-      "perplexity-fast": {
-        "point": 0.4698,
-        "lo": 0.4397,
+        "point": 0.4793,
+        "lo": 0.4564,
         "hi": 0.5027
       },
+      "brave": {
+        "point": 0.5554,
+        "lo": 0.5326,
+        "hi": 0.5784
+      },
+      "brave-llmcontext": {
+        "point": 0.5668,
+        "lo": 0.5443,
+        "hi": 0.5897
+      },
+      "ceramic": {
+        "point": 0.0076,
+        "lo": 0.0038,
+        "hi": 0.0119
+      },
+      "chatgpt-search": {
+        "point": 0.3533,
+        "lo": 0.3306,
+        "hi": 0.3756
+      },
+      "claude-search": {
+        "point": 0.5848,
+        "lo": 0.5619,
+        "hi": 0.6076
+      },
+      "context": {
+        "point": 0.167,
+        "lo": 0.0,
+        "hi": 0.5316
+      },
+      "exa": {
+        "point": 0.5924,
+        "lo": 0.5697,
+        "hi": 0.6152
+      },
+      "exa-instant": {
+        "point": 0.5332,
+        "lo": 0.5106,
+        "hi": 0.5563
+      },
+      "firecrawl": {
+        "point": 0.5103,
+        "lo": 0.4833,
+        "hi": 0.5345
+      },
+      "google": {
+        "point": 0.5065,
+        "lo": 0.4759,
+        "hi": 0.5299
+      },
+      "jina": {
+        "point": 0.5114,
+        "lo": 0.4812,
+        "hi": 0.5351
+      },
+      "kagi": {
+        "point": 0.6288,
+        "lo": 0.6042,
+        "hi": 0.6512
+      },
+      "keenable": {
+        "point": 0.7527,
+        "lo": 0.7328,
+        "hi": 0.7728
+      },
+      "keenable-realtime": {
+        "point": 0.75,
+        "lo": 0.7297,
+        "hi": 0.77
+      },
+      "octen": {
+        "point": 0.1614,
+        "lo": 0.1443,
+        "hi": 0.1793
+      },
+      "parallel": {
+        "point": 0.6076,
+        "lo": 0.5852,
+        "hi": 0.6298
+      },
+      "parallel-turbo": {
+        "point": 0.3087,
+        "lo": 0.2835,
+        "hi": 0.3312
+      },
+      "perplexity": {
+        "point": 0.4543,
+        "lo": 0.4313,
+        "hi": 0.4777
+      },
+      "perplexity-fast": {
+        "point": 0.4717,
+        "lo": 0.446,
+        "hi": 0.4962
+      },
       "tavily": {
-        "point": 0.3056,
-        "lo": 0.2709,
-        "hi": 0.3313
+        "point": 0.3082,
+        "lo": 0.2788,
+        "hi": 0.3299
       },
       "tinyfish": {
-        "point": 0.3358,
-        "lo": 0.2368,
-        "hi": 0.4385
+        "point": 0.3255,
+        "lo": 0.2424,
+        "hi": 0.4129
       },
       "ultimate": {
-        "point": 0.8968,
-        "lo": 0.8811,
-        "hi": 0.912
+        "point": 0.8973,
+        "lo": 0.883,
+        "hi": 0.9111
       },
       "you": {
-        "point": 0.5389,
-        "lo": 0.5138,
-        "hi": 0.5645
+        "point": 0.5391,
+        "lo": 0.5163,
+        "hi": 0.5621
       }
     }
   }
