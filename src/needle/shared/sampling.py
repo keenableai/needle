@@ -67,7 +67,7 @@ def sample_stratified(
     for d, rs in by_domain.items():
         domain_seed = seed ^ int.from_bytes(hashlib.sha256(d.encode()).digest()[:8], "big")
         perm = shuffle_indices(len(rs), domain_seed)
-        by_domain[d] = [rs[i] for i in perm]
+        by_domain[d] = [rs[i] for i in reversed(perm)]
 
     domains = sorted(by_domain.keys())
     perm = shuffle_indices(len(domains), seed)
@@ -82,7 +82,7 @@ def sample_stratified(
             bucket = by_domain[d]
             if not bucket:
                 continue
-            picked.append(bucket.pop(0))
+            picked.append(bucket.pop())
             if bucket:
                 next_round.append(d)
         domain_order = next_round
