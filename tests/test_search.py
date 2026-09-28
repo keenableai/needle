@@ -389,8 +389,6 @@ async def test_brave_llmcontext_maps_fields_and_builds_body(monkeypatch):
         "q": "hi",
         "country": "us",
         "search_lang": "en",
-        "maximum_number_of_urls": 5,
-        "maximum_number_of_tokens_per_url": 769,
     }
     assert calls["headers"] == {"Accept": "application/json", "X-Subscription-Token": "k"}
 
@@ -415,34 +413,15 @@ async def test_brave_llmcontext_published_date_prefers_parseable_iso(monkeypatch
     assert results[0].published_date == expected
 
 
-@pytest.mark.parametrize("chars,expected", [(2000, 769), (500, 512), (40000, 8192), (0, None)])
-async def test_brave_llmcontext_clamps_token_budget(monkeypatch, chars, expected):
+@pytest.mark.parametrize("chars,expected", [(5, "one\nt"), (0, "one\ntwo")])
+async def test_brave_llmcontext_clips_snippet(monkeypatch, chars, expected):
     c = BraveLlmContextClient(api_key="k", snippet_chars=chars)
-    fake, calls = _canned({"grounding": {"generic": []}})
+    fake, _ = _canned(
+        {"grounding": {"generic": [{"url": "https://a", "snippets": ["one", "two"]}]}}
+    )
     monkeypatch.setattr(c, "_request_json", fake)
-    await c.search("hi")
-    assert calls["json"].get("maximum_number_of_tokens_per_url") == expected
-
-
-async def test_brave_llmcontext_clamps_max_urls(monkeypatch):
-    c = BraveLlmContextClient(api_key="k")
-    fake, calls = _canned({"grounding": {"generic": []}})
-    monkeypatch.setattr(c, "_request_json", fake)
-    await c.search("hi", num_results=60)
-    assert calls["json"]["maximum_number_of_urls"] == 50
-
-
-async def test_brave_llmcontext_sends_sites_as_goggle_not_query_text(monkeypatch):
-    c = BraveLlmContextClient(api_key="k")
-    fake, calls = _canned({"grounding": {"generic": []}})
-    monkeypatch.setattr(c, "_request_json", fake)
-
-    await c.search("acme site:sec.gov site:nasdaq.com")
-    assert calls["json"]["q"] == "acme"
-    assert calls["json"]["goggles"] == "$discard\n$site=sec.gov\n$site=nasdaq.com"
-
-    await c.search("acme")
-    assert "goggles" not in calls["json"]
+    results, _ = await c.search("hi")
+    assert results[0].snippet == expected
 
 
 async def test_brave_llmcontext_tolerates_malformed_payload(monkeypatch):
@@ -1647,8 +1626,7 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             {"grounding": {"generic": []}},
             "json",
             {
-                "q": "acme filing",
-                "goggles": "$discard\n$site=sec.gov",
+                "q": "acme filing site:sec.gov",
                 "freshness": "2026-06-01to2026-06-30",
             },
         ),

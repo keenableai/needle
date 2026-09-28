@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from needle.shared.search.base import HttpSearchClient, SearchResult, clamped_chars
+from needle.shared.search.base import HttpSearchClient, SearchResult
 from needle.shared.search.queryops import freshness_window, parse_ops
 
 BASE_URL = "https://api.search.brave.com/res/v1"
@@ -60,18 +60,8 @@ class BraveClient(HttpSearchClient):
         return results, None
 
 
-MAX_CONTEXT_URLS = 50
-CHARS_PER_TOKEN = 2.6
-MIN_TOKENS_PER_URL = 512
-MAX_TOKENS_PER_URL = 8192
-
-
 def _dict(value: Any) -> dict[str, Any]:
     return value if isinstance(value, dict) else {}
-
-
-def _site_goggle(sites: tuple[str, ...]) -> str:
-    return "\n".join(["$discard", *(f"$site={s}" for s in sites)])
 
 
 def _is_iso(value: Any) -> bool:
@@ -98,23 +88,23 @@ class BraveLlmContextClient(HttpSearchClient):
         super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.snippet_chars = snippet_chars
 
+    def _snippet(self, e: dict[str, Any]) -> str | None:
+        text = "\n".join(filter(None, e.get("snippets") or []))
+        if self.snippet_chars > 0:
+            text = text[: self.snippet_chars]
+        return text or None
+
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
         ops = parse_ops(query)
         body: dict[str, Any] = {
-            "q": _clip_query(ops.text),
+            "q": _clip_query(ops.text, ops.sites),
             "country": "us",
             "search_lang": "en",
-            "maximum_number_of_urls": min(num_results, MAX_CONTEXT_URLS),
         }
-        if ops.sites:
-            body["goggles"] = _site_goggle(ops.sites)
         if fresh := freshness_window(ops):
             body["freshness"] = fresh
-        tokens = int(self.snippet_chars / CHARS_PER_TOKEN)
-        if (per_url := clamped_chars(tokens, MIN_TOKENS_PER_URL, MAX_TOKENS_PER_URL)) is not None:
-            body["maximum_number_of_tokens_per_url"] = per_url
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/llm/context",
@@ -130,7 +120,7 @@ class BraveLlmContextClient(HttpSearchClient):
             SearchResult(
                 url=e["url"],
                 title=e.get("title") or None,
-                snippet="\n".join(filter(None, e.get("snippets") or [])) or None,
+                snippet=self._snippet(e),
                 published_date=_published(sources.get(e["url"])),
             )
             for e in grounding.get("generic") or []
