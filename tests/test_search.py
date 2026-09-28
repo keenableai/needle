@@ -887,15 +887,15 @@ async def test_brave_clips_query_and_keeps_sites(monkeypatch):
     fake, calls = _canned({"web": {"results": []}})
     monkeypatch.setattr(c, "_request_json", fake)
 
-    await c.search(" ".join(f"w{i}" for i in range(60)) + " site:sec.gov")
+    await c.search(" ".join(f"w{i}" for i in range(90)) + " site:sec.gov")
     q = calls["params"]["q"]
     assert q.endswith("site:sec.gov")
-    assert len(q.split()) <= 50
+    assert len(q.split()) <= 75
 
-    await c.search(" ".join(f"word{i:06d}" for i in range(45)) + " site:sec.gov")
+    await c.search(" ".join(f"word{i:06d}" for i in range(60)) + " site:sec.gov")
     q = calls["params"]["q"]
     assert q.endswith("site:sec.gov")
-    assert len(q) <= 400
+    assert len(q) <= 600
 
 
 async def test_ceramic_clamps_query_words_and_description_chars(monkeypatch):

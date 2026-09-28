@@ -5,8 +5,8 @@ from needle.shared.search.base import HttpSearchClient, SearchResult, clamped_ch
 from needle.shared.search.queryops import freshness_window, parse_ops
 
 BASE_URL = "https://api.search.brave.com/res/v1"
-MAX_QUERY_WORDS = 50
-MAX_QUERY_CHARS = 400
+MAX_QUERY_WORDS = 75
+MAX_QUERY_CHARS = 600
 
 
 def _clip_query(text: str, sites: tuple[str, ...] = ()) -> str:
