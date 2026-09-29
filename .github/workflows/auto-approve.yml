@@ -13,12 +13,6 @@ on:
   issue_comment:
     types: [created, edited]
 
-# Qodo edits its persistent review comment on every re-review; when edits land
-# in a burst, only the newest matters.
-concurrency:
-  group: auto-approve-${{ github.event.issue.number }}
-  cancel-in-progress: true
-
 jobs:
   approve:
     name: Approve on Qodo review
@@ -29,6 +23,14 @@ jobs:
       github.event.comment.user.login == 'qodo-code-review[bot]' &&
       github.event.comment.user.type == 'Bot' &&
       contains(github.event.comment.body, 'Code Review by Qodo')
+    # Job-level, not workflow-level: a workflow-level group is joined by EVERY
+    # comment on the PR (Sonar, Infracost, plans, Qodo's summary), and those
+    # runs cancelled the one carrying the review before their own `if` skipped
+    # them. Jobs skipped by `if` never join a job-level group, so only Qodo
+    # review events compete here; when its edits land in a burst, the newest wins.
+    concurrency:
+      group: auto-approve-${{ github.event.issue.number }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
