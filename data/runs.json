@@ -18105,5 +18105,13 @@
       "agentic_rare.json",
       "agentic_rare.jsonl"
     ]
+  },
+  {
+    "id": "2026-10-03T1039Z",
+    "ts": "2026-10-03T10:39Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "ndcg.json"
+    ]
   }
 ]
