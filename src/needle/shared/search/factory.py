@@ -114,7 +114,7 @@ def _build_jina(api_key: str | None, snippet_chars: int) -> SearchClient:
 
 
 def _build_context(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return ContextDevClient(api_key=api_key or "")
+    return ContextDevClient(api_key=api_key or "", description_chars=snippet_chars)
 
 
 def _build_claude(api_key: str | None, snippet_chars: int) -> SearchClient:
