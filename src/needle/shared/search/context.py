@@ -32,6 +32,12 @@ class ContextDevClient(HttpSearchClient):
     engine = "context"
     base_url = "https://api.context.dev/v1"
 
+    def __init__(
+        self, *, api_key: str, description_chars: int = 0, timeout_s: float = 30.0
+    ) -> None:
+        super().__init__(api_key=api_key, timeout_s=timeout_s)
+        self.description_chars = description_chars
+
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
@@ -46,6 +52,8 @@ class ContextDevClient(HttpSearchClient):
             body["includeDomains"] = list(ops.sites)
         if fresh := _freshness(ops):
             body["freshness"] = fresh
+        if self.description_chars > 0:
+            body["descriptionMaxCharacters"] = self.description_chars
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/web/search",

@@ -694,6 +694,15 @@ async def test_context_maps_fields_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_context_requests_descriptions_up_to_snippet_chars(monkeypatch):
+    c = ContextDevClient(api_key="k", description_chars=2000)
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search("acme filing")
+    assert calls["json"]["descriptionMaxCharacters"] == 2000
+
+
 async def test_context_clamps_num_results_and_clips_query(monkeypatch):
     c = ContextDevClient(api_key="k")
     fake, calls = _canned({"results": None})
