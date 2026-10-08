@@ -1721,6 +1721,7 @@ function renderStandings(rows) {
   const holder = document.getElementById("standings");
   holder.replaceChildren();
   card._mdRows = null;
+  card._summaryRows = null;
   const { ult, entries } = shareEntries(rows);
   if (!entries.length) {
     holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
@@ -1738,18 +1739,30 @@ function renderStandings(rows) {
     }
     best.push(m);
   }
+  const header = ["engine", "overall", "overall 95% CI",
+    ...STANDINGS_BENCHES.map(([b]) => verticalName(b))];
+  const engineRow = (x) => {
+    const c = boot.get(x.e);
+    return [displayName(x.e), fmtPct(x.overall),
+      c ? `[${fmtPct(c.lo)}, ${fmtPct(c.hi)}]` : "–",
+      ...x.shares.map((s) => s ? fmtPct(s.share) : "–")];
+  };
   card._mdRows = () => [
-    ["engine", "overall", "overall 95% CI", ...STANDINGS_BENCHES.map(([b]) => verticalName(b))],
+    header,
     ["ultimate (raw)", "100%", "", ...ult.map((u) => u == null ? "–" : fmt3(u))],
     ["gap to ultimate", best[0] == null ? "–" : `−${Math.round((1 - best[0]) * 100)}%`, "",
       ...best.slice(1).map((m) => m == null ? "–" : `−${Math.round((1 - m) * 100)}%`)],
-    ...entries.map((x) => {
-      const c = boot.get(x.e);
-      return [displayName(x.e), fmtPct(x.overall),
-        c ? `[${fmtPct(c.lo)}, ${fmtPct(c.hi)}]` : "–",
-        ...x.shares.map((s) => s ? fmtPct(s.share) : "–")];
-    }),
+    ...entries.map(engineRow),
   ];
+  card._summaryRows = () => {
+    const latency = new Map(latencyStats(rows).map((s) => [s.e, s]));
+    return [
+      [...header, "$ / 1k queries", "p50 latency", "p95 latency"],
+      ...entries.map((x) => [...engineRow(x),
+        PRICES.has(x.e) ? fmtUsd(PRICES.get(x.e).usd) : "–",
+        fmtMs(latency.get(x.e)?.p50), fmtMs(latency.get(x.e)?.p95)]),
+    ];
+  };
 
   const W = 560;
   const R = 240;
@@ -2166,9 +2179,9 @@ function renderQualityPrice(rows) {
   svg.addEventListener("pointerleave", hideTip);
 }
 
-function renderLatencySummary(rows) {
+function latencyStats(rows) {
   const week = inRange(rows, WEEK_MS);
-  const stats = ENGINES.map((e) => {
+  return ENGINES.map((e) => {
     const er = week.filter((r) => r.engine === e);
     const raw = er.flatMap((r) => r.lat_ms || []);
     const fallback = er.filter((r) => !r.lat_ms?.length);
@@ -2185,6 +2198,10 @@ function renderLatencySummary(rows) {
       n: raw.length,
     };
   }).filter(Boolean);
+}
+
+function renderLatencySummary(rows) {
+  const stats = latencyStats(rows);
   const card = document.getElementById("card-latency-dumbbell");
   card._mdRows = null;
   const holderD = document.getElementById("latency-dumbbell");
@@ -2978,6 +2995,8 @@ function buildMarkdown() {
   const lines = ["# NEEDLE — search engine benchmarks"];
   const updated = document.getElementById("updated").textContent;
   if (updated) lines.push("", updated);
+  const summary = document.getElementById("card-standings")._summaryRows?.();
+  if (summary) lines.push("", "## Summary — one row per engine", "", rowsToMarkdown(summary));
   for (const card of document.querySelectorAll(".wrap .card, .wrap .lb-panel")) {
     if (card.closest("#card-runs")) {
       if (card.id === "card-runs") {

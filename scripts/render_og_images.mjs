@@ -1,16 +1,11 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { openDashboard } from "./dashboard_page.mjs";
+import { withDashboard } from "./dashboard_page.mjs";
 
 const [siteDir, outSub] = process.argv.slice(2);
 const outDir = join(resolve(siteDir), outSub);
 
-let dashboard;
-try {
-  mkdirSync(outDir, { recursive: true });
-  dashboard = await openDashboard(siteDir, { viewport: { width: 1200, height: 900 },
-                                             deviceScaleFactor: 2 });
-  const { page } = dashboard;
+async function renderImages(page) {
   await page.waitForSelector("#standings svg", { timeout: 20000 }).catch(() => {});
   await page.evaluate(() => document.fonts.ready);
   await page.addStyleTag({ content:
@@ -54,8 +49,12 @@ try {
     }
   }
   console.log(`rendered ${done}/${ids.length} og images`);
+}
+
+try {
+  mkdirSync(outDir, { recursive: true });
+  await withDashboard(siteDir, { viewport: { width: 1200, height: 900 }, deviceScaleFactor: 2 },
+                      renderImages);
 } catch (e) {
   console.error(`og image rendering failed, stubs will have no images: ${e.message}`);
-} finally {
-  await dashboard?.close();
 }

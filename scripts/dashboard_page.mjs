@@ -21,13 +21,9 @@ function serveSite(root) {
   });
 }
 
-export async function openDashboard(siteDir, pageOptions) {
+export async function withDashboard(siteDir, pageOptions, use) {
   const server = serveSite(resolve(siteDir));
   let browser;
-  const close = async () => {
-    await browser?.close();
-    server.close();
-  };
   try {
     await new Promise((r) => server.listen(0, "127.0.0.1", r));
     browser = await chromium.launch(
@@ -35,9 +31,9 @@ export async function openDashboard(siteDir, pageOptions) {
                               : { channel: "chrome" });
     const page = await browser.newPage(pageOptions);
     await page.goto(`http://127.0.0.1:${server.address().port}/`, { waitUntil: "load" });
-    return { page, close };
-  } catch (e) {
-    await close();
-    throw e;
+    return await use(page);
+  } finally {
+    await browser?.close();
+    server.close();
   }
 }
