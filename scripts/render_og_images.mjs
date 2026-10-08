@@ -1,39 +1,16 @@
-import { createServer } from "node:http";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { readFile } from "node:fs/promises";
-import { extname, join, resolve } from "node:path";
-import { chromium } from "playwright-core";
+import { join, resolve } from "node:path";
+import { openDashboard } from "./dashboard_page.mjs";
 
 const [siteDir, outSub] = process.argv.slice(2);
-const root = resolve(siteDir);
-const outDir = join(root, outSub);
+const outDir = join(resolve(siteDir), outSub);
 
-const MIME = { ".html": "text/html", ".json": "application/json",
-               ".jsonl": "application/x-ndjson", ".png": "image/png" };
-
-const server = createServer(async (req, res) => {
-  const path = decodeURIComponent(req.url.split("?")[0]);
-  const file = join(root, path === "/" ? "index.html" : path.slice(1));
-  try {
-    const data = await readFile(file);
-    res.writeHead(200, { "content-type": MIME[extname(file)] ?? "application/octet-stream" });
-    res.end(data);
-  } catch {
-    res.writeHead(404);
-    res.end();
-  }
-});
-
+let dashboard;
 try {
   mkdirSync(outDir, { recursive: true });
-  await new Promise((r) => server.listen(0, "127.0.0.1", r));
-
-  const browser = await chromium.launch(
-    process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH }
-                            : { channel: "chrome" });
-  const page = await browser.newPage({ viewport: { width: 1200, height: 900 },
-                                       deviceScaleFactor: 2 });
-  await page.goto(`http://127.0.0.1:${server.address().port}/`, { waitUntil: "load" });
+  dashboard = await openDashboard(siteDir, { viewport: { width: 1200, height: 900 },
+                                             deviceScaleFactor: 2 });
+  const { page } = dashboard;
   await page.waitForSelector("#standings svg", { timeout: 20000 }).catch(() => {});
   await page.evaluate(() => document.fonts.ready);
   await page.addStyleTag({ content:
@@ -77,9 +54,8 @@ try {
     }
   }
   console.log(`rendered ${done}/${ids.length} og images`);
-  await browser.close();
 } catch (e) {
   console.error(`og image rendering failed, stubs will have no images: ${e.message}`);
 } finally {
-  server.close();
+  await dashboard?.close();
 }

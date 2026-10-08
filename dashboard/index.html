@@ -578,7 +578,7 @@
       outer ring) per vertical, farther out is better; click a table row to
       toggle an engine &middot;
       <span class="hint" title="The hatched band is performance no single engine currently captures; the orange % is the gap between today's best engine and ultimate.">hatched band?</span></div>
-    <div id="standings"></div>
+    <div id="standings" data-static></div>
   </div>
 
   <div class="card" id="card-leaderboards" data-tools>
@@ -598,32 +598,32 @@
     <div class="lb-panel active" id="card-lb-overall" role="tabpanel">
       <h2>Overall — 7-day mean</h2>
       <div class="sub" id="lb-overall-sub"></div>
-      <div id="lb-overall"></div>
+      <div id="lb-overall" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-scholar" role="tabpanel">
       <h2><span class="vert" data-vert="scholar"></span> — 7-day mean</h2>
       <div class="sub" id="lb-scholar-sub"></div>
-      <div id="lb-scholar"></div>
+      <div id="lb-scholar" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-fresh" role="tabpanel">
       <h2><span class="vert" data-vert="news"></span> — 7-day mean</h2>
       <div class="sub" id="lb-fresh-sub"></div>
-      <div id="lb-fresh"></div>
+      <div id="lb-fresh" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-company" role="tabpanel">
       <h2><span class="vert" data-vert="finance"></span> — 7-day mean</h2>
       <div class="sub" id="lb-company-sub"></div>
-      <div id="lb-company"></div>
+      <div id="lb-company" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-rare" role="tabpanel">
       <h2><span class="vert" data-vert="agentic_rare"></span> — 7-day mean</h2>
       <div class="sub" id="lb-rare-sub"></div>
-      <div id="lb-rare"></div>
+      <div id="lb-rare" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-legal" role="tabpanel">
       <h2><span class="vert" data-vert="legal"></span> — 7-day mean</h2>
       <div class="sub" id="lb-legal-sub"></div>
-      <div id="lb-legal"></div>
+      <div id="lb-legal" data-static></div>
     </div>
   </div>
 
@@ -732,12 +732,12 @@
   <div class="card" id="card-quality-price" data-tools>
     <h2>Overall quality vs price</h2>
     <div class="sub" id="quality-price-sub"></div>
-    <div id="quality-price"></div>
+    <div id="quality-price" data-static></div>
   </div>
   <div class="card" id="card-prices" data-tools>
     <h2>Price per 1,000 queries</h2>
     <div class="sub" id="prices-sub"></div>
-    <div id="prices-table"></div>
+    <div id="prices-table" data-static></div>
   </div>
 
   <h2 class="section-title" id="sec-latency">Search latency</h2>
@@ -747,7 +747,7 @@
     <h2>Search latency — last 7 days</h2>
     <div class="sub">p50 (filled) to p95 (open), successful calls, log
       scale; hover for values (<a href="#app-protocol">Appendix C</a>)</div>
-    <div id="latency-dumbbell"></div>
+    <div id="latency-dumbbell" data-static></div>
   </div>
 
   <h2 class="section-title" id="sec-overlap">Index independence</h2>
@@ -2955,13 +2955,12 @@ function rowsToMarkdown(rows) {
 }
 
 function cardRows(card) {
-  const clean = (s) => String(s).replace(/\s+/g, " ").trim();
   const table = card.querySelector("table");
   const rows = card._mdRows?.() ?? (table
     ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
     : null);
   if (!rows?.length) return null;
-  const keep = rows[0].map((_, i) => rows.some((r) => clean(r[i])));
+  const keep = rows[0].map((_, i) => rows.some((r) => String(r[i]).trim()));
   return rows.map((r) => r.filter((_, i) => keep[i]));
 }
 
