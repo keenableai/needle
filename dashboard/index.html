@@ -516,7 +516,7 @@
     <div class="fm">
       <p class="lastrun"><span id="updated"></span>
         <span class="cadence">News runs each hour; all other suites run
-        each day. Times are UTC.</span></p>
+        each day. Times are UTC.</span><span id="results-link"></span></p>
       <p>NEEDLE (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
         <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is a
         live open-source search benchmark. It compares search engines with
@@ -578,7 +578,7 @@
       outer ring) per vertical, farther out is better; click a table row to
       toggle an engine &middot;
       <span class="hint" title="The hatched band is performance no single engine currently captures; the orange % is the gap between today's best engine and ultimate.">hatched band?</span></div>
-    <div id="standings"></div>
+    <div id="standings" data-static></div>
   </div>
 
   <div class="card" id="card-leaderboards" data-tools>
@@ -598,32 +598,32 @@
     <div class="lb-panel active" id="card-lb-overall" role="tabpanel">
       <h2>Overall — 7-day mean</h2>
       <div class="sub" id="lb-overall-sub"></div>
-      <div id="lb-overall"></div>
+      <div id="lb-overall" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-scholar" role="tabpanel">
       <h2><span class="vert" data-vert="scholar"></span> — 7-day mean</h2>
       <div class="sub" id="lb-scholar-sub"></div>
-      <div id="lb-scholar"></div>
+      <div id="lb-scholar" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-fresh" role="tabpanel">
       <h2><span class="vert" data-vert="news"></span> — 7-day mean</h2>
       <div class="sub" id="lb-fresh-sub"></div>
-      <div id="lb-fresh"></div>
+      <div id="lb-fresh" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-company" role="tabpanel">
       <h2><span class="vert" data-vert="finance"></span> — 7-day mean</h2>
       <div class="sub" id="lb-company-sub"></div>
-      <div id="lb-company"></div>
+      <div id="lb-company" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-rare" role="tabpanel">
       <h2><span class="vert" data-vert="agentic_rare"></span> — 7-day mean</h2>
       <div class="sub" id="lb-rare-sub"></div>
-      <div id="lb-rare"></div>
+      <div id="lb-rare" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-legal" role="tabpanel">
       <h2><span class="vert" data-vert="legal"></span> — 7-day mean</h2>
       <div class="sub" id="lb-legal-sub"></div>
-      <div id="lb-legal"></div>
+      <div id="lb-legal" data-static></div>
     </div>
   </div>
 
@@ -732,12 +732,12 @@
   <div class="card" id="card-quality-price" data-tools>
     <h2>Overall quality vs price</h2>
     <div class="sub" id="quality-price-sub"></div>
-    <div id="quality-price"></div>
+    <div id="quality-price" data-static></div>
   </div>
   <div class="card" id="card-prices" data-tools>
     <h2>Price per 1,000 queries</h2>
     <div class="sub" id="prices-sub"></div>
-    <div id="prices-table"></div>
+    <div id="prices-table" data-static></div>
   </div>
 
   <h2 class="section-title" id="sec-latency">Search latency</h2>
@@ -747,7 +747,7 @@
     <h2>Search latency — last 7 days</h2>
     <div class="sub">p50 (filled) to p95 (open), successful calls, log
       scale; hover for values (<a href="#app-protocol">Appendix C</a>)</div>
-    <div id="latency-dumbbell"></div>
+    <div id="latency-dumbbell" data-static></div>
   </div>
 
   <h2 class="section-title" id="sec-overlap">Index independence</h2>
@@ -1721,6 +1721,7 @@ function renderStandings(rows) {
   const holder = document.getElementById("standings");
   holder.replaceChildren();
   card._mdRows = null;
+  card._summaryRows = null;
   const { ult, entries } = shareEntries(rows);
   if (!entries.length) {
     holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
@@ -1738,18 +1739,30 @@ function renderStandings(rows) {
     }
     best.push(m);
   }
+  const header = ["engine", "overall", "overall 95% CI",
+    ...STANDINGS_BENCHES.map(([b]) => verticalName(b))];
+  const engineRow = (x) => {
+    const c = boot.get(x.e);
+    return [displayName(x.e), fmtPct(x.overall),
+      c ? `[${fmtPct(c.lo)}, ${fmtPct(c.hi)}]` : "–",
+      ...x.shares.map((s) => s ? fmtPct(s.share) : "–")];
+  };
   card._mdRows = () => [
-    ["engine", "overall", "overall 95% CI", ...STANDINGS_BENCHES.map(([b]) => verticalName(b))],
+    header,
     ["ultimate (raw)", "100%", "", ...ult.map((u) => u == null ? "–" : fmt3(u))],
     ["gap to ultimate", best[0] == null ? "–" : `−${Math.round((1 - best[0]) * 100)}%`, "",
       ...best.slice(1).map((m) => m == null ? "–" : `−${Math.round((1 - m) * 100)}%`)],
-    ...entries.map((x) => {
-      const c = boot.get(x.e);
-      return [displayName(x.e), fmtPct(x.overall),
-        c ? `[${fmtPct(c.lo)}, ${fmtPct(c.hi)}]` : "–",
-        ...x.shares.map((s) => s ? fmtPct(s.share) : "–")];
-    }),
+    ...entries.map(engineRow),
   ];
+  card._summaryRows = () => {
+    const latency = new Map(latencyStats(rows).map((s) => [s.e, s]));
+    return [
+      [...header, "$ / 1k queries", "p50 latency", "p95 latency"],
+      ...entries.map((x) => [...engineRow(x),
+        PRICES.has(x.e) ? fmtUsd(PRICES.get(x.e).usd) : "–",
+        fmtMs(latency.get(x.e)?.p50), fmtMs(latency.get(x.e)?.p95)]),
+    ];
+  };
 
   const W = 560;
   const R = 240;
@@ -2166,9 +2179,9 @@ function renderQualityPrice(rows) {
   svg.addEventListener("pointerleave", hideTip);
 }
 
-function renderLatencySummary(rows) {
+function latencyStats(rows) {
   const week = inRange(rows, WEEK_MS);
-  const stats = ENGINES.map((e) => {
+  return ENGINES.map((e) => {
     const er = week.filter((r) => r.engine === e);
     const raw = er.flatMap((r) => r.lat_ms || []);
     const fallback = er.filter((r) => !r.lat_ms?.length);
@@ -2185,6 +2198,10 @@ function renderLatencySummary(rows) {
       n: raw.length,
     };
   }).filter(Boolean);
+}
+
+function renderLatencySummary(rows) {
+  const stats = latencyStats(rows);
   const card = document.getElementById("card-latency-dumbbell");
   card._mdRows = null;
   const holderD = document.getElementById("latency-dumbbell");
@@ -2954,6 +2971,16 @@ function rowsToMarkdown(rows) {
   return lines.join("\n");
 }
 
+function cardRows(card) {
+  const table = card.querySelector("table");
+  const rows = card._mdRows?.() ?? (table
+    ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
+    : null);
+  if (!rows?.length) return null;
+  const keep = rows[0].map((_, i) => rows.some((r) => String(r[i]).trim()));
+  return rows.map((r) => r.filter((_, i) => keep[i]));
+}
+
 function buildMarkdown() {
   drawAllTrends?.();
   const clean = (s) => s.replace(/\s+/g, " ").trim();
@@ -2968,6 +2995,8 @@ function buildMarkdown() {
   const lines = ["# NEEDLE — search engine benchmarks"];
   const updated = document.getElementById("updated").textContent;
   if (updated) lines.push("", updated);
+  const summary = document.getElementById("card-standings")._summaryRows?.();
+  if (summary) lines.push("", "## Summary — one row per engine", "", rowsToMarkdown(summary));
   for (const card of document.querySelectorAll(".wrap .card, .wrap .lb-panel")) {
     if (card.closest("#card-runs")) {
       if (card.id === "card-runs") {
@@ -2978,14 +3007,7 @@ function buildMarkdown() {
       continue;
     }
     if (card.querySelector(".lb-panel")) continue;
-    const table = card.querySelector("table");
-    let rows = card._mdRows?.() ?? (table
-      ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
-      : null);
-    if (rows) {
-      const keep = rows[0].map((_, i) => rows.some((r) => clean(r[i])));
-      rows = rows.map((r) => r.filter((_, i) => keep[i]));
-    }
+    const rows = cardRows(card);
     const prose = rows ? [] : [...card.querySelectorAll(".prose p")];
     if (!rows && !prose.length) continue;
     lines.push("", `## ${card.querySelector("h2").textContent}`);

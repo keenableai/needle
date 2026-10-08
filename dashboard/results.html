@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Web search API benchmark: {{ENGINES}} engines compared on quality, price and latency | NEEDLE</title>
+<meta name="description" content="Results of NEEDLE, an open-source benchmark of {{ENGINES}} web search APIs for AI agents: quality in {{VERTICAL_COUNT}} verticals, price per 1,000 queries, and latency. {{UPDATED}}">
+<link rel="canonical" href="{{BASE}}results/">
+<link rel="alternate" type="text/markdown" href="../results.md" title="NEEDLE results as Markdown">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NEEDLE">
+<meta property="og:title" content="Web search API benchmark: {{ENGINES}} engines compared">
+<meta property="og:description" content="Quality in {{VERTICAL_COUNT}} verticals, price per 1,000 queries, and latency. {{UPDATED}}">
+<meta property="og:url" content="{{BASE}}results/">
+<meta property="og:image" content="{{BASE}}og/card-standings.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "Dataset",
+ "name": "NEEDLE web search API benchmark results",
+ "description": "Quality, price per 1,000 queries, and latency of web search APIs for AI agents, measured each day in {{VERTICAL_COUNT}} verticals: {{VERTICALS}}.",
+ "url": "{{BASE}}results/",
+ "dateModified": "{{LAST_RUN}}",
+ "license": "https://opensource.org/license/mit",
+ "creator": {"@type": "Organization", "name": "Keenable", "url": "https://keenable.ai"},
+ "isAccessibleForFree": true,
+ "distribution": [
+  {"@type": "DataDownload", "encodingFormat": "text/markdown", "contentUrl": "{{BASE}}results.md"}]}
+</script>
+<style>
+  :root { color-scheme: light dark; --page: #FFFFFF; --text-primary: #2A2A2A;
+          --text-secondary: #646464; --grid: #DDDDDD; --link: #0A57E8; }
+  @media (prefers-color-scheme: dark) {
+    :root { --page: #111111; --text-primary: #E6E6E6; --text-secondary: #A6A6A6;
+            --grid: #333333; --link: #74A6FF; }
+  }
+  body { margin: 0; background: var(--page); color: var(--text-primary);
+         font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1040px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 8px; }
+  h2 { font-size: 18px; margin: 32px 0 8px; }
+  a { color: var(--link); }
+  .updated, dd, .links { color: var(--text-secondary); }
+  .scroll { overflow-x: auto; margin: 24px 0 8px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: 6px 10px; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--text-secondary); font-weight: 500; font-size: 13px; }
+  dt { font-weight: 600; margin-top: 10px; }
+  dd { margin: 2px 0 0; }
+</style>
+</head>
+<body>
+<main>
+<h1>Web search API benchmark results</h1>
+<p class="updated">{{UPDATED}} The table updates after each benchmark run.</p>
+<p>NEEDLE is an open-source benchmark of web search APIs for AI agents, run by
+  <a href="https://keenable.ai">Keenable</a>. Each engine gets the same queries in {{VERTICAL_COUNT}}
+  verticals: {{VERTICALS}}. An LLM judge or a match against known answers
+  scores the top results of each engine. A score is the share of the best result list that all engines found
+  together, so 100% is the ceiling.</p>
+<div class="scroll">{{TABLE}}</div>
+<h2>Columns</h2>
+<dl>
+  <dt>overall</dt>
+  <dd>Mean share of the ceiling across the verticals where the engine has a score, over the last
+    7 days, with a 95% confidence interval. A dash marks a vertical with no score.</dd>
+  <dt>{{VERTICALS}}</dt>
+  <dd>Share of the ceiling in each vertical over the last 7 days.</dd>
+  <dt>$ / 1k queries</dt>
+  <dd>Lowest public self-serve price per 1,000 queries, without enterprise quotes; collected {{PRICES_ASOF}}. The plan behind each price is in the
+    <a href="../#card-prices">price table</a>.</dd>
+  <dt>p50 latency, p95 latency</dt>
+  <dd>Search latency of successful calls over the last 7 days, one request at a time.</dd>
+</dl>
+<p class="links"><a href="../">Full dashboard</a> ·
+  <a href="../#app-protocol">Methodology</a> ·
+  <a href="../results.md">All tables as Markdown</a> ·
+  <a href="https://github.com/keenableai/needle">Source code</a> ·
+  <a href="https://huggingface.co/datasets/keenable-ai/needle-results">Raw results</a></p>
+</main>
+</body>
+</html>
