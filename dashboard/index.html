@@ -2954,6 +2954,17 @@ function rowsToMarkdown(rows) {
   return lines.join("\n");
 }
 
+function cardRows(card) {
+  const clean = (s) => String(s).replace(/\s+/g, " ").trim();
+  const table = card.querySelector("table");
+  const rows = card._mdRows?.() ?? (table
+    ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
+    : null);
+  if (!rows?.length) return null;
+  const keep = rows[0].map((_, i) => rows.some((r) => clean(r[i])));
+  return rows.map((r) => r.filter((_, i) => keep[i]));
+}
+
 function buildMarkdown() {
   drawAllTrends?.();
   const clean = (s) => s.replace(/\s+/g, " ").trim();
@@ -2978,14 +2989,7 @@ function buildMarkdown() {
       continue;
     }
     if (card.querySelector(".lb-panel")) continue;
-    const table = card.querySelector("table");
-    let rows = card._mdRows?.() ?? (table
-      ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
-      : null);
-    if (rows) {
-      const keep = rows[0].map((_, i) => rows.some((r) => clean(r[i])));
-      rows = rows.map((r) => r.filter((_, i) => keep[i]));
-    }
+    const rows = cardRows(card);
     const prose = rows ? [] : [...card.querySelectorAll(".prose p")];
     if (!rows && !prose.length) continue;
     lines.push("", `## ${card.querySelector("h2").textContent}`);
