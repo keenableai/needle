@@ -16,6 +16,7 @@ from needle.shared.search import (
     JinaClient,
     KagiClient,
     KeenableClient,
+    LinkupClient,
     OctenClient,
     ParallelClient,
     PerplexityClient,
@@ -503,6 +504,35 @@ async def test_tavily_maps_fields_and_builds_body(monkeypatch):
     assert results[0].snippet == "ca"
     assert results[0].published_date == "2026-07-01"
     assert calls["json"] == {"query": "hi", "max_results": 20, "search_depth": "basic"}
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_linkup_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "results": [
+            {"type": "image", "name": "pic", "url": "https://img", "content": ""},
+            {"type": "text", "name": "A &amp; B", "url": "https://a", "content": "it&#x27;s ca"},
+            {"type": "text", "name": "B", "url": "https://b", "content": "cb"},
+            {"type": "text", "name": "no url", "content": "x"},
+        ]
+    }
+    c = LinkupClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=1)
+    assert err is None
+    assert [r.url for r in results] == ["https://a"]
+    assert results[0].title == "A & B"
+    assert results[0].snippet == "it's ca"
+    assert results[0].published_date is None
+    assert calls["url"] == "https://api.linkup.so/v1/search"
+    assert calls["json"] == {
+        "q": "hi",
+        "depth": "standard",
+        "outputType": "searchResults",
+        "maxResults": 1,
+    }
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
@@ -1238,6 +1268,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("BRAVE_API_KEY", "bk")
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
     monkeypatch.setenv("TAVILY_API_KEY", "tk")
+    monkeypatch.setenv("LINKUP_API_KEY", "lk")
     monkeypatch.setenv("PERPLEXITY_API_KEY", "xk")
     monkeypatch.setenv("OCTEN_API_KEY", "ok")
     monkeypatch.setenv("CERAMIC_API_KEY", "ck")
@@ -1258,6 +1289,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "brave",
             "parallel",
             "tavily",
+            "linkup",
             "perplexity",
             "perplexity-fast",
             "octen",
@@ -1278,6 +1310,9 @@ def test_factory_builds_new_engines(monkeypatch):
     assert isinstance(clients["brave"], BraveClient)
     assert isinstance(clients["parallel"], ParallelClient)
     assert isinstance(clients["tavily"], TavilyClient)
+    assert isinstance(clients["linkup"], LinkupClient)
+    assert clients["linkup"].api_key == "lk"
+    assert clients["linkup"].depth == "standard"
     assert isinstance(clients["perplexity"], PerplexityClient)
     assert clients["perplexity"].api_key == "xk"
     assert clients["perplexity"].search_type is None
@@ -1672,6 +1707,17 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
                 "include_domains": ["sec.gov"],
                 "start_date": "2026-06-01",
                 "end_date": "2026-06-30",
+            },
+        ),
+        (
+            lambda: LinkupClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "q": "acme filing",
+                "includeDomains": ["sec.gov"],
+                "fromDate": "2026-06-01",
+                "toDate": "2026-06-30",
             },
         ),
         (

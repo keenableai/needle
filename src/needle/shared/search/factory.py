@@ -13,6 +13,7 @@ from needle.shared.search.firecrawl import FirecrawlClient
 from needle.shared.search.jina import JinaClient
 from needle.shared.search.kagi import KagiClient
 from needle.shared.search.keenable import KeenableClient
+from needle.shared.search.linkup import LinkupClient
 from needle.shared.search.octen import OctenClient
 from needle.shared.search.parallel import ParallelClient
 from needle.shared.search.perplexity import PerplexityClient
@@ -93,6 +94,10 @@ def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:
     return TavilyClient(api_key=api_key or "", search_depth=os.environ.get("TAVILY_DEPTH", "basic"))
 
 
+def _build_linkup(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return LinkupClient(api_key=api_key or "", depth=os.environ.get("LINKUP_DEPTH", "standard"))
+
+
 def _build_tinyfish(api_key: str | None, snippet_chars: int) -> SearchClient:
     return TinyFishClient(api_key=api_key or "")
 
@@ -157,6 +162,7 @@ ENGINES: dict[str, EngineSpec] = {
         key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity("fast")
     ),
     "tavily": EngineSpec(key_env="TAVILY_API_KEY", key_required=True, build=_build_tavily),
+    "linkup": EngineSpec(key_env="LINKUP_API_KEY", key_required=True, build=_build_linkup),
     "tinyfish": EngineSpec(key_env="TINYFISH_API_KEY", key_required=True, build=_build_tinyfish),
     "octen": EngineSpec(key_env="OCTEN_API_KEY", key_required=True, build=_build_octen),
     "ceramic": EngineSpec(key_env="CERAMIC_API_KEY", key_required=True, build=_build_ceramic),
