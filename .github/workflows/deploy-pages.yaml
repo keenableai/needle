@@ -26,6 +26,7 @@ jobs:
           path: _src
           sparse-checkout: |
             dashboard/index.html
+            dashboard/results.html
             scripts/dashboard_page.mjs
             scripts/gen_og_stubs.py
             scripts/render_og_images.mjs
