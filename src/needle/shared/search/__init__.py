@@ -19,6 +19,7 @@ from needle.shared.search.firecrawl import FirecrawlClient
 from needle.shared.search.jina import JinaClient
 from needle.shared.search.kagi import KagiClient
 from needle.shared.search.keenable import KeenableClient
+from needle.shared.search.linkup import LinkupClient
 from needle.shared.search.octen import OctenClient
 from needle.shared.search.parallel import ParallelClient
 from needle.shared.search.perplexity import PerplexityClient
@@ -42,6 +43,7 @@ __all__ = [
     "JinaClient",
     "KagiClient",
     "KeenableClient",
+    "LinkupClient",
     "OctenClient",
     "ParallelClient",
     "PerplexityClient",
