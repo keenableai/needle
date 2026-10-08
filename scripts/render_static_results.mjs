@@ -11,6 +11,9 @@ const RESULTS_LINK =
   ' <a href="results/">Results table</a> · <a href="results.md">all tables as Markdown</a>.';
 const MARKDOWN_ONLY_LINK = ' <a href="results.md">All tables as Markdown</a>.';
 
+const warn = (message) =>
+  console.log(`::warning title=Static results::${message.replace(/%/g, "%25")}`);
+
 const fillEmptyElement = (doc, id, inner) => {
   let found = 0;
   const filled = doc.replace(new RegExp(`<(div|span)\\b[^>]*\\bid="${id}"[^>]*>(?=</\\1>)`, "g"),
@@ -104,9 +107,10 @@ try {
   await writeFile(join(root, "results.md"), snapshot.markdown);
   await writeFile(indexPath, doc);
   for (const id of snapshot.missing) console.error(`no rows for #${id}, left empty`);
+  if (!resultsPage) warn("no standings in the last 7 days, results/ not written");
   console.log(`filled ${Object.keys(snapshot.html).length} elements; wrote `
     + (resultsPage ? `results/ (${snapshot.engines} engines)` : "no results/ (no standings)")
     + " and results.md");
 } catch (e) {
-  console.error(`static results failed, index.html left as is: ${e.message.split("\n")[0]}`);
+  warn(`static results failed, index.html left as is: ${e.message.split("\n")[0]}`);
 }
