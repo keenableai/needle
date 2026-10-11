@@ -19,6 +19,7 @@ needle <benchmark> run --queries queries.jsonl ...    # evaluate engines on them
 | [`scholar`](#scholar) | known-item paper retrieval: by title vs. by a full-text-only detail | recall@K + MRR@K by paper-id match |
 | [`legal`](#legal) | known-item caselaw / CFR retrieval | recall@K + MRR@K by citation/docket/URL identity |
 | [`agentic_rare`](#agentic_rare) | English rare-word queries sampled from a filtered query stream | LLM relevance judge → nDCG@5 |
+| [`haystack`](#haystack) | questions about facts buried deep in long documents (Federal Register, SEC 10-Ks, Wikipedia, arXiv) | answer-recall@K + MRR@K, deterministic (optional LLM backstop) |
 
 Each bench generates gold on demand from public sources; the repo commits
 none of it. `agentic_rare` differs: it is a query producer plus a news-style
@@ -36,7 +37,7 @@ The CLI loads `.env` from the working directory (copy
 
 | Variable | Purpose |
 | --- | --- |
-| `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`) and judging |
+| `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`, haystack) and judging |
 | `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `LINKUP_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY`, `FIRECRAWL_API_KEY`, `TINYFISH_API_KEY`, `KAGI_API_KEY`, `JINA_API_KEY`, `CONTEXT_DEV_API_KEY` (`context`), `ANTHROPIC_API_KEY` (`claude-search`), `OPENAI_API_KEY` (`chatgpt-search`) | one per engine, required when that engine is in `--engines` |
 | `KEENABLE_API_KEY` | optional — without it the CLI uses the keyless, rate-limited endpoint |
 | `NEEDLE_LLM_MODEL`, `NEEDLE_JUDGE_MODEL` | both default to `openai/gpt-5.6-terra`; `--llm-model` / `--judge-model` override |
@@ -191,6 +192,40 @@ result URLs and snippets for reporter citations, docket numbers (scored only
 next to a gold party token), CourtListener/Justia URLs, and CFR citations;
 it breaks down by suite, syntax, and court.
 
+## haystack
+
+Natural-language questions about facts buried deep in long public
+documents. Like finance, the score asks whether top-K results *contain
+the answer*, not whether they hit one pinned URL.
+
+```bash
+needle haystack generate --per-suite 15 --out haystack.jsonl
+needle haystack run --queries haystack.jsonl --judge --out haystack.json
+```
+
+Four suites (`--suites`): **`gov`** — recent Federal Register final
+rules; **`sec`** — 10-K primary documents from EDGAR, companies sampled
+from the SEC ticker registry; **`wiki`** — Wikipedia featured articles;
+**`arxiv`** — recent arXiv HTML full texts across four domains. All
+sources are keyless.
+
+`generate` keeps only documents of 30k+ characters, takes a 7k-character
+excerpt starting past the 55% mark, and asks an LLM for a question plus
+a verbatim answer span typed as one of person, entity, year, money,
+numeric_band, or exact_id. Gates reject the pair when the span is not
+verbatim in the excerpt, the answer already matches against the title
+plus the first 4k characters (so the question would not require depth),
+the answer leaks into the question, or the question cites a document
+identifier (accession number, arXiv id, CFR cite, FR document number).
+~50% of `gov`/`sec`/`arxiv` queries carry operator syntax (`site:`,
+`after:`/`before:`); `wiki` has no publish date, so only `site:`.
+
+`run` scores exactly like finance: the deterministic matcher scans top-K
+titles and snippets for the answer, `--judge` adds the upgrade-only LLM
+backstop, and the report breaks down by suite, syntax, answer type, and
+depth band. Snippet-only checks give a lower bound, the same for every
+engine.
+
 ## agentic_rare
 
 A query producer plus a news-style eval for English rare-word queries.
@@ -246,7 +281,8 @@ the overlap and uniqueness stats exclude it.
 [`bench.yaml`](.github/workflows/bench.yaml) runs against all registered
 engines: news hourly (`--limit 20`); daily with fresh gold — finance 00:17
 UTC (`--limit 120 --judge`), agentic_rare 06:17 (`--limit 100`), scholar
-12:17 (`--per-cell 7`), legal 18:17. Gold lives on `gh-pages` between runs;
+12:17 (`--per-cell 7`), legal 18:17, haystack 21:17 (`--limit 60
+--judge`). Gold lives on `gh-pages` between runs;
 a daily bench also runs off-schedule when a manual dispatch selects it or
 when its gold file is missing. Each bench is its own job and publishes its
 own run, so a slow daily bench never delays the hourly news result. Each

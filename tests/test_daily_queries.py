@@ -45,3 +45,7 @@ def test_rare_rows_fallback_shape():
     assert daily_queries._rare_rows("2026-08-06T0732Z", report) == [
         {"run_id": "2026-08-06T0732Z", "bench": "agentic_rare", "query_text": "rare one"}
     ]
+
+
+def test_benches_include_haystack():
+    assert ("haystack", "haystack.jsonl", ("haystack.json",)) in daily_queries.BENCHES

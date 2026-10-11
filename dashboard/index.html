@@ -12,11 +12,11 @@
   } catch {}
 </script>
 <title>NEEDLE — search engine benchmarks</title>
-<meta name="description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta name="description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, legal, and deep-document suites compare public search APIs.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEEDLE">
 <meta property="og:title" content="NEEDLE — search engine benchmarks">
-<meta property="og:description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta property="og:description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, legal, and deep-document suites compare public search APIs.">
 <meta property="og:url" content="https://keenableai.github.io/needle/">
 <meta property="og:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -368,7 +368,7 @@
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
   .overlap-matrix, #fields-table, #history-table, .bar-table, #prices-table,
-  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
+  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal, #lb-haystack,
   #app-queries, #app-metrics, #app-engines, #app-data { overflow-x: auto; }
   #card-standings { max-width: var(--measure); }
   #standings .st-layout { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
@@ -522,7 +522,7 @@
       <p>NEEDLE (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
         <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is a
         live open-source search benchmark. It compares search engines with
-        queries that model agent behavior. The five verticals match
+        queries that model agent behavior. The six verticals match
         the use cases we see each day in Keenable's own search
         traffic:</p>
       <ul>
@@ -541,6 +541,9 @@
           agentic search logs</li>
         <li><b><span class="vert" data-vert="legal"></span>:</b> find a specific court opinion or section of the
           Code of Federal Regulations</li>
+        <li><b><span class="vert" data-vert="haystack"></span>:</b> questions about facts buried deep in long
+          documents: Federal Register rules, SEC filings, Wikipedia
+          featured articles, and arXiv full texts</li>
       </ul>
       <p><b>Methodology.</b> Each engine in a run receives the same query
         text. We score each engine on the ranking, titles, and snippets
@@ -560,7 +563,9 @@
         exactly&nbsp;1, with a penalty for duplicate
         URLs. <span class="vert" data-vert="finance"></span> measures if the answer text reaches the
         agent: we scan the top-5 titles and snippets and report
-        answer-recall@5 with MRR@5. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are
+        answer-recall@5 with MRR@5, and <span class="vert" data-vert="haystack"></span> applies the same
+        answer-recall@5 to facts from deep inside long
+        documents. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are
         known-item tasks: we match identifiers and report recall@10 and
         recall@5 with MRR. <a href="#app-metrics">Appendix D</a> gives the exact
         definitions.</p>
@@ -586,7 +591,7 @@
   <div class="card" id="card-leaderboards" data-tools>
     <h2 id="sec-leaderboards">7-day leaderboards</h2>
     <div class="sub">Query-weighted 7-day means with a 95% CI;
-      <span class="hint" title="title, body, clue, and tot for Scholar; filings and filingdoc for Finance; caselaw and code for Legal">suite columns</span>
+      <span class="hint" title="title, body, clue, and tot for Scholar; filings and filingdoc for Finance; caselaw and code for Legal; gov, sec, wiki, and arxiv for Haystack">suite columns</span>
       split the score.</div>
     <div class="lb-tabs" id="lb-tabs" role="tablist" aria-label="Bench leaderboards">
       <button role="tab" aria-selected="true" class="active" data-panel="card-lb-overall">Overall</button>
@@ -595,6 +600,7 @@
       <button role="tab" aria-selected="false" data-panel="card-lb-company"><span class="vert" data-vert="finance"></span></button>
       <button role="tab" aria-selected="false" data-panel="card-lb-rare"><span class="vert" data-vert="agentic_rare"></span></button>
       <button role="tab" aria-selected="false" data-panel="card-lb-legal"><span class="vert" data-vert="legal"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-haystack"><span class="vert" data-vert="haystack"></span></button>
       <div id="lb-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-lb-overall" role="tabpanel">
@@ -627,6 +633,11 @@
       <div class="sub" id="lb-legal-sub"></div>
       <div id="lb-legal"></div>
     </div>
+    <div class="lb-panel" id="card-lb-haystack" role="tabpanel">
+      <h2><span class="vert" data-vert="haystack"></span> — 7-day mean</h2>
+      <div class="sub" id="lb-haystack-sub"></div>
+      <div id="lb-haystack"></div>
+    </div>
   </div>
 
   <h2 class="section-title" id="sec-trends">Slices over time</h2>
@@ -643,6 +654,7 @@
       <button role="tab" aria-selected="false" data-panel="trend-finance"><span class="vert" data-vert="finance"></span></button>
       <button role="tab" aria-selected="false" data-panel="trend-rare"><span class="vert" data-vert="agentic_rare"></span></button>
       <button role="tab" aria-selected="false" data-panel="trend-legal"><span class="vert" data-vert="legal"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-haystack"><span class="vert" data-vert="haystack"></span></button>
       <div class="tab-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="trend-scholar" role="tabpanel">
@@ -726,6 +738,36 @@
       <div class="lb-panel" id="trend-legal-code" role="tabpanel">
         <h2><span class="vert" data-vert="legal"></span> — code recall@5 over time</h2>
         <div class="sub">recall@5 on CFR sections found from their regulatory substance</div>
+      </div>
+    </div>
+    <div class="lb-panel" id="trend-haystack" role="tabpanel">
+      <div class="lb-tabs" role="tablist" aria-label="Haystack slices">
+        <button role="tab" aria-selected="true" class="active" data-panel="trend-haystack-recall">overview</button>
+        <button role="tab" aria-selected="false" data-panel="trend-haystack-gov">gov</button>
+        <button role="tab" aria-selected="false" data-panel="trend-haystack-sec">sec</button>
+        <button role="tab" aria-selected="false" data-panel="trend-haystack-wiki">wiki</button>
+        <button role="tab" aria-selected="false" data-panel="trend-haystack-arxiv">arxiv</button>
+        <div class="tab-ind" aria-hidden="true"></div>
+      </div>
+      <div class="lb-panel active" id="trend-haystack-recall" role="tabpanel">
+        <h2><span class="vert" data-vert="haystack"></span> — answer-recall@5 over time</h2>
+        <div class="sub">answer-recall@5, deep-document questions per run across all suites</div>
+      </div>
+      <div class="lb-panel" id="trend-haystack-gov" role="tabpanel">
+        <h2><span class="vert" data-vert="haystack"></span> — gov recall@5 over time</h2>
+        <div class="sub">answer-recall@5 on facts from deep inside Federal Register rules</div>
+      </div>
+      <div class="lb-panel" id="trend-haystack-sec" role="tabpanel">
+        <h2><span class="vert" data-vert="haystack"></span> — sec recall@5 over time</h2>
+        <div class="sub">answer-recall@5 on facts from deep inside SEC filings</div>
+      </div>
+      <div class="lb-panel" id="trend-haystack-wiki" role="tabpanel">
+        <h2><span class="vert" data-vert="haystack"></span> — wiki recall@5 over time</h2>
+        <div class="sub">answer-recall@5 on facts from deep inside Wikipedia featured articles</div>
+      </div>
+      <div class="lb-panel" id="trend-haystack-arxiv" role="tabpanel">
+        <h2><span class="vert" data-vert="haystack"></span> — arxiv recall@5 over time</h2>
+        <div class="sub">answer-recall@5 on facts from deep inside arXiv full texts</div>
       </div>
     </div>
   </div>
@@ -904,6 +946,8 @@
         <td>recent published opinions from the CourtListener API across 14 federal courts, one caption-style query per case; gold is the reporter citation, docket number with party tokens, and cluster id</td></tr>
       <tr><td><span class="vert" data-vert="legal"></span></td><td>code</td>
         <td>eCFR sections; an LLM projects each section into a query about its regulatory substance with one verbatim quoted span, rejected if it leaks the citation; gold is the "title CFR section" citation</td></tr>
+      <tr><td><span class="vert" data-vert="haystack"></span></td><td>gov / sec / wiki / arxiv</td>
+        <td>long documents (Federal Register final rules, SEC 10-K filings, Wikipedia featured articles, arXiv full texts; 30k+ characters); an LLM reads a 7k-character excerpt from past the 55% mark of the document and writes a natural-language question plus a verbatim answer span; the question is rejected if the answer already matches against the title or the first 4k characters, leaks into the question, or cites a document identifier; ~50% of gov/sec/arxiv queries carry operator syntax (site:, after:/before:)</td></tr>
     </table>
   </div>
 
@@ -930,7 +974,7 @@
         <td>DCG over the top 5 results (Σ gain(rᵢ) / log₂(i + 1), with judge ratings mapped to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0), divided by the DCG of the ideal ranking: the pooled ultimate ordering of every engine's deduplicated results, so ultimate scores exactly 1. A query is scored only if every one of its results was judged (otherwise it is dropped from the mean and counted as judge errors) and only if the pooled ideal has any gain; queries where no engine found anything relevant are excluded.</td></tr>
       <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>applied to engine ratings before scoring: a duplicate URL drops the rating to 0. The pooled ideal is already deduplicated, so no penalty applies there. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
-      <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
+      <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span>, <span class="vert" data-vert="haystack"></span></td>
         <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher, with an LLM-judge backstop for paraphrased answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
         <td>known-item: the gold opinion or CFR section identified by citation, docket (with a party-token check), CFR citation, or URL match.</td></tr>
@@ -941,7 +985,7 @@
 
   <div class="card" id="app-judge">
     <h2>Appendix E — LLM judge</h2>
-    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; <span class="vert" data-vert="finance"></span> fallback matcher only; <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are deterministic</div>
+    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; <span class="vert" data-vert="finance"></span> and <span class="vert" data-vert="haystack"></span> fallback matcher only; <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are deterministic</div>
     <div class="prose">
       <p>We judge with <code>openai/gpt-5.6-terra</code> via OpenRouter, temperature 0, one pointwise call per document. We record the model for each run as <code>judge_model</code> in its archived report. The judgement browser shows it when you select a run, so judge changes stay visible in the history.</p>
       <p>The judge does not see the engine identity. The prompt contains the query, the document title, the URL, the published date, and the snippet — not the engine name. We judge each distinct combination of URL, title, snippet, and date once per query and use that rating again where the identical result occurs for other engines. We judge the same URL with a different snippet separately, with the same blind judge and rubric.</p>
@@ -991,7 +1035,7 @@
         <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results)</td>
         <td><a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF: keenable-ai/needle-results</a>, runs/&lt;run-id&gt;/</td></tr>
       <tr><td>query files</td>
-        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, haystack.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
         <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, runs.json, ci_scores.jsonl, ci.json</td>
@@ -1072,7 +1116,8 @@ const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable"],
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
 const VERTICALS = new Map([["news", "News"], ["finance", "Finance"],
-  ["scholar", "Scholar"], ["agentic_rare", "AgenticRare"], ["legal", "Legal"]]);
+  ["scholar", "Scholar"], ["agentic_rare", "AgenticRare"], ["legal", "Legal"],
+  ["haystack", "Haystack"]]);
 const verticalName = (b) => VERTICALS.get(b) ?? b;
 
 const ENGINE_LOGOS = new Map([
@@ -1462,6 +1507,11 @@ const TREND_SLICES = [
   ["trend-legal-recall", "legal", "recall"],
   ["trend-legal-caselaw", "legal", "caselaw_recall"],
   ["trend-legal-code", "legal", "code_recall"],
+  ["trend-haystack-recall", "haystack", "recall"],
+  ["trend-haystack-gov", "haystack", "gov_recall"],
+  ["trend-haystack-sec", "haystack", "sec_recall"],
+  ["trend-haystack-wiki", "haystack", "wiki_recall"],
+  ["trend-haystack-arxiv", "haystack", "arxiv_recall"],
 ];
 
 let drawAllTrends = null;
@@ -1614,6 +1664,13 @@ function renderLeaderboards(rows) {
     ["caselaw_recall", "caselaw", "caselaw_n"],
     ["code_recall", "code", "code_n"],
   ]);
+  renderLeaderboard("lb-haystack", "lb-haystack-sub", rows, "haystack", [
+    ["recall", "recall@5"],
+    ["gov_recall", "gov", "gov_n"],
+    ["sec_recall", "sec", "sec_n"],
+    ["wiki_recall", "wiki", "wiki_n"],
+    ["arxiv_recall", "arxiv", "arxiv_n"],
+  ]);
 }
 
 const STANDINGS_BENCHES = [
@@ -1622,6 +1679,7 @@ const STANDINGS_BENCHES = [
   ["finance", "recall", "recall@5"],
   ["agentic_rare", "ndcg", "nDCG@5"],
   ["legal", "recall", "recall@5"],
+  ["haystack", "recall", "recall@5"],
 ];
 function shareEntries(rows) {
   const benchRows = STANDINGS_BENCHES.map(([bench]) => ciWindowed(rows, bench));
@@ -2766,6 +2824,7 @@ function renderFinanceRun(holder, per) {
     summary.appendChild(el("span", { class: "chip" }, pq.bucket || "?"));
     if (pq.syntax && pq.syntax !== "plain") summary.appendChild(el("span", { class: "chip" }, pq.syntax));
     if (pq.tier) summary.appendChild(el("span", { class: "chip" }, pq.tier));
+    if (pq.depth_pct) summary.appendChild(el("span", { class: "chip" }, `depth ${pq.depth_pct}%`));
     summary.appendChild(el("span", {}, pq.query));
     summary.appendChild(el("span", { class: "host" }, `gold: ${pq.value ?? "–"}`));
     summary.appendChild(el("span", { class: "score" },
@@ -2810,7 +2869,7 @@ function renderKnownItemRun(holder, per, goldKey) {
 }
 
 const LEGACY_BENCH = { freshstream: "news", companyfill: "finance", rarestream: "agentic_rare" };
-const RUN_ARTIFACT = { scholar: ["scholar.json"], news: ["ndcg.json", "rbp.json"], finance: ["recall.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], legal: ["legal.json"] };
+const RUN_ARTIFACT = { scholar: ["scholar.json"], news: ["ndcg.json", "rbp.json"], finance: ["recall.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], legal: ["legal.json"], haystack: ["haystack.json"] };
 const BENCHES = Object.keys(RUN_ARTIFACT);
 
 let runDetailSeq = 0;
@@ -2882,7 +2941,7 @@ async function renderRunDetail(runs) {
     pageSel.hidden = pages <= 1;
     const slice = per.slice(page * RUN_PAGE_SIZE, (page + 1) * RUN_PAGE_SIZE);
     holder.replaceChildren();
-    if (benchSel.value === "finance") renderFinanceRun(holder, slice);
+    if (benchSel.value === "finance" || benchSel.value === "haystack") renderFinanceRun(holder, slice);
     else if (benchSel.value === "scholar") renderKnownItemRun(holder, slice, "paper_key");
     else if (benchSel.value === "legal") renderKnownItemRun(holder, slice, "case_key");
     else renderNewsRun(holder, slice, legacyNdcg(report));
