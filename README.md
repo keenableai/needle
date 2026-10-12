@@ -203,8 +203,9 @@ needle haystack generate --per-suite 15 --out haystack.jsonl
 needle haystack run --queries haystack.jsonl --judge --out haystack.json
 ```
 
-Four suites (`--suites`): **`gov`** — recent Federal Register final
-rules; **`sec`** — 10-K primary documents from EDGAR, companies sampled
+Four suites (`--suites`): **`gov`** — Federal Register final rules
+published 7–120 days ago, so every document is old enough to be
+indexed; **`sec`** — 10-K primary documents from EDGAR, companies sampled
 from the SEC ticker registry; **`wiki`** — Wikipedia featured articles;
 **`arxiv`** — recent arXiv HTML full texts across four domains. All
 sources are keyless.

@@ -84,19 +84,28 @@ class HaystackSourceClient(HttpSearchClient):
 
 
 class FederalRegisterClient(HaystackSourceClient):
-    async def rules(self, *, pages: int = 3, per_page: int = 100) -> list[dict]:
+    async def rules(
+        self,
+        *,
+        pages: int = 3,
+        per_page: int = 100,
+        published_after: str | None = None,
+        published_before: str | None = None,
+    ) -> list[dict]:
         docs: list[dict] = []
         for page in range(1, pages + 1):
-            payload = await self._get(
-                FR_DOCUMENTS_URL,
-                params={
-                    "conditions[type][]": "RULE",
-                    "order": "newest",
-                    "per_page": per_page,
-                    "page": page,
-                    "fields[]": list(FR_FIELDS),
-                },
-            )
+            params: dict[str, Any] = {
+                "conditions[type][]": "RULE",
+                "order": "newest",
+                "per_page": per_page,
+                "page": page,
+                "fields[]": list(FR_FIELDS),
+            }
+            if published_after:
+                params["conditions[publication_date][gte]"] = published_after
+            if published_before:
+                params["conditions[publication_date][lte]"] = published_before
+            payload = await self._get(FR_DOCUMENTS_URL, params=params)
             docs.extend(parse_fr_documents(payload))
             results = payload.get("results") if isinstance(payload, dict) else None
             if not results:

@@ -42,6 +42,7 @@ class FakeFR:
         ]
 
     async def rules(self, **kwargs):
+        self.rules_kwargs = kwargs
         return self.rules_list
 
     async def document_text(self, raw_text_url):
@@ -179,6 +180,15 @@ async def test_all_suites_and_provenance_keys():
         for r in rows
         if r["query_origin"]["bucket"] == "wiki" and r["query_origin"]["syntax"] == "plain"
     )
+
+
+async def test_gov_candidates_use_publication_window():
+    fr = FakeFR()
+    await _generate(fr=fr)
+    assert fr.rules_kwargs == {
+        "published_after": "2026-06-03",
+        "published_before": "2026-09-24",
+    }
 
 
 async def test_suite_subsetting_skips_missing_clients():
