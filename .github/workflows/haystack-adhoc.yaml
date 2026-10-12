@@ -1,0 +1,49 @@
+name: Haystack ad-hoc
+
+on:
+  push:
+    branches: [haystack-adhoc-run]
+
+permissions:
+  contents: read
+
+env:
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+  EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+  KEENABLE_API_KEY: ${{ secrets.KEENABLE_API_KEY }}
+  SERPER_API_KEY: ${{ secrets.SERPER_API_KEY }}
+  SEARCHAPI_API_KEY: ${{ secrets.SEARCHAPI_API_KEY }}
+  BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
+  PARALLEL_API_KEY: ${{ secrets.PARALLEL_API_KEY }}
+  TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+  LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
+  PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+  OCTEN_API_KEY: ${{ secrets.OCTEN_API_KEY }}
+  CERAMIC_API_KEY: ${{ secrets.CERAMIC_API_KEY }}
+  YOU_API_KEY: ${{ secrets.YOU_API_KEY }}
+  FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+  TINYFISH_API_KEY: ${{ secrets.TINYFISH_API_KEY }}
+  KAGI_API_KEY: ${{ secrets.KAGI_API_KEY }}
+  JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
+  CONTEXT_DEV_API_KEY: ${{ secrets.CONTEXT_DEV_API_KEY }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,linkup,perplexity-fast,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,claude-search,chatgpt-search
+
+jobs:
+  haystack:
+    runs-on: gke-use5-amd64
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: |
+          uv run needle haystack generate --per-suite 10 --out haystack.jsonl
+          uv run needle haystack run --queries haystack.jsonl \
+            --limit 24 --engines "$ENGINES" --judge --out haystack.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: haystack-adhoc
+          path: |
+            haystack.json
+            haystack.jsonl
