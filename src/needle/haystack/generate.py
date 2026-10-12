@@ -23,6 +23,7 @@ from needle.shared.sampling import dedupe_by, shuffle_indices
 
 SEC_FORMS = frozenset({"10-K"})
 SEC_SEED_ROWS = 1000
+GOV_WINDOW_DAYS = (120, 7)
 ARXIV_WINDOW_DAYS = (30, 3)
 ARXIV_PER_DOMAIN = 60
 
@@ -129,8 +130,13 @@ async def _suite_rows(
     return rows
 
 
-async def _gov_candidates(fr: FederalRegisterClient, n: int, seed: int) -> list[dict]:
-    rules = await fr.rules()
+async def _gov_candidates(
+    fr: FederalRegisterClient, n: int, seed: int, now: datetime
+) -> list[dict]:
+    rules = await fr.rules(
+        published_after=(now - timedelta(days=GOV_WINDOW_DAYS[0])).date().isoformat(),
+        published_before=(now - timedelta(days=GOV_WINDOW_DAYS[1])).date().isoformat(),
+    )
     return _pick(rules, n, seed ^ SUITE_SEEDS["gov"])
 
 
@@ -285,7 +291,7 @@ async def run_generate(
         )
 
     if "gov" in suites and fr is not None:
-        await add("gov", await _gov_candidates(fr, n, seed), _gov_fetcher(fr))
+        await add("gov", await _gov_candidates(fr, n, seed, now), _gov_fetcher(fr))
     if "sec" in suites and sec is not None and edgar is not None:
         await add("sec", await _sec_candidates(sec, n, seed), _sec_fetcher(edgar, seed))
     if "wiki" in suites and wiki is not None:
