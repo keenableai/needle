@@ -6,7 +6,7 @@ from needle.haystack.score import depth_bucket, run_haystack
 from needle.shared.search import SearchResult
 
 
-def _q(text, value, field_type="entity", bucket="gov", syntax="plain", depth=62):
+def _q(text, value, field_type="entity", bucket="gov", syntax="plain", depth=62, cues=()):
     return GoldQuery(
         text=text,
         field=field_type,
@@ -16,6 +16,7 @@ def _q(text, value, field_type="entity", bucket="gov", syntax="plain", depth=62)
         bucket=bucket,
         freshness_window="static",
         syntax=syntax,
+        cues=cues,
         extras=(("depth_pct", depth),),
     )
 
@@ -28,6 +29,7 @@ WIKI_Q = _q(
     bucket="wiki",
     syntax="site",
     depth=88,
+    cues=("sailed",),
 )
 
 
@@ -75,13 +77,21 @@ async def test_run_haystack_metrics_and_breakdowns():
                 ],
                 None,
             ),
-            WIKI_Q.text: ([_r("https://c.com", "History", "it first sailed in 1987")], None),
+            WIKI_Q.text: (
+                [
+                    _r("https://x.com", "Timeline", "the 1987 harvest festival program"),
+                    _r("https://c.com", "History", "it first sailed in 1987"),
+                ],
+                None,
+            ),
         }
     )
     report = await run_haystack([GOV_Q, WIKI_Q], {"fake": engine}, num_results=5)
     e = report["engines"]["fake"]
     assert e["recall_at_k"] == 1.0
-    assert e["mrr_at_k"] == pytest.approx((1 / 2 + 1 / 1) / 2)
+    assert e["per_query"][1]["hit_rank"] == 2
+    assert e["per_query"][1]["results"][0]["det_match"] is False
+    assert e["mrr_at_k"] == pytest.approx((1 / 2 + 1 / 2) / 2)
     assert e["by_bucket"]["gov"] == {"n": 1, "recall_at_k": 1.0}
     assert e["by_syntax"]["site"]["n"] == 1
     assert e["by_field_type"] == {
@@ -154,6 +164,19 @@ async def test_judge_error_excludes_unresolved_miss():
     assert e["by_bucket"] == {}
 
 
+async def test_year_without_cue_in_snippet_is_a_miss():
+    engine = FakeEngine(
+        {
+            WIKI_Q.text: (
+                [_r("https://a.com", "Almanac", "notable events of 1987 listed here")],
+                None,
+            )
+        }
+    )
+    report = await run_haystack([WIKI_Q], {"fake": engine}, num_results=5)
+    assert report["engines"]["fake"]["per_query"][0]["hit_rank"] is None
+
+
 def test_gold_ok_and_gold_query_roundtrip():
     row = {
         "query_text": "which instrument charted the acme deep floor site:federalregister.gov",
@@ -166,6 +189,9 @@ def test_gold_ok_and_gold_query_roundtrip():
             "field": "haystack",
             "field_type": "entity",
             "value": "keelhauler sonar array",
+            "cues": [
+                "charted",
+            ],
             "aliases": [],
             "freshness_window": "static",
             "tier": "",
@@ -177,6 +203,13 @@ def test_gold_ok_and_gold_query_roundtrip():
     assert q.bucket == "gov"
     assert q.syntax == "site"
     assert dict(q.extras)["depth_pct"] == 73
+    assert q.cues == ()
+
+    year_gold = {"field_type": "year", "value": "1987", "cues": ["sailed"]}
+    assert haystack_cli._gold_ok(year_gold) is True
+    assert haystack_cli._gold_ok({"field_type": "year", "value": "1987"}) is False
+    yq = haystack_cli._gold_query({"query_text": "q", "query_origin": {}, "gold": year_gold})
+    assert yq.cues == ("sailed",)
 
     assert haystack_cli._gold_ok({"field_type": "entity", "value": ""}) is False
     assert haystack_cli._gold_ok({"value": "x"}) is False

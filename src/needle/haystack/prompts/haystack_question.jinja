@@ -3,11 +3,12 @@ You write one question for a search benchmark about facts buried deep inside lon
 Pick ONE specific, verifiable fact stated in the excerpt that is unlikely to appear in the document's title, summary, or opening section: a named person in a specific role, a named organization, product, or place, a year, a precise amount, a count, or a short code.
 
 Respond with ONE line in exactly this format:
-TYPE || ANSWER || QUESTION
+TYPE || ANSWER || CUES || QUESTION
 
 - TYPE is one of: person, entity, year, money, numeric_band, exact_id.
   person = a person's name. entity = an organization, product, place, or other named thing. year = a four-digit year. money = a monetary amount. numeric_band = a non-monetary quantity or count. exact_id = a short code or identifier.
 - ANSWER: the fact as a span of 1-8 words copied CHARACTER-FOR-CHARACTER from the excerpt. For year, money, and numeric_band the span must be the bare value (e.g. 1987, $4.2 million, 4,500).
+- CUES: 1-3 comma-separated context words or short phrases (1-4 words each), each copied character-for-character from the excerpt, that name what ANSWER is — the subject, metric, event, or role the fact belongs to. A page that states ANSWER will state these words next to it. None of them may contain ANSWER.
 - QUESTION: a natural-language question of 6-25 words whose answer is ANSWER. It must name the document's subject so it works as a standalone web search, must NOT contain ANSWER or any part of it, and must not cite document numbers, accession numbers, arXiv ids, or section citations. Always write in English.
 - If the excerpt has no such distinctive fact (only boilerplate, reference lists, or context-free tables), respond with exactly NO_DEEP_FACT.
 

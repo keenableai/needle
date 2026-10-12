@@ -211,13 +211,17 @@ from the SEC ticker registry; **`wiki`** — Wikipedia featured articles;
 sources are keyless.
 
 `generate` keeps only documents of 30k+ characters, takes a 7k-character
-excerpt starting past the 55% mark, and asks an LLM for a question plus
-a verbatim answer span typed as one of person, entity, year, money,
-numeric_band, or exact_id. Gates reject the pair when the span is not
-verbatim in the excerpt, the answer already matches against the title
-plus the first 4k characters (so the question would not require depth),
-the answer leaks into the question, or the question cites a document
-identifier (accession number, arXiv id, CFR cite, FR document number).
+excerpt starting past the 55% mark, and asks an LLM for a question, a
+verbatim answer span typed as one of person, entity, year, money,
+numeric_band, or exact_id, and 1-3 verbatim cue words naming what the
+answer is. Gates reject the tuple when the span or a cue is not verbatim
+in the excerpt, a cue contains the answer, the answer already matches
+against the title plus the first 4k characters (so the question would
+not require depth), the answer leaks into the question, or the question
+cites a document identifier (accession number, arXiv id, CFR cite, FR
+document number). For low-entropy answers (year, money, numeric_band)
+the matcher requires a cue word in the result text, so a stray year or
+roughly-equal number cannot score.
 ~50% of `gov`/`sec`/`arxiv` queries carry operator syntax (`site:`,
 `after:`/`before:`); `wiki` has no publish date, so only `site:`.
 

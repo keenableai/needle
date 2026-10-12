@@ -48,7 +48,9 @@ class GenStats:
     no_question: int = 0
     rejected: int = 0
     surplus: int = 0
+    errors: int = 0
     by_suite: dict[str, int] = field(default_factory=dict)
+    error_samples: dict[str, str] = field(default_factory=dict)
 
 
 def _pick(items: list[Any], n: int, seed: int) -> list[Any]:
@@ -70,10 +72,11 @@ async def _suite_rows(
     spec = SUITE_SPECS[suite]
     stats.candidates += len(candidates)
 
-    async def project(cand: Any) -> tuple[DeepDoc, str, str, str, int] | str:
+    async def project(cand: Any) -> tuple[DeepDoc, str, str, tuple[str, ...], str, int] | str:
         try:
             doc = await fetch_doc(cand)
-        except Exception:
+        except Exception as exc:
+            stats.error_samples.setdefault(f"{suite}:fetch", repr(exc))
             return "fetch"
         if doc is None:
             return "fetch"
@@ -89,17 +92,19 @@ async def _suite_rows(
                 max_tokens=1024,
                 reasoning_effort="minimal",
             )
-        except Exception:
+        except Exception as exc:
+            stats.error_samples.setdefault(f"{suite}:llm", repr(exc))
             return "llm_error"
         if err is not None:
+            stats.error_samples.setdefault(f"{suite}:llm", str(err))
             return "llm_error"
         parsed = parse_haystack_reply(reply)
         if parsed is None:
             return "no_question"
-        field_type, answer, question = parsed
-        if not question_ok(question, answer, field_type, doc=doc, excerpt=excerpt):
+        field_type, answer, cues, question = parsed
+        if not question_ok(question, answer, field_type, cues, doc=doc, excerpt=excerpt):
             return "rejected"
-        return doc, field_type, answer, question, depth_pct
+        return doc, field_type, answer, cues, question, depth_pct
 
     projected = await bounded_gather(candidates, project, concurrency=doc_concurrency)
 
@@ -112,13 +117,14 @@ async def _suite_rows(
         if len(rows) >= per_suite:
             stats.surplus += 1
             continue
-        doc, field_type, answer, question, depth_pct = outcome
+        doc, field_type, answer, cues, question, depth_pct = outcome
         syntax = next(syntax_cycle)
         rows.append(
             build_gold_row(
                 suite=suite,
                 field_type=field_type,
                 value=answer,
+                cues=list(cues),
                 query_text=syntax_query(question, syntax, site=spec.site, published=doc.published),
                 doc=doc,
                 depth_pct=depth_pct,
@@ -290,14 +296,37 @@ async def run_generate(
             )
         )
 
-    if "gov" in suites and fr is not None:
+    async def gov_suite() -> None:
+        assert fr is not None
         await add("gov", await _gov_candidates(fr, n, seed, now), _gov_fetcher(fr))
-    if "sec" in suites and sec is not None and edgar is not None:
+
+    async def sec_suite() -> None:
+        assert sec is not None and edgar is not None
         await add("sec", await _sec_candidates(sec, n, seed), _sec_fetcher(edgar, seed))
-    if "wiki" in suites and wiki is not None:
+
+    async def wiki_suite() -> None:
+        assert wiki is not None
         await add("wiki", await _wiki_candidates(wiki, n, seed), _wiki_fetcher(wiki))
-    if "arxiv" in suites and arxiv is not None:
+
+    async def arxiv_suite() -> None:
+        assert arxiv is not None
         await add("arxiv", await _arxiv_candidates(arxiv, n, seed, now), _arxiv_fetcher(arxiv))
+
+    runners = []
+    if "gov" in suites and fr is not None:
+        runners.append(("gov", gov_suite))
+    if "sec" in suites and sec is not None and edgar is not None:
+        runners.append(("sec", sec_suite))
+    if "wiki" in suites and wiki is not None:
+        runners.append(("wiki", wiki_suite))
+    if "arxiv" in suites and arxiv is not None:
+        runners.append(("arxiv", arxiv_suite))
+    for suite, run_suite in runners:
+        try:
+            await run_suite()
+        except Exception as exc:
+            stats.errors += 1
+            stats.error_samples.setdefault(suite, repr(exc))
 
     rows = dedupe_by(rows, lambda r: r["query_id"])
     stats.rows = len(rows)
