@@ -11,7 +11,7 @@ HOUR = datetime(2026, 10, 1, 12, tzinfo=UTC)
 DEEP_FACT = "the keelhauler sonar array ran without fault for nine seasons "
 LONG_TEXT = "intro filler words here " * 200 + "x " * (HEAD_CHARS // 2) + DEEP_FACT * 600
 REPLY = (
-    "entity || keelhauler sonar array || "
+    "entity || keelhauler sonar array || nine seasons || "
     "which instrument did the acme expedition rely on to chart the deep ocean floor"
 )
 
@@ -150,6 +150,7 @@ async def test_gov_rows_shape_and_syntax_cycle():
     assert r["gold"]["field"] == "haystack"
     assert r["gold"]["field_type"] == "entity"
     assert r["gold"]["value"] == "keelhauler sonar array"
+    assert r["gold"]["cues"] == ["nine seasons"]
     prov = r["query_origin"]["provenance"]
     assert prov["depth_pct"] >= 55
     assert prov["document_number"].startswith("2026-")
@@ -206,7 +207,7 @@ async def test_drop_stats_counted():
     assert rows == [] and stats.no_question == 12
 
     rows, stats = await _generate(
-        fr=FakeFR(), llm=FakeLLM("entity || not in excerpt || " + "w " * 8)
+        fr=FakeFR(), llm=FakeLLM("entity || not in excerpt || nine seasons || " + "w " * 8)
     )
     assert rows == [] and stats.rejected == 12
 
@@ -216,6 +217,27 @@ async def test_drop_stats_counted():
 
     rows, stats = await _generate(fr=FakeFR(), llm=BoomLLM())
     assert rows == [] and stats.llm_errors == 12
+    assert "500" in stats.error_samples["gov:llm"]
+
+    class RaisingFR(FakeFR):
+        async def document_text(self, raw_text_url):
+            raise RuntimeError("socket closed")
+
+    rows, stats = await _generate(fr=RaisingFR())
+    assert rows == [] and stats.fetch_fail == 12
+    assert "socket closed" in stats.error_samples["gov:fetch"]
+
+
+async def test_suite_discovery_failure_keeps_other_suites():
+    class BoomArxiv(FakeArxiv):
+        async def search_domain(self, domain, *, from_date, to_date, max_results=100):
+            raise RuntimeError("oai down")
+
+    rows, stats = await _generate(fr=FakeFR(), arxiv=BoomArxiv(), suites=("gov", "arxiv"))
+    assert stats.by_suite == {"gov": 4}
+    assert len(rows) == 4
+    assert stats.errors == 1
+    assert "oai down" in stats.error_samples["arxiv"]
 
 
 async def test_rows_deduped_by_query_id():

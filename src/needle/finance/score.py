@@ -34,6 +34,7 @@ class GoldQuery:
     freshness_window: str
     syntax: str = "plain"
     tier: str = ""
+    cues: tuple[str, ...] = ()
     extras: tuple[tuple[str, Any], ...] = ()
 
 
@@ -45,7 +46,7 @@ def result_answers(query: GoldQuery, result: SearchResult, *, snippet_chars: int
         query.aliases,
         text=text,
         url=result.url,
-        cues=cues_for(query.field),
+        cues=query.cues or cues_for(query.field),
     )
 
 

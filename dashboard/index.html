@@ -947,7 +947,7 @@
       <tr><td><span class="vert" data-vert="legal"></span></td><td>code</td>
         <td>eCFR sections; an LLM projects each section into a query about its regulatory substance with one verbatim quoted span, rejected if it leaks the citation; gold is the "title CFR section" citation</td></tr>
       <tr><td><span class="vert" data-vert="haystack"></span></td><td>gov / sec / wiki / arxiv</td>
-        <td>long documents (Federal Register final rules, SEC 10-K filings, Wikipedia featured articles, arXiv full texts; 30k+ characters); an LLM reads a 7k-character excerpt from past the 55% mark of the document and writes a natural-language question plus a verbatim answer span; the question is rejected if the answer already matches against the title or the first 4k characters, leaks into the question, or cites a document identifier; ~50% of gov/sec/arxiv queries carry operator syntax (site:, after:/before:)</td></tr>
+        <td>long documents (Federal Register final rules, SEC 10-K filings, Wikipedia featured articles, arXiv full texts; 30k+ characters); an LLM reads a 7k-character excerpt from past the 55% mark of the document and writes a natural-language question plus a verbatim answer span and 1-3 verbatim cue words (required in the result text for year/money/count answers, so a stray number cannot score); the question is rejected if the answer already matches against the title or the first 4k characters, leaks into the question, or cites a document identifier; ~50% of gov/sec/arxiv queries carry operator syntax (site:, after:/before:)</td></tr>
     </table>
   </div>
 

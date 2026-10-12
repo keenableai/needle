@@ -11,6 +11,8 @@ SUITES = ("gov", "sec", "wiki", "arxiv")
 
 HAYSTACK_FIELD_TYPES = FIELD_TYPES - {"country", "domain"}
 
+LOW_ENTROPY_TYPES = frozenset({"year", "money", "numeric_band"})
+
 DEFAULT_SYNTAX_CYCLE = ("plain", "site", "plain", "date")
 WIKI_SYNTAX_CYCLE = ("plain", "site")
 
@@ -45,6 +47,7 @@ def build_gold_row(
     suite: str,
     field_type: str,
     value: str,
+    cues: list[str],
     query_text: str,
     doc: DeepDoc,
     depth_pct: int,
@@ -79,6 +82,7 @@ def build_gold_row(
             "field": "haystack",
             "field_type": field_type,
             "value": value,
+            "cues": cues,
             "aliases": [],
             "freshness_window": "static",
             "tier": "",

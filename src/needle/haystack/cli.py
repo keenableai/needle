@@ -5,7 +5,7 @@ from needle.finance.registries import SecClient
 from needle.finance.score import GoldQuery
 from needle.finance.sources import EdgarClient
 from needle.haystack.generate import GenStats, run_generate
-from needle.haystack.models import HAYSTACK_FIELD_TYPES, SUITES
+from needle.haystack.models import HAYSTACK_FIELD_TYPES, LOW_ENTROPY_TYPES, SUITES
 from needle.haystack.score import run_haystack
 from needle.haystack.sources import FederalRegisterClient, WikiClient
 from needle.scholar.sources import ArxivClient
@@ -35,6 +35,8 @@ def _gold_ok(gold: dict) -> bool:
             f"error: unsupported gold.field_type {field_type!r} "
             f"(known: {', '.join(sorted(HAYSTACK_FIELD_TYPES))})"
         )
+    if field_type in LOW_ENTROPY_TYPES and not gold.get("cues"):
+        return False
     return True
 
 
@@ -43,15 +45,18 @@ def _gold_query(row: dict) -> GoldQuery:
     origin = origin if isinstance(origin, dict) else {}
     provenance = origin.get("provenance") or {}
     gold = row["gold"]
+    field_type = str(gold["field_type"])
+    cues = tuple(str(c) for c in gold.get("cues") or [])
     return GoldQuery(
         text=str(row["query_text"]),
-        field=str(gold["field_type"]),
-        field_type=str(gold["field_type"]),
+        field=field_type,
+        field_type=field_type,
         value=gold.get("value"),
         aliases=tuple(str(a) for a in gold.get("aliases") or []),
         bucket=str(origin.get("bucket") or "unknown"),
         freshness_window=str(gold.get("freshness_window") or "static"),
         syntax=str(origin.get("syntax") or "plain"),
+        cues=cues if field_type in LOW_ENTROPY_TYPES else (),
         extras=(("depth_pct", int(provenance.get("depth_pct") or 0)),),
     )
 
@@ -109,9 +114,12 @@ class Haystack:
         print(
             f"haystack: {stats.rows} queries of {stats.candidates} candidates ({suites_str}; "
             f"fetch={stats.fetch_fail}, thin={stats.thin}, no_question={stats.no_question}, "
-            f"rejected={stats.rejected}, surplus={stats.surplus}, llm_err={stats.llm_errors})",
+            f"rejected={stats.rejected}, surplus={stats.surplus}, llm_err={stats.llm_errors}, "
+            f"suite_err={stats.errors})",
             file=sys.stderr,
         )
+        for key, msg in sorted(stats.error_samples.items()):
+            print(f"haystack: {key} error: {msg[:200]}", file=sys.stderr)
 
     def run(
         self,

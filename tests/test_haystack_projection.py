@@ -50,27 +50,33 @@ def test_deep_excerpt_is_seed_and_url_deterministic():
 
 
 def test_parse_haystack_reply_happy_and_first_line():
-    assert parse_haystack_reply("person || Maria Ellsworth || who led the dig\nignored") == (
-        "person",
-        "Maria Ellsworth",
-        "who led the dig",
-    )
-    assert parse_haystack_reply("ENTITY || X Corp || who built it")[0] == "entity"
+    assert parse_haystack_reply(
+        "person || Maria Ellsworth || survey, expedition || who led the dig\nignored"
+    ) == ("person", "Maria Ellsworth", ("survey", "expedition"), "who led the dig")
+    assert parse_haystack_reply("ENTITY || X Corp || works || who built it")[0] == "entity"
 
 
 def test_parse_haystack_reply_rejects_sentinel_and_malformed():
     assert parse_haystack_reply("NO_DEEP_FACT") is None
     assert parse_haystack_reply(None) is None
     assert parse_haystack_reply("") is None
-    assert parse_haystack_reply("person || only two fields") is None
-    assert parse_haystack_reply("a || b || c || d") is None
-    assert parse_haystack_reply("person ||  || question") is None
+    assert parse_haystack_reply("person || answer || question") is None
+    assert parse_haystack_reply("a || b || c || d || e") is None
+    assert parse_haystack_reply("person || answer ||  || question") is None
+    assert parse_haystack_reply("person || answer || , , || question") is None
 
 
-def _ok(answer="Maria Ellsworth", field_type="person", question=QUESTION, head="", deep=None):
+def _ok(
+    answer="Maria Ellsworth",
+    field_type="person",
+    question=QUESTION,
+    head="",
+    deep=None,
+    cues=("survey",),
+):
     deep = deep if deep is not None else f"the survey was led by {answer} across three seasons"
     text = (head or "intro ") * 1 + "x" * HEAD_CHARS + deep
-    return question_ok(question, answer, field_type, doc=_doc(text), excerpt=deep)
+    return question_ok(question, answer, field_type, cues, doc=_doc(text), excerpt=deep)
 
 
 def test_question_ok_happy_path():
@@ -113,13 +119,54 @@ def test_question_ok_rejects_answers_findable_from_head():
 
 
 def test_question_ok_validates_typed_values():
-    assert _ok(answer="1987", field_type="year", deep="first charted in 1987 by the crew") is True
-    assert _ok(answer="around then", field_type="year") is False
     assert (
-        _ok(answer="$4.2 million", field_type="money", deep="a budget of $4.2 million was spent")
+        _ok(
+            answer="1987",
+            field_type="year",
+            deep="first charted in 1987 by the crew",
+            cues=("charted",),
+        )
         is True
     )
-    assert _ok(answer="several", field_type="numeric_band", deep="several ships sailed") is False
+    assert _ok(answer="around then", field_type="year") is False
+    assert (
+        _ok(
+            answer="$4.2 million",
+            field_type="money",
+            deep="a budget of $4.2 million was spent",
+            cues=("budget",),
+        )
+        is True
+    )
+    assert (
+        _ok(
+            answer="several",
+            field_type="numeric_band",
+            deep="several ships sailed",
+            cues=("ships",),
+        )
+        is False
+    )
+
+
+def test_question_ok_rejects_bad_cues():
+    assert _ok(cues=()) is False
+    assert _ok(cues=("survey", "led by", "seasons", "three")) is False
+    assert _ok(cues=("not in the excerpt",)) is False
+    assert _ok(cues=("one two three four five",)) is False
+    assert (
+        _ok(
+            cues=("led by Maria Ellsworth",),
+            deep="the survey was led by Maria Ellsworth across three seasons",
+        )
+        is False
+    )
+
+
+def test_question_ok_accepts_year_ranges():
+    assert (
+        _ok(question="how long did the acme mapping run during the 2023-2024 field seasons") is True
+    )
 
 
 def test_syntax_query_variants():

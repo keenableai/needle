@@ -18,9 +18,12 @@ MIN_QUESTION_WORDS = 6
 MAX_QUESTION_WORDS = 25
 MAX_ANSWER_WORDS = 8
 MAX_ANSWER_CHARS = 80
+MAX_CUES = 3
+MAX_CUE_WORDS = 4
+MAX_CUE_CHARS = 40
 
 ARXIV_LEAK_RE = re.compile(r"\b\d{4}\.\d{4,5}\b")
-FR_DOCNUM_LEAK_RE = re.compile(r"\b\d{4}-\d{4,6}\b")
+FR_DOCNUM_LEAK_RE = re.compile(r"\b(?:19|20)\d{2}-\d{5,6}\b")
 LEAK_RES = (ADSH_RE, ARXIV_LEAK_RE, FR_DOCNUM_LEAK_RE, CFR_LEAK_RE)
 
 
@@ -47,15 +50,18 @@ def build_haystack_prompt(doc: DeepDoc, excerpt: str, *, spec: SuiteSpec) -> str
     )
 
 
-def parse_haystack_reply(text: str | None) -> tuple[str, str, str] | None:
+def parse_haystack_reply(text: str | None) -> tuple[str, str, tuple[str, ...], str] | None:
     line = clean_llm_line(text, sentinel=SENTINEL)
     if line is None:
         return None
     parts = [p.strip() for p in line.split("||")]
-    if len(parts) != 3 or not all(parts):
+    if len(parts) != 4 or not all(parts):
         return None
-    field_type, answer, question = parts
-    return field_type.lower(), answer, question
+    field_type, answer, cues_part, question = parts
+    cues = tuple(c.strip() for c in cues_part.split(",") if c.strip())
+    if not cues:
+        return None
+    return field_type.lower(), answer, cues, question
 
 
 def _value_ok(field_type: str, answer: str) -> bool:
@@ -66,7 +72,34 @@ def _value_ok(field_type: str, answer: str) -> bool:
     return True
 
 
-def question_ok(question: str, answer: str, field_type: str, *, doc: DeepDoc, excerpt: str) -> bool:
+def _verbatim_in(span: str, text: str) -> bool:
+    return " ".join(span.lower().split()) in " ".join(text.lower().split())
+
+
+def cues_ok(cues: tuple[str, ...], answer: str, *, excerpt: str) -> bool:
+    if not 1 <= len(cues) <= MAX_CUES:
+        return False
+    norm_answer = squad_norm(answer)
+    for cue in cues:
+        if not 1 <= len(cue.split()) <= MAX_CUE_WORDS or len(cue) > MAX_CUE_CHARS:
+            return False
+        if not _verbatim_in(cue, excerpt):
+            return False
+        norm_cue = squad_norm(cue)
+        if not norm_cue or phrase_in(norm_answer, norm_cue):
+            return False
+    return True
+
+
+def question_ok(
+    question: str,
+    answer: str,
+    field_type: str,
+    cues: tuple[str, ...],
+    *,
+    doc: DeepDoc,
+    excerpt: str,
+) -> bool:
     if field_type not in HAYSTACK_FIELD_TYPES:
         return False
     if not MIN_QUESTION_WORDS <= len(question.split()) <= MAX_QUESTION_WORDS:
@@ -75,7 +108,9 @@ def question_ok(question: str, answer: str, field_type: str, *, doc: DeepDoc, ex
         return False
     if not _value_ok(field_type, answer):
         return False
-    if " ".join(answer.lower().split()) not in " ".join(excerpt.lower().split()):
+    if not _verbatim_in(answer, excerpt):
+        return False
+    if not cues_ok(cues, answer, excerpt=excerpt):
         return False
     norm_answer = squad_norm(answer)
     if not norm_answer or phrase_in(norm_answer, squad_norm(question)):

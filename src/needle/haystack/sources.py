@@ -2,7 +2,7 @@ from typing import Any
 from urllib.parse import quote
 
 from needle.finance.sources import html_text
-from needle.shared.search.base import USER_AGENT, HttpSearchClient
+from needle.shared.search.base import USER_AGENT, HttpSearchClient, SourceError
 
 FR_DOCUMENTS_URL = "https://www.federalregister.gov/api/v1/documents.json"
 FR_FIELDS = (
@@ -104,10 +104,10 @@ class FederalRegisterClient(HaystackSourceClient):
         return docs
 
     async def document_text(self, raw_text_url: str) -> str | None:
-        raw = await self._get_text(raw_text_url)
-        if raw is None:
-            return None
-        return html_text(raw) or None
+        raw, err = await self._request_text(raw_text_url)
+        if err is not None:
+            raise SourceError(f"{err['error_type']}: {err['error_message']}")
+        return html_text(raw or "") or None
 
 
 class WikiClient(HaystackSourceClient):
