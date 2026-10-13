@@ -48,14 +48,6 @@ jobs:
           NUM: ${{ github.event.issue.number }}
         run: |
           set -euo pipefail
-          # Dedupe: comment edits re-fire this job; approve each head commit once.
-          head_sha=$(gh api "repos/$REPO/pulls/$NUM" --jq .head.sha)
-          dup=$(gh api "repos/$REPO/pulls/$NUM/reviews?per_page=100" --paginate \
-            --jq "[.[] | select(.user.login==\"github-actions[bot]\" and .state==\"APPROVED\" and .commit_id==\"$head_sha\")] | length")
-          if [ "$dup" -gt 0 ]; then
-            echo "Head $head_sha already carries an auto-approval; nothing to do."
-            exit 0
-          fi
           # Quote whatever verdict categories the comment carries, without
           # encoding Qodo's taxonomy (it changes between releases). A parse
           # miss must be visible, not silently degraded.
@@ -64,5 +56,31 @@ jobs:
             echo "::warning::No verdict categories parsed from the Qodo comment — its format may have changed; approving with a link only."
             verdict="see the review comment"
           fi
-          gh pr review "$NUM" --repo "$REPO" --approve \
-            --body "Auto-approved: Qodo review completed — ${verdict}. Findings are advisory per team policy; verdict source: ${COMMENT_URL} [auto-approve.yml]"
+          # One attempt: dedupe, then approve. Comment edits re-fire this job,
+          # so each head commit is approved once.
+          approve_once() {
+            local head_sha dup
+            head_sha=$(gh api "repos/$REPO/pulls/$NUM" --jq .head.sha) || return 1
+            dup=$(gh api "repos/$REPO/pulls/$NUM/reviews?per_page=100" --paginate \
+              --jq "[.[] | select(.user.login==\"github-actions[bot]\" and .state==\"APPROVED\" and .commit_id==\"$head_sha\")] | length") || return 1
+            if [ "$dup" -gt 0 ]; then
+              echo "Head $head_sha already carries an auto-approval; nothing to do."
+              return 0
+            fi
+            gh pr review "$NUM" --repo "$REPO" --approve \
+              --body "Auto-approved: Qodo review completed — ${verdict}. Findings are advisory per team policy; verdict source: ${COMMENT_URL} [auto-approve.yml]" || return 1
+          }
+          # Retry: one GitHub API error (HTTP 502 during the 2026-10-12 incident)
+          # used to drop the approval silently. Each attempt re-reads the head and
+          # the dedupe, so a retry after a partial success never double-approves.
+          for attempt in 1 2 3 4; do
+            if approve_once; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 4 ]; then
+              echo "::warning::Approval attempt $attempt failed (GitHub API error?); retrying in $((attempt * 20))s."
+              sleep $((attempt * 20))
+            fi
+          done
+          echo "::error::Approval failed after 4 attempts; re-run this job once GitHub recovers."
+          exit 1
