@@ -1123,6 +1123,7 @@ function engineCell(engine, cls = "") {
   return td;
 }
 let history = [];
+let uniqueness = [];
 let ciData = null;
 
 const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
@@ -1725,6 +1726,7 @@ function renderStandings(rows) {
   const holder = document.getElementById("standings");
   holder.replaceChildren();
   card._mdRows = null;
+  card._summaryData = null;
   card._summaryRows = null;
   const { ult, entries } = shareEntries(rows);
   if (!entries.length) {
@@ -1758,14 +1760,36 @@ function renderStandings(rows) {
       ...best.slice(1).map((m) => m == null ? "–" : `−${Math.round((1 - m) * 100)}%`)],
     ...entries.map(engineRow),
   ];
-  card._summaryRows = () => {
+  card._summaryData = () => {
     const latency = new Map(latencyStats(rows).map((s) => [s.e, s]));
-    return [
-      [...header, "$ / 1k queries", "p50 latency", "p95 latency"],
-      ...entries.map((x) => [...engineRow(x),
-        PRICES.has(x.e) ? fmtUsd(PRICES.get(x.e).usd) : "–",
-        fmtMs(latency.get(x.e)?.p50), fmtMs(latency.get(x.e)?.p95)]),
-    ];
+    const unique = uniquenessAgg(inRange(uniqueness, WEEK_MS));
+    const runTimes = STANDINGS_BENCHES.map(([b]) => [...new Set(ciWindowed(rows, b).map((r) => r.ts))].sort());
+    const allTimes = runTimes.flat().sort();
+    return {
+      header: [...header, "$ / 1k queries", "p50 latency", "p95 latency", "unique URLs"],
+      verticals: STANDINGS_BENCHES.map(([b], i) => ({ key: b, runs: runTimes[i].length, lastRun: runTimes[i].at(-1) ?? null })),
+      window: [allTimes[0], allTimes.at(-1)],
+      engines: entries.map((x) => {
+        const c = boot.get(x.e);
+        const price = PRICES.get(x.e) ?? null;
+        const lat = latency.get(x.e);
+        const u = unique.get(x.e);
+        const uniqueShare = u?.relDen ? u.relUnique / u.relDen : null;
+        return {
+          engine: x.e, name: displayName(x.e), home: x.e === HOME_ENGINE,
+          overall: x.overall, ci: c ? [c.lo, c.hi] : null,
+          verticals: x.shares.map((s, i) => s && { share: s.share, ci: c?.benches[i] ? [c.benches[i].lo, c.benches[i].hi] : null }),
+          price, p50: lat?.p50 ?? null, p95: lat?.p95 ?? null, unique: uniqueShare,
+          cells: [...engineRow(x),
+            price ? `${fmtUsd(price.usd)}${price.usd === 0 ? " (free plan)" : ""}` : "–",
+            fmtMs(lat?.p50), fmtMs(lat?.p95), uniqueShare == null ? "–" : fmtPct(uniqueShare)],
+        };
+      }),
+    };
+  };
+  card._summaryRows = () => {
+    const data = card._summaryData();
+    return [data.header, ...data.engines.map((x) => x.cells)];
   };
 
   const W = 560;
@@ -3313,7 +3337,8 @@ async function main() {
   drawTrends(history);
   renderLatencySummary(history);
   renderAll();
-  const uniqAgg = uniquenessAgg(uniquenessRows.filter((r) => !HIDDEN_ENGINES.has(r.engine)));
+  uniqueness = uniquenessRows.filter((r) => !HIDDEN_ENGINES.has(r.engine));
+  const uniqAgg = uniquenessAgg(uniqueness);
   renderOverlap(overlapRows.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)), uniqAgg);
   renderUniqueness(uniqAgg);
   initRunBrowser();
