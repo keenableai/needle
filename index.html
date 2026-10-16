@@ -507,7 +507,7 @@
   <div class="topbar">
     <div class="header-actions">
       <a href="https://github.com/keenableai/needle" title="Source on GitHub" aria-label="Source on GitHub"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
-      <button id="export-md" title="Open the current tables as Markdown">MD</button>
+      <a id="export-md" href="results.md" title="This page as Markdown">MD</a>
       <button id="export-pdf" title="Print / save as PDF">PDF</button>
       <button id="theme-toggle" title="Dark theme" aria-label="Dark theme"><svg class="moon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.5 1.5a6.5 6.5 0 1 0 8 8A5.5 5.5 0 0 1 6.5 1.5z"/></svg><svg class="sun" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg></button>
     </div>
@@ -3000,50 +3000,72 @@ function rowsToMarkdown(rows) {
   return lines.join("\n");
 }
 
-function cardRows(card) {
+function cardRows(card, cell = (c) => c.textContent) {
   const table = card.querySelector("table");
   const rows = card._mdRows?.() ?? (table
-    ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
+    ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map(cell))
     : null);
   if (!rows?.length) return null;
   const keep = rows[0].map((_, i) => rows.some((r) => String(r[i]).trim()));
   return rows.map((r) => r.filter((_, i) => keep[i]));
 }
 
-function buildMarkdown() {
-  drawAllTrends?.();
-  const clean = (s) => s.replace(/\s+/g, " ").trim();
-  const subText = (node) => {
-    if (!node) return "";
-    const copy = node.cloneNode(true);
-    for (const h of copy.querySelectorAll(".hint[title]")) {
-      h.textContent = `${h.textContent} (${h.getAttribute("title")})`;
-    }
-    return clean(copy.textContent);
+function md(node) {
+  const wrap = (s, mark) => {
+    const t = s.trim();
+    return t ? s.replace(t, `${mark}${t}${mark}`) : s;
   };
-  const lines = ["# NEEDLE — search engine benchmarks"];
-  const updated = document.getElementById("updated").textContent;
-  if (updated) lines.push("", updated);
-  const summary = document.getElementById("card-standings")._summaryRows?.();
-  if (summary) lines.push("", "## Summary — one row per engine", "", rowsToMarkdown(summary));
-  for (const card of document.querySelectorAll(".wrap .card, .wrap .lb-panel")) {
-    if (card.closest("#card-runs")) {
-      if (card.id === "card-runs") {
-        lines.push("", `## ${card.querySelector("h2").textContent}`,
-          "", subText(card.querySelector(".sub")) +
-          " (https://huggingface.co/datasets/keenable-ai/needle-results)");
+  const walk = (n) => {
+    if (n.nodeType === Node.TEXT_NODE) return n.textContent;
+    if (n.nodeType !== Node.ELEMENT_NODE) return "";
+    const inner = [...n.childNodes].map(walk).join("");
+    if (n.matches(".hint[title]")) return `${inner} (${n.title})`;
+    switch (n.tagName) {
+      case "A": {
+        const href = n.getAttribute("href");
+        return href.startsWith("#") ? inner : `[${inner.trim()}](${href})`;
       }
-      continue;
+      case "B": return wrap(inner, "**");
+      case "EM": return wrap(inner, "*");
+      case "CODE": return wrap(inner, "`");
+      case "SUB": return `_${inner}`;
+      default: return inner;
     }
-    if (card.querySelector(".lb-panel")) continue;
-    const rows = cardRows(card);
-    const prose = rows ? [] : [...card.querySelectorAll(".prose p")];
-    if (!rows && !prose.length) continue;
-    lines.push("", `## ${card.querySelector("h2").textContent}`);
-    const sub = subText(card.querySelector(".sub"));
-    if (sub) lines.push("", sub);
-    if (rows) lines.push("", rowsToMarkdown(rows));
-    else for (const p of prose) lines.push("", clean(p.textContent).replace(/\|/g, "\\|"));
+  };
+  return walk(node).replace(/\s+/g, " ").trim();
+}
+
+function buildMarkdown(lead) {
+  drawAllTrends?.();
+  const header = document.getElementById("top");
+  const lines = [`# ${md(header.querySelector("h1"))}`];
+  const push = (...blocks) => { for (const b of blocks) if (b) lines.push("", b); };
+
+  push(md(header.querySelector(".lastrun")), lead);
+  for (const n of header.querySelectorAll(".fm > p:not(.lastrun), .fm > ul")) {
+    push(n.tagName === "UL" ? [...n.children].map((li) => `- ${md(li)}`).join("\n") : md(n));
+  }
+  const summary = document.getElementById("card-standings")._summaryRows?.();
+  if (summary) push("## Summary — one row per engine", rowsToMarkdown(summary));
+
+  const pushCard = (node, level) => {
+    const h2 = node.querySelector(":scope > h2");
+    if (h2) push(`${"#".repeat(level)} ${md(h2)}`);
+    for (const n of node.querySelectorAll(":scope > .sub, :scope > p, :scope > .prose > p")) push(md(n));
+    const panels = node.querySelectorAll(":scope > .lb-panel");
+    if (panels.length) {
+      for (const p of panels) pushCard(p, h2 ? level + 1 : level);
+    } else if (node.id !== "card-runs") {
+      const rows = cardRows(node, md);
+      if (rows) push(rowsToMarkdown(rows));
+    }
+    const pre = node.querySelector(":scope > pre");
+    if (pre) push("```\n" + pre.textContent.trim() + "\n```");
+  };
+  for (const n of document.querySelectorAll(".wrap > *")) {
+    if (n.matches("h2.section-title")) push(`## ${md(n)}`);
+    else if (n.matches("p.section-desc")) push(md(n));
+    else if (n.matches(".card")) pushCard(n, 3);
   }
   return lines.join("\n") + "\n";
 }
@@ -3253,10 +3275,6 @@ function revealHash() {
 }
 window.addEventListener("hashchange", revealHash);
 
-document.getElementById("export-md").addEventListener("click", () => {
-  const blob = new Blob([buildMarkdown()], { type: "text/plain;charset=utf-8" });
-  window.open(URL.createObjectURL(blob));
-});
 document.getElementById("export-pdf").addEventListener("click", () => window.print());
 const themeToggle = document.getElementById("theme-toggle");
 const syncThemeToggle = () =>
