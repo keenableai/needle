@@ -116,3 +116,20 @@ def test_publish_auto_ts_skips_taken_minute(tmp_path, monkeypatch, capsys):
     assert capsys.readouterr().out.strip() == "2026-08-17T00:01Z"
     ids = [r["id"] for r in json.loads((site / "data" / "runs.json").read_text(encoding="utf-8"))]
     assert ids == ["2026-08-17T0000Z", "2026-08-17T0001Z"]
+
+
+def test_haystack_rows_publish_four_suites():
+    row = publish_bench.haystack_rows(
+        _report(
+            {
+                "gov": {"n": 3, "recall_at_k": 1 / 3},
+                "sec": {"n": 4, "recall_at_k": 0.75},
+                "wiki": {"n": 5, "recall_at_k": 0.2},
+                "arxiv": {"n": 2, "recall_at_k": 0.5},
+            }
+        ),
+        "2026-01-01T00:00:00Z",
+    )[0]
+    assert row["bench"] == "haystack"
+    assert (row["gov_n"], row["sec_n"], row["wiki_n"], row["arxiv_n"]) == (3, 4, 5, 2)
+    assert row["arxiv_recall"] == 0.5

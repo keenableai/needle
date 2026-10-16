@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -33,6 +34,8 @@ class GoldQuery:
     freshness_window: str
     syntax: str = "plain"
     tier: str = ""
+    cues: tuple[str, ...] = ()
+    extras: tuple[tuple[str, Any], ...] = ()
 
 
 def result_answers(query: GoldQuery, result: SearchResult, *, snippet_chars: int) -> bool:
@@ -43,7 +46,7 @@ def result_answers(query: GoldQuery, result: SearchResult, *, snippet_chars: int
         query.aliases,
         text=text,
         url=result.url,
-        cues=cues_for(query.field),
+        cues=query.cues or cues_for(query.field),
     )
 
 
@@ -51,7 +54,9 @@ def _judge_uncertain(pq: dict) -> bool:
     return bool(pq["judge_errors"]) and pq["hit_rank"] is None
 
 
-def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
+def answer_summary(
+    per_query: list[dict], latency: dict | None, groups: dict[str, Callable[[dict], str]]
+) -> dict[str, Any]:
     scored = [pq for pq in per_query if not _judge_uncertain(pq)]
     return {
         **recall_summary(per_query, latency, scored),
@@ -60,9 +65,22 @@ def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
         "judge_upgrades": sum(
             1 for pq in scored if pq["hit_rank"] is not None and pq["hit_rank"] != pq["det_rank"]
         ),
-        "by_field": group_recall(scored, lambda pq: pq["field"]),
-        "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
-        "by_syntax": group_recall(scored, lambda pq: pq["syntax"]),
+        **{name: group_recall(scored, key) for name, key in groups.items()},
+    }
+
+
+def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
+    scored = [pq for pq in per_query if not _judge_uncertain(pq)]
+    return {
+        **answer_summary(
+            per_query,
+            latency,
+            {
+                "by_field": lambda pq: pq["field"],
+                "by_bucket": lambda pq: pq["bucket"],
+                "by_syntax": lambda pq: pq["syntax"],
+            },
+        ),
         "by_tier": group_recall([pq for pq in scored if pq["tier"]], lambda pq: pq["tier"]),
         "by_freshness": _ladder_order(group_recall(scored, lambda pq: pq["freshness_window"])),
     }
@@ -101,13 +119,15 @@ async def run_answers(
     snippet_chars: int = DEFAULT_SNIPPET_CHARS,
     judge: LLMClient | None = None,
     judge_concurrency: int = 8,
+    summary_fn: Callable[[list[dict], dict | None], dict[str, Any]] | None = None,
+    judge_fn: Callable[..., Awaitable[tuple[bool | None, dict[str, str] | None]]] = judge_answer,
 ) -> dict[str, Any]:
     judge_sem = asyncio.Semaphore(max(1, judge_concurrency))
 
     async def judge_result(query: GoldQuery, result: SearchResult) -> tuple[bool | None, bool]:
         assert judge is not None
         async with judge_sem:
-            verdict, err = await judge_answer(
+            verdict, err = await judge_fn(
                 judge,
                 query_text=query.text,
                 field=query.field,
@@ -135,6 +155,7 @@ async def run_answers(
             "n_results": 0,
             "results": [],
             "search_error": err,
+            **dict(query.extras),
         }
         if err is not None:
             return pq
@@ -170,7 +191,7 @@ async def run_answers(
         queries,
         engines,
         eval_engine,
-        _summary,
+        summary_fn or _summary,
         num_results=num_results,
         snippet_chars=snippet_chars,
         ultimate_fn=_ultimate,

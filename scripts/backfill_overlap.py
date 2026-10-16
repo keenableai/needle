@@ -15,6 +15,7 @@ ARTIFACTS = (
     ("agentic_rare.json", "rarestream.json"),
     ("scholar.json",),
     ("legal.json",),
+    ("haystack.json",),
 )
 
 

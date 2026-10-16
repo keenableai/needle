@@ -6,7 +6,8 @@ on:
     - cron: "17 6 * * *"
     - cron: "17 12 * * *"
     - cron: "17 18 * * *"
-    - cron: "17 1-5,7-11,13-17,19-23 * * *"
+    - cron: "17 21 * * *"
+    - cron: "17 1-5,7-11,13-17,19-20,22-23 * * *"
   workflow_dispatch:
     inputs:
       finance:
@@ -23,6 +24,10 @@ on:
         default: false
       legal:
         description: "Also run legal (regenerates gold)"
+        type: boolean
+        default: false
+      haystack:
+        description: "Also run haystack (regenerates gold)"
         type: boolean
         default: false
 
@@ -64,6 +69,7 @@ jobs:
       agentic_rare: ${{ steps.plan.outputs.agentic_rare }}
       scholar: ${{ steps.plan.outputs.scholar }}
       legal: ${{ steps.plan.outputs.legal }}
+      haystack: ${{ steps.plan.outputs.haystack }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -72,6 +78,7 @@ jobs:
             data/gold.jsonl
             data/scholar.jsonl
             data/legal.jsonl
+            data/haystack.jsonl
           sparse-checkout-cone-mode: false
       - id: plan
         env:
@@ -80,6 +87,7 @@ jobs:
           AGENTIC_RARE: ${{ inputs.agentic_rare }}
           SCHOLAR: ${{ inputs.scholar }}
           LEGAL: ${{ inputs.legal }}
+          HAYSTACK: ${{ inputs.haystack }}
         run: |
           want() {
             if [ "$SCHEDULE" = "$1" ] || [ "$2" = "true" ]; then echo true
@@ -92,6 +100,7 @@ jobs:
             echo "agentic_rare=$(want '17 6 * * *' "$AGENTIC_RARE" '')"
             echo "scholar=$(want '17 12 * * *' "$SCHOLAR" data/scholar.jsonl)"
             echo "legal=$(want '17 18 * * *' "$LEGAL" data/legal.jsonl)"
+            echo "haystack=$(want '17 21 * * *' "$HAYSTACK" data/haystack.jsonl)"
           } >> "$GITHUB_OUTPUT"
 
   news:
@@ -188,4 +197,24 @@ jobs:
         with:
           args: --legal legal.json --legal-queries legal.jsonl
           daily_args: --legal legal.jsonl --legal_report legal.json
+
+  haystack:
+    needs: plan
+    if: needs.plan.outputs.haystack == 'true'
+    runs-on: gke-use5-amd64
+    timeout-minutes: 270
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          site-data: true
+      - run: |
+          uv run needle haystack generate --per-suite 15 \
+            --out haystack.jsonl
+          uv run needle haystack run --queries haystack.jsonl \
+            --limit 60 --engines "$ENGINES" --judge --out haystack.json
+      - uses: ./.github/actions/publish
+        with:
+          args: --haystack haystack.json --haystack-queries haystack.jsonl
+          daily_args: --haystack haystack.jsonl --haystack_report haystack.json
 

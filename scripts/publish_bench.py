@@ -71,26 +71,28 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
     return rows
 
 
-def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> list[dict]:
+def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, ...]) -> list[dict]:
     rows = []
     for name, e in report["engines"].items():
-        rows.append(
+        row = {
+            "ts": ts,
+            "bench": bench,
+            "engine": name,
+            "recall": e["recall_at_k"],
+            "mrr": e["mrr_at_k"],
+        }
+        for suite in suites:
+            row[f"{suite}_recall"] = e["by_bucket"].get(suite, {}).get("recall_at_k")
+            row[f"{suite}_n"] = e["by_bucket"].get(suite, {}).get("n")
+        row.update(
             {
-                "ts": ts,
-                "bench": bench,
-                "engine": name,
-                "recall": e["recall_at_k"],
-                "mrr": e["mrr_at_k"],
-                f"{suites[0]}_recall": e["by_bucket"].get(suites[0], {}).get("recall_at_k"),
-                f"{suites[0]}_n": e["by_bucket"].get(suites[0], {}).get("n"),
-                f"{suites[1]}_recall": e["by_bucket"].get(suites[1], {}).get("recall_at_k"),
-                f"{suites[1]}_n": e["by_bucket"].get(suites[1], {}).get("n"),
                 "num_scored": e["num_scored"],
                 "num_queries": report["num_queries"],
                 "search_errors": e["search_errors"],
                 **_latency_fields(e),
             }
         )
+        rows.append(row)
     return rows
 
 
@@ -100,6 +102,10 @@ def finance_rows(report: dict, ts: str) -> list[dict]:
 
 def legal_rows(report: dict, ts: str) -> list[dict]:
     return _suite_rows(report, ts, "legal", ("caselaw", "code"))
+
+
+def haystack_rows(report: dict, ts: str) -> list[dict]:
+    return _suite_rows(report, ts, "haystack", ("gov", "sec", "wiki", "arxiv"))
 
 
 def slim_report(report: dict) -> dict:
@@ -143,6 +149,8 @@ def publish(
     scholar_queries: str | None = None,
     legal: str | None = None,
     legal_queries: str | None = None,
+    haystack: str | None = None,
+    haystack_queries: str | None = None,
     ts: str | None = None,
 ) -> None:
     data = Path(site) / "data"
@@ -170,6 +178,7 @@ def publish(
         ("agentic_rare", agentic_rare, agentic_rare_rows, "agentic_rare.json"),
         ("scholar", scholar, scholar_rows, "scholar.json"),
         ("legal", legal, legal_rows, "legal.json"),
+        ("haystack", haystack, haystack_rows, "haystack.json"),
     ):
         if not path:
             continue
@@ -186,6 +195,7 @@ def publish(
         (agentic_rare_queries, "agentic_rare.jsonl"),
         (scholar_queries, "scholar.jsonl"),
         (legal_queries, "legal.jsonl"),
+        (haystack_queries, "haystack.jsonl"),
     ):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
@@ -193,6 +203,7 @@ def publish(
         (gold, "gold.jsonl"),
         (scholar_queries, "scholar.jsonl"),
         (legal_queries, "legal.jsonl"),
+        (haystack_queries, "haystack.jsonl"),
     ):
         if path:
             (data / name).write_bytes(Path(path).read_bytes())

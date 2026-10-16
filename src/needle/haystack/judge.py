@@ -1,0 +1,35 @@
+from typing import Any
+
+from needle.finance.judge import VERDICT_RETRY_SUFFIX, parse_verdict
+from needle.shared.judge import complete_parsed
+from needle.shared.llm import LLMClient
+from needle.shared.prompts import render_prompt
+
+ANSWER_TEMPLATE = "answer_match.jinja"
+
+
+async def judge_answer(
+    llm: LLMClient,
+    *,
+    query_text: str,
+    field: str,
+    value: Any,
+    aliases: tuple[str, ...],
+    title: str | None,
+    url: str,
+    snippet: str,
+) -> tuple[bool | None, dict[str, str] | None]:
+    prompt = render_prompt(
+        __package__,
+        ANSWER_TEMPLATE,
+        query=query_text,
+        field=field,
+        value=value,
+        aliases=list(aliases),
+        title=title or "",
+        url=url,
+        snippet=snippet,
+    )
+    return await complete_parsed(
+        llm, prompt, parse_verdict, retry_suffix=VERDICT_RETRY_SUFFIX, max_tokens=8192
+    )

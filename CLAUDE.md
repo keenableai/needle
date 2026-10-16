@@ -1,11 +1,13 @@
 # NEEDLE
 
-Hourly search-engine benchmarks; full docs in README.md. Four benches:
+Hourly search-engine benchmarks; full docs in README.md. Five benches:
 news (hourly, nDCG@5, LLM judge), finance (daily, answer-recall@5 +
 MRR@5, deterministic matcher with LLM judge backstop), scholar (daily,
-known-item papers, recall@10 + MRR@10 by arXiv/DOI/PMID match), and legal
+known-item papers, recall@10 + MRR@10 by arXiv/DOI/PMID match), legal
 (daily, known-item caselaw/CFR, recall@5 + MRR@5 by citation/docket/URL
-match). agentic_rare is a query producer, not a bench: `scripts/agentic_rare_filter.py`
+match), and haystack (daily, answer-recall@5 + MRR@5 on LLM-written
+questions about facts deep inside long documents from the Federal
+Register, EDGAR, Wikipedia, and arXiv). agentic_rare is a query producer, not a bench: `scripts/agentic_rare_filter.py`
 filters a query stream for English rare-word queries (BERT WordPiece +
 fastText language ID), and `needle agentic_rare generate` / `run` samples
 the filtered artifact and evaluates it like news.
