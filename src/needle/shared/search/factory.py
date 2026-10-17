@@ -8,6 +8,7 @@ from needle.shared.search.ceramic import CeramicClient
 from needle.shared.search.chatgpt import ChatGptSearchClient
 from needle.shared.search.claude import ClaudeSearchClient
 from needle.shared.search.context import ContextDevClient
+from needle.shared.search.deepseek import DeepSeekClient
 from needle.shared.search.exa import ExaClient
 from needle.shared.search.firecrawl import FirecrawlClient
 from needle.shared.search.jina import JinaClient
@@ -98,6 +99,10 @@ def _build_linkup(api_key: str | None, snippet_chars: int) -> SearchClient:
     return LinkupClient(api_key=api_key or "", depth=os.environ.get("LINKUP_DEPTH", "standard"))
 
 
+def _build_deepseek(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return DeepSeekClient(api_key=api_key or "")
+
+
 def _build_tinyfish(api_key: str | None, snippet_chars: int) -> SearchClient:
     return TinyFishClient(api_key=api_key or "")
 
@@ -163,6 +168,7 @@ ENGINES: dict[str, EngineSpec] = {
     ),
     "tavily": EngineSpec(key_env="TAVILY_API_KEY", key_required=True, build=_build_tavily),
     "linkup": EngineSpec(key_env="LINKUP_API_KEY", key_required=True, build=_build_linkup),
+    "deepseek": EngineSpec(key_env="DEEPSEEK_API_KEY", key_required=True, build=_build_deepseek),
     "tinyfish": EngineSpec(key_env="TINYFISH_API_KEY", key_required=True, build=_build_tinyfish),
     "octen": EngineSpec(key_env="OCTEN_API_KEY", key_required=True, build=_build_octen),
     "ceramic": EngineSpec(key_env="CERAMIC_API_KEY", key_required=True, build=_build_ceramic),

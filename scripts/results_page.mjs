@@ -18,7 +18,7 @@ const PROSE_NAMES = new Map([
   ["exa", "Exa"], ["exa-instant", "Exa Instant"], ["brave", "Brave"],
   ["brave-llmcontext", "Brave LLM Context"], ["parallel", "Parallel"],
   ["parallel-turbo", "Parallel Turbo"], ["perplexity", "Perplexity"],
-  ["perplexity-fast", "Perplexity Fast"], ["tavily", "Tavily"], ["linkup", "Linkup"],
+  ["perplexity-fast", "Perplexity Fast"], ["tavily", "Tavily"], ["linkup", "Linkup"], ["deepseek", "DeepSeek"],
   ["you", "You.com"], ["firecrawl", "Firecrawl"], ["tinyfish", "TinyFish"], ["kagi", "Kagi"],
   ["jina", "Jina"], ["octen", "Octen"], ["claude-search", "Claude web search"],
   ["chatgpt-search", "ChatGPT search"],

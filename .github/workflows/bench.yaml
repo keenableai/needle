@@ -40,6 +40,7 @@ env:
   PARALLEL_API_KEY: ${{ secrets.PARALLEL_API_KEY }}
   TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
   LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
+  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
   PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
   OCTEN_API_KEY: ${{ secrets.OCTEN_API_KEY }}
   CERAMIC_API_KEY: ${{ secrets.CERAMIC_API_KEY }}
@@ -53,7 +54,7 @@ env:
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/needle-results
-  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,linkup,perplexity-fast,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,claude-search,chatgpt-search
+  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,linkup,deepseek,perplexity-fast,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,claude-search,chatgpt-search
 
 jobs:
   plan:

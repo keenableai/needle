@@ -11,6 +11,7 @@ from needle.shared.search import (
     ChatGptSearchClient,
     ClaudeSearchClient,
     ContextDevClient,
+    DeepSeekClient,
     ExaClient,
     FirecrawlClient,
     JinaClient,
@@ -513,6 +514,51 @@ async def test_linkup_maps_fields_and_builds_body(monkeypatch):
         "maxResults": 1,
     }
     assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_deepseek_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "results": [
+            {
+                "title": "A",
+                "url": "https://a",
+                "snippet": "short a",
+                "summary": "long a",
+                "date": "2026-06-01T00:00:00+00:00",
+            },
+            {"title": "B", "url": "https://b", "snippet": "short b", "summary": "", "date": None},
+            {"title": "no url", "summary": "x"},
+            {"title": "C", "url": "https://c", "summary": "c"},
+        ]
+    }
+    c = DeepSeekClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=3)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].snippet == "long a"
+    assert results[0].published_date == "2026-06-01T00:00:00+00:00"
+    assert results[1].snippet == "short b"
+    assert results[1].published_date is None
+    assert calls["url"] == "https://api.deepseek.com/v1/tools/search"
+    assert calls["json"] == {"query": "hi", "count": 3}
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_deepseek_joins_sites_and_fits_query_limit(monkeypatch):
+    c = DeepSeekClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search("x site:a.com site:b.org", num_results=80)
+    assert calls["json"] == {"query": "x site:a.com OR site:b.org", "count": 50}
+
+    await c.search(" ".join(["word"] * 60) + " site:sec.gov after:2026-06-01")
+    query = calls["json"]["query"]
+    assert len(query) <= 128
+    assert query.endswith(" site:sec.gov after:2026-06-01")
 
 
 async def test_firecrawl_maps_fields_and_builds_body(monkeypatch):
@@ -1257,6 +1303,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
     monkeypatch.setenv("TAVILY_API_KEY", "tk")
     monkeypatch.setenv("LINKUP_API_KEY", "lk")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "dk")
     monkeypatch.setenv("PERPLEXITY_API_KEY", "xk")
     monkeypatch.setenv("OCTEN_API_KEY", "ok")
     monkeypatch.setenv("CERAMIC_API_KEY", "ck")
@@ -1278,6 +1325,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "parallel",
             "tavily",
             "linkup",
+            "deepseek",
             "perplexity",
             "perplexity-fast",
             "octen",
@@ -1301,6 +1349,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert isinstance(clients["linkup"], LinkupClient)
     assert clients["linkup"].api_key == "lk"
     assert clients["linkup"].depth == "standard"
+    assert isinstance(clients["deepseek"], DeepSeekClient)
+    assert clients["deepseek"].api_key == "dk"
     assert isinstance(clients["perplexity"], PerplexityClient)
     assert clients["perplexity"].api_key == "xk"
     assert clients["perplexity"].search_type is None
@@ -1706,6 +1756,12 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
                 "fromDate": "2026-06-01",
                 "toDate": "2026-06-30",
             },
+        ),
+        (
+            lambda: DeepSeekClient(api_key="k"),
+            {"results": []},
+            "json",
+            {"query": "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"},
         ),
         (
             lambda: PerplexityClient(api_key="k"),

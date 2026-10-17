@@ -13,6 +13,7 @@ from needle.shared.search.ceramic import CeramicClient
 from needle.shared.search.chatgpt import ChatGptSearchClient
 from needle.shared.search.claude import ClaudeSearchClient
 from needle.shared.search.context import ContextDevClient
+from needle.shared.search.deepseek import DeepSeekClient
 from needle.shared.search.exa import ExaClient
 from needle.shared.search.factory import build_search_clients
 from needle.shared.search.firecrawl import FirecrawlClient
@@ -37,6 +38,7 @@ __all__ = [
     "ClaudeSearchClient",
     "ContextDevClient",
     "DEFAULT_SNIPPET_CHARS",
+    "DeepSeekClient",
     "ExaClient",
     "FirecrawlClient",
     "HttpSearchClient",
