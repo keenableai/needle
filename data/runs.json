@@ -21585,5 +21585,13 @@
       "legal.json",
       "legal.jsonl"
     ]
+  },
+  {
+    "id": "2026-10-21T2210Z",
+    "ts": "2026-10-21T22:10Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "ndcg.json"
+    ]
   }
 ]
