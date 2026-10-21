@@ -756,8 +756,7 @@
 
   <h2 class="section-title" id="sec-overlap">Index independence</h2>
   <p class="section-desc">Repeated overlap on junk or near-identical
-    lists suggests a shared upstream index (all runs, all
-    benchmarks).</p>
+    lists suggests a shared upstream index (all benchmarks).</p>
 
   <div class="card" id="card-def-suspicious">
     <h2>Definition: suspicious sharing</h2>
@@ -775,7 +774,7 @@
         <var>U<sub>B</sub></var>(<var>q</var>)| ≥ 3.</p>
       <p>Each matrix cell shows the share of comparable queries (both
         searches succeeded and at least one returned a result) where the
-        pair shares suspiciously, pooled over all published runs.
+        pair shares suspiciously, pooled over the selected runs.
         Engines that share <em>good</em> results show normal
         ranking behavior. Engines that share junk, or 3+ URLs at once,
         possibly share an upstream index. Results on the known-answer
@@ -788,6 +787,10 @@
     <h2>Index independence — four views</h2>
     <div class="sub">suspicious-sharing matrix, URL-intersection matrix,
       borrowing graph, and per-engine result uniqueness</div>
+    <div class="legend" id="independence-range" role="group" aria-label="Time range">
+      <button type="button" aria-pressed="true" data-range="all runs">all runs</button>
+      <button type="button" aria-pressed="false" data-range="last 7 days">last 7 days</button>
+    </div>
     <div class="lb-tabs" role="tablist" aria-label="Index independence views">
       <button role="tab" aria-selected="true" class="active" data-panel="card-lowshared">suspicious sharing</button>
       <button role="tab" aria-selected="false" data-panel="card-urlshare">URL intersection</button>
@@ -796,24 +799,24 @@
       <div class="tab-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-lowshared" role="tabpanel">
-      <h2>Suspicious sharing (all runs)</h2>
+      <h2>Suspicious sharing (<span class="ind-range">all runs</span>)</h2>
       <div class="sub" id="lowshared-sub"></div>
       <div class="overlap-matrix" id="lowshared-table"></div>
       <div class="overlap-pair" id="lowshared-pair" aria-live="polite"></div>
     </div>
     <div class="lb-panel" id="card-urlshare" role="tabpanel">
-      <h2>URL intersection</h2>
+      <h2>URL intersection (<span class="ind-range">all runs</span>)</h2>
       <div class="sub" id="urlshare-sub"></div>
       <div class="overlap-matrix" id="urlshare-table"></div>
       <div class="overlap-pair" id="urlshare-pair" aria-live="polite"></div>
     </div>
     <div class="lb-panel" id="card-sharegraph" role="tabpanel">
-      <h2>Borrowing graph (all runs)</h2>
+      <h2>Borrowing graph (<span class="ind-range">all runs</span>)</h2>
       <div class="sub" id="sharegraph-sub"></div>
       <div id="sharegraph"></div>
     </div>
     <div class="lb-panel" id="card-uniqueness" role="tabpanel">
-      <h2>Result uniqueness (since Aug 1)</h2>
+      <h2>Result uniqueness (<span class="ind-range">all runs</span>)</h2>
       <div class="sub">share of an engine's URLs that no other engine family
         returned for the same query and that are relevant (judged HM/FullyM
         on the judged verticals, the known-item gold hit on the known-answer
@@ -1128,6 +1131,7 @@ function engineCell(engine, cls = "") {
 }
 let history = [];
 let uniqueness = [];
+let overlap = [];
 let ciData = null;
 
 const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
@@ -2641,6 +2645,15 @@ function uniquenessAgg(rows) {
   return agg;
 }
 
+function renderIndependence(range) {
+  const weekOnly = range === "last 7 days";
+  const pick = (rows) => (weekOnly ? inRange(rows, WEEK_MS) : rows);
+  for (const span of document.querySelectorAll(".ind-range")) span.textContent = range;
+  const uniqAgg = uniquenessAgg(pick(uniqueness));
+  renderOverlap(pick(overlap), uniqAgg);
+  renderUniqueness(uniqAgg);
+}
+
 function renderUniqueness(agg) {
   const holder = document.getElementById("uniqueness-table");
   holder.replaceChildren();
@@ -3361,9 +3374,14 @@ async function main() {
   renderLatencySummary(history);
   renderAll();
   uniqueness = uniquenessRows.filter((r) => !HIDDEN_ENGINES.has(r.engine));
-  const uniqAgg = uniquenessAgg(uniqueness);
-  renderOverlap(overlapRows.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)), uniqAgg);
-  renderUniqueness(uniqAgg);
+  overlap = overlapRows.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b));
+  renderIndependence("all runs");
+  document.getElementById("independence-range").addEventListener("click", (ev) => {
+    const btn = ev.target.closest("button");
+    if (!btn || btn.getAttribute("aria-pressed") === "true") return;
+    for (const b of ev.currentTarget.querySelectorAll("button")) b.setAttribute("aria-pressed", b === btn);
+    renderIndependence(btn.dataset.range);
+  });
   initRunBrowser();
   initChartTools();
   revealHash();
