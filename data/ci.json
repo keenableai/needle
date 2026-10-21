@@ -2,7 +2,7 @@
   "confidence": 0.95,
   "resamples": 10000,
   "window_days": 7,
-  "window_end": "2026-10-21T09:30Z",
+  "window_end": "2026-10-21T09:53Z",
   "method": "percentile cluster bootstrap, wider of query and run clustering",
   "runs": {
     "agentic_rare": [
@@ -190,7 +190,8 @@
       "2026-10-21T06:08Z",
       "2026-10-21T07:27Z",
       "2026-10-21T08:13Z",
-      "2026-10-21T09:16Z"
+      "2026-10-21T09:16Z",
+      "2026-10-21T09:53Z"
     ],
     "scholar": [
       "2026-10-14T15:06Z",
