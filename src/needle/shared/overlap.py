@@ -23,6 +23,7 @@ def _engine_sets(
 FAMILIES = {
     "keenable-realtime": "keenable",
     "exa-instant": "exa",
+    "exa-lite": "exa",
     "parallel-turbo": "parallel",
     "perplexity-fast": "perplexity",
     "brave-llmcontext": "brave",

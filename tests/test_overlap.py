@@ -104,6 +104,7 @@ def test_uniqueness_ignores_same_family_engines():
         {
             "exa": [_pq(["https://a.com", "https://b.com"])],
             "exa-instant": [_pq(["https://a.com"])],
+            "exa-lite": [_pq(["https://a.com"])],
             "google": [_pq(["https://b.com"])],
         }
     )
@@ -111,6 +112,7 @@ def test_uniqueness_ignores_same_family_engines():
     assert by_engine["exa"]["unique_urls"] == 1
     assert by_engine["exa"]["total_urls"] == 2
     assert by_engine["exa-instant"]["unique_urls"] == 1
+    assert by_engine["exa-lite"]["unique_urls"] == 1
     assert by_engine["google"]["unique_urls"] == 0
 
 

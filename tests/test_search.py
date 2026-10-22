@@ -100,7 +100,8 @@ async def test_keenable_snippet_falls_back_to_description(monkeypatch):
     assert calls["headers"] == {"X-Keenable-Title": "keenbench", "X-API-Key": "k"}
 
 
-async def test_exa_maps_fields_and_builds_body(monkeypatch):
+@pytest.mark.parametrize("search_type", ["auto", "instant", "lite"])
+async def test_exa_maps_fields_and_builds_body(monkeypatch, search_type):
     payload = {
         "results": [
             {
@@ -112,7 +113,7 @@ async def test_exa_maps_fields_and_builds_body(monkeypatch):
             },
         ]
     }
-    c = ExaClient(api_key="x")
+    c = ExaClient(api_key="x", search_type=search_type)
     fake, calls = _canned(payload)
     monkeypatch.setattr(c, "_request_json", fake)
 
@@ -124,7 +125,7 @@ async def test_exa_maps_fields_and_builds_body(monkeypatch):
     assert calls["json"] == {
         "query": "hi",
         "numResults": 5,
-        "type": "auto",
+        "type": search_type,
         "contents": {"highlights": {"maxCharacters": 10000}},
     }
     assert calls["headers"] == {"x-api-key": "x"}
@@ -138,7 +139,7 @@ async def test_exa_omits_contents_when_highlights_and_text_disabled(monkeypatch)
     assert "contents" not in calls["json"]
 
 
-@pytest.mark.parametrize("chars,expected", [(500, 500), (20000, 10000), (0, 10000)])
+@pytest.mark.parametrize("chars,expected", [(500, 500), (2000, 2000), (20000, 10000), (0, 10000)])
 async def test_exa_clamps_highlight_chars(monkeypatch, chars, expected):
     c = ExaClient(api_key="x", highlight_chars=chars)
     fake, calls = _canned({"results": []})
@@ -1405,6 +1406,7 @@ def test_factory_builds_engine_variants(monkeypatch):
             "keenable-realtime",
             "exa",
             "exa-instant",
+            "exa-lite",
             "parallel",
             "parallel-turbo",
             "brave",
@@ -1420,6 +1422,10 @@ def test_factory_builds_engine_variants(monkeypatch):
     assert isinstance(clients["exa-instant"], ExaClient)
     assert clients["exa"].search_type == "auto"
     assert clients["exa-instant"].search_type == "instant"
+    assert isinstance(clients["exa-lite"], ExaClient)
+    assert clients["exa-lite"].api_key == "ek"
+    assert clients["exa-lite"].search_type == "lite"
+    assert clients["exa-lite"].highlight_chars == 500
     assert isinstance(clients["parallel-turbo"], ParallelClient)
     assert clients["parallel"].mode == "advanced"
     assert clients["parallel-turbo"].mode == "turbo"

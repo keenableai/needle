@@ -146,6 +146,7 @@ ENGINES: dict[str, EngineSpec] = {
     "exa-instant": EngineSpec(
         key_env="EXA_API_KEY", key_required=True, build=_build_exa("instant")
     ),
+    "exa-lite": EngineSpec(key_env="EXA_API_KEY", key_required=True, build=_build_exa("lite")),
     "google": EngineSpec(key_env="SERPER_API_KEY", key_required=True, build=_build_serper),
     "bing": EngineSpec(
         key_env="SEARCHAPI_API_KEY", key_required=True, build=_build_searchapi("bing")

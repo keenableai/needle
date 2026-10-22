@@ -15,7 +15,8 @@ const DOWNLOADS = [["results.csv", "text/csv"], ["results.json", "application/js
   ["results.md", "text/markdown"], ["results.pdf", "application/pdf"]];
 const TITLE_RIVALS = ["exa", "parallel", "tavily", "brave"];
 const PROSE_NAMES = new Map([
-  ["exa", "Exa"], ["exa-instant", "Exa Instant"], ["brave", "Brave"],
+  ["exa", "Exa"], ["exa-instant", "Exa Instant"],
+  ["exa-lite", "Exa Lite"], ["brave", "Brave"],
   ["brave-llmcontext", "Brave LLM Context"], ["parallel", "Parallel"],
   ["parallel-turbo", "Parallel Turbo"], ["perplexity", "Perplexity"],
   ["perplexity-fast", "Perplexity Fast"], ["tavily", "Tavily"], ["linkup", "Linkup"],
