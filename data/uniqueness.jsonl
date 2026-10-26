@@ -50371,8 +50371,6 @@
 {"ts": "2026-10-24T17:53Z", "engine": "chatgpt-search", "unique_urls": 50, "total_urls": 100, "unique_relevant_urls": 20}
 {"ts": "2026-10-24T18:57Z", "engine": "keenable-realtime", "unique_urls": 46, "total_urls": 100, "unique_relevant_urls": 27}
 {"ts": "2026-10-24T18:57Z", "engine": "keenable", "unique_urls": 43, "total_urls": 100, "unique_relevant_urls": 27}
-{"ts": "2026-10-24T18:57Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-24T18:57Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T18:57Z", "engine": "google", "unique_urls": 37, "total_urls": 100, "unique_relevant_urls": 3}
 {"ts": "2026-10-24T18:57Z", "engine": "bing", "unique_urls": 82, "total_urls": 100, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T18:57Z", "engine": "brave", "unique_urls": 7, "total_urls": 100, "unique_relevant_urls": 1}
@@ -50396,8 +50394,6 @@
 {"ts": "2026-10-24T18:57Z", "engine": "chatgpt-search", "unique_urls": 64, "total_urls": 99, "unique_relevant_urls": 20}
 {"ts": "2026-10-24T19:48Z", "engine": "keenable-realtime", "unique_urls": 45, "total_urls": 100, "unique_relevant_urls": 24}
 {"ts": "2026-10-24T19:48Z", "engine": "keenable", "unique_urls": 43, "total_urls": 100, "unique_relevant_urls": 24}
-{"ts": "2026-10-24T19:48Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-24T19:48Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T19:48Z", "engine": "google", "unique_urls": 25, "total_urls": 100, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T19:48Z", "engine": "bing", "unique_urls": 66, "total_urls": 100, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T19:48Z", "engine": "brave", "unique_urls": 6, "total_urls": 100, "unique_relevant_urls": 1}
@@ -50421,8 +50417,6 @@
 {"ts": "2026-10-24T19:48Z", "engine": "chatgpt-search", "unique_urls": 52, "total_urls": 100, "unique_relevant_urls": 21}
 {"ts": "2026-10-24T20:34Z", "engine": "keenable-realtime", "unique_urls": 127, "total_urls": 280, "unique_relevant_urls": 6}
 {"ts": "2026-10-24T20:34Z", "engine": "keenable", "unique_urls": 127, "total_urls": 280, "unique_relevant_urls": 6}
-{"ts": "2026-10-24T20:34Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-24T20:34Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T20:34Z", "engine": "google", "unique_urls": 14, "total_urls": 275, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T20:34Z", "engine": "bing", "unique_urls": 236, "total_urls": 263, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T20:34Z", "engine": "brave", "unique_urls": 12, "total_urls": 252, "unique_relevant_urls": 1}
@@ -50446,8 +50440,6 @@
 {"ts": "2026-10-24T20:34Z", "engine": "chatgpt-search", "unique_urls": 147, "total_urls": 279, "unique_relevant_urls": 9}
 {"ts": "2026-10-24T20:53Z", "engine": "keenable-realtime", "unique_urls": 50, "total_urls": 100, "unique_relevant_urls": 29}
 {"ts": "2026-10-24T20:53Z", "engine": "keenable", "unique_urls": 50, "total_urls": 100, "unique_relevant_urls": 29}
-{"ts": "2026-10-24T20:53Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-24T20:53Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T20:53Z", "engine": "google", "unique_urls": 15, "total_urls": 100, "unique_relevant_urls": 3}
 {"ts": "2026-10-24T20:53Z", "engine": "bing", "unique_urls": 83, "total_urls": 99, "unique_relevant_urls": 1}
 {"ts": "2026-10-24T20:53Z", "engine": "brave", "unique_urls": 8, "total_urls": 100, "unique_relevant_urls": 2}
@@ -50471,8 +50463,6 @@
 {"ts": "2026-10-24T20:53Z", "engine": "chatgpt-search", "unique_urls": 80, "total_urls": 100, "unique_relevant_urls": 28}
 {"ts": "2026-10-24T21:53Z", "engine": "keenable-realtime", "unique_urls": 50, "total_urls": 100, "unique_relevant_urls": 21}
 {"ts": "2026-10-24T21:53Z", "engine": "keenable", "unique_urls": 50, "total_urls": 100, "unique_relevant_urls": 23}
-{"ts": "2026-10-24T21:53Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-24T21:53Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T21:53Z", "engine": "google", "unique_urls": 14, "total_urls": 100, "unique_relevant_urls": 1}
 {"ts": "2026-10-24T21:53Z", "engine": "bing", "unique_urls": 81, "total_urls": 100, "unique_relevant_urls": 1}
 {"ts": "2026-10-24T21:53Z", "engine": "brave", "unique_urls": 5, "total_urls": 100, "unique_relevant_urls": 0}
@@ -50496,8 +50486,6 @@
 {"ts": "2026-10-24T21:53Z", "engine": "chatgpt-search", "unique_urls": 69, "total_urls": 100, "unique_relevant_urls": 18}
 {"ts": "2026-10-24T22:51Z", "engine": "keenable-realtime", "unique_urls": 47, "total_urls": 100, "unique_relevant_urls": 21}
 {"ts": "2026-10-24T22:51Z", "engine": "keenable", "unique_urls": 47, "total_urls": 100, "unique_relevant_urls": 21}
-{"ts": "2026-10-24T22:51Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-24T22:51Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T22:51Z", "engine": "google", "unique_urls": 15, "total_urls": 100, "unique_relevant_urls": 4}
 {"ts": "2026-10-24T22:51Z", "engine": "bing", "unique_urls": 62, "total_urls": 90, "unique_relevant_urls": 4}
 {"ts": "2026-10-24T22:51Z", "engine": "brave", "unique_urls": 6, "total_urls": 100, "unique_relevant_urls": 1}
@@ -50521,8 +50509,6 @@
 {"ts": "2026-10-24T22:51Z", "engine": "chatgpt-search", "unique_urls": 70, "total_urls": 99, "unique_relevant_urls": 26}
 {"ts": "2026-10-24T23:51Z", "engine": "keenable-realtime", "unique_urls": 48, "total_urls": 100, "unique_relevant_urls": 33}
 {"ts": "2026-10-24T23:51Z", "engine": "keenable", "unique_urls": 48, "total_urls": 100, "unique_relevant_urls": 32}
-{"ts": "2026-10-24T23:51Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-24T23:51Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-24T23:51Z", "engine": "google", "unique_urls": 17, "total_urls": 100, "unique_relevant_urls": 2}
 {"ts": "2026-10-24T23:51Z", "engine": "bing", "unique_urls": 69, "total_urls": 93, "unique_relevant_urls": 3}
 {"ts": "2026-10-24T23:51Z", "engine": "brave", "unique_urls": 10, "total_urls": 100, "unique_relevant_urls": 3}
@@ -50546,8 +50532,6 @@
 {"ts": "2026-10-24T23:51Z", "engine": "chatgpt-search", "unique_urls": 60, "total_urls": 99, "unique_relevant_urls": 23}
 {"ts": "2026-10-25T01:28Z", "engine": "keenable-realtime", "unique_urls": 45, "total_urls": 100, "unique_relevant_urls": 23}
 {"ts": "2026-10-25T01:28Z", "engine": "keenable", "unique_urls": 44, "total_urls": 100, "unique_relevant_urls": 23}
-{"ts": "2026-10-25T01:28Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-25T01:28Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T01:28Z", "engine": "google", "unique_urls": 28, "total_urls": 100, "unique_relevant_urls": 4}
 {"ts": "2026-10-25T01:28Z", "engine": "bing", "unique_urls": 73, "total_urls": 91, "unique_relevant_urls": 1}
 {"ts": "2026-10-25T01:28Z", "engine": "brave", "unique_urls": 2, "total_urls": 100, "unique_relevant_urls": 0}
@@ -50571,8 +50555,6 @@
 {"ts": "2026-10-25T01:28Z", "engine": "chatgpt-search", "unique_urls": 69, "total_urls": 100, "unique_relevant_urls": 17}
 {"ts": "2026-10-25T01:59Z", "engine": "keenable-realtime", "unique_urls": 44, "total_urls": 90, "unique_relevant_urls": 19}
 {"ts": "2026-10-25T01:59Z", "engine": "keenable", "unique_urls": 41, "total_urls": 90, "unique_relevant_urls": 19}
-{"ts": "2026-10-25T01:59Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-25T01:59Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T01:59Z", "engine": "google", "unique_urls": 13, "total_urls": 90, "unique_relevant_urls": 3}
 {"ts": "2026-10-25T01:59Z", "engine": "bing", "unique_urls": 69, "total_urls": 85, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T01:59Z", "engine": "brave", "unique_urls": 11, "total_urls": 90, "unique_relevant_urls": 5}
@@ -50596,8 +50578,6 @@
 {"ts": "2026-10-25T01:59Z", "engine": "chatgpt-search", "unique_urls": 53, "total_urls": 90, "unique_relevant_urls": 13}
 {"ts": "2026-10-25T03:02Z", "engine": "keenable-realtime", "unique_urls": 61, "total_urls": 100, "unique_relevant_urls": 30}
 {"ts": "2026-10-25T03:02Z", "engine": "keenable", "unique_urls": 61, "total_urls": 100, "unique_relevant_urls": 30}
-{"ts": "2026-10-25T03:02Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-25T03:02Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T03:02Z", "engine": "google", "unique_urls": 21, "total_urls": 100, "unique_relevant_urls": 1}
 {"ts": "2026-10-25T03:02Z", "engine": "bing", "unique_urls": 66, "total_urls": 100, "unique_relevant_urls": 5}
 {"ts": "2026-10-25T03:02Z", "engine": "brave", "unique_urls": 4, "total_urls": 100, "unique_relevant_urls": 0}
@@ -50621,8 +50601,6 @@
 {"ts": "2026-10-25T03:02Z", "engine": "chatgpt-search", "unique_urls": 65, "total_urls": 100, "unique_relevant_urls": 15}
 {"ts": "2026-10-25T03:26Z", "engine": "keenable-realtime", "unique_urls": 343, "total_urls": 599, "unique_relevant_urls": 45}
 {"ts": "2026-10-25T03:26Z", "engine": "keenable", "unique_urls": 354, "total_urls": 599, "unique_relevant_urls": 49}
-{"ts": "2026-10-25T03:26Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-25T03:26Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T03:26Z", "engine": "google", "unique_urls": 17, "total_urls": 585, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T03:26Z", "engine": "bing", "unique_urls": 414, "total_urls": 580, "unique_relevant_urls": 1}
 {"ts": "2026-10-25T03:26Z", "engine": "brave", "unique_urls": 24, "total_urls": 586, "unique_relevant_urls": 0}
@@ -50646,8 +50624,6 @@
 {"ts": "2026-10-25T03:26Z", "engine": "chatgpt-search", "unique_urls": 338, "total_urls": 588, "unique_relevant_urls": 32}
 {"ts": "2026-10-25T04:00Z", "engine": "keenable-realtime", "unique_urls": 51, "total_urls": 100, "unique_relevant_urls": 21}
 {"ts": "2026-10-25T04:00Z", "engine": "keenable", "unique_urls": 53, "total_urls": 100, "unique_relevant_urls": 23}
-{"ts": "2026-10-25T04:00Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-25T04:00Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T04:00Z", "engine": "google", "unique_urls": 24, "total_urls": 100, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T04:00Z", "engine": "bing", "unique_urls": 64, "total_urls": 93, "unique_relevant_urls": 2}
 {"ts": "2026-10-25T04:00Z", "engine": "brave", "unique_urls": 3, "total_urls": 100, "unique_relevant_urls": 0}
@@ -50671,8 +50647,6 @@
 {"ts": "2026-10-25T04:00Z", "engine": "chatgpt-search", "unique_urls": 55, "total_urls": 98, "unique_relevant_urls": 17}
 {"ts": "2026-10-25T04:57Z", "engine": "keenable-realtime", "unique_urls": 47, "total_urls": 100, "unique_relevant_urls": 24}
 {"ts": "2026-10-25T04:57Z", "engine": "keenable", "unique_urls": 45, "total_urls": 100, "unique_relevant_urls": 24}
-{"ts": "2026-10-25T04:57Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-25T04:57Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T04:57Z", "engine": "google", "unique_urls": 17, "total_urls": 100, "unique_relevant_urls": 5}
 {"ts": "2026-10-25T04:57Z", "engine": "bing", "unique_urls": 72, "total_urls": 100, "unique_relevant_urls": 5}
 {"ts": "2026-10-25T04:57Z", "engine": "brave", "unique_urls": 9, "total_urls": 100, "unique_relevant_urls": 3}
@@ -50696,8 +50670,6 @@
 {"ts": "2026-10-25T04:57Z", "engine": "chatgpt-search", "unique_urls": 61, "total_urls": 98, "unique_relevant_urls": 17}
 {"ts": "2026-10-25T05:53Z", "engine": "keenable-realtime", "unique_urls": 57, "total_urls": 100, "unique_relevant_urls": 37}
 {"ts": "2026-10-25T05:53Z", "engine": "keenable", "unique_urls": 56, "total_urls": 100, "unique_relevant_urls": 37}
-{"ts": "2026-10-25T05:53Z", "engine": "exa-instant", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
-{"ts": "2026-10-25T05:53Z", "engine": "exa", "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0}
 {"ts": "2026-10-25T05:53Z", "engine": "google", "unique_urls": 14, "total_urls": 100, "unique_relevant_urls": 3}
 {"ts": "2026-10-25T05:53Z", "engine": "bing", "unique_urls": 75, "total_urls": 97, "unique_relevant_urls": 5}
 {"ts": "2026-10-25T05:53Z", "engine": "brave", "unique_urls": 6, "total_urls": 100, "unique_relevant_urls": 4}
