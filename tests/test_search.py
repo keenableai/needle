@@ -11,6 +11,7 @@ from needle.shared.search import (
     CeramicClient,
     ChatGptSearchClient,
     ClaudeSearchClient,
+    ClawifiClient,
     ContextDevClient,
     DeepSeekClient,
     ExaClient,
@@ -901,6 +902,64 @@ async def test_deepseek_tolerates_null_results(monkeypatch):
     assert await c.search("hi") == ([], None)
 
 
+async def test_clawifi_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "results": [
+            {"url": "https://a", "title": "A", "snippet": "sa", "published_at": "2026-07-01"},
+            {"url": "https://b", "title": "", "snippet": None},
+            {"title": "no url"},
+        ]
+    }
+    c = ClawifiClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].snippet == "sa"
+    assert results[0].published_date == "2026-07-01"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert calls["method"] == "POST"
+    assert calls["url"] == "https://api.clawifi.dev/search/free"
+    assert calls["json"] == {"query": "hi", "max_results": 5}
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_clawifi_clips_query_and_caps_results(monkeypatch):
+    c = ClawifiClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    long_query = " ".join(f"word{i}" for i in range(200))
+    await c.search(long_query, num_results=100)
+    assert len(calls["json"]["query"]) <= 500
+    assert long_query.startswith(calls["json"]["query"])
+    assert calls["json"]["max_results"] == 50
+
+
+async def test_clawifi_maps_recent_after_to_time_range(monkeypatch):
+    c = ClawifiClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    after = (datetime.now(UTC).date() - timedelta(days=3)).isoformat()
+    await c.search(f"hello after:{after}")
+    assert calls["json"]["time_range"] == "week"
+
+    await c.search(OPS_QUERY)
+    assert calls["json"]["include_domains"] == ["sec.gov"]
+    assert "time_range" not in calls["json"]
+
+
+async def test_clawifi_tolerates_null_results(monkeypatch):
+    c = ClawifiClient(api_key="k")
+    fake, _ = _canned({"results": None})
+    monkeypatch.setattr(c, "_request_json", fake)
+    assert await c.search("hi") == ([], None)
+
+
 async def test_tinyfish_maps_fields_and_builds_params(monkeypatch):
     payload = {
         "results": [
@@ -1325,6 +1384,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("KAGI_API_KEY", "kk")
     monkeypatch.setenv("JINA_API_KEY", "jk")
     monkeypatch.setenv("CONTEXT_DEV_API_KEY", "cdk")
+    monkeypatch.setenv("CLAWIFI_API_KEY", "clk")
     monkeypatch.setenv("DEEPSEEK_API_KEY", "dk")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "ak")
     monkeypatch.setenv("OPENAI_API_KEY", "oak")
@@ -1348,6 +1408,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "kagi",
             "jina",
             "context",
+            "clawifi",
             "deepseek",
         ]
     )
@@ -1388,6 +1449,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["jina"].api_key == "jk"
     assert clients["jina"].snippet_chars == 0
     assert isinstance(clients["context"], ContextDevClient)
+    assert isinstance(clients["clawifi"], ClawifiClient)
+    assert clients["clawifi"].api_key == "clk"
     assert clients["context"].api_key == "cdk"
     assert clients["context"].engine == "context"
     assert isinstance(clients["deepseek"], DeepSeekClient)
@@ -1818,6 +1881,12 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
                 "count": 10,
                 "need_content": False,
             },
+        ),
+        (
+            lambda: ClawifiClient(api_key="k"),
+            {"results": []},
+            "json",
+            {"query": "acme filing", "include_domains": ["sec.gov"]},
         ),
         (
             lambda: TinyFishClient(api_key="k"),
