@@ -50,11 +50,12 @@ env:
   JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
   CONTEXT_DEV_API_KEY: ${{ secrets.CONTEXT_DEV_API_KEY }}
   DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+  CLAWIFI_API_KEY: ${{ secrets.CLAWIFI_API_KEY }}
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/needle-results
-  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,linkup,perplexity-fast,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,deepseek,claude-search,chatgpt-search
+  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,linkup,perplexity-fast,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,deepseek,clawifi,claude-search,chatgpt-search
 
 jobs:
   plan:
