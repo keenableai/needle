@@ -1,5 +1,6 @@
 import re
 from dataclasses import dataclass, field
+from urllib.parse import unquote
 
 from needle.shared.search import SearchResult, titled_snippet
 
@@ -66,7 +67,7 @@ def extract_doi(url: str, text: str) -> set[str]:
 
 
 def extract_ids(result: SearchResult, *, snippet_chars: int) -> PaperIds:
-    url = result.url or ""
+    url = unquote(result.url or "")
     text = titled_snippet(result, snippet_chars)
     return PaperIds(
         arxiv=extract_arxiv(url, text),

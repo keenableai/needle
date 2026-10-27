@@ -79,6 +79,16 @@ def test_extract_ids_caps_snippet():
     assert ids_full.doi == {"10.1234/deep.buried"}
 
 
+def test_extract_ids_decodes_percent_encoded_url():
+    result = SearchResult(
+        url="https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0358267",
+        title="T",
+        snippet="",
+    )
+    ids = extract_ids(result, snippet_chars=500)
+    assert ids.doi == {"10.1371/journal.pone.0358267"}
+
+
 def test_extract_ids_match_dict():
     result = SearchResult(url="https://arxiv.org/abs/2506.12345", title="T", snippet="")
     ids = extract_ids(result, snippet_chars=500)
