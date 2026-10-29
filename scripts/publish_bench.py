@@ -108,6 +108,10 @@ def legal_rows(report: dict, ts: str) -> list[dict]:
     return _suite_rows(report, ts, "legal", ("caselaw", "code"))
 
 
+def coding_rows(report: dict, ts: str) -> list[dict]:
+    return _suite_rows(report, ts, "coding", ("title", "task"))
+
+
 def slim_report(report: dict) -> dict:
     slim = dict(report)
     slim["engines"] = {
@@ -148,6 +152,8 @@ def publish(
     scholar_queries: str | None = None,
     legal: str | None = None,
     legal_queries: str | None = None,
+    coding: str | None = None,
+    coding_queries: str | None = None,
     ts: str | None = None,
 ) -> None:
     data = Path(site) / "data"
@@ -175,6 +181,7 @@ def publish(
         ("agentic_rare", agentic_rare, agentic_rare_rows, "agentic_rare.json"),
         ("scholar", scholar, scholar_rows, "scholar.json"),
         ("legal", legal, legal_rows, "legal.json"),
+        ("coding", coding, coding_rows, "coding.json"),
     ):
         if not path:
             continue
@@ -191,6 +198,7 @@ def publish(
         (agentic_rare_queries, "agentic_rare.jsonl"),
         (scholar_queries, "scholar.jsonl"),
         (legal_queries, "legal.jsonl"),
+        (coding_queries, "coding.jsonl"),
     ):
         if path:
             (run_dir / archive_name).write_bytes(Path(path).read_bytes())
@@ -198,6 +206,7 @@ def publish(
         (gold, "gold.jsonl"),
         (scholar_queries, "scholar.jsonl"),
         (legal_queries, "legal.jsonl"),
+        (coding_queries, "coding.jsonl"),
     ):
         if path:
             (data / name).write_bytes(Path(path).read_bytes())

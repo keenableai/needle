@@ -3,10 +3,11 @@ name: Bench
 on:
   schedule:
     - cron: "17 0 * * *"
+    - cron: "17 3 * * *"
     - cron: "17 6 * * *"
     - cron: "17 12 * * *"
     - cron: "17 18 * * *"
-    - cron: "17 1-5,7-11,13-17,19-23 * * *"
+    - cron: "17 1-2,4-5,7-11,13-17,19-23 * * *"
   workflow_dispatch:
     inputs:
       finance:
@@ -23,6 +24,10 @@ on:
         default: false
       legal:
         description: "Also run legal (regenerates gold)"
+        type: boolean
+        default: false
+      coding:
+        description: "Also run coding (regenerates gold)"
         type: boolean
         default: false
 
@@ -65,6 +70,7 @@ jobs:
       agentic_rare: ${{ steps.plan.outputs.agentic_rare }}
       scholar: ${{ steps.plan.outputs.scholar }}
       legal: ${{ steps.plan.outputs.legal }}
+      coding: ${{ steps.plan.outputs.coding }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -73,6 +79,7 @@ jobs:
             data/gold.jsonl
             data/scholar.jsonl
             data/legal.jsonl
+            data/coding.jsonl
           sparse-checkout-cone-mode: false
       - id: plan
         env:
@@ -81,6 +88,7 @@ jobs:
           AGENTIC_RARE: ${{ inputs.agentic_rare }}
           SCHOLAR: ${{ inputs.scholar }}
           LEGAL: ${{ inputs.legal }}
+          CODING: ${{ inputs.coding }}
         run: |
           want() {
             if [ "$SCHEDULE" = "$1" ] || [ "$2" = "true" ]; then echo true
@@ -93,6 +101,7 @@ jobs:
             echo "agentic_rare=$(want '17 6 * * *' "$AGENTIC_RARE" '')"
             echo "scholar=$(want '17 12 * * *' "$SCHOLAR" data/scholar.jsonl)"
             echo "legal=$(want '17 18 * * *' "$LEGAL" data/legal.jsonl)"
+            echo "coding=$(want '17 3 * * *' "$CODING" data/coding.jsonl)"
           } >> "$GITHUB_OUTPUT"
 
   news:
@@ -189,4 +198,23 @@ jobs:
         with:
           args: --legal legal.json --legal-queries legal.jsonl
           daily_args: --legal legal.jsonl --legal_report legal.json
+
+  coding:
+    needs: plan
+    if: needs.plan.outputs.coding == 'true'
+    runs-on: gke-use5-amd64
+    timeout-minutes: 270
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          site-data: true
+      - run: |
+          uv run needle coding generate --per-host 4 --out coding.jsonl
+          uv run needle coding run --queries coding.jsonl \
+            --engines "$ENGINES" --out coding.json
+      - uses: ./.github/actions/publish
+        with:
+          args: --coding coding.json --coding-queries coding.jsonl
+          daily_args: --coding coding.jsonl --coding_report coding.json
 

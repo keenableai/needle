@@ -12,6 +12,7 @@ SPEC.loader.exec_module(daily_queries)
 
 def test_benches_include_agentic_rare():
     assert ("agentic_rare", "agentic_rare.jsonl", ("agentic_rare.json",)) in daily_queries.BENCHES
+    assert ("coding", "coding.jsonl", ("coding.json",)) in daily_queries.BENCHES
 
 
 def test_news_reports_accept_pre_switch_artifacts():

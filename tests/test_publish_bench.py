@@ -13,6 +13,7 @@ publish_bench = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(publish_bench)
 finance_rows = publish_bench.finance_rows
 scholar_rows = publish_bench.scholar_rows
+coding_rows = publish_bench.coding_rows
 
 
 def _report(by_bucket):
@@ -58,6 +59,22 @@ def test_suite_rows_publish_slice_denominators():
     )[0]
     assert row["filings_n"] == 3
     assert row["filingdoc_n"] == 4
+
+
+def test_coding_rows_publish_slice_denominators():
+    row = coding_rows(
+        _report(
+            {
+                "title": {"n": 4, "recall_at_k": 0.5},
+                "task": {"n": 4, "recall_at_k": 0.25},
+            }
+        ),
+        "2026-01-01T00:00:00Z",
+    )[0]
+    assert row["bench"] == "coding"
+    assert row["title_n"] == 4
+    assert row["task_recall"] == 0.25
+    assert row["task_n"] == 4
 
 
 def test_publish_writes_ci_files(tmp_path):

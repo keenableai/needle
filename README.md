@@ -18,6 +18,7 @@ needle <benchmark> run --queries queries.jsonl ...    # evaluate engines on them
 | [`finance`](#finance) | company and financial fact lookups, gold from public registries and SEC filings | answer-recall@K + MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | known-item paper retrieval: by title vs. by a full-text-only detail | recall@K + MRR@K by paper-id match |
 | [`legal`](#legal) | known-item caselaw / CFR retrieval | recall@K + MRR@K by citation/docket/URL identity |
+| [`coding`](#coding) | known-item documentation-page retrieval: by title vs. by the task a coding agent is doing | recall@K + MRR@K by page URL match |
 | [`agentic_rare`](#agentic_rare) | English rare-word queries sampled from a filtered query stream | LLM relevance judge → nDCG@5 |
 
 Each bench generates gold on demand from public sources; the repo commits
@@ -36,7 +37,7 @@ The CLI loads `.env` from the working directory (copy
 
 | Variable | Purpose |
 | --- | --- |
-| `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`) and judging |
+| `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`, coding `task`) and judging |
 | `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `LINKUP_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY`, `FIRECRAWL_API_KEY`, `TINYFISH_API_KEY`, `KAGI_API_KEY`, `JINA_API_KEY`, `CONTEXT_DEV_API_KEY` (`context`), `DEEPSEEK_API_KEY`, `ANTHROPIC_API_KEY` (`claude-search`), `OPENAI_API_KEY` (`chatgpt-search`) | one per engine, required when that engine is in `--engines` |
 | `KEENABLE_API_KEY` | optional — without it the CLI uses the keyless, rate-limited endpoint |
 | `NEEDLE_LLM_MODEL`, `NEEDLE_JUDGE_MODEL` | both default to `openai/gpt-6-luna`; `--llm-model` / `--judge-model` override |
@@ -192,6 +193,45 @@ result URLs and snippets for reporter citations, docket numbers (scored only
 next to a gold party token), CourtListener/Justia URLs, and CFR citations;
 it breaks down by suite, syntax, and court.
 
+## coding
+
+Known-item documentation lookup. A coding assistant needs one English
+page from a product's docs, and the bench asks whether the top 5 contain
+that page. Gold is the host and path. A hit is that page in a result URL
+or in the snippet. Scheme, a `.md` suffix, a trailing slash, and a query
+string still match. Path case is part of the identity. A different path
+is a miss, including another version or a translation.
+
+```bash
+needle coding generate --per-host 4 --out coding.jsonl
+needle coding run --queries coding.jsonl --out coding.json
+needle coding generate --slices title --per-host 2 --hosts firecrawl --out coding.jsonl
+```
+
+`generate` reads public `/llms.txt` indexes. The current hosts are
+Mintlify-hosted docs (`firecrawl`, `browserbase`, `resend`,
+`langchain`); `--hosts` is how that set changes. A
+`/_llms/` tree replaces inline legacy pages. When an English index
+exists, translated trees are left out. A child index keeps the pages it
+lists and still follows its nested indexes.
+
+Each kept page yields two slices. **`title`** is the product name, the
+section, and the page title. The section is the nearest heading, or the
+parent path when the index is a flat list. **`task`** is a 6–14 word
+keyword query a coding agent would issue. The bench rejects it when it
+starts with what, why, or how, omits the product name, copies the title
+(the whole title when it is shorter than four words, otherwise any
+four-word span), or contains the host, path, or hyphenated slug. A
+rejected task drops that page's title row too. A query that repeats one
+already kept is skipped, and the next candidate fills the slot. `run`
+reports recall@5 and MRR@5 by slice. `--slices title` skips the LLM.
+
+The 03:17 UTC job sends those queries to every engine in the daily
+field, the same list as the other benches. One engine's failure stays a
+search error on that engine. The archived report keeps, for each
+engine, the gold page and the rank of the first hit, so a miss is a
+docs page that engine did not return.
+
 ## agentic_rare
 
 A query producer plus a news-style eval for English rare-word queries.
@@ -246,8 +286,8 @@ the overlap and uniqueness stats exclude it.
 
 [`bench.yaml`](.github/workflows/bench.yaml) runs against all registered
 engines: news hourly (`--limit 20`); daily with fresh gold — finance 00:17
-UTC (`--limit 120 --judge`), agentic_rare 06:17 (`--limit 100`), scholar
-12:17 (`--per-cell 7`), legal 18:17. Gold lives on `gh-pages` between runs;
+UTC (`--limit 120 --judge`), coding 03:17 (`--per-host 4`), agentic_rare
+06:17 (`--limit 100`), scholar 12:17 (`--per-cell 7`), legal 18:17. Gold lives on `gh-pages` between runs;
 a daily bench also runs off-schedule when a manual dispatch selects it or
 when its gold file is missing. Each bench is its own job and publishes its
 own run, so a slow daily bench never delays the hourly news result. Each

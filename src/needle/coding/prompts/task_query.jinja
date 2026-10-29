@@ -1,0 +1,18 @@
+You generate a search query for a coding-assistant benchmark. The query must lead a web search engine to ONE specific {{ product }} documentation page without naming that page.
+
+You are given the page title (so you can avoid it) and the page body. Produce ONE keyword-style search query a coding agent would issue when it needs this page: the task, the API, the error, or the constraint.
+
+Requirements:
+- Keyword-style, 6-14 words. Not a natural-language question. Do not start with what/why/how.
+- Include the product name "{{ product }}".
+- Do not copy 4 or more consecutive words from the title. If the title is shorter than 4 words, do not copy the whole title. A one-word title must not appear as a word in the query.
+- Do not include a URL, a host name, a file path, or a hyphenated slug from the page URL.
+- Always respond in English.
+- If the body is too thin to single the page out (a title repeat, a nav list, or a stub), respond with exactly NO_DISTINCT_QUERY.
+
+Product: {{ product }}
+Title: {{ title }}
+Body:
+{{ body }}
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

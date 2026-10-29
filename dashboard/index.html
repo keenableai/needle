@@ -12,11 +12,11 @@
   } catch {}
 </script>
 <title>NEEDLE — search engine benchmarks</title>
-<meta name="description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta name="description" content="Live open-source search benchmark: hourly news and daily finance, scholar, coding, rare-word, and legal suites compare public search APIs.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEEDLE">
 <meta property="og:title" content="NEEDLE — search engine benchmarks">
-<meta property="og:description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta property="og:description" content="Live open-source search benchmark: hourly news and daily finance, scholar, coding, rare-word, and legal suites compare public search APIs.">
 <meta property="og:url" content="https://keenableai.github.io/needle/">
 <meta property="og:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -373,7 +373,7 @@
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
   .overlap-matrix, #fields-table, #history-table, .bar-table, #prices-table,
-  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
+  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal, #lb-coding,
   #app-queries, #app-metrics, #app-engines, #app-data { overflow-x: auto; }
   #card-standings { max-width: var(--measure); }
   #standings .st-layout { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
@@ -527,7 +527,7 @@
       <p>NEEDLE (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
         <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is a
         live open-source search benchmark. It compares search engines with
-        queries that model agent behavior. The five verticals match
+        queries that model agent behavior. The six verticals match
         the use cases we see each day in Keenable's own search
         traffic:</p>
       <ul>
@@ -546,6 +546,8 @@
           agentic search logs</li>
         <li><b><span class="vert" data-vert="legal"></span>:</b> find a specific court opinion or section of the
           Code of Federal Regulations</li>
+        <li><b><span class="vert" data-vert="coding"></span>:</b> find a specific documentation
+          page from its title, or from the task a coding agent is trying to do</li>
       </ul>
       <p><b>Methodology.</b> Each engine in a run receives the same query
         text. We score each engine on the ranking, titles, and snippets
@@ -565,9 +567,9 @@
         exactly&nbsp;1, with a penalty for duplicate
         URLs. <span class="vert" data-vert="finance"></span> measures if the answer text reaches the
         agent: we scan the top-5 titles and snippets and report
-        answer-recall@5 with MRR@5. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are
-        known-item tasks: we match identifiers and report recall@10 and
-        recall@5 with MRR. <a href="#app-metrics">Appendix D</a> gives the exact
+        answer-recall@5 with MRR@5. <span class="vert" data-vert="scholar"></span>, <span class="vert" data-vert="legal"></span>, and <span class="vert" data-vert="coding"></span> are
+        known-item tasks: we match identifiers and report recall@10
+        (scholar) or recall@5 (legal and coding) with MRR. <a href="#app-metrics">Appendix D</a> gives the exact
         definitions.</p>
       <p><b>The <em>ultimate</em> ceiling.</b> The italicized row in
         each leaderboard is <em>ultimate</em>, a synthetic engine. It
@@ -591,7 +593,7 @@
   <div class="card" id="card-leaderboards" data-tools>
     <h2 id="sec-leaderboards">7-day leaderboards</h2>
     <div class="sub">Query-weighted 7-day means with a 95% CI;
-      <span class="hint" title="title, body, clue, and tot for Scholar; filings and filingdoc for Finance; caselaw and code for Legal">suite columns</span>
+      <span class="hint" title="title, body, clue, and tot for Scholar; title and task for Coding; filings and filingdoc for Finance; caselaw and code for Legal">suite columns</span>
       split the score.</div>
     <div class="lb-tabs" id="lb-tabs" role="tablist" aria-label="Bench leaderboards">
       <button role="tab" aria-selected="true" class="active" data-panel="card-lb-overall">Overall</button>
@@ -600,6 +602,7 @@
       <button role="tab" aria-selected="false" data-panel="card-lb-company"><span class="vert" data-vert="finance"></span></button>
       <button role="tab" aria-selected="false" data-panel="card-lb-rare"><span class="vert" data-vert="agentic_rare"></span></button>
       <button role="tab" aria-selected="false" data-panel="card-lb-legal"><span class="vert" data-vert="legal"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-coding"><span class="vert" data-vert="coding"></span></button>
       <div id="lb-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-lb-overall" role="tabpanel">
@@ -632,6 +635,11 @@
       <div class="sub" id="lb-legal-sub"></div>
       <div id="lb-legal" data-static></div>
     </div>
+    <div class="lb-panel" id="card-lb-coding" role="tabpanel">
+      <h2><span class="vert" data-vert="coding"></span> — 7-day mean</h2>
+      <div class="sub" id="lb-coding-sub"></div>
+      <div id="lb-coding"></div>
+    </div>
   </div>
 
   <h2 class="section-title" id="sec-trends">Slices over time</h2>
@@ -648,6 +656,7 @@
       <button role="tab" aria-selected="false" data-panel="trend-finance"><span class="vert" data-vert="finance"></span></button>
       <button role="tab" aria-selected="false" data-panel="trend-rare"><span class="vert" data-vert="agentic_rare"></span></button>
       <button role="tab" aria-selected="false" data-panel="trend-legal"><span class="vert" data-vert="legal"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-coding"><span class="vert" data-vert="coding"></span></button>
       <div class="tab-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="trend-scholar" role="tabpanel">
@@ -731,6 +740,26 @@
       <div class="lb-panel" id="trend-legal-code" role="tabpanel">
         <h2><span class="vert" data-vert="legal"></span> — code recall@5 over time</h2>
         <div class="sub">recall@5 on CFR sections found from their regulatory substance</div>
+      </div>
+    </div>
+    <div class="lb-panel" id="trend-coding" role="tabpanel">
+      <div class="lb-tabs" role="tablist" aria-label="Coding slices">
+        <button role="tab" aria-selected="true" class="active" data-panel="trend-coding-recall">overview</button>
+        <button role="tab" aria-selected="false" data-panel="trend-coding-title">title</button>
+        <button role="tab" aria-selected="false" data-panel="trend-coding-task">task</button>
+        <div class="tab-ind" aria-hidden="true"></div>
+      </div>
+      <div class="lb-panel active" id="trend-coding-recall" role="tabpanel">
+        <h2><span class="vert" data-vert="coding"></span> — recall@5 over time</h2>
+        <div class="sub">recall@5, gold documentation pages per run across both slices</div>
+      </div>
+      <div class="lb-panel" id="trend-coding-title" role="tabpanel">
+        <h2><span class="vert" data-vert="coding"></span> — title-query recall@5 over time</h2>
+        <div class="sub">recall@5 on pages found by product name plus page title</div>
+      </div>
+      <div class="lb-panel" id="trend-coding-task" role="tabpanel">
+        <h2><span class="vert" data-vert="coding"></span> — task-query recall@5 over time</h2>
+        <div class="sub">recall@5 on pages found from the task a coding agent is trying to do</div>
       </div>
     </div>
   </div>
@@ -912,6 +941,10 @@
         <td>recent published opinions from the CourtListener API across 14 federal courts, one caption-style query per case; gold is the reporter citation, docket number with party tokens, and cluster id</td></tr>
       <tr><td><span class="vert" data-vert="legal"></span></td><td>code</td>
         <td>eCFR sections; an LLM projects each section into a query about its regulatory substance with one verbatim quoted span, rejected if it leaks the citation; gold is the "title CFR section" citation</td></tr>
+      <tr><td><span class="vert" data-vert="coding"></span></td><td>title</td>
+        <td>the product name, the section, and the page title. The section is the nearest heading, or the parent path when the index is a flat list. The page is the English one</td></tr>
+      <tr><td><span class="vert" data-vert="coding"></span></td><td>task</td>
+        <td>a 6–14 word keyword query a coding agent would issue, including the product name. Rejected when it starts with what, why, or how, copies the title, or contains the host, path, or hyphenated slug. Gold is the page's host and path</td></tr>
     </table>
   </div>
 
@@ -942,6 +975,8 @@
         <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher, with an LLM-judge backstop for paraphrased answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
         <td>known-item: the gold opinion or CFR section identified by citation, docket (with a party-token check), CFR citation, or URL match.</td></tr>
+      <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="coding"></span></td>
+        <td>known-item: the gold documentation page identified by its host and path in a top-5 result URL or in the snippet. Scheme, a <code>.md</code> suffix, a trailing slash, and a query string still match. Path case is part of the identity. A different path, including another version or a translation, is a miss.</td></tr>
       <tr><td>latency p50 / p95</td><td>all</td>
         <td>percentiles over per-call durations of successful search API calls, pooled across queries in the window; runs published without per-call samples contribute their per-run percentiles instead. Failed calls carry no latency sample and show up in the error rate.</td></tr>
     </table>
@@ -949,7 +984,7 @@
 
   <div class="card" id="app-judge">
     <h2>Appendix E — LLM judge</h2>
-    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; <span class="vert" data-vert="finance"></span> fallback matcher only; <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are deterministic</div>
+    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; <span class="vert" data-vert="finance"></span> fallback matcher only; <span class="vert" data-vert="scholar"></span>, <span class="vert" data-vert="legal"></span>, and <span class="vert" data-vert="coding"></span> are deterministic</div>
     <div class="prose">
       <p>We judge with <code>openai/gpt-6-luna</code> via OpenRouter, high reasoning effort, temperature 0, one pointwise call per document. We record the model for each run as <code>judge_model</code> in its archived report. The judgement browser shows it when you select a run, so judge changes stay visible in the history.</p>
       <p>The judge does not see the engine identity. The prompt contains the query, the document title, the URL, the published date, and the snippet — not the engine name. We judge each distinct combination of URL, title, snippet, and date once per query and use that rating again where the identical result occurs for other engines. We judge the same URL with a different snippet separately, with the same blind judge and rubric.</p>
@@ -1001,7 +1036,7 @@
         <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results)</td>
         <td><a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF: keenable-ai/needle-results</a>, runs/&lt;run-id&gt;/</td></tr>
       <tr><td>query files</td>
-        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, coding.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
         <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, independence.json, runs.json, ci_scores.jsonl, ci.json</td>
@@ -1082,7 +1117,8 @@ const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable"],
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
 const VERTICALS = new Map([["news", "News"], ["finance", "Finance"],
-  ["scholar", "Scholar"], ["agentic_rare", "AgenticRare"], ["legal", "Legal"]]);
+  ["scholar", "Scholar"], ["agentic_rare", "AgenticRare"], ["legal", "Legal"],
+  ["coding", "Coding"]]);
 const verticalName = (b) => VERTICALS.get(b) ?? b;
 
 const ENGINE_LOGOS = new Map([
@@ -1475,6 +1511,9 @@ const TREND_SLICES = [
   ["trend-legal-recall", "legal", "recall"],
   ["trend-legal-caselaw", "legal", "caselaw_recall"],
   ["trend-legal-code", "legal", "code_recall"],
+  ["trend-coding-recall", "coding", "recall"],
+  ["trend-coding-title", "coding", "title_recall"],
+  ["trend-coding-task", "coding", "task_recall"],
 ];
 
 let drawAllTrends = null;
@@ -1627,6 +1666,11 @@ function renderLeaderboards(rows) {
     ["caselaw_recall", "caselaw", "caselaw_n"],
     ["code_recall", "code", "code_n"],
   ]);
+  renderLeaderboard("lb-coding", "lb-coding-sub", rows, "coding", [
+    ["recall", "recall@5"],
+    ["title_recall", "title", "title_n"],
+    ["task_recall", "task", "task_n"],
+  ]);
 }
 
 const STANDINGS_BENCHES = [
@@ -1635,6 +1679,7 @@ const STANDINGS_BENCHES = [
   ["finance", "recall", "recall@5"],
   ["agentic_rare", "ndcg", "nDCG@5"],
   ["legal", "recall", "recall@5"],
+  ["coding", "recall", "recall@5"],
 ];
 function shareEntries(rows) {
   const benchRows = STANDINGS_BENCHES.map(([bench]) => ciWindowed(rows, bench));
@@ -2849,7 +2894,7 @@ function renderKnownItemRun(holder, per, goldKey) {
 }
 
 const LEGACY_BENCH = { freshstream: "news", companyfill: "finance", rarestream: "agentic_rare" };
-const RUN_ARTIFACT = { scholar: ["scholar.json"], news: ["ndcg.json", "rbp.json"], finance: ["recall.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], legal: ["legal.json"] };
+const RUN_ARTIFACT = { scholar: ["scholar.json"], news: ["ndcg.json", "rbp.json"], finance: ["recall.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], legal: ["legal.json"], coding: ["coding.json"] };
 const BENCHES = Object.keys(RUN_ARTIFACT);
 
 let runDetailSeq = 0;
@@ -2924,6 +2969,7 @@ async function renderRunDetail(runs) {
     if (benchSel.value === "finance") renderFinanceRun(holder, slice);
     else if (benchSel.value === "scholar") renderKnownItemRun(holder, slice, "paper_key");
     else if (benchSel.value === "legal") renderKnownItemRun(holder, slice, "case_key");
+    else if (benchSel.value === "coding") renderKnownItemRun(holder, slice, "item_key");
     else renderNewsRun(holder, slice, legacyNdcg(report));
     if (!holder.children.length) {
       holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
