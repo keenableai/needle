@@ -422,17 +422,19 @@ export function resultsFiles(template, snapshot) {
   const updated = `${DAY_TIME.format(lastRun)} UTC`;
   const runs = summary.verticals.map((v) => `${names[v.key] ?? v.key} ${v.runs}`
     + `${v.lastRun ? ` (latest ${SHORT_TIME.format(new Date(v.lastRun))} UTC)` : ""}`);
+  const otherEngines = engines - 2;
   const values = {
     TITLE: home && rivals.length
-      ? `Web Search API Benchmark ${lastRun.getUTCFullYear()}: ${proseName(home)} vs ${rivals.slice(0, 3).join(", ")}`
+      ? `Web Search API Benchmark ${lastRun.getUTCFullYear()}: ${proseName(home)} vs ${rivals[0]} and `
+        + `${otherEngines} ${otherEngines === 1 ? "API" : "APIs"}`
       : `Web Search API Benchmark ${lastRun.getUTCFullYear()}: ${engines} engines compared`,
     H1: home && rivals.length
       ? `Web search API benchmark results: ${proseName(home)} vs ${moreProviders
         ? `${rivals.join(", ")} and ${moreProviders} more ${moreProviders === 1 ? "provider" : "providers"}`
         : listText(rivals)}`
       : `Web search API benchmark results: ${engines} engines compared`,
-    DESCRIPTION: `NEEDLE benchmark results: ${engines} web search APIs for AI agents compared on quality in `
-      + `${verticals.length} verticals, price per 1,000 queries and latency. Updated ${DAY.format(lastRun)}.`,
+    DESCRIPTION: `Web search API comparison (NEEDLE): ${engines} APIs for AI agents on quality in `
+      + `${verticals.length} verticals, price per 1K queries and latency. Updated ${DAY.format(lastRun)}.`,
     OG_DESCRIPTION: `Quality in ${verticals.length} verticals, price per 1,000 queries and latency. `
       + `Updated ${DAY.format(lastRun)}.`,
     ENGINES: String(engines),
