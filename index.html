@@ -1997,8 +1997,8 @@ function renderStandings(rows) {
 
 const PRICES_ASOF = "2026-08-21";
 const PRICES = new Map([
-  ["keenable", { usd: 1.00, plan: "Frontier Tier — at 100 RPS+" }],
-  ["keenable-realtime", { usd: 1.00, plan: "Frontier Tier — at 100 RPS+" }],
+  ["keenable", { usd: 1.00, plan: "Dedicated capacity — at 100+ RPS", url: "https://keenable.ai/pricing" }],
+  ["keenable-realtime", { usd: 1.00, plan: "Dedicated capacity — at 100+ RPS", url: "https://keenable.ai/pricing" }],
   ["google", { usd: 0.30, plan: "Serper Ultimate — $3,750 / 12.5M credits" }],
   ["bing", { usd: 1.00, plan: "SearchApi.io Octo 5M — $5,000/mo" }],
   ["brave", { usd: 5.00, plan: "flat rate" }],
@@ -2049,7 +2049,9 @@ function renderPriceTable() {
     markHome(tr, e);
     tr.appendChild(engineCell(e));
     tr.appendChild(el("td", { class: "num" }, fmtUsd(p.usd)));
-    tr.appendChild(el("td", {}, p.plan));
+    const planCell = el("td", {}, p.url ? null : p.plan);
+    if (p.url) planCell.appendChild(el("a", { href: p.url }, p.plan));
+    tr.appendChild(planCell);
     table.appendChild(tr);
   }
   holder.appendChild(table);
