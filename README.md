@@ -59,7 +59,7 @@ across engines. Per-engine tuning uses env vars: `TAVILY_DEPTH`, `LINKUP_DEPTH`,
 entry fixes Keenable's, Exa's, Parallel's and Perplexity's modes and Brave's
 endpoint (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
 `exa-instant` = instant, `exa-lite` = lite,
-`parallel` = advanced, `parallel-turbo` = turbo,
+`parallel` = advanced, `parallel-fast` = fast, `parallel-turbo` = turbo,
 `perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
 `brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). The mean skips queries whose
 search or judging failed

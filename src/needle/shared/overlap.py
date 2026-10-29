@@ -26,6 +26,7 @@ FAMILIES = {
     "exa-instant": "exa",
     "exa-lite": "exa",
     "parallel-turbo": "parallel",
+    "parallel-fast": "parallel",
     "perplexity-fast": "perplexity",
     "brave-llmcontext": "brave",
 }

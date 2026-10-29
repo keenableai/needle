@@ -1409,6 +1409,7 @@ def test_factory_builds_engine_variants(monkeypatch):
             "exa-lite",
             "parallel",
             "parallel-turbo",
+            "parallel-fast",
             "brave",
             "brave-llmcontext",
             "jina",
@@ -1429,6 +1430,8 @@ def test_factory_builds_engine_variants(monkeypatch):
     assert isinstance(clients["parallel-turbo"], ParallelClient)
     assert clients["parallel"].mode == "advanced"
     assert clients["parallel-turbo"].mode == "turbo"
+    assert isinstance(clients["parallel-fast"], ParallelClient)
+    assert clients["parallel-fast"].mode == "fast"
     assert isinstance(clients["brave-llmcontext"], BraveLlmContextClient)
     assert clients["brave-llmcontext"].snippet_chars == 500
     assert clients["jina"].snippet_chars == 500

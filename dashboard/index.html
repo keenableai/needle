@@ -78,6 +78,7 @@
     --series-22: #5D4037;
     --series-23: #9E9D24;
     --series-24: #00838F;
+    --series-25: #526D82;
   }
   @media screen {
     [data-theme="dark"] {
@@ -118,6 +119,7 @@
       --series-22: #A1887F;
       --series-23: #D4E157;
       --series-24: #4DD0E1;
+      --series-25: #9DB2BF;
     }
   }
   * { box-sizing: border-box; }
@@ -973,7 +975,8 @@
       <tr><td>exa</td><td>Exa POST /search</td><td>type=auto, numResults=k, contents.highlights.maxCharacters=2000; site: → includeDomains, after:/before: → startPublishedDate/endPublishedDate (full-day UTC bounds)</td></tr>
       <tr><td>exa-lite</td><td>Exa POST /search</td><td>same as exa but type=lite</td></tr>
       <tr><td>exa-instant</td><td>Exa POST /search</td><td>same as exa but type=instant</td></tr>
-      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=basic, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
+      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=advanced, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
+      <tr><td>parallel-fast</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=fast</td></tr>
       <tr><td>parallel-turbo</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=turbo</td></tr>
       <tr><td>perplexity</td><td>Perplexity POST /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → search_after_date_filter/search_before_date_filter (MM/DD/YYYY)</td></tr>
       <tr><td>perplexity-fast</td><td>Perplexity POST /search</td><td>same as perplexity but search_type=fast (perplexity leaves the field unset, so it takes the API default web)</td></tr>
@@ -1047,9 +1050,9 @@ function registerEngines(names) {
 
 registerEngines(["keenable-realtime", "google", "bing", "brave", "brave-llmcontext",
   "exa", "exa-instant", "exa-lite", "parallel", "parallel-turbo", "perplexity-fast", "perplexity", "tavily", "linkup", "you", "firecrawl",
-  "tinyfish", "kagi", "jina", "context", "deepseek", "octen", "claude-search", "chatgpt-search"]);
+  "tinyfish", "kagi", "jina", "context", "deepseek", "octen", "claude-search", "chatgpt-search", "parallel-fast"]);
 
-const SERIES_COUNT = 24;
+const SERIES_COUNT = 25;
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
   const slot = ENGINE_SLOT.get(engine);
@@ -1103,6 +1106,8 @@ const ENGINE_LOGOS = new Map([
   ["claude-search", "data:image/png;base64,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"],
   ["chatgpt-search", "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20viewBox%3D%220%200%202406%202406%22%3E%3Cpath%20d%3D%22M1%20578.4C1%20259.5%20259.5%201%20578.4%201h1249.1c319%200%20577.5%20258.5%20577.5%20577.4V2406H578.4C259.5%202406%201%202147.5%201%201828.6V578.4z%22%20fill%3D%22%2374aa9c%22%2F%3E%3Cpath%20id%3D%22a%22%20d%3D%22M1107.3%20299.1c-197.999%200-373.9%20127.3-435.2%20315.3L650%20743.5v427.9c0%2021.4%2011%2040.4%2029.4%2051.4l344.5%20198.515V833.3h.1v-27.9L1372.7%20604c33.715-19.52%2070.44-32.857%20108.47-39.828L1447.6%20450.3C1361%20353.5%201237.1%20298.5%201107.3%20299.1zm0%20117.5-.6.6c79.699%200%20156.3%2027.5%20217.6%2078.4-2.5%201.2-7.4%204.3-11%206.1L952.8%20709.3c-18.4%2010.4-29.4%2030-29.4%2051.4V1248l-155.1-89.4V755.8c-.1-187.099%20151.601-338.9%20339-339.2z%22%20fill%3D%22%23fff%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%2860%201203%201203%29%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%28120%201203%201203%29%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%28180%201203%201203%29%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%28240%201203%201203%29%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%28300%201203%201203%29%22%2F%3E%3C%2Fsvg%3E"],
 ]);
+
+ENGINE_LOGOS.set("parallel-fast", ENGINE_LOGOS.get("parallel"));
 
 const isDarkTheme = () => document.documentElement.dataset.theme === "dark";
 const LOGO_DARK = new Map([[ENGINE_LOGOS.get("keenable"), ENGINE_LOGOS.get("keenable").replaceAll("%232A2A2A", "%23E6E6E6")]]);
@@ -2008,6 +2013,7 @@ const PRICES = new Map([
   ["exa-lite", { usd: 4.00, plan: "pay-as-you-go" }],
   ["parallel", { usd: 5.00, plan: "pay-as-you-go" }],
   ["parallel-turbo", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["parallel-fast", { usd: 1.00, plan: "pay-as-you-go" }],
   ["perplexity", { usd: 5.00, plan: "flat rate" }],
   ["perplexity-fast", { usd: 1.00, plan: "fast search — $1 / 1k requests" }],
   ["tavily", { usd: 5.00, plan: "Growth — $500/mo / 100k credits" }],
