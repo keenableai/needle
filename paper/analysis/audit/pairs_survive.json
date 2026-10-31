@@ -1,0 +1,60 @@
+{
+ "counts": {
+  "run_pointwise": 187,
+  "run_bonferroni": 179,
+  "day_pointwise": 186,
+  "day_bonferroni": 178,
+  "matched_pointwise": 189,
+  "matched_bonferroni": 175,
+  "all_three_pointwise": 180,
+  "all_three_bonferroni": 172
+ },
+ "lost": [
+  [
+   "linkup",
+   "you",
+   "day",
+   ""
+  ],
+  [
+   "context",
+   "chatgpt-search",
+   "",
+   "matched"
+  ],
+  [
+   "deepseek",
+   "chatgpt-search",
+   "",
+   "matched"
+  ],
+  [
+   "firecrawl",
+   "bing",
+   "",
+   "matched"
+  ],
+  [
+   "octen",
+   "google",
+   "",
+   "matched"
+  ],
+  [
+   "octen",
+   "bing",
+   "day",
+   "matched"
+  ],
+  [
+   "chatgpt-search",
+   "tinyfish",
+   "",
+   "matched"
+  ]
+ ],
+ "fully_all_three": [
+  "keenable",
+  "ceramic"
+ ]
+}

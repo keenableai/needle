@@ -1,0 +1,572 @@
+[
+ {
+  "id": 5,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Official rijksoverheid page names the Wtl and details its scope, six due-care criteria, reporting and RTE review."
+ },
+ {
+  "id": 8,
+  "rating": 2,
+  "label": "SM",
+  "note": "Site and topic match, but the page covers parliamentary answers on the law's evaluation, not its scope or requirements."
+ },
+ {
+  "id": 16,
+  "rating": 2,
+  "label": "SM",
+  "note": "Due-care criteria page on rijksoverheid, but snippet only states doctors must follow the criteria without listing them."
+ },
+ {
+  "id": 18,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Theme hub snippet only mentions a child end-of-life regulation, not the Wtl scope."
+ },
+ {
+  "id": 19,
+  "rating": 2,
+  "label": "SM",
+  "note": "Evaluation document of the Wtl on rijksoverheid; snippet gives no detail on the law's requirements."
+ },
+ {
+  "id": 23,
+  "rating": 2,
+  "label": "SM",
+  "note": "Kamerbrief on the fourth Wtl evaluation; only a title-level mention of the law."
+ },
+ {
+  "id": 24,
+  "rating": 2,
+  "label": "SM",
+  "note": "Legislative history note on the written declaration in article 2; narrow aspect of the law."
+ },
+ {
+  "id": 29,
+  "rating": 2,
+  "label": "SM",
+  "note": "Legislative history note on article 2 written declaration; no general scope or requirements."
+ },
+ {
+  "id": 37,
+  "rating": 3,
+  "label": "HM",
+  "note": "Official euthanasia-and-law page names the Wtl and explains euthanasia vs assisted suicide and minors' rules, but snippet is partial."
+ },
+ {
+  "id": 49,
+  "rating": 3,
+  "label": "HM",
+  "note": "Official page names the Wtl and covers oral requests and physician refusal; due-care criteria detail is limited."
+ },
+ {
+  "id": 54,
+  "rating": 2,
+  "label": "SM",
+  "note": "Legislative history note on article 2 written declaration; narrow aspect only."
+ },
+ {
+  "id": 57,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Hoornbeeck college quality agenda; off-topic."
+ },
+ {
+  "id": 68,
+  "rating": 2,
+  "label": "SM",
+  "note": "Legislative history note on article 2 written declaration; narrow aspect only."
+ },
+ {
+  "id": 80,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host wetten.overheid.nl does not match site:rijksoverheid.nl."
+ },
+ {
+  "id": 96,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "All quoted spans appear, but it is a pediatric dosing guide with no NHS 2022 cloxacillin prescription statistic."
+ },
+ {
+  "id": 101,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span 2022 and NHS absent from snippet and title."
+ },
+ {
+  "id": 103,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span 2022 and NHS absent from snippet and title."
+ },
+ {
+  "id": 109,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans Prescription, 2022 and NHS absent from snippet and title."
+ },
+ {
+  "id": 110,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans cloxacillin, Prescription, 2022 and NHS absent from snippet and title."
+ },
+ {
+  "id": 113,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans cloxacillin and 2022 absent."
+ },
+ {
+  "id": 124,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span cloxacillin absent; 2022 only in URL."
+ },
+ {
+  "id": 131,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Only flucloxacillin appears; quoted span cloxacillin as its own word is absent."
+ },
+ {
+  "id": 140,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans cloxacillin and 2022 absent; page is about flucloxacillin."
+ },
+ {
+  "id": 153,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans Prescription, 2022 and NHS absent."
+ },
+ {
+  "id": 156,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span cloxacillin absent; Belgian study."
+ },
+ {
+  "id": 157,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans cloxacillin and 2022 absent."
+ },
+ {
+  "id": 161,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans 2022 and NHS absent."
+ },
+ {
+  "id": 164,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span NHS absent."
+ },
+ {
+  "id": 165,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span 2022 absent."
+ },
+ {
+  "id": 167,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span NHS absent; Hong Kong drug info page."
+ },
+ {
+  "id": 171,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans cloxacillin as a word, Prescription and 2022 absent."
+ },
+ {
+  "id": 173,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans cloxacillin and NHS absent."
+ },
+ {
+  "id": 180,
+  "rating": 2,
+  "label": "SM",
+  "note": "Motion-model tracker for team sports reducing ID switches, but no pose cues or MMAction2."
+ },
+ {
+  "id": 188,
+  "rating": 2,
+  "label": "SM",
+  "note": "Uses MMAction2 pose-based action recognition in hockey, but pose is not used to improve tracking or disambiguation."
+ },
+ {
+  "id": 190,
+  "rating": 2,
+  "label": "SM",
+  "note": "Soccer player tracking with motion vectors; no pose cues, hierarchical motion models or MMAction2."
+ },
+ {
+  "id": 191,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hockey long-term tracking paper with graph hierarchies; snippet thin, no pose or MMAction2."
+ },
+ {
+  "id": 207,
+  "rating": 2,
+  "label": "SM",
+  "note": "Combines MMaction2 action recognition with BoT-Sort tracking in hockey, but pose is not used for tracking disambiguation."
+ },
+ {
+  "id": 221,
+  "rating": 2,
+  "label": "SM",
+  "note": "Long-term soccer and hockey tracking with re-ID and jersey features; no pose cues or MMAction2."
+ },
+ {
+  "id": 227,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical association with context-conditioned motion models for field hockey tracking; no pose or MMAction2."
+ },
+ {
+  "id": 230,
+  "rating": 2,
+  "label": "SM",
+  "note": "Survey chapter on sports MOT and re-ID; pose only for foul prediction, no MMAction2."
+ },
+ {
+  "id": 235,
+  "rating": 2,
+  "label": "SM",
+  "note": "Survey on pose tracking with learned motion models in sports; no MMAction2-specific method."
+ },
+ {
+  "id": 251,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Video snippet on youth hockey tracking with no method detail."
+ },
+ {
+  "id": 261,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hockey long-term tracking paper with graph hierarchies; snippet thin, no pose or MMAction2."
+ },
+ {
+  "id": 268,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Soccer 3D reconstruction paper; pose and tracking only mentioned as error sources."
+ },
+ {
+  "id": 275,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host wikihow.com does not match the site: operator."
+ },
+ {
+  "id": 280,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host tustinca.org does not match the site: operator."
+ },
+ {
+  "id": 292,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted spans appear, but the Swiss law register lists no 1843 Bundesbeschluss."
+ },
+ {
+  "id": 297,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted spans appear, but the archive record lists later federal laws, not an 1843 Bundesbeschluss."
+ },
+ {
+  "id": 298,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted spans appear, but only for the 1999 free-movement accord; no 1843 Bundesbeschluss."
+ },
+ {
+  "id": 302,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted spans appear in a modern EU sectoral-agreement text; no 1843 resolution."
+ },
+ {
+  "id": 309,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Freizuegigkeit appears only inside compound words, so the exact span is absent."
+ },
+ {
+  "id": 319,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span Bundesbeschluss absent."
+ },
+ {
+  "id": 322,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span Bundesbeschluss absent."
+ },
+ {
+  "id": 325,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span Bundesbeschluss absent."
+ },
+ {
+  "id": 326,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span Bundesbeschluss absent."
+ },
+ {
+  "id": 330,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span Bundesbeschluss absent."
+ },
+ {
+  "id": 332,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span Bundesbeschluss absent."
+ },
+ {
+  "id": 362,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted spans appear, but the cited Bundesbeschluss is from 1854, not 1843."
+ },
+ {
+  "id": 368,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Only the spelling Bundesbeschluß appears, so the exact span Bundesbeschluss is absent; cited resolution is 1817."
+ },
+ {
+  "id": 373,
+  "rating": 3,
+  "label": "HM",
+  "note": "Both spans present; explains M. circinelloides as a model lipogenic fungus with genetic tools and genome."
+ },
+ {
+  "id": 382,
+  "rating": 3,
+  "label": "HM",
+  "note": "Both spans present; says Mucor is a model for RNAi, virulence and light sensing, and a model fungus for epimutation."
+ },
+ {
+  "id": 386,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both spans present, but the model-fungus sentence is about Monascus, not Mucor."
+ },
+ {
+  "id": 388,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both spans present, but model fungus refers to Neurospora; no content on Mucor as a model."
+ },
+ {
+  "id": 399,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent; text says model oleaginous fungus."
+ },
+ {
+  "id": 407,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent."
+ },
+ {
+  "id": 409,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent; text says model oleaginous fungus."
+ },
+ {
+  "id": 412,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans Mucor circinelloides and model fungus absent."
+ },
+ {
+  "id": 413,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent."
+ },
+ {
+  "id": 416,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent; text says model organism."
+ },
+ {
+  "id": 422,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent; text says model organism."
+ },
+ {
+  "id": 423,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent; text says model microbe."
+ },
+ {
+  "id": 427,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent."
+ },
+ {
+  "id": 447,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent."
+ },
+ {
+  "id": 455,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent from this snippet."
+ },
+ {
+  "id": 460,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent."
+ },
+ {
+  "id": 461,
+  "rating": 2,
+  "label": "SM",
+  "note": "Both spans present; one sentence calls it an oleaginous model fungus for lipid research, no depth."
+ },
+ {
+  "id": 466,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent; text says model oleaginous fungus."
+ },
+ {
+  "id": 467,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent; text says model oleaginous fungus."
+ },
+ {
+  "id": 468,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span model fungus absent; text says model organism."
+ },
+ {
+  "id": 473,
+  "rating": 2,
+  "label": "SM",
+  "note": "Both spans present; abstract calls it a model fungus for mucormycosis but focuses on one RNAi plasmid."
+ },
+ {
+  "id": 484,
+  "rating": 3,
+  "label": "HM",
+  "note": "All spans present; states Swainson introduced the family in 1832, brief page."
+ },
+ {
+  "id": 486,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans introduced and English absent."
+ },
+ {
+  "id": 487,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans family, introduced and English absent."
+ },
+ {
+  "id": 490,
+  "rating": 3,
+  "label": "HM",
+  "note": "All spans present; states Swainson introduced the family in 1832, rest of page garbled."
+ },
+ {
+  "id": 497,
+  "rating": 2,
+  "label": "SM",
+  "note": "All spans present, but the truncated Facebook post gives only English ornithologist William with no date."
+ },
+ {
+  "id": 501,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans absent; paddlefish page off-topic."
+ },
+ {
+  "id": 503,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans introduced and English absent."
+ },
+ {
+  "id": 505,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "All spans present, but the page covers golden whistler naming, not who introduced the family."
+ },
+ {
+  "id": 507,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All spans present; gives Swainson 1832 as subfamily Pachycephalinae plus full taxonomic placement."
+ },
+ {
+  "id": 511,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All spans present; GBIF states Swainson introduced it in 1832 and explains the 1831 title-page date."
+ },
+ {
+  "id": 523,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All spans present; states Swainson 1832 with genera, placement and Bock reference."
+ },
+ {
+  "id": 529,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span introduced absent."
+ },
+ {
+  "id": 540,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted span introduced absent."
+ },
+ {
+  "id": 547,
+  "rating": 2,
+  "label": "SM",
+  "note": "All spans present, but the truncated Facebook post gives only English ornithologist William with no date."
+ },
+ {
+  "id": 548,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted spans introduced and English absent."
+ }
+]

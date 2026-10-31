@@ -1,0 +1,572 @@
+[
+ {
+  "id": 2,
+  "rating": 2,
+  "label": "SM",
+  "note": "Official rijksoverheid.nl evaluation report of the Wtl, but the snippet gives only a one-line summary with no legal requirements."
+ },
+ {
+  "id": 6,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Site matches, but the page only lists that 14 evaluation recommendations exist, with no content on the law's scope or requirements."
+ },
+ {
+  "id": 11,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Rijksoverheid.nl page lists all 6 due-care requirements of the Euthanasia Act in depth and notes after-the-fact review."
+ },
+ {
+  "id": 27,
+  "rating": 3,
+  "label": "HM",
+  "note": "Rijksoverheid.nl page explains the Wtl's scope, criminal-law exception, reporting to the coroner and RTE review, but does not list the 6 requirements."
+ },
+ {
+  "id": 30,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Site matches, but it is a cover letter for the 4th evaluation with no content on the law's requirements."
+ },
+ {
+  "id": 34,
+  "rating": 2,
+  "label": "SM",
+  "note": "Rijksoverheid.nl brochure on the written euthanasia request under art. 2(2) of the Wtl, a narrow aspect with little substance in the snippet."
+ },
+ {
+  "id": 41,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Sign-language video page; describes what the video covers but gives no text content on the law."
+ },
+ {
+  "id": 42,
+  "rating": 3,
+  "label": "HM",
+  "note": "Rijksoverheid.nl page names the Wtl, explains reporting to the coroner and RTE review against the 6 requirements, though the requirements are not listed."
+ },
+ {
+  "id": 53,
+  "rating": 2,
+  "label": "SM",
+  "note": "Official evaluation report page for the Wtl with only a one-line summary and no requirements."
+ },
+ {
+  "id": 56,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Cabinet response letter to the evaluation; site matches but no substantive content on the law's scope."
+ },
+ {
+  "id": 66,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "PMC host fails the site:rijksoverheid.nl operator."
+ },
+ {
+  "id": 70,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Snippet only names an annex (Beslisnota) of the evaluation letter; no substantive content."
+ },
+ {
+  "id": 85,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "RTE annual report listing page with only a link and one sentence; no content on requirements."
+ },
+ {
+  "id": 86,
+  "rating": 3,
+  "label": "HM",
+  "note": "Rijksoverheid.nl page details the first 4 of the 6 due-care requirements; truncated before the rest and the review procedure."
+ },
+ {
+  "id": 90,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Cabinet decision list PDF that only mentions the Wtl in passing."
+ },
+ {
+  "id": 93,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Page covers termination of life for children 1-12, a separate rule outside the Wtl's request-based scope."
+ },
+ {
+  "id": 97,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"cloxacillin\" absent from snippet and title (only penicillin)."
+ },
+ {
+  "id": 106,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent from snippet and title."
+ },
+ {
+  "id": 111,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"cloxacillin\" and \"2022\" absent."
+ },
+ {
+  "id": 118,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"NHS\" and \"2022\" absent; Indian pharmacy product page."
+ },
+ {
+  "id": 119,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"NHS\" absent; US veterinary DailyMed label."
+ },
+ {
+  "id": 134,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent."
+ },
+ {
+  "id": 142,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"cloxacillin\" (only flucloxacillin), \"Prescription\", \"2022\" and \"NHS\" absent from snippet and title."
+ },
+ {
+  "id": 144,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"cloxacillin\" absent as a word (only flucloxacillin); a PGD with no prescription statistic."
+ },
+ {
+  "id": 145,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent."
+ },
+ {
+  "id": 163,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent; MSF dosing page."
+ },
+ {
+  "id": 177,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical data association with context-conditioned motion models for player tracking in field hockey, but no pose cues or MMAction2."
+ },
+ {
+  "id": 181,
+  "rating": 2,
+  "label": "SM",
+  "note": "Uses MMAction2 skeleton pose with BoT-SORT tracking in ice hockey, but aims at strategy analysis, not improving tracking or disambiguation."
+ },
+ {
+  "id": 183,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical graph tracking for soccer and hockey with domain features; no pose cues or MMAction2."
+ },
+ {
+  "id": 189,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 repo landing text about supported tasks; nothing on player tracking."
+ },
+ {
+  "id": 194,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Hockey tracking-based motion stream with only a one-line snippet; no pose cues or disambiguation method."
+ },
+ {
+  "id": 197,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 documentation home page with no tracking content."
+ },
+ {
+  "id": 200,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 PoseC3D skeleton action recognition docs; no player tracking."
+ },
+ {
+  "id": 201,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MultiSports dataset paper only uses MMAction2 code for action detection; no tracking."
+ },
+ {
+  "id": 203,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MultiSports dataset paper only uses MMAction2 for action detection baselines; no tracking."
+ },
+ {
+  "id": 204,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 user guide on skeleton motion modalities; no player tracking."
+ },
+ {
+  "id": 205,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Soccer multimodal scene analysis for ball possession; mentions disambiguation but no pose-based tracking."
+ },
+ {
+  "id": 212,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical association with context-conditioned motion models for field hockey tracking, no pose cues or MMAction2."
+ },
+ {
+  "id": 214,
+  "rating": 2,
+  "label": "SM",
+  "note": "Motion-vector augmented soccer player tracking; no pose cues or MMAction2."
+ },
+ {
+  "id": 220,
+  "rating": 2,
+  "label": "SM",
+  "note": "Ice hockey player tracking and identification system; no pose cues, hierarchical motion models or MMAction2."
+ },
+ {
+  "id": 225,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Interview transcript touches on motion models and occlusion identity in hockey only conversationally."
+ },
+ {
+  "id": 229,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Annotation guide for sports footage; marginal to tracking methods."
+ },
+ {
+  "id": 236,
+  "rating": 2,
+  "label": "SM",
+  "note": "SportsSUSHI hierarchical graph tracking for soccer and hockey; no pose cues or MMAction2."
+ },
+ {
+  "id": 248,
+  "rating": 2,
+  "label": "SM",
+  "note": "Pose-centric hockey analysis with MMAction2 and BoT-SORT; snippet is a one-line teaser with no method detail."
+ },
+ {
+  "id": 252,
+  "rating": 2,
+  "label": "SM",
+  "note": "Same IAFOR paper on MMAction2 pose plus BoT-SORT in hockey; one-line teaser only."
+ },
+ {
+  "id": 263,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Hockey action recognition via pose and optical flow; not about tracking."
+ },
+ {
+  "id": 273,
+  "rating": 2,
+  "label": "SM",
+  "note": "Context-conditioned motion models with hierarchical association for hockey tracking; no pose or MMAction2."
+ },
+ {
+  "id": 281,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Scribd host fails the site: operator."
+ },
+ {
+  "id": 286,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Freizügigkeit\" appears only inside compound words; document is about a 2005 vote, not 1843."
+ },
+ {
+  "id": 289,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms appear, but it is the 1848 Federal Constitution, not the 1843 Bundesbeschluss."
+ },
+ {
+  "id": 295,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Neither quoted term appears in the snippet or title."
+ },
+ {
+  "id": 301,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent."
+ },
+ {
+  "id": 312,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms appear, but it is a 2026 decree on the EU free-movement agreement, not the 1843 resolution."
+ },
+ {
+  "id": 316,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent."
+ },
+ {
+  "id": 324,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent."
+ },
+ {
+  "id": 331,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent."
+ },
+ {
+  "id": 335,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent; page lists the 1999 free-movement agreement."
+ },
+ {
+  "id": 337,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms appear, but the page covers the modern EU free-movement agreement, not the 1843 resolution."
+ },
+ {
+  "id": 346,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent from snippet and title."
+ },
+ {
+  "id": 348,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms appear only in passing in a modern constitutional-law text; nothing on 1843."
+ },
+ {
+  "id": 349,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms appear in a Bundesblatt message on a later vote; no 1843 resolution."
+ },
+ {
+  "id": 353,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms appear in a 1945 archive listing; wrong era and document."
+ },
+ {
+  "id": 361,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms appear, but the snippet cites an 1832 Bundesbeschluss, not the 1843 one."
+ },
+ {
+  "id": 366,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Freizügigkeit\" appears only inside a compound word; 2005 referendum table."
+ },
+ {
+  "id": 378,
+  "rating": 2,
+  "label": "SM",
+  "note": "Both quoted spans appear; the BioProject only says the WJ11 genome will help develop M. circinelloides as an oleaginous model fungus."
+ },
+ {
+  "id": 393,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Mucor circinelloides\" and \"model fungus\" absent."
+ },
+ {
+  "id": 419,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent; the text says \"model oleaginous fungus\" and \"model organism\"."
+ },
+ {
+  "id": 420,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent; the text says \"model oleaginous fungus\"."
+ },
+ {
+  "id": 440,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent from the snippet and title."
+ },
+ {
+  "id": 441,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both spans appear, but \"model fungus\" refers to Neurospora crassa; the paper is on antifungal resistance."
+ },
+ {
+  "id": 442,
+  "rating": 2,
+  "label": "SM",
+  "note": "Both spans appear in a short snippet naming the model fungus Mucor circinelloides, with no depth."
+ },
+ {
+  "id": 446,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 449,
+  "rating": 2,
+  "label": "SM",
+  "note": "Both spans appear; one sentence says it is a well-established oleaginous model fungus for lipid research due to genetic tractability."
+ },
+ {
+  "id": 451,
+  "rating": 2,
+  "label": "SM",
+  "note": "Both spans appear; one sentence on its use as an oleaginous model fungus in lipid research."
+ },
+ {
+  "id": 454,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent from the snippet and title."
+ },
+ {
+  "id": 472,
+  "rating": 2,
+  "label": "SM",
+  "note": "Both spans appear; the study builds an expression platform in the model fungus M. circinelloides, but its model-organism use is only mentioned in passing."
+ },
+ {
+  "id": 478,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "publicschoolreview.com host fails the site:websitesourcedomain.travel operator."
+ },
+ {
+  "id": 488,
+  "rating": 3,
+  "label": "HM",
+  "note": "All quoted words appear and the snippet states Swainson, an English ornithologist, introduced the family in 1832, but the snippet is minimal."
+ },
+ {
+  "id": 491,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted words appear; Wikipedia states Swainson introduced the family in 1832, with the citation and taxonomic context."
+ },
+ {
+  "id": 495,
+  "rating": 3,
+  "label": "HM",
+  "note": "All quoted words appear and the one-line snippet gives Swainson and 1832, with no further context."
+ },
+ {
+  "id": 498,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "No snippet, title only; the page shows no content and lacks the quoted words."
+ },
+ {
+  "id": 504,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 510,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Pachycephalidae\" absent; only genus names appear."
+ },
+ {
+  "id": 515,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 520,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"English\" absent."
+ },
+ {
+  "id": 521,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 534,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 542,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 543,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted words appear; Wikipedia gives Swainson in 1832 plus taxonomy and genera context."
+ },
+ {
+  "id": 551,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted words appear; Wikipedia PDF gives Swainson 1832, the genera and the taxobox authority."
+ },
+ {
+  "id": 552,
+  "rating": 3,
+  "label": "HM",
+  "note": "All quoted words appear and it gives Swainson 1832, but it is a proxied Wikiwand mirror."
+ },
+ {
+  "id": 556,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted words appear; Wikipedia gives Swainson 1832 with the taxobox and description."
+ },
+ {
+  "id": 517,
+  "rating": 3,
+  "label": "HM",
+  "note": "All quoted words appear and it gives Swainson 1832, but it is a lower-authority Wikipedia mirror."
+ },
+ {
+  "id": 564,
+  "rating": 3,
+  "label": "HM",
+  "note": "All quoted words appear and it gives Swainson 1832 on a Wikiwand mirror with a short snippet."
+ },
+ {
+  "id": 513,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted words appear; Wikipedia gives Swainson in 1832 with citations."
+ }
+]

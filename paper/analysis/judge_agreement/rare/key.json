@@ -1,0 +1,2832 @@
+{
+ "0": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "1": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://rijksoverheid.nl/documenten/publicaties/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "2": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://rijksoverheid.nl/documenten/rapporten/2023/05/30/pg-1048101-b-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "3": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://rijksoverheid.nl/documenten/kamerstukken/2024/06/14/kamerbrief-over-kabinetsreactie-op-de-vierde-evaluatie-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding-wtl"
+ },
+ "4": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://rijksoverheid.nl/documenten/kamerstukken/2023/05/30/kamerbrief-over-vierde-evaluatie-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "5": {
+  "q": 0,
+  "gpt": 3,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "6": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/06/14/overzicht-aanbevelingen-vierde-evaluatie-wtl"
+ },
+ "7": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie"
+ },
+ "8": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/01/15/beantwoording-vragen-schriftelijk-overleg-inzake-de-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "9": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2023/05/30/pg-1048101-b-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "10": {
+  "q": 0,
+  "gpt": 3,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "11": {
+  "q": 0,
+  "gpt": 3,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/zorgvuldigheidseisen"
+ },
+ "12": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/vraag-en-antwoord/levenseinde-en-euthanasie/wie-kan-om-euthanasie-vragen"
+ },
+ "13": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/01/15/beantwoording-vragen-schriftelijk-overleg-inzake-de-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "14": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2015/12/17/handreiking-schriftelijk-euthanasieverzoek-artsenversie"
+ },
+ "15": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2026/03/26/jaarverslag-2025-regionale-toetsingscommissies-euthanasie"
+ },
+ "16": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/zorgvuldigheidseisen"
+ },
+ "17": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "18": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie"
+ },
+ "19": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2023/05/30/pg-1048101-b-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "20": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2023/05/30/kamerbrief-over-vierde-evaluatie-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "21": {
+  "q": 0,
+  "gpt": 3,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/zorgvuldigheidseisen"
+ },
+ "22": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "23": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2023/05/30/pg-1048101-b-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "24": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/publicaties/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "25": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/06/14/overzicht-aanbevelingen-vierde-evaluatie-wtl"
+ },
+ "26": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://rijksoverheid.nl/documenten/kamerstukken/2023/05/30/kamerbrief-over-vierde-evaluatie-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "27": {
+  "q": 0,
+  "gpt": 3,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "28": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2023/05/30/pg-1048101-b-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "29": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/publicaties/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "30": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://rijksoverheid.nl/documenten/kamerstukken/2023/05/30/kamerbrief-over-vierde-evaluatie-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "31": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/06/14/overzicht-aanbevelingen-vierde-evaluatie-wtl"
+ },
+ "32": {
+  "q": 0,
+  "gpt": 3,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "33": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "34": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2015/12/17/handreiking-schriftelijk-euthanasieverzoek-artsenversie"
+ },
+ "35": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2025/03/24/regionale-toetsingscommissies-euthanasie-jaarverslag-2024"
+ },
+ "36": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/onderwerpen/levenseinde-en-euthanasie/euthanasie"
+ },
+ "37": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "38": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "39": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2025/03/24/regionale-toetsingscommissies-euthanasie-jaarverslag-2024"
+ },
+ "40": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2015/12/17/handreiking-schriftelijk-euthanasieverzoek-artsenversie"
+ },
+ "41": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/videos/2019/03/22/euthanasie-in-nederlandse-gebarentaal"
+ },
+ "42": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "43": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/site/binaries/site-content/collections/documents/2024/06/14/geannoteerde-besluitenlijst-ministerraad-14-juni-2024/besluitenlijst-ministerraad-20240614.pdf"
+ },
+ "44": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2026/03/26/jaarverslag-2025-regionale-toetsingscommissies-euthanasie"
+ },
+ "45": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/site/binaries/site-content/collections/documents/2025/05/21/volksgezondheid-welzijn-en-sport-2024/jaarverslag-volksgezondheid-welzijn-en-sport-2024.pdf"
+ },
+ "46": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/site/binaries/site-content/collections/documents/2024/05/15/volksgezondheid-welzijn-en-sport-2023/vws-jaarverslag-2023.pdf"
+ },
+ "47": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/04/04/kamerbrief-over-aanbieding-rte-jaarverslag-2023"
+ },
+ "48": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/onderwerpen/levenseinde-en-euthanasie/euthanasie"
+ },
+ "49": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "50": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://rijksoverheid.nl/documenten/rapporten/2026/03/26/jaarverslag-2025-regionale-toetsingscommissies-euthanasie"
+ },
+ "51": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/publicaties/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "52": {
+  "q": 0,
+  "gpt": 3,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "53": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2023/05/30/pg-1048101-b-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "54": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "55": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/publicaties/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "56": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/06/14/kamerbrief-over-kabinetsreactie-op-de-vierde-evaluatie-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding-wtl"
+ },
+ "57": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://rijksoverheid.nl/binaries/rijksoverheid/documenten/rapporten/2024/06/10/kwaliteitsagenda-2024-2027-hoornbeeck/Kwaliteitsagenda+2024-2027+Hoornbeeck.pdf"
+ },
+ "58": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://rijksoverheid.nl/site/binaries/site-content/collections/documents/2023/09/12/country-note-education-at-a-glance-2023/country-note-education-at-a-glance-2023.pdf"
+ },
+ "59": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://rijksoverheid.nl/themas/migratie-en-reizen/ambassades-consulaten-en-overige-vertegenwoordigingen/internationale-organisaties/unu-maastricht-economic-and-social-research-and-training-centre-on-innovation-and-technology"
+ },
+ "60": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://rijksoverheid.nl/site/binaries/site-content/collections/documents/2023/10/27/bijlage-2-nationale-voortgangsrapportage-its-2020-2023/bijlage-2-nationale-voortgangsrapportage-its-2020-2023.pdf"
+ },
+ "61": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://rijksoverheid.nl/documenten/toespraken/2026/05/20/gastlezing-van-staatssecretaris-sandra-palmen---schlangen-bij-de-universiteit-oslo"
+ },
+ "62": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://wfrtds.org/worldmap/the-netherlands/"
+ },
+ "63": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://wfrtds.org/worldmap/the-netherlands/3/"
+ },
+ "64": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://www.cbhd.org/cbhd-resources/developments-in-the-practice-of-physician-assisted-death-since-its-legalization-in-the-netherlands"
+ },
+ "65": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://www.cbhd.org/dignitas-articles/developments-in-the-practice-of-physician-assisted-death-since-its-legalization-in-the-netherlands"
+ },
+ "66": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9251055/"
+ },
+ "67": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2023/05/30/pg-1048101-b-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "68": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/publicaties/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "69": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/06/14/overzicht-aanbevelingen-vierde-evaluatie-wtl"
+ },
+ "70": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://rijksoverheid.nl/documenten/kamerstukken/2023/05/30/kamerbrief-over-vierde-evaluatie-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "71": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "72": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/01/15/beantwoording-vragen-schriftelijk-overleg-inzake-de-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "73": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2015/12/17/handreiking-schriftelijk-euthanasieverzoek-artsenversie"
+ },
+ "74": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2026/03/26/jaarverslag-2025-regionale-toetsingscommissies-euthanasie"
+ },
+ "75": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/zorgvuldigheidseisen"
+ },
+ "76": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "77": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://www.euthanasiecommissie.nl/documenten/wet/wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding/wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding-engelse-vertaling"
+ },
+ "78": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://wetten.overheid.nl/BWBR0012410/2021-10-01/0"
+ },
+ "79": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://wetten.overheid.nl/BWBR0012410/2021-10-01"
+ },
+ "80": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://wetten.overheid.nl/BWBR0012410/informatie"
+ },
+ "81": {
+  "q": 0,
+  "gpt": 0,
+  "url": "https://wetten-overheid.nl/wet/BWBR0012410"
+ },
+ "82": {
+  "q": 0,
+  "gpt": 3,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "83": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/01/15/beantwoording-vragen-schriftelijk-overleg-inzake-de-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "84": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2015/12/17/handreiking-schriftelijk-euthanasieverzoek-artsenversie"
+ },
+ "85": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2026/03/26/jaarverslag-2025-regionale-toetsingscommissies-euthanasie"
+ },
+ "86": {
+  "q": 0,
+  "gpt": 3,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/zorgvuldigheidseisen"
+ },
+ "87": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "88": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/zorgvuldigheidseisen"
+ },
+ "89": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/01/15/beantwoording-vragen-schriftelijk-overleg-inzake-de-vierde-evaluatie-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "90": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/site/binaries/site-content/collections/documents/2024/06/14/geannoteerde-besluitenlijst-ministerraad-14-juni-2024/besluitenlijst-ministerraad-20240614.pdf"
+ },
+ "91": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/euthanasie"
+ },
+ "92": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/late-zwangerschapsafbreking-en-levensbeeindiging-bij-pasgeborenen"
+ },
+ "93": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/themas/familie-zorg-en-gezondheid/levenseinde-en-euthanasie/levensbeeindiging-bij-kinderen-van-1-12-jaar"
+ },
+ "94": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2014/07/04/wetsgeschiedenins-van-de-wet-toetsing-levensbeeindiging-op-verzoek-en-hulp-bij-zelfdoding"
+ },
+ "95": {
+  "q": 0,
+  "gpt": 2,
+  "url": "https://www.rijksoverheid.nl/documenten/2024/06/14/overzicht-aanbevelingen-vierde-evaluatie-wtl"
+ },
+ "96": {
+  "q": 1,
+  "gpt": 2,
+  "url": "https://docs.google.com/document/d/1qX1oFcgEFDstF0tN2mpG3FQCyC-z4f-dU-DM2oprquU/edit"
+ },
+ "97": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://discovery.ucl.ac.uk/id/eprint/10208246/1/3047611.pdf"
+ },
+ "98": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9909774"
+ },
+ "99": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://fortunejournals.org/ojs/index.php/ami/article/view/16949/2286"
+ },
+ "100": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://fortunejournals.com/articles/antibiotic-use-in-primary-care-in-northern-ireland.html"
+ },
+ "101": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.findmeds.uk/medicines/flucloxacillin-250mg-5ml-oral-solution"
+ },
+ "102": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.findmeds.uk/medicines/flucloxacillin-500mg-capsules"
+ },
+ "103": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.findmeds.uk/medicines/flucloxacillin-125mg-5ml-oral-solution"
+ },
+ "104": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://eprints.whiterose.ac.uk/id/eprint/205023/1/2633-1462.410.BJO-2023-0055.R1.pdf"
+ },
+ "105": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.fortunejournals.com/articles/antibiotic-use-in-primary-care-in-northern-ireland.html"
+ },
+ "106": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.findmeds.uk/medicines/flucloxacillin-250mg-5ml-oral-solution"
+ },
+ "107": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.findmeds.uk/medicines/flucloxacillin-125mg-5ml-oral-solution"
+ },
+ "108": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.findmeds.uk/medicines/flucloxacillin-500mg-capsules"
+ },
+ "109": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://jknsabah.moh.gov.my/hbeaufort/multimedia/buletin-farmasi?download=11%3Abuletin-farmasi-hospital-beaufort-bil5-tahun-2022"
+ },
+ "110": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://boneandjoint.org.uk/Article/10.1302/2633-1462.410.BJO-2023-0055.R1/pdf"
+ },
+ "111": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.nhsbsa.nhs.uk/sites/default/files/2026-10/FINAL DRAFT NHS Prescribing in Community Pharmacy Specification v1.5_1.pdf"
+ },
+ "112": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://bnf.nice.org.uk/"
+ },
+ "113": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.nhs.uk/nhs-services/prescriptions/how-to-order-a-repeat-prescription/"
+ },
+ "114": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.sfh-tr.nhs.uk/media/ulxj23yq/antimicrobial-prescribing-policy.pdf"
+ },
+ "115": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://uktax.tools/nhs-charges/"
+ },
+ "116": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.publications.scot.nhs.uk/files/msan-2022-07.pdf"
+ },
+ "117": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://grokipedia.com/page/Flucloxacillin"
+ },
+ "118": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.truemeds.in/medicine/cloxamox-lb-capsule-10-tm-cacr1-011501"
+ },
+ "119": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?audience=consumer&setid=6fbf05bc-2be7-4a26-9ed4-107b4b4d8a5b"
+ },
+ "120": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=6fbf05bc-2be7-4a26-9ed4-107b4b4d8a5b"
+ },
+ "121": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.rexall.ca/article/drug/view/id/2276"
+ },
+ "122": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://pubchem.ncbi.nlm.nih.gov/compound/Cloxacillin-sodium"
+ },
+ "123": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://evsexplore.semantics.cancer.gov/evsexplore/concept/ncim/C0009077"
+ },
+ "124": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.northernlincolnshireapc.nhs.uk/wp-content/uploads/2022/06/Antibiotic-Formulary-Prescribing-Advice-Adult-V9.1.pdf"
+ },
+ "125": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://openprescribing.net/chemical/0501012D0"
+ },
+ "126": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.nbt.nhs.uk/sites/default/files/document/NBT%20Antimicrobial%20Guidelines%20v7.3_0.pdf"
+ },
+ "127": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2807791"
+ },
+ "128": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://dailymed.nlm.nih.gov/dailymed/drugInfo.cfm?setid=8478f242-c715-4984-ac1d-dc79dc28665e"
+ },
+ "129": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.ismp-canada.org/SafeHomeInfusion/download/Monograph-IV-Cloxacillin.pdf"
+ },
+ "130": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://pdf.hres.ca/dpd_pm/00055444.PDF"
+ },
+ "131": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.nhsbsa.nhs.uk/sites/default/files/2022-12/SSP046%20Phenoxymethylpenicillin%20250mg-5ml%20oral%20solution%20SF%20final%20v11.pdf"
+ },
+ "132": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.drugs.com/dosage/cloxacillin.html"
+ },
+ "133": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.nhs.uk/medicines/antibiotics"
+ },
+ "134": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://grokipedia.com/page/Cloxacillin"
+ },
+ "135": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://dermapproved.com/active-ingredients/cloxacillin"
+ },
+ "136": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.drugs.com/dosage/cloxacillin.html"
+ },
+ "137": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.thehealthboard.com/what-is-cloxacillin.htm"
+ },
+ "138": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://jagran.b-cdn.net/../../posts/a/what-are-amoxicillin-and-cloxacillin-capsules-used-for/"
+ },
+ "139": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.nhs.uk/medicines/flucloxacillin/"
+ },
+ "140": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.nhs.uk/medicines/flucloxacillin/about-flucloxacillin/"
+ },
+ "141": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.nhsbsa.nhs.uk/sites/default/files/2022-12/SSP046%20Phenoxymethylpenicillin%20250mg-5ml%20oral%20solution%20SF%20final%20v11.pdf"
+ },
+ "142": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://formulary.panmerseyapc.nhs.uk/chaptersSubDetails.asp?FormularySectionID=27&SubSectionRef=27.12&SubSectionID=A100"
+ },
+ "143": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.nhs.uk/medicines/antibiotics/"
+ },
+ "144": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://pthb.nhs.wales/services/pharmacy-and-medicines-management/professionals/patient-group-directions-pgds/patient-group-directions-accordian/minor-injury-unit-pgds-documents/pgd-0188b-flucloxacillin"
+ },
+ "145": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://clinicaltrials.eu/inn/cloxacillin"
+ },
+ "146": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://ndf.gov.sg/about-drugs/active-ingredient/M00403/"
+ },
+ "147": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://rightdecisions.scot.nhs.uk/antimicrobial-prescribing-nhs-tayside/hospital-guidelines/skin-soft-tissue/cellulitis/"
+ },
+ "148": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://list.essentialmeds.org/recommendations/561"
+ },
+ "149": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.drugs.com/dosage/cloxacillin.html"
+ },
+ "150": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.drugs.com/cdi/cloxacillin-capsules.html"
+ },
+ "151": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://medicalguidelines.msf.org/en/viewport/EssDr/english/cloxacillin-injectable-16682609.html"
+ },
+ "152": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.pediatriconcall.com/drugs/cloxacillin/440"
+ },
+ "153": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://medicalguidelines.msf.org/en/viewport/EssDr/english/cloxacillin-oral-16683395.html"
+ },
+ "154": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.rightdecisions.scot.nhs.uk/m/emwhwsk5/202310ukpas.pdf"
+ },
+ "155": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.royaldevon.nhs.uk/media/mcjdb4om/antimicrobial-paediatric-summary-ukpas.pdf"
+ },
+ "156": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.sciensano.be/sites/default/files/eurosurv-29-46-4.pdf"
+ },
+ "157": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC12645964/"
+ },
+ "158": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.mdpi.com/2079-6382/11/12/1824"
+ },
+ "159": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.mskcc.org/cancer-care/patient-education/medications/pediatric/cloxacillin"
+ },
+ "160": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.drugs.com/cdi/cloxacillin-capsules.html"
+ },
+ "161": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.drugs.com/dosage/cloxacillin.html"
+ },
+ "162": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://reference.medscape.com/cc2/p10/cellulitis-and-erysipelas-antimicrobial-prescribing-2022a1001a67"
+ },
+ "163": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://medicalguidelines.msf.org/en/viewport/EssDr/english/cloxacillin-injectable-16682609.html"
+ },
+ "164": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://link.springer.com/article/10.1186/s12982-026-01603-z"
+ },
+ "165": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://academic.oup.com/jac/article/71/6/1697/1751406"
+ },
+ "166": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.researchgate.net/publication/282736866_Evaluation_of_use_of_antibiotic_without_prescription_among_young_adults"
+ },
+ "167": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.healthymatters.com.hk/medicines/cloxacillin-in-hong-kong#1"
+ },
+ "168": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://hellodoctor.com.ph/drugs-supplements/cloxacillin/"
+ },
+ "169": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://opengovca.com/drug-product/99993"
+ },
+ "170": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://dailymed.nlm.nih.gov/dailymed/fda/fdaDrugXsl.cfm?setid=7aefe003-c331-4577-991a-4ad768d6726d&type=display#1"
+ },
+ "171": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.gp.brightonandhoveccg.nhs.uk/file/5136/download?token=CyiAft19#1#3#1"
+ },
+ "172": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.fortunejournals.com/articles/antibiotic-use-in-primary-care-in-northern-ireland.html"
+ },
+ "173": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10044650/"
+ },
+ "174": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://link.springer.com/article/10.1186/s12982-026-01603-z"
+ },
+ "175": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.scribd.com/document/971891858/2512-21127v1"
+ },
+ "176": {
+  "q": 1,
+  "gpt": 0,
+  "url": "https://www.tandfonline.com/doi/full/10.1186/s40545-023-00659-5"
+ },
+ "177": {
+  "q": 2,
+  "gpt": 2,
+  "url": "http://cv-foundation.org/openaccess/content_cvpr_2013/papers/Liu_Tracking_Sports_Players_2013_CVPR_paper.pdf"
+ },
+ "178": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content/WACV2025W/CV4WS/papers/Koshkina_Towards_long-term_player_tracking_with_graph_hierarchies_and_domain-specific_features_WACVW_2025_paper.pdf"
+ },
+ "179": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2502.21242"
+ },
+ "180": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/pdf/2506.03335v1.pdf"
+ },
+ "181": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/wp-content/uploads/papers/ece2024/ECE2024_79871.pdf?t=8"
+ },
+ "182": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://doi.org/10.22492/issn.2188-1162.2024.18"
+ },
+ "183": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content/WACV2025W/CV4WS/html/Koshkina_Towards_long-term_player_tracking_with_graph_hierarchies_and_domain-specific_features_WACVW_2025_paper.html"
+ },
+ "184": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/wp-content/uploads/papers/ece2024/ECE2024_79871.pdf?t=8"
+ },
+ "185": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.mdpi.com/1424-8220/23/18/7938"
+ },
+ "186": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.scitepress.org/Papers/2025/131680/131680.pdf"
+ },
+ "187": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://doi.org/10.22492/issn.2188-1162.2024.18"
+ },
+ "188": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/wp-content/uploads/papers/ece2025/ECE2025_93889.pdf"
+ },
+ "189": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://github.com/open-mmlab/mmaction2/"
+ },
+ "190": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.scitepress.org/Papers/2025/131680/131680.pdf"
+ },
+ "191": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2502.21242v1"
+ },
+ "192": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://la.disneyresearch.com/wp-content/uploads/Motion-Fields-to-Predict-Play-Evolution-in-Dynamic-Sport-Scenes-Paper.pdf"
+ },
+ "193": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.ida.liu.se/research/sportsanalytics/LINHAC/LINHAC25/papers/linhac25-paper38.pdf"
+ },
+ "194": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openreview.net/pdf?id=4wqtWjPtjA"
+ },
+ "195": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9189896/"
+ },
+ "196": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://github.com/open-mmlab/mmaction2"
+ },
+ "197": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://mmaction2.readthedocs.io/"
+ },
+ "198": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://github.com/open-mmlab/mmaction2/tree/main/demo"
+ },
+ "199": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/wp-content/uploads/papers/ece2024/ECE2024_79871.pdf"
+ },
+ "200": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://mmaction2.readthedocs.io/en/0.x/skeleton_models.html"
+ },
+ "201": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://ar5iv.labs.arxiv.org/html/2105.07404"
+ },
+ "202": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://github.com/open-mmlab/mmaction2"
+ },
+ "203": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2105.07404v1"
+ },
+ "204": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openmmlab.medium.com/newest-user-guide-for-mmaction2-master-action-recognition-today-baa107c6eb10"
+ },
+ "205": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2512.19528"
+ },
+ "206": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content_cvpr_2013/papers/Liu_Tracking_Sports_Players_2013_CVPR_paper.pdf"
+ },
+ "207": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/submission79871/"
+ },
+ "208": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://appliedmaths.sun.ac.za/~wbrink/papers/prasa2009_vos.pdf"
+ },
+ "209": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://link.springer.com/article/10.1007/s10462-025-11344-1"
+ },
+ "210": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content/WACV2025W/CV4WS/papers/Koshkina_Towards_long-term_player_tracking_with_graph_hierarchies_and_domain-specific_features_WACVW_2025_paper.pdf"
+ },
+ "211": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content/WACV2025W/CV4WS/papers/Koshkina_Towards_long-term_player_tracking_with_graph_hierarchies_and_domain-specific_features_WACVW_2025_paper.pdf"
+ },
+ "212": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.cse.psu.edu/~rtc12/Papers/cvpr2013JingchenDisney.pdf"
+ },
+ "213": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/pdf/2405.13397"
+ },
+ "214": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content/CVPR2024W/CVsports/papers/Majeed_MV-Soccer_Motion-Vector_Augmented_Instance_Segmentation_for_Soccer_Player_Tracking_CVPRW_2024_paper.pdf"
+ },
+ "215": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/pdf/2110.03090v2"
+ },
+ "216": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content/CVPR2026W/CVsports/papers/Wang_Game_Context-Aware_3D_Human_Mesh_Recovery_in_Ice_Hockey_CVPRW_2026_paper.pdf"
+ },
+ "217": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2502.21242"
+ },
+ "218": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content_cvpr_2013/papers/Liu_Tracking_Sports_Players_2013_CVPR_paper.pdf"
+ },
+ "219": {
+  "q": 2,
+  "gpt": 3,
+  "url": "https://ieeexplore.ieee.org/document/6619083/"
+ },
+ "220": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.sciencedirect.com/science/article/abs/pii/S0957417422022680"
+ },
+ "221": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2502.21242v1"
+ },
+ "222": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content_cvpr_2013/papers/Liu_Tracking_Sports_Players_2013_CVPR_paper.pdf"
+ },
+ "223": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://thesis.dial.uclouvain.be/entities/masterthesis/25bfb80d-e617-4aec-97fe-caf5e6e7b774"
+ },
+ "224": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://mkoshkina.github.io/projects"
+ },
+ "225": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.youtube.com/watch?v=4vpnDveixDk"
+ },
+ "226": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.researchgate.net/publication/339010597_Multi-camera_Multi-player_Tracking_with_Deep_Player_Identification_in_Sports_Video"
+ },
+ "227": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://la.disneyresearch.com/publication/tracking-sports-players-with-context-conditioned-motion-models/"
+ },
+ "228": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.springerprofessional.de/a-comprehensive-survey-on-pose-estimation-and-tracking-in-sports/51811550"
+ },
+ "229": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://datavlab.ai/post/how-to-annotate-sports-footage-for-player-tracking-ai"
+ },
+ "230": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://link.springer.com/chapter/10.1007/978-981-96-1445-5_2"
+ },
+ "231": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/wp-content/uploads/papers/ece2024/ECE2024_79871.pdf?t=8"
+ },
+ "232": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/wp-content/uploads/papers/ece2025/ECE2025_93889.pdf"
+ },
+ "233": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://link.springer.com/chapter/10.1007/978-981-96-1445-5_2"
+ },
+ "234": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/pdf/2502.21242?"
+ },
+ "235": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://link.springer.com/content/pdf/10.1007/s10462-025-11344-1.pdf?error=cookies_not_supported&code=66b88993-9c21-4d04-8f89-4d1b1ee9f56a"
+ },
+ "236": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/abs/2502.21242"
+ },
+ "237": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/abs/2405.13397"
+ },
+ "238": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://github.com/mkoshkina/sports-SUSHI"
+ },
+ "239": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://openaccess.thecvf.com/content/WACV2025W/CV4WS/html/Koshkina_Towards_long-term_player_tracking_with_graph_hierarchies_and_domain-specific_features_WACVW_2025_paper.html"
+ },
+ "240": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://ui.adsabs.harvard.edu/abs/2025arXiv250221242K/abstract"
+ },
+ "241": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://ar5iv.labs.arxiv.org/html/2105.07404"
+ },
+ "242": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://github.com/open-mmlab/mmaction2"
+ },
+ "243": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2105.07404v1"
+ },
+ "244": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.nature.com/articles/s41598-025-29586-y"
+ },
+ "245": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2502.21242v1"
+ },
+ "246": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://pure.psu.edu/en/publications/tracking-sports-players-with-context-conditioned-motion-models/"
+ },
+ "247": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.youtube.com/watch?v=4vpnDveixDk"
+ },
+ "248": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/submission79871/"
+ },
+ "249": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://ui.adsabs.harvard.edu/abs/arXiv:1812.09533"
+ },
+ "250": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://pure.psu.edu/en/publications/tracking-sports-players-with-context-conditioned-motion-models/"
+ },
+ "251": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.youtube.com/watch?v=4vpnDveixDk"
+ },
+ "252": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/submission79871/"
+ },
+ "253": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://ui.adsabs.harvard.edu/abs/arXiv:1812.09533"
+ },
+ "254": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://github.com/open-mmlab/mmaction2"
+ },
+ "255": {
+  "q": 2,
+  "gpt": 1,
+  "url": "https://github.com/open-mmlab/mmaction2/tree/main/demo"
+ },
+ "256": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://mmaction2.readthedocs.io/"
+ },
+ "257": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2502.21242v1"
+ },
+ "258": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://pure.psu.edu/en/publications/tracking-sports-players-with-context-conditioned-motion-models/"
+ },
+ "259": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.ida.liu.se/research/sportsanalytics/LINHAC/LINHAC25/papers/linhac25-paper38.pdf"
+ },
+ "260": {
+  "q": 2,
+  "gpt": 0,
+  "url": "https://papers.iafor.org/submission79871/"
+ },
+ "261": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/html/2502.21242v1"
+ },
+ "262": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://arxiv.org/abs/2610.30519v1"
+ },
+ "263": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.semanticscholar.org/paper/Temporal-Hockey-Action-Recognition-via-Pose-and-Cai-Neher/8445fa2b66bd1669cdf303b6313b041d5da247a9"
+ },
+ "264": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://papers.iafor.org/wp-content/uploads/conference-proceedings/ECE/ECE2024_proceedings.pdf?t=5#39#177#39"
+ },
+ "265": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://uwspace.uwaterloo.ca/bitstreams/210c76d5-55ad-4484-99a2-372f5675bb1a/download#4#9#4"
+ },
+ "266": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.e3s-conferences.org/articles/e3sconf/pdf/2024/113/e3sconf_itese2024_06016.pdf#2#2#2"
+ },
+ "267": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://ecp.ep.liu.se/index.php/linhac/article/download/1206/1068/1296#1#2#1"
+ },
+ "268": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://huggingface.co/buckets/huggingchat/papers-content/tree/1806/1806.00890.md#2"
+ },
+ "269": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.growkudos.com/publications/10.1145%25252F3728423.3759415/reader"
+ },
+ "270": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://doi.org/10.1007/s10462-025-11344-1"
+ },
+ "271": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://github.com/open-mmlab/mmaction2"
+ },
+ "272": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://www.sciencedirect.com/science/article/abs/pii/S1077314225003492"
+ },
+ "273": {
+  "q": 2,
+  "gpt": 2,
+  "url": "https://la.disneyresearch.com/publication/tracking-sports-players-with-context-conditioned-motion-models/"
+ },
+ "274": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://www.facebook.com/help/contact.php/"
+ },
+ "275": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://www.wikihow.com/Contact-Facebook"
+ },
+ "276": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://www.facebook.com/help/contact/485974059259751/"
+ },
+ "277": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://www.facebook.com/contact_us_en.html/"
+ },
+ "278": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://facebook.pissedconsumer.com/customer-service.html"
+ },
+ "279": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://webdocs.tustinca.org/Weblink/DocView.aspx?id=189662&dbid=0&repo=TUSTIN"
+ },
+ "280": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://webdocs.tustinca.org/Weblink/DocView.aspx?id=189708&dbid=0&repo=TUSTIN"
+ },
+ "281": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://www.scribd.com/document/866629067/Architectural-l-6-Cu"
+ },
+ "282": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://imlive.s3.amazonaws.com/Federal%20Government/ID35597478901788049536147941695960571995/803CM3014%20Bath%20NC%20Exp%20Specifications.pdf"
+ },
+ "283": {
+  "q": 3,
+  "gpt": 0,
+  "url": "https://d3n9y02raazwpg.cloudfront.net/suisuncityca/3e596573-61a2-11f0-b7f5-005056a89546-5360f717-96cd-4307-943a-c7dc7bb46276-1755222609.pdf"
+ },
+ "284": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://ubt.opus.hbz-nrw.de/files/2175/Dissertation_Karbach.pdf"
+ },
+ "285": {
+  "q": 4,
+  "gpt": 2,
+  "url": "https://edoc.unibas.ch/bitstreams/8b31468a-b610-4133-bdde-be4cf9b289a1/download"
+ },
+ "286": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://swissvotes.ch/attachments/374c18a78f3fe3a0d60a4f8532ced9a8123e3e85ee3d2d523fc96ae14936e7aa"
+ },
+ "287": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://degruyterbrill.com/document/doi/10.1515/9783110345391-008/html"
+ },
+ "288": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://verfassungen.ch/verf48.htm"
+ },
+ "289": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.verfassungen.ch/verf48.htm"
+ },
+ "290": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.europa.eda.admin.ch/de/personenfreizuegigkeit"
+ },
+ "291": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.fedlex.admin.ch/eli/fga/1992/3_908_878_802/de"
+ },
+ "292": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.zbgr.ch/deu/suc_ges.php"
+ },
+ "293": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.cadastre.ch/de/1841-1923-geometerkonkordat-eidgenoessischen-grundbuchvermessung"
+ },
+ "294": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.verfassungen.ch/verf48.htm"
+ },
+ "295": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://link.springer.com/content/pdf/10.1007/978-3-662-62952-9.pdf"
+ },
+ "296": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://archives-quickaccess.ch/statg/rechtserlasse?page=121"
+ },
+ "297": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://klio.sh.ch/records/a7d302a6508043ffaa80dcf3aeaef175"
+ },
+ "298": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.ius.uzh.ch/dam/jcr:eca403e5-ed51-4a29-ac16-02fdc0e73a96/Die%20demokratischen%20Rechte%20und%20Bund%20und%20Kantonen%20der%20Schweizerischen%20Eidgenossenschaft.pdf"
+ },
+ "299": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://swissvotes.ch/vote/85.00/botschaft-de.pdf"
+ },
+ "300": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.fedlex.admin.ch/de/oc/index/2009/5"
+ },
+ "301": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://archives-quickaccess.ch/statg/rechtserlasse?page=121"
+ },
+ "302": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://serval.unil.ch/resource/serval:BIB_86859D95814F.P001/REF.pdf"
+ },
+ "303": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.google.com/chrome/index.html"
+ },
+ "304": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.google.com/chrome/"
+ },
+ "305": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://support.google.com/chrome/answer/95346?hl=en-na"
+ },
+ "306": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://support.google.com/chrome/answer/95346?hl=en&co=GENIE.Platform=Android"
+ },
+ "307": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.techspot.com/downloads/4718-google-chrome.html"
+ },
+ "308": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://d-nb.info/850642264/04"
+ },
+ "309": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://de.wikipedia.org/wiki/Eidgen%C3%B6ssische_Abstimmung_%C3%BCber_die_Weiterf%C3%BChrung_der_Personenfreiz%C3%BCgigkeit_und_deren_Ausdehnung_auf_Rum%C3%A4nien_und_Bulgarien"
+ },
+ "310": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.koeblergerhard.de/Rechtsgeschichte/RechtsgeschichteOesterreichinDeutschlandundEuropa.htm"
+ },
+ "311": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://hls-dhs-dss.ch/de/articles/010384/2015-07-09/"
+ },
+ "312": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.europa.eda.admin.ch/dam/en/sd-web/NRAhIdX8S0Lm/01%20Bundesbeschluss%20Stabilisierungsteil%20DE.pdf"
+ },
+ "313": {
+  "q": 4,
+  "gpt": 0,
+  "url": "http://www.oklegislature.gov/BillInfo.aspx?Bill=hb1843"
+ },
+ "314": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://de.wikisource.org/wiki/Freiz%C3%BCgigkeit"
+ },
+ "315": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://de.wikisource.org/wiki/Gesetz_%C3%BCber_die_Freiz%C3%BCgigkeit"
+ },
+ "316": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://reichsverfassungsurkunde.bismarckserben.org/seite221.php"
+ },
+ "317": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://archives.lib.state.ma.us/entities/aggregation/6c713390-27b9-4edc-8713-190e38026d8b"
+ },
+ "318": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://germanhistorydocs.org/de/vom-vormaerz-bis-zur-preussischen-vorherrschaft-1815-1866/deutschlands-vereinigung-1843"
+ },
+ "319": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://forum1848.de/forderungen/freizuegigkeit"
+ },
+ "320": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.verfassungen.de/de06-66/bundesbeschluss24.htm"
+ },
+ "321": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.verfassungen.de/de06-66/pressfreiheit48.htm"
+ },
+ "322": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://de.wikisource.org/wiki/Freiz%C3%BCgigkeit"
+ },
+ "323": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://natlex.ilo.org/dyn/natlex2/natlex2/files/download/61887/DEU61887.pdf"
+ },
+ "324": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.svr-migration.de/glossar/freizuegigkeit"
+ },
+ "325": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.bmi.bund.de/DE/themen/migration/aufenthaltsrecht/freizuegigkeit-eu-buerger/freizuegigkeit-eu-buerger-node.html"
+ },
+ "326": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.verwaltungsvorschriften-im-internet.de/bsvwvbund_03022016_MI12100972.htm"
+ },
+ "327": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.gesetze-im-internet.de/freiz_gg_eu_2004"
+ },
+ "328": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.marktplatz-mittelstand.de/lexikon/freizuegigkeit"
+ },
+ "329": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://unternehmer.de/lexikon/recht-lexikon/freizuegigkeit"
+ },
+ "330": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://de.wikipedia.org/wiki/Freiz%C3%BCgigkeit"
+ },
+ "331": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.constellatio.de/definition/freizuegigkeit"
+ },
+ "332": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://bundestag.de/dokumente/textarchiv/2023/kw51-kalenderblatt-1848-584354"
+ },
+ "333": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.europa.eda.admin.ch/dam/en/sd-web/NRAhIdX8S0Lm/01%20Bundesbeschluss%20Stabilisierungsteil%20DE.pdf"
+ },
+ "334": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://dip.bundestag.de/erweiterte-suche?f.deskriptor=Freiz%C3%BCgigkeit"
+ },
+ "335": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://ch.odat.ch/de/"
+ },
+ "336": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.newsd.admin.ch/newsd/message/attachments/79211.pdf"
+ },
+ "337": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.europa.eda.admin.ch/de/personenfreizuegigkeit"
+ },
+ "338": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://dictionary.cambridge.org/zhs/%E8%AF%8D%E5%85%B8/%E5%BE%B7%E8%AF%AD-%E8%8B%B1%E8%AF%AD/freizugigkeit"
+ },
+ "339": {
+  "q": 4,
+  "gpt": 0,
+  "url": "http://www.phil.muni.cz/en/research/publishing-and-editorial-activities-of-the-faculty/overview-of-publishing-and-scientific-activities/1483176"
+ },
+ "340": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://ius.uzh.ch/dam/jcr:3581547d-7f46-4af7-abb5-083ad2ec5c2c/PCM223379_00_SRIEL_2023_03_GESAMT_210823_V1.pdf"
+ },
+ "341": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://oeil.europarl.europa.eu/oeil/en/procedure-document-summary/pdf?id=75587"
+ },
+ "342": {
+  "q": 4,
+  "gpt": 0,
+  "url": "http://www.bk.admin.ch/ch/d/pore/va/19770313/can266.html"
+ },
+ "343": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://de.wikisource.org/wiki/Gesetz_%C3%BCber_die_Freiz%C3%BCgigkeit"
+ },
+ "344": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.verfassungen.de/de67-18/freizuegigkeit67.htm"
+ },
+ "345": {
+  "q": 4,
+  "gpt": 0,
+  "url": "http://www.documentarchiv.de/nzjh/ndbd/freizgkt_ges.html"
+ },
+ "346": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://de.wikipedia.org/wiki/Freiz%C3%BCgigkeit"
+ },
+ "347": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/de:s:Gesetz_%C3%BCber_die_Freiz%C3%BCgigkeit"
+ },
+ "348": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.ius.uzh.ch/dam/jcr:eca403e5-ed51-4a29-ac16-02fdc0e73a96/Die%20demokratischen%20Rechte%20und%20Bund%20und%20Kantonen%20der%20Schweizerischen%20Eidgenossenschaft.pdf"
+ },
+ "349": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://swissvotes.ch/vote/85.00/botschaft-de.pdf"
+ },
+ "350": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.fedlex.admin.ch/de/oc/index/2009/5"
+ },
+ "351": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://archives-quickaccess.ch/statg/rechtserlasse?page=121"
+ },
+ "352": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://serval.unil.ch/resource/serval:BIB_86859D95814F.P001/REF.pdf"
+ },
+ "353": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.ag.ch/staatsarchiv/suche/archivplansuche.aspx?ID=532372"
+ },
+ "354": {
+  "q": 4,
+  "gpt": 2,
+  "url": "https://www.cedefop.europa.eu/files/5157_de.pdf"
+ },
+ "355": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.ius.uzh.ch/dam/jcr:eca403e5-ed51-4a29-ac16-02fdc0e73a96/Die%20demokratischen%20Rechte%20und%20Bund%20und%20Kantonen%20der%20Schweizerischen%20Eidgenossenschaft.pdf"
+ },
+ "356": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://swissvotes.ch/vote/85.00/botschaft-de.pdf"
+ },
+ "357": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.fedlex.admin.ch/de/oc/index/2009/5"
+ },
+ "358": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://archives-quickaccess.ch/statg/rechtserlasse?page=121"
+ },
+ "359": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://serval.unil.ch/resource/serval:BIB_86859D95814F.P001/REF.pdf"
+ },
+ "360": {
+  "q": 4,
+  "gpt": 2,
+  "url": "https://www.cedefop.europa.eu/files/5157_de.pdf"
+ },
+ "361": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://ubt.opus.hbz-nrw.de/files/2175/Dissertation_Karbach.pdf"
+ },
+ "362": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://link.springer.com/content/pdf/10.1007/978-3-662-62952-9.pdf"
+ },
+ "363": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://cris.maastrichtuniversity.nl/files/92102767/c6915.pdf?__cf_chl_tk=Vhytobdu3g1cGRuTpN2CsXMJPHlBweNGT9BMwh1Vsqc-1766030488-1.0.1.1-l4.rG0c9uJtuYJ0OZThuLRQ0KVlop6sYp51ky3L7838#63#73#63"
+ },
+ "364": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://lup.lub.lu.se/luur/download?func=downloadFile&recordOId=1555182&fileOId=1563574#10#10#10"
+ },
+ "365": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://lup.lub.lu.se/luur/download?func=downloadFile&recordOId=1555182&fileOId=1563574#2#10#2"
+ },
+ "366": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.econstor.eu/bitstream/10419/214498/1/2011-14.pdf#3#5#3"
+ },
+ "367": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://cris.maastrichtuniversity.nl/files/60072171/c6915.pdf?__cf_chl_tk=yAU0QarzIs9VB_qONw5siaY5R7GEtHhzQwn2hUZxkiI-1766043952-1.0.1.1-kJmzos1qexf0_tWk8gJ08I71SRsnitwsDXspMedQHTg#61#71#61"
+ },
+ "368": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://de.wikisource.org/wiki/Die_Staats-Vertr%C3%A4ge_des_K%C3%B6nigreichs_Bayern_von_1806_bis_1858"
+ },
+ "369": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://sozialversicherungen.admin.ch/de/d/18459/download?version=4"
+ },
+ "370": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://sozialversicherungen.admin.ch/de/d/18452/download?version=1"
+ },
+ "371": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.parlament.ch/centers/documents/_layouts/15/DocIdRedir.aspx?ID=DOCID-1-8433"
+ },
+ "372": {
+  "q": 4,
+  "gpt": 0,
+  "url": "https://www.bj.admin.ch/dam/bj/de/data/staat/gesetzgebung/archiv/anwaltsgesetz-freizuegigkeit/vn2-sa-d.pdf.download.pdf/vn2-sa-d.pdf"
+ },
+ "373": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://ncbi.nlm.nih.gov/pmc/articles/PMC3762813"
+ },
+ "374": {
+  "q": 5,
+  "gpt": 4,
+  "url": "https://pubmed.ncbi.nlm.nih.gov/30931637"
+ },
+ "375": {
+  "q": 5,
+  "gpt": 4,
+  "url": "https://dx.plos.org/10.1371/journal.pone.0071068"
+ },
+ "376": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8640210"
+ },
+ "377": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4564205"
+ },
+ "378": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://www.ncbi.nlm.nih.gov/bioproject/PRJNA290220"
+ },
+ "379": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0137543"
+ },
+ "380": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0071068"
+ },
+ "381": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://pubmed.ncbi.nlm.nih.gov/40664271/"
+ },
+ "382": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://journals.plos.org/plosgenetics/article?id=10.1371%2Fjournal.pgen.1007957"
+ },
+ "383": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pubs.acs.org/doi/10.1021/acs.jafc.9b08155"
+ },
+ "384": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0137543"
+ },
+ "385": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0071068"
+ },
+ "386": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/mucor-circinelloides"
+ },
+ "387": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.researchgate.net/publication/324815755_Mucor_circinelloides_Growth_Maintenance_and_Genetic_Manipulation"
+ },
+ "388": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6386414/"
+ },
+ "389": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0071068"
+ },
+ "390": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2021.774825/full"
+ },
+ "391": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/mucor-circinelloides"
+ },
+ "392": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://www.sciencedirect.com/science/article/abs/pii/S2212429225006522"
+ },
+ "393": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2021.774825/full"
+ },
+ "394": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0071068&type=printable"
+ },
+ "395": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0071068"
+ },
+ "396": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://journals.plos.org/plosgenetics/article?id=10.1371%2Fjournal.pgen.1007957"
+ },
+ "397": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0071068"
+ },
+ "398": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3762813/"
+ },
+ "399": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8883733"
+ },
+ "400": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6060640"
+ },
+ "401": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pubmed.ncbi.nlm.nih.gov/35227264"
+ },
+ "402": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.ncbi.nlm.nih.gov/datasets/taxonomy/36080"
+ },
+ "403": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pubmed.ncbi.nlm.nih.gov/39032627/"
+ },
+ "404": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pubmed.ncbi.nlm.nih.gov/30040216"
+ },
+ "405": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6060640"
+ },
+ "406": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3127746"
+ },
+ "407": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Mucor_circinelloides"
+ },
+ "408": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8883733"
+ },
+ "409": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://link.springer.com/article/10.1186/s12934-022-01758-9"
+ },
+ "410": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.sciencedirect.com/topics/immunology-and-microbiology/mucor-circinelloides"
+ },
+ "411": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pubmed.ncbi.nlm.nih.gov/35227264"
+ },
+ "412": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://journals.plos.org/plospathogens/article?id=10.1371%2Fjournal.ppat.1002086"
+ },
+ "413": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://mycology.adelaide.edu.au/fungal-descriptions-and-antifungal-susceptibility/mucoromycota-pin-moulds/mucor"
+ },
+ "414": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8883733/"
+ },
+ "415": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://currentprotocols.onlinelibrary.wiley.com/doi/abs/10.1002/cpmc.53"
+ },
+ "416": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://currentprotocols.onlinelibrary.wiley.com/doi/10.1002/cpmc.53"
+ },
+ "417": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.researchgate.net/publication/324815755_Mucor_circinelloides_Growth_Maintenance_and_Genetic_Manipulation"
+ },
+ "418": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pl.wikipedia.org/wiki/Mucor_circinelloides"
+ },
+ "419": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://link.springer.com/content/pdf/10.1186/s12934-022-01758-9.pdf?pdf=button&error=cookies_not_supported&code=6fa5462d-0e5a-411b-bd31-1ed9352d6db0"
+ },
+ "420": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://link.springer.com/article/10.1186/s12934-022-01758-9?error=cookies_not_supported&code=3543184a-6eda-49a9-81bc-a060000b1cbf"
+ },
+ "421": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3127746/"
+ },
+ "422": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6060640/"
+ },
+ "423": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8160456/"
+ },
+ "424": {
+  "q": 5,
+  "gpt": 0,
+  "url": "http://scholars.duke.edu/publication/1327574"
+ },
+ "425": {
+  "q": 5,
+  "gpt": 0,
+  "url": "http://www.springermedizin.de/an-adult-zebrafish-model-reveals-that-mucormycosis-induces-apopt/52830878"
+ },
+ "426": {
+  "q": 5,
+  "gpt": 0,
+  "url": "http://www.pubmed.ncbi.nlm.nih.gov/28476909/"
+ },
+ "427": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6315630/"
+ },
+ "428": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://avesis.gazi.edu.tr/publication/details/d7ffa227-6aab-45e7-ad64-080558d40f8e/transformation-of-yeast-and-mould-forms-mucor-circinelloides-and-the-assessment-of-its-virulence-on-galleria-mellonella-larvae-model-in-vivo"
+ },
+ "429": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC9843973/"
+ },
+ "430": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://experts.illinois.edu/en/publications/calcineurin-orchestrates-dimorphic-transitions-antifungal-drug-re/"
+ },
+ "431": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://experts.umn.edu/en/publications/critical-applications-of-mucor-circinelloides-within-a-biorefiner/"
+ },
+ "432": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://journals.plos.org/plospathogens/article?id=10.1371/journal.ppat.1002086"
+ },
+ "433": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://research-portal.uea.ac.uk/en/publications/the-rnai-machinery-controls-distinct-responses-to-environmental-s/"
+ },
+ "434": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8883733/"
+ },
+ "435": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Mucor_circinelloides"
+ },
+ "436": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://link.springer.com/article/10.1186/s12934-022-01758-9"
+ },
+ "437": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6060640/"
+ },
+ "438": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.science.gov/topicpages/f/fungus+mucor+circinelloides"
+ },
+ "439": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/mucor-circinelloides"
+ },
+ "440": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.researchgate.net/publication/324815755_Mucor_circinelloides_Growth_Maintenance_and_Genetic_Manipulation"
+ },
+ "441": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6386414/"
+ },
+ "442": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0071068"
+ },
+ "443": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2021.774825/full"
+ },
+ "444": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2668293/"
+ },
+ "445": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://journals.asm.org/doi/10.1128/jcm.01907-06"
+ },
+ "446": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.creative-biolabs.com/drug-discovery/therapeutics/mucor-circinelloides.htm"
+ },
+ "447": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://explorer.natureserve.org/Taxon/ELEMENT_GLOBAL.2.1260118/Mucor_circinelloides"
+ },
+ "448": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://scholar.google.com/scholar?q=%22Mucor+circinelloides%22+%22model+fungus%22&hl=en&as_sdt=0&as_vis=1&oi=scholart"
+ },
+ "449": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://www.sciencedirect.com/science/article/abs/pii/S2212429225006522"
+ },
+ "450": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://www.ssrn.com/abstract=5242947"
+ },
+ "451": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://pubmed.ncbi.nlm.nih.gov/40664271/"
+ },
+ "452": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.sciencedirect.com/topics/agricultural-and-biological-sciences/mucor-circinelloides"
+ },
+ "453": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.researchgate.net/publication/324815755_Mucor_circinelloides_Growth_Maintenance_and_Genetic_Manipulation"
+ },
+ "454": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6386414/"
+ },
+ "455": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0071068"
+ },
+ "456": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.frontiersin.org/journals/microbiology/articles/10.3389/fmicb.2021.774825/full"
+ },
+ "457": {
+  "q": 5,
+  "gpt": 2,
+  "url": "https://pubmed.ncbi.nlm.nih.gov/40664271/"
+ },
+ "458": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://pubs.acs.org/doi/10.1021/acs.jafc.9b08155"
+ },
+ "459": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://acs.figshare.com/articles/journal_contribution/Biosynthesis_of_Naringenin_from_i_p_i_Coumaric_Acid_in_Engineering_Oleaginous_Filamentous_Fungus_Mucor_circinelloides/25356214"
+ },
+ "460": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pubs-acs-org-443.webvpna.lzu.edu.cn/doi/pdf/10.1021/acsfoodscitech.3c00645#1#4#1"
+ },
+ "461": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://gz.nstl.gov.cn/paper_detail.html?id=3fa016ec2f33c380fc9d083834b29b39#1"
+ },
+ "462": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://dx.nstl.gov.cn/search.html?t=JournalPaper,ProceedingsPaper,DegreePaper&q=5L2c6ICF77yaWWFuZywgWXVlcGluZw#1"
+ },
+ "463": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.science.gov/topicpages/f/fungal+spore+coatings.html#9"
+ },
+ "464": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.sciencedirect.com/science/article/abs/pii/S1087184515300475#1"
+ },
+ "465": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8883733/"
+ },
+ "466": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://link.springer.com/article/10.1186/s12934-022-01758-9"
+ },
+ "467": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8883733/"
+ },
+ "468": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.science.gov/topicpages/d/dimorphic+fungus+mucor"
+ },
+ "469": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://www.researchgate.net/publication/324815755_Mucor_circinelloides_Growth_Maintenance_and_Genetic_Manipulation"
+ },
+ "470": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6386414/"
+ },
+ "471": {
+  "q": 5,
+  "gpt": 0,
+  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11323738/"
+ },
+ "472": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://doi.org/10.1021/acsfoodscitech.3c00645"
+ },
+ "473": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://vap.ac.vn/Portals/0/TuyenTap/2020/6/25/130f0a5815274d15ab692bfbb440a2a3/UD45.Tao%20plasmid%20RNAi.8p.895-902ok.pdf"
+ },
+ "474": {
+  "q": 5,
+  "gpt": 3,
+  "url": "https://pubs.acs.org/doi/abs/10.1021/acsfoodscitech.3c00645"
+ },
+ "475": {
+  "q": 6,
+  "gpt": 0,
+  "url": "https://magazine.berea.edu/alumni-connections/passages-winter-2022/"
+ },
+ "476": {
+  "q": 6,
+  "gpt": 0,
+  "url": "https://www.publicschoolreview.com/arizona/chandler"
+ },
+ "477": {
+  "q": 6,
+  "gpt": 0,
+  "url": "https://www.girlscouts.org/en/discover/about-us/what-girl-scouts-do/gold-award-girl-scout-graduating--bridging-class-this-year-list/2022-gold-award-girl-scout-graduating--bridging-class-list.html"
+ },
+ "478": {
+  "q": 6,
+  "gpt": 0,
+  "url": "https://www.publicschoolreview.com/arizona/chandler/elementary"
+ },
+ "479": {
+  "q": 6,
+  "gpt": 0,
+  "url": "https://engineering.und.edu/alumni/alumni-academy.html"
+ },
+ "480": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "481": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://kiwix.enszfarms.org/content/wikipedia_en_all_maxi_2025-08/Pachycephalidae"
+ },
+ "482": {
+  "q": 7,
+  "gpt": 4,
+  "url": "https://wikipedia.nlaha.com/content/wikipedia_en_all_maxi_2024-01/A/Pachycephalidae"
+ },
+ "483": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://iiab.live/kiwix/content/wikipedia_en_all_maxi_2023-05/A/Pachycephalidae"
+ },
+ "484": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://reference.org/facts/Pachycephalidae/lVVeuBtb"
+ },
+ "485": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "486": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/whistlers-pachycephalidae"
+ },
+ "487": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.researchgate.net/publication/357337719_Systematics_and_biogeography_of_the_whistlers_Aves_Pachycephalidae_inferred_from_ultraconserved_elements_and_ancestral_area_reconstruction"
+ },
+ "488": {
+  "q": 7,
+  "gpt": 4,
+  "url": "https://en.m.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "489": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://mapress.com/zootaxa/2014/f/z03786p522f.pdf"
+ },
+ "490": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://api.eol.org/pages/2842443/articles"
+ },
+ "491": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "492": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/pachycephalidae"
+ },
+ "493": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://handwiki.org/wiki/Biology:Pachycephalidae"
+ },
+ "494": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalinae"
+ },
+ "495": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "496": {
+  "q": 7,
+  "gpt": 2,
+  "url": "https://www.facebook.com/100091538184537/posts/todays-best-photo-of-pachycephalidae-pachycephalidae-commonly-known-as-the-whist/511813505213251/"
+ },
+ "497": {
+  "q": 7,
+  "gpt": 2,
+  "url": "https://www.facebook.com/karyono.apic/posts/the-yellow-throated-whistler-pachycephala-macrorhyncha-or-banda-sea-whistler-is-/10215416235716786/"
+ },
+ "498": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "499": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Australian_Golden_Whistler"
+ },
+ "500": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.sciencedirect.com/science/article/pii/S1055790317303743"
+ },
+ "501": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://iere.org/animals/what-is-the-origin-of-paddlefish-2/"
+ },
+ "502": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://vdoc.pub/documents/the-birds-of-the-thai-malay-peninsula-passerines-vol-2-5hv7b0uaduk0"
+ },
+ "503": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "504": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://handwiki.org/wiki/Biology:Pachycephalidae"
+ },
+ "505": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Australian_golden_whistler"
+ },
+ "506": {
+  "q": 7,
+  "gpt": 4,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "507": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://handwiki.org/wiki/Biology:Pachycephalidae"
+ },
+ "508": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Australian_Golden_Whistler"
+ },
+ "509": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Australasian_robin"
+ },
+ "510": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/List_of_birds_of_Queensland"
+ },
+ "511": {
+  "q": 7,
+  "gpt": 4,
+  "url": "https://www.gbif.org/species/144101850"
+ },
+ "512": {
+  "q": 7,
+  "gpt": 0,
+  "url": "http://ftp.funet.fi/pub/files/index/Tree_of_life/aves/passeriformes/pachycephalidae/"
+ },
+ "513": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "514": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://demo.birdsoftheworld.org/bow/species/pachyc2/1.0/introduction"
+ },
+ "515": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://publications.australian.museum/family-pachycephalidae-whistlers-and-allies"
+ },
+ "516": {
+  "q": 7,
+  "gpt": 4,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "517": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://everything.explained.today/whistler_(bird)"
+ },
+ "518": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://www.scientificlib.com/en/Biology/Animalia/Chordata/Aves/Pachycephalidae.html"
+ },
+ "519": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://everything.explained.today/Pachycephalidae"
+ },
+ "520": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.inaturalist.org/taxa/71345-Pachycephalidae"
+ },
+ "521": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://natureworks.nhpbs.org/kingdom/pachycephalidae"
+ },
+ "522": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://handwiki.org/wiki/Biology:Pachycephalidae"
+ },
+ "523": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://www.scientificlib.com/en/Biology/Animalia/Chordata/Aves/Pachycephalidae.html"
+ },
+ "524": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "525": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Pachycephala"
+ },
+ "526": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.gbif.org/species/3241790"
+ },
+ "527": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "528": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Pachycephala"
+ },
+ "529": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://birdsoftheworld.org/bow/historic/hbw/vogwhi1/1.0/introduction"
+ },
+ "530": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://pt.wikipedia.org/wiki/Pachycephalidae?uselang=en"
+ },
+ "531": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/whistlers-pachycephalidae"
+ },
+ "532": {
+  "q": 7,
+  "gpt": 4,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "533": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/List_of_birds_of_Thailand"
+ },
+ "534": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://nhpbs.org/wild/forthebirdsPachycephalidae.asp"
+ },
+ "535": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://mittavalleylandcaregroup.com/category/birds/"
+ },
+ "536": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.wikidata.org/wiki/Q518502"
+ },
+ "537": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "538": {
+  "q": 7,
+  "gpt": 2,
+  "url": "https://en.wikipedia.org/wiki/List_of_birds_of_Australia"
+ },
+ "539": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.wiktionary.org/wiki/Pachycephalidae"
+ },
+ "540": {
+  "q": 7,
+  "gpt": 0,
+  "url": "http://www.wiktionary.org/w/index.php?printable=yes&title=Pachycephalidae"
+ },
+ "541": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://species.wikimedia.org/wiki/Pachycephalidae?uselang=ru"
+ },
+ "542": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/whistlers-pachycephalidae"
+ },
+ "543": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "544": {
+  "q": 7,
+  "gpt": 2,
+  "url": "https://fatbirder.com/ornithology/eulacestomatidae-ploughbill/"
+ },
+ "545": {
+  "q": 7,
+  "gpt": 2,
+  "url": "https://en.wikipedia.org/wiki/Australian_golden_whistler"
+ },
+ "546": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Wattled_ploughbill"
+ },
+ "547": {
+  "q": 7,
+  "gpt": 2,
+  "url": "https://www.facebook.com/karyono.apic/posts/the-yellow-throated-whistler-pachycephala-macrorhyncha-or-banda-sea-whistler-is-/10215416235716786/"
+ },
+ "548": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "549": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.facebook.com/100091538184537/posts/todays-best-photo-of-pachycephalidae-pachycephalidae-commonly-known-as-the-whist/511813505213251/"
+ },
+ "550": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.facebook.com/karyono.apic/posts/the-yellow-throated-whistler-pachycephala-macrorhyncha-or-banda-sea-whistler-is-/10215416235716786/"
+ },
+ "551": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/api/rest_v1/page/pdf/Pachycephalidae#1#1#1"
+ },
+ "552": {
+  "q": 7,
+  "gpt": 4,
+  "url": "https://vi.safeoc.com/wg-cgi/www.wikiwand.com/en/articles/Pachycephalidae#1"
+ },
+ "553": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://www.encyclopedia.com/environment/encyclopedias-almanacs-transcripts-and-maps/whistlers-pachycephalidae#1"
+ },
+ "554": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://www.questionai.com/knowledge/kRGygYbTe5-pachycephalidae#1"
+ },
+ "555": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://par.nsf.gov/servlets/purl/10422278#1#8#1"
+ },
+ "556": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "557": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Pachycephala"
+ },
+ "558": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://handwiki.org/wiki/Biology:Pachycephalidae"
+ },
+ "559": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Pachyrhizodus"
+ },
+ "560": {
+  "q": 7,
+  "gpt": 0,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalosaurus"
+ },
+ "561": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://en.wikipedia.org/wiki/Pachycephalidae"
+ },
+ "562": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://handwiki.org/wiki/Biology%3APachycephalidae"
+ },
+ "563": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://browse.zim.carpocratian.org/content/wikipedia_en_all_maxi_2022-05/A/Pachycephalidae"
+ },
+ "564": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://wikwiand-revamp.pages.dev/en/Pachycephalidae"
+ },
+ "565": {
+  "q": 7,
+  "gpt": 3,
+  "url": "https://iiab.live/kiwix/content/wikipedia_en_top1m_maxi_2024-05/A/Pachycephalidae"
+ }
+}

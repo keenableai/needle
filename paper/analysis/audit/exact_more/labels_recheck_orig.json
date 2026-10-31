@@ -1,0 +1,212 @@
+[
+ {
+  "id": 5,
+  "label": "no",
+  "reason": "Snippet gives only adjusted net income $1.94B; no GAAP net income figure."
+ },
+ {
+  "id": 6,
+  "label": "no",
+  "reason": "Snippet gives segment operating profit $2.5B and net income figures; no $2.035B operating income."
+ },
+ {
+  "id": 9,
+  "label": "yes",
+  "reason": "States Q3 2025 operating income was $17.4 billion."
+ },
+ {
+  "id": 11,
+  "label": "no",
+  "reason": "Snippet gives basic EPS $1.51; diluted EPS not stated."
+ },
+ {
+  "id": 12,
+  "label": "yes",
+  "reason": "States diluted EPS of $2.01 for quarter ended March 28, 2026."
+ },
+ {
+  "id": 15,
+  "label": "no",
+  "reason": "Value -$1.13M for Sep 2024 is EBT, a different line item than operating income."
+ },
+ {
+  "id": 18,
+  "label": "no",
+  "reason": "Snippet gives only adjusted net income $1.94B; no GAAP net income figure."
+ },
+ {
+  "id": 22,
+  "label": "yes",
+  "reason": "States Q1 2026 operating income totaled $2.73 billion."
+ },
+ {
+  "id": 30,
+  "label": "no",
+  "reason": "Snippet gives Q1 2015 net income $833M, not operating income."
+ },
+ {
+  "id": 31,
+  "label": "no",
+  "reason": "Snippet covers Q4 and full-year 2025 EPS only; no Q1 2025 figure."
+ },
+ {
+  "id": 33,
+  "label": "no",
+  "reason": "Snippet covers Q4 and full-year 2025 EPS; no Q3 2025 diluted EPS."
+ },
+ {
+  "id": 36,
+  "label": "no",
+  "reason": "Snippet gives adjusted operating income $687M only; no GAAP $461M figure."
+ },
+ {
+  "id": 38,
+  "label": "yes",
+  "reason": "States total segment operating income of $5.1 billion for Q1 fiscal 2025."
+ },
+ {
+  "id": 40,
+  "label": "yes",
+  "reason": "Income from operations 128,507 in first column of three months ended June 30 table."
+ },
+ {
+  "id": 42,
+  "label": "no",
+  "reason": "Snippet is Q1 2026 release with operating income only; no Q1 2025 net income."
+ },
+ {
+  "id": 43,
+  "label": "yes",
+  "reason": "States Q3 2024 net income attributable to Uber was $2.6 billion."
+ },
+ {
+  "id": 45,
+  "label": "no",
+  "reason": "Snippet gives net income to common $36.3M for Q1 2026; $38.0M is Q4 2025."
+ },
+ {
+  "id": 46,
+  "label": "no",
+  "reason": "Snippet gives non-GAAP EPS $25.11 only; no diluted GAAP EPS."
+ },
+ {
+  "id": 48,
+  "label": "no",
+  "reason": "Snippet shows operating profit $1,088 and $849 and adjusted net income; no $2.035B."
+ },
+ {
+  "id": 50,
+  "label": "no",
+  "reason": "Snippet states no operating income figure."
+ },
+ {
+  "id": 52,
+  "label": "yes",
+  "reason": "States first quarter 2025 net income of $17.1 billion."
+ },
+ {
+  "id": 53,
+  "label": "no",
+  "reason": "Snippet gives net income to common $36.3M for Q1 2026; $38.0M is Q4 2025."
+ },
+ {
+  "id": 56,
+  "label": "no",
+  "reason": "Snippet gives adjusted earnings $14.7 billion only; no GAAP net income."
+ },
+ {
+  "id": 57,
+  "label": "no",
+  "reason": "Shows $42.8M for Q3 2019 but the line item is not identified."
+ },
+ {
+  "id": 59,
+  "label": "no",
+  "reason": "Snippet gives revenue and EPS only; no operating income figure."
+ },
+ {
+  "id": 60,
+  "label": "yes",
+  "reason": "States net income for three months ended September 30, 2025 was $6.0 million."
+ },
+ {
+  "id": 63,
+  "label": "no",
+  "reason": "Snippet gives Q2 2026 net income $87.1M, not Q1 2026."
+ },
+ {
+  "id": 66,
+  "label": "no",
+  "reason": "Snippet shows annual diluted EPS only; no Q3 2025 figure."
+ },
+ {
+  "id": 70,
+  "label": "no",
+  "reason": "$1.8 billion is Q4 2025 net income, not Q3 2025."
+ },
+ {
+  "id": 74,
+  "label": "no",
+  "reason": "$1.8 billion figures are Q4 2025 and Q4 2024; no Q3 2025 net income."
+ },
+ {
+  "id": 75,
+  "label": "yes",
+  "reason": "States Q2 2026 operating income was $32.1 million."
+ },
+ {
+  "id": 78,
+  "label": "no",
+  "reason": "Snippet gives revenue, net profit and EPS; no operating income figure."
+ },
+ {
+  "id": 85,
+  "label": "yes",
+  "reason": "States Q2 fiscal 2026 GAAP net income of $0.35 per diluted share."
+ },
+ {
+  "id": 105,
+  "label": "yes",
+  "reason": "Quarterly EPS table lists $1.03 for quarter ended 2024-08-31; label says EPS, not diluted."
+ },
+ {
+  "id": 111,
+  "label": "yes",
+  "reason": "States GAAP operating income Q3 2025 = $542M."
+ },
+ {
+  "id": 115,
+  "label": "no",
+  "reason": "Snippet states net income $183.1 million, which does not round from $182.98 million."
+ },
+ {
+  "id": 116,
+  "label": "no",
+  "reason": "Diluted EPS row lists 0.88 but no column shows which quarter it is."
+ },
+ {
+  "id": 125,
+  "label": "no",
+  "reason": "Snippet states 31,000 employees, not about 28,000."
+ },
+ {
+  "id": 138,
+  "label": "no",
+  "reason": "Snippet states a workforce of 84,900 at another date, not 86,200."
+ },
+ {
+  "id": 143,
+  "label": "no",
+  "reason": "Snippet states about 18,000 employees, not 17,000."
+ },
+ {
+  "id": 221,
+  "label": "yes",
+  "reason": "States the group holding entity was created in December 2002."
+ },
+ {
+  "id": 224,
+  "label": "no",
+  "reason": "Snippet names Musk CEO of SpaceX and Boring; Tesla roles are Technoking and founder."
+ }
+]

@@ -1,0 +1,2743 @@
+[
+ {
+  "q": 0,
+  "run": "2026-10-22T0933Z",
+  "query": "Netherlands Wet toetsing levensbe\u00ebindiging op verzoek site:rijksoverheid.nl",
+  "today": "2026-10-22",
+  "profile": {
+   "query_type": "broad",
+   "query_domain": "legal",
+   "query_search_operators_exist": true,
+   "query_main_aspects": [
+    "The legal scope and requirements of the Netherlands\u2019 Act on termination of life on request and assisted suicide"
+   ],
+   "query_aux_aspects": [
+    "The procedures for physician reporting and review"
+   ],
+   "query_content_archetype": "persistent"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "penalized": [
+     2,
+     0,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.2183213092434803
+   },
+   "keenable": {
+    "positions": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "penalized": [
+     2,
+     0,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.2183213092434803
+   },
+   "exa-instant": {
+    "positions": [
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.7205985101796962
+   },
+   "exa": {
+    "positions": [
+     10,
+     11,
+     6,
+     12,
+     9
+    ],
+    "penalized": [
+     3,
+     3,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 1.0
+   },
+   "google": {
+    "positions": [
+     0,
+     13,
+     14,
+     15,
+     16
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   },
+   "bing": {
+    "positions": [
+     17,
+     18,
+     19,
+     20,
+     21
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     3
+    ],
+    "ndcg": 0.4490718653066966
+   },
+   "brave": {
+    "positions": [
+     22,
+     23,
+     24,
+     25,
+     26
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   },
+   "brave-llmcontext": {
+    "positions": [
+     27,
+     28,
+     29,
+     30,
+     31
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.7205985101796962
+   },
+   "parallel-turbo": {
+    "positions": [
+     32,
+     33,
+     34,
+     35,
+     36
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.7205985101796962
+   },
+   "parallel": {
+    "positions": [
+     37,
+     38,
+     39,
+     40,
+     41
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   },
+   "tavily": {
+    "positions": [
+     42,
+     43,
+     44,
+     45,
+     46
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   },
+   "linkup": {
+    "positions": [
+     47,
+     48,
+     49,
+     50,
+     51
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   },
+   "perplexity-fast": {
+    "positions": [
+     52,
+     53,
+     54,
+     55,
+     56
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.7205985101796962
+   },
+   "perplexity": {
+    "positions": [
+     52,
+     53,
+     54,
+     55,
+     56
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.7205985101796962
+   },
+   "octen": {
+    "positions": [
+     57,
+     58,
+     59,
+     60,
+     61
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "ceramic": {
+    "positions": [
+     62,
+     63,
+     64,
+     65,
+     66
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "you": {
+    "positions": [
+     22,
+     67,
+     68,
+     69,
+     70
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   },
+   "firecrawl": {
+    "positions": [
+     71,
+     72,
+     73,
+     74,
+     75
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   },
+   "tinyfish": {
+    "positions": [
+     76,
+     13,
+     14,
+     15,
+     16
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   },
+   "kagi": {
+    "positions": [
+     77,
+     78,
+     79,
+     80,
+     81
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "jina": {
+    "positions": [
+     82,
+     83,
+     84,
+     85,
+     86
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     2,
+     3
+    ],
+    "ndcg": 0.8919127493175023
+   },
+   "context": {
+    "positions": [
+     87,
+     88,
+     14,
+     89,
+     90
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   },
+   "deepseek": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": 0.0
+   },
+   "chatgpt-search": {
+    "positions": [
+     91,
+     92,
+     93,
+     94,
+     95
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.27775762616889044
+   }
+  }
+ },
+ {
+  "q": 1,
+  "run": "2026-10-23T0926Z",
+  "query": "\"cloxacillin\" \"Prescription\" \"2022\" \"NHS\"",
+  "today": "2026-10-23",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "health",
+   "query_search_operators_exist": true,
+   "query_main_aspects": [
+    "the NHS prescription statistic for cloxacillin in 2022"
+   ],
+   "query_aux_aspects": [
+    "the cost, quantity, or other prescribing details associated with that statistic"
+   ],
+   "query_content_archetype": "evergreen"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     96,
+     97,
+     98,
+     99,
+     100
+    ],
+    "penalized": [
+     2,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 1.0
+   },
+   "keenable": {
+    "positions": [
+     96,
+     97,
+     98,
+     99,
+     100
+    ],
+    "penalized": [
+     2,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 1.0
+   },
+   "exa-instant": {
+    "positions": [
+     101,
+     102,
+     103,
+     104,
+     105
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "exa": {
+    "positions": [
+     106,
+     107,
+     108,
+     109,
+     110
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "google": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": 0.0
+   },
+   "bing": {
+    "positions": [
+     111,
+     112,
+     113,
+     114,
+     115
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "brave": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": 0.0
+   },
+   "brave-llmcontext": {
+    "positions": [
+     116,
+     117,
+     118
+    ],
+    "penalized": [
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "parallel-turbo": {
+    "positions": [
+     119,
+     120,
+     121,
+     122,
+     123
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "parallel": {
+    "positions": [
+     124,
+     125,
+     126,
+     127,
+     128
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "tavily": {
+    "positions": [
+     129,
+     130,
+     131,
+     132,
+     133
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "linkup": {
+    "positions": [
+     134,
+     135,
+     136,
+     137,
+     138
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "perplexity-fast": {
+    "positions": [
+     139,
+     140,
+     141,
+     142,
+     143
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "perplexity": {
+    "positions": [
+     139,
+     140,
+     141,
+     142,
+     143
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "octen": {
+    "positions": [
+     144,
+     145,
+     146,
+     147,
+     148
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "ceramic": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": 0.0
+   },
+   "you": {
+    "positions": [
+     149,
+     150,
+     151,
+     152,
+     153
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "firecrawl": {
+    "positions": [
+     154,
+     155,
+     156,
+     157,
+     158
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "tinyfish": {
+    "positions": [
+     159,
+     160,
+     161,
+     162,
+     163
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "kagi": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": 0.0
+   },
+   "context": {
+    "positions": [
+     164,
+     165,
+     166,
+     154,
+     156
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "deepseek": {
+    "positions": [
+     167,
+     168,
+     169,
+     170,
+     171
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "chatgpt-search": {
+    "positions": [
+     172,
+     173,
+     174,
+     175,
+     176
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   }
+  }
+ },
+ {
+  "q": 2,
+  "run": "2026-10-24T0838Z",
+  "query": "Leveraging pose cues and hierarchical motion models from MMaction2 to improve player tracking and disambiguation in dense soccer and hockey scenes",
+  "today": "2026-10-24",
+  "profile": {
+   "query_type": "broad",
+   "query_domain": "academic",
+   "query_search_operators_exist": false,
+   "query_main_aspects": [
+    "methods for using MMAction2 pose cues and hierarchical motion models to improve player tracking and disambiguation"
+   ],
+   "query_aux_aspects": [
+    "application to dense soccer and hockey scenes",
+    "implementation details and evaluation of the approach"
+   ],
+   "query_content_archetype": "persistent"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     177,
+     178,
+     179,
+     180,
+     181
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "keenable": {
+    "positions": [
+     177,
+     178,
+     179,
+     180,
+     181
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "exa-instant": {
+    "positions": [
+     182,
+     183,
+     184,
+     185,
+     186
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "exa": {
+    "positions": [
+     187,
+     188,
+     183,
+     189,
+     190
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "google": {
+    "positions": [
+     191,
+     192,
+     193,
+     194,
+     195
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "bing": {
+    "positions": [
+     196,
+     197,
+     198,
+     199,
+     200
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "brave": {
+    "positions": [
+     201,
+     202,
+     203,
+     204,
+     205
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "brave-llmcontext": {
+    "positions": [
+     206,
+     207,
+     208,
+     209,
+     210
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "parallel-turbo": {
+    "positions": [
+     211,
+     212,
+     213,
+     214,
+     215
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "parallel": {
+    "positions": [
+     216,
+     217,
+     218,
+     219,
+     220
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     3,
+     2
+    ],
+    "ndcg": 0.6501245940017529
+   },
+   "tavily": {
+    "positions": [
+     221,
+     222,
+     223,
+     224,
+     225
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "linkup": {
+    "positions": [
+     226,
+     227,
+     228,
+     229,
+     230
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "perplexity-fast": {
+    "positions": [
+     231,
+     232,
+     233,
+     234,
+     235
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "perplexity": {
+    "positions": [
+     231,
+     232,
+     233,
+     234,
+     235
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "octen": {
+    "positions": [
+     236,
+     237,
+     238,
+     239,
+     240
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "ceramic": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": 0.0
+   },
+   "you": {
+    "positions": [
+     241,
+     242,
+     205,
+     243,
+     244
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "firecrawl": {
+    "positions": [
+     245,
+     246,
+     247,
+     248,
+     249
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "tinyfish": {
+    "positions": [
+     191,
+     250,
+     251,
+     252,
+     253
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "kagi": {
+    "positions": [
+     191,
+     254,
+     255,
+     256,
+     250
+    ],
+    "penalized": [
+     2,
+     2,
+     1,
+     2,
+     2
+    ],
+    "ndcg": 0.32008872646363795
+   },
+   "jina": {
+    "positions": [
+     257,
+     258,
+     251,
+     259,
+     260
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     0
+    ],
+    "ndcg": 0.33488053595556333
+   },
+   "context": {
+    "positions": [
+     248,
+     246,
+     261,
+     262,
+     263
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "deepseek": {
+    "positions": [
+     264,
+     265,
+     266,
+     267,
+     268
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   },
+   "chatgpt-search": {
+    "positions": [
+     269,
+     270,
+     271,
+     272,
+     273
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.38545406664749526
+   }
+  }
+ },
+ {
+  "q": 3,
+  "run": "2026-10-25T0825Z",
+  "query": "site:transportfornewsgov.au CADD manual \"3.3 Landscaping\" availability file size",
+  "today": "2026-10-25",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "other",
+   "query_search_operators_exist": true,
+   "query_main_aspects": [
+    "The availability or download access of the CADD manual containing section 3.3 Landscaping",
+    "The file size of that manual"
+   ],
+   "query_aux_aspects": [],
+   "query_content_archetype": "persistent"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "keenable": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "exa-instant": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "exa": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "google": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "bing": {
+    "positions": [
+     274,
+     275,
+     276,
+     277,
+     278
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": null
+   },
+   "brave": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "brave-llmcontext": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "parallel-turbo": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "parallel": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "tavily": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "linkup": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "perplexity-fast": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "perplexity": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "octen": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "ceramic": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "you": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "firecrawl": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "tinyfish": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "kagi": {
+    "positions": [
+     279,
+     280,
+     281,
+     282,
+     283
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": null
+   },
+   "context": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "deepseek": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "chatgpt-search": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   }
+  }
+ },
+ {
+  "q": 4,
+  "run": "2026-10-26T0905Z",
+  "query": "\"Freiz\u00fcgigkeit\" 1843 \"Bundesbeschluss\"",
+  "today": "2026-10-26",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "legal",
+   "query_search_operators_exist": true,
+   "query_main_aspects": [
+    "The identity or provisions of the 1843 Bundesbeschluss concerning Freiz\u00fcgigkeit"
+   ],
+   "query_aux_aspects": [
+    "The historical context and significance of the resolution",
+    "The resolution's precise date and archival or citation details"
+   ],
+   "query_content_archetype": "evergreen"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     284,
+     285,
+     286,
+     287,
+     288
+    ],
+    "penalized": [
+     0,
+     2,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.3868528072345416
+   },
+   "keenable": {
+    "positions": [
+     284,
+     285,
+     286,
+     287,
+     288
+    ],
+    "penalized": [
+     0,
+     2,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.3868528072345416
+   },
+   "exa-instant": {
+    "positions": [
+     289,
+     290,
+     291,
+     292,
+     293
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "exa": {
+    "positions": [
+     294,
+     295,
+     290,
+     296,
+     297
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "google": {
+    "positions": [
+     298,
+     299,
+     300,
+     301,
+     302
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "bing": {
+    "positions": [
+     303,
+     304,
+     305,
+     306,
+     307
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "brave": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": 0.0
+   },
+   "brave-llmcontext": {
+    "positions": [
+     308,
+     309,
+     310,
+     311,
+     312
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "parallel-turbo": {
+    "positions": [
+     313,
+     314,
+     315,
+     316,
+     317
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "parallel": {
+    "positions": [
+     318,
+     319,
+     320,
+     321,
+     322
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "tavily": {
+    "positions": [
+     323,
+     324,
+     325,
+     326,
+     327
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "linkup": {
+    "positions": [
+     328,
+     329,
+     330,
+     331,
+     332
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "perplexity-fast": {
+    "positions": [
+     333,
+     334,
+     335,
+     336,
+     337
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "perplexity": {
+    "positions": [
+     333,
+     334,
+     335,
+     336,
+     337
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "octen": {
+    "positions": [
+     338,
+     339,
+     340,
+     341,
+     342
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "ceramic": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": 0.0
+   },
+   "you": {
+    "positions": [
+     343,
+     344,
+     345,
+     346,
+     347
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "firecrawl": {
+    "positions": [
+     348,
+     349,
+     350,
+     351,
+     352
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "tinyfish": {
+    "positions": [
+     299,
+     300,
+     298,
+     301,
+     302
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "kagi": {
+    "positions": [
+     298,
+     299,
+     353,
+     354,
+     300
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     2,
+     0
+    ],
+    "ndcg": 0.2640681225725908
+   },
+   "jina": {
+    "positions": [
+     355,
+     356,
+     357,
+     358,
+     359
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "context": {
+    "positions": [
+     349,
+     360,
+     361,
+     362,
+     348
+    ],
+    "penalized": [
+     0,
+     2,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.3868528072345416
+   },
+   "deepseek": {
+    "positions": [
+     363,
+     364,
+     365,
+     366,
+     367
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "chatgpt-search": {
+    "positions": [
+     368,
+     369,
+     370,
+     371,
+     372
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   }
+  }
+ },
+ {
+  "q": 5,
+  "run": "2026-10-27T0911Z",
+  "query": "\"Mucor circinelloides\" \"model fungus\"",
+  "today": "2026-10-27",
+  "profile": {
+   "query_type": "broad",
+   "query_domain": "academic",
+   "query_search_operators_exist": true,
+   "query_main_aspects": [
+    "the use of Mucor circinelloides as a model fungus"
+   ],
+   "query_aux_aspects": [
+    "biological characteristics of Mucor circinelloides",
+    "research areas in which it is used as a model"
+   ],
+   "query_content_archetype": "evergreen"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     373,
+     374,
+     375,
+     376,
+     377
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.9336579865820435
+   },
+   "keenable": {
+    "positions": [
+     373,
+     374,
+     375,
+     376,
+     377
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.9336579865820435
+   },
+   "exa-instant": {
+    "positions": [
+     378,
+     379,
+     380,
+     381,
+     382
+    ],
+    "penalized": [
+     2,
+     0,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.39677388573404626
+   },
+   "exa": {
+    "positions": [
+     383,
+     378,
+     384,
+     381,
+     385
+    ],
+    "penalized": [
+     0,
+     2,
+     0,
+     3,
+     3
+    ],
+    "ndcg": 0.24668505405804614
+   },
+   "google": {
+    "positions": [
+     386,
+     387,
+     388,
+     389,
+     390
+    ],
+    "penalized": [
+     2,
+     0,
+     2,
+     3,
+     2
+    ],
+    "ndcg": 0.20242205113633752
+   },
+   "bing": {
+    "positions": [
+     391,
+     392,
+     393,
+     394,
+     395
+    ],
+    "penalized": [
+     0,
+     2,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.02941313255696938
+   },
+   "brave": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": 0.0
+   },
+   "brave-llmcontext": {
+    "positions": [
+     396,
+     397,
+     398
+    ],
+    "penalized": [
+     0,
+     3,
+     3
+    ],
+    "ndcg": 0.3005632471056938
+   },
+   "parallel-turbo": {
+    "positions": [
+     399,
+     400,
+     401,
+     402,
+     403
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "parallel": {
+    "positions": [
+     404,
+     405,
+     406,
+     407,
+     408
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "tavily": {
+    "positions": [
+     409,
+     410,
+     411,
+     412,
+     413
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "linkup": {
+    "positions": [
+     414,
+     415,
+     416,
+     417,
+     418
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "perplexity-fast": {
+    "positions": [
+     419,
+     420,
+     421,
+     422,
+     423
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "perplexity": {
+    "positions": [
+     419,
+     420,
+     421,
+     422,
+     423
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "octen": {
+    "positions": [
+     424,
+     425,
+     426,
+     427,
+     428
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "ceramic": {
+    "positions": [
+     429,
+     430,
+     431,
+     432,
+     433
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "you": {
+    "positions": [
+     434,
+     435,
+     436,
+     437,
+     438
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "firecrawl": {
+    "positions": [
+     439,
+     440,
+     441,
+     442,
+     443
+    ],
+    "penalized": [
+     2,
+     0,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.10804023433767435
+   },
+   "tinyfish": {
+    "positions": [
+     444,
+     445,
+     446,
+     447,
+     448
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     2
+    ],
+    "ndcg": 0.018034579657744083
+   },
+   "kagi": {
+    "positions": [
+     386,
+     449,
+     388,
+     450,
+     451
+    ],
+    "penalized": [
+     2,
+     3,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.2757202293419357
+   },
+   "jina": {
+    "positions": [
+     452,
+     453,
+     454,
+     455,
+     456
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "context": {
+    "positions": [
+     457,
+     450,
+     458,
+     442,
+     459
+    ],
+    "penalized": [
+     2,
+     2,
+     3,
+     2,
+     0
+    ],
+    "ndcg": 0.22899268327256364
+   },
+   "deepseek": {
+    "positions": [
+     460,
+     461,
+     462,
+     463,
+     464
+    ],
+    "penalized": [
+     0,
+     3,
+     3,
+     0,
+     0
+    ],
+    "ndcg": 0.3005632471056938
+   },
+   "claude-search": {
+    "positions": [
+     465,
+     466,
+     467,
+     468,
+     469
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "chatgpt-search": {
+    "positions": [
+     470,
+     471,
+     472,
+     473,
+     474
+    ],
+    "penalized": [
+     3,
+     0,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.6159216778053743
+   }
+  }
+ },
+ {
+  "q": 6,
+  "run": "2026-10-28T0905Z",
+  "query": "Top 10 Best Public Schools in Arizona (2022) Knox Gifted Academy math reading 2022 site:websitesourcedomain.travel",
+  "today": "2026-10-28",
+  "profile": {
+   "query_type": "list",
+   "query_domain": "other",
+   "query_search_operators_exist": true,
+   "query_main_aspects": [
+    "The identities and ranking of the top 10 public schools in Arizona for 2022"
+   ],
+   "query_aux_aspects": [
+    "Knox Gifted Academy's math and reading performance in 2022"
+   ],
+   "query_content_archetype": "evergreen"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "keenable": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "exa-instant": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "exa": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "google": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "bing": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "brave": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "brave-llmcontext": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "parallel-turbo": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "parallel": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "tavily": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "linkup": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "perplexity-fast": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "perplexity": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "octen": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "ceramic": {
+    "positions": [
+     475,
+     476,
+     477,
+     478,
+     479
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": null
+   },
+   "you": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "firecrawl": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "tinyfish": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "context": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "deepseek": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "claude-search": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   },
+   "chatgpt-search": {
+    "positions": [],
+    "penalized": [],
+    "ndcg": null
+   }
+  }
+ },
+ {
+  "q": 7,
+  "run": "2026-10-29T0843Z",
+  "query": "\"Pachycephalidae\" \"family\" \"introduced\" \"English\"",
+  "today": "2026-10-29",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "academic",
+   "query_search_operators_exist": true,
+   "query_main_aspects": [
+    "the identity and date associated with introducing Pachycephalidae as a family name in English-language taxonomic usage"
+   ],
+   "query_aux_aspects": [
+    "the family's taxonomic placement and English common-name usage"
+   ],
+   "query_content_archetype": "evergreen"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     480,
+     481,
+     482,
+     483,
+     484
+    ],
+    "penalized": [
+     3,
+     3,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.7234701741780571
+   },
+   "keenable": {
+    "positions": [
+     480,
+     481,
+     482,
+     483,
+     484
+    ],
+    "penalized": [
+     3,
+     3,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.7234701741780571
+   },
+   "exa-instant": {
+    "positions": [
+     485,
+     486,
+     487,
+     488,
+     489
+    ],
+    "penalized": [
+     3,
+     0,
+     0,
+     4,
+     0
+    ],
+    "ndcg": 0.3722882067602084
+   },
+   "exa": {
+    "positions": [
+     490,
+     491,
+     492,
+     493,
+     494
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.667
+   },
+   "exa-lite": {
+    "positions": [
+     491,
+     490,
+     492,
+     494,
+     493
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.667
+   },
+   "google": {
+    "positions": [
+     495,
+     496,
+     497
+    ],
+    "penalized": [
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.2710971218999482
+   },
+   "bing": {
+    "positions": [
+     498,
+     499,
+     500,
+     501,
+     502
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "brave": {
+    "positions": [
+     503,
+     504,
+     505
+    ],
+    "penalized": [
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "brave-llmcontext": {
+    "positions": [
+     506,
+     507,
+     508,
+     509,
+     510
+    ],
+    "penalized": [
+     4,
+     3,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.481889043851546
+   },
+   "parallel-turbo": {
+    "positions": [
+     511,
+     512,
+     513,
+     514,
+     515
+    ],
+    "penalized": [
+     4,
+     0,
+     3,
+     0,
+     0
+    ],
+    "ndcg": 0.4522701337323671
+   },
+   "parallel": {
+    "positions": [
+     516,
+     511,
+     517,
+     518,
+     519
+    ],
+    "penalized": [
+     4,
+     4,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.851197774512712
+   },
+   "tavily": {
+    "positions": [
+     520,
+     521
+    ],
+    "penalized": [
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "linkup": {
+    "positions": [
+     522,
+     523,
+     524,
+     525,
+     526
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     0,
+     0
+    ],
+    "ndcg": 0.4820586239541828
+   },
+   "perplexity-fast": {
+    "positions": [
+     527,
+     528,
+     529,
+     530,
+     531
+    ],
+    "penalized": [
+     3,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.22621985691750196
+   },
+   "perplexity": {
+    "positions": [
+     532,
+     533,
+     534,
+     535,
+     536
+    ],
+    "penalized": [
+     4,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.3391602052736161
+   },
+   "octen": {
+    "positions": [
+     537,
+     538,
+     539,
+     540,
+     541
+    ],
+    "penalized": [
+     3,
+     2,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.2512562498914417
+   },
+   "ceramic": {
+    "positions": [
+     542,
+     543,
+     544,
+     545,
+     546
+    ],
+    "penalized": [
+     0,
+     3,
+     2,
+     2,
+     0
+    ],
+    "ndcg": 0.1796597075180331
+   },
+   "you": {
+    "positions": [
+     503,
+     504
+    ],
+    "penalized": [
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "firecrawl": {
+    "positions": [
+     495,
+     496,
+     497
+    ],
+    "penalized": [
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.2710971218999482
+   },
+   "tinyfish": {
+    "positions": [
+     495,
+     496,
+     547
+    ],
+    "penalized": [
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.2710971218999482
+   },
+   "jina": {
+    "positions": [
+     548,
+     549,
+     550
+    ],
+    "penalized": [
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "context": {
+    "positions": [
+     495,
+     547,
+     496
+    ],
+    "penalized": [
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.2710971218999482
+   },
+   "deepseek": {
+    "positions": [
+     551,
+     552,
+     553,
+     554,
+     555
+    ],
+    "penalized": [
+     3,
+     4,
+     0,
+     3,
+     0
+    ],
+    "ndcg": 0.5376337109971148
+   },
+   "claude-search": {
+    "positions": [
+     556,
+     557,
+     558,
+     559,
+     560
+    ],
+    "penalized": [
+     3,
+     0,
+     3,
+     0,
+     0
+    ],
+    "ndcg": 0.33932978537625297
+   },
+   "chatgpt-search": {
+    "positions": [
+     561,
+     562,
+     563,
+     564,
+     565
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.667
+   }
+  }
+ }
+]

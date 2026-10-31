@@ -1,0 +1,202 @@
+[
+ {
+  "id": 40,
+  "verdict": "wrong_context",
+  "note": "Table stops at depreciation; no operating income row and gold 17,474 not in text."
+ },
+ {
+  "id": 41,
+  "verdict": "yes",
+  "note": "Net income attributable to shareholders $59.7 million for Q1 2026."
+ },
+ {
+  "id": 42,
+  "verdict": "yes",
+  "note": "GAAP net income $94,320 thousand for Q2 2025 (also $94 million in prose)."
+ },
+ {
+  "id": 43,
+  "verdict": "yes",
+  "note": "Net income 5,282,791 thousand and 5,283 million for Q1'26."
+ },
+ {
+  "id": 44,
+  "verdict": "yes",
+  "note": "Net income 1,545 million, three months ended March 31, 2026."
+ },
+ {
+  "id": 45,
+  "verdict": "wrong_context",
+  "note": "Result is fiscal 2026 Q2; 183 is other income (6 months) and other current assets, not FY2016 net income."
+ },
+ {
+  "id": 46,
+  "verdict": "yes",
+  "note": "Income from operations 494 in the three months ended Jun 30, 2025 column."
+ },
+ {
+  "id": 47,
+  "verdict": "wrong_context",
+  "note": "Q2 2024 release; 387.5 is Q2 2023 net income before NCI, not Q3 2024 attributable net income."
+ },
+ {
+  "id": 48,
+  "verdict": "yes",
+  "note": "GAAP income from operations 105.8 million, Q2 2025 release."
+ },
+ {
+  "id": 49,
+  "verdict": "yes",
+  "note": "Net income attributable to Targa 387.4 for three months ended Sep 30, 2024."
+ },
+ {
+  "id": 50,
+  "verdict": "yes",
+  "note": "Operating income 2,309 in the Q2 fiscal 2026 release, first quarterly column."
+ },
+ {
+  "id": 51,
+  "verdict": "yes",
+  "note": "Net income attributable to Amphenol $737.8 million, Q1 2025 release."
+ },
+ {
+  "id": 52,
+  "verdict": "yes",
+  "note": "Operating earnings 77.8 in Q1 fiscal 2025 release."
+ },
+ {
+  "id": 53,
+  "verdict": "wrong_context",
+  "note": "Operating income row cut off; gold 2,512 not in text, only net income and other figures."
+ },
+ {
+  "id": 54,
+  "verdict": "yes",
+  "note": "Income from operations 1,293.5 in Q2 2026 column."
+ },
+ {
+  "id": 55,
+  "verdict": "yes",
+  "note": "Net income 37,822 thousand in Q1 2026 results."
+ },
+ {
+  "id": 56,
+  "verdict": "yes",
+  "note": "Q3 2024 operating income $550.00 millions stated directly."
+ },
+ {
+  "id": 57,
+  "verdict": "yes",
+  "note": "Net income $50.6 million for three months ended June 30, 2025."
+ },
+ {
+  "id": 58,
+  "verdict": "yes",
+  "note": "Operating income 3,188 in Q3 2024 column."
+ },
+ {
+  "id": 59,
+  "verdict": "yes",
+  "note": "Quarterly operating income $1,154 for 2025-09-30."
+ },
+ {
+  "id": 60,
+  "verdict": "yes",
+  "note": "Earnings (loss) from operations (458) for three months ended June 30, 2025."
+ },
+ {
+  "id": 61,
+  "verdict": "yes",
+  "note": "Net income $2,139 million in Q2 2026 table ($2.1 billion in prose)."
+ },
+ {
+  "id": 62,
+  "verdict": "yes",
+  "note": "Loss from operations $(53.3) million for Q2 2026."
+ },
+ {
+  "id": 63,
+  "verdict": "wrong_context",
+  "note": "No operating income in text; nearest figure 2,555 is pretax income, gold 2,598 absent."
+ },
+ {
+  "id": 64,
+  "verdict": "yes",
+  "note": "GAAP operating income $3,188 for quarter ended Sep 30, 2024."
+ },
+ {
+  "id": 65,
+  "verdict": "yes",
+  "note": "Loss from operations (4,469,084) for three months ended March 31, 2026."
+ },
+ {
+  "id": 66,
+  "verdict": "yes",
+  "note": "GAAP net income $5,853 million ($5.9B) for fiscal Q1 2026."
+ },
+ {
+  "id": 67,
+  "verdict": "yes",
+  "note": "Net income 152,510 thousand in FY2026 Q3 10-Q, three-month column."
+ },
+ {
+  "id": 68,
+  "verdict": "wrong_context",
+  "note": "Table cut before operating income row; gold 155 not in text."
+ },
+ {
+  "id": 69,
+  "verdict": "yes",
+  "note": "GAAP net income $59,688 million in Q2 FY27 column."
+ },
+ {
+  "id": 70,
+  "verdict": "yes",
+  "note": "Operating loss of $3.3 million in Q3 FY2026."
+ },
+ {
+  "id": 71,
+  "verdict": "yes",
+  "note": "GAAP net loss $(268) million for Q1 2025."
+ },
+ {
+  "id": 72,
+  "verdict": "yes",
+  "note": "Operating income 867,654 thousand in Q3 FY2025 release, first column."
+ },
+ {
+  "id": 73,
+  "verdict": "yes",
+  "note": "Net income $27,747 million in current-quarter column of Q1 FY2026 statement."
+ },
+ {
+  "id": 74,
+  "verdict": "yes",
+  "note": "Net income attributable to common shareholders $15,402 thousand ($15.4M) for Q2 2026."
+ },
+ {
+  "id": 75,
+  "verdict": "yes",
+  "note": "GAAP operating income $24 million in Q2 2025 results."
+ },
+ {
+  "id": 76,
+  "verdict": "yes",
+  "note": "Net income 6,407 million ($6.4 billion) for Q2 2026."
+ },
+ {
+  "id": 77,
+  "verdict": "yes",
+  "note": "Net income $1,554 (thousands) for quarter ended March 31, 2026."
+ },
+ {
+  "id": 78,
+  "verdict": "yes",
+  "note": "Income from operations 176,586 thousand in Q2 2026 first column."
+ },
+ {
+  "id": 79,
+  "verdict": "yes",
+  "note": "Operating income 630 million in Q1 FY2025 column (gold 630.1)."
+ }
+]

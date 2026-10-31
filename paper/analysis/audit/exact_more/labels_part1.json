@@ -1,0 +1,252 @@
+[
+ {
+  "id": 0,
+  "label": "yes",
+  "reason": "States Q1 2025 net earnings of $10,999 million as the prior-year comparison."
+ },
+ {
+  "id": 1,
+  "label": "yes",
+  "reason": "Table shows diluted EPS $1.22 for 1Q 2025."
+ },
+ {
+  "id": 2,
+  "label": "yes",
+  "reason": "States Q2 2026 net income of USD 39.926 million."
+ },
+ {
+  "id": 3,
+  "label": "yes",
+  "reason": "Second-quarter GAAP operating income $855 million; fiscal year not stated but nothing conflicts."
+ },
+ {
+  "id": 4,
+  "label": "yes",
+  "reason": "10-Q filed April 2025 shows operating income $209M, rounded gold."
+ },
+ {
+  "id": 5,
+  "label": "yes",
+  "reason": "States GAAP diluted EPS $4.43 for fiscal Q1 2026."
+ },
+ {
+  "id": 6,
+  "label": "yes",
+  "reason": "States Q1 2026 net income $37.8 million, rounded gold."
+ },
+ {
+  "id": 7,
+  "label": "no",
+  "reason": "Snippet covers fiscal 2026 Q3 and shows no operating income figure."
+ },
+ {
+  "id": 8,
+  "label": "yes",
+  "reason": "States Q1 2025 diluted EPS $1.04."
+ },
+ {
+  "id": 9,
+  "label": "no",
+  "reason": "Snippet shows only EPS and revenue, no net income figure."
+ },
+ {
+  "id": 10,
+  "label": "yes",
+  "reason": "States Q3 2024 diluted EPS $3.49."
+ },
+ {
+  "id": 11,
+  "label": "yes",
+  "reason": "States Q2 2026 operating income $2,003 million."
+ },
+ {
+  "id": 12,
+  "label": "yes",
+  "reason": "States Q1 2026 diluted EPS $0.29."
+ },
+ {
+  "id": 13,
+  "label": "no",
+  "reason": "Shows -0.50 for quarter ending 2025-07-31; fiscal quarter label not identifiable from text."
+ },
+ {
+  "id": 14,
+  "label": "yes",
+  "reason": "Q2 2026 GAAP EPS $3.22; headline EPS, diluted not stated explicitly."
+ },
+ {
+  "id": 15,
+  "label": "yes",
+  "reason": "States Q2 2026 net income $182,145 thousand."
+ },
+ {
+  "id": 16,
+  "label": "yes",
+  "reason": "States Q2 2026 operating income $350.4M, rounded gold."
+ },
+ {
+  "id": 17,
+  "label": "yes",
+  "reason": "Q3 2025 EPS $0.38; headline EPS, diluted not stated explicitly."
+ },
+ {
+  "id": 18,
+  "label": "yes",
+  "reason": "States Q1 2026 GAAP diluted EPS $4.43."
+ },
+ {
+  "id": 19,
+  "label": "yes",
+  "reason": "Table shows Q1'26 diluted EPS $0.84."
+ },
+ {
+  "id": 20,
+  "label": "yes",
+  "reason": "States Q3 fiscal 2025 diluted EPS $2.92."
+ },
+ {
+  "id": 21,
+  "label": "no",
+  "reason": "Shows $2.01 per share but basic or diluted row label is elided."
+ },
+ {
+  "id": 22,
+  "label": "yes",
+  "reason": "States Q2 2026 diluted EPS $2.01."
+ },
+ {
+  "id": 23,
+  "label": "yes",
+  "reason": "States 2025 third quarter net income $629 million."
+ },
+ {
+  "id": 24,
+  "label": "yes",
+  "reason": "States Q1 2026 diluted EPS $2.87."
+ },
+ {
+  "id": 25,
+  "label": "no",
+  "reason": "Snippet shows only EPS and revenue, no net income figure."
+ },
+ {
+  "id": 26,
+  "label": "yes",
+  "reason": "States Q2 2026 operating income $350.4 million, rounded gold."
+ },
+ {
+  "id": 27,
+  "label": "no",
+  "reason": "Shows 8,708 earnings from operations but the period of that table is not identifiable."
+ },
+ {
+  "id": 28,
+  "label": "yes",
+  "reason": "Third quarter 2024 release states diluted EPS $1.02."
+ },
+ {
+  "id": 29,
+  "label": "yes",
+  "reason": "States diluted EPS $1.11 for quarter ending Mar 2026."
+ },
+ {
+  "id": 30,
+  "label": "yes",
+  "reason": "States operating income $90,179,000 for fiscal Q3 2024."
+ },
+ {
+  "id": 31,
+  "label": "yes",
+  "reason": "Q1 FY2025 call states first-quarter net income $1.798 billion."
+ },
+ {
+  "id": 32,
+  "label": "yes",
+  "reason": "States Q1 2025 net income $66 million, rounded gold."
+ },
+ {
+  "id": 33,
+  "label": "no",
+  "reason": "Snippet truncates before any EPS figure appears."
+ },
+ {
+  "id": 34,
+  "label": "yes",
+  "reason": "States first quarter 2026 diluted EPS $0.19."
+ },
+ {
+  "id": 35,
+  "label": "yes",
+  "reason": "States second quarter 2025 operating income $455 million."
+ },
+ {
+  "id": 36,
+  "label": "yes",
+  "reason": "States Q2 fiscal 2026 GAAP diluted EPS $1.08."
+ },
+ {
+  "id": 37,
+  "label": "yes",
+  "reason": "Third-quarter 2025 reported GAAP EPS $1.90; diluted not stated explicitly."
+ },
+ {
+  "id": 38,
+  "label": "yes",
+  "reason": "States Q2 2026 diluted EPS $7.70."
+ },
+ {
+  "id": 39,
+  "label": "yes",
+  "reason": "Table shows Q3 FY2026 operating income $2,188,000,000."
+ },
+ {
+  "id": 40,
+  "label": "yes",
+  "reason": "States Q1 2026 GAAP net income $334 million."
+ },
+ {
+  "id": 41,
+  "label": "yes",
+  "reason": "Second-quarter 2026 EPS $3.23; diluted not stated explicitly."
+ },
+ {
+  "id": 42,
+  "label": "yes",
+  "reason": "States Q2 fiscal 2026 diluted EPS $0.35."
+ },
+ {
+  "id": 43,
+  "label": "yes",
+  "reason": "States diluted EPS $0.15 for Q3 FY2025."
+ },
+ {
+  "id": 44,
+  "label": "yes",
+  "reason": "2Q26 EPS $7.70; diluted not stated explicitly."
+ },
+ {
+  "id": 45,
+  "label": "yes",
+  "reason": "States Q3 fiscal 2026 GAAP net income $1.901 billion."
+ },
+ {
+  "id": 46,
+  "label": "no",
+  "reason": "Snippet shows EPS and revenue only, no net income figure."
+ },
+ {
+  "id": 47,
+  "label": "yes",
+  "reason": "States diluted EPS $1.78 for three months ended September 30, 2025."
+ },
+ {
+  "id": 48,
+  "label": "yes",
+  "reason": "States Q1 2026 net income attributable to shareholders $59.7 million."
+ },
+ {
+  "id": 49,
+  "label": "yes",
+  "reason": "States third quarter 2024 diluted EPS $1.02."
+ }
+]

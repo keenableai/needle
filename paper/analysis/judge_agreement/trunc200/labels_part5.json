@@ -1,0 +1,806 @@
+[
+ {
+  "id": 0,
+  "rating": 3,
+  "label": "HM",
+  "note": "Collins (unnamed, described) set for Oct 10 Misfits debut against Charlie 'Big Stacks'."
+ },
+ {
+  "id": 1,
+  "rating": 3,
+  "label": "HM",
+  "note": "Wales Online: Collins to make boxing debut against Big Stacks in London next month."
+ },
+ {
+  "id": 4,
+  "rating": 2,
+  "label": "SM",
+  "note": "Collins signs with Misfits for Oct 10 debut; Big Stacks not named."
+ },
+ {
+  "id": 12,
+  "rating": 3,
+  "label": "HM",
+  "note": "bet365 Big Stacks vs James Collins fight date, venue and card article."
+ },
+ {
+  "id": 26,
+  "rating": 3,
+  "label": "HM",
+  "note": "Collins boxing debut against Big Stacks, dated 28 Sept 2026."
+ },
+ {
+  "id": 27,
+  "rating": 2,
+  "label": "SM",
+  "note": "Big Stacks photo caption; Collins not named, bout details absent from snippet."
+ },
+ {
+  "id": 28,
+  "rating": 3,
+  "label": "HM",
+  "note": "Collins debuts against Big Stacks at Misfits event in London on Oct 10."
+ },
+ {
+  "id": 29,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Forbes: Collins vs Big Stacks Oct 10 at Copper Box Arena with date, venue and card."
+ },
+ {
+  "id": 53,
+  "rating": 3,
+  "label": "HM",
+  "note": "Collins signs with Misfits to fight 'UK's Hardest Man' (Big Stacks) next month."
+ },
+ {
+  "id": 55,
+  "rating": 3,
+  "label": "HM",
+  "note": "talkSPORT: Collins to fight content creator Big Stacks in Misfits Boxing."
+ },
+ {
+  "id": 68,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Snippet holds only navigation and image alt text; no substantive content."
+ },
+ {
+  "id": 72,
+  "rating": 3,
+  "label": "HM",
+  "note": "Collins agrees crossover debut against Charlie 'Big Stacks', scheduled Saturday."
+ },
+ {
+  "id": 84,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Snippet holds only logo images; no substantive content."
+ },
+ {
+  "id": 86,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "No snippet; metadata only."
+ },
+ {
+  "id": 87,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "No snippet; metadata only."
+ },
+ {
+  "id": 93,
+  "rating": 3,
+  "label": "HM",
+  "note": "Big Stacks vs Collins on Misfits card, scheduled Saturday 10 October."
+ },
+ {
+  "id": 103,
+  "rating": 2,
+  "label": "SM",
+  "note": "INSE Walmart sale at $89 but from March 2026; stale for a current-sale query."
+ },
+ {
+  "id": 104,
+  "rating": 2,
+  "label": "SM",
+  "note": "INSE Walmart rollback $49.98 from July 2026; two months stale."
+ },
+ {
+  "id": 106,
+  "rating": 2,
+  "label": "SM",
+  "note": "Walmart INSE product page; no sale price in snippet."
+ },
+ {
+  "id": 112,
+  "rating": 2,
+  "label": "SM",
+  "note": "INSE Walmart sale $64 from Feb 2026; stale."
+ },
+ {
+  "id": 118,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "April 2026 Walmart vacuum flash sale; INSE brand not confirmed in snippet."
+ },
+ {
+  "id": 125,
+  "rating": 3,
+  "label": "HM",
+  "note": "INSE V770 on sale at Walmart for $64.99, Sept 2026."
+ },
+ {
+  "id": 128,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Inselife coupon page, not a Walmart sale."
+ },
+ {
+  "id": 140,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Inspired Entertainment (ticker INSE) earnings; wrong entity."
+ },
+ {
+  "id": 149,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Walmart INSE V770 sale from June 2025; wrong year."
+ },
+ {
+  "id": 150,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Parade INSE Walmart sale from Dec 2025; wrong year, no price."
+ },
+ {
+  "id": 152,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Parade INSE Walmart sale from July 2025; wrong year."
+ },
+ {
+  "id": 154,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "INSE 2-in-1 at $45 holiday sale; Walmart not mentioned."
+ },
+ {
+  "id": 165,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Undated customer review mentioning a past $75 sale price."
+ },
+ {
+  "id": 166,
+  "rating": 3,
+  "label": "HM",
+  "note": "Walmart INSE brand page lists V770 at $62.08, was $259.99."
+ },
+ {
+  "id": 171,
+  "rating": 2,
+  "label": "SM",
+  "note": "Walmart review notes $75 sale from $149.99 with 2026 hint; anecdotal."
+ },
+ {
+  "id": 180,
+  "rating": 2,
+  "label": "SM",
+  "note": "INSE Walmart spring sale $89, March 2026; stale."
+ },
+ {
+  "id": 186,
+  "rating": 2,
+  "label": "SM",
+  "note": "INSE Walmart $100 off in July 2026; stale."
+ },
+ {
+  "id": 195,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Paramount press release: acquisition of WBD completed Oct 6, 2026."
+ },
+ {
+  "id": 198,
+  "rating": 3,
+  "label": "HM",
+  "note": "TechCrunch Oct 6, 2026: Paramount closes Warner Bros merger."
+ },
+ {
+  "id": 199,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Axios: Paramount closes $110B WBD deal, creates Skydance."
+ },
+ {
+  "id": 201,
+  "rating": 3,
+  "label": "HM",
+  "note": "ABC News: Paramount completes takeover of Warner Bros."
+ },
+ {
+  "id": 204,
+  "rating": 3,
+  "label": "HM",
+  "note": "Yahoo: $110B merger closed on Tuesday."
+ },
+ {
+  "id": 209,
+  "rating": 3,
+  "label": "HM",
+  "note": "TechCrunch: Paramount completed $110B acquisition on Tuesday."
+ },
+ {
+  "id": 212,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "CNBC: takeover closed Tuesday with full timeline."
+ },
+ {
+  "id": 213,
+  "rating": 3,
+  "label": "HM",
+  "note": "Daily Caller Oct 6: Paramount closes Warner Bros deal."
+ },
+ {
+  "id": 225,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "NY AG halts merger for months; superseded, no closing date."
+ },
+ {
+  "id": 232,
+  "rating": 3,
+  "label": "HM",
+  "note": "ABC7 video Oct 6: Paramount has closed $81B takeover."
+ },
+ {
+  "id": 236,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Snippet is only privacy/terms boilerplate; no substantive content."
+ },
+ {
+  "id": 237,
+  "rating": 2,
+  "label": "SM",
+  "note": "Judge approves close on Sept 30; no closing date in snippet."
+ },
+ {
+  "id": 238,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "CNBC: takeover closed Tuesday Oct 6, 2026, with key points."
+ },
+ {
+  "id": 245,
+  "rating": 3,
+  "label": "HM",
+  "note": "AP via The Star: Paramount closes $81B takeover."
+ },
+ {
+  "id": 258,
+  "rating": 3,
+  "label": "HM",
+  "note": "Skydance press page: Paramount completes acquisition of WBD."
+ },
+ {
+  "id": 265,
+  "rating": 3,
+  "label": "HM",
+  "note": "ABC7: deal completed Tuesday."
+ },
+ {
+  "id": 267,
+  "rating": 3,
+  "label": "HM",
+  "note": "Reuters Sept 30: deal expected to close on October 6."
+ },
+ {
+  "id": 269,
+  "rating": 3,
+  "label": "HM",
+  "note": "LA Times: transaction closes, Skydance said Tuesday."
+ },
+ {
+  "id": 271,
+  "rating": 2,
+  "label": "SM",
+  "note": "Paramount IR Sept 30 announcement of anticipated close; date cut off."
+ },
+ {
+  "id": 285,
+  "rating": 3,
+  "label": "HM",
+  "note": "AP: Paramount on Tuesday closed $81B takeover."
+ },
+ {
+  "id": 286,
+  "rating": 2,
+  "label": "SM",
+  "note": "AP takeover-impact piece; closing not stated in snippet."
+ },
+ {
+  "id": 288,
+  "rating": 3,
+  "label": "HM",
+  "note": "AP: Paramount Skydance has completed acquisition of WBD."
+ },
+ {
+  "id": 305,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Apple-Broadcom chip deal; not ADT."
+ },
+ {
+  "id": 319,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Apple blocks The Trade Desk; off-topic."
+ },
+ {
+  "id": 326,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "ADT joins CSA board in June; no Apple partnership."
+ },
+ {
+  "id": 337,
+  "rating": 3,
+  "label": "HM",
+  "note": "MacRumors Oct 10: Apple may announce ADT partnership with smart home hub."
+ },
+ {
+  "id": 345,
+  "rating": 3,
+  "label": "HM",
+  "note": "Flipboard of MacRumors: rumored Apple-ADT partnership with smart home hub."
+ },
+ {
+  "id": 352,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "No snippet; generic investor page."
+ },
+ {
+  "id": 357,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Apple Business platform; off-topic."
+ },
+ {
+  "id": 364,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Upcoming Apple products guide; no ADT."
+ },
+ {
+  "id": 367,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Navigation-only snippet on EU app changes; off-topic."
+ },
+ {
+  "id": 372,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Apple Developer October 2026 page on Apple Pay; no ADT."
+ },
+ {
+  "id": 373,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Apple and AT&T partnership; wrong entity."
+ },
+ {
+  "id": 375,
+  "rating": 3,
+  "label": "HM",
+  "note": "MacRumors: ADT to share details this month, likely with Apple hub launch."
+ },
+ {
+  "id": 378,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Apple reportedly partners with LG for smart home; not ADT."
+ },
+ {
+  "id": 385,
+  "rating": 3,
+  "label": "HM",
+  "note": "MileLion: Aeroplan 90% bonus on points until 1 June 2026."
+ },
+ {
+  "id": 389,
+  "rating": 3,
+  "label": "HM",
+  "note": "Prince of Travel: up to 90% bonus until May 31, 2026."
+ },
+ {
+  "id": 401,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Aeroplan status page; no points bonus offer."
+ },
+ {
+  "id": 403,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Aeroplan promotions list; no 90% bonus in snippet."
+ },
+ {
+  "id": 408,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Aeroplan 100% bonus ending Aug 2026; not the 90% offer."
+ },
+ {
+  "id": 410,
+  "rating": 2,
+  "label": "SM",
+  "note": "Reddit thread title on 90% bonus; undated, snippet off-topic."
+ },
+ {
+  "id": 425,
+  "rating": 3,
+  "label": "HM",
+  "note": "Prince of Travel March 17, 2026: 90% bonus ends March 19."
+ },
+ {
+  "id": 440,
+  "rating": 3,
+  "label": "HM",
+  "note": "MileLion: 90% bonus until 1 June 2026."
+ },
+ {
+  "id": 451,
+  "rating": 2,
+  "label": "SM",
+  "note": "Point Hacks: up to 90% bonus; no 2026 date."
+ },
+ {
+  "id": 457,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Air Canada points page; no bonus offer stated."
+ },
+ {
+  "id": 477,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "OMAAT: up to 90% bonus through October 29, 2026, with cost per point."
+ },
+ {
+  "id": 481,
+  "rating": 3,
+  "label": "HM",
+  "note": "Prince of Travel table lists up to 90% more points, May 14, 2026."
+ },
+ {
+  "id": 483,
+  "rating": 2,
+  "label": "SM",
+  "note": "Snippet covers devaluation; 90% bonus only in title."
+ },
+ {
+  "id": 490,
+  "rating": 3,
+  "label": "HM",
+  "note": "MileLion: 90% bonus until 1 June 2026."
+ },
+ {
+  "id": 491,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "July-August 2026 promo is 110%, not 90%."
+ },
+ {
+  "id": 493,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "LA Times: New Mexico judge granted motion to quash Busfield indictment."
+ },
+ {
+  "id": 494,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Variety: judge threw out Busfield indictment, lists charges."
+ },
+ {
+  "id": 495,
+  "rating": 3,
+  "label": "HM",
+  "note": "Judge dismissed Busfield indictment citing prosecutor misconduct."
+ },
+ {
+  "id": 496,
+  "rating": 3,
+  "label": "HM",
+  "note": "THR: Busfield case dismissed over prosecutorial misconduct."
+ },
+ {
+  "id": 499,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "WaPo/AP Oct 16: judge tosses Busfield charges for prosecutor misconduct."
+ },
+ {
+  "id": 504,
+  "rating": 3,
+  "label": "HM",
+  "note": "LA Times: Busfield charges tossed Friday."
+ },
+ {
+  "id": 514,
+  "rating": 3,
+  "label": "HM",
+  "note": "THR: case dismissed over prosecutorial misconduct."
+ },
+ {
+  "id": 527,
+  "rating": 3,
+  "label": "HM",
+  "note": "LA Times: indictment thrown out by judge."
+ },
+ {
+  "id": 528,
+  "rating": 3,
+  "label": "HM",
+  "note": "KCRA/AP: judge tosses Busfield charges, prosecutor misconduct."
+ },
+ {
+  "id": 530,
+  "rating": 3,
+  "label": "HM",
+  "note": "USA Today: Busfield child sex-abuse case dismissed."
+ },
+ {
+  "id": 540,
+  "rating": 3,
+  "label": "HM",
+  "note": "Low-authority site quoting Yahoo: judge dismissed charges."
+ },
+ {
+  "id": 545,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "NYT: judge dismissed charges Friday over flawed grand jury presentation."
+ },
+ {
+  "id": 547,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "CNN: judge dismissed indictment citing prosecutor misconduct."
+ },
+ {
+  "id": 549,
+  "rating": 3,
+  "label": "HM",
+  "note": "Judge Joseph Montano granted motion to dismiss."
+ },
+ {
+  "id": 552,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "CBS: New Mexico judge dismissed Busfield indictment."
+ },
+ {
+  "id": 554,
+  "rating": 3,
+  "label": "HM",
+  "note": "Straits Times: judge dismisses charges; snippet adds denial."
+ },
+ {
+  "id": 556,
+  "rating": 3,
+  "label": "HM",
+  "note": "Independent: charges dismissed over prosecutor misconduct."
+ },
+ {
+  "id": 563,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Guardian: judge dismissed charges, prosecution not fair and impartial."
+ },
+ {
+  "id": 572,
+  "rating": 2,
+  "label": "SM",
+  "note": "Facebook post title states dismissal; snippet describes indictment."
+ },
+ {
+  "id": 576,
+  "rating": 2,
+  "label": "SM",
+  "note": "Facebook video title states dismissal; snippet is login wall."
+ },
+ {
+  "id": 580,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Guardian: court dismissed charges over grand jury conduct."
+ },
+ {
+  "id": 585,
+  "rating": 2,
+  "label": "SM",
+  "note": "KOB title states dismissal; snippet holds related headlines only."
+ },
+ {
+  "id": 603,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Wikipedia tour page; no Oct 21 cancellation."
+ },
+ {
+  "id": 612,
+  "rating": 3,
+  "label": "HM",
+  "note": "Phoenix New Times: Charli xcx cancels Oct 21 Arizona concert."
+ },
+ {
+  "id": 615,
+  "rating": 3,
+  "label": "HM",
+  "note": "Fan X account: tomorrow's Arizona show cancelled."
+ },
+ {
+  "id": 618,
+  "rating": 3,
+  "label": "HM",
+  "note": "Charli xcx cancels Arizona concert after losing voice."
+ },
+ {
+  "id": 624,
+  "rating": 3,
+  "label": "HM",
+  "note": "Oct 21 Glendale concert cancelled due to illness."
+ },
+ {
+  "id": 629,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Shazam lists Oct 21 show as upcoming; no cancellation."
+ },
+ {
+  "id": 632,
+  "rating": 3,
+  "label": "HM",
+  "note": "Variety title: Arizona show cancelled due to illness."
+ },
+ {
+  "id": 636,
+  "rating": 3,
+  "label": "HM",
+  "note": "Fan X account: tomorrow's Arizona show cancelled."
+ },
+ {
+  "id": 658,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Navigation-only snippet; off-topic."
+ },
+ {
+  "id": 661,
+  "rating": 3,
+  "label": "HM",
+  "note": "Charli xcx cancels Arizona concert after losing voice."
+ },
+ {
+  "id": 667,
+  "rating": 3,
+  "label": "HM",
+  "note": "Oct 21 Glendale concert cancelled, posted 53 minutes ago."
+ },
+ {
+  "id": 675,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "2015 tour cancellation; wrong event and year."
+ },
+ {
+  "id": 678,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Pre-event Live Nation promo for the Oct 21 show."
+ },
+ {
+  "id": 690,
+  "rating": 3,
+  "label": "HM",
+  "note": "mxdwn Oct 20: Arizona stop cancelled due to sickness."
+ },
+ {
+  "id": 691,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "No snippet; metadata only."
+ },
+ {
+  "id": 702,
+  "rating": 3,
+  "label": "HM",
+  "note": "Recorder will restore eligibility to 24 flagged voters."
+ },
+ {
+  "id": 706,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "12news: recorder to reinstate more than 20 citizens, per AG."
+ },
+ {
+  "id": 707,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "azcentral: Heap reinstated two dozen voters after AG and SoS suit."
+ },
+ {
+  "id": 711,
+  "rating": 3,
+  "label": "HM",
+  "note": "Dispute over 24 voters resolved after mediation."
+ },
+ {
+  "id": 721,
+  "rating": 3,
+  "label": "HM",
+  "note": "Title: recorder to reinstate more than 20; snippet on county attorney view."
+ },
+ {
+  "id": 741,
+  "rating": 2,
+  "label": "SM",
+  "note": "Oct 22 lawsuit: 25 voters not yet reinstated; superseded."
+ },
+ {
+  "id": 750,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "12news: more than 20 Arizonans to have voting rights restored."
+ },
+ {
+  "id": 766,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Parks heritage fund; off-topic."
+ },
+ {
+  "id": 771,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "One-page ballot notice; no reinstatement."
+ },
+ {
+  "id": 772,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Generic elections facts blog."
+ },
+ {
+  "id": 781,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "azcentral: Heap reinstated voting rights of two dozen people."
+ },
+ {
+  "id": 782,
+  "rating": 2,
+  "label": "SM",
+  "note": "KTAR post: 25 voters could miss voting; pre-resolution."
+ },
+ {
+  "id": 786,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "YouTube navigation-only snippet."
+ },
+ {
+  "id": 788,
+  "rating": 3,
+  "label": "HM",
+  "note": "Recorder agreed to reinstate voters after Oct 23 hearing."
+ }
+]

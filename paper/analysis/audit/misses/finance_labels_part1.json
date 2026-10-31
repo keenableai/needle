@@ -1,0 +1,302 @@
+[
+ {
+  "id": 0,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give Q2 FY26 EPS and consolidated net earnings 143.8M; the attributable 146.7M figure is cut off."
+ },
+ {
+  "id": 1,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Only Q3 operating income, full-year and Q4 net income appear; no Q3 net income of 72.1M."
+ },
+ {
+  "id": 2,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Results are IR index pages and release boilerplate with no operating income figure."
+ },
+ {
+  "id": 3,
+  "verdict": "absent",
+  "rank": null,
+  "note": "All results are about other companies (Hillenbrand, Qorvo, Kimball, Enerpac)."
+ },
+ {
+  "id": 4,
+  "verdict": "present",
+  "rank": 1,
+  "note": "Q1 2025 10-Q snippet shows income from operations 801 (millions) vs 765."
+ },
+ {
+  "id": 5,
+  "verdict": "absent",
+  "rank": null,
+  "note": "No Q1 2025 operating income of 630.1M; only revenue guidance, annual and Q1 2026 figures."
+ },
+ {
+  "id": 6,
+  "verdict": "absent",
+  "rank": null,
+  "note": "All five snippets are empty."
+ },
+ {
+  "id": 7,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Q1 FY27 release snippets show operating income and guidance but no consolidated net income."
+ },
+ {
+  "id": 8,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Q2 2026 releases show revenue, net income and EPS but no operating income of 1,293.5M."
+ },
+ {
+  "id": 9,
+  "verdict": "present",
+  "rank": 2,
+  "note": "IFF reconciliation table shows reported GAAP diluted EPS $(3.98) alongside the Q1 2025 goodwill impairment."
+ },
+ {
+  "id": 10,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Q3 2025 releases give net income 110M and adjusted EBITDA; no operating income of 204M."
+ },
+ {
+  "id": 11,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give adjusted EPS and margins only; no Q3 2025 operating income figure."
+ },
+ {
+  "id": 12,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Q3 2025 snippets have no operating income; the Q4 release shows 580, not 683."
+ },
+ {
+  "id": 13,
+  "verdict": "present",
+  "rank": 1,
+  "note": "Q2 2025 statement of operations shows earnings (loss) from operations of (458) for the quarter."
+ },
+ {
+  "id": 14,
+  "verdict": "present",
+  "rank": 2,
+  "note": "Q3 FY2026 release lists prior-year Q3 (FY2025) net income of $185,808 thousand in its comparative column."
+ },
+ {
+  "id": 15,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Only annual operating losses and Q2 2026 revenue appear; no Q2 2025 operating loss of 35.6M."
+ },
+ {
+  "id": 16,
+  "verdict": "present",
+  "rank": 1,
+  "note": "Q2 2025 release table shows Operating (Loss) Profit of (38.4) million for the quarter."
+ },
+ {
+  "id": 17,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Only revenue, annual net income and adjusted EBITDA appear; no Q1 2025 operating income of 31.1M."
+ },
+ {
+  "id": 18,
+  "verdict": "present",
+  "rank": 1,
+  "note": "Q3 2025 release shows net (loss) income of $(29,517) thousand for the quarter."
+ },
+ {
+  "id": 19,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets are truncated teasers with no diluted EPS value."
+ },
+ {
+  "id": 20,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Results are about other steel companies and market news; no Steel Dynamics Q3 2025 EPS."
+ },
+ {
+  "id": 21,
+  "verdict": "near_miss",
+  "rank": null,
+  "note": "488 appears only as net income in the Q4 FY2025 release, not as Q2 FY2025 operating income."
+ },
+ {
+  "id": 22,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Results are generic financials pages with no Q3 2024 operating loss of 1.13M."
+ },
+ {
+  "id": 23,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Q3 FY26 snippets give net income and EPS; the income statement table with operating income is cut off."
+ },
+ {
+  "id": 24,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets mention a 34% operating income rise but never state 28,521M."
+ },
+ {
+  "id": 25,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Results are IR index pages and the Q4 2025 release; no Q3 2025 operating income."
+ },
+ {
+  "id": 26,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Results are market news and analysis pages with no Acushnet Q2 2026 operating income."
+ },
+ {
+  "id": 27,
+  "verdict": "present",
+  "rank": 2,
+  "note": "Q2 2026 release income statement shows income from operations 407 vs 207 prior year."
+ },
+ {
+  "id": 28,
+  "verdict": "present",
+  "rank": 4,
+  "note": "PG&E quarterly results page states Q2 2026 income of $0.33 per diluted share."
+ },
+ {
+  "id": 29,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Results are about Micron, FICO and Lumentum or are blocked pages; no Freenome figure."
+ },
+ {
+  "id": 30,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give net loss 9.4M and EPS but no Q2 2025 operating loss of 4.84M."
+ },
+ {
+  "id": 31,
+  "verdict": "absent",
+  "rank": null,
+  "note": "FY26 Q1 snippets mention OpenAI losses but never state net income of 27.7B."
+ },
+ {
+  "id": 32,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give revenue, DEPS guidance and cash flow; no Q3 2024 operating income."
+ },
+ {
+  "id": 33,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets have no Q1 2023 diluted EPS value."
+ },
+ {
+  "id": 34,
+  "verdict": "present",
+  "rank": 4,
+  "note": "Q1 2026 10-Q table shows operating income $997 vs $607 prior year."
+ },
+ {
+  "id": 35,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give full-year net income guidance and buybacks; no Q2 FY2026 net income of 535M."
+ },
+ {
+  "id": 36,
+  "verdict": "present",
+  "rank": 1,
+  "note": "Q1 2026 release table shows diluted loss per share $(0.05) vs $(1.56)."
+ },
+ {
+  "id": 37,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give revenue, adjusted EPS and cash flow; no Q1 FY2026 GAAP diluted EPS of 0.35."
+ },
+ {
+  "id": 38,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give full-year 2025 figures and Q4 margins; no Q3 2025 net income of 834M."
+ },
+ {
+  "id": 39,
+  "verdict": "present",
+  "rank": 1,
+  "note": "Q3 2024 release states net loss attributable to common stockholders of $239.3 million."
+ },
+ {
+  "id": 40,
+  "verdict": "present",
+  "rank": 5,
+  "note": "Barchart table lists operating income 485,000 (thousands) for 06-2025; Macrotrends at rank 3 shows $485M labeled EBIT."
+ },
+ {
+  "id": 41,
+  "verdict": "absent",
+  "rank": null,
+  "note": "All results are about other companies; no Pfizer data."
+ },
+ {
+  "id": 42,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give share counts and full-year EPS of -0.78; no Q3 2025 diluted EPS of -1.04."
+ },
+ {
+  "id": 43,
+  "verdict": "present",
+  "rank": 3,
+  "note": "Q2 FY26 earnings release PDF shows Net Earnings Attributable to Coherent Corp. $146.7 million."
+ },
+ {
+  "id": 44,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give Q2 2024 EPS teaser and Q1 2024 operating earnings; no Q2 2024 net income of 308M."
+ },
+ {
+  "id": 45,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Results are Salesforce pages and Ventas index pages with no Q1 2010 net income."
+ },
+ {
+  "id": 46,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Snippets give Q3 2025 highlights without the 325.4M net income and Q4 net income 512.0M."
+ },
+ {
+  "id": 47,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Results are about Curtiss-Wright, fund holdings and a BWXT data page with no Q2 2025 EPS."
+ },
+ {
+  "id": 48,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Q1 2025 snippet gives net income 75.5M and EPS 0.54; no operating income of 97.0M."
+ },
+ {
+  "id": 49,
+  "verdict": "absent",
+  "rank": null,
+  "note": "Q2 2026 snippets give revenue and net loss 596.5M; no operating loss of 555.0M."
+ }
+]

@@ -1,0 +1,116 @@
+{
+ "money_exact": {
+  "n": 100,
+  "yes": 93,
+  "no": 1,
+  "unclear": 6,
+  "precision": 0.93,
+  "wilson": [
+   0.8625032899347025,
+   0.965681175635936
+  ]
+ },
+ "money_reading": {
+  "n": 339,
+  "yes": 238,
+  "no": 6,
+  "unclear": 95,
+  "precision": 0.7020648967551623,
+  "wilson": [
+   0.6513351657855849,
+   0.7482662828134182
+  ]
+ },
+ "other_field": {
+  "n": 50,
+  "yes": 39,
+  "no": 9,
+  "unclear": 2,
+  "precision": 0.78,
+  "wilson": [
+   0.6475818431054045,
+   0.8724621377569771
+  ]
+ },
+ "all": {
+  "n": 489,
+  "yes": 370,
+  "no": 16,
+  "unclear": 103,
+  "precision": 0.7566462167689162,
+  "wilson": [
+   0.7167078796153268,
+   0.7925835438359403
+  ]
+ },
+ "money_by_engine": {
+  "exa": {
+   "yes": 50,
+   "n": 52
+  },
+  "firecrawl": {
+   "yes": 15,
+   "n": 45
+  },
+  "google": {
+   "yes": 7,
+   "n": 13
+  },
+  "context": {
+   "yes": 14,
+   "n": 17
+  },
+  "tavily": {
+   "yes": 18,
+   "n": 31
+  },
+  "brave-llmcontext": {
+   "yes": 35,
+   "n": 45
+  },
+  "octen": {
+   "yes": 18,
+   "n": 23
+  },
+  "jina": {
+   "yes": 17,
+   "n": 17
+  },
+  "parallel": {
+   "yes": 39,
+   "n": 51
+  },
+  "chatgpt-search": {
+   "yes": 26,
+   "n": 35
+  },
+  "perplexity": {
+   "yes": 36,
+   "n": 41
+  },
+  "keenable": {
+   "yes": 22,
+   "n": 28
+  },
+  "tinyfish": {
+   "yes": 7,
+   "n": 10
+  },
+  "brave": {
+   "yes": 8,
+   "n": 9
+  },
+  "linkup": {
+   "yes": 13,
+   "n": 13
+  },
+  "ceramic": {
+   "yes": 4,
+   "n": 7
+  },
+  "bing": {
+   "yes": 2,
+   "n": 2
+  }
+ }
+}

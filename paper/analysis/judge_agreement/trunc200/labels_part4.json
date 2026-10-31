@@ -1,0 +1,806 @@
+[
+ {
+  "id": 2,
+  "rating": 3,
+  "label": "HM",
+  "note": "Sep 28 article confirms Collins fights Big Stacks on a Misfits card; date and venue not in snippet."
+ },
+ {
+  "id": 9,
+  "rating": 3,
+  "label": "HM",
+  "note": "Reports Collins set for Misfits boxing debut in October; opponent unnamed in snippet."
+ },
+ {
+  "id": 14,
+  "rating": 2,
+  "label": "SM",
+  "note": "Facebook video caption confirms Collins vs Big Stacks Misfits debut; thin social preview."
+ },
+ {
+  "id": 21,
+  "rating": 3,
+  "label": "HM",
+  "note": "bet365 preview of Big Stacks vs Collins on the Misfits card headlined by Essex vs Dapper Laughs."
+ },
+ {
+  "id": 31,
+  "rating": 3,
+  "label": "HM",
+  "note": "States Collins debuts against Big Stacks at Misfits event in London on October 10; low-authority site."
+ },
+ {
+  "id": 32,
+  "rating": 3,
+  "label": "HM",
+  "note": "WalesOnline Sep 28 reports Collins fights the UK's hardest man in London next month."
+ },
+ {
+  "id": 52,
+  "rating": 3,
+  "label": "HM",
+  "note": "Same EssentiallySports piece: Collins set for Misfits debut in October; opponent not in snippet."
+ },
+ {
+  "id": 54,
+  "rating": 3,
+  "label": "HM",
+  "note": "Forbes Sep 30 piece on Collins vs Big Stacks Misfits debut with date and how-to-watch in title; snippet truncated."
+ },
+ {
+  "id": 67,
+  "rating": 2,
+  "label": "SM",
+  "note": "Facebook video caption confirms Collins vs Big Stacks Misfits debut; social preview with little detail."
+ },
+ {
+  "id": 76,
+  "rating": 3,
+  "label": "HM",
+  "note": "Facebook group post gives Collins vs Big Stacks at Copper Box Arena on October 10 on DAZN; social source."
+ },
+ {
+  "id": 77,
+  "rating": 2,
+  "label": "SM",
+  "note": "IFL TV Facebook clip about Big Stacks vs Collins fight; snippet garbled and thin."
+ },
+ {
+  "id": 97,
+  "rating": 2,
+  "label": "SM",
+  "note": "INSE cordless at $49.98 at Walmart but from July 2026, stale for an October sale query."
+ },
+ {
+  "id": 102,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "June 2026 one-day Walmart stick vacuum deal; INSE not named in text and no price."
+ },
+ {
+  "id": 108,
+  "rating": 2,
+  "label": "SM",
+  "note": "INSE 6-in-1 at $63.99 Walmart deal that expired Sep 26."
+ },
+ {
+  "id": 122,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "March 2026 Walmart spring sale at $89; INSE not named in snippet and stale."
+ },
+ {
+  "id": 123,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "April 2026 Walmart flash sale INSE at $59; six months stale."
+ },
+ {
+  "id": 127,
+  "rating": 2,
+  "label": "SM",
+  "note": "June 2026 Walmart sale of INSE 6-in-1 at $58.97; several months stale."
+ },
+ {
+  "id": 130,
+  "rating": 2,
+  "label": "SM",
+  "note": "Walmart INSE vacuum listing page shows a product but no price or sale info in snippet."
+ },
+ {
+  "id": 134,
+  "rating": 3,
+  "label": "HM",
+  "note": "October 2026 TheStreet: Inse cordless stick vacuum $90 at Walmart, $110 off."
+ },
+ {
+  "id": 141,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Inspired Entertainment SEC filings; wrong entity sharing ticker INSE."
+ },
+ {
+  "id": 159,
+  "rating": 2,
+  "label": "SM",
+  "note": "Sep 18 Walmart pet hair stick vacuum at $64.99; INSE brand not named in snippet."
+ },
+ {
+  "id": 162,
+  "rating": 3,
+  "label": "HM",
+  "note": "Walmart INSE brand page lists V770 cordless vacuum at $62.08, was $259.99."
+ },
+ {
+  "id": 174,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "February 2026 Walmart vacuum sale at $64; stale and INSE not named."
+ },
+ {
+  "id": 181,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "General Walmart vacuum deals roundup naming other brands, not INSE."
+ },
+ {
+  "id": 182,
+  "rating": 2,
+  "label": "SM",
+  "note": "INSE 6-in-1 Walmart flash sale 76% off; no date or price in snippet."
+ },
+ {
+  "id": 214,
+  "rating": 3,
+  "label": "HM",
+  "note": "AP via KSAT dated Oct 6 2026 reports Paramount completed the Warner Bros takeover."
+ },
+ {
+  "id": 215,
+  "rating": 3,
+  "label": "HM",
+  "note": "Bloomberg Oct 6 2026 headline says Paramount Skydance completed the $110B Warner Bros merger; snippet is navigation."
+ },
+ {
+  "id": 222,
+  "rating": 3,
+  "label": "HM",
+  "note": "WBD investor release gives anticipated closing date of October 6, 2026."
+ },
+ {
+  "id": 231,
+  "rating": 2,
+  "label": "SM",
+  "note": "WBD Sept 30 release on anticipated closing date, but the date itself is not in the snippet."
+ },
+ {
+  "id": 234,
+  "rating": 2,
+  "label": "SM",
+  "note": "Forbes YouTube video title says the merger closed; no date or detail in snippet."
+ },
+ {
+  "id": 242,
+  "rating": 2,
+  "label": "SM",
+  "note": "Reports the deal was cleared to close after a judge approved a state settlement; no closing date in snippet."
+ },
+ {
+  "id": 244,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "PBS/AP Oct 6 2026: it is official, Paramount closed its takeover of Warner Bros."
+ },
+ {
+  "id": 247,
+  "rating": 3,
+  "label": "HM",
+  "note": "AP reports Paramount closed its takeover of Warner Bros Discovery; date not shown in snippet."
+ },
+ {
+  "id": 256,
+  "rating": 3,
+  "label": "HM",
+  "note": "Bloomberg Oct 6 2026 headline says the merger completed; snippet is navigation."
+ },
+ {
+  "id": 259,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "NBC: on Oct 6 2026 Paramount Skydance completed its $110B takeover of Warner Bros Discovery."
+ },
+ {
+  "id": 260,
+  "rating": 3,
+  "label": "HM",
+  "note": "Washington Post Oct 6 2026 reports Paramount Skydance closed its $110B deal."
+ },
+ {
+  "id": 261,
+  "rating": 2,
+  "label": "SM",
+  "note": "YouTube clip says Paramount closed the takeover; relative date only and thin."
+ },
+ {
+  "id": 262,
+  "rating": 2,
+  "label": "SM",
+  "note": "Reuters Sept 30: judge allows Paramount to close the deal; no closing date in snippet."
+ },
+ {
+  "id": 264,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Deadline: Paramount-WBD merger closed October 6, 2026."
+ },
+ {
+  "id": 268,
+  "rating": 3,
+  "label": "HM",
+  "note": "CNBC timeline: deal closed Tuesday, new company Skydance trades as SKYD."
+ },
+ {
+  "id": 272,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Yahoo page snippet is an error message with no content."
+ },
+ {
+  "id": 273,
+  "rating": 2,
+  "label": "SM",
+  "note": "WBD release on anticipated closing date; date not in snippet."
+ },
+ {
+  "id": 278,
+  "rating": 3,
+  "label": "HM",
+  "note": "CNBC timeline headline says the takeover closes Tuesday with key events."
+ },
+ {
+  "id": 287,
+  "rating": 2,
+  "label": "SM",
+  "note": "AP piece on CNN's future mentions in passing that Paramount closed the buyout."
+ },
+ {
+  "id": 298,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "TechCrunch on Apple partnering with LG, not ADT."
+ },
+ {
+  "id": 300,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Japan Times on Apple smart home devices with LG, not ADT."
+ },
+ {
+  "id": 310,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "How-to for bridging ADT devices into HomeKit; no partnership news."
+ },
+ {
+  "id": 311,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Digital Trends on Apple working with LG, not ADT."
+ },
+ {
+  "id": 313,
+  "rating": 3,
+  "label": "HM",
+  "note": "Copy of MacRumors Oct 10 report that Apple may announce an ADT partnership with its smart home hub."
+ },
+ {
+  "id": 316,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "ADT investor press release index with only boilerplate in snippet."
+ },
+ {
+  "id": 332,
+  "rating": 3,
+  "label": "HM",
+  "note": "MacRumors Oct 10 says the Apple-ADT partnership is still a rumor based on clues."
+ },
+ {
+  "id": 339,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Bloomberg on Apple smart home devices codeveloped with LG, not ADT."
+ },
+ {
+  "id": 340,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "List of ADT press releases with earnings items, no Apple partnership."
+ },
+ {
+  "id": 349,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Vietnamese ADT & SNST semiconductor news; wrong entity."
+ },
+ {
+  "id": 354,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Apple Business platform launch from March 2026; unrelated to ADT."
+ },
+ {
+  "id": 371,
+  "rating": 3,
+  "label": "HM",
+  "note": "MacRumors Oct 10: Apple may announce a partnership with ADT alongside its smart home hub."
+ },
+ {
+  "id": 383,
+  "rating": 2,
+  "label": "SM",
+  "note": "Russian MacRumors copy shows only the rumor headline and date."
+ },
+ {
+  "id": 391,
+  "rating": 3,
+  "label": "HM",
+  "note": "Says Aeroplan offered buy points with up to 90% bonus until March 19, 2026."
+ },
+ {
+  "id": 397,
+  "rating": 3,
+  "label": "HM",
+  "note": "Aeroplan buy points with up to 90% bonus until May 31, 2026."
+ },
+ {
+  "id": 405,
+  "rating": 3,
+  "label": "HM",
+  "note": "Aeroplan targeted promotion of up to 90% bonus through May 31, 2026."
+ },
+ {
+  "id": 409,
+  "rating": 3,
+  "label": "HM",
+  "note": "MileLion: Aeroplan points sale with up to 90% bonus until 1 June 2026."
+ },
+ {
+  "id": 417,
+  "rating": 2,
+  "label": "SM",
+  "note": "OMAAT table lists 2026 Aeroplan bonuses of 100% and 110%; 90% not shown in snippet."
+ },
+ {
+  "id": 422,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Aeroplan hotel and car rental points cost cut; no buy-points bonus."
+ },
+ {
+  "id": 423,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Milesopedia index of current Aeroplan promotions; no 90% bonus in snippet."
+ },
+ {
+  "id": 426,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Generic Air Canada Aeroplan promotions landing page with no offer details."
+ },
+ {
+  "id": 427,
+  "rating": 3,
+  "label": "HM",
+  "note": "MileLion May 15 2026 post on Aeroplan up to 90% bonus, marked expired."
+ },
+ {
+  "id": 430,
+  "rating": 3,
+  "label": "HM",
+  "note": "Aeroplan promotion with up to 90% bonus on bought points until March 19, 2026."
+ },
+ {
+  "id": 443,
+  "rating": 2,
+  "label": "SM",
+  "note": "Roundup mentions the Aeroplan 90% bonus in passing with a timing caveat."
+ },
+ {
+  "id": 445,
+  "rating": 3,
+  "label": "HM",
+  "note": "Prince of Travel: up to 90% bonus on buying Aeroplan points until May 31, 2026."
+ },
+ {
+  "id": 446,
+  "rating": 3,
+  "label": "HM",
+  "note": "MileLion: buy Aeroplan points with 90% bonus until 1 June 2026."
+ },
+ {
+  "id": 447,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Generic Air Canada Aeroplan promotions landing page with no offer details."
+ },
+ {
+  "id": 449,
+  "rating": 3,
+  "label": "HM",
+  "note": "AwardWallet March 2, 2026 post on buying Aeroplan points with up to 90% bonus."
+ },
+ {
+  "id": 454,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "OMAAT snippet shows a reader comment on an offer ending Aug 12, 2026; no 90% bonus."
+ },
+ {
+  "id": 458,
+  "rating": 2,
+  "label": "SM",
+  "note": "Reddit post states Aeroplan up to 90% bonus by May 31, 2026; social source."
+ },
+ {
+  "id": 462,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Points.com Aeroplan page offers up to 100% bonus until Sept 25, 2026, not 90%."
+ },
+ {
+  "id": 465,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Upgraded Points on a 30% discount offer through Oct 13, 2026, not a 90% bonus."
+ },
+ {
+  "id": 474,
+  "rating": 2,
+  "label": "SM",
+  "note": "OMAAT title names a 90% bonus but snippet is page chrome with no dates."
+ },
+ {
+  "id": 478,
+  "rating": 3,
+  "label": "HM",
+  "note": "Aeroplan up to 90% targeted bonus through May 31, 2026."
+ },
+ {
+  "id": 486,
+  "rating": 3,
+  "label": "HM",
+  "note": "LoyaltyLobby: Aeroplan up to 90% or higher bonus through March 2, 2026."
+ },
+ {
+  "id": 487,
+  "rating": 3,
+  "label": "HM",
+  "note": "OMAAT table row: 90% bonus on purchased points May 14 to May 31, 2026."
+ },
+ {
+  "id": 489,
+  "rating": 2,
+  "label": "SM",
+  "note": "Reddit user got an email about a 90% bonus until May 31, 2026; social source."
+ },
+ {
+  "id": 497,
+  "rating": 3,
+  "label": "HM",
+  "note": "AP headline says a judge dismissed the sexual contact charges against Busfield; snippet truncated."
+ },
+ {
+  "id": 510,
+  "rating": 3,
+  "label": "HM",
+  "note": "CBS: New Mexico judge dismissed the indictment against Busfield."
+ },
+ {
+  "id": 511,
+  "rating": 3,
+  "label": "HM",
+  "note": "AP: New Mexico judge dismissed the grand jury indictment of four counts against Busfield."
+ },
+ {
+  "id": 512,
+  "rating": 3,
+  "label": "HM",
+  "note": "USA Today Oct 16: New Mexico judge threw out the case citing prosecutorial misconduct."
+ },
+ {
+  "id": 517,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "USA Today: Judge Joseph Montano granted Busfield's motion to dismiss the indictment on Friday in October."
+ },
+ {
+  "id": 534,
+  "rating": 3,
+  "label": "HM",
+  "note": "People: indictment tossed after judge found prosecutor improperly blocked witnesses."
+ },
+ {
+  "id": 536,
+  "rating": 3,
+  "label": "HM",
+  "note": "NBC News video posted Oct 16, 2026 reports judge dismissed the charges."
+ },
+ {
+  "id": 550,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "NYT: New Mexico judge on Friday dismissed the charges over flaws in the grand jury presentation."
+ },
+ {
+  "id": 557,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Older ABQ Journal report that Busfield remains jailed; no dismissal."
+ },
+ {
+  "id": 558,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "IBTimes on deposition allegations; no disposition of charges."
+ },
+ {
+  "id": 578,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "YouTube page snippet holds only links, no content."
+ },
+ {
+  "id": 582,
+  "rating": 3,
+  "label": "HM",
+  "note": "Vulture: charges dismissed after judge cited prosecutorial misconduct in grand jury."
+ },
+ {
+  "id": 597,
+  "rating": 3,
+  "label": "HM",
+  "note": "Oct 20 repost: Charli xcx canceled tomorrow night's Arizona show due to illness."
+ },
+ {
+  "id": 598,
+  "rating": 3,
+  "label": "HM",
+  "note": "Reports cancellation of the Wednesday Glendale show at Desert Diamond Arena due to illness; low-authority site."
+ },
+ {
+  "id": 606,
+  "rating": 3,
+  "label": "HM",
+  "note": "Charli xcx cancels Arizona concert after losing her voice; date not in snippet."
+ },
+ {
+  "id": 610,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Official site still lists the Oct 21 Glendale show with tickets; no cancellation."
+ },
+ {
+  "id": 620,
+  "rating": 3,
+  "label": "HM",
+  "note": "Variety: Charli xcx cancels Arizona show due to illness."
+ },
+ {
+  "id": 635,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Stereogum on the 2026 tour announcement and an opener's cancellations; wrong event."
+ },
+ {
+  "id": 641,
+  "rating": 3,
+  "label": "HM",
+  "note": "Blog: Charli xcx canceled her October 21 Glendale concert after illness and losing her voice."
+ },
+ {
+  "id": 646,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Phoenix New Times: Oct 21 Desert Diamond Arena concert in Glendale will not take place."
+ },
+ {
+  "id": 648,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Rolling Stone: Arizona show at Desert Diamond Arena canceled over health issues."
+ },
+ {
+  "id": 651,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Rolling Stone: Arizona show on Wednesday canceled after she lost her voice."
+ },
+ {
+  "id": 653,
+  "rating": 3,
+  "label": "HM",
+  "note": "Yahoo Canada copy of Variety: tomorrow night's Arizona show canceled due to illness."
+ },
+ {
+  "id": 663,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Official site store page with no tour news."
+ },
+ {
+  "id": 665,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Live Nation Facebook promo for the Oct 21 show; pre-event, no cancellation."
+ },
+ {
+  "id": 670,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Live Nation Facebook promo for the Oct 21 show; pre-event, no cancellation."
+ },
+ {
+  "id": 671,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Ticketmaster lists the Oct 21 Glendale date with no cancellation."
+ },
+ {
+  "id": 672,
+  "rating": 3,
+  "label": "HM",
+  "note": "Charli xcx canceled her October 21 Glendale concert after illness."
+ },
+ {
+  "id": 673,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Reddit thread about Toronto tickets; not the Oct 21 show."
+ },
+ {
+  "id": 676,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "SeatGeek capture is only a tracker image."
+ },
+ {
+  "id": 693,
+  "rating": 2,
+  "label": "SM",
+  "note": "Yahoo title says Arizona show canceled after she lost her voice; no snippet text."
+ },
+ {
+  "id": 700,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Ticketmaster tour list showing the Oct 21 date; no cancellation."
+ },
+ {
+  "id": 701,
+  "rating": 3,
+  "label": "HM",
+  "note": "KTAR: Recorder Heap expected to reinstate 25 confirmed citizens after mediation."
+ },
+ {
+  "id": 710,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "12News on the lawsuit filed before any reinstatement; pre-outcome."
+ },
+ {
+  "id": 719,
+  "rating": 3,
+  "label": "HM",
+  "note": "azfamily Oct 24: Heap will restore voting eligibility to 24 Maricopa citizens."
+ },
+ {
+  "id": 727,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Votebeat Oct 22 on the lawsuit over 25 voters not yet reinstated; pre-outcome."
+ },
+ {
+  "id": 734,
+  "rating": 3,
+  "label": "HM",
+  "note": "12News: Maricopa recorder to reinstate voting status of more than 20 citizens, AG says."
+ },
+ {
+  "id": 744,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "AZ Mirror Oct 22 on the lawsuit seeking reinstatement; pre-outcome."
+ },
+ {
+  "id": 747,
+  "rating": 3,
+  "label": "HM",
+  "note": "Heap reinstated voting rights of two dozen people after AG and Secretary of State sued."
+ },
+ {
+  "id": 748,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Democracy Docket on the lawsuit; 25 voters still blocked."
+ },
+ {
+  "id": 752,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Votebeat lawsuit article; snippet shows only boilerplate and an update stamp."
+ },
+ {
+  "id": 753,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "azcentral Oct 23: Heap reinstated voting rights of two dozen people after the AG and SOS lawsuit."
+ },
+ {
+  "id": 757,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Maricopa voter registration totals page; no reinstatement news."
+ },
+ {
+  "id": 775,
+  "rating": 3,
+  "label": "HM",
+  "note": "Recorder agreed to reinstate the voters after an Oct 23 Superior Court hearing."
+ },
+ {
+  "id": 777,
+  "rating": 2,
+  "label": "SM",
+  "note": "YouTube clip: Heap will restore eligibility to 24 voters; thin video snippet."
+ },
+ {
+  "id": 778,
+  "rating": 3,
+  "label": "HM",
+  "note": "12News: 25 voters get rights restored in a settlement after the Oct 21 lawsuit."
+ },
+ {
+  "id": 785,
+  "rating": 2,
+  "label": "SM",
+  "note": "azcentral headline says two dozen voters restored; snippet is page chrome."
+ },
+ {
+  "id": 787,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Access Denied error page."
+ },
+ {
+  "id": 790,
+  "rating": 3,
+  "label": "HM",
+  "note": "12News: 25 voters' rights restored in a settlement after the Oct 21 lawsuit."
+ },
+ {
+  "id": 794,
+  "rating": 3,
+  "label": "HM",
+  "note": "KTAR: Heap to reinstate ballot access for 25 citizens after mediation ordered by a judge."
+ },
+ {
+  "id": 760,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Votebeat on the lawsuit; voters still kept not eligible; pre-outcome."
+ },
+ {
+  "id": 796,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "KJZZ Oct 22 on the lawsuit to restore access; pre-outcome."
+ },
+ {
+  "id": 797,
+  "rating": 3,
+  "label": "HM",
+  "note": "Yahoo copy: more than 20 Arizonans will have voting rights restored, per AG."
+ }
+]

@@ -1,0 +1,502 @@
+[
+ {
+  "id": 0,
+  "label": "citing",
+  "reason": "SCOTUSblog case page for docket 26A124 with judgment and vote; a page about the case, not the opinion or docket."
+ },
+ {
+  "id": 1,
+  "label": "target",
+  "reason": "Fourth Circuit PDF of No. 24-1958, US v. Rund, decided September 4, 2026."
+ },
+ {
+  "id": 2,
+  "label": "target",
+  "reason": "CourtListener opinion page titled with the exact gold caption."
+ },
+ {
+  "id": 3,
+  "label": "citing",
+  "reason": "NY Daily Record news summary of 23-7400; facts differ from the opinion text."
+ },
+ {
+  "id": 4,
+  "label": "target",
+  "reason": "Supreme Court slip opinion PDF for 24-297 Mahmoud v. Taylor."
+ },
+ {
+  "id": 5,
+  "label": "target",
+  "reason": "Supreme Court slip opinion PDF for 23-1239 Barnes v. Felix."
+ },
+ {
+  "id": 6,
+  "label": "target",
+  "reason": "Supreme Court slip opinion PDF for 24-297 Mahmoud v. Taylor."
+ },
+ {
+  "id": 7,
+  "label": "citing",
+  "reason": "Same case, but a September 2025 stay order hosted by ACLJ, not the December 2025 opinion."
+ },
+ {
+  "id": 8,
+  "label": "target",
+  "reason": "Justia opinion page for 23-7400 dated 2026-06-01, matches docket and date."
+ },
+ {
+  "id": 9,
+  "label": "target",
+  "reason": "Justia opinion page for No. 23-1345 dated 2025-06-13."
+ },
+ {
+  "id": 10,
+  "label": "target",
+  "reason": "Justia opinion page for In re BPS Direct, 23-3235, dated 2026-05-11."
+ },
+ {
+  "id": 11,
+  "label": "target",
+  "reason": "Second Circuit opinion PDF for 25-707 Raymond v. 1199SEIU, decided July 23, 2026."
+ },
+ {
+  "id": 12,
+  "label": "target",
+  "reason": "Justia Supreme Court page for 25-767 Margolin v. NAIJ with opinion text."
+ },
+ {
+  "id": 13,
+  "label": "target",
+  "reason": "Justia Supreme Court page for 26A308, decided September 25, 2026."
+ },
+ {
+  "id": 14,
+  "label": "target",
+  "reason": "Justia docket feed for First Circuit case 24-1920, same case."
+ },
+ {
+  "id": 15,
+  "label": "target",
+  "reason": "Justia opinion page for 24-3112 dated 2026-05-04."
+ },
+ {
+  "id": 16,
+  "label": "target",
+  "reason": "Supreme Court docket page for 26A203, same case."
+ },
+ {
+  "id": 17,
+  "label": "target",
+  "reason": "FindLaw opinion for No. 24-2673 DiFraia v. Ransom, decided March 31, 2026."
+ },
+ {
+  "id": 18,
+  "label": "target",
+  "reason": "GovInfo opinion record for 26-2469, same caption."
+ },
+ {
+  "id": 19,
+  "label": "target",
+  "reason": "CourtListener opinion page with opinion text about Basilici."
+ },
+ {
+  "id": 20,
+  "label": "citing",
+  "reason": "Wikipedia article about the case, not the opinion itself."
+ },
+ {
+  "id": 21,
+  "label": "unclear",
+  "reason": "Justia opinion for same docket 24-1679 but dated 2025-10-22, not gold 2025-11-21; maybe original vs amended."
+ },
+ {
+  "id": 22,
+  "label": "target",
+  "reason": "Justia opinion page for 24-1844 dated 2025-09-11."
+ },
+ {
+  "id": 23,
+  "label": "target",
+  "reason": "GovInfo opinion record for 24-1741 Taveras Martinez v. Blanche."
+ },
+ {
+  "id": 24,
+  "label": "target",
+  "reason": "Justia docket page for First Circuit case 24-1562, same case."
+ },
+ {
+  "id": 25,
+  "label": "unclear",
+  "reason": "Justia opinion for same docket 24-1679 but dated 2025-10-22, not gold 2025-11-21; maybe original vs amended."
+ },
+ {
+  "id": 26,
+  "label": "target",
+  "reason": "CourtListener docket page for 25-1413, same case."
+ },
+ {
+  "id": 27,
+  "label": "target",
+  "reason": "Justia opinion page for 24-251 dated 2025-06-18."
+ },
+ {
+  "id": 28,
+  "label": "citing",
+  "reason": "Extension motion in Supreme Court docket 25-7118 that lists the Riddy appeal."
+ },
+ {
+  "id": 29,
+  "label": "citing",
+  "reason": "Same case, but a CourtListener oral argument audio page, not the opinion."
+ },
+ {
+  "id": 30,
+  "label": "target",
+  "reason": "Supreme Court per curiam PDF for 26A124, dated August 24, 2026."
+ },
+ {
+  "id": 31,
+  "label": "target",
+  "reason": "Justia opinion page for 25-1130 dated 2026-05-28."
+ },
+ {
+  "id": 32,
+  "label": "target",
+  "reason": "Third Circuit opinion PDF for No. 23-3058, filed February 12, 2026."
+ },
+ {
+  "id": 33,
+  "label": "target",
+  "reason": "Third Circuit opinion PDF for No. 24-2673, filed March 31, 2026."
+ },
+ {
+  "id": 34,
+  "label": "target",
+  "reason": "Supreme Court docket page for 26A308, same case."
+ },
+ {
+  "id": 35,
+  "label": "unclear",
+  "reason": "Third-party database entry naming 25-1327; snippet does not show if it hosts the opinion."
+ },
+ {
+  "id": 36,
+  "label": "target",
+  "reason": "Third Circuit opinion PDF for No. 25-2026, filed September 18, 2026."
+ },
+ {
+  "id": 37,
+  "label": "target",
+  "reason": "CourtListener opinion page for No. 24-1351 Miller v. Roycroft."
+ },
+ {
+  "id": 38,
+  "label": "citing",
+  "reason": "Plain-English overview of the case on a third-party site, not the opinion."
+ },
+ {
+  "id": 39,
+  "label": "target",
+  "reason": "Supreme Court per curiam PDF for 26A124, dated August 24, 2026."
+ },
+ {
+  "id": 40,
+  "label": "target",
+  "reason": "Justia docket page for Fourth Circuit case 24-7049, same case."
+ },
+ {
+  "id": 41,
+  "label": "target",
+  "reason": "CourtListener docket page for 25-1413, same case."
+ },
+ {
+  "id": 42,
+  "label": "target",
+  "reason": "Justia opinion page for 25-1698/25-1755 decided December 12, 2025."
+ },
+ {
+  "id": 43,
+  "label": "target",
+  "reason": "FindLaw opinion for No. 25-1435, decided August 18, 2026."
+ },
+ {
+  "id": 44,
+  "label": "target",
+  "reason": "Supreme Court slip opinion PDF for 24-316, dated June 27, 2025."
+ },
+ {
+  "id": 45,
+  "label": "citing",
+  "reason": "Wikipedia article about the case, not the opinion itself."
+ },
+ {
+  "id": 46,
+  "label": "target",
+  "reason": "Copy of the slip opinion in No. 23-1239 hosted on justice.gov."
+ },
+ {
+  "id": 47,
+  "label": "target",
+  "reason": "Justia opinion page for 24-1913 dated 2025-09-18."
+ },
+ {
+  "id": 48,
+  "label": "target",
+  "reason": "Counsel Stack opinion page for No. 23-1211, decided July 30, 2025."
+ },
+ {
+  "id": 49,
+  "label": "target",
+  "reason": "Third Circuit opinion PDF for No. 24-2125, filed September 1, 2026."
+ },
+ {
+  "id": 50,
+  "label": "target",
+  "reason": "Justia Supreme Court page for 26A308 with per curiam text."
+ },
+ {
+  "id": 51,
+  "label": "target",
+  "reason": "Supreme Court slip opinion PDF for 23-715, dated April 29, 2025."
+ },
+ {
+  "id": 52,
+  "label": "target",
+  "reason": "CourtListener opinion page for No. 24-3005, filed May 18, 2026."
+ },
+ {
+  "id": 53,
+  "label": "target",
+  "reason": "Justia opinion page for 25-1378 dated 2026-07-17."
+ },
+ {
+  "id": 54,
+  "label": "target",
+  "reason": "Copy of the 25-869 Second Circuit opinion filed on the district docket on CourtListener."
+ },
+ {
+  "id": 55,
+  "label": "citing",
+  "reason": "Georgetown litigation tracker entry about the case, not the opinion or court docket."
+ },
+ {
+  "id": 56,
+  "label": "target",
+  "reason": "GovInfo opinion record for 24-2076, same caption."
+ },
+ {
+  "id": 57,
+  "label": "target",
+  "reason": "Cornell LII opinion text for No. 24-351 Postal Service v. Konan."
+ },
+ {
+  "id": 58,
+  "label": "target",
+  "reason": "Justia opinion page for 23-7400 dated 2026-06-01 with opinion text."
+ },
+ {
+  "id": 59,
+  "label": "target",
+  "reason": "Justia opinion page for 25-2089 dated 2025-11-09."
+ },
+ {
+  "id": 60,
+  "label": "target",
+  "reason": "GovInfo opinion record for 24-2673 DiFraia v. Ransom."
+ },
+ {
+  "id": 61,
+  "label": "unclear",
+  "reason": "Justia opinion for same docket 24-1279 but dated 2026-01-28, not gold 2025-08-15."
+ },
+ {
+  "id": 62,
+  "label": "target",
+  "reason": "FindLaw opinion for No. 25-1327, decided August 24, 2026."
+ },
+ {
+  "id": 63,
+  "label": "target",
+  "reason": "Justia opinion page for 23-1950 dated 2026-09-16."
+ },
+ {
+  "id": 64,
+  "label": "target",
+  "reason": "Justia opinion page for 24-3112 dated 2026-05-04."
+ },
+ {
+  "id": 65,
+  "label": "citing",
+  "reason": "NY Daily Record news summary of the 25-707 decision."
+ },
+ {
+  "id": 66,
+  "label": "target",
+  "reason": "Justia opinion page for 23-1345 dated 2025-06-13."
+ },
+ {
+  "id": 67,
+  "label": "citing",
+  "reason": "Wikipedia article about the case, not the opinion itself."
+ },
+ {
+  "id": 68,
+  "label": "target",
+  "reason": "Justia opinion page for 25-304 dated 2026-09-17."
+ },
+ {
+  "id": 69,
+  "label": "target",
+  "reason": "Justia opinion page for 24-1958 dated 2026-09-04."
+ },
+ {
+  "id": 70,
+  "label": "target",
+  "reason": "Justia opinion page for 24-1920 dated 2025-11-20."
+ },
+ {
+  "id": 71,
+  "label": "target",
+  "reason": "Justia opinion page for 24-1920 dated 2025-11-20."
+ },
+ {
+  "id": 72,
+  "label": "target",
+  "reason": "Justia opinion page for 25-1149 dated 2025-10-31."
+ },
+ {
+  "id": 73,
+  "label": "target",
+  "reason": "Cornell LII opinion text for No. 25-52, decided November 24, 2025."
+ },
+ {
+  "id": 74,
+  "label": "target",
+  "reason": "Justia opinion page for 24-2673 dated 2026-03-31."
+ },
+ {
+  "id": 75,
+  "label": "target",
+  "reason": "GovInfo opinion record for 24-1958, opinion filed September 4, 2026."
+ },
+ {
+  "id": 76,
+  "label": "target",
+  "reason": "FindLaw opinion for No. 26-2469, decided August 31, 2026."
+ },
+ {
+  "id": 77,
+  "label": "target",
+  "reason": "Fourth Circuit opinion PDF for No. 24-7049 Edwards v. Witherspoon."
+ },
+ {
+  "id": 78,
+  "label": "target",
+  "reason": "Cornell LII opinion text for No. 25-52, decided November 24, 2025."
+ },
+ {
+  "id": 79,
+  "label": "target",
+  "reason": "CourtListener docket page for 24-1958, same case."
+ },
+ {
+  "id": 80,
+  "label": "citing",
+  "reason": "SCOTUSblog case page for docket 25-52 with decision and vote; a page about the case, not the opinion or docket."
+ },
+ {
+  "id": 81,
+  "label": "target",
+  "reason": "Justia docket page for First Circuit case 25-2089, same case."
+ },
+ {
+  "id": 82,
+  "label": "target",
+  "reason": "Third Circuit opinion PDF for Nos. 23-1950 et al., filed September 16, 2026."
+ },
+ {
+  "id": 83,
+  "label": "citing",
+  "reason": "Advocacy blog post linking to the opinion and docket, not the opinion itself."
+ },
+ {
+  "id": 84,
+  "label": "target",
+  "reason": "Supreme Court slip opinion PDF for 24A884, dated June 27, 2025."
+ },
+ {
+  "id": 85,
+  "label": "target",
+  "reason": "CourtListener opinion for No. 24-1988, dated July 1, 2025."
+ },
+ {
+  "id": 86,
+  "label": "target",
+  "reason": "CourtListener opinion page for Trump v. J. G. G. with opinion text."
+ },
+ {
+  "id": 87,
+  "label": "target",
+  "reason": "Justia Supreme Court page for 25-748 with opinion text."
+ },
+ {
+  "id": 88,
+  "label": "target",
+  "reason": "Justia opinion page for 24-1098 dated 2026-09-25."
+ },
+ {
+  "id": 89,
+  "label": "target",
+  "reason": "Supreme Court slip opinion PDF for 24A884, dated June 27, 2025."
+ },
+ {
+  "id": 90,
+  "label": "unclear",
+  "reason": "Justia opinion for same docket 25-2089 but dated 2025-11-07, not gold 2025-11-09."
+ },
+ {
+  "id": 91,
+  "label": "citing",
+  "reason": "Advocacy blog post linking to the opinion and docket, not the opinion itself."
+ },
+ {
+  "id": 92,
+  "label": "target",
+  "reason": "Leagle opinion page for No. 25-304, decided September 17, 2026."
+ },
+ {
+  "id": 93,
+  "label": "target",
+  "reason": "CourtListener opinion for No. 23-1239 Barnes v. Felix, May 15, 2025."
+ },
+ {
+  "id": 94,
+  "label": "target",
+  "reason": "Third Circuit opinion PDF for No. 23-3058, filed February 12, 2026."
+ },
+ {
+  "id": 95,
+  "label": "target",
+  "reason": "Supreme Court per curiam PDF for 25-52, dated November 24, 2025."
+ },
+ {
+  "id": 96,
+  "label": "target",
+  "reason": "GovInfo opinion record for 24-1679, same caption."
+ },
+ {
+  "id": 97,
+  "label": "target",
+  "reason": "CourtListener opinion for No. 25-2950, decided August 28, 2026."
+ },
+ {
+  "id": 98,
+  "label": "wrong",
+  "reason": "2025 blog on another case; cites the 2023 district-court BPS ruling, not this opinion."
+ },
+ {
+  "id": 99,
+  "label": "target",
+  "reason": "FindLaw opinion for No. 25-304-ag, decided September 17, 2026."
+ }
+]

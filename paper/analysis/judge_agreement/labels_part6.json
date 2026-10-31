@@ -1,0 +1,1066 @@
+[
+ {
+  "id": 23,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "States Collins debuts vs Big Stacks Oct 10 at Copper Box; brief."
+ },
+ {
+  "id": 38,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Covers Big Stacks' different fight vs Jordan McCann, not Collins bout."
+ },
+ {
+  "id": 40,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Full details: Oct 10 2026, Copper Box, Misfits, replaces Skinner."
+ },
+ {
+  "id": 47,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Confirms Collins agreed to debut vs Big Stacks; no date in snippet."
+ },
+ {
+  "id": 50,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "The Sun: Collins fights Big Stacks Oct 10 Copperbox, card context."
+ },
+ {
+  "id": 59,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Library catalog search page, off-topic."
+ },
+ {
+  "id": 60,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Text of The Lottery, off-topic."
+ },
+ {
+  "id": 61,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Racing donor name list, off-topic."
+ },
+ {
+  "id": 62,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Self-storage page, off-topic."
+ },
+ {
+  "id": 63,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Whale dataset contributor names, off-topic."
+ },
+ {
+  "id": 64,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Collins replaces Skinner vs Big Stacks on Oct 10 Misfits card; no venue."
+ },
+ {
+  "id": 66,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Date, venue, card, opponent background, quotes."
+ },
+ {
+  "id": 70,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook video preview, one line only."
+ },
+ {
+  "id": 71,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Collins makes Misfits debut on short notice vs Big Stacks; no date."
+ },
+ {
+  "id": 74,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Date, time, weight class, venue in short fragment."
+ },
+ {
+  "id": 79,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "One sentence: Oct 10 Copper Box debut vs Big Stacks."
+ },
+ {
+  "id": 82,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Instagram login wall; only title states the bout."
+ },
+ {
+  "id": 83,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Full key points: date, venue, card, DAZN, replacement."
+ },
+ {
+  "id": 88,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "No snippet; metadata-only page fails integrity."
+ },
+ {
+  "id": 92,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Promoter quote: Collins fights Big Stacks Oct 10 Copperbox on DAZN."
+ },
+ {
+  "id": 95,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Podcast page: Collins agreed to fight Big Stacks Oct 10 Copper Box."
+ },
+ {
+  "id": 99,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "INSE $58.97 at Walmart with details, but June deal is stale by October."
+ },
+ {
+  "id": 105,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "INSE $57 at Walmart dated May 2026; stale for current sale."
+ },
+ {
+  "id": 119,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "INSE $54.99 in Walmart Summer Deals; June sale, stale."
+ },
+ {
+  "id": 120,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "INSE $56.78 July 4th Rollback; stale by October."
+ },
+ {
+  "id": 126,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "INSE $49.98 Walmart rollback July 2026; stale by two months."
+ },
+ {
+  "id": 132,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Walmart INSE product page, no sale price shown."
+ },
+ {
+  "id": 136,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "INSE $54.99 June deal, thin and stale."
+ },
+ {
+  "id": 147,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Walmart INSE listing Now $68.67 from $348.99 with specs."
+ },
+ {
+  "id": 155,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Generic Black Friday ad page, no INSE content."
+ },
+ {
+  "id": 168,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook group post, INSE $79.97 Walmart, undated preview."
+ },
+ {
+  "id": 170,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Walmart INSE category page, no pricing."
+ },
+ {
+  "id": 172,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Bot-check page, no content."
+ },
+ {
+  "id": 184,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Inse $89 in Walmart spring sale; old sale, year not shown."
+ },
+ {
+  "id": 185,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Walmart INSE handheld now $59.99, save $60, recent crawl."
+ },
+ {
+  "id": 192,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Engadget: $110B merger finally closes today, SKYD trading."
+ },
+ {
+  "id": 210,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "IR title promises closing date but snippet cuts off before it."
+ },
+ {
+  "id": 219,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "NBC/Reuters Oct 6 2026: takeover completed."
+ },
+ {
+  "id": 223,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Official release: merger expected to close Oct 6 2026."
+ },
+ {
+  "id": 226,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Judge allows close; no closing date in snippet."
+ },
+ {
+  "id": 228,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "CNBC: takeover closes Tuesday, with timeline."
+ },
+ {
+  "id": 246,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "AP Oct 6 2026: Paramount has closed takeover, background."
+ },
+ {
+  "id": 249,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Old article: WBD rejects Paramount bid for Netflix; superseded."
+ },
+ {
+  "id": 253,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Title says takeover closed; timeline in snippet."
+ },
+ {
+  "id": 254,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Sept 30 judge approval, final hurdle; no closing date."
+ },
+ {
+  "id": 276,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook post: likely closing in next few days; vague."
+ },
+ {
+  "id": 284,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Feb 2026 SEC filing: expected close Q3 2026; superseded."
+ },
+ {
+  "id": 291,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "ADT+ app listing, no Apple partnership."
+ },
+ {
+  "id": 294,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "ADT joins CSA board alongside Apple; not a partnership."
+ },
+ {
+  "id": 296,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Dutch report: Apple expected to announce ADT partnership Oct 13."
+ },
+ {
+  "id": 306,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Apple 2026 lineup for channel partners; no ADT."
+ },
+ {
+  "id": 307,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "MacRumors rumor teaser, one line."
+ },
+ {
+  "id": 315,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "ADT CSA board news; not Apple partnership."
+ },
+ {
+  "id": 317,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "MacRumors rumor with clues and Oct 13 event; unconfirmed."
+ },
+ {
+  "id": 321,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Apple ad tech crackdown; not ADT."
+ },
+ {
+  "id": 348,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "ADT company history, Google partnership; no Apple deal."
+ },
+ {
+  "id": 350,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Xfinity security review mentioning ADT only in comparison."
+ },
+ {
+  "id": 351,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "2017 Samsung-ADT partnership, wrong partner and year."
+ },
+ {
+  "id": 355,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Apple manufacturing program partners; no ADT."
+ },
+ {
+  "id": 358,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Apple manufacturing program partners; no ADT."
+ },
+ {
+  "id": 363,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "MacRumors homepage, headline mention only."
+ },
+ {
+  "id": 370,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Affordable Drill Towers (different ADT) Instagram post."
+ },
+ {
+  "id": 381,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "MacRumors: partnership may be official Oct 13; Google context."
+ },
+ {
+  "id": 395,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "90% bonus until May 31 2026 with tiers and limits."
+ },
+ {
+  "id": 400,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Reddit: up to 90% bonus valid to May 31 2026."
+ },
+ {
+  "id": 406,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Up to 90% bonus through May 31 2026."
+ },
+ {
+  "id": 407,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "90% buy bonus 16-19 July 2026."
+ },
+ {
+  "id": 411,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Up to 90% bonus to May 31 2026, cost per point."
+ },
+ {
+  "id": 428,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "90% bonus until March 19 2026 with tiers and cost."
+ },
+ {
+  "id": 429,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "90% bonus till 20 March 2026 with tier breakdown."
+ },
+ {
+  "id": 431,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Up to 90% bonus until March 19 2026 with example costs."
+ },
+ {
+  "id": 434,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "90% bonus till 1 June 2026, tiers, limits."
+ },
+ {
+  "id": 437,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "90% bonus until 19 March 2026 with costs and limits."
+ },
+ {
+  "id": 444,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "90% bonus until March 19 2026, cost and limits."
+ },
+ {
+  "id": 456,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Up to 90% bonus to May 31 2026, cost per point."
+ },
+ {
+  "id": 459,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "30% discount promo, not a 90% bonus."
+ },
+ {
+  "id": 464,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Up to 90% bonus by May 31 2026."
+ },
+ {
+  "id": 467,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Aeroplan Elite status page, no buy bonus."
+ },
+ {
+  "id": 472,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Navigation-only loading page."
+ },
+ {
+  "id": 476,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Aeroplan earn page, no 90% bonus."
+ },
+ {
+  "id": 485,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Up to 90% bonus through May 31 2026, tiered."
+ },
+ {
+  "id": 500,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "TMZ: case dismissed for prosecutorial misconduct, details."
+ },
+ {
+  "id": 505,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Judge dismissed indictment; short snippet."
+ },
+ {
+  "id": 506,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Guardian: charges dismissed, judge cites unfair grand jury process."
+ },
+ {
+  "id": 508,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Snippet only says indictment secured; dismissal only in URL."
+ },
+ {
+  "id": 519,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "BBC: judge threw out charges, reasons, DA response."
+ },
+ {
+  "id": 524,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "CBS: judge dismisses charges, ruling quote, next steps."
+ },
+ {
+  "id": 537,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "BBC: judge granted motion to dismiss indictment, DA evaluating."
+ },
+ {
+  "id": 544,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "BBC: charges thrown out, reasons, indictment details."
+ },
+ {
+  "id": 553,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Reuters Oct 16: charges dismissed, reasons, new charges possible."
+ },
+ {
+  "id": 560,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Earlier release hearing, not dismissal."
+ },
+ {
+  "id": 562,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "NYT: judge dismissed charges for grand jury flaws."
+ },
+ {
+  "id": 564,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "AP: judge dismissed indictment citing misconduct."
+ },
+ {
+  "id": 570,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook preview; title says dismissed, snippet says seeking dismissal."
+ },
+ {
+  "id": 571,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook post fragment; title states dismissal."
+ },
+ {
+  "id": 573,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "CBS short: judge dismissed indictment citing misconduct."
+ },
+ {
+  "id": 577,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Snippet is NYT navigation only; fails integrity."
+ },
+ {
+  "id": 579,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Indictment dismissed for prosecutorial misconduct; short."
+ },
+ {
+  "id": 584,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "CNN/AP: charges tossed, reasons, prosecutors undecided."
+ },
+ {
+  "id": 586,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "KSL/AP: indictment dismissed, details."
+ },
+ {
+  "id": 588,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "January release from jail, not dismissal."
+ },
+ {
+  "id": 590,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "LA Times: indictment quashed, charges tossed."
+ },
+ {
+  "id": 591,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "CBS: indictment dismissed, misconduct, context."
+ },
+ {
+  "id": 593,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Wikipedia bio; dismissal only as reference title."
+ },
+ {
+  "id": 595,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Variety: Wednesday Glendale show canceled due to illness."
+ },
+ {
+  "id": 596,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Yahoo/Variety: Wednesday Arizona show canceled, illness, refunds."
+ },
+ {
+  "id": 599,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Billboard: Wednesday Glendale show canceled, full message."
+ },
+ {
+  "id": 608,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Ticket listing for Oct 21 show; no cancellation."
+ },
+ {
+  "id": 623,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Oct 21 Glendale concert canceled, illness, refunds."
+ },
+ {
+  "id": 625,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Wednesday Arizona show canceled, lost voice; short."
+ },
+ {
+  "id": 633,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Title Oct 21 Arizona concert canceled; quote on illness."
+ },
+ {
+  "id": 642,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Oct 21 Desert Diamond Arena show canceled, quotes."
+ },
+ {
+  "id": 645,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Tour announcement listing 10/21 date; pre-event."
+ },
+ {
+  "id": 654,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Oct 18 concert guide; pre-cancellation."
+ },
+ {
+  "id": 662,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "SeatGeek page with old dates; no cancellation."
+ },
+ {
+  "id": 680,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Wikipedia old tour page, navigation only."
+ },
+ {
+  "id": 684,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Yahoo/Variety Oct 20: Wednesday Arizona show canceled."
+ },
+ {
+  "id": 696,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Ticketmaster help listing Oct 21 date; no cancellation."
+ },
+ {
+  "id": 698,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Ticketmaster listing Oct 21 show; no cancellation."
+ },
+ {
+  "id": 708,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Heap expected to reinstate 25 voters after mediation; detailed."
+ },
+ {
+  "id": 715,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "More than 20 Arizonans to have voting rights restored."
+ },
+ {
+  "id": 716,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "YouTube preview: Heap to restore 24 voters; thin."
+ },
+ {
+  "id": 728,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "AG lawsuit seeking reinstatement; pre-outcome."
+ },
+ {
+  "id": 729,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Lawsuit filed to restore 25 voters; pre-outcome."
+ },
+ {
+  "id": 745,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "More than 20 Arizonans' voting rights restored, per AG."
+ },
+ {
+  "id": 749,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Heap expected to reinstate 25 confirmed citizens."
+ },
+ {
+  "id": 755,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Heap reinstated two dozen voters after lawsuit."
+ },
+ {
+  "id": 768,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "2021 Ron Watkins registration story, off-topic."
+ },
+ {
+  "id": 769,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "2021 election audit article, off-topic."
+ },
+ {
+  "id": 780,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Legal battle article; no reinstatement reported."
+ },
+ {
+  "id": 789,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Recorder agreed to reinstate voters after Oct 23 hearing."
+ },
+ {
+  "id": 795,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Parties close to deal; one voter restored; outcome pending."
+ },
+ {
+  "id": 802,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "AG threatens lawsuit over 24 voters; pre-outcome."
+ }
+]

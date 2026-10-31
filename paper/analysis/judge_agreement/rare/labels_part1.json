@@ -1,0 +1,572 @@
+[
+ {
+  "id": 3,
+  "rating": 2,
+  "label": "SM",
+  "note": "Cabinet letter on the 4th evaluation of the Act; no scope or requirements given."
+ },
+ {
+  "id": 9,
+  "rating": 2,
+  "label": "SM",
+  "note": "Evaluation report page for the Act; only says it covers 2017-2022."
+ },
+ {
+  "id": 12,
+  "rating": 3,
+  "label": "HM",
+  "note": "Official page states patient request, the 6 statutory requirements, and doctor criteria."
+ },
+ {
+  "id": 17,
+  "rating": 2,
+  "label": "SM",
+  "note": "Short snippet: doctors may act only on patient request; rules are in the law."
+ },
+ {
+  "id": 21,
+  "rating": 2,
+  "label": "SM",
+  "note": "Title names the 6 requirements but snippet does not list them."
+ },
+ {
+  "id": 22,
+  "rating": 3,
+  "label": "HM",
+  "note": "Covers conditions, written request, and reporting to coroner and RTE review."
+ },
+ {
+  "id": 28,
+  "rating": 2,
+  "label": "SM",
+  "note": "Evaluation report page; metadata only, no scope or requirements."
+ },
+ {
+  "id": 32,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "Official page gives official name, scope, criminal exception, patient request, age rules, 6 requirements, reporting and RTE review."
+ },
+ {
+  "id": 40,
+  "rating": 2,
+  "label": "SM",
+  "note": "Guide on written euthanasia request under art. 2(2); no general scope."
+ },
+ {
+  "id": 45,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Ministry annual report PDF with only a passing mention of the Act's evaluation."
+ },
+ {
+  "id": 55,
+  "rating": 2,
+  "label": "SM",
+  "note": "Legislative history on the written declaration in art. 2(2); narrow."
+ },
+ {
+  "id": 58,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "OECD education note; off-topic."
+ },
+ {
+  "id": 69,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Snippet is only a related document title; no content."
+ },
+ {
+  "id": 72,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Snippet fragment about parliamentary answers; no content on the Act."
+ },
+ {
+  "id": 78,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host wetten.overheid.nl fails site:rijksoverheid.nl."
+ },
+ {
+  "id": 84,
+  "rating": 2,
+  "label": "SM",
+  "note": "Guide on written euthanasia request under art. 2(2); mostly navigation."
+ },
+ {
+  "id": 89,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Snippet is a metadata fragment only."
+ },
+ {
+  "id": 94,
+  "rating": 2,
+  "label": "SM",
+  "note": "Legislative history on the written declaration in art. 2(2); narrow."
+ },
+ {
+  "id": 95,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Snippet is only the page heading; no content."
+ },
+ {
+  "id": 98,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "All quoted strings present, but Cochrane review has no NHS cloxacillin prescription statistic."
+ },
+ {
+  "id": 125,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Prescription\" absent from title and snippet (only \"prescribing\")."
+ },
+ {
+  "id": 127,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Prescription\" absent from title and snippet."
+ },
+ {
+  "id": 137,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent."
+ },
+ {
+  "id": 141,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "\"cloxacillin\" appears only inside \"Flucloxacillin\"; SSP is about phenoxymethylpenicillin."
+ },
+ {
+  "id": 146,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"NHS\", \"2022\", \"Prescription\" absent; Singapore formulary."
+ },
+ {
+  "id": 148,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"NHS\", \"2022\", \"Prescription\" absent."
+ },
+ {
+  "id": 151,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"NHS\", \"2022\", \"Prescription\" absent."
+ },
+ {
+  "id": 154,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"cloxacillin\" and \"Prescription\" absent."
+ },
+ {
+  "id": 162,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Only \"flucloxacillin\" and \"prescribing\"; quoted \"cloxacillin\" and \"Prescription\" absent."
+ },
+ {
+  "id": 166,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"NHS\" absent."
+ },
+ {
+  "id": 193,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Hockey action recognition with pose; not player tracking."
+ },
+ {
+  "id": 196,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 repo page with navigation only; no tracking content."
+ },
+ {
+  "id": 206,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical association with context-conditioned motion models for player tracking in field hockey; no pose cues or MMAction2."
+ },
+ {
+  "id": 209,
+  "rating": 2,
+  "label": "SM",
+  "note": "Survey section on pose tracking, identity preservation and motion modeling in sports; general."
+ },
+ {
+  "id": 216,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "3D mesh recovery in hockey; not tracking or disambiguation."
+ },
+ {
+  "id": 217,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical graph tracking on soccer and hockey; no pose cues or MMAction2."
+ },
+ {
+  "id": 218,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical association and motion models for player tracking; no pose cues or MMAction2."
+ },
+ {
+  "id": 234,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical tracking on soccer and hockey; pose only mentioned in related work."
+ },
+ {
+  "id": 239,
+  "rating": 2,
+  "label": "SM",
+  "note": "Abstract of hierarchical soccer and hockey tracking; no pose cues or MMAction2."
+ },
+ {
+  "id": 243,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Uses MMAction2 for action detection only; not tracking."
+ },
+ {
+  "id": 253,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Hockey action recognition via pose; not tracking."
+ },
+ {
+  "id": 262,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Trajectory and pose forecasting; not tracking or disambiguation."
+ },
+ {
+  "id": 267,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Hockey action recognition with pose priors; tracking only mentioned in passing."
+ },
+ {
+  "id": 269,
+  "rating": 2,
+  "label": "SM",
+  "note": "Soccer player tracking and re-ID with tracklet association; no pose cues or hierarchical motion models."
+ },
+ {
+  "id": 271,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 repo with tags; no tracking method content."
+ },
+ {
+  "id": 276,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host facebook.com fails site:transportfornewsgov.au."
+ },
+ {
+  "id": 279,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host tustinca.org fails site operator; unrelated city document."
+ },
+ {
+  "id": 283,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host cloudfront.net fails site operator; unrelated agenda."
+ },
+ {
+  "id": 287,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms present but discusses an 1817 Bundesbeschluss; no 1843 resolution."
+ },
+ {
+  "id": 291,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Swiss 1992 Bundesbeschluss on pension Freizügigkeit; wrong entity."
+ },
+ {
+  "id": 299,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms present; Bundesblatt fragment with no 1843 resolution."
+ },
+ {
+  "id": 303,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Chrome page; quoted terms absent."
+ },
+ {
+  "id": 305,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Chrome help page; quoted terms absent."
+ },
+ {
+  "id": 323,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent; modern German EU law."
+ },
+ {
+  "id": 334,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent."
+ },
+ {
+  "id": 338,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent; dictionary entry."
+ },
+ {
+  "id": 339,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent."
+ },
+ {
+  "id": 343,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent; 1867 law."
+ },
+ {
+  "id": 344,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent; 1867 law."
+ },
+ {
+  "id": 345,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent."
+ },
+ {
+  "id": 352,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Both terms present but about modern Swiss-EU joint committees; wrong entity."
+ },
+ {
+  "id": 357,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Freizügigkeit\" absent; 2009 Swiss index."
+ },
+ {
+  "id": 358,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted terms absent; Thurgau archive list."
+ },
+ {
+  "id": 364,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Both terms present but 2004 Swiss-EC free movement Bundesbeschluss; wrong entity."
+ },
+ {
+  "id": 365,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Both terms present but 2004 Swiss-EC free movement Bundesbeschluss; wrong entity."
+ },
+ {
+  "id": 379,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent from title and snippet."
+ },
+ {
+  "id": 387,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 392,
+  "rating": 2,
+  "label": "SM",
+  "note": "States M. circinelloides is a well-established oleaginous model fungus for lipid metabolism; very brief."
+ },
+ {
+  "id": 395,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 397,
+  "rating": 3,
+  "label": "HM",
+  "note": "Calls it the model fungus for lipid work and explains why: plasmid, Agrobacterium and electroporation transformation tools."
+ },
+ {
+  "id": 398,
+  "rating": 2,
+  "label": "SM",
+  "note": "Names it the model fungus for lipid accumulation; rest is about cellulose use."
+ },
+ {
+  "id": 403,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Only \"model oleaginous fungus\" and \"model filamentous fungi\"; quoted \"model fungus\" absent."
+ },
+ {
+  "id": 405,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent (only \"model system\")."
+ },
+ {
+  "id": 415,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent (only \"model organism\")."
+ },
+ {
+  "id": 421,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 424,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 432,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 433,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent (only \"fungal model\")."
+ },
+ {
+  "id": 436,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent (only \"model oleaginous fungus\")."
+ },
+ {
+  "id": 450,
+  "rating": 2,
+  "label": "SM",
+  "note": "States it is a well-established oleaginous model fungus for lipid metabolism research; very brief."
+ },
+ {
+  "id": 453,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Security check page; integrity fail."
+ },
+ {
+  "id": 465,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent (only \"model oleaginous fungus\" and \"model organism\")."
+ },
+ {
+  "id": 469,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent (only \"model fungi\" and \"model organism\")."
+ },
+ {
+  "id": 471,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 485,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted terms present; states Swainson, English ornithologist, introduced the family in 1832 with citations."
+ },
+ {
+  "id": 489,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 496,
+  "rating": 2,
+  "label": "SM",
+  "note": "Facebook preview names Swainson but the date is cut off; low authority."
+ },
+ {
+  "id": 500,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Pachycephalidae\", \"family\", \"introduced\", \"English\" absent."
+ },
+ {
+  "id": 514,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 530,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent; Portuguese page."
+ },
+ {
+  "id": 531,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 553,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 555,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" absent."
+ },
+ {
+  "id": 560,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Wrong taxon (dinosaur genus); quoted terms absent."
+ },
+ {
+  "id": 563,
+  "rating": 3,
+  "label": "HM",
+  "note": "Wikipedia mirror states Swainson, English ornithologist, introduced the family in 1832; brief mirror."
+ }
+]

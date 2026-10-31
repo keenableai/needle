@@ -1,0 +1,3359 @@
+[
+ {
+  "q": 0,
+  "run": "2026-09-30T0705Z",
+  "query": "James Collins Big Stacks boxing 2026",
+  "today": "2026-09-30",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "other",
+   "query_search_operators_exist": false,
+   "query_main_aspects": [
+    "the 2026 boxing bout, event, or boxing-related appearance involving James Collins and Big Stacks"
+   ],
+   "query_aux_aspects": [
+    "the event date, location, promotion, and fight outcome or other results"
+   ],
+   "query_content_archetype": "ephemeral"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     3
+    ],
+    "ndcg": 0.9563087091883903
+   },
+   "keenable": {
+    "positions": [
+     0,
+     1,
+     2,
+     3,
+     4
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     3
+    ],
+    "ndcg": 0.9563087091883903
+   },
+   "exa-instant": {
+    "positions": [
+     5,
+     6,
+     7,
+     8,
+     9
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     3,
+     4
+    ],
+    "ndcg": 0.9513592395023788
+   },
+   "exa": {
+    "positions": [
+     5,
+     10,
+     11,
+     12,
+     13
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "google": {
+    "positions": [
+     14,
+     15,
+     16,
+     17,
+     18
+    ],
+    "penalized": [
+     2,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.4804618870995111
+   },
+   "bing": {
+    "positions": [
+     19,
+     20,
+     21,
+     22,
+     23
+    ],
+    "penalized": [
+     3,
+     3,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.7234701741780571
+   },
+   "brave": {
+    "positions": [
+     24,
+     25,
+     26,
+     27,
+     28
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "brave-llmcontext": {
+    "positions": [
+     29,
+     30,
+     31,
+     32,
+     33
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "parallel-turbo": {
+    "positions": [
+     34,
+     35,
+     36,
+     37,
+     38
+    ],
+    "penalized": [
+     4,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.3391602052736161
+   },
+   "parallel": {
+    "positions": [
+     39,
+     40,
+     41,
+     42,
+     43
+    ],
+    "penalized": [
+     4,
+     4,
+     3,
+     4,
+     4
+    ],
+    "ndcg": 0.9435298258219429
+   },
+   "tavily": {
+    "positions": [
+     44,
+     45,
+     46,
+     47,
+     48
+    ],
+    "penalized": [
+     4,
+     4,
+     3,
+     3,
+     2
+    ],
+    "ndcg": 0.7790349818809239
+   },
+   "perplexity-fast": {
+    "positions": [
+     49,
+     50,
+     51,
+     52,
+     53
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "perplexity": {
+    "positions": [
+     49,
+     51,
+     52,
+     50,
+     53
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "octen": {
+    "positions": [
+     54,
+     55,
+     56,
+     57,
+     58
+    ],
+    "penalized": [
+     4,
+     3,
+     4,
+     3,
+     4
+    ],
+    "ndcg": 0.8801018133457811
+   },
+   "ceramic": {
+    "positions": [
+     59,
+     60,
+     61,
+     62,
+     63
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "you": {
+    "positions": [
+     24,
+     64,
+     65,
+     66,
+     28
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "firecrawl": {
+    "positions": [
+     67,
+     68,
+     69,
+     70,
+     71
+    ],
+    "penalized": [
+     2,
+     4,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.5517193132561089
+   },
+   "tinyfish": {
+    "positions": [
+     72,
+     73,
+     74,
+     18,
+     75
+    ],
+    "penalized": [
+     3,
+     4,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.7382574261565977
+   },
+   "kagi": {
+    "positions": [
+     14,
+     76,
+     77,
+     78,
+     79
+    ],
+    "penalized": [
+     2,
+     3,
+     0,
+     4,
+     3
+    ],
+    "ndcg": 0.41599271913838143
+   },
+   "jina": {
+    "positions": [
+     80,
+     81,
+     82,
+     83,
+     84
+    ],
+    "penalized": [
+     2,
+     0,
+     2,
+     4,
+     2
+    ],
+    "ndcg": 0.22094195993717008
+   },
+   "context": {
+    "positions": [
+     14,
+     15,
+     18,
+     74,
+     85
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.667
+   },
+   "claude-search": {
+    "positions": [
+     86,
+     87,
+     88,
+     89,
+     90
+    ],
+    "penalized": [
+     3,
+     2,
+     3,
+     2,
+     0
+    ],
+    "ndcg": 0.38145617528178927
+   },
+   "chatgpt-search": {
+    "positions": [
+     91,
+     92,
+     93,
+     94,
+     95
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     4,
+     3
+    ],
+    "ndcg": 0.8433683608322761
+   }
+  }
+ },
+ {
+  "q": 1,
+  "run": "2026-10-03T0706Z",
+  "query": "INSE vacuum Walmart sale 2026",
+  "today": "2026-10-03",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "commerce",
+   "query_search_operators_exist": false,
+   "query_main_aspects": [
+    "Current Walmart sale availability and pricing for INSE vacuum products in 2026"
+   ],
+   "query_aux_aspects": [
+    "The specific INSE vacuum models included in the sale",
+    "Discount amounts, product specifications, shipping, and pickup details"
+   ],
+   "query_content_archetype": "ephemeral"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     96,
+     97,
+     98,
+     99,
+     100
+    ],
+    "penalized": [
+     4,
+     3,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.8364105225341711
+   },
+   "keenable": {
+    "positions": [
+     96,
+     97,
+     98,
+     99,
+     100
+    ],
+    "penalized": [
+     4,
+     3,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.8364105225341711
+   },
+   "exa-instant": {
+    "positions": [
+     101,
+     102,
+     103,
+     104,
+     105
+    ],
+    "penalized": [
+     2,
+     2,
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.2102690564502445
+   },
+   "exa": {
+    "positions": [
+     106,
+     102,
+     107,
+     108,
+     109
+    ],
+    "penalized": [
+     4,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.416478461256603
+   },
+   "google": {
+    "positions": [
+     110,
+     111,
+     112,
+     113,
+     114
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     0,
+     2
+    ],
+    "ndcg": 0.4974096180231268
+   },
+   "bing": {
+    "positions": [
+     115,
+     116,
+     117
+    ],
+    "penalized": [
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.2710971218999482
+   },
+   "brave": {
+    "positions": [
+     118,
+     119,
+     120,
+     121,
+     122
+    ],
+    "penalized": [
+     2,
+     4,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.5517193132561089
+   },
+   "brave-llmcontext": {
+    "positions": [
+     123,
+     124,
+     125,
+     126,
+     127
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.7947276003346548
+   },
+   "parallel-turbo": {
+    "positions": [
+     128,
+     129,
+     130,
+     131,
+     132
+    ],
+    "penalized": [
+     0,
+     2,
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.17058731243323136
+   },
+   "parallel": {
+    "positions": [
+     133,
+     134,
+     135,
+     136,
+     137
+    ],
+    "penalized": [
+     4,
+     3,
+     4,
+     4,
+     3
+    ],
+    "ndcg": 0.8850512830317925
+   },
+   "tavily": {
+    "positions": [
+     138,
+     139,
+     140,
+     141,
+     142
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "perplexity-fast": {
+    "positions": [
+     143,
+     144,
+     145,
+     146,
+     147
+    ],
+    "penalized": [
+     4,
+     2,
+     4,
+     3,
+     4
+    ],
+    "ndcg": 0.7624093677417909
+   },
+   "perplexity": {
+    "positions": [
+     143,
+     144,
+     145,
+     146,
+     147
+    ],
+    "penalized": [
+     4,
+     2,
+     4,
+     3,
+     4
+    ],
+    "ndcg": 0.7624093677417909
+   },
+   "octen": {
+    "positions": [
+     148,
+     149,
+     150,
+     151,
+     152
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     1,
+     2
+    ],
+    "ndcg": 0.09991000306840335
+   },
+   "ceramic": {
+    "positions": [
+     153,
+     154,
+     155,
+     156,
+     157
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     3
+    ],
+    "ndcg": 0.08751378670073198
+   },
+   "you": {
+    "positions": [
+     158,
+     119,
+     159,
+     160,
+     161
+    ],
+    "penalized": [
+     2,
+     4,
+     3,
+     4,
+     2
+    ],
+    "ndcg": 0.5281972811219421
+   },
+   "firecrawl": {
+    "positions": [
+     162,
+     163,
+     164,
+     165,
+     114
+    ],
+    "penalized": [
+     3,
+     3,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.421230558504479
+   },
+   "tinyfish": {
+    "positions": [
+     166,
+     167,
+     111,
+     168,
+     113
+    ],
+    "penalized": [
+     2,
+     2,
+     3,
+     0,
+     0
+    ],
+    "ndcg": 0.1778280654497038
+   },
+   "kagi": {
+    "positions": [
+     110,
+     169,
+     170,
+     171,
+     117
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.30353811290048893
+   },
+   "jina": {
+    "positions": [
+     172,
+     173,
+     174,
+     175,
+     176
+    ],
+    "penalized": [
+     0,
+     1,
+     2,
+     0,
+     2
+    ],
+    "ndcg": 0.035191866077450534
+   },
+   "context": {
+    "positions": [
+     112,
+     177,
+     178,
+     179,
+     110
+    ],
+    "penalized": [
+     2,
+     0,
+     2,
+     2,
+     3
+    ],
+    "ndcg": 0.16412639965784828
+   },
+   "claude-search": {
+    "positions": [
+     180,
+     181,
+     182,
+     183,
+     184
+    ],
+    "penalized": [
+     2,
+     2,
+     1,
+     2,
+     2
+    ],
+    "ndcg": 0.09715912799149345
+   },
+   "chatgpt-search": {
+    "positions": [
+     185,
+     186,
+     187,
+     188,
+     189
+    ],
+    "penalized": [
+     4,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.416478461256603
+   }
+  }
+ },
+ {
+  "q": 2,
+  "run": "2026-10-07T1310Z",
+  "query": "Paramount Warner Bros takeover closes 2026",
+  "today": "2026-10-07",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "news",
+   "query_search_operators_exist": false,
+   "query_main_aspects": [
+    "the expected or actual closing date of Paramount's takeover of Warner Bros. in 2026"
+   ],
+   "query_aux_aspects": [
+    "the current status of the takeover, including regulatory or shareholder approvals",
+    "the terms and parties involved in the proposed transaction"
+   ],
+   "query_content_archetype": "ephemeral"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     190,
+     191,
+     192,
+     193,
+     194
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "keenable": {
+    "positions": [
+     190,
+     191,
+     192,
+     193,
+     194
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "exa-instant": {
+    "positions": [
+     195,
+     196,
+     197,
+     198,
+     199
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "exa": {
+    "positions": [
+     195,
+     197,
+     200,
+     201,
+     198
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "google": {
+    "positions": [
+     202,
+     203,
+     204,
+     205,
+     206
+    ],
+    "penalized": [
+     2,
+     2,
+     3,
+     4,
+     4
+    ],
+    "ndcg": 0.45510149280475204
+   },
+   "bing": {
+    "positions": [
+     207,
+     208,
+     209,
+     210,
+     211
+    ],
+    "penalized": [
+     2,
+     3,
+     4,
+     2,
+     3
+    ],
+    "ndcg": 0.4565944688640796
+   },
+   "brave": {
+    "positions": [
+     212,
+     213,
+     214,
+     215,
+     216
+    ],
+    "penalized": [
+     3,
+     3,
+     4,
+     4,
+     2
+    ],
+    "ndcg": 0.6999481420438903
+   },
+   "brave-llmcontext": {
+    "positions": [
+     217,
+     218,
+     219,
+     220,
+     221
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "parallel-turbo": {
+    "positions": [
+     222,
+     223,
+     224,
+     225,
+     226
+    ],
+    "penalized": [
+     4,
+     4,
+     2,
+     4,
+     2
+    ],
+    "ndcg": 0.7344066859283007
+   },
+   "parallel": {
+    "positions": [
+     227,
+     228,
+     229,
+     230,
+     231
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "tavily": {
+    "positions": [
+     232,
+     233,
+     234,
+     235,
+     236
+    ],
+    "penalized": [
+     3,
+     4,
+     3,
+     4,
+     2
+    ],
+    "ndcg": 0.7147353940224309
+   },
+   "perplexity-fast": {
+    "positions": [
+     237,
+     238,
+     239,
+     240,
+     241
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.907667948690769
+   },
+   "perplexity": {
+    "positions": [
+     237,
+     238,
+     240,
+     241,
+     242
+    ],
+    "penalized": [
+     4,
+     4,
+     3,
+     3,
+     4
+    ],
+    "ndcg": 0.8948890653243217
+   },
+   "octen": {
+    "positions": [
+     243,
+     244,
+     245,
+     246,
+     247
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 0.8870596516438858
+   },
+   "ceramic": {
+    "positions": [
+     248,
+     249,
+     250,
+     251,
+     252
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     1,
+     2
+    ],
+    "ndcg": 0.09991000306840335
+   },
+   "you": {
+    "positions": [
+     253,
+     254,
+     255,
+     256,
+     257
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     4,
+     4
+    ],
+    "ndcg": 0.5483705492549965
+   },
+   "firecrawl": {
+    "positions": [
+     258,
+     259,
+     260,
+     261,
+     262
+    ],
+    "penalized": [
+     2,
+     4,
+     4,
+     2,
+     4
+    ],
+    "ndcg": 0.5715431858322871
+   },
+   "tinyfish": {
+    "positions": [
+     263,
+     264,
+     265,
+     266,
+     267
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     4
+    ],
+    "ndcg": 0.7106912908116099
+   },
+   "kagi": {
+    "positions": [
+     263,
+     268,
+     269,
+     270,
+     271
+    ],
+    "penalized": [
+     2,
+     4,
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.39921892821083227
+   },
+   "jina": {
+    "positions": [
+     272,
+     273,
+     274,
+     275,
+     276
+    ],
+    "penalized": [
+     0,
+     4,
+     4,
+     0,
+     2
+    ],
+    "ndcg": 0.3989173614402796
+   },
+   "context": {
+    "positions": [
+     202,
+     277,
+     203,
+     278,
+     279
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     3,
+     3
+    ],
+    "ndcg": 0.26950038504527657
+   },
+   "claude-search": {
+    "positions": [
+     280,
+     281,
+     282,
+     283,
+     284
+    ],
+    "penalized": [
+     4,
+     2,
+     1,
+     4,
+     4
+    ],
+    "ndcg": 0.6414700256026041
+   },
+   "chatgpt-search": {
+    "positions": [
+     285,
+     286,
+     287,
+     288,
+     289
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.11699999999999999
+   }
+  }
+ },
+ {
+  "q": 3,
+  "run": "2026-10-11T0357Z",
+  "query": "Apple ADT partnership October 2026",
+  "today": "2026-10-11",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "news",
+   "query_search_operators_exist": false,
+   "query_main_aspects": [
+    "Information confirming and describing the Apple and ADT partnership referenced for October 2026"
+   ],
+   "query_aux_aspects": [
+    "The partnership's terms, products or services involved, and intended customer impact",
+    "The announcement date and related business context"
+   ],
+   "query_content_archetype": "ephemeral"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     290,
+     291,
+     292,
+     293,
+     294
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     1,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "keenable": {
+    "positions": [
+     290,
+     291,
+     292,
+     293,
+     294
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     1,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "exa-instant": {
+    "positions": [
+     295,
+     296,
+     297,
+     298,
+     299
+    ],
+    "penalized": [
+     2,
+     3,
+     2,
+     0,
+     0
+    ],
+    "ndcg": 0.48014430700734395
+   },
+   "exa": {
+    "positions": [
+     295,
+     296,
+     300,
+     301,
+     297
+    ],
+    "penalized": [
+     2,
+     3,
+     0,
+     0,
+     2
+    ],
+    "ndcg": 0.46948535112460066
+   },
+   "google": {
+    "positions": [
+     302,
+     303,
+     304,
+     305,
+     306
+    ],
+    "penalized": [
+     2,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.09420433350775322
+   },
+   "bing": {
+    "positions": [
+     307,
+     308,
+     309,
+     310,
+     311
+    ],
+    "penalized": [
+     2,
+     0,
+     2,
+     0,
+     0
+    ],
+    "ndcg": 0.14130650026162983
+   },
+   "brave": {
+    "positions": [
+     312,
+     313,
+     314,
+     315,
+     316
+    ],
+    "penalized": [
+     1,
+     2,
+     1,
+     0,
+     0
+    ],
+    "ndcg": 0.059436316925410126
+   },
+   "brave-llmcontext": {
+    "positions": [
+     317,
+     318,
+     319,
+     320,
+     321
+    ],
+    "penalized": [
+     2,
+     2,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.15364065043316336
+   },
+   "parallel-turbo": {
+    "positions": [
+     322,
+     323,
+     324,
+     325,
+     326
+    ],
+    "penalized": [
+     3,
+     1,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.5370452175185589
+   },
+   "parallel": {
+    "positions": [
+     327,
+     328,
+     329,
+     330,
+     331
+    ],
+    "penalized": [
+     2,
+     2,
+     0,
+     2,
+     0
+    ],
+    "ndcg": 0.1942122485438805
+   },
+   "tavily": {
+    "positions": [
+     332,
+     333,
+     334,
+     335,
+     336
+    ],
+    "penalized": [
+     2,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.09420433350775322
+   },
+   "linkup": {
+    "positions": [
+     337,
+     338,
+     339,
+     340,
+     341
+    ],
+    "penalized": [
+     1,
+     2,
+     0,
+     0,
+     1
+    ],
+    "ndcg": 0.059436316925410126
+   },
+   "octen": {
+    "positions": [
+     342,
+     343,
+     344,
+     345,
+     346
+    ],
+    "penalized": [
+     2,
+     1,
+     2,
+     2,
+     1
+    ],
+    "ndcg": 0.18187809837234697
+   },
+   "ceramic": {
+    "positions": [
+     347,
+     348,
+     349,
+     350,
+     351
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "you": {
+    "positions": [
+     312,
+     313,
+     314,
+     315,
+     352
+    ],
+    "penalized": [
+     1,
+     2,
+     1,
+     0,
+     1
+    ],
+    "ndcg": 0.059436316925410126
+   },
+   "firecrawl": {
+    "positions": [
+     353,
+     304,
+     354,
+     355,
+     356
+    ],
+    "penalized": [
+     2,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.09420433350775322
+   },
+   "tinyfish": {
+    "positions": [
+     304,
+     357,
+     358,
+     359,
+     360
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "kagi": {
+    "positions": [
+     361,
+     362,
+     363,
+     364,
+     365
+    ],
+    "penalized": [
+     0,
+     2,
+     2,
+     0,
+     0
+    ],
+    "ndcg": 0.10653848367928673
+   },
+   "jina": {
+    "positions": [
+     366,
+     367,
+     368,
+     369,
+     370
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "context": {
+    "positions": [
+     371,
+     372,
+     373,
+     374,
+     359
+    ],
+    "penalized": [
+     2,
+     0,
+     0,
+     0,
+     0
+    ],
+    "ndcg": 0.09420433350775322
+   },
+   "claude-search": {
+    "positions": [
+     375,
+     376,
+     377,
+     378,
+     379
+    ],
+    "penalized": [
+     2,
+     0,
+     1,
+     0,
+     0
+    ],
+    "ndcg": 0.09420433350775322
+   },
+   "chatgpt-search": {
+    "positions": [
+     380,
+     381,
+     382,
+     383,
+     384
+    ],
+    "penalized": [
+     1,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.1835532926611372
+   }
+  }
+ },
+ {
+  "q": 4,
+  "run": "2026-10-14T1606Z",
+  "query": "Aeroplan 90% points bonus 2026",
+  "today": "2026-10-14",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "commerce",
+   "query_search_operators_exist": false,
+   "query_main_aspects": [
+    "Whether Aeroplan offered a 90% points bonus in 2026"
+   ],
+   "query_aux_aspects": [
+    "The offer's dates, eligibility, and terms"
+   ],
+   "query_content_archetype": "ephemeral"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     385,
+     386,
+     387,
+     388,
+     389
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.907667948690769
+   },
+   "keenable": {
+    "positions": [
+     385,
+     386,
+     387,
+     388,
+     389
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.907667948690769
+   },
+   "exa-instant": {
+    "positions": [
+     390,
+     391,
+     392,
+     393,
+     394
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     4
+    ],
+    "ndcg": 0.7106912908116099
+   },
+   "exa": {
+    "positions": [
+     395,
+     392,
+     396,
+     397,
+     391
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.667
+   },
+   "google": {
+    "positions": [
+     398,
+     399,
+     400,
+     401,
+     402
+    ],
+    "penalized": [
+     2,
+     0,
+     3,
+     1,
+     2
+    ],
+    "ndcg": 0.16814266654470805
+   },
+   "bing": {
+    "positions": [
+     403,
+     404,
+     405,
+     406,
+     407
+    ],
+    "penalized": [
+     2,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.4804618870995111
+   },
+   "brave": {
+    "positions": [
+     408,
+     409,
+     410,
+     411,
+     412
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     4
+    ],
+    "ndcg": 0.7106912908116099
+   },
+   "brave-llmcontext": {
+    "positions": [
+     413,
+     414,
+     415,
+     416,
+     417
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.667
+   },
+   "parallel-turbo": {
+    "positions": [
+     418,
+     419,
+     420,
+     421,
+     422
+    ],
+    "penalized": [
+     2,
+     0,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.09196360702606028
+   },
+   "parallel": {
+    "positions": [
+     423,
+     424,
+     425,
+     426,
+     427
+    ],
+    "penalized": [
+     2,
+     2,
+     3,
+     2,
+     4
+    ],
+    "ndcg": 0.3261231398936423
+   },
+   "tavily": {
+    "positions": [
+     428,
+     429,
+     430,
+     431,
+     432
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     0
+    ],
+    "ndcg": 0.579486213299268
+   },
+   "linkup": {
+    "positions": [
+     433,
+     434,
+     435,
+     436,
+     437
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.667
+   },
+   "perplexity-fast": {
+    "positions": [
+     438,
+     439,
+     440,
+     441,
+     442
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.907667948690769
+   },
+   "perplexity": {
+    "positions": [
+     438,
+     439,
+     440,
+     442,
+     443
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     3,
+     4
+    ],
+    "ndcg": 0.9513592395023788
+   },
+   "octen": {
+    "positions": [
+     444,
+     445,
+     446,
+     447,
+     448
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     2,
+     0
+    ],
+    "ndcg": 0.6268762212204342
+   },
+   "ceramic": {
+    "positions": [
+     449,
+     450,
+     451,
+     452,
+     453
+    ],
+    "penalized": [
+     4,
+     3,
+     4,
+     4,
+     3
+    ],
+    "ndcg": 0.8850512830317925
+   },
+   "you": {
+    "positions": [
+     454,
+     409,
+     455,
+     456,
+     412
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     4
+    ],
+    "ndcg": 0.7106912908116099
+   },
+   "firecrawl": {
+    "positions": [
+     457,
+     458,
+     459,
+     460,
+     461
+    ],
+    "penalized": [
+     2,
+     3,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.2346924456039902
+   },
+   "tinyfish": {
+    "positions": [
+     462,
+     463,
+     464,
+     465,
+     466
+    ],
+    "penalized": [
+     2,
+     2,
+     3,
+     2,
+     0
+    ],
+    "ndcg": 0.19491806238130047
+   },
+   "kagi": {
+    "positions": [
+     467,
+     468,
+     469,
+     470,
+     471
+    ],
+    "penalized": [
+     2,
+     2,
+     2,
+     3,
+     3
+    ],
+    "ndcg": 0.26950038504527657
+   },
+   "jina": {
+    "positions": [
+     472,
+     473,
+     474,
+     475,
+     476
+    ],
+    "penalized": [
+     0,
+     0,
+     2,
+     2,
+     0
+    ],
+    "ndcg": 0.0369308689401032
+   },
+   "context": {
+    "positions": [
+     477,
+     478,
+     479,
+     480,
+     481
+    ],
+    "penalized": [
+     4,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.779940348356114
+   },
+   "claude-search": {
+    "positions": [
+     482,
+     483,
+     484,
+     485,
+     486
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.667
+   },
+   "chatgpt-search": {
+    "positions": [
+     487,
+     488,
+     489,
+     490,
+     491
+    ],
+    "penalized": [
+     4,
+     3,
+     3,
+     3,
+     2
+    ],
+    "ndcg": 0.7077775557243262
+   }
+  }
+ },
+ {
+  "q": 5,
+  "run": "2026-10-17T2013Z",
+  "query": "Timothy Busfield charges dismissed",
+  "today": "2026-10-17",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "legal",
+   "query_search_operators_exist": false,
+   "query_main_aspects": [
+    "The disposition of the charges against Timothy Busfield"
+   ],
+   "query_aux_aspects": [
+    "The nature of the charges and relevant case details",
+    "The timing and circumstances of any dismissal"
+   ],
+   "query_content_archetype": "ephemeral"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     492,
+     493,
+     494,
+     495,
+     496
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "keenable": {
+    "positions": [
+     492,
+     493,
+     494,
+     495,
+     496
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "exa-instant": {
+    "positions": [
+     497,
+     498,
+     499,
+     500,
+     501
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     4,
+     4
+    ],
+    "ndcg": 0.7593320513092311
+   },
+   "exa": {
+    "positions": [
+     497,
+     502,
+     503,
+     498,
+     504
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     3,
+     4
+    ],
+    "ndcg": 0.8384188911462646
+   },
+   "google": {
+    "positions": [
+     505,
+     506,
+     507,
+     508,
+     509
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     2,
+     3
+    ],
+    "ndcg": 0.5866624075865114
+   },
+   "bing": {
+    "positions": [
+     510,
+     511,
+     512,
+     513,
+     514
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.7947276003346548
+   },
+   "brave": {
+    "positions": [
+     515,
+     516,
+     517,
+     518,
+     519
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "brave-llmcontext": {
+    "positions": [
+     520,
+     521,
+     522,
+     523,
+     524
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "parallel-turbo": {
+    "positions": [
+     525,
+     526,
+     527,
+     528,
+     529
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "parallel": {
+    "positions": [
+     530,
+     531,
+     532,
+     533,
+     534
+    ],
+    "penalized": [
+     3,
+     4,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.7382574261565977
+   },
+   "tavily": {
+    "positions": [
+     535,
+     536,
+     537,
+     538,
+     539
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     3,
+     3
+    ],
+    "ndcg": 0.907667948690769
+   },
+   "linkup": {
+    "positions": [
+     540,
+     541,
+     542,
+     543,
+     544
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "perplexity-fast": {
+    "positions": [
+     545,
+     546,
+     547,
+     548,
+     549
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "perplexity": {
+    "positions": [
+     546,
+     547,
+     548,
+     550,
+     551
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "octen": {
+    "positions": [
+     552,
+     553,
+     554,
+     555,
+     556
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "ceramic": {
+    "positions": [
+     557,
+     558,
+     559,
+     560,
+     561
+    ],
+    "penalized": [
+     1,
+     2,
+     0,
+     2,
+     2
+    ],
+    "ndcg": 0.05747738397448037
+   },
+   "you": {
+    "positions": [
+     562,
+     563,
+     564,
+     517,
+     565
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     4
+    ],
+    "ndcg": 1.0
+   },
+   "firecrawl": {
+    "positions": [
+     566,
+     567,
+     568,
+     569,
+     570
+    ],
+    "penalized": [
+     4,
+     3,
+     3,
+     3,
+     2
+    ],
+    "ndcg": 0.7077775557243262
+   },
+   "tinyfish": {
+    "positions": [
+     505,
+     506,
+     507,
+     508,
+     509
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     2,
+     3
+    ],
+    "ndcg": 0.5866624075865114
+   },
+   "kagi": {
+    "positions": [
+     507,
+     571,
+     572,
+     573,
+     505
+    ],
+    "penalized": [
+     3,
+     3,
+     3,
+     4,
+     3
+    ],
+    "ndcg": 0.7156407604976213
+   },
+   "jina": {
+    "positions": [
+     574,
+     575,
+     576,
+     577,
+     578
+    ],
+    "penalized": [
+     3,
+     3,
+     4,
+     3,
+     0
+    ],
+    "ndcg": 0.6359563874773251
+   },
+   "context": {
+    "positions": [
+     579,
+     580,
+     581,
+     582,
+     583
+    ],
+    "penalized": [
+     3,
+     4,
+     3,
+     3,
+     4
+    ],
+    "ndcg": 0.7819487169682074
+   },
+   "claude-search": {
+    "positions": [
+     584,
+     585,
+     586,
+     587,
+     588
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     2
+    ],
+    "ndcg": 0.8841459165566022
+   },
+   "chatgpt-search": {
+    "positions": [
+     589,
+     590,
+     591,
+     592,
+     593
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     2
+    ],
+    "ndcg": 0.8841459165566022
+   }
+  }
+ },
+ {
+  "q": 6,
+  "run": "2026-10-21T0214Z",
+  "query": "Charli XCX Oct 21 concert cancellation",
+  "today": "2026-10-21",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "news",
+   "query_search_operators_exist": false,
+   "query_main_aspects": [
+    "Whether Charli XCX's concert scheduled for October 21 was cancelled"
+   ],
+   "query_aux_aspects": [
+    "The reason for any cancellation",
+    "The concert's venue and tour"
+   ],
+   "query_content_archetype": "ephemeral"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     594,
+     595,
+     596,
+     597,
+     598
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     4,
+     3
+    ],
+    "ndcg": 0.8433683608322761
+   },
+   "keenable": {
+    "positions": [
+     594,
+     595,
+     596,
+     597,
+     598
+    ],
+    "penalized": [
+     3,
+     4,
+     4,
+     4,
+     3
+    ],
+    "ndcg": 0.8433683608322761
+   },
+   "exa-instant": {
+    "positions": [
+     599,
+     600,
+     601,
+     602,
+     603
+    ],
+    "penalized": [
+     4,
+     2,
+     2,
+     3,
+     0
+    ],
+    "ndcg": 0.4814650596011476
+   },
+   "exa": {
+    "positions": [
+     604,
+     605,
+     600,
+     601,
+     606
+    ],
+    "penalized": [
+     4,
+     4,
+     2,
+     2,
+     4
+    ],
+    "ndcg": 0.7212824164605887
+   },
+   "google": {
+    "positions": [
+     607,
+     608,
+     609,
+     610,
+     611
+    ],
+    "penalized": [
+     1,
+     2,
+     1,
+     3,
+     1
+    ],
+    "ndcg": 0.12246398231902492
+   },
+   "bing": {
+    "positions": [
+     612,
+     613,
+     614,
+     615,
+     616
+    ],
+    "penalized": [
+     4,
+     1,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.6372115097781843
+   },
+   "brave": {
+    "positions": [
+     617,
+     618,
+     619,
+     620,
+     621
+    ],
+    "penalized": [
+     4,
+     3,
+     3,
+     3,
+     1
+    ],
+    "ndcg": 0.6924265616553822
+   },
+   "brave-llmcontext": {
+    "positions": [
+     622,
+     623,
+     624,
+     625,
+     626
+    ],
+    "penalized": [
+     4,
+     4,
+     3,
+     4,
+     4
+    ],
+    "ndcg": 0.9435298258219429
+   },
+   "parallel-turbo": {
+    "positions": [
+     627,
+     628,
+     629,
+     630,
+     631
+    ],
+    "penalized": [
+     4,
+     3,
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.6274399633108376
+   },
+   "parallel": {
+    "positions": [
+     632,
+     633,
+     634,
+     635,
+     636
+    ],
+    "penalized": [
+     1,
+     4,
+     1,
+     1,
+     1
+    ],
+    "ndcg": 0.21398626473452756
+   },
+   "tavily": {
+    "positions": [
+     637,
+     637,
+     638,
+     639,
+     640
+    ],
+    "penalized": [
+     1,
+     0,
+     2,
+     1,
+     1
+    ],
+    "ndcg": 0.019840872008506545
+   },
+   "linkup": {
+    "positions": [
+     641,
+     642,
+     643,
+     644,
+     645
+    ],
+    "penalized": [
+     3,
+     4,
+     3,
+     1,
+     1
+    ],
+    "ndcg": 0.5533160501107804
+   },
+   "perplexity-fast": {
+    "positions": [
+     646,
+     647,
+     648,
+     649,
+     650
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     1,
+     3
+    ],
+    "ndcg": 0.8102403593456838
+   },
+   "perplexity": {
+    "positions": [
+     646,
+     647,
+     648,
+     649,
+     650
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     1,
+     3
+    ],
+    "ndcg": 0.8102403593456838
+   },
+   "octen": {
+    "positions": [
+     651,
+     652,
+     653,
+     654,
+     655
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     1,
+     1
+    ],
+    "ndcg": 0.7227265726449519
+   },
+   "ceramic": {
+    "positions": [
+     656,
+     657,
+     658,
+     659,
+     660
+    ],
+    "penalized": [
+     0,
+     0,
+     1,
+     1,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "you": {
+    "positions": [
+     617,
+     661,
+     620,
+     662,
+     663
+    ],
+    "penalized": [
+     4,
+     3,
+     3,
+     1,
+     1
+    ],
+    "ndcg": 0.594998972310297
+   },
+   "firecrawl": {
+    "positions": [
+     664,
+     665,
+     666,
+     667,
+     668
+    ],
+    "penalized": [
+     1,
+     1,
+     2,
+     3,
+     1
+    ],
+    "ndcg": 0.11726846135359174
+   },
+   "tinyfish": {
+    "positions": [
+     669,
+     670,
+     671,
+     672,
+     673
+    ],
+    "penalized": [
+     1,
+     1,
+     2,
+     3,
+     1
+    ],
+    "ndcg": 0.11726846135359174
+   },
+   "kagi": {
+    "positions": [
+     607,
+     609,
+     674,
+     611,
+     675
+    ],
+    "penalized": [
+     1,
+     1,
+     3,
+     1,
+     1
+    ],
+    "ndcg": 0.11310992845875098
+   },
+   "jina": {
+    "positions": [
+     676,
+     677,
+     678,
+     679,
+     680
+    ],
+    "penalized": [
+     0,
+     0,
+     1,
+     0,
+     0
+    ],
+    "ndcg": 0.0
+   },
+   "context": {
+    "positions": [
+     681,
+     682,
+     683,
+     684,
+     685
+    ],
+    "penalized": [
+     4,
+     4,
+     4,
+     4,
+     1
+    ],
+    "ndcg": 0.8687949224876582
+   },
+   "deepseek": {
+    "positions": [
+     686,
+     687,
+     688,
+     689,
+     690
+    ],
+    "penalized": [
+     4,
+     4,
+     3,
+     1,
+     1
+    ],
+    "ndcg": 0.6662563984668947
+   },
+   "claude-search": {
+    "positions": [
+     691,
+     692,
+     693,
+     694,
+     695
+    ],
+    "penalized": [
+     3,
+     1,
+     1,
+     0,
+     1
+    ],
+    "ndcg": 0.22621985691750196
+   },
+   "chatgpt-search": {
+    "positions": [
+     696,
+     697,
+     698,
+     699,
+     700
+    ],
+    "penalized": [
+     1,
+     1,
+     1,
+     1,
+     2
+    ],
+    "ndcg": 0.01535099406894399
+   }
+  }
+ },
+ {
+  "q": 7,
+  "run": "2026-10-24T0301Z",
+  "query": "Maricopa 20 voters reinstated 2026",
+  "today": "2026-10-24",
+  "profile": {
+   "query_type": "specific",
+   "query_domain": "news",
+   "query_search_operators_exist": false,
+   "query_main_aspects": [
+    "Whether 20 voters in Maricopa were reinstated in 2026"
+   ],
+   "query_aux_aspects": [
+    "The circumstances or authority behind the reinstatement"
+   ],
+   "query_content_archetype": "ephemeral"
+  },
+  "engines": {
+   "keenable-realtime": {
+    "positions": [
+     701,
+     702,
+     703,
+     704,
+     705
+    ],
+    "penalized": [
+     2,
+     4,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.5769259528383336
+   },
+   "keenable": {
+    "positions": [
+     701,
+     702,
+     703,
+     704,
+     705
+    ],
+    "penalized": [
+     2,
+     4,
+     3,
+     3,
+     3
+    ],
+    "ndcg": 0.5769259528383336
+   },
+   "exa-instant": {
+    "positions": [
+     706,
+     707,
+     708,
+     709,
+     710
+    ],
+    "penalized": [
+     2,
+     3,
+     2,
+     3,
+     2
+    ],
+    "ndcg": 0.3294229520139387
+   },
+   "exa": {
+    "positions": [
+     711,
+     712,
+     708,
+     713,
+     714
+    ],
+    "penalized": [
+     3,
+     3,
+     2,
+     1,
+     2
+    ],
+    "ndcg": 0.42260470671220013
+   },
+   "google": {
+    "positions": [
+     715,
+     716,
+     717,
+     718,
+     719
+    ],
+    "penalized": [
+     1,
+     2,
+     1,
+     3,
+     2
+    ],
+    "ndcg": 0.1441113889937603
+   },
+   "bing": {
+    "positions": [
+     720,
+     721,
+     722,
+     723,
+     724
+    ],
+    "penalized": [
+     2,
+     2,
+     1,
+     1,
+     2
+    ],
+    "ndcg": 0.08372728418195698
+   },
+   "brave": {
+    "positions": [
+     725,
+     726,
+     727,
+     728,
+     729
+    ],
+    "penalized": [
+     3,
+     2,
+     3,
+     2,
+     1
+    ],
+    "ndcg": 0.3988839290248934
+   },
+   "brave-llmcontext": {
+    "positions": [
+     730,
+     731,
+     732,
+     733,
+     734
+    ],
+    "penalized": [
+     2,
+     4,
+     1,
+     1,
+     1
+    ],
+    "ndcg": 0.2652574491001197
+   },
+   "parallel-turbo": {
+    "positions": [
+     735,
+     736,
+     737,
+     738,
+     739
+    ],
+    "penalized": [
+     3,
+     0,
+     1,
+     1,
+     1
+    ],
+    "ndcg": 0.23655526164714374
+   },
+   "parallel": {
+    "positions": [
+     740,
+     741,
+     742,
+     743,
+     744
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     2,
+     1
+    ],
+    "ndcg": 0.30135364873559134
+   },
+   "tavily": {
+    "positions": [
+     745,
+     746,
+     747,
+     748,
+     749
+    ],
+    "penalized": [
+     2,
+     2,
+     3,
+     2,
+     1
+    ],
+    "ndcg": 0.20382336844628918
+   },
+   "linkup": {
+    "positions": [
+     750,
+     751,
+     752,
+     753,
+     754
+    ],
+    "penalized": [
+     2,
+     2,
+     0,
+     4,
+     1
+    ],
+    "ndcg": 0.2204167804897978
+   },
+   "perplexity-fast": {
+    "positions": [
+     755,
+     756,
+     757,
+     758,
+     759
+    ],
+    "penalized": [
+     3,
+     2,
+     0,
+     2,
+     0
+    ],
+    "ndcg": 0.2806062982013216
+   },
+   "perplexity": {
+    "positions": [
+     755,
+     756,
+     757,
+     758,
+     759
+    ],
+    "penalized": [
+     3,
+     2,
+     0,
+     2,
+     0
+    ],
+    "ndcg": 0.2806062982013216
+   },
+   "octen": {
+    "positions": [
+     760,
+     761,
+     762,
+     763,
+     764
+    ],
+    "penalized": [
+     3,
+     1,
+     2,
+     1,
+     2
+    ],
+    "ndcg": 0.27335495377513613
+   },
+   "ceramic": {
+    "positions": [
+     765,
+     766,
+     767,
+     768,
+     769
+    ],
+    "penalized": [
+     0,
+     0,
+     0,
+     0,
+     1
+    ],
+    "ndcg": 0.0
+   },
+   "you": {
+    "positions": [
+     725,
+     770,
+     771,
+     772,
+     773
+    ],
+    "penalized": [
+     3,
+     2,
+     1,
+     0,
+     0
+    ],
+    "ndcg": 0.26273550316683864
+   },
+   "firecrawl": {
+    "positions": [
+     774,
+     775,
+     776,
+     777,
+     778
+    ],
+    "penalized": [
+     1,
+     3,
+     3,
+     2,
+     2
+    ],
+    "ndcg": 0.3014505203888415
+   },
+   "tinyfish": {
+    "positions": [
+     715,
+     717,
+     716,
+     718,
+     779
+    ],
+    "penalized": [
+     1,
+     1,
+     2,
+     3,
+     2
+    ],
+    "ndcg": 0.13867849800833515
+   },
+   "kagi": {
+    "positions": [
+     715,
+     718,
+     780,
+     781,
+     782
+    ],
+    "penalized": [
+     1,
+     3,
+     1,
+     4,
+     1
+    ],
+    "ndcg": 0.3019915908386275
+   },
+   "jina": {
+    "positions": [
+     783,
+     784,
+     785,
+     786,
+     787
+    ],
+    "penalized": [
+     0,
+     4,
+     3,
+     1,
+     0
+    ],
+    "ndcg": 0.34204037885515215
+   },
+   "context": {
+    "positions": [
+     788,
+     789,
+     790,
+     791,
+     792
+    ],
+    "penalized": [
+     2,
+     3,
+     2,
+     3,
+     2
+    ],
+    "ndcg": 0.3294229520139387
+   },
+   "deepseek": {
+    "positions": [
+     793,
+     794,
+     795,
+     796,
+     797
+    ],
+    "penalized": [
+     3,
+     2,
+     2,
+     2,
+     2
+    ],
+    "ndcg": 0.31740599032931394
+   },
+   "chatgpt-search": {
+    "positions": [
+     798,
+     799,
+     800,
+     801,
+     802
+    ],
+    "penalized": [
+     2,
+     1,
+     1,
+     2,
+     2
+    ],
+    "ndcg": 0.07541783769674501
+   }
+  }
+ }
+]

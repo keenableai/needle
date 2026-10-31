@@ -1,0 +1,2211 @@
+{
+ "order": [
+  "keenable",
+  "exa",
+  "perplexity",
+  "parallel",
+  "brave-llmcontext",
+  "linkup",
+  "brave",
+  "context",
+  "deepseek",
+  "you",
+  "claude-search",
+  "firecrawl",
+  "octen",
+  "kagi",
+  "chatgpt-search",
+  "google",
+  "jina",
+  "tavily",
+  "bing",
+  "tinyfish",
+  "ceramic"
+ ],
+ "base": {
+  "keenable": 0.7295513957096992,
+  "exa": 0.6839103167227394,
+  "perplexity": 0.6658711815240175,
+  "parallel": 0.6510387591363778,
+  "brave-llmcontext": 0.6418436957017228,
+  "linkup": 0.5713249858343069,
+  "brave": 0.5701706386033993,
+  "context": 0.5682939872439621,
+  "deepseek": 0.5646496050383984,
+  "you": 0.5549727048582154,
+  "claude-search": 0.5087242595414897,
+  "firecrawl": 0.5035228465812601,
+  "octen": 0.4991717730458472,
+  "kagi": 0.49620519952511,
+  "chatgpt-search": 0.48108225382286457,
+  "google": 0.47461355805673155,
+  "jina": 0.42458238623920536,
+  "tavily": 0.42242364297340657,
+  "bing": 0.42125636313262255,
+  "tinyfish": 0.3747314149242505,
+  "ceramic": 0.13905328999761327
+ },
+ "adjacent": [
+  {
+   "a": "keenable",
+   "b": "exa",
+   "diff": 0.04564107898695979,
+   "lo": 0.036923105397045575,
+   "hi": 0.054175832007842595,
+   "separated": true
+  },
+  {
+   "a": "exa",
+   "b": "perplexity",
+   "diff": 0.018039135198721912,
+   "lo": 0.005773208487998005,
+   "hi": 0.03159693381198725,
+   "separated": true
+  },
+  {
+   "a": "perplexity",
+   "b": "parallel",
+   "diff": 0.01483242238763971,
+   "lo": 0.0013638750657898324,
+   "hi": 0.028707709132449466,
+   "separated": true
+  },
+  {
+   "a": "parallel",
+   "b": "brave-llmcontext",
+   "diff": 0.009195063434654926,
+   "lo": -0.0028532376089808187,
+   "hi": 0.020549025969052614,
+   "separated": false
+  },
+  {
+   "a": "brave-llmcontext",
+   "b": "linkup",
+   "diff": 0.07051870986741593,
+   "lo": 0.06211770573101283,
+   "hi": 0.07965898035056806,
+   "separated": true
+  },
+  {
+   "a": "linkup",
+   "b": "brave",
+   "diff": 0.0011543472309075709,
+   "lo": -0.006699330637229273,
+   "hi": 0.008431108515683627,
+   "separated": false
+  },
+  {
+   "a": "brave",
+   "b": "context",
+   "diff": 0.0018766513594372647,
+   "lo": -0.014016089303762524,
+   "hi": 0.018924398096310857,
+   "separated": false
+  },
+  {
+   "a": "context",
+   "b": "deepseek",
+   "diff": 0.0036443822055636232,
+   "lo": -0.010963355249176798,
+   "hi": 0.017746931812485767,
+   "separated": false
+  },
+  {
+   "a": "deepseek",
+   "b": "you",
+   "diff": 0.009676900180183079,
+   "lo": -0.0014839451602397524,
+   "hi": 0.021302724153546837,
+   "separated": false
+  },
+  {
+   "a": "you",
+   "b": "claude-search",
+   "diff": 0.04624844531672567,
+   "lo": 0.03642351792815135,
+   "hi": 0.05795778360191339,
+   "separated": true
+  },
+  {
+   "a": "claude-search",
+   "b": "firecrawl",
+   "diff": 0.005201412960229579,
+   "lo": -0.006844377909586363,
+   "hi": 0.01577255200586447,
+   "separated": false
+  },
+  {
+   "a": "firecrawl",
+   "b": "octen",
+   "diff": 0.004351073535412919,
+   "lo": -0.009326080797080527,
+   "hi": 0.01792918507189678,
+   "separated": false
+  },
+  {
+   "a": "octen",
+   "b": "kagi",
+   "diff": 0.0029665735207372035,
+   "lo": -0.013918274454432666,
+   "hi": 0.019740381508815297,
+   "separated": false
+  },
+  {
+   "a": "kagi",
+   "b": "chatgpt-search",
+   "diff": 0.015122945702245427,
+   "lo": -0.015155038671414878,
+   "hi": 0.05290580226608066,
+   "separated": false
+  },
+  {
+   "a": "chatgpt-search",
+   "b": "google",
+   "diff": 0.006468695766133015,
+   "lo": -0.02986063803387662,
+   "hi": 0.03478947742057403,
+   "separated": false
+  },
+  {
+   "a": "google",
+   "b": "jina",
+   "diff": 0.0500311718175262,
+   "lo": 0.037136515544278825,
+   "hi": 0.06824037472905792,
+   "separated": true
+  },
+  {
+   "a": "jina",
+   "b": "tavily",
+   "diff": 0.0021587432657987904,
+   "lo": -0.015185344565173453,
+   "hi": 0.015511418755865869,
+   "separated": false
+  },
+  {
+   "a": "tavily",
+   "b": "bing",
+   "diff": 0.001167279840784019,
+   "lo": -0.03347217613054321,
+   "hi": 0.03894643726377184,
+   "separated": false
+  },
+  {
+   "a": "bing",
+   "b": "tinyfish",
+   "diff": 0.04652494820837205,
+   "lo": 0.004164294975837868,
+   "hi": 0.08529076059583829,
+   "separated": true
+  },
+  {
+   "a": "tinyfish",
+   "b": "ceramic",
+   "diff": 0.23567812492663723,
+   "lo": 0.2221036068274016,
+   "hi": 0.24756860349427556,
+   "separated": true
+  }
+ ],
+ "all_pairs": {
+  "keenable|exa": {
+   "diff": 0.04564107898695979,
+   "lo": 0.036923105397045575,
+   "hi": 0.054175832007842595,
+   "separated": true,
+   "sd": 0.004451118248282312,
+   "separated_bonferroni": true
+  },
+  "keenable|perplexity": {
+   "diff": 0.0636802141856817,
+   "lo": 0.05022645788349345,
+   "hi": 0.07847441051378101,
+   "separated": true,
+   "sd": 0.007193061118878928,
+   "separated_bonferroni": true
+  },
+  "keenable|parallel": {
+   "diff": 0.07851263657332141,
+   "lo": 0.06703579751483335,
+   "hi": 0.08987837703041801,
+   "separated": true,
+   "sd": 0.0057633464065776465,
+   "separated_bonferroni": true
+  },
+  "keenable|brave-llmcontext": {
+   "diff": 0.08770770000797634,
+   "lo": 0.0791536488509007,
+   "hi": 0.09610034358100883,
+   "separated": true,
+   "sd": 0.004425564090089041,
+   "separated_bonferroni": true
+  },
+  "keenable|linkup": {
+   "diff": 0.15822640987539227,
+   "lo": 0.1481528791676786,
+   "hi": 0.16919933312400337,
+   "separated": true,
+   "sd": 0.005374578959325459,
+   "separated_bonferroni": true
+  },
+  "keenable|brave": {
+   "diff": 0.15938075710629984,
+   "lo": 0.15175100242648043,
+   "hi": 0.1670237500715238,
+   "separated": true,
+   "sd": 0.0039268712062387676,
+   "separated_bonferroni": true
+  },
+  "keenable|context": {
+   "diff": 0.1612574084657371,
+   "lo": 0.14450591715807837,
+   "hi": 0.17870791192866553,
+   "separated": true,
+   "sd": 0.00858758452979504,
+   "separated_bonferroni": true
+  },
+  "keenable|deepseek": {
+   "diff": 0.16490179067130073,
+   "lo": 0.15317193026977205,
+   "hi": 0.17611792772657775,
+   "separated": true,
+   "sd": 0.005893586572059063,
+   "separated_bonferroni": true
+  },
+  "keenable|you": {
+   "diff": 0.1745786908514838,
+   "lo": 0.1672000407498222,
+   "hi": 0.1820933642793099,
+   "separated": true,
+   "sd": 0.0037514769559752383,
+   "separated_bonferroni": true
+  },
+  "keenable|claude-search": {
+   "diff": 0.22082713616820948,
+   "lo": 0.20913327482102873,
+   "hi": 0.23336549251344152,
+   "separated": true,
+   "sd": 0.006142612187066225,
+   "separated_bonferroni": true
+  },
+  "keenable|firecrawl": {
+   "diff": 0.22602854912843906,
+   "lo": 0.21432418796546948,
+   "hi": 0.23849473716374675,
+   "separated": true,
+   "sd": 0.006072153742557152,
+   "separated_bonferroni": true
+  },
+  "keenable|octen": {
+   "diff": 0.23037962266385198,
+   "lo": 0.2186424213696695,
+   "hi": 0.24189628877108066,
+   "separated": true,
+   "sd": 0.005980168014239357,
+   "separated_bonferroni": true
+  },
+  "keenable|kagi": {
+   "diff": 0.23334619618458918,
+   "lo": 0.22006500008525887,
+   "hi": 0.24592636772823717,
+   "separated": true,
+   "sd": 0.006614559184555837,
+   "separated_bonferroni": true
+  },
+  "keenable|chatgpt-search": {
+   "diff": 0.2484691418868346,
+   "lo": 0.2194713212603805,
+   "hi": 0.2852810139630657,
+   "separated": true,
+   "sd": 0.016899794500114983,
+   "separated_bonferroni": true
+  },
+  "keenable|google": {
+   "diff": 0.2549378376529676,
+   "lo": 0.2452175115571818,
+   "hi": 0.2646107535519046,
+   "separated": true,
+   "sd": 0.004884045651713081,
+   "separated_bonferroni": true
+  },
+  "keenable|jina": {
+   "diff": 0.3049690094704938,
+   "lo": 0.28868247714712386,
+   "hi": 0.32431343253829525,
+   "separated": true,
+   "sd": 0.009142647522433739,
+   "separated_bonferroni": true
+  },
+  "keenable|tavily": {
+   "diff": 0.3071277527362926,
+   "lo": 0.29907319716846764,
+   "hi": 0.3151256935745858,
+   "separated": true,
+   "sd": 0.004086258625945844,
+   "separated_bonferroni": true
+  },
+  "keenable|bing": {
+   "diff": 0.30829503257707663,
+   "lo": 0.27469732373754696,
+   "hi": 0.3450987470857248,
+   "separated": true,
+   "sd": 0.01835853322981845,
+   "separated_bonferroni": true
+  },
+  "keenable|tinyfish": {
+   "diff": 0.3548199807854487,
+   "lo": 0.3433334457642822,
+   "hi": 0.36696161509923575,
+   "separated": true,
+   "sd": 0.005975831741944772,
+   "separated_bonferroni": true
+  },
+  "keenable|ceramic": {
+   "diff": 0.5904981057120859,
+   "lo": 0.5813887139941827,
+   "hi": 0.6000035417718077,
+   "separated": true,
+   "sd": 0.004726374019362634,
+   "separated_bonferroni": true
+  },
+  "exa|perplexity": {
+   "diff": 0.018039135198721912,
+   "lo": 0.005773208487998005,
+   "hi": 0.03159693381198725,
+   "separated": true,
+   "sd": 0.006742626376195554,
+   "separated_bonferroni": false
+  },
+  "exa|parallel": {
+   "diff": 0.03287155758636162,
+   "lo": 0.02222131779803782,
+   "hi": 0.043934015763233636,
+   "separated": true,
+   "sd": 0.005569087916362476,
+   "separated_bonferroni": true
+  },
+  "exa|brave-llmcontext": {
+   "diff": 0.04206662102101655,
+   "lo": 0.03343363300289759,
+   "hi": 0.05066424433994943,
+   "separated": true,
+   "sd": 0.004282367652356576,
+   "separated_bonferroni": true
+  },
+  "exa|linkup": {
+   "diff": 0.11258533088843248,
+   "lo": 0.1012796773553607,
+   "hi": 0.12537650718047844,
+   "separated": true,
+   "sd": 0.0058963787030727206,
+   "separated_bonferroni": true
+  },
+  "exa|brave": {
+   "diff": 0.11373967811934005,
+   "lo": 0.10491173140553078,
+   "hi": 0.12269298201387846,
+   "separated": true,
+   "sd": 0.004482746052314682,
+   "separated_bonferroni": true
+  },
+  "exa|context": {
+   "diff": 0.11561632947877731,
+   "lo": 0.09868461702074927,
+   "hi": 0.13263201613338327,
+   "separated": true,
+   "sd": 0.008472575983658744,
+   "separated_bonferroni": true
+  },
+  "exa|deepseek": {
+   "diff": 0.11926071168434094,
+   "lo": 0.10644304257971615,
+   "hi": 0.1321734824502162,
+   "separated": true,
+   "sd": 0.006489991032531181,
+   "separated_bonferroni": true
+  },
+  "exa|you": {
+   "diff": 0.12893761186452402,
+   "lo": 0.12074050001379999,
+   "hi": 0.1372748657392352,
+   "separated": true,
+   "sd": 0.004215783943531627,
+   "separated_bonferroni": true
+  },
+  "exa|claude-search": {
+   "diff": 0.1751860571812497,
+   "lo": 0.16336600224808817,
+   "hi": 0.18875271428799156,
+   "separated": true,
+   "sd": 0.0064895019548832575,
+   "separated_bonferroni": true
+  },
+  "exa|firecrawl": {
+   "diff": 0.18038747014147927,
+   "lo": 0.1698908449092097,
+   "hi": 0.19118958121361534,
+   "separated": true,
+   "sd": 0.005422757777840681,
+   "separated_bonferroni": true
+  },
+  "exa|octen": {
+   "diff": 0.1847385436768922,
+   "lo": 0.17301029488307185,
+   "hi": 0.19688572751437322,
+   "separated": true,
+   "sd": 0.006129802185188085,
+   "separated_bonferroni": true
+  },
+  "exa|kagi": {
+   "diff": 0.1877051171976294,
+   "lo": 0.17431142351398243,
+   "hi": 0.20052163871888812,
+   "separated": true,
+   "sd": 0.00672407692896646,
+   "separated_bonferroni": true
+  },
+  "exa|chatgpt-search": {
+   "diff": 0.20282806289987482,
+   "lo": 0.17457725661699164,
+   "hi": 0.2392717573064756,
+   "separated": true,
+   "sd": 0.016356043217673043,
+   "separated_bonferroni": true
+  },
+  "exa|google": {
+   "diff": 0.20929675866600783,
+   "lo": 0.2002480075133553,
+   "hi": 0.2185661501695878,
+   "separated": true,
+   "sd": 0.004734930027877678,
+   "separated_bonferroni": true
+  },
+  "exa|jina": {
+   "diff": 0.25932793048353403,
+   "lo": 0.2449048847234424,
+   "hi": 0.2778834613006048,
+   "separated": true,
+   "sd": 0.00840445653270523,
+   "separated_bonferroni": true
+  },
+  "exa|tavily": {
+   "diff": 0.2614866737493328,
+   "lo": 0.2521259916281959,
+   "hi": 0.27060388143871933,
+   "separated": true,
+   "sd": 0.004609812064229386,
+   "separated_bonferroni": true
+  },
+  "exa|bing": {
+   "diff": 0.26265395359011684,
+   "lo": 0.2260029871761216,
+   "hi": 0.30324810850237194,
+   "separated": true,
+   "sd": 0.019554602128343757,
+   "separated_bonferroni": true
+  },
+  "exa|tinyfish": {
+   "diff": 0.3091789017984889,
+   "lo": 0.2967277818793579,
+   "hi": 0.3213747418980859,
+   "separated": true,
+   "sd": 0.006288762556908743,
+   "separated_bonferroni": true
+  },
+  "exa|ceramic": {
+   "diff": 0.5448570267251261,
+   "lo": 0.5353529124609209,
+   "hi": 0.5549580108263465,
+   "separated": true,
+   "sd": 0.005046601426435439,
+   "separated_bonferroni": true
+  },
+  "perplexity|parallel": {
+   "diff": 0.01483242238763971,
+   "lo": 0.0013638750657898324,
+   "hi": 0.028707709132449466,
+   "separated": true,
+   "sd": 0.007021199125659539,
+   "separated_bonferroni": false
+  },
+  "perplexity|brave-llmcontext": {
+   "diff": 0.024027485822294636,
+   "lo": 0.008365958451386768,
+   "hi": 0.03980117960962937,
+   "separated": true,
+   "sd": 0.008146658319405543,
+   "separated_bonferroni": false
+  },
+  "perplexity|linkup": {
+   "diff": 0.09454619568971057,
+   "lo": 0.07787865106084002,
+   "hi": 0.11225469918493158,
+   "separated": true,
+   "sd": 0.008810077484727499,
+   "separated_bonferroni": true
+  },
+  "perplexity|brave": {
+   "diff": 0.09570054292061814,
+   "lo": 0.07973288685843383,
+   "hi": 0.11137102230446039,
+   "separated": true,
+   "sd": 0.008317898996723118,
+   "separated_bonferroni": true
+  },
+  "perplexity|context": {
+   "diff": 0.0975771942800554,
+   "lo": 0.07723091390129122,
+   "hi": 0.11911393049910113,
+   "separated": true,
+   "sd": 0.01101121330801745,
+   "separated_bonferroni": true
+  },
+  "perplexity|deepseek": {
+   "diff": 0.10122157648561902,
+   "lo": 0.08349381134813072,
+   "hi": 0.11932952558786525,
+   "separated": true,
+   "sd": 0.009067123600072495,
+   "separated_bonferroni": true
+  },
+  "perplexity|you": {
+   "diff": 0.1108984766658021,
+   "lo": 0.09513186340380031,
+   "hi": 0.12556892041665602,
+   "separated": true,
+   "sd": 0.008046066099746129,
+   "separated_bonferroni": true
+  },
+  "perplexity|claude-search": {
+   "diff": 0.15714692198252778,
+   "lo": 0.13981104720491033,
+   "hi": 0.17627724305108505,
+   "separated": true,
+   "sd": 0.009244849192378371,
+   "separated_bonferroni": true
+  },
+  "perplexity|firecrawl": {
+   "diff": 0.16234833494275736,
+   "lo": 0.14577856753570262,
+   "hi": 0.1792184227149135,
+   "separated": true,
+   "sd": 0.008502690472539235,
+   "separated_bonferroni": true
+  },
+  "perplexity|octen": {
+   "diff": 0.16669940847817027,
+   "lo": 0.14859333258039664,
+   "hi": 0.18522482934281304,
+   "separated": true,
+   "sd": 0.009601855373848207,
+   "separated_bonferroni": true
+  },
+  "perplexity|kagi": {
+   "diff": 0.16966598199890748,
+   "lo": 0.15263743771176563,
+   "hi": 0.18528270849188866,
+   "separated": true,
+   "sd": 0.00842044706140851,
+   "separated_bonferroni": true
+  },
+  "perplexity|chatgpt-search": {
+   "diff": 0.1847889277011529,
+   "lo": 0.15269276294084266,
+   "hi": 0.22138190351458775,
+   "separated": true,
+   "sd": 0.017514310589947655,
+   "separated_bonferroni": true
+  },
+  "perplexity|google": {
+   "diff": 0.19125762346728592,
+   "lo": 0.17577955370753973,
+   "hi": 0.20583128637016046,
+   "separated": true,
+   "sd": 0.007529253922286966,
+   "separated_bonferroni": true
+  },
+  "perplexity|jina": {
+   "diff": 0.24128879528481212,
+   "lo": 0.22158030278060326,
+   "hi": 0.2629278339814917,
+   "separated": true,
+   "sd": 0.010533989388863154,
+   "separated_bonferroni": true
+  },
+  "perplexity|tavily": {
+   "diff": 0.2434475385506109,
+   "lo": 0.22685614040405966,
+   "hi": 0.25966258385412005,
+   "separated": true,
+   "sd": 0.008400498120440768,
+   "separated_bonferroni": true
+  },
+  "perplexity|bing": {
+   "diff": 0.24461481839139493,
+   "lo": 0.20642115159108854,
+   "hi": 0.28703003361002155,
+   "separated": true,
+   "sd": 0.020717270844291275,
+   "separated_bonferroni": true
+  },
+  "perplexity|tinyfish": {
+   "diff": 0.291139766599767,
+   "lo": 0.2737307539553832,
+   "hi": 0.3089527309034644,
+   "separated": true,
+   "sd": 0.008945937119556322,
+   "separated_bonferroni": true
+  },
+  "perplexity|ceramic": {
+   "diff": 0.5268178915264042,
+   "lo": 0.513278444515264,
+   "hi": 0.5402682442302582,
+   "separated": true,
+   "sd": 0.006870238606382883,
+   "separated_bonferroni": true
+  },
+  "parallel|brave-llmcontext": {
+   "diff": 0.009195063434654926,
+   "lo": -0.0028532376089808187,
+   "hi": 0.020549025969052614,
+   "separated": false,
+   "sd": 0.005847953943584938,
+   "separated_bonferroni": false
+  },
+  "parallel|linkup": {
+   "diff": 0.07971377330207086,
+   "lo": 0.0660326772144233,
+   "hi": 0.09382023962014041,
+   "separated": true,
+   "sd": 0.00688741297393739,
+   "separated_bonferroni": true
+  },
+  "parallel|brave": {
+   "diff": 0.08086812053297843,
+   "lo": 0.06917074116364452,
+   "hi": 0.09318108364130417,
+   "separated": true,
+   "sd": 0.006240473357226347,
+   "separated_bonferroni": true
+  },
+  "parallel|context": {
+   "diff": 0.08274477189241569,
+   "lo": 0.0678069015977435,
+   "hi": 0.09833132313661241,
+   "separated": true,
+   "sd": 0.007842692858931535,
+   "separated_bonferroni": true
+  },
+  "parallel|deepseek": {
+   "diff": 0.08638915409797931,
+   "lo": 0.07590523766498569,
+   "hi": 0.09678942007770774,
+   "separated": true,
+   "sd": 0.005269456255792219,
+   "separated_bonferroni": true
+  },
+  "parallel|you": {
+   "diff": 0.0960660542781624,
+   "lo": 0.0851870777965914,
+   "hi": 0.10749285321454982,
+   "separated": true,
+   "sd": 0.005832559575424769,
+   "separated_bonferroni": true
+  },
+  "parallel|claude-search": {
+   "diff": 0.14231449959488807,
+   "lo": 0.13106118610325812,
+   "hi": 0.1551504297278573,
+   "separated": true,
+   "sd": 0.006255255847456684,
+   "separated_bonferroni": true
+  },
+  "parallel|firecrawl": {
+   "diff": 0.14751591255511765,
+   "lo": 0.13465399896200736,
+   "hi": 0.1600505623779538,
+   "separated": true,
+   "sd": 0.006456614373650208,
+   "separated_bonferroni": true
+  },
+  "parallel|octen": {
+   "diff": 0.15186698609053056,
+   "lo": 0.13940210114424545,
+   "hi": 0.164849833769591,
+   "separated": true,
+   "sd": 0.006605447263223056,
+   "separated_bonferroni": true
+  },
+  "parallel|kagi": {
+   "diff": 0.15483355961126777,
+   "lo": 0.14063018408649836,
+   "hi": 0.1671357281902343,
+   "separated": true,
+   "sd": 0.006779055308597734,
+   "separated_bonferroni": true
+  },
+  "parallel|chatgpt-search": {
+   "diff": 0.1699565053135132,
+   "lo": 0.14051588992752256,
+   "hi": 0.20574757518966874,
+   "separated": true,
+   "sd": 0.016750224702276283,
+   "separated_bonferroni": true
+  },
+  "parallel|google": {
+   "diff": 0.1764252010796462,
+   "lo": 0.16406227634776865,
+   "hi": 0.188631188391715,
+   "separated": true,
+   "sd": 0.006304865788692319,
+   "separated_bonferroni": true
+  },
+  "parallel|jina": {
+   "diff": 0.2264563728971724,
+   "lo": 0.20799629407115544,
+   "hi": 0.24711038220926523,
+   "separated": true,
+   "sd": 0.009931440989625598,
+   "separated_bonferroni": true
+  },
+  "parallel|tavily": {
+   "diff": 0.2286151161629712,
+   "lo": 0.21630525047084725,
+   "hi": 0.24096910405654715,
+   "separated": true,
+   "sd": 0.006214799656826308,
+   "separated_bonferroni": true
+  },
+  "parallel|bing": {
+   "diff": 0.22978239600375522,
+   "lo": 0.19101510775613983,
+   "hi": 0.2706277913671819,
+   "separated": true,
+   "sd": 0.020435710317949444,
+   "separated_bonferroni": true
+  },
+  "parallel|tinyfish": {
+   "diff": 0.27630734421212727,
+   "lo": 0.26240694805090636,
+   "hi": 0.2915718555882917,
+   "separated": true,
+   "sd": 0.0074905695406611,
+   "separated_bonferroni": true
+  },
+  "parallel|ceramic": {
+   "diff": 0.5119854691387645,
+   "lo": 0.5011811008703899,
+   "hi": 0.5227504619187862,
+   "separated": true,
+   "sd": 0.005521518779516294,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|linkup": {
+   "diff": 0.07051870986741593,
+   "lo": 0.06211770573101283,
+   "hi": 0.07965898035056806,
+   "separated": true,
+   "sd": 0.004331059203860916,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|brave": {
+   "diff": 0.0716730570983235,
+   "lo": 0.06450326484797919,
+   "hi": 0.0785669657763175,
+   "separated": true,
+   "sd": 0.0035250556955913857,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|context": {
+   "diff": 0.07354970845776077,
+   "lo": 0.05887091199245176,
+   "hi": 0.08942130554044714,
+   "separated": true,
+   "sd": 0.007902306914462422,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|deepseek": {
+   "diff": 0.07719409066332439,
+   "lo": 0.0655105982689278,
+   "hi": 0.08920832319631333,
+   "separated": true,
+   "sd": 0.006056171539527954,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|you": {
+   "diff": 0.08687099084350747,
+   "lo": 0.07954873517700345,
+   "hi": 0.09450973371650206,
+   "separated": true,
+   "sd": 0.0038260348778515626,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|claude-search": {
+   "diff": 0.13311943616023314,
+   "lo": 0.12381439446096754,
+   "hi": 0.1443996910223042,
+   "separated": true,
+   "sd": 0.005288107075417901,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|firecrawl": {
+   "diff": 0.13832084912046272,
+   "lo": 0.12959899238230466,
+   "hi": 0.1478647487646551,
+   "separated": true,
+   "sd": 0.0046866738309228224,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|octen": {
+   "diff": 0.14267192265587564,
+   "lo": 0.13140186177992652,
+   "hi": 0.15447715468185924,
+   "separated": true,
+   "sd": 0.005913427394166484,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|kagi": {
+   "diff": 0.14563849617661284,
+   "lo": 0.13138818183417522,
+   "hi": 0.1579599878981096,
+   "separated": true,
+   "sd": 0.0067668936997060435,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|chatgpt-search": {
+   "diff": 0.16076144187885827,
+   "lo": 0.13172459420024302,
+   "hi": 0.19890396831877472,
+   "separated": true,
+   "sd": 0.01699240378726926,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|google": {
+   "diff": 0.16723013764499128,
+   "lo": 0.15829775846455169,
+   "hi": 0.17596552290256745,
+   "separated": true,
+   "sd": 0.0045243440562622505,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|jina": {
+   "diff": 0.21726130946251748,
+   "lo": 0.20216661919809664,
+   "hi": 0.23626043065552,
+   "separated": true,
+   "sd": 0.008845579562825714,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|tavily": {
+   "diff": 0.21942005272831627,
+   "lo": 0.21150606353223483,
+   "hi": 0.22726984164715136,
+   "separated": true,
+   "sd": 0.003975575104904807,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|bing": {
+   "diff": 0.2205873325691003,
+   "lo": 0.18596821014164266,
+   "hi": 0.2578358448714616,
+   "separated": true,
+   "sd": 0.01849074175691949,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|tinyfish": {
+   "diff": 0.26711228077747234,
+   "lo": 0.25728335824329085,
+   "hi": 0.27667855989997747,
+   "separated": true,
+   "sd": 0.004998423029619859,
+   "separated_bonferroni": true
+  },
+  "brave-llmcontext|ceramic": {
+   "diff": 0.5027904057041096,
+   "lo": 0.49143285511199525,
+   "hi": 0.514682727865531,
+   "separated": true,
+   "sd": 0.005918412902190063,
+   "separated_bonferroni": true
+  },
+  "linkup|brave": {
+   "diff": 0.0011543472309075709,
+   "lo": -0.006699330637229273,
+   "hi": 0.008431108515683627,
+   "separated": false,
+   "sd": 0.0038179546448705646,
+   "separated_bonferroni": false
+  },
+  "linkup|context": {
+   "diff": 0.0030309985903448355,
+   "lo": -0.013690778694761652,
+   "hi": 0.020589144625953293,
+   "separated": false,
+   "sd": 0.008724624853869961,
+   "separated_bonferroni": false
+  },
+  "linkup|deepseek": {
+   "diff": 0.006675380795908459,
+   "lo": -0.007351101948722127,
+   "hi": 0.020348351922043317,
+   "separated": false,
+   "sd": 0.007075669852129506,
+   "separated_bonferroni": false
+  },
+  "linkup|you": {
+   "diff": 0.016352280976091538,
+   "lo": 0.00793847514346524,
+   "hi": 0.02458682124876621,
+   "separated": true,
+   "sd": 0.004239316276703613,
+   "separated_bonferroni": true
+  },
+  "linkup|claude-search": {
+   "diff": 0.06260072629281721,
+   "lo": 0.05161026629886778,
+   "hi": 0.07517610648466844,
+   "separated": true,
+   "sd": 0.0059100628048289455,
+   "separated_bonferroni": true
+  },
+  "linkup|firecrawl": {
+   "diff": 0.06780213925304679,
+   "lo": 0.05594080426908976,
+   "hi": 0.07975950170879947,
+   "separated": true,
+   "sd": 0.006091404324039431,
+   "separated_bonferroni": true
+  },
+  "linkup|octen": {
+   "diff": 0.07215321278845971,
+   "lo": 0.05870378275424848,
+   "hi": 0.08595571020276371,
+   "separated": true,
+   "sd": 0.007027938479748191,
+   "separated_bonferroni": true
+  },
+  "linkup|kagi": {
+   "diff": 0.07511978630919691,
+   "lo": 0.05712847712288882,
+   "hi": 0.08984748546223609,
+   "separated": true,
+   "sd": 0.008213750251631177,
+   "separated_bonferroni": true
+  },
+  "linkup|chatgpt-search": {
+   "diff": 0.09024273201144234,
+   "lo": 0.05984960842408482,
+   "hi": 0.12782780207348293,
+   "separated": true,
+   "sd": 0.016944537567247092,
+   "separated_bonferroni": true
+  },
+  "linkup|google": {
+   "diff": 0.09671142777757535,
+   "lo": 0.08414671089516662,
+   "hi": 0.10893974140723894,
+   "separated": true,
+   "sd": 0.006226299058744888,
+   "separated_bonferroni": true
+  },
+  "linkup|jina": {
+   "diff": 0.14674259959510155,
+   "lo": 0.12930800754953808,
+   "hi": 0.16805973387018813,
+   "separated": true,
+   "sd": 0.01002884823744023,
+   "separated_bonferroni": true
+  },
+  "linkup|tavily": {
+   "diff": 0.14890134286090034,
+   "lo": 0.13886038344088464,
+   "hi": 0.1587189034271725,
+   "separated": true,
+   "sd": 0.005061914063727021,
+   "separated_bonferroni": true
+  },
+  "linkup|bing": {
+   "diff": 0.15006862270168436,
+   "lo": 0.11445874264309847,
+   "hi": 0.18730499493372404,
+   "separated": true,
+   "sd": 0.018589182958254367,
+   "separated_bonferroni": true
+  },
+  "linkup|tinyfish": {
+   "diff": 0.19659357091005641,
+   "lo": 0.18365726719145303,
+   "hi": 0.21006696445776157,
+   "separated": true,
+   "sd": 0.006603043394492209,
+   "separated_bonferroni": true
+  },
+  "linkup|ceramic": {
+   "diff": 0.43227169583669367,
+   "lo": 0.41890887517583086,
+   "hi": 0.44481424854727203,
+   "separated": true,
+   "sd": 0.006497000525546989,
+   "separated_bonferroni": true
+  },
+  "brave|context": {
+   "diff": 0.0018766513594372647,
+   "lo": -0.014016089303762524,
+   "hi": 0.018924398096310857,
+   "separated": false,
+   "sd": 0.008290309449578804,
+   "separated_bonferroni": false
+  },
+  "brave|deepseek": {
+   "diff": 0.005521033565000888,
+   "lo": -0.0077301553647587395,
+   "hi": 0.01780564634346915,
+   "separated": false,
+   "sd": 0.006505120605058271,
+   "separated_bonferroni": false
+  },
+  "brave|you": {
+   "diff": 0.015197933745183967,
+   "lo": 0.011748949662667374,
+   "hi": 0.01881327875829175,
+   "separated": true,
+   "sd": 0.001752606131957222,
+   "separated_bonferroni": true
+  },
+  "brave|claude-search": {
+   "diff": 0.06144637906190964,
+   "lo": 0.0508580223331756,
+   "hi": 0.07408782005340991,
+   "separated": true,
+   "sd": 0.006042142168716263,
+   "separated_bonferroni": true
+  },
+  "brave|firecrawl": {
+   "diff": 0.06664779202213922,
+   "lo": 0.05673607770828315,
+   "hi": 0.0781295740125687,
+   "separated": true,
+   "sd": 0.0055341225934803845,
+   "separated_bonferroni": true
+  },
+  "brave|octen": {
+   "diff": 0.07099886555755214,
+   "lo": 0.05977570493171824,
+   "hi": 0.08254027282215942,
+   "separated": true,
+   "sd": 0.005845234266811614,
+   "separated_bonferroni": true
+  },
+  "brave|kagi": {
+   "diff": 0.07396543907828934,
+   "lo": 0.05824191388802846,
+   "hi": 0.08720745521449302,
+   "separated": true,
+   "sd": 0.007402840425996967,
+   "separated_bonferroni": true
+  },
+  "brave|chatgpt-search": {
+   "diff": 0.08908838478053477,
+   "lo": 0.060673860623108755,
+   "hi": 0.12686657587935962,
+   "separated": true,
+   "sd": 0.016560769894531306,
+   "separated_bonferroni": true
+  },
+  "brave|google": {
+   "diff": 0.09555708054666778,
+   "lo": 0.08563504486546214,
+   "hi": 0.1055591926355599,
+   "separated": true,
+   "sd": 0.005111177815607444,
+   "separated_bonferroni": true
+  },
+  "brave|jina": {
+   "diff": 0.14558825236419398,
+   "lo": 0.13068226902327262,
+   "hi": 0.16438430820991834,
+   "separated": true,
+   "sd": 0.008722180865153343,
+   "separated_bonferroni": true
+  },
+  "brave|tavily": {
+   "diff": 0.14774699562999277,
+   "lo": 0.1401378341864209,
+   "hi": 0.15536682200128238,
+   "separated": true,
+   "sd": 0.003909129202294895,
+   "separated_bonferroni": true
+  },
+  "brave|bing": {
+   "diff": 0.1489142754707768,
+   "lo": 0.11292368028683103,
+   "hi": 0.1878332484707635,
+   "separated": true,
+   "sd": 0.019199517105743552,
+   "separated_bonferroni": true
+  },
+  "brave|tinyfish": {
+   "diff": 0.19543922367914884,
+   "lo": 0.18618437638080781,
+   "hi": 0.2056982082481379,
+   "separated": true,
+   "sd": 0.005063552066774654,
+   "separated_bonferroni": true
+  },
+  "brave|ceramic": {
+   "diff": 0.4311173486057861,
+   "lo": 0.42049576464090177,
+   "hi": 0.44174547363191535,
+   "separated": true,
+   "sd": 0.005495309420037149,
+   "separated_bonferroni": true
+  },
+  "context|deepseek": {
+   "diff": 0.0036443822055636232,
+   "lo": -0.010963355249176798,
+   "hi": 0.017746931812485767,
+   "separated": false,
+   "sd": 0.0071305749061945254,
+   "separated_bonferroni": false
+  },
+  "context|you": {
+   "diff": 0.013321282385746702,
+   "lo": -0.003834834345870619,
+   "hi": 0.029086559417888402,
+   "separated": false,
+   "sd": 0.0083563206762339,
+   "separated_bonferroni": false
+  },
+  "context|claude-search": {
+   "diff": 0.059569727702472375,
+   "lo": 0.04255140281441461,
+   "hi": 0.07789732434845709,
+   "separated": true,
+   "sd": 0.00914458478724797,
+   "separated_bonferroni": true
+  },
+  "context|firecrawl": {
+   "diff": 0.06477114066270195,
+   "lo": 0.0508078684763712,
+   "hi": 0.07944145302195377,
+   "separated": true,
+   "sd": 0.00735835491791797,
+   "separated_bonferroni": true
+  },
+  "context|octen": {
+   "diff": 0.06912221419811487,
+   "lo": 0.05264808431180357,
+   "hi": 0.08504202115250853,
+   "separated": true,
+   "sd": 0.008152695055094982,
+   "separated_bonferroni": true
+  },
+  "context|kagi": {
+   "diff": 0.07208878771885208,
+   "lo": 0.05308963689178825,
+   "hi": 0.0893790549525822,
+   "separated": true,
+   "sd": 0.009256787362080656,
+   "separated_bonferroni": true
+  },
+  "context|chatgpt-search": {
+   "diff": 0.0872117334210975,
+   "lo": 0.05685453311284183,
+   "hi": 0.12482386993023603,
+   "separated": true,
+   "sd": 0.017146543481024977,
+   "separated_bonferroni": true
+  },
+  "context|google": {
+   "diff": 0.09368042918723052,
+   "lo": 0.0776007855836684,
+   "hi": 0.10907787846132144,
+   "separated": true,
+   "sd": 0.007914240430062483,
+   "separated_bonferroni": true
+  },
+  "context|jina": {
+   "diff": 0.14371160100475672,
+   "lo": 0.12763667366537718,
+   "hi": 0.1618649379947666,
+   "separated": true,
+   "sd": 0.008765226483926677,
+   "separated_bonferroni": true
+  },
+  "context|tavily": {
+   "diff": 0.1458703442705555,
+   "lo": 0.1310539637362032,
+   "hi": 0.16016185058560128,
+   "separated": true,
+   "sd": 0.0072990852192532304,
+   "separated_bonferroni": true
+  },
+  "context|bing": {
+   "diff": 0.14703762411133953,
+   "lo": 0.10605946037157776,
+   "hi": 0.19023435711425796,
+   "separated": true,
+   "sd": 0.02150970899513026,
+   "separated_bonferroni": true
+  },
+  "context|tinyfish": {
+   "diff": 0.19356257231971158,
+   "lo": 0.17823419053308992,
+   "hi": 0.20745455530060225,
+   "separated": true,
+   "sd": 0.007494516171547285,
+   "separated_bonferroni": true
+  },
+  "context|ceramic": {
+   "diff": 0.42924069724634883,
+   "lo": 0.4131023549860906,
+   "hi": 0.44388294331914924,
+   "separated": true,
+   "sd": 0.007858406540643929,
+   "separated_bonferroni": true
+  },
+  "deepseek|you": {
+   "diff": 0.009676900180183079,
+   "lo": -0.0014839451602397524,
+   "hi": 0.021302724153546837,
+   "separated": false,
+   "sd": 0.005920941594550042,
+   "separated_bonferroni": false
+  },
+  "deepseek|claude-search": {
+   "diff": 0.05592534549690875,
+   "lo": 0.042996718821713076,
+   "hi": 0.06975654861976127,
+   "separated": true,
+   "sd": 0.006825557309525953,
+   "separated_bonferroni": true
+  },
+  "deepseek|firecrawl": {
+   "diff": 0.06112675845713833,
+   "lo": 0.046673876762014066,
+   "hi": 0.07624459818199625,
+   "separated": true,
+   "sd": 0.007367978352574046,
+   "separated_bonferroni": true
+  },
+  "deepseek|octen": {
+   "diff": 0.06547783199255125,
+   "lo": 0.051769180164716655,
+   "hi": 0.07916650322118235,
+   "separated": true,
+   "sd": 0.007023836741957846,
+   "separated_bonferroni": true
+  },
+  "deepseek|kagi": {
+   "diff": 0.06844440551328845,
+   "lo": 0.05463741269914335,
+   "hi": 0.08194763160744611,
+   "separated": true,
+   "sd": 0.0069535528413977145,
+   "separated_bonferroni": true
+  },
+  "deepseek|chatgpt-search": {
+   "diff": 0.08356735121553388,
+   "lo": 0.054045106937302356,
+   "hi": 0.1197201752112041,
+   "separated": true,
+   "sd": 0.016902763851101687,
+   "separated_bonferroni": true
+  },
+  "deepseek|google": {
+   "diff": 0.0900360469816669,
+   "lo": 0.07640095647515083,
+   "hi": 0.10429736992446725,
+   "separated": true,
+   "sd": 0.007103642328838168,
+   "separated_bonferroni": true
+  },
+  "deepseek|jina": {
+   "diff": 0.1400672187991931,
+   "lo": 0.12048220950054928,
+   "hi": 0.1626984463095536,
+   "separated": true,
+   "sd": 0.010599254417191688,
+   "separated_bonferroni": true
+  },
+  "deepseek|tavily": {
+   "diff": 0.14222596206499188,
+   "lo": 0.12950310503484547,
+   "hi": 0.15557175775796467,
+   "separated": true,
+   "sd": 0.006624112964350619,
+   "separated_bonferroni": true
+  },
+  "deepseek|bing": {
+   "diff": 0.1433932419057759,
+   "lo": 0.10679059189882284,
+   "hi": 0.18339481089768506,
+   "separated": true,
+   "sd": 0.01958219618014271,
+   "separated_bonferroni": true
+  },
+  "deepseek|tinyfish": {
+   "diff": 0.18991819011414796,
+   "lo": 0.17468559585734017,
+   "hi": 0.2065450199530124,
+   "separated": true,
+   "sd": 0.008126684628759814,
+   "separated_bonferroni": true
+  },
+  "deepseek|ceramic": {
+   "diff": 0.4255963150407852,
+   "lo": 0.41541620426323583,
+   "hi": 0.4358384479652777,
+   "separated": true,
+   "sd": 0.0052037848535342575,
+   "separated_bonferroni": true
+  },
+  "you|claude-search": {
+   "diff": 0.04624844531672567,
+   "lo": 0.03642351792815135,
+   "hi": 0.05795778360191339,
+   "separated": true,
+   "sd": 0.005530629621571868,
+   "separated_bonferroni": true
+  },
+  "you|firecrawl": {
+   "diff": 0.05144985827695525,
+   "lo": 0.04101210226968588,
+   "hi": 0.06345635538984973,
+   "separated": true,
+   "sd": 0.005678437497942345,
+   "separated_bonferroni": true
+  },
+  "you|octen": {
+   "diff": 0.05580093181236817,
+   "lo": 0.0440408459460635,
+   "hi": 0.0675292308011522,
+   "separated": true,
+   "sd": 0.0060958508979339155,
+   "separated_bonferroni": true
+  },
+  "you|kagi": {
+   "diff": 0.058767505333105374,
+   "lo": 0.044102564494668095,
+   "hi": 0.07095256067573097,
+   "separated": true,
+   "sd": 0.007000261172520132,
+   "separated_bonferroni": true
+  },
+  "you|chatgpt-search": {
+   "diff": 0.0738904510353508,
+   "lo": 0.04514556639016343,
+   "hi": 0.11114345195926473,
+   "separated": true,
+   "sd": 0.016465038160845734,
+   "separated_bonferroni": true
+  },
+  "you|google": {
+   "diff": 0.08035914680148382,
+   "lo": 0.06992682662990679,
+   "hi": 0.09051222093855427,
+   "separated": true,
+   "sd": 0.005269629606838564,
+   "separated_bonferroni": true
+  },
+  "you|jina": {
+   "diff": 0.13039031861901001,
+   "lo": 0.11512615032134332,
+   "hi": 0.1497146013781021,
+   "separated": true,
+   "sd": 0.009056997850369695,
+   "separated_bonferroni": true
+  },
+  "you|tavily": {
+   "diff": 0.1325490618848088,
+   "lo": 0.12460636046755008,
+   "hi": 0.14023046204152617,
+   "separated": true,
+   "sd": 0.004031432702517143,
+   "separated_bonferroni": true
+  },
+  "you|bing": {
+   "diff": 0.13371634172559282,
+   "lo": 0.09829840999044642,
+   "hi": 0.1723907559046276,
+   "separated": true,
+   "sd": 0.01913491404228249,
+   "separated_bonferroni": true
+  },
+  "you|tinyfish": {
+   "diff": 0.18024128993396488,
+   "lo": 0.17014085382467148,
+   "hi": 0.19145913515595125,
+   "separated": true,
+   "sd": 0.005568361944065666,
+   "separated_bonferroni": true
+  },
+  "you|ceramic": {
+   "diff": 0.41591941486060213,
+   "lo": 0.40583508905631493,
+   "hi": 0.4265657698037735,
+   "separated": true,
+   "sd": 0.005256602734470141,
+   "separated_bonferroni": true
+  },
+  "claude-search|firecrawl": {
+   "diff": 0.005201412960229579,
+   "lo": -0.006844377909586363,
+   "hi": 0.01577255200586447,
+   "separated": false,
+   "sd": 0.005899925739963088,
+   "separated_bonferroni": false
+  },
+  "claude-search|octen": {
+   "diff": 0.009552486495642498,
+   "lo": -0.007426809958159364,
+   "hi": 0.024407090936300502,
+   "separated": false,
+   "sd": 0.008145959747209585,
+   "separated_bonferroni": false
+  },
+  "claude-search|kagi": {
+   "diff": 0.012519060016379702,
+   "lo": -0.003943009712826018,
+   "hi": 0.02615189945779023,
+   "separated": false,
+   "sd": 0.007895898347561619,
+   "separated_bonferroni": false
+  },
+  "claude-search|chatgpt-search": {
+   "diff": 0.02764200571862513,
+   "lo": -0.0036566001609722454,
+   "hi": 0.06655791024727864,
+   "separated": false,
+   "sd": 0.01792967508265276,
+   "separated_bonferroni": false
+  },
+  "claude-search|google": {
+   "diff": 0.034110701484758144,
+   "lo": 0.019026105727486697,
+   "hi": 0.04615247451639831,
+   "separated": true,
+   "sd": 0.007078385765742484,
+   "separated_bonferroni": true
+  },
+  "claude-search|jina": {
+   "diff": 0.08414187330228434,
+   "lo": 0.06413517166681543,
+   "hi": 0.10519923337834158,
+   "separated": true,
+   "sd": 0.010516972664899704,
+   "separated_bonferroni": true
+  },
+  "claude-search|tavily": {
+   "diff": 0.08630061656808313,
+   "lo": 0.07406490796217274,
+   "hi": 0.09722286101209371,
+   "separated": true,
+   "sd": 0.005997376211754534,
+   "separated_bonferroni": true
+  },
+  "claude-search|bing": {
+   "diff": 0.08746789640886715,
+   "lo": 0.05181147107692641,
+   "hi": 0.12456622187844874,
+   "separated": true,
+   "sd": 0.01853140999974282,
+   "separated_bonferroni": true
+  },
+  "claude-search|tinyfish": {
+   "diff": 0.1339928446172392,
+   "lo": 0.11878884586340582,
+   "hi": 0.1471695586253638,
+   "separated": true,
+   "sd": 0.007506514803882774,
+   "separated_bonferroni": true
+  },
+  "claude-search|ceramic": {
+   "diff": 0.36967096954387646,
+   "lo": 0.35321233051022594,
+   "hi": 0.38357941094647147,
+   "separated": true,
+   "sd": 0.007854432614251174,
+   "separated_bonferroni": true
+  },
+  "firecrawl|octen": {
+   "diff": 0.004351073535412919,
+   "lo": -0.009326080797080527,
+   "hi": 0.01792918507189678,
+   "separated": false,
+   "sd": 0.00688783169413541,
+   "separated_bonferroni": false
+  },
+  "firecrawl|kagi": {
+   "diff": 0.007317647056150123,
+   "lo": -0.009376233336358064,
+   "hi": 0.021167127733153546,
+   "separated": false,
+   "sd": 0.007777156197886287,
+   "separated_bonferroni": false
+  },
+  "firecrawl|chatgpt-search": {
+   "diff": 0.02244059275839555,
+   "lo": -0.006406998655716034,
+   "hi": 0.05960365573657356,
+   "separated": false,
+   "sd": 0.01675533105839796,
+   "separated_bonferroni": false
+  },
+  "firecrawl|google": {
+   "diff": 0.028909288524528565,
+   "lo": 0.019735746464294157,
+   "hi": 0.0363116230582724,
+   "separated": true,
+   "sd": 0.004229948376832997,
+   "separated_bonferroni": true
+  },
+  "firecrawl|jina": {
+   "diff": 0.07894046034205476,
+   "lo": 0.06460111139114033,
+   "hi": 0.09734802644547164,
+   "separated": true,
+   "sd": 0.008340228602135676,
+   "separated_bonferroni": true
+  },
+  "firecrawl|tavily": {
+   "diff": 0.08109920360785355,
+   "lo": 0.07249932758268568,
+   "hi": 0.08949610168290822,
+   "separated": true,
+   "sd": 0.004324618489257079,
+   "separated_bonferroni": true
+  },
+  "firecrawl|bing": {
+   "diff": 0.08226648344863757,
+   "lo": 0.04666613722182528,
+   "hi": 0.1205979209726552,
+   "separated": true,
+   "sd": 0.019252549698177867,
+   "separated_bonferroni": true
+  },
+  "firecrawl|tinyfish": {
+   "diff": 0.12879143165700963,
+   "lo": 0.12051354129570191,
+   "hi": 0.1373073624705729,
+   "separated": true,
+   "sd": 0.004328552556948088,
+   "separated_bonferroni": true
+  },
+  "firecrawl|ceramic": {
+   "diff": 0.3644695565836469,
+   "lo": 0.3504890249819619,
+   "hi": 0.3774982658340335,
+   "separated": true,
+   "sd": 0.0066982245292556515,
+   "separated_bonferroni": true
+  },
+  "octen|kagi": {
+   "diff": 0.0029665735207372035,
+   "lo": -0.013918274454432666,
+   "hi": 0.019740381508815297,
+   "separated": false,
+   "sd": 0.00858499945129636,
+   "separated_bonferroni": false
+  },
+  "octen|chatgpt-search": {
+   "diff": 0.01808951922298263,
+   "lo": -0.0123636444222055,
+   "hi": 0.05535131762655282,
+   "separated": false,
+   "sd": 0.01687954063297676,
+   "separated_bonferroni": false
+  },
+  "octen|google": {
+   "diff": 0.024558214989115645,
+   "lo": 0.01208996570377785,
+   "hi": 0.037812388688137744,
+   "separated": true,
+   "sd": 0.0066060566686575875,
+   "separated_bonferroni": true
+  },
+  "octen|jina": {
+   "diff": 0.07458938680664184,
+   "lo": 0.05855818482429015,
+   "hi": 0.09539094028571599,
+   "separated": true,
+   "sd": 0.009410402896264516,
+   "separated_bonferroni": true
+  },
+  "octen|tavily": {
+   "diff": 0.07674813007244063,
+   "lo": 0.06496194550722878,
+   "hi": 0.0884278713723291,
+   "separated": true,
+   "sd": 0.006076745578266688,
+   "separated_bonferroni": true
+  },
+  "octen|bing": {
+   "diff": 0.07791540991322465,
+   "lo": 0.0395611832021564,
+   "hi": 0.12027794291872829,
+   "separated": true,
+   "sd": 0.021092790946132367,
+   "separated_bonferroni": true
+  },
+  "octen|tinyfish": {
+   "diff": 0.1244403581215967,
+   "lo": 0.11187795249300858,
+   "hi": 0.13727478358713052,
+   "separated": true,
+   "sd": 0.006549243191292576,
+   "separated_bonferroni": true
+  },
+  "octen|ceramic": {
+   "diff": 0.3601184830482339,
+   "lo": 0.34919715359329084,
+   "hi": 0.37034196480831333,
+   "separated": true,
+   "sd": 0.005417176166444313,
+   "separated_bonferroni": true
+  },
+  "kagi|chatgpt-search": {
+   "diff": 0.015122945702245427,
+   "lo": -0.015155038671414878,
+   "hi": 0.05290580226608066,
+   "separated": false,
+   "sd": 0.01746824254915091,
+   "separated_bonferroni": false
+  },
+  "kagi|google": {
+   "diff": 0.021591641468378442,
+   "lo": 0.011218056338186233,
+   "hi": 0.032058370612491505,
+   "separated": true,
+   "sd": 0.005289141753912511,
+   "separated_bonferroni": true
+  },
+  "kagi|jina": {
+   "diff": 0.07162281328590464,
+   "lo": 0.05267131819050891,
+   "hi": 0.09443775937472065,
+   "separated": true,
+   "sd": 0.010337777885438626,
+   "separated_bonferroni": true
+  },
+  "kagi|tavily": {
+   "diff": 0.07378155655170343,
+   "lo": 0.06080922025758523,
+   "hi": 0.08825887062354021,
+   "separated": true,
+   "sd": 0.006933725009074082,
+   "separated_bonferroni": true
+  },
+  "kagi|bing": {
+   "diff": 0.07494883639248745,
+   "lo": 0.03972395090298414,
+   "hi": 0.11367588649745941,
+   "separated": true,
+   "sd": 0.01868174936879771,
+   "separated_bonferroni": true
+  },
+  "kagi|tinyfish": {
+   "diff": 0.1214737846008595,
+   "lo": 0.10664281688122762,
+   "hi": 0.1376502907453665,
+   "separated": true,
+   "sd": 0.007842839018112753,
+   "separated_bonferroni": true
+  },
+  "kagi|ceramic": {
+   "diff": 0.35715190952749676,
+   "lo": 0.34535395910918065,
+   "hi": 0.37008184440411973,
+   "separated": true,
+   "sd": 0.006199001762726157,
+   "separated_bonferroni": true
+  },
+  "chatgpt-search|google": {
+   "diff": 0.006468695766133015,
+   "lo": -0.02986063803387662,
+   "hi": 0.03478947742057403,
+   "separated": false,
+   "sd": 0.01685532484301444,
+   "separated_bonferroni": false
+  },
+  "chatgpt-search|jina": {
+   "diff": 0.05649986758365921,
+   "lo": 0.015901824367821504,
+   "hi": 0.09273649762285996,
+   "separated": true,
+   "sd": 0.0192160578971265,
+   "separated_bonferroni": false
+  },
+  "chatgpt-search|tavily": {
+   "diff": 0.058658610849458004,
+   "lo": 0.02349536298649796,
+   "hi": 0.08666344966036826,
+   "separated": true,
+   "sd": 0.01627876997566678,
+   "separated_bonferroni": false
+  },
+  "chatgpt-search|bing": {
+   "diff": 0.05982589069024202,
+   "lo": 0.00553225580465222,
+   "hi": 0.11307136120767658,
+   "separated": true,
+   "sd": 0.02730909431764702,
+   "separated_bonferroni": false
+  },
+  "chatgpt-search|tinyfish": {
+   "diff": 0.10635083889861408,
+   "lo": 0.06789236991083847,
+   "hi": 0.13667903117227637,
+   "separated": true,
+   "sd": 0.017338437010999602,
+   "separated_bonferroni": true
+  },
+  "chatgpt-search|ceramic": {
+   "diff": 0.3420289638252513,
+   "lo": 0.3060523280994489,
+   "hi": 0.3708585238334433,
+   "separated": true,
+   "sd": 0.01673659774279776,
+   "separated_bonferroni": true
+  },
+  "google|jina": {
+   "diff": 0.0500311718175262,
+   "lo": 0.037136515544278825,
+   "hi": 0.06824037472905792,
+   "separated": true,
+   "sd": 0.007963172180970365,
+   "separated_bonferroni": true
+  },
+  "google|tavily": {
+   "diff": 0.05218991508332499,
+   "lo": 0.044575677748314835,
+   "hi": 0.0601600319321518,
+   "separated": true,
+   "sd": 0.004065177888841501,
+   "separated_bonferroni": true
+  },
+  "google|bing": {
+   "diff": 0.05335719492410901,
+   "lo": 0.01823405292179653,
+   "hi": 0.09215723566966394,
+   "separated": true,
+   "sd": 0.018699289015460963,
+   "separated_bonferroni": false
+  },
+  "google|tinyfish": {
+   "diff": 0.09988214313248106,
+   "lo": 0.0923606613789979,
+   "hi": 0.10856689664677682,
+   "separated": true,
+   "sd": 0.00429594922836635,
+   "separated_bonferroni": true
+  },
+  "google|ceramic": {
+   "diff": 0.3355602680591183,
+   "lo": 0.32515718272068356,
+   "hi": 0.34574199062934524,
+   "separated": true,
+   "sd": 0.005266769540415193,
+   "separated_bonferroni": true
+  },
+  "jina|tavily": {
+   "diff": 0.0021587432657987904,
+   "lo": -0.015185344565173453,
+   "hi": 0.015511418755865869,
+   "separated": false,
+   "sd": 0.007841872415794149,
+   "separated_bonferroni": false
+  },
+  "jina|bing": {
+   "diff": 0.0033260231065828094,
+   "lo": -0.03672138990788626,
+   "hi": 0.04796774870234338,
+   "separated": false,
+   "sd": 0.021735260998029034,
+   "separated_bonferroni": false
+  },
+  "jina|tinyfish": {
+   "diff": 0.04985097131495486,
+   "lo": 0.03280513572076016,
+   "hi": 0.06204564758199743,
+   "separated": true,
+   "sd": 0.00761207014692936,
+   "separated_bonferroni": true
+  },
+  "jina|ceramic": {
+   "diff": 0.28552909624159206,
+   "lo": 0.2657993792669251,
+   "hi": 0.3007527113600268,
+   "separated": true,
+   "sd": 0.008940355097149466,
+   "separated_bonferroni": true
+  },
+  "tavily|bing": {
+   "diff": 0.001167279840784019,
+   "lo": -0.03347217613054321,
+   "hi": 0.03894643726377184,
+   "separated": false,
+   "sd": 0.018460222341017057,
+   "separated_bonferroni": false
+  },
+  "tavily|tinyfish": {
+   "diff": 0.04769222804915607,
+   "lo": 0.03887053750857322,
+   "hi": 0.056699767835142356,
+   "separated": true,
+   "sd": 0.004541510864571472,
+   "separated_bonferroni": true
+  },
+  "tavily|ceramic": {
+   "diff": 0.28337035297579327,
+   "lo": 0.2726774486513801,
+   "hi": 0.2946086553066681,
+   "separated": true,
+   "sd": 0.0056656916393729865,
+   "separated_bonferroni": true
+  },
+  "bing|tinyfish": {
+   "diff": 0.04652494820837205,
+   "lo": 0.004164294975837868,
+   "hi": 0.08529076059583829,
+   "separated": true,
+   "sd": 0.02052040934674221,
+   "separated_bonferroni": false
+  },
+  "bing|ceramic": {
+   "diff": 0.28220307313500925,
+   "lo": 0.24174448548234,
+   "hi": 0.3191142075521452,
+   "separated": true,
+   "sd": 0.01964911992228701,
+   "separated_bonferroni": true
+  },
+  "tinyfish|ceramic": {
+   "diff": 0.23567812492663723,
+   "lo": 0.2221036068274016,
+   "hi": 0.24756860349427556,
+   "separated": true,
+   "sd": 0.006602714188591786,
+   "separated_bonferroni": true
+  }
+ },
+ "runs": [
+  "2026-10-17T21:51Z",
+  "2026-10-17T22:17Z",
+  "2026-10-17T22:54Z",
+  "2026-10-17T23:14Z",
+  "2026-10-18T00:09Z",
+  "2026-10-18T01:46Z",
+  "2026-10-18T02:24Z",
+  "2026-10-18T03:28Z",
+  "2026-10-18T03:38Z",
+  "2026-10-18T04:24Z",
+  "2026-10-18T05:58Z",
+  "2026-10-18T07:10Z",
+  "2026-10-18T07:11Z",
+  "2026-10-18T07:35Z",
+  "2026-10-18T08:08Z",
+  "2026-10-18T08:12Z",
+  "2026-10-18T09:22Z",
+  "2026-10-18T09:48Z",
+  "2026-10-18T09:53Z",
+  "2026-10-18T10:48Z",
+  "2026-10-18T14:39Z",
+  "2026-10-18T14:46Z",
+  "2026-10-18T15:31Z",
+  "2026-10-18T16:26Z",
+  "2026-10-18T17:27Z",
+  "2026-10-18T18:00Z",
+  "2026-10-18T19:26Z",
+  "2026-10-18T20:21Z",
+  "2026-10-18T21:23Z",
+  "2026-10-18T21:26Z",
+  "2026-10-18T22:21Z",
+  "2026-10-18T23:17Z",
+  "2026-10-19T00:14Z",
+  "2026-10-19T01:39Z",
+  "2026-10-19T02:03Z",
+  "2026-10-19T04:44Z",
+  "2026-10-19T06:06Z",
+  "2026-10-19T07:33Z",
+  "2026-10-19T08:22Z",
+  "2026-10-19T09:17Z",
+  "2026-10-19T09:25Z",
+  "2026-10-19T10:14Z",
+  "2026-10-19T11:04Z",
+  "2026-10-19T12:06Z",
+  "2026-10-19T13:32Z",
+  "2026-10-19T14:18Z",
+  "2026-10-19T15:05Z",
+  "2026-10-19T15:15Z",
+  "2026-10-19T16:14Z",
+  "2026-10-19T17:14Z",
+  "2026-10-19T18:00Z",
+  "2026-10-19T19:27Z",
+  "2026-10-19T20:22Z",
+  "2026-10-19T21:16Z",
+  "2026-10-19T21:49Z",
+  "2026-10-19T22:18Z",
+  "2026-10-19T23:19Z",
+  "2026-10-20T00:22Z",
+  "2026-10-20T01:33Z",
+  "2026-10-20T02:15Z",
+  "2026-10-20T03:11Z",
+  "2026-10-20T04:09Z",
+  "2026-10-20T05:02Z",
+  "2026-10-20T05:08Z",
+  "2026-10-20T06:06Z",
+  "2026-10-20T07:21Z",
+  "2026-10-20T08:17Z",
+  "2026-10-20T09:05Z",
+  "2026-10-20T09:10Z",
+  "2026-10-20T10:07Z",
+  "2026-10-20T11:05Z",
+  "2026-10-20T12:08Z",
+  "2026-10-20T13:23Z",
+  "2026-10-20T14:12Z",
+  "2026-10-20T15:02Z",
+  "2026-10-20T15:11Z",
+  "2026-10-20T16:10Z",
+  "2026-10-20T17:16Z",
+  "2026-10-20T18:05Z",
+  "2026-10-20T19:15Z",
+  "2026-10-20T20:03Z",
+  "2026-10-20T21:08Z",
+  "2026-10-20T21:40Z",
+  "2026-10-20T22:03Z",
+  "2026-10-20T23:04Z",
+  "2026-10-21T00:03Z",
+  "2026-10-21T01:34Z",
+  "2026-10-21T02:14Z",
+  "2026-10-21T03:16Z",
+  "2026-10-21T04:06Z",
+  "2026-10-21T04:54Z",
+  "2026-10-21T05:07Z",
+  "2026-10-21T06:08Z",
+  "2026-10-21T07:27Z",
+  "2026-10-21T08:13Z",
+  "2026-10-21T09:16Z",
+  "2026-10-21T09:30Z",
+  "2026-10-21T11:07Z",
+  "2026-10-21T12:17Z",
+  "2026-10-21T13:30Z",
+  "2026-10-21T14:11Z",
+  "2026-10-21T15:19Z",
+  "2026-10-21T15:21Z",
+  "2026-10-21T16:37Z",
+  "2026-10-21T17:15Z",
+  "2026-10-21T18:02Z",
+  "2026-10-21T19:51Z",
+  "2026-10-21T20:26Z",
+  "2026-10-21T21:24Z",
+  "2026-10-21T21:36Z",
+  "2026-10-21T22:10Z",
+  "2026-10-21T23:06Z",
+  "2026-10-22T00:01Z",
+  "2026-10-22T01:37Z",
+  "2026-10-22T02:17Z",
+  "2026-10-22T03:15Z",
+  "2026-10-22T04:22Z",
+  "2026-10-22T05:14Z",
+  "2026-10-22T06:20Z",
+  "2026-10-22T07:27Z",
+  "2026-10-22T08:15Z",
+  "2026-10-22T09:20Z",
+  "2026-10-22T09:33Z",
+  "2026-10-22T10:18Z",
+  "2026-10-22T11:13Z",
+  "2026-10-22T12:19Z",
+  "2026-10-22T13:34Z",
+  "2026-10-22T14:18Z",
+  "2026-10-22T14:25Z",
+  "2026-10-22T15:08Z",
+  "2026-10-22T16:22Z",
+  "2026-10-22T17:23Z",
+  "2026-10-22T18:17Z",
+  "2026-10-22T19:22Z",
+  "2026-10-22T21:11Z",
+  "2026-10-22T22:08Z",
+  "2026-10-22T23:05Z",
+  "2026-10-23T00:07Z",
+  "2026-10-23T01:42Z",
+  "2026-10-23T02:18Z",
+  "2026-10-23T03:34Z",
+  "2026-10-23T04:09Z",
+  "2026-10-23T04:17Z",
+  "2026-10-23T05:18Z",
+  "2026-10-23T06:09Z",
+  "2026-10-23T07:35Z",
+  "2026-10-23T08:16Z",
+  "2026-10-23T09:13Z",
+  "2026-10-23T09:26Z",
+  "2026-10-23T10:10Z",
+  "2026-10-23T11:05Z",
+  "2026-10-23T12:13Z",
+  "2026-10-23T13:23Z",
+  "2026-10-23T14:02Z",
+  "2026-10-23T15:01Z",
+  "2026-10-23T15:21Z",
+  "2026-10-23T16:01Z",
+  "2026-10-23T17:01Z",
+  "2026-10-23T17:56Z",
+  "2026-10-23T19:03Z",
+  "2026-10-23T19:53Z",
+  "2026-10-23T20:37Z",
+  "2026-10-23T20:59Z",
+  "2026-10-23T21:53Z",
+  "2026-10-23T22:54Z",
+  "2026-10-23T23:51Z",
+  "2026-10-24T01:20Z",
+  "2026-10-24T02:01Z",
+  "2026-10-24T03:01Z",
+  "2026-10-24T03:41Z",
+  "2026-10-24T03:58Z",
+  "2026-10-24T05:00Z",
+  "2026-10-24T05:55Z",
+  "2026-10-24T07:09Z",
+  "2026-10-24T07:53Z",
+  "2026-10-24T08:38Z",
+  "2026-10-24T08:58Z",
+  "2026-10-24T09:50Z",
+  "2026-10-24T10:53Z",
+  "2026-10-24T11:52Z",
+  "2026-10-24T13:02Z",
+  "2026-10-24T13:51Z",
+  "2026-10-24T14:48Z",
+  "2026-10-24T14:55Z",
+  "2026-10-24T15:54Z",
+  "2026-10-24T16:57Z",
+  "2026-10-24T17:53Z",
+  "2026-10-24T20:34Z",
+  "2026-10-25T03:26Z",
+  "2026-10-25T07:08Z",
+  "2026-10-25T07:58Z",
+  "2026-10-25T08:25Z",
+  "2026-10-25T09:00Z",
+  "2026-10-25T09:57Z",
+  "2026-10-25T10:48Z",
+  "2026-10-25T11:50Z",
+  "2026-10-25T13:05Z",
+  "2026-10-25T13:50Z",
+  "2026-10-25T14:46Z",
+  "2026-10-25T14:52Z",
+  "2026-10-25T15:52Z",
+  "2026-10-25T16:52Z",
+  "2026-10-25T17:53Z",
+  "2026-10-25T18:55Z",
+  "2026-10-25T19:48Z",
+  "2026-10-25T20:36Z",
+  "2026-10-25T20:51Z",
+  "2026-10-25T21:50Z",
+  "2026-10-25T22:49Z",
+  "2026-10-25T23:50Z",
+  "2026-10-26T01:26Z",
+  "2026-10-26T02:05Z",
+  "2026-10-26T03:12Z",
+  "2026-10-26T03:36Z",
+  "2026-10-26T04:06Z",
+  "2026-10-26T05:03Z",
+  "2026-10-26T06:02Z",
+  "2026-10-26T07:31Z",
+  "2026-10-26T08:18Z",
+  "2026-10-26T09:05Z",
+  "2026-10-26T09:15Z",
+  "2026-10-26T10:14Z",
+  "2026-10-26T11:06Z",
+  "2026-10-26T12:15Z",
+  "2026-10-26T15:22Z",
+  "2026-10-26T16:17Z",
+  "2026-10-26T17:09Z",
+  "2026-10-26T18:02Z",
+  "2026-10-26T19:16Z",
+  "2026-10-26T19:59Z",
+  "2026-10-26T21:04Z",
+  "2026-10-26T21:30Z",
+  "2026-10-26T22:00Z",
+  "2026-10-26T23:02Z",
+  "2026-10-26T23:54Z",
+  "2026-10-27T01:33Z",
+  "2026-10-27T02:13Z",
+  "2026-10-27T03:14Z",
+  "2026-10-27T04:10Z",
+  "2026-10-27T04:48Z",
+  "2026-10-27T05:02Z",
+  "2026-10-27T06:01Z",
+  "2026-10-27T07:20Z",
+  "2026-10-27T08:09Z",
+  "2026-10-27T09:11Z",
+  "2026-10-27T09:13Z",
+  "2026-10-27T10:07Z",
+  "2026-10-27T11:02Z",
+  "2026-10-27T12:04Z",
+  "2026-10-27T13:25Z",
+  "2026-10-27T14:09Z",
+  "2026-10-27T14:52Z",
+  "2026-10-27T15:08Z",
+  "2026-10-27T16:09Z",
+  "2026-10-27T17:02Z",
+  "2026-10-27T17:58Z",
+  "2026-10-27T19:01Z",
+  "2026-10-27T19:44Z",
+  "2026-10-27T19:56Z",
+  "2026-10-27T20:57Z",
+  "2026-10-27T21:54Z",
+  "2026-10-27T22:52Z",
+  "2026-10-27T23:53Z",
+  "2026-10-28T01:17Z",
+  "2026-10-28T01:55Z",
+  "2026-10-28T03:01Z",
+  "2026-10-28T04:01Z",
+  "2026-10-28T04:37Z",
+  "2026-10-28T04:58Z",
+  "2026-10-28T05:56Z",
+  "2026-10-28T07:07Z",
+  "2026-10-28T07:57Z",
+  "2026-10-28T09:00Z",
+  "2026-10-28T09:05Z",
+  "2026-10-28T10:03Z",
+  "2026-10-28T10:59Z",
+  "2026-10-28T11:48Z",
+  "2026-10-28T11:59Z",
+  "2026-10-28T13:12Z",
+  "2026-10-28T14:01Z",
+  "2026-10-28T15:01Z",
+  "2026-10-28T15:06Z",
+  "2026-10-28T15:57Z",
+  "2026-10-28T17:01Z",
+  "2026-10-28T17:57Z",
+  "2026-10-28T19:03Z",
+  "2026-10-28T19:44Z",
+  "2026-10-28T19:56Z",
+  "2026-10-28T20:57Z",
+  "2026-10-28T21:53Z",
+  "2026-10-28T22:52Z",
+  "2026-10-28T23:49Z",
+  "2026-10-29T01:14Z",
+  "2026-10-29T01:51Z",
+  "2026-10-29T02:59Z",
+  "2026-10-29T03:54Z",
+  "2026-10-29T04:55Z",
+  "2026-10-29T05:52Z",
+  "2026-10-29T07:06Z",
+  "2026-10-29T07:57Z",
+  "2026-10-29T08:43Z",
+  "2026-10-29T09:01Z",
+  "2026-10-29T10:03Z",
+  "2026-10-29T10:56Z",
+  "2026-10-29T11:53Z"
+ ],
+ "cluster": "run",
+ "fully_separated_bonferroni": [
+  "keenable",
+  "ceramic"
+ ],
+ "fully_separated_pointwise": [
+  "keenable",
+  "exa",
+  "perplexity",
+  "tinyfish",
+  "ceramic"
+ ]
+}

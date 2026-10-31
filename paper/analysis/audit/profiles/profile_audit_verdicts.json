@@ -1,0 +1,18 @@
+[
+ {"id": "news-0", "verdict": "same", "type_match": false, "answer_leak": false, "note": "Same intent, but 'James Collins and Big Stacks' reads the nickname as a second party; I typed it broad."},
+ {"id": "news-1", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Walmart sale pricing for INSE vacuums matches my reading."},
+ {"id": "news-2", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Closing date or status of the deal matches; it does not assert that the deal closed."},
+ {"id": "news-3", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Requires a document that confirms and describes the Apple-ADT partnership, as I would."},
+ {"id": "news-4", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Aeroplan 90% bonus offer matches; phrased as a yes/no question rather than as document content."},
+ {"id": "news-5", "verdict": "same", "type_match": true, "answer_leak": false, "note": "'Disposition of the charges' neutrally covers the dismissal without asserting it."},
+ {"id": "news-6", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Cancellation status of the Oct 21 concert matches; reason sits in AUX."},
+ {"id": "news-7", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Reinstatement of 20 Maricopa voters matches without asserting it happened."},
+ {"id": "rare-0", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Same topic; the site:rijksoverheid.nl constraint is left to the operator flag, not MAIN."},
+ {"id": "rare-1", "verdict": "narrower", "type_match": true, "answer_leak": false, "note": "Demands a 2022 prescription statistic and would reject NHS cloxacillin prescribing guidance; a plausible but single reading."},
+ {"id": "rare-2", "verdict": "narrower", "type_match": true, "answer_leak": false, "note": "Requires MMAction2 pose cues plus hierarchical motion models together, so pose-based player tracking work without MMAction2 fails; sport moved to AUX."},
+ {"id": "rare-3", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Availability and file size of the CADD manual match; the misspelled site operator is left to the operator flag."},
+ {"id": "rare-4", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Identity or provisions of the 1843 Bundesbeschluss on Freizuegigkeit matches."},
+ {"id": "rare-5", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Use of Mucor circinelloides as a model fungus matches."},
+ {"id": "rare-6", "verdict": "broader", "type_match": false, "answer_leak": false, "note": "MAIN accepts any Arizona top-10 list for 2022 and moves Knox Gifted Academy's math and reading scores, the real target, to AUX."},
+ {"id": "rare-7", "verdict": "same", "type_match": true, "answer_leak": false, "note": "Who introduced the family and when matches, but it misreads 'English' as English-language usage instead of a likely English naturalist."}
+]

@@ -1,0 +1,1074 @@
+[
+ {
+  "id": 5,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Wales Online confirms Collins vs Big Stacks Misfits bout Oct 10 at Copper Box Arena."
+ },
+ {
+  "id": 7,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Yahoo key facts: Oct 10 2026, Copper Box, Misfits card, Collins debut vs Big Stacks."
+ },
+ {
+  "id": 8,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Reports Collins signed to face Big Stacks Oct 10 on Misfits card; notes bout not yet formally confirmed, no venue."
+ },
+ {
+  "id": 18,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Thin snippet: Collins heading to Misfits ring, opponent name truncated; no date or details."
+ },
+ {
+  "id": 20,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "States Collins will fight Big Stacks in Misfits Boxing; no date in snippet."
+ },
+ {
+  "id": 22,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Snippet says Collins debuts on short notice against a truncated opponent; Big Stacks not named."
+ },
+ {
+  "id": 25,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Collins replaces Skinner to fight Big Stacks on Misfits Oct 10 card; no venue."
+ },
+ {
+  "id": 34,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Wales Online: Collins vs Big Stacks on Misfits undercard Oct 10 at Copper Box Arena."
+ },
+ {
+  "id": 37,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "About Big Stacks vs Jordan McCann, a different bout; Collins absent."
+ },
+ {
+  "id": 42,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "bet365 fight guide: Big Stacks vs Collins, Sat Oct 10 2026, Copper Box, Misfits, heavyweight."
+ },
+ {
+  "id": 43,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Wales Online: bout on Misfits card Oct 10 at Copper Box Arena with Misfits announcement."
+ },
+ {
+  "id": 45,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "talkSPORT: Collins vs Big Stacks on Misfits undercard, Copper Box Oct 10; fragmented boilerplate."
+ },
+ {
+  "id": 48,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook video preview: one line that Collins will face Big Stacks for Misfits debut."
+ },
+ {
+  "id": 56,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "The Sun: Collins to fight Big Stacks on Misfits Copper Box card Oct 10 after Skinner withdrew."
+ },
+ {
+  "id": 57,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Flipboard aggregator teaser with headline only; no date or details."
+ },
+ {
+  "id": 73,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "talkSPORT snippet: Big Stacks vs Collins at Copper Box, Saturday Oct 10."
+ },
+ {
+  "id": 91,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "AgentMMA: Collins signed to face Big Stacks Oct 10 under Misfits; no venue."
+ },
+ {
+  "id": 100,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "April 2026 Walmart flash sale INSE at $59; limited-time deal stale by October (moderate staleness)."
+ },
+ {
+  "id": 113,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Walmart review mentions a past $75 sale price, undated; no current sale info."
+ },
+ {
+  "id": 114,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook deal post: INSE at Walmart $79.97 reg $320; undated social preview."
+ },
+ {
+  "id": 117,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Official Walmart INSE category page but snippet has no prices or sale details."
+ },
+ {
+  "id": 129,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "USA Today June 2026 Walmart Summer Deals INSE $54.99, event ended June 28; stale."
+ },
+ {
+  "id": 133,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Walmart INSE listing with current prices, V770 now $74.99 was $320; sale info partly visible."
+ },
+ {
+  "id": 135,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Walmart INSE browse page with Now/Was prices for several models and shipping details."
+ },
+ {
+  "id": 137,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Walmart clearance INSE $69.99 was $149.99, but snippet shows March delivery dates; stale snapshot."
+ },
+ {
+  "id": 138,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Snippet is only Billboard navigation boilerplate; no vacuum content (integrity fail)."
+ },
+ {
+  "id": 139,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Inspired Entertainment stock (ticker INSE), wrong entity."
+ },
+ {
+  "id": 142,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Inspired Entertainment holiday parks sale, wrong entity."
+ },
+ {
+  "id": 148,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Feb 2026 Walmart flash sale INSE $64; past limited-time deal, stale."
+ },
+ {
+  "id": 151,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "People article on a February 2025 sale; wrong year for 2026 query."
+ },
+ {
+  "id": 156,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "TopCashback Presidents Day 2024 picks; wrong year."
+ },
+ {
+  "id": 161,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "TheStreet Mar 30 2026 Walmart INSE $89; past spring sale, stale."
+ },
+ {
+  "id": 163,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "TheStreet INSE $89 sale (March 2026 per URL); stale, thin."
+ },
+ {
+  "id": 167,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "June 2026 masslive: INSE 6-in-1 at Walmart $58.97; stale, thin."
+ },
+ {
+  "id": 169,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Walmart INSE handheld category page, no prices in snippet."
+ },
+ {
+  "id": 173,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "No snippet content; blank/metadata-only."
+ },
+ {
+  "id": 177,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Women's Health sale from September 2024 per URL; wrong year."
+ },
+ {
+  "id": 187,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "USA Today June 2026 Summer Deals $54.99 through June 28; ended, stale."
+ },
+ {
+  "id": 196,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "CBS: Paramount completed $110B WBD acquisition on Tuesday Oct 6 2026, with settlement context."
+ },
+ {
+  "id": 200,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "The Verge Oct 6 2026: Paramount completed WBD acquisition, details on approvals and terms."
+ },
+ {
+  "id": 203,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Feb 27 2026 deal announcement; snippet has only title/date, no closing date."
+ },
+ {
+  "id": 206,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "TechCrunch Oct 6 2026: Paramount completed $110B WBD acquisition; short snippet."
+ },
+ {
+  "id": 207,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Sept 30 press release snippet truncated; no closing information."
+ },
+ {
+  "id": 216,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Sept 30 judge approved settlement, final hurdle to close; no closing date given."
+ },
+ {
+  "id": 217,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "AP via KSAT: Paramount closed WBD takeover Tuesday Oct 6, with settlements and FCC context."
+ },
+ {
+  "id": 220,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "PBS/AP Oct 6 2026: takeover closed Tuesday, legal fights and settlement detailed."
+ },
+ {
+  "id": 221,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Just the News Oct 6: Paramount officially closed WBD takeover Tuesday; derivative, brief."
+ },
+ {
+  "id": 229,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Official Skydance release Oct 6 2026 announcing completion of the WBD acquisition."
+ },
+ {
+  "id": 239,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Paramount press list shows Oct 6 2026 release 'Paramount Completes Acquisition of WBD'; headlines only."
+ },
+ {
+  "id": 243,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Reuters Sept 30: judge allows close; no closing date."
+ },
+ {
+  "id": 263,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "NBC Sept 30 short snippet: judge allows close; no date."
+ },
+ {
+  "id": 274,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Variety: deal set to close Tuesday Oct 6 after judge approved settlement; expected date given."
+ },
+ {
+  "id": 282,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "SEC proxy background on 2025 deal history; no closing date."
+ },
+ {
+  "id": 283,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Merger filing expecting Q3 2026 close with ticking fee; superseded expectation, stale."
+ },
+ {
+  "id": 292,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "About ADTechnology chip contract and Apple-Samsung, not ADT home security."
+ },
+ {
+  "id": 318,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "MacHash summary of MacRumors rumor of Apple-ADT partnership; speculative, brief."
+ },
+ {
+  "id": 324,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "ADT+ App Store listing; no Apple partnership news."
+ },
+ {
+  "id": 328,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "MacRumors tweet with headline only about rumored partnership."
+ },
+ {
+  "id": 329,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "ADT investor news list; no Apple partnership."
+ },
+ {
+  "id": 334,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Blank page of invisible characters; integrity fail."
+ },
+ {
+  "id": 335,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "ADT 2024 10-K debt tables; nothing on Apple."
+ },
+ {
+  "id": 336,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "ADT works-with page lists Apple TV/Watch; not the October 2026 partnership."
+ },
+ {
+  "id": 338,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "MacHash summary: Apple may announce ADT partnership at Oct 13 event; rumor only."
+ },
+ {
+  "id": 341,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "ADT press release list; no Apple partnership."
+ },
+ {
+  "id": 342,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "MacRumors Oct 10: detailed clues to Apple-ADT partnership for Oct 13 event; explicitly a rumor."
+ },
+ {
+  "id": 343,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Flipboard teaser of MacRumors rumor; little depth."
+ },
+ {
+  "id": 356,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Apple ATT antitrust article; unrelated to ADT."
+ },
+ {
+  "id": 361,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Apple developer October newsletter; no ADT mention."
+ },
+ {
+  "id": 365,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Apple Ads partners page; unrelated."
+ },
+ {
+  "id": 366,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "MacRumors page snippet is only navigation; integrity fail."
+ },
+ {
+  "id": 368,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "fail",
+  "coverage": "fail",
+  "note": "Apple Business newsroom page with only navigation; unrelated."
+ },
+ {
+  "id": 380,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Tom's Guide Oct 13 event preview; no ADT mention in snippet."
+ },
+ {
+  "id": 393,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Confirms Aeroplan up to 90% bonus until May 31 2026 with tiers, cost, limits."
+ },
+ {
+  "id": 398,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Aeroplan buy-points page mentions 2026 earn change; no 90% bonus."
+ },
+ {
+  "id": 399,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook post mixes 90% bonus until May 31 with 2024 dates; year unclear."
+ },
+ {
+  "id": 413,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "MileLion May 2026: up to 90% bonus until 1 June 2026, tiers, costs, limits."
+ },
+ {
+  "id": 415,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "MileLion Mar 2026: up to 90% bonus until 20 March 2026 with tiers and cost."
+ },
+ {
+  "id": 420,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Official Aeroplan buy page shows up to 100% bonus until Sept 25 2026, not 90%."
+ },
+ {
+  "id": 421,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Air Canada earn-on-flights page; no points-purchase bonus."
+ },
+ {
+  "id": 424,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Transfer bonus list incl. Aeroplan 20%/15%; no 90% purchase bonus."
+ },
+ {
+  "id": 433,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Canadian Jetsetter: up to 90% bonus until March 19 2026, cost 1.97 cpp; tiers not listed."
+ },
+ {
+  "id": 435,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "MileLion: 90% bonus until 20 March 2026 with full tiers and limits."
+ },
+ {
+  "id": 436,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Prince of Travel: 90% bonus until March 19 2026 with tiers and cost."
+ },
+ {
+  "id": 452,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "MileLion: 90% bonus until 20 March 2026, cost and limits."
+ },
+ {
+  "id": 461,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook preview: 90% bonus until May 31, no year in snippet."
+ },
+ {
+  "id": 466,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Air Canada elite earn multiplier; not the purchase bonus."
+ },
+ {
+  "id": 470,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "MileLion snippet: buy Aeroplan points with 90% bonus until 1 June 2026; brief."
+ },
+ {
+  "id": 471,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "MileLion snippet: 90% bonus until 20 March 2026; brief."
+ },
+ {
+  "id": 473,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Reddit block page; integrity fail."
+ },
+ {
+  "id": 475,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Facebook post on 50% flight earn bonus (January), not the 90% purchase bonus."
+ },
+ {
+  "id": 498,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Snippet holds only title/author/date metadata; integrity fail per rules."
+ },
+ {
+  "id": 513,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Title says indictment tossed; snippet only mentions June 15 motion."
+ },
+ {
+  "id": 518,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "NBC/AP: Judge Montano dismissed the indictment citing prosecutorial misconduct, with case details."
+ },
+ {
+  "id": 531,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "CBS: judge dismissed indictment citing prosecutorial misconduct; brief."
+ },
+ {
+  "id": 535,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "NYT: judge dismissed charges Friday over grand jury flaws, with case background."
+ },
+ {
+  "id": 538,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "THR snippet covers background of charges, not the dismissal; title only states it."
+ },
+ {
+  "id": 543,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "KCRA/AP: judge dismissed indictment citing misconduct; motion and case details."
+ },
+ {
+  "id": 548,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "LA Times Oct 16 2026: motion to quash granted, order quotes, charge details."
+ },
+ {
+  "id": 551,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "BBC: judge threw out charges over prosecutor issues; DA evaluating options."
+ },
+ {
+  "id": 567,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "ABC News Facebook video preview: judge dismissed indictment on four counts; social preview."
+ },
+ {
+  "id": 569,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "YouTube preview: judge dismissed charges over prosecutor misconduct; video limit."
+ },
+ {
+  "id": 602,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Live Nation event listing for Oct 21 show without cancellation; entity without event."
+ },
+ {
+  "id": 605,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Variety Oct 20: Charli xcx cancelled Oct 21 Glendale show due to illness, refunds, tour context."
+ },
+ {
+  "id": 613,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Variety snippet: cancelled tomorrow night's Arizona show due to illness; brief."
+ },
+ {
+  "id": 616,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Film Daily: Charli XCX cancels Arizona concert over illness, citing Variety; brief."
+ },
+ {
+  "id": 619,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Blog repost of Variety: Oct 21 Glendale concert cancelled for illness, refunds."
+ },
+ {
+  "id": 622,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Phoenix New Times: Oct 21 Desert Diamond Arena show cancelled, Instagram statement quoted."
+ },
+ {
+  "id": 630,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "setlist.fm upcoming show page; no cancellation."
+ },
+ {
+  "id": 637,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Tour dates page; no cancellation."
+ },
+ {
+  "id": 639,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Concert photos archive from 2025; no Oct 21 cancellation."
+ },
+ {
+  "id": 668,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Reddit tour announcement thread; speculates about a Milwaukee show, wrong event."
+ },
+ {
+  "id": 679,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Reddit block page; integrity fail."
+ },
+ {
+  "id": 686,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Rolling Stone: Arizona Desert Diamond Arena show Wednesday cancelled due to illness, refund details."
+ },
+ {
+  "id": 688,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Music blog: Oct 21 Glendale concert cancelled after illness, refunds; lower-authority source."
+ },
+ {
+  "id": 692,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "No snippet content; metadata only."
+ },
+ {
+  "id": 695,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "No snippet content; metadata only."
+ },
+ {
+  "id": 699,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Official site still lists Oct 21 Glendale date; no cancellation."
+ },
+ {
+  "id": 705,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Oct 22 lawsuit seeking to reinstate 25 voters; pre-outcome for reinstatement query."
+ },
+ {
+  "id": 709,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Votebeat Oct 22 lawsuit seeking reinstatement; voters not yet reinstated, pre-outcome."
+ },
+ {
+  "id": 714,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Votebeat fragment about pending lawsuit; pre-outcome."
+ },
+ {
+  "id": 718,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "12News: recorder to reinstate more than 20 citizens; 25 voters get rights restored; brief."
+ },
+ {
+  "id": 720,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Votebeat snippet: county hasn't reinstated 25 voters; pre-outcome."
+ },
+ {
+  "id": 730,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "AZCentral Oct 23: Heap restored two dozen voters to active status after lawsuit and mediation."
+ },
+ {
+  "id": 735,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Votebeat lawsuit article; reinstatement not yet happened, pre-outcome."
+ },
+ {
+  "id": 736,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "June 2026 KJZZ on Heap vs supervisors mediation; different matter."
+ },
+ {
+  "id": 737,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Maricopa 2026 election plan; nothing on reinstated voters."
+ },
+ {
+  "id": 743,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Yahoo: more than 20 Arizonans will have voting rights restored per AG Mayes; brief."
+ },
+ {
+  "id": 746,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "AZCentral snippet: Heap reinstated voting rights of two dozen people after lawsuit; brief."
+ },
+ {
+  "id": 763,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "KJZZ Oct 22 lawsuit to restore 25 voters; pre-outcome."
+ },
+ {
+  "id": 776,
+  "rating": 3,
+  "label": "HM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "AZCentral snippet: Heap reinstated two dozen voters after AG/SoS suit; brief."
+ },
+ {
+  "id": 783,
+  "rating": 0,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "Access Denied error page."
+ },
+ {
+  "id": 784,
+  "rating": 4,
+  "label": "FullyM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "Fresno Bee wire copy: Heap restored two dozen voters to active status and mailed ballots after mediation."
+ },
+ {
+  "id": 792,
+  "rating": 2,
+  "label": "SM",
+  "relevance": "pass",
+  "coverage": "pass",
+  "note": "YouTube preview: Heap will restore eligibility to 24 voters; video preview limit."
+ },
+ {
+  "id": 799,
+  "rating": 1,
+  "label": "FailsM",
+  "relevance": "pass",
+  "coverage": "fail",
+  "note": "AZFamily Oct 23 hearing: judge urged settlement over 24 voters; pre-outcome."
+ }
+]

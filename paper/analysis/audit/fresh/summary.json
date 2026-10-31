@@ -1,0 +1,695 @@
+{
+ "num_queries": 307,
+ "ceiling": 0.996742671009772,
+ "table1_ceiling": 0.9931818181818182,
+ "tau_b_shares": 0.7481481481481481,
+ "mean_abs_dshare": 0.05006583274915193,
+ "engines": {
+  "keenable": {
+   "recall": 0.9511400651465798,
+   "share": 0.9542483660130718,
+   "table_share": 0.9038901601830663,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     135,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     31,
+     33
+    ],
+    "person": [
+     16,
+     17
+    ],
+    "domain": [
+     22,
+     23
+    ],
+    "exact_id": [
+     45,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "exa": {
+   "recall": 0.9543973941368078,
+   "share": 0.957516339869281,
+   "table_share": 0.9212814645308925,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     137,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     30,
+     33
+    ],
+    "person": [
+     15,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     45,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "google": {
+   "recall": 0.6677524429967426,
+   "share": 0.6699346405228758,
+   "table_share": 0.7398932112890924,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     54,
+     146
+    ],
+    "country": [
+     21,
+     23
+    ],
+    "year": [
+     27,
+     33
+    ],
+    "person": [
+     15,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     45,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "bing": {
+   "recall": 0.6319218241042345,
+   "share": 0.6339869281045751,
+   "table_share": 0.6346300533943554,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     48,
+     146
+    ],
+    "country": [
+     20,
+     23
+    ],
+    "year": [
+     24,
+     33
+    ],
+    "person": [
+     16,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     43,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "brave": {
+   "recall": 0.7719869706840391,
+   "share": 0.7745098039215687,
+   "table_share": 0.7658276125095347,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     85,
+     146
+    ],
+    "country": [
+     22,
+     23
+    ],
+    "year": [
+     28,
+     33
+    ],
+    "person": [
+     16,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     43,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "brave-llmcontext": {
+   "recall": 0.9413680781758957,
+   "share": 0.9444444444444444,
+   "table_share": 0.8527841342486651,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     131,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     31,
+     33
+    ],
+    "person": [
+     16,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     45,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "parallel": {
+   "recall": 0.9446254071661238,
+   "share": 0.9477124183006536,
+   "table_share": 0.9069412662090007,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     133,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     30,
+     33
+    ],
+    "person": [
+     16,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     45,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "perplexity": {
+   "recall": 0.9381107491856677,
+   "share": 0.9411764705882353,
+   "table_share": 0.8916857360793288,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     136,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     28,
+     33
+    ],
+    "person": [
+     14,
+     17
+    ],
+    "domain": [
+     22,
+     23
+    ],
+    "exact_id": [
+     45,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "tavily": {
+   "recall": 0.8762214983713354,
+   "share": 0.8790849673202614,
+   "table_share": 0.8268497330282227,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     114,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     32,
+     33
+    ],
+    "person": [
+     16,
+     17
+    ],
+    "domain": [
+     21,
+     23
+    ],
+    "exact_id": [
+     43,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "linkup": {
+   "recall": 0.8697068403908795,
+   "share": 0.8725490196078431,
+   "table_share": 0.794050343249428,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     113,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     30,
+     33
+    ],
+    "person": [
+     14,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     44,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "tinyfish": {
+   "recall": 0.6188925081433225,
+   "share": 0.6209150326797386,
+   "table_share": 0.7330282227307399,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     49,
+     146
+    ],
+    "country": [
+     17,
+     23
+    ],
+    "year": [
+     24,
+     33
+    ],
+    "person": [
+     13,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     44,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "octen": {
+   "recall": 0.7817589576547231,
+   "share": 0.7843137254901961,
+   "table_share": 0.7200610221205187,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     91,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     32,
+     33
+    ],
+    "person": [
+     16,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     35,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "ceramic": {
+   "recall": 0.4169381107491857,
+   "share": 0.41830065359477125,
+   "table_share": 0.429443173150267,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     17,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     19,
+     33
+    ],
+    "person": [
+     16,
+     17
+    ],
+    "domain": [
+     8,
+     23
+    ],
+    "exact_id": [
+     29,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     6,
+     10
+    ]
+   }
+  },
+  "firecrawl": {
+   "recall": 0.7817589576547231,
+   "share": 0.7843137254901961,
+   "table_share": 0.8184591914569032,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     84,
+     146
+    ],
+    "country": [
+     23,
+     23
+    ],
+    "year": [
+     30,
+     33
+    ],
+    "person": [
+     15,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     45,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "jina": {
+   "recall": 0.6950819672131148,
+   "share": 0.6973534769098897,
+   "table_share": 0.7238749046529368,
+   "errors": 2,
+   "by_type": {
+    "money": [
+     73,
+     144
+    ],
+    "country": [
+     19,
+     23
+    ],
+    "year": [
+     27,
+     33
+    ],
+    "person": [
+     13,
+     17
+    ],
+    "domain": [
+     22,
+     23
+    ],
+    "exact_id": [
+     44,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     4,
+     10
+    ]
+   }
+  },
+  "context": {
+   "recall": 0.7296416938110749,
+   "share": 0.7320261437908496,
+   "table_share": 0.7833714721586575,
+   "errors": 0,
+   "by_type": {
+    "money": [
+     74,
+     146
+    ],
+    "country": [
+     21,
+     23
+    ],
+    "year": [
+     27,
+     33
+    ],
+    "person": [
+     14,
+     17
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     45,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     10,
+     10
+    ]
+   }
+  },
+  "chatgpt-search": {
+   "recall": 0.7973856209150327,
+   "share": 0.7999914562775001,
+   "table_share": 0.7269260106788711,
+   "errors": 1,
+   "by_type": {
+    "money": [
+     102,
+     146
+    ],
+    "country": [
+     22,
+     23
+    ],
+    "year": [
+     22,
+     33
+    ],
+    "person": [
+     12,
+     16
+    ],
+    "domain": [
+     23,
+     23
+    ],
+    "exact_id": [
+     44,
+     45
+    ],
+    "entity": [
+     10,
+     10
+    ],
+    "numeric_band": [
+     9,
+     10
+    ]
+   }
+  }
+ },
+ "pool": {
+  "exact": 1237,
+  "other": 2526,
+  "reading": 339
+ },
+ "sample": 489
+}

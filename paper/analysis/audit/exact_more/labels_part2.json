@@ -1,0 +1,252 @@
+[
+ {
+  "id": 50,
+  "label": "yes",
+  "reason": "Table shows Q1 2026 (Mar 31, 2026) net income 88,228 in thousands."
+ },
+ {
+  "id": 51,
+  "label": "no",
+  "reason": "Snippet gives EPS and noninterest income $628M, not net income of $629 million."
+ },
+ {
+  "id": 52,
+  "label": "yes",
+  "reason": "Q1 2025 GAAP EPS assuming dilution stated as $2.01."
+ },
+ {
+  "id": 53,
+  "label": "yes",
+  "reason": "Q2 2026 diluted EPS stated as $0.73."
+ },
+ {
+  "id": 54,
+  "label": "yes",
+  "reason": "Q2 FY2025 GAAP net income stated as $824.5 million."
+ },
+ {
+  "id": 55,
+  "label": "yes",
+  "reason": "Title says Q1 fiscal 2026; GAAP net income $192 million."
+ },
+ {
+  "id": 56,
+  "label": "no",
+  "reason": "Year of quarter not stated, FY26 guidance implies fiscal 2026; EPS not labeled diluted."
+ },
+ {
+  "id": 57,
+  "label": "yes",
+  "reason": "Q2 2026 diluted EPS stated as $0.19."
+ },
+ {
+  "id": 58,
+  "label": "yes",
+  "reason": "Q3 GAAP EPS $2.23 per share with fiscal 2026 context; unlabeled but GAAP headline EPS."
+ },
+ {
+  "id": 59,
+  "label": "yes",
+  "reason": "Q3 2025 diluted EPS stated as $2.85."
+ },
+ {
+  "id": 60,
+  "label": "yes",
+  "reason": "Q3 2025 diluted EPS stated as $0.15."
+ },
+ {
+  "id": 61,
+  "label": "yes",
+  "reason": "Q1 fiscal 2026 GAAP net income stated as $192 million."
+ },
+ {
+  "id": 62,
+  "label": "yes",
+  "reason": "Q1 2026 diluted EPS stated as $1.84."
+ },
+ {
+  "id": 63,
+  "label": "yes",
+  "reason": "Q1 2026 GAAP diluted EPS stated as $4.43."
+ },
+ {
+  "id": 64,
+  "label": "yes",
+  "reason": "Second quarter 2025 diluted EPS stated as $1.01."
+ },
+ {
+  "id": 65,
+  "label": "yes",
+  "reason": "Second quarter 2025 diluted EPS stated as $1.01."
+ },
+ {
+  "id": 66,
+  "label": "yes",
+  "reason": "Table for three months ended June 30, 2025 shows diluted EPS 1.85."
+ },
+ {
+  "id": 67,
+  "label": "yes",
+  "reason": "Q3 2025 net income attributable to 3M shown as $834M."
+ },
+ {
+  "id": 68,
+  "label": "no",
+  "reason": "Snippet shows no net income figure."
+ },
+ {
+  "id": 69,
+  "label": "yes",
+  "reason": "Q1 2026 net income stated as $88.2 million and 88,228 thousands."
+ },
+ {
+  "id": 70,
+  "label": "yes",
+  "reason": "Q3 2025 net income stated as $629 million."
+ },
+ {
+  "id": 71,
+  "label": "yes",
+  "reason": "Q2 2026 net income stated as USD 39.926 million."
+ },
+ {
+  "id": 72,
+  "label": "yes",
+  "reason": "Q1 2026 diluted EPS stated as $3.56."
+ },
+ {
+  "id": 73,
+  "label": "yes",
+  "reason": "Q2 2025 diluted EPS stated as $1.01."
+ },
+ {
+  "id": 74,
+  "label": "yes",
+  "reason": "Q1 2025 GAAP net income attributable to Ares stated as $47.2 million."
+ },
+ {
+  "id": 75,
+  "label": "yes",
+  "reason": "1Q 2026 diluted EPS stated as $0.83."
+ },
+ {
+  "id": 76,
+  "label": "yes",
+  "reason": "Q3 2024 GAAP EPS $0.81 next to net income; unlabeled but adjusted given separately."
+ },
+ {
+  "id": 77,
+  "label": "yes",
+  "reason": "Q3 2025 diluted EPS stated as $3.16."
+ },
+ {
+  "id": 78,
+  "label": "yes",
+  "reason": "Q2 fiscal 2027 GAAP net income stated as $59.7 billion."
+ },
+ {
+  "id": 79,
+  "label": "yes",
+  "reason": "Q2 2026 operating income stated as $350.4 million."
+ },
+ {
+  "id": 80,
+  "label": "yes",
+  "reason": "Q1 2026 diluted EPS stated as $14.06."
+ },
+ {
+  "id": 81,
+  "label": "yes",
+  "reason": "Operating income $113,140,000 for quarter ending Sep 2024."
+ },
+ {
+  "id": 82,
+  "label": "yes",
+  "reason": "Q2 2026 diluted EPS stated as $0.73."
+ },
+ {
+  "id": 83,
+  "label": "yes",
+  "reason": "Operating income $38,000,000 for quarter ending Mar 2025."
+ },
+ {
+  "id": 84,
+  "label": "no",
+  "reason": "Quarterly table truncates before the Q1 2025 row; -3.98 not shown."
+ },
+ {
+  "id": 85,
+  "label": "yes",
+  "reason": "Q1 2026 net earnings stated as $5.63 billion."
+ },
+ {
+  "id": 86,
+  "label": "no",
+  "reason": "Garbled fragment; $0.04 not clearly tied to Q2 2025 diluted EPS."
+ },
+ {
+  "id": 87,
+  "label": "yes",
+  "reason": "Q3 2025 diluted EPS from continuing operations stated as $4.25."
+ },
+ {
+  "id": 88,
+  "label": "yes",
+  "reason": "Q2 2026 net income stated as $482 million."
+ },
+ {
+  "id": 89,
+  "label": "yes",
+  "reason": "Fiscal 2026 Q2 operating profit stated as $728 million."
+ },
+ {
+  "id": 90,
+  "label": "yes",
+  "reason": "Q3 2024 operating earnings stated as $8.7 billion."
+ },
+ {
+  "id": 91,
+  "label": "yes",
+  "reason": "Q1 2026 net income stated as $88,228 thousand."
+ },
+ {
+  "id": 92,
+  "label": "no",
+  "reason": "Operating income row shows 506 M but column periods are not identifiable."
+ },
+ {
+  "id": 93,
+  "label": "yes",
+  "reason": "Q2 2026 net income stated as $182.1 million."
+ },
+ {
+  "id": 94,
+  "label": "yes",
+  "reason": "Q1 2026 diluted EPS stated as $0.03."
+ },
+ {
+  "id": 95,
+  "label": "no",
+  "reason": "Snippet shows no operating income figure."
+ },
+ {
+  "id": 96,
+  "label": "no",
+  "reason": "$0.38 compared to estimates; unclear whether GAAP diluted or adjusted EPS."
+ },
+ {
+  "id": 97,
+  "label": "yes",
+  "reason": "Q3 2024 GAAP net income per diluted share stated as $0.19."
+ },
+ {
+  "id": 98,
+  "label": "yes",
+  "reason": "Title states 1Q 2026 diluted EPS $0.83."
+ },
+ {
+  "id": 99,
+  "label": "yes",
+  "reason": "Q1 2025 net income stated as $395 million."
+ }
+]

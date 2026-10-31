@@ -1,0 +1,252 @@
+[
+ {
+  "id": 250,
+  "label": "unclear",
+  "reason": "971.9 in table with unlabeled columns and units"
+ },
+ {
+  "id": 251,
+  "label": "yes",
+  "reason": "GAAP operating income $4,777 million, three months ended June 30, 2025"
+ },
+ {
+  "id": 252,
+  "label": "yes",
+  "reason": "2Q'26 release: diluted EPS $1.25 vs $1.29, current column"
+ },
+ {
+  "id": 253,
+  "label": "unclear",
+  "reason": "815 in income from operations row; columns unlabeled"
+ },
+ {
+  "id": 254,
+  "label": "unclear",
+  "reason": "1.12 diluted EPS but column headers garbled"
+ },
+ {
+  "id": 255,
+  "label": "yes",
+  "reason": "2Q 2025 net income applicable to MS $3,539 million"
+ },
+ {
+  "id": 256,
+  "label": "no",
+  "reason": "2,646 is year-to-date segment operating profit, not quarterly total"
+ },
+ {
+  "id": 257,
+  "label": "yes",
+  "reason": "815 income from operations; net income 639 matches Q3 2026 narrative"
+ },
+ {
+  "id": 258,
+  "label": "yes",
+  "reason": "Q1 2026 net income attributable to GE Vernova $4,745 million"
+ },
+ {
+  "id": 259,
+  "label": "yes",
+  "reason": "Q3 2025 operating loss $20.5 million; loss from operations (20,549)"
+ },
+ {
+  "id": 260,
+  "label": "unclear",
+  "reason": "971.9 income from operations; columns and units unlabeled"
+ },
+ {
+  "id": 261,
+  "label": "yes",
+  "reason": "1Q25 quarterly net income of $584 million"
+ },
+ {
+  "id": 262,
+  "label": "unclear",
+  "reason": "operating income 291 vs 241; columns unlabeled"
+ },
+ {
+  "id": 263,
+  "label": "unclear",
+  "reason": "174,545 may be Hospitality segment figure, not consolidated"
+ },
+ {
+  "id": 264,
+  "label": "yes",
+  "reason": "three months ended June 30, 2025 net loss (39,654) thousands"
+ },
+ {
+  "id": 265,
+  "label": "yes",
+  "reason": "three months ended June 30, 2026 net income $15,848 million"
+ },
+ {
+  "id": 266,
+  "label": "no",
+  "reason": "forecast page; 99 is a price target"
+ },
+ {
+  "id": 267,
+  "label": "unclear",
+  "reason": "net income 2,429 in table with unlabeled columns"
+ },
+ {
+  "id": 268,
+  "label": "yes",
+  "reason": "Q2 2026 income from continuing operations $2,166 million, within 0.1%"
+ },
+ {
+  "id": 269,
+  "label": "yes",
+  "reason": "Matt Murphy is Chairman and CEO of Marvell Technology"
+ },
+ {
+  "id": 270,
+  "label": "yes",
+  "reason": "Stephen J. Hemsley named UnitedHealth CEO"
+ },
+ {
+  "id": 271,
+  "label": "yes",
+  "reason": "Q2 FY26 GAAP diluted net EPS $0.49"
+ },
+ {
+  "id": 272,
+  "label": "yes",
+  "reason": "Greg Abel is CEO of Berkshire Hathaway"
+ },
+ {
+  "id": 273,
+  "label": "yes",
+  "reason": "diluted EPS $0.15 for quarter ending March 2025"
+ },
+ {
+  "id": 274,
+  "label": "yes",
+  "reason": "quarter ended Mar 31, 2025 net income 4,894 million"
+ },
+ {
+  "id": 275,
+  "label": "yes",
+  "reason": "Q2 2025 operating income 357,895; margin matches 74.6% operating ratio"
+ },
+ {
+  "id": 276,
+  "label": "unclear",
+  "reason": "net income 1,887 in table with unlabeled columns"
+ },
+ {
+  "id": 277,
+  "label": "yes",
+  "reason": "Q3 2026 diluted EPS of $7.89"
+ },
+ {
+  "id": 278,
+  "label": "yes",
+  "reason": "Q2 2026 GAAP diluted EPS of $5.37"
+ },
+ {
+  "id": 279,
+  "label": "yes",
+  "reason": "Q1 FY26 net income attributable to Cencora 559,647, current vs prior"
+ },
+ {
+  "id": 280,
+  "label": "yes",
+  "reason": "Apple page links to apple.com"
+ },
+ {
+  "id": 281,
+  "label": "unclear",
+  "reason": "678 in Q2 2026 release table; columns unlabeled, likely prior year"
+ },
+ {
+  "id": 282,
+  "label": "yes",
+  "reason": "Q3 2025 net income $2,709 million"
+ },
+ {
+  "id": 283,
+  "label": "yes",
+  "reason": "three months ended March 31, 2026 operating income 4,907 million"
+ },
+ {
+  "id": 284,
+  "label": "yes",
+  "reason": "Q3 2025 GAAP after-tax earnings $186 million"
+ },
+ {
+  "id": 285,
+  "label": "yes",
+  "reason": "3 months ended Sep 30, 2026 income from operations $815 million"
+ },
+ {
+  "id": 286,
+  "label": "unclear",
+  "reason": "operating income $6,696 fragment; segment and period unclear"
+ },
+ {
+  "id": 287,
+  "label": "yes",
+  "reason": "Q1 2025 net loss attributable to Intel $(821) million"
+ },
+ {
+  "id": 288,
+  "label": "yes",
+  "reason": "1Q25 supplement, current column Wells Fargo net income 4,894"
+ },
+ {
+  "id": 289,
+  "label": "yes",
+  "reason": "Q1 2025 net loss attributable to Intel $(821) million"
+ },
+ {
+  "id": 290,
+  "label": "yes",
+  "reason": "Q1 fiscal 2027 diluted EPS $0.05"
+ },
+ {
+  "id": 291,
+  "label": "unclear",
+  "reason": "operating income 428.6 shown without period or units"
+ },
+ {
+  "id": 292,
+  "label": "unclear",
+  "reason": "income from operations 154,714; columns unlabeled"
+ },
+ {
+  "id": 293,
+  "label": "yes",
+  "reason": "website www.analog.com"
+ },
+ {
+  "id": 294,
+  "label": "yes",
+  "reason": "Q2 2026 net income $15,848 vs $18,337, (14)% change"
+ },
+ {
+  "id": 295,
+  "label": "yes",
+  "reason": "three months ended June 30, 2025 net loss $(39,654) thousands"
+ },
+ {
+  "id": 296,
+  "label": "yes",
+  "reason": "quarter 2025-06-30 net income $226 million, within 0.1%"
+ },
+ {
+  "id": 297,
+  "label": "yes",
+  "reason": "three months ended March 31, 2025 net loss (29,511) thousands"
+ },
+ {
+  "id": 298,
+  "label": "unclear",
+  "reason": "698.4 net income attributable; columns unlabeled"
+ },
+ {
+  "id": 299,
+  "label": "yes",
+  "reason": "Q2 2024 operating income $175.9M"
+ }
+]

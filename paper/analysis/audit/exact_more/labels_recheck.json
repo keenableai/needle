@@ -1,0 +1,18 @@
+[
+{"id": 7, "label": "no", "reason": "Snippet gives $259 million for fiscal 2026 Q3; fiscal 2025 Q3 operating income was $165 million."},
+{"id": 9, "label": "yes", "reason": "GAAP net income for Q3 fiscal 2026 was $1.901 billion."},
+{"id": 13, "label": "no", "reason": "Table lists -$0.50 for quarter ending 2025-07-31; text never maps it to Q1 fiscal 2025."},
+{"id": 21, "label": "no", "reason": "Row label is cut; $2.01 could be basic or diluted EPS, and year is not shown."},
+{"id": 25, "label": "yes", "reason": "GAAP net income for Q1 fiscal 2027 was $34.5 million."},
+{"id": 27, "label": "yes", "reason": "Third quarter 2024 earnings from operations were 8,708 million, also stated as $8.7 billion."},
+{"id": 33, "label": "yes", "reason": "Table shows diluted EPS of $1.08 for Q2 FY26."},
+{"id": 46, "label": "yes", "reason": "Q1 2025 net income shown as $65.61M."},
+{"id": 51, "label": "yes", "reason": "Net income for 2025 third quarter was $629 million."},
+{"id": 56, "label": "no", "reason": "First quarter -$0.50 per share; fiscal year not stated, FY26 guidance implies fiscal 2026; diluted not stated."},
+{"id": 68, "label": "yes", "reason": "Net income for first quarter of 2026 was $534 million."},
+{"id": 84, "label": "yes", "reason": "Quarterly diluted EPS table lists Q1 2025 at -$3.98."},
+{"id": 86, "label": "no", "reason": "Garbled fragment; $0.04 not clearly tied to Q2 2025 or to diluted EPS."},
+{"id": 92, "label": "no", "reason": "506 M appears in an unlabeled column row; its quarter cannot be identified."},
+{"id": 95, "label": "no", "reason": "Snippet gives Q2 2025 operating income of $949 million, not the gold value of 0."},
+{"id": 96, "label": "no", "reason": "$0.38 EPS versus estimate; text does not say it is GAAP diluted EPS."}
+]

@@ -1,0 +1,201 @@
+{
+ "news-0": {
+  "query_type": "specific",
+  "query_domain": "other",
+  "query_search_operators_exist": false,
+  "query_main_aspects": [
+   "the 2026 boxing bout, event, or boxing-related appearance involving James Collins and Big Stacks"
+  ],
+  "query_aux_aspects": [
+   "the event date, location, promotion, and fight outcome or other results"
+  ],
+  "query_content_archetype": "ephemeral"
+ },
+ "news-1": {
+  "query_type": "specific",
+  "query_domain": "commerce",
+  "query_search_operators_exist": false,
+  "query_main_aspects": [
+   "Current Walmart sale availability and pricing for INSE vacuum products in 2026"
+  ],
+  "query_aux_aspects": [
+   "The specific INSE vacuum models included in the sale",
+   "Discount amounts, product specifications, shipping, and pickup details"
+  ],
+  "query_content_archetype": "ephemeral"
+ },
+ "news-2": {
+  "query_type": "specific",
+  "query_domain": "news",
+  "query_search_operators_exist": false,
+  "query_main_aspects": [
+   "the expected or actual closing date of Paramount's takeover of Warner Bros. in 2026"
+  ],
+  "query_aux_aspects": [
+   "the current status of the takeover, including regulatory or shareholder approvals",
+   "the terms and parties involved in the proposed transaction"
+  ],
+  "query_content_archetype": "ephemeral"
+ },
+ "news-3": {
+  "query_type": "specific",
+  "query_domain": "news",
+  "query_search_operators_exist": false,
+  "query_main_aspects": [
+   "Information confirming and describing the Apple and ADT partnership referenced for October 2026"
+  ],
+  "query_aux_aspects": [
+   "The partnership's terms, products or services involved, and intended customer impact",
+   "The announcement date and related business context"
+  ],
+  "query_content_archetype": "ephemeral"
+ },
+ "news-4": {
+  "query_type": "specific",
+  "query_domain": "commerce",
+  "query_search_operators_exist": false,
+  "query_main_aspects": [
+   "Whether Aeroplan offered a 90% points bonus in 2026"
+  ],
+  "query_aux_aspects": [
+   "The offer's dates, eligibility, and terms"
+  ],
+  "query_content_archetype": "ephemeral"
+ },
+ "news-5": {
+  "query_type": "specific",
+  "query_domain": "legal",
+  "query_search_operators_exist": false,
+  "query_main_aspects": [
+   "The disposition of the charges against Timothy Busfield"
+  ],
+  "query_aux_aspects": [
+   "The nature of the charges and relevant case details",
+   "The timing and circumstances of any dismissal"
+  ],
+  "query_content_archetype": "ephemeral"
+ },
+ "news-6": {
+  "query_type": "specific",
+  "query_domain": "news",
+  "query_search_operators_exist": false,
+  "query_main_aspects": [
+   "Whether Charli XCX's concert scheduled for October 21 was cancelled"
+  ],
+  "query_aux_aspects": [
+   "The reason for any cancellation",
+   "The concert's venue and tour"
+  ],
+  "query_content_archetype": "ephemeral"
+ },
+ "news-7": {
+  "query_type": "specific",
+  "query_domain": "news",
+  "query_search_operators_exist": false,
+  "query_main_aspects": [
+   "Whether 20 voters in Maricopa were reinstated in 2026"
+  ],
+  "query_aux_aspects": [
+   "The circumstances or authority behind the reinstatement"
+  ],
+  "query_content_archetype": "ephemeral"
+ },
+ "rare-0": {
+  "query_type": "broad",
+  "query_domain": "legal",
+  "query_search_operators_exist": true,
+  "query_main_aspects": [
+   "The legal scope and requirements of the Netherlands\u2019 Act on termination of life on request and assisted suicide"
+  ],
+  "query_aux_aspects": [
+   "The procedures for physician reporting and review"
+  ],
+  "query_content_archetype": "persistent"
+ },
+ "rare-1": {
+  "query_type": "specific",
+  "query_domain": "health",
+  "query_search_operators_exist": true,
+  "query_main_aspects": [
+   "the NHS prescription statistic for cloxacillin in 2022"
+  ],
+  "query_aux_aspects": [
+   "the cost, quantity, or other prescribing details associated with that statistic"
+  ],
+  "query_content_archetype": "evergreen"
+ },
+ "rare-2": {
+  "query_type": "broad",
+  "query_domain": "academic",
+  "query_search_operators_exist": false,
+  "query_main_aspects": [
+   "methods for using MMAction2 pose cues and hierarchical motion models to improve player tracking and disambiguation"
+  ],
+  "query_aux_aspects": [
+   "application to dense soccer and hockey scenes",
+   "implementation details and evaluation of the approach"
+  ],
+  "query_content_archetype": "persistent"
+ },
+ "rare-3": {
+  "query_type": "specific",
+  "query_domain": "other",
+  "query_search_operators_exist": true,
+  "query_main_aspects": [
+   "The availability or download access of the CADD manual containing section 3.3 Landscaping",
+   "The file size of that manual"
+  ],
+  "query_aux_aspects": [],
+  "query_content_archetype": "persistent"
+ },
+ "rare-4": {
+  "query_type": "specific",
+  "query_domain": "legal",
+  "query_search_operators_exist": true,
+  "query_main_aspects": [
+   "The identity or provisions of the 1843 Bundesbeschluss concerning Freiz\u00fcgigkeit"
+  ],
+  "query_aux_aspects": [
+   "The historical context and significance of the resolution",
+   "The resolution's precise date and archival or citation details"
+  ],
+  "query_content_archetype": "evergreen"
+ },
+ "rare-5": {
+  "query_type": "broad",
+  "query_domain": "academic",
+  "query_search_operators_exist": true,
+  "query_main_aspects": [
+   "the use of Mucor circinelloides as a model fungus"
+  ],
+  "query_aux_aspects": [
+   "biological characteristics of Mucor circinelloides",
+   "research areas in which it is used as a model"
+  ],
+  "query_content_archetype": "evergreen"
+ },
+ "rare-6": {
+  "query_type": "list",
+  "query_domain": "other",
+  "query_search_operators_exist": true,
+  "query_main_aspects": [
+   "The identities and ranking of the top 10 public schools in Arizona for 2022"
+  ],
+  "query_aux_aspects": [
+   "Knox Gifted Academy's math and reading performance in 2022"
+  ],
+  "query_content_archetype": "evergreen"
+ },
+ "rare-7": {
+  "query_type": "specific",
+  "query_domain": "academic",
+  "query_search_operators_exist": true,
+  "query_main_aspects": [
+   "the identity and date associated with introducing Pachycephalidae as a family name in English-language taxonomic usage"
+  ],
+  "query_aux_aspects": [
+   "the family's taxonomic placement and English common-name usage"
+  ],
+  "query_content_archetype": "evergreen"
+ }
+}

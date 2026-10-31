@@ -1,0 +1,18 @@
+[
+ {"id": "news-0", "query_type": "broad", "main_aspects": ["James 'Big Stacks' Collins as a boxer", "his 2026 boxing activity (a fight, bout, or result)"], "archetype": "ephemeral"},
+ {"id": "news-1", "query_type": "specific", "main_aspects": ["an INSE vacuum", "a sale price or discount at Walmart"], "archetype": "ephemeral"},
+ {"id": "news-2", "query_type": "specific", "main_aspects": ["Paramount's takeover of Warner Bros. Discovery", "the closing status or completion of that deal"], "archetype": "ephemeral"},
+ {"id": "news-3", "query_type": "specific", "main_aspects": ["a partnership between Apple and ADT", "what the partnership covers"], "archetype": "ephemeral"},
+ {"id": "news-4", "query_type": "specific", "main_aspects": ["an Aeroplan promotion with a 90% bonus on points"], "archetype": "ephemeral"},
+ {"id": "news-5", "query_type": "specific", "main_aspects": ["criminal charges against Timothy Busfield", "the dismissal of those charges"], "archetype": "ephemeral"},
+ {"id": "news-6", "query_type": "specific", "main_aspects": ["the cancellation of Charli XCX's October 21 concert", "the reason or details of the cancellation"], "archetype": "ephemeral"},
+ {"id": "news-7", "query_type": "specific", "main_aspects": ["voters in Maricopa County reinstated to the rolls", "the count of about 20 reinstated voters or the reason"], "archetype": "ephemeral"},
+ {"id": "rare-0", "query_type": "broad", "main_aspects": ["the Dutch euthanasia law (Wet toetsing levensbeeindiging op verzoek en hulp bij zelfdoding)", "a page on rijksoverheid.nl"], "archetype": "persistent"},
+ {"id": "rare-1", "query_type": "specific", "main_aspects": ["cloxacillin prescribing", "NHS source with 2022 data or guidance"], "archetype": "persistent"},
+ {"id": "rare-2", "query_type": "broad", "main_aspects": ["player tracking or identity disambiguation in crowded soccer or hockey scenes", "use of pose cues or hierarchical motion models (e.g. MMAction2)"], "archetype": "evergreen"},
+ {"id": "rare-3", "query_type": "specific", "main_aspects": ["the Transport for NSW CADD manual section 3.3 Landscaping", "its download availability and file size"], "archetype": "persistent"},
+ {"id": "rare-4", "query_type": "specific", "main_aspects": ["an 1843 Bundesbeschluss", "its content on Freizuegigkeit (freedom of movement)"], "archetype": "evergreen"},
+ {"id": "rare-5", "query_type": "broad", "main_aspects": ["Mucor circinelloides", "its use or role as a model fungus"], "archetype": "evergreen"},
+ {"id": "rare-6", "query_type": "specific", "main_aspects": ["Knox Gifted Academy", "its 2022 math and reading scores or ranking among Arizona public schools"], "archetype": "persistent"},
+ {"id": "rare-7", "query_type": "specific", "main_aspects": ["the bird family Pachycephalidae", "who introduced the family and when, or its English name"], "archetype": "evergreen"}
+]

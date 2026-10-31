@@ -1,0 +1,37 @@
+{
+ "scholar": {
+  "query_runs": 4820,
+  "distinct_texts": 4679,
+  "texts_in_more_than_one_run": 119,
+  "query_runs_of_repeated_texts": 260,
+  "query_runs_of_texts_on_more_than_one_day": 260
+ },
+ "news": {
+  "query_runs": 5121,
+  "distinct_texts": 4803,
+  "texts_in_more_than_one_run": 230,
+  "query_runs_of_repeated_texts": 548,
+  "query_runs_of_texts_on_more_than_one_day": 215
+ },
+ "finance": {
+  "query_runs": 1320,
+  "distinct_texts": 1033,
+  "texts_in_more_than_one_run": 170,
+  "query_runs_of_repeated_texts": 457,
+  "query_runs_of_texts_on_more_than_one_day": 457
+ },
+ "agentic_rare": {
+  "query_runs": 1300,
+  "distinct_texts": 1184,
+  "texts_in_more_than_one_run": 112,
+  "query_runs_of_repeated_texts": 228,
+  "query_runs_of_texts_on_more_than_one_day": 222
+ },
+ "legal": {
+  "query_runs": 568,
+  "distinct_texts": 558,
+  "texts_in_more_than_one_run": 8,
+  "query_runs_of_repeated_texts": 18,
+  "query_runs_of_texts_on_more_than_one_day": 18
+ }
+}

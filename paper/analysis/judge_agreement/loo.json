@@ -1,0 +1,206 @@
+{
+ "runs": 111,
+ "queries": 1909,
+ "engines": {
+  "keenable-realtime": {
+   "n": 1888,
+   "full": 0.6204,
+   "loo": 0.6204,
+   "delta": 0.0,
+   "exceed_frac": 0.0,
+   "snippet_median": 1339
+  },
+  "keenable": {
+   "n": 1888,
+   "full": 0.6276,
+   "loo": 0.6289,
+   "delta": 0.0013,
+   "exceed_frac": 0.0005,
+   "snippet_median": 1338
+  },
+  "exa-instant": {
+   "n": 1829,
+   "full": 0.5811,
+   "loo": 0.5839,
+   "delta": 0.0027,
+   "exceed_frac": 0.0033,
+   "snippet_median": 1665
+  },
+  "exa": {
+   "n": 1811,
+   "full": 0.6354,
+   "loo": 0.6372,
+   "delta": 0.0018,
+   "exceed_frac": 0.0022,
+   "snippet_median": 1610
+  },
+  "google": {
+   "n": 1871,
+   "full": 0.304,
+   "loo": 0.3042,
+   "delta": 0.0001,
+   "exceed_frac": 0.0,
+   "snippet_median": 144
+  },
+  "bing": {
+   "n": 1870,
+   "full": 0.3311,
+   "loo": 0.3314,
+   "delta": 0.0003,
+   "exceed_frac": 0.0,
+   "snippet_median": 116
+  },
+  "brave": {
+   "n": 1891,
+   "full": 0.5953,
+   "loo": 0.5929,
+   "delta": -0.0024,
+   "exceed_frac": 0.0,
+   "snippet_median": 1105
+  },
+  "brave-llmcontext": {
+   "n": 1871,
+   "full": 0.6772,
+   "loo": 0.6811,
+   "delta": 0.0039,
+   "exceed_frac": 0.0037,
+   "snippet_median": 1464
+  },
+  "parallel-turbo": {
+   "n": 1851,
+   "full": 0.4122,
+   "loo": 0.4162,
+   "delta": 0.004,
+   "exceed_frac": 0.0043,
+   "snippet_median": 1514
+  },
+  "parallel": {
+   "n": 1850,
+   "full": 0.5122,
+   "loo": 0.5158,
+   "delta": 0.0036,
+   "exceed_frac": 0.0016,
+   "snippet_median": 724
+  },
+  "tavily": {
+   "n": 1871,
+   "full": 0.347,
+   "loo": 0.3485,
+   "delta": 0.0015,
+   "exceed_frac": 0.0005,
+   "snippet_median": 1158
+  },
+  "octen": {
+   "n": 1871,
+   "full": 0.4996,
+   "loo": 0.5025,
+   "delta": 0.0029,
+   "exceed_frac": 0.0011,
+   "snippet_median": 1711
+  },
+  "ceramic": {
+   "n": 1871,
+   "full": 0.0537,
+   "loo": 0.0537,
+   "delta": 0.0001,
+   "exceed_frac": 0.0,
+   "snippet_median": 1969
+  },
+  "you": {
+   "n": 1871,
+   "full": 0.5892,
+   "loo": 0.5898,
+   "delta": 0.0005,
+   "exceed_frac": 0.0016,
+   "snippet_median": 1101
+  },
+  "firecrawl": {
+   "n": 1871,
+   "full": 0.3092,
+   "loo": 0.3096,
+   "delta": 0.0004,
+   "exceed_frac": 0.0,
+   "snippet_median": 153
+  },
+  "tinyfish": {
+   "n": 1870,
+   "full": 0.3074,
+   "loo": 0.3077,
+   "delta": 0.0002,
+   "exceed_frac": 0.0,
+   "snippet_median": 144
+  },
+  "kagi": {
+   "n": 1871,
+   "full": 0.3679,
+   "loo": 0.3683,
+   "delta": 0.0005,
+   "exceed_frac": 0.0,
+   "snippet_median": 177
+  },
+  "jina": {
+   "n": 1870,
+   "full": 0.2263,
+   "loo": 0.2273,
+   "delta": 0.001,
+   "exceed_frac": 0.0005,
+   "snippet_median": 2000
+  },
+  "context": {
+   "n": 1832,
+   "full": 0.4226,
+   "loo": 0.424,
+   "delta": 0.0014,
+   "exceed_frac": 0.0016,
+   "snippet_median": 147
+  },
+  "claude-search": {
+   "n": 1612,
+   "full": 0.4903,
+   "loo": 0.4936,
+   "delta": 0.0033,
+   "exceed_frac": 0.0031,
+   "snippet_median": 634
+  },
+  "chatgpt-search": {
+   "n": 1848,
+   "full": 0.3728,
+   "loo": 0.3746,
+   "delta": 0.0018,
+   "exceed_frac": 0.0011,
+   "snippet_median": 416
+  },
+  "perplexity-fast": {
+   "n": 1810,
+   "full": 0.6592,
+   "loo": 0.6596,
+   "delta": 0.0004,
+   "exceed_frac": 0.0,
+   "snippet_median": 1172
+  },
+  "perplexity": {
+   "n": 1809,
+   "full": 0.6652,
+   "loo": 0.6663,
+   "delta": 0.0011,
+   "exceed_frac": 0.0011,
+   "snippet_median": 1176
+  },
+  "linkup": {
+   "n": 1113,
+   "full": 0.5782,
+   "loo": 0.5792,
+   "delta": 0.001,
+   "exceed_frac": 0.0,
+   "snippet_median": 1569
+  },
+  "deepseek": {
+   "n": 578,
+   "full": 0.6355,
+   "loo": 0.6491,
+   "delta": 0.0135,
+   "exceed_frac": 0.0104,
+   "snippet_median": 1979
+  }
+ }
+}

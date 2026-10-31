@@ -1,0 +1,62 @@
+{
+ "claude-search": {
+  "overall": 0.5087242595414897,
+  "excluded_scored_zero": 0.3284776272641612,
+  "excluded_scored_as_ceiling": 0.6907637714679498,
+  "excluded_fraction": {
+   "scholar": 0.337344398340249,
+   "news": 0.37171756467613304,
+   "finance": 0.36363636363636365,
+   "agentic_rare": 0.44999999999999996,
+   "legal": 0.28873239436619713
+  }
+ },
+ "exa": {
+  "overall": 0.6839103167227394,
+  "excluded_scored_zero": 0.6351780692196802,
+  "excluded_scored_as_ceiling": 0.7060294638505117,
+  "excluded_fraction": {
+   "scholar": 0.0,
+   "news": 0.02937171756467616,
+   "finance": 0.09090909090909094,
+   "agentic_rare": 0.13538461538461544,
+   "legal": 0.09859154929577463
+  }
+ },
+ "kagi": {
+  "overall": 0.49620519952511,
+  "excluded_scored_zero": 0.43854635464179204,
+  "excluded_scored_as_ceiling": 0.5738526447677168,
+  "excluded_fraction": {
+   "scholar": 0.08713692946058094,
+   "news": 0.16300330674965957,
+   "finance": 0.09090909090909094,
+   "agentic_rare": 0.2615384615384615,
+   "legal": 0.073943661971831
+  }
+ },
+ "parallel": {
+  "overall": 0.6510387591363778,
+  "excluded_scored_zero": 0.6370961107034733,
+  "excluded_scored_as_ceiling": 0.6704399378547309,
+  "excluded_fraction": {
+   "scholar": 0.0,
+   "news": 0.032872981910134214,
+   "finance": 0.0,
+   "agentic_rare": 0.13384615384615384,
+   "legal": 0.0
+  }
+ },
+ "perplexity": {
+  "overall": 0.6658711815240175,
+  "excluded_scored_zero": 0.6515509779369284,
+  "excluded_scored_as_ceiling": 0.6813900095530462,
+  "excluded_fraction": {
+   "scholar": 0.0,
+   "news": 0.013810542695973593,
+   "finance": 0.0,
+   "agentic_rare": 0.13538461538461544,
+   "legal": 0.0
+  }
+ }
+}

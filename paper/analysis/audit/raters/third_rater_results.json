@@ -1,0 +1,155 @@
+{
+ "gemini": {
+  "all": {
+   "n": 1199,
+   "kappa_vs_consensus": 0.9198582180917781,
+   "kappa_vs_A": 0.92176933876807,
+   "kappa_vs_judge_page": 0.784574343539438,
+   "kappa_snippet_vs_judge": 0.8190928162549908,
+   "within1_vs_judge": 0.8899082568807339,
+   "mean": 1.8798999165971644,
+   "spearman_engines_vs_judge": 0.8402597402597403,
+   "spearman_engines_vs_consensus": 0.9857142857142858,
+   "engines": 21,
+   "ci_kappa_vs_judge_page": [
+    0.7461309948160366,
+    0.8184101267694289
+   ],
+   "ci_kappa_vs_consensus": [
+    0.8949520857403735,
+    0.9371880730174835
+   ],
+   "ci_spearman_engines_vs_judge": [
+    0.7191163427387389,
+    0.948051948051948
+   ]
+  },
+  "news": {
+   "n": 600,
+   "kappa_vs_consensus": 0.9115604569231172,
+   "kappa_vs_A": 0.9183703006838658,
+   "kappa_vs_judge_page": 0.7462010862109315,
+   "kappa_snippet_vs_judge": 0.7883950971862039,
+   "within1_vs_judge": 0.8633333333333333,
+   "mean": 2.2516666666666665,
+   "spearman_engines_vs_judge": 0.8532467532467533,
+   "spearman_engines_vs_consensus": 0.9753246753246754,
+   "engines": 21,
+   "ci_kappa_vs_judge_page": [
+    0.6919086794198301,
+    0.7908079461989029
+   ],
+   "ci_kappa_vs_consensus": [
+    0.891070467993545,
+    0.9276937205736298
+   ],
+   "ci_spearman_engines_vs_judge": [
+    0.7168831168831169,
+    0.9402597402597402
+   ]
+  },
+  "agentic_rare": {
+   "n": 599,
+   "kappa_vs_consensus": 0.9171721686418839,
+   "kappa_vs_A": 0.9147056242997134,
+   "kappa_vs_judge_page": 0.8048180844026729,
+   "kappa_snippet_vs_judge": 0.8331508644615877,
+   "within1_vs_judge": 0.9165275459098498,
+   "mean": 1.5075125208681135,
+   "spearman_engines_vs_judge": 0.7320559009025149,
+   "spearman_engines_vs_consensus": 0.9360182370900835,
+   "engines": 21,
+   "ci_kappa_vs_judge_page": [
+    0.7499920135450275,
+    0.8569781443111595
+   ],
+   "ci_kappa_vs_consensus": [
+    0.8691693472469305,
+    0.9460642212063776
+   ],
+   "ci_spearman_engines_vs_judge": [
+    0.4853802194239085,
+    0.9373173602505138
+   ]
+  }
+ },
+ "grok": {
+  "all": {
+   "n": 1199,
+   "kappa_vs_consensus": 0.8973639061478009,
+   "kappa_vs_A": 0.8981623273334021,
+   "kappa_vs_judge_page": 0.7893281721258486,
+   "kappa_snippet_vs_judge": 0.8348503036254864,
+   "within1_vs_judge": 0.8932443703085905,
+   "mean": 1.884070058381985,
+   "spearman_engines_vs_judge": 0.8506493506493507,
+   "spearman_engines_vs_consensus": 0.9844155844155844,
+   "engines": 21,
+   "ci_kappa_vs_judge_page": [
+    0.756630382012093,
+    0.8158257578570879
+   ],
+   "ci_kappa_vs_consensus": [
+    0.8732986600625521,
+    0.918718093284948
+   ],
+   "ci_spearman_engines_vs_judge": [
+    0.6948051948051948,
+    0.9402597402597402
+   ]
+  },
+  "news": {
+   "n": 600,
+   "kappa_vs_consensus": 0.9034459082521563,
+   "kappa_vs_A": 0.9103043246129204,
+   "kappa_vs_judge_page": 0.7518895176289028,
+   "kappa_snippet_vs_judge": 0.8005909612000065,
+   "within1_vs_judge": 0.8766666666666667,
+   "mean": 2.275,
+   "spearman_engines_vs_judge": 0.8207792207792208,
+   "spearman_engines_vs_consensus": 0.951948051948052,
+   "engines": 21,
+   "ci_kappa_vs_judge_page": [
+    0.7016704838132353,
+    0.7930755213605993
+   ],
+   "ci_kappa_vs_consensus": [
+    0.8825924963174768,
+    0.9220317201604814
+   ],
+   "ci_spearman_engines_vs_judge": [
+    0.7038961038961039,
+    0.9246753246753247
+   ]
+  },
+  "agentic_rare": {
+   "n": 599,
+   "kappa_vs_consensus": 0.8770198939540346,
+   "kappa_vs_A": 0.871519103898777,
+   "kappa_vs_judge_page": 0.8089930988870824,
+   "kappa_snippet_vs_judge": 0.8537534761760772,
+   "within1_vs_judge": 0.9098497495826378,
+   "mean": 1.4924874791318865,
+   "spearman_engines_vs_judge": 0.7164664229773505,
+   "spearman_engines_vs_consensus": 0.9067879659804001,
+   "engines": 21,
+   "ci_kappa_vs_judge_page": [
+    0.7622675165489761,
+    0.8504259364922011
+   ],
+   "ci_kappa_vs_consensus": [
+    0.8252556691863051,
+    0.9155688557828883
+   ],
+   "ci_spearman_engines_vs_judge": [
+    0.5170510178512883,
+    0.9324675324675324
+   ]
+  }
+ },
+ "between": {
+  "all": 0.9178875339527761,
+  "news": 0.9192149982659785,
+  "agentic_rare": 0.9051076740441284
+ }
+}

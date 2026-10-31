@@ -1,0 +1,572 @@
+[
+ {
+  "id": 1,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "On-site legislative-history page for the Act, but snippet is title and date only."
+ },
+ {
+  "id": 4,
+  "rating": 2,
+  "label": "SM",
+  "note": "On-site Kamerbrief on the 4th evaluation of the Act; names the law but gives no scope or requirements."
+ },
+ {
+  "id": 7,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "On-site theme page showing only navigation and FAQ links, no content on the Act."
+ },
+ {
+  "id": 10,
+  "rating": 3,
+  "label": "HM",
+  "note": "Official page explains the Act, patient request, minors, written requests and reporting to RTE; six care criteria not listed."
+ },
+ {
+  "id": 15,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "On-site RTE annual report page with one truncated line on review under the Act."
+ },
+ {
+  "id": 25,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "On-site page with a single line about the cabinet reaction to the evaluation."
+ },
+ {
+  "id": 44,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "On-site RTE 2025 annual report page; one sentence on review under the Act, no requirements."
+ },
+ {
+  "id": 48,
+  "rating": 2,
+  "label": "SM",
+  "note": "On-site page names the Act and covers oral request and doctor refusal; care criteria only linked."
+ },
+ {
+  "id": 65,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host cbhd.org fails site:rijksoverheid.nl."
+ },
+ {
+  "id": 67,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "On-site page with one line naming the Kamerbrief on the evaluation."
+ },
+ {
+  "id": 79,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host wetten.overheid.nl fails site:rijksoverheid.nl."
+ },
+ {
+  "id": 81,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host wetten-overheid.nl fails site:rijksoverheid.nl."
+ },
+ {
+  "id": 87,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "On-site page but snippet only gives the official name of the Act."
+ },
+ {
+  "id": 107,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent from snippet and title."
+ },
+ {
+  "id": 108,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent from snippet and title."
+ },
+ {
+  "id": 115,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"cloxacillin\" and \"2022\" absent."
+ },
+ {
+  "id": 117,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" absent from snippet and title."
+ },
+ {
+  "id": 121,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent; Canadian drug factsheet."
+ },
+ {
+  "id": 123,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Prescription\", \"2022\" and \"NHS\" absent."
+ },
+ {
+  "id": 128,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"NHS\" absent; US dicloxacillin label."
+ },
+ {
+  "id": 130,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent; Canadian monograph."
+ },
+ {
+  "id": 139,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" absent; NHS flucloxacillin page with no statistic."
+ },
+ {
+  "id": 149,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent; dosage guide."
+ },
+ {
+  "id": 150,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent; patient leaflet."
+ },
+ {
+  "id": 155,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"cloxacillin\" absent from snippet and title."
+ },
+ {
+  "id": 169,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"NHS\" absent; Health Canada product record."
+ },
+ {
+  "id": 170,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"2022\" and \"NHS\" absent; veterinary label."
+ },
+ {
+  "id": 195,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Survey of sports action recognition; one line, no tracking or MMAction2 pose method."
+ },
+ {
+  "id": 199,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Hockey pose paper fragment with no visible tracking content."
+ },
+ {
+  "id": 202,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 repo overview; no player tracking or disambiguation."
+ },
+ {
+  "id": 208,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Sports player tracking with hierarchical particle filter for speed; no pose cues or MMAction2."
+ },
+ {
+  "id": 211,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical graph tracking for soccer and hockey with pose used for jersey numbers; no MMAction2, motion model left to future work."
+ },
+ {
+  "id": 213,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hockey tracking using foot keypoints to disambiguate overlapping players; no MMAction2 or hierarchical motion model."
+ },
+ {
+  "id": 222,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hierarchical association with motion models for team-sport player tracking; no pose cues or MMAction2."
+ },
+ {
+  "id": 223,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Field hockey detection and team classification; little on pose or motion models."
+ },
+ {
+  "id": 224,
+  "rating": 2,
+  "label": "SM",
+  "note": "Project page summarizes hierarchical tracking in soccer and hockey; no pose or MMAction2."
+ },
+ {
+  "id": 231,
+  "rating": 2,
+  "label": "SM",
+  "note": "Uses MMAction2 pose action recognition plus BoT-SORT tracking in hockey, but pose is not used to improve tracking; no hierarchical motion model."
+ },
+ {
+  "id": 232,
+  "rating": 2,
+  "label": "SM",
+  "note": "MMAction2 pose recognition with ByteTrack in hockey for MARL; pose not used for tracking disambiguation."
+ },
+ {
+  "id": 237,
+  "rating": 2,
+  "label": "SM",
+  "note": "Hockey tracking abstract using foot keypoints and homography to disentangle occluded players; no MMAction2."
+ },
+ {
+  "id": 255,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 demo script note; unrelated to player tracking."
+ },
+ {
+  "id": 256,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 docs landing line only."
+ },
+ {
+  "id": 258,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Publication record page with navigation only, no method content."
+ },
+ {
+  "id": 259,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Skeleton-based hockey action recognition; not about tracking or disambiguation of players."
+ },
+ {
+  "id": 260,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Bot-check page, no content."
+ },
+ {
+  "id": 266,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "MMAction2 training walkthrough for gesture recognition; no player tracking."
+ },
+ {
+  "id": 282,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host amazonaws.com fails the site: operator."
+ },
+ {
+  "id": 284,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both quoted terms present but refers to an 1832 Bundesbeschluss; no 1843 resolution."
+ },
+ {
+  "id": 288,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Swiss 1848 constitution with Freizügigkeit article and 1866 Bundesbeschluss; no 1843 resolution."
+ },
+ {
+  "id": 300,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Modern 2009 Swiss official gazette; wrong entity for the 1843 resolution."
+ },
+ {
+  "id": 310,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Legal history page mentions an 1837 Bundesbeschluss and Freizügigkeit; no 1843 resolution."
+ },
+ {
+  "id": 311,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent from snippet and title."
+ },
+ {
+  "id": 318,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Freizügigkeit\" and \"Bundesbeschluss\" absent."
+ },
+ {
+  "id": 333,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Modern 2026 Swiss-EU draft Bundesbeschluss; wrong entity."
+ },
+ {
+  "id": 336,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Modern Swiss-EU Croatia protocol Bundesbeschluss; wrong entity."
+ },
+ {
+  "id": 347,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent from snippet and title."
+ },
+ {
+  "id": 363,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Bibliography of modern Swiss-EU free movement acts; wrong entity."
+ },
+ {
+  "id": 367,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Bundesbeschluss\" absent (only Bundesratsbeschluss)."
+ },
+ {
+  "id": 369,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Modern Swiss social insurance circular; wrong entity."
+ },
+ {
+  "id": 375,
+  "rating": 3,
+  "label": "HM",
+  "note": "Both phrases present; explains suitability of M. circinelloides as model lipogenic fungus with genetic tools and genome."
+ },
+ {
+  "id": 376,
+  "rating": 3,
+  "label": "HM",
+  "note": "Both phrases present; describes M. lusitanicus (ex M. circinelloides f. lusitanicus) as model for lipids, gene silencing, light response."
+ },
+ {
+  "id": 380,
+  "rating": 3,
+  "label": "HM",
+  "note": "Both phrases present; details M. circinelloides as model fungus with molecular tool repertoire and genome."
+ },
+ {
+  "id": 383,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 384,
+  "rating": 2,
+  "label": "SM",
+  "note": "Both phrases present; notes wide use for lipid studies and development as model fungus, little depth on model use."
+ },
+ {
+  "id": 394,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 396,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 400,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent; says model organism instead."
+ },
+ {
+  "id": 411,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 414,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent; says model oleaginous fungus."
+ },
+ {
+  "id": 417,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 426,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent; says model fungi and model system."
+ },
+ {
+  "id": 435,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 438,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent."
+ },
+ {
+  "id": 439,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Phrase \"model fungus\" refers to Monascus; no content on M. circinelloides as model."
+ },
+ {
+  "id": 443,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Both phrases present in a fragment only; no substantive content."
+ },
+ {
+  "id": 452,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Captcha page, no content."
+ },
+ {
+  "id": 456,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"model fungus\" absent; says model organism."
+ },
+ {
+  "id": 462,
+  "rating": 2,
+  "label": "SM",
+  "note": "Search listing with one abstract calling M. circinelloides a well-established oleaginous model fungus; thin."
+ },
+ {
+  "id": 475,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host fails site:websitesourcedomain.travel; off-topic obituary."
+ },
+ {
+  "id": 479,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Host fails site:websitesourcedomain.travel; off-topic."
+ },
+ {
+  "id": 480,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted terms present; states Swainson introduced the family in 1832."
+ },
+ {
+  "id": 481,
+  "rating": 3,
+  "label": "HM",
+  "note": "All quoted terms present; Wikipedia mirror states Swainson in 1832."
+ },
+ {
+  "id": 493,
+  "rating": 3,
+  "label": "HM",
+  "note": "All quoted terms present; HandWiki mirror states Swainson in 1832."
+ },
+ {
+  "id": 494,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted terms present; full article states Swainson 1832 with taxonomy and references."
+ },
+ {
+  "id": 502,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"Pachycephalidae\" absent."
+ },
+ {
+  "id": 509,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Terms present but the introduction fact concerns the Australasian robin family; wrong entity."
+ },
+ {
+  "id": 516,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted terms present; states Swainson introduced the family in 1832."
+ },
+ {
+  "id": 528,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"English\" absent."
+ },
+ {
+  "id": 532,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted terms present; states Swainson introduced the family in 1832."
+ },
+ {
+  "id": 536,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" absent."
+ },
+ {
+  "id": 545,
+  "rating": 1,
+  "label": "FailsM",
+  "note": "Terms present but page is about the golden whistler; no family introduction fact."
+ },
+ {
+  "id": 550,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"introduced\" and \"English\" absent."
+ },
+ {
+  "id": 554,
+  "rating": 3,
+  "label": "HM",
+  "note": "All quoted terms present; QuestionAI copy states Swainson in 1832."
+ },
+ {
+  "id": 557,
+  "rating": 0,
+  "label": "FailsM",
+  "note": "Quoted \"English\" absent."
+ },
+ {
+  "id": 561,
+  "rating": 4,
+  "label": "FullyM",
+  "note": "All quoted terms present; states Swainson introduced the family in 1832."
+ },
+ {
+  "id": 562,
+  "rating": 3,
+  "label": "HM",
+  "note": "All quoted terms present; HandWiki mirror states Swainson in 1832."
+ }
+]

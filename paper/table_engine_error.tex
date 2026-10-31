@@ -1,0 +1,29 @@
+\begin{tabular}{@{}lrrrrrrrr@{}}
+\toprule
+ & \multicolumn{4}{c}{Finance: table-reading hits} & \multicolumn{4}{c}{Caselaw: identity of the hit} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+Engine & $n$ & confirmed & recall loss & rank & own share & any-host R@5 & $\times$ pooled & $\times$ own \\
+\midrule
+Keenable & 57 & .79 & 0.9 & 1 & .75 & .80 & .76 & .75 \\
+Exa & 117 & .96 & 0.4 & 2 & 1 & .78 & .73 & .78 \\
+Perplexity & 98 & .88 & 0.9 & 3 & 1 & .69 & .64 & .69 \\
+Parallel & 119 & .76 & 2.1 & 4 & 1 & .75 & .70 & .75 \\
+Brave (LLM ctx) & 106 & .78 & 1.8 & 5 & .50 & .66 & .61 & .55 \\
+Linkup & 9 & .70 & 0.2 & 6 & .50 & .56 & .52 & .46 \\
+Brave & 5 & .70 & 0.1 & 7 & .75 & .62 & .58 & .57 \\
+Context & 29 & .70 & 0.7 & 8 & 1 & .58 & .54 & .58 \\
+DeepSeek & 100 & .70 & 2.3 & 9 & 1 & .69 & .64 & .69 \\
+You.com & 5 & .70 & 0.1 & 10 & 1 & .60 & .56 & .60 \\
+Claude search & 13 & .70 & 0.5 & 11 & .75 & .53 & .49 & .48 \\
+Firecrawl & 111 & .33 & 5.6 & 12 $\to$ 14 & 1 & .59 & .56 & .59 \\
+Octen & 34 & .78 & 0.6 & 13 $\to$ 12 & .50 & .59 & .56 & .52 \\
+Kagi & 6 & .70 & 0.1 & 14 $\to$ 13 & .50 & .63 & .59 & .53 \\
+ChatGPT search & 72 & .74 & 1.4 & 15 & 1 & .72 & .68 & .72 \\
+Google (Serper) & 12 & .70 & 0.3 & 16 & .75 & .57 & .54 & .53 \\
+Jina & 25 & .70 & 0.6 & 17 & .75 & .52 & .49 & .49 \\
+Tavily & 84 & .58 & 2.7 & 18 $\to$ 19 & .75 & .36 & .33 & .32 \\
+Bing (SearchAPI) & 3 & .70 & 0.1 & 19 $\to$ 18 & 1 & .52 & .49 & .52 \\
+TinyFish & 18 & .70 & 0.4 & 20 & .75 & .52 & .49 & .48 \\
+Ceramic & 2 & .70 & 0.0 & 21 & .00 & .14 & .13 & .09 \\
+\bottomrule
+\end{tabular}

@@ -1,0 +1,233 @@
+[
+ {
+  "engine": "keenable",
+  "recall": 0.8049242424242424,
+  "target_pooled": 0.7575757575757576,
+  "target_lo": 0.7365457003014909,
+  "target_hi": 0.7733508706062739,
+  "target_own": 0.7457386363636364,
+  "own_fraction": 0.75,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "exa",
+  "recall": 0.7754237288135594,
+  "target_pooled": 0.7334745762711864,
+  "target_lo": 0.7148426584094836,
+  "target_hi": 0.7474507916666298,
+  "target_own": 0.7754237288135594,
+  "own_fraction": 1.0,
+  "n_caselaw": 112,
+  "n_cfr": 360
+ },
+ {
+  "engine": "parallel",
+  "recall": 0.7462121212121212,
+  "target_pooled": 0.7000000000000001,
+  "target_lo": 0.6794746641003158,
+  "target_hi": 0.715396510317784,
+  "target_own": 0.7462121212121212,
+  "own_fraction": 1.0,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "chatgpt-search",
+  "recall": 0.7159090909090909,
+  "target_pooled": 0.6776515151515152,
+  "target_lo": 0.6606592288739077,
+  "target_hi": 0.6903978064801723,
+  "target_own": 0.7159090909090909,
+  "own_fraction": 1.0,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "perplexity",
+  "recall": 0.6893939393939394,
+  "target_pooled": 0.6428030303030302,
+  "target_lo": 0.6221094539451518,
+  "target_hi": 0.6583257415250584,
+  "target_own": 0.6893939393939394,
+  "own_fraction": 1.0,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "deepseek",
+  "recall": 0.6856060606060606,
+  "target_pooled": 0.6428030303030302,
+  "target_lo": 0.6237918585270933,
+  "target_hi": 0.6570637324826172,
+  "target_own": 0.6856060606060606,
+  "own_fraction": 1.0,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "brave-llmcontext",
+  "recall": 0.6571969696969697,
+  "target_pooled": 0.6124999999999999,
+  "target_lo": 0.5926476259330923,
+  "target_hi": 0.6273917067008075,
+  "target_own": 0.5454545454545454,
+  "own_fraction": 0.5,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "kagi",
+  "recall": 0.6255144032921811,
+  "target_pooled": 0.5876543209876544,
+  "target_lo": 0.570838583339016,
+  "target_hi": 0.600268179268648,
+  "target_own": 0.5308641975308642,
+  "own_fraction": 0.5,
+  "n_caselaw": 128,
+  "n_cfr": 358
+ },
+ {
+  "engine": "brave",
+  "recall": 0.6212121212121212,
+  "target_pooled": 0.5784090909090909,
+  "target_lo": 0.5593979191331538,
+  "target_hi": 0.5926697930886777,
+  "target_own": 0.5677083333333334,
+  "own_fraction": 0.75,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "you",
+  "recall": 0.6022727272727273,
+  "target_pooled": 0.5587121212121212,
+  "target_lo": 0.5393644685197959,
+  "target_hi": 0.5732252252001963,
+  "target_own": 0.6022727272727273,
+  "own_fraction": 1.0,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "firecrawl",
+  "recall": 0.5946969696969697,
+  "target_pooled": 0.5587121212121212,
+  "target_lo": 0.5427292776836785,
+  "target_hi": 0.5707012071153137,
+  "target_own": 0.5946969696969697,
+  "own_fraction": 1.0,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "octen",
+  "recall": 0.5890151515151515,
+  "target_pooled": 0.5606060606060606,
+  "target_lo": 0.5479880262415006,
+  "target_hi": 0.5700711284243705,
+  "target_own": 0.5179924242424242,
+  "own_fraction": 0.5,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "context",
+  "recall": 0.5795454545454546,
+  "target_pooled": 0.543939393939394,
+  "target_lo": 0.5281247908691454,
+  "target_hi": 0.5558022789383423,
+  "target_own": 0.5795454545454546,
+  "own_fraction": 1.0,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "google",
+  "recall": 0.5738636363636364,
+  "target_pooled": 0.5420454545454545,
+  "target_lo": 0.5279132560571473,
+  "target_hi": 0.5526463305019615,
+  "target_own": 0.5340909090909091,
+  "own_fraction": 0.75,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "linkup",
+  "recall": 0.5625,
+  "target_pooled": 0.5227272727272727,
+  "target_lo": 0.5050620246168886,
+  "target_hi": 0.5359783676729065,
+  "target_own": 0.4630681818181818,
+  "own_fraction": 0.5,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "claude-search",
+  "recall": 0.5302197802197802,
+  "target_pooled": 0.49175824175824173,
+  "target_lo": 0.4746753644646836,
+  "target_hi": 0.5045724874199535,
+  "target_own": 0.48214285714285715,
+  "own_fraction": 0.75,
+  "n_caselaw": 84,
+  "n_cfr": 280
+ },
+ {
+  "engine": "bing",
+  "recall": 0.5227272727272727,
+  "target_pooled": 0.49318181818181817,
+  "target_lo": 0.48005906244267577,
+  "target_hi": 0.5030254887128603,
+  "target_own": 0.5227272727272727,
+  "own_fraction": 1.0,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "tinyfish",
+  "recall": 0.5227272727272727,
+  "target_pooled": 0.4909090909090909,
+  "target_lo": 0.4767768924207837,
+  "target_hi": 0.5015099668655979,
+  "target_own": 0.48295454545454547,
+  "own_fraction": 0.75,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "jina",
+  "recall": 0.5227272727272727,
+  "target_pooled": 0.4946969696969697,
+  "target_lo": 0.48224717579060383,
+  "target_hi": 0.5040358366110355,
+  "target_own": 0.4876893939393939,
+  "own_fraction": 0.75,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "tavily",
+  "recall": 0.36363636363636365,
+  "target_pooled": 0.33106060606060606,
+  "target_lo": 0.3165919266559106,
+  "target_hi": 0.34191388382560134,
+  "target_own": 0.3229166666666667,
+  "own_fraction": 0.75,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ },
+ {
+  "engine": "ceramic",
+  "recall": 0.13825757575757575,
+  "target_pooled": 0.12803030303030302,
+  "target_lo": 0.12348781065906142,
+  "target_hi": 0.13143772744489457,
+  "target_own": 0.08712121212121213,
+  "own_fraction": 0.0,
+  "n_caselaw": 128,
+  "n_cfr": 400
+ }
+]

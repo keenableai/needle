@@ -1,0 +1,98 @@
+[
+ {
+  "id": "news-0",
+  "bench": "news",
+  "date": "2026-09-30",
+  "query": "James Collins Big Stacks boxing 2026"
+ },
+ {
+  "id": "news-1",
+  "bench": "news",
+  "date": "2026-10-03",
+  "query": "INSE vacuum Walmart sale 2026"
+ },
+ {
+  "id": "news-2",
+  "bench": "news",
+  "date": "2026-10-07",
+  "query": "Paramount Warner Bros takeover closes 2026"
+ },
+ {
+  "id": "news-3",
+  "bench": "news",
+  "date": "2026-10-11",
+  "query": "Apple ADT partnership October 2026"
+ },
+ {
+  "id": "news-4",
+  "bench": "news",
+  "date": "2026-10-14",
+  "query": "Aeroplan 90% points bonus 2026"
+ },
+ {
+  "id": "news-5",
+  "bench": "news",
+  "date": "2026-10-17",
+  "query": "Timothy Busfield charges dismissed"
+ },
+ {
+  "id": "news-6",
+  "bench": "news",
+  "date": "2026-10-21",
+  "query": "Charli XCX Oct 21 concert cancellation"
+ },
+ {
+  "id": "news-7",
+  "bench": "news",
+  "date": "2026-10-24",
+  "query": "Maricopa 20 voters reinstated 2026"
+ },
+ {
+  "id": "rare-0",
+  "bench": "rare",
+  "date": "2026-10-22",
+  "query": "Netherlands Wet toetsing levensbe\u00ebindiging op verzoek site:rijksoverheid.nl"
+ },
+ {
+  "id": "rare-1",
+  "bench": "rare",
+  "date": "2026-10-23",
+  "query": "\"cloxacillin\" \"Prescription\" \"2022\" \"NHS\""
+ },
+ {
+  "id": "rare-2",
+  "bench": "rare",
+  "date": "2026-10-24",
+  "query": "Leveraging pose cues and hierarchical motion models from MMaction2 to improve player tracking and disambiguation in dense soccer and hockey scenes"
+ },
+ {
+  "id": "rare-3",
+  "bench": "rare",
+  "date": "2026-10-25",
+  "query": "site:transportfornewsgov.au CADD manual \"3.3 Landscaping\" availability file size"
+ },
+ {
+  "id": "rare-4",
+  "bench": "rare",
+  "date": "2026-10-26",
+  "query": "\"Freiz\u00fcgigkeit\" 1843 \"Bundesbeschluss\""
+ },
+ {
+  "id": "rare-5",
+  "bench": "rare",
+  "date": "2026-10-27",
+  "query": "\"Mucor circinelloides\" \"model fungus\""
+ },
+ {
+  "id": "rare-6",
+  "bench": "rare",
+  "date": "2026-10-28",
+  "query": "Top 10 Best Public Schools in Arizona (2022) Knox Gifted Academy math reading 2022 site:websitesourcedomain.travel"
+ },
+ {
+  "id": "rare-7",
+  "bench": "rare",
+  "date": "2026-10-29",
+  "query": "\"Pachycephalidae\" \"family\" \"introduced\" \"English\""
+ }
+]
