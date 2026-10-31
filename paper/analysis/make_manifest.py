@@ -27,7 +27,6 @@ manifest = {
         "matched_support_full_window": {"file": "audit/matched_pairs.json", "news_runs": 256, "matched_query_runs": 6801},
         "figure_results_a": {"source": "history_v3.jsonl", "bench": "scholar", "window_days": 30, "window_end": "2026-10-29"},
         "figure_results_b": {"source": "history_v3.jsonl", "weeks": "2026-W36..2026-W43"},
-        "figure_overlap": {"source": "independence.json", "scope": "all runs"},
         "adjacent_pairs": {"files": ["audit/adjacent_pairs.json", "audit/adjacent_pairs_day.json"], "resamples": 2000},
         "lag_subset": {"file": "audit/lag_subset.json", "runs": 249, "queries": 4959},
         "finance_bias": {"file": "audit/finance_bias.json"},

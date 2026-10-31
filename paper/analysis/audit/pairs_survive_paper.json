@@ -1,0 +1,92 @@
+{
+ "counts": {
+  "run_pointwise": 187,
+  "run_bonferroni": 179,
+  "day_pointwise": 186,
+  "day_bonferroni": 178,
+  "matched_pointwise": 186,
+  "matched_bonferroni": 174,
+  "all_three_pointwise": 180,
+  "all_three_bonferroni": 170
+ },
+ "lost": [
+  [
+   "linkup",
+   "you",
+   "day",
+   ""
+  ],
+  [
+   "context",
+   "chatgpt-search",
+   "",
+   "matched"
+  ],
+  [
+   "you",
+   "chatgpt-search",
+   "",
+   "matched"
+  ],
+  [
+   "firecrawl",
+   "bing",
+   "",
+   "matched"
+  ],
+  [
+   "octen",
+   "google",
+   "",
+   "matched"
+  ],
+  [
+   "octen",
+   "bing",
+   "day",
+   "matched"
+  ],
+  [
+   "kagi",
+   "google",
+   "",
+   "matched"
+  ],
+  [
+   "kagi",
+   "bing",
+   "",
+   "matched"
+  ],
+  [
+   "chatgpt-search",
+   "tinyfish",
+   "",
+   "matched"
+  ]
+ ],
+ "lost_vs_production": [
+  [
+   "kagi",
+   "bing"
+  ],
+  [
+   "kagi",
+   "google"
+  ],
+  [
+   "you",
+   "chatgpt-search"
+  ]
+ ],
+ "gained_vs_production": [
+  [
+   "deepseek",
+   "chatgpt-search"
+  ]
+ ],
+ "fully_all_three": [
+  "keenable",
+  "ceramic"
+ ]
+}

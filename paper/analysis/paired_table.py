@@ -10,7 +10,7 @@ data = {b: json.load(open(p))["engines"] for b, p in files.items()}
 COLS = [("finance", "filing", ("quoted", "site", "date")), ("legal", "caselaw", ("quoted", "site", "date")), ("legal", "code", ("quoted", "site"))]
 cols = [(b, bk, vs) for b, bk, vs in COLS if b in data]
 first = data.get("finance", data[next(iter(data))])
-engines = sorted({e for d in data.values() for e in d}, key=lambda e: -(first.get(e, {}).get("filing", {}).get("plain") or 0))
+engines = sorted({e for d in data.values() for e in d}, key=lambda e: (-(first.get(e, {}).get("filing", {}).get("plain") or 0), -(data.get("legal", {}).get(e, {}).get("caselaw", {}).get("plain") or 0), e))
 HEAD = {"quoted": "quoted", "site": r"\texttt{site:}", "date": "dates"}
 
 
@@ -23,7 +23,7 @@ def cell(d, v):
         return "--"
     m, lo, hi = d[v]["mean"], d[v]["lo"], d[v]["hi"]
     s = "0" if abs(m) < 0.005 else f"${m:+.2f}$".replace("0.", ".")
-    return s if lo > 0 or hi < 0 else rf"\textcolor{{muted}}{{{s}}}"
+    return s if lo > 0 or hi < 0 else rf"\textcolor{{ink2}}{{{s}}}$^{{\dagger}}$"
 
 
 lines = [r"\begin{tabular}{@{}l" + "".join("r" * (1 + len(vs)) for _, _, vs in cols) + "@{}}", r"\toprule"]

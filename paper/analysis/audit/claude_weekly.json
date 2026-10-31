@@ -1,0 +1,1527 @@
+{
+ "weeks": [
+  "2026-W36",
+  "2026-W37",
+  "2026-W38",
+  "2026-W39",
+  "2026-W40",
+  "2026-W41",
+  "2026-W42",
+  "2026-W43"
+ ],
+ "2026-W36": {
+  "figure": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": null,
+     "ceiling": 0.9064059900166389,
+     "share": null
+    },
+    "news": {
+     "metric": null,
+     "ceiling": 1.0,
+     "share": null
+    },
+    "finance": {
+     "metric": null,
+     "ceiling": 0.9714285714285714,
+     "share": null
+    },
+    "agentic_rare": {
+     "metric": null,
+     "ceiling": 1.0,
+     "share": null
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": 0.9622641509433962,
+     "share": null
+    }
+   }
+  },
+  "runs": {
+   "scholar": {
+    "bench_runs": 7,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   },
+   "news": {
+    "bench_runs": 170,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   },
+   "finance": {
+    "bench_runs": 7,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   },
+   "agentic_rare": {
+    "bench_runs": 8,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   },
+   "legal": {
+    "bench_runs": 9,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   }
+  },
+  "zero_error_runs": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "news": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "finance": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "agentic_rare": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    }
+   }
+  },
+  "low_error_runs": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "news": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "finance": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "agentic_rare": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    }
+   }
+  },
+  "failures_zero": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": null,
+     "ceiling": 0.9064059900166389,
+     "share": null
+    },
+    "news": {
+     "metric": null,
+     "ceiling": 1.0,
+     "share": null
+    },
+    "finance": {
+     "metric": null,
+     "ceiling": 0.9714285714285714,
+     "share": null
+    },
+    "agentic_rare": {
+     "metric": null,
+     "ceiling": 1.0,
+     "share": null
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": 0.9622641509433962,
+     "share": null
+    }
+   }
+  }
+ },
+ "2026-W37": {
+  "figure": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": null,
+     "ceiling": 0.90625,
+     "share": null
+    },
+    "news": {
+     "metric": null,
+     "ceiling": 1.0,
+     "share": null
+    },
+    "finance": {
+     "metric": null,
+     "ceiling": 0.975,
+     "share": null
+    },
+    "agentic_rare": {
+     "metric": null,
+     "ceiling": 1.0,
+     "share": null
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": 0.9776785714285714,
+     "share": null
+    }
+   }
+  },
+  "runs": {
+   "scholar": {
+    "bench_runs": 7,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   },
+   "news": {
+    "bench_runs": 168,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   },
+   "finance": {
+    "bench_runs": 7,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   },
+   "agentic_rare": {
+    "bench_runs": 7,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   },
+   "legal": {
+    "bench_runs": 7,
+    "runs": 0,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 0,
+    "failed": 0,
+    "failed_frac": null
+   }
+  },
+  "zero_error_runs": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "news": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "finance": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "agentic_rare": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    }
+   }
+  },
+  "low_error_runs": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "news": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "finance": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "agentic_rare": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    }
+   }
+  },
+  "failures_zero": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": null,
+     "ceiling": 0.90625,
+     "share": null
+    },
+    "news": {
+     "metric": null,
+     "ceiling": 1.0,
+     "share": null
+    },
+    "finance": {
+     "metric": null,
+     "ceiling": 0.975,
+     "share": null
+    },
+    "agentic_rare": {
+     "metric": null,
+     "ceiling": 1.0,
+     "share": null
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": 0.9776785714285714,
+     "share": null
+    }
+   }
+  }
+ },
+ "2026-W38": {
+  "figure": {
+   "overall": 0.5908693535770008,
+   "bench": {
+    "scholar": {
+     "metric": 0.5094901377000373,
+     "ceiling": 0.8696428571428572,
+     "share": 0.5858613493059976
+    },
+    "news": {
+     "metric": 0.47911316328372505,
+     "ceiling": 1.0,
+     "share": 0.47911316328372505
+    },
+    "finance": {
+     "metric": 0.7916666666666666,
+     "ceiling": 0.9666666666666667,
+     "share": 0.8189655172413792
+    },
+    "agentic_rare": {
+     "metric": 0.3115221016405609,
+     "ceiling": 1.0,
+     "share": 0.3115221016405609
+    },
+    "legal": {
+     "metric": 0.7351694915254238,
+     "ceiling": 0.96875,
+     "share": 0.7588846364133407
+    }
+   }
+  },
+  "runs": {
+   "scholar": {
+    "bench_runs": 9,
+    "runs": 8,
+    "runs_with_errors": 6,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 2704,
+    "failed": 17,
+    "failed_frac": 0.00628698224852071
+   },
+   "news": {
+    "bench_runs": 179,
+    "runs": 165,
+    "runs_with_errors": 37,
+    "runs_over_low": 30,
+    "runs_all_failed": 30,
+    "query_runs": 3288,
+    "failed": 600,
+    "failed_frac": 0.18248175182481752
+   },
+   "finance": {
+    "bench_runs": 5,
+    "runs": 4,
+    "runs_with_errors": 1,
+    "runs_over_low": 1,
+    "runs_all_failed": 1,
+    "query_runs": 480,
+    "failed": 120,
+    "failed_frac": 0.25
+   },
+   "agentic_rare": {
+    "bench_runs": 8,
+    "runs": 7,
+    "runs_with_errors": 3,
+    "runs_over_low": 1,
+    "runs_all_failed": 1,
+    "query_runs": 700,
+    "failed": 103,
+    "failed_frac": 0.14714285714285713
+   },
+   "legal": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 7,
+    "runs_over_low": 2,
+    "runs_all_failed": 2,
+    "query_runs": 672,
+    "failed": 200,
+    "failed_frac": 0.2976190476190476
+   }
+  },
+  "zero_error_runs": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": 0.4587378640776699,
+     "ceiling": 0.8640776699029126,
+     "share": 0.5308988764044944
+    },
+    "news": {
+     "metric": 0.4813567077346515,
+     "ceiling": 1.0,
+     "share": 0.4813567077346515
+    },
+    "finance": {
+     "metric": 0.7916666666666666,
+     "ceiling": 0.9777777777777777,
+     "share": 0.8096590909090909
+    },
+    "agentic_rare": {
+     "metric": 0.29914337509299455,
+     "ceiling": 1.0,
+     "share": 0.29914337509299455
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    }
+   }
+  },
+  "low_error_runs": {
+   "overall": 0.5872428362972423,
+   "bench": {
+    "scholar": {
+     "metric": 0.5094901377000373,
+     "ceiling": 0.8731508875739645,
+     "share": 0.5835075528762815
+    },
+    "news": {
+     "metric": 0.47911316328372505,
+     "ceiling": 1.0,
+     "share": 0.47911316328372505
+    },
+    "finance": {
+     "metric": 0.7916666666666666,
+     "ceiling": 0.9777777777777777,
+     "share": 0.8096590909090909
+    },
+    "agentic_rare": {
+     "metric": 0.3115221016405609,
+     "ceiling": 1.0,
+     "share": 0.3115221016405609
+    },
+    "legal": {
+     "metric": 0.7351694915254238,
+     "ceiling": 0.9770833333333333,
+     "share": 0.7524122727765531
+    }
+   }
+  },
+  "failures_zero": {
+   "overall": 0.47769513368185745,
+   "bench": {
+    "scholar": {
+     "metric": 0.5062869822485208,
+     "ceiling": 0.8696428571428572,
+     "share": 0.5821780494028165
+    },
+    "news": {
+     "metric": 0.3916039097159214,
+     "ceiling": 1.0,
+     "share": 0.3916039097159214
+    },
+    "finance": {
+     "metric": 0.59375,
+     "ceiling": 0.9666666666666667,
+     "share": 0.6142241379310345
+    },
+    "agentic_rare": {
+     "metric": 0.26744345768823985,
+     "ceiling": 1.0,
+     "share": 0.26744345768823985
+    },
+    "legal": {
+     "metric": 0.5163690476190477,
+     "ceiling": 0.96875,
+     "share": 0.5330261136712751
+    }
+   }
+  }
+ },
+ "2026-W39": {
+  "figure": {
+   "overall": 0.6100164450760681,
+   "bench": {
+    "scholar": {
+     "metric": 0.5886214442013129,
+     "ceiling": 0.8972826086956521,
+     "share": 0.6560045168567025
+    },
+    "news": {
+     "metric": 0.5144344312612571,
+     "ceiling": 1.0,
+     "share": 0.5144344312612571
+    },
+    "finance": {
+     "metric": 0.7896935933147632,
+     "ceiling": 0.9833333333333333,
+     "share": 0.8030782304895897
+    },
+    "agentic_rare": {
+     "metric": 0.29933420921403614,
+     "ceiling": 1.0,
+     "share": 0.29933420921403614
+    },
+    "legal": {
+     "metric": 0.7621951219512195,
+     "ceiling": 0.9806547619047619,
+     "share": 0.777230837558755
+    }
+   }
+  },
+  "runs": {
+   "scholar": {
+    "bench_runs": 5,
+    "runs": 5,
+    "runs_with_errors": 5,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 1840,
+    "failed": 12,
+    "failed_frac": 0.006521739130434782
+   },
+   "news": {
+    "bench_runs": 171,
+    "runs": 171,
+    "runs_with_errors": 19,
+    "runs_over_low": 14,
+    "runs_all_failed": 14,
+    "query_runs": 3405,
+    "failed": 284,
+    "failed_frac": 0.08340675477239354
+   },
+   "finance": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 3,
+    "runs_over_low": 1,
+    "runs_all_failed": 1,
+    "query_runs": 840,
+    "failed": 122,
+    "failed_frac": 0.14523809523809525
+   },
+   "agentic_rare": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 3,
+    "runs_over_low": 1,
+    "runs_all_failed": 1,
+    "query_runs": 700,
+    "failed": 105,
+    "failed_frac": 0.15
+   },
+   "legal": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 7,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 672,
+    "failed": 16,
+    "failed_frac": 0.023809523809523808
+   }
+  },
+  "zero_error_runs": {
+   "overall": null,
+   "bench": {
+    "scholar": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    },
+    "news": {
+     "metric": 0.5160504904285731,
+     "ceiling": 1.0,
+     "share": 0.5160504904285731
+    },
+    "finance": {
+     "metric": 0.7958333333333333,
+     "ceiling": 0.9791666666666666,
+     "share": 0.8127659574468085
+    },
+    "agentic_rare": {
+     "metric": 0.3054320080891475,
+     "ceiling": 1.0,
+     "share": 0.3054320080891475
+    },
+    "legal": {
+     "metric": null,
+     "ceiling": null,
+     "share": null
+    }
+   }
+  },
+  "low_error_runs": {
+   "overall": 0.6104714469063738,
+   "bench": {
+    "scholar": {
+     "metric": 0.5886214442013129,
+     "ceiling": 0.8972826086956521,
+     "share": 0.6560045168567025
+    },
+    "news": {
+     "metric": 0.5144344312612571,
+     "ceiling": 1.0,
+     "share": 0.5144344312612571
+    },
+    "finance": {
+     "metric": 0.7896935933147632,
+     "ceiling": 0.9805555555555555,
+     "share": 0.8053532396411183
+    },
+    "agentic_rare": {
+     "metric": 0.29933420921403614,
+     "ceiling": 1.0,
+     "share": 0.29933420921403614
+    },
+    "legal": {
+     "metric": 0.7621951219512195,
+     "ceiling": 0.9806547619047619,
+     "share": 0.777230837558755
+    }
+   }
+  },
+  "failures_zero": {
+   "overall": 0.56436111760483,
+   "bench": {
+    "scholar": {
+     "metric": 0.5847826086956521,
+     "ceiling": 0.8972826086956521,
+     "share": 0.6517262265293761
+    },
+    "news": {
+     "metric": 0.47148928767566123,
+     "ceiling": 1.0,
+     "share": 0.47148928767566123
+    },
+    "finance": {
+     "metric": 0.675,
+     "ceiling": 0.9833333333333333,
+     "share": 0.6864406779661018
+    },
+    "agentic_rare": {
+     "metric": 0.25342405442660726,
+     "ceiling": 1.0,
+     "share": 0.25342405442660726
+    },
+    "legal": {
+     "metric": 0.7440476190476191,
+     "ceiling": 0.9806547619047619,
+     "share": 0.7587253414264037
+    }
+   }
+  }
+ },
+ "2026-W40": {
+  "figure": {
+   "overall": 0.5670405182353483,
+   "bench": {
+    "scholar": {
+     "metric": 0.557997557997558,
+     "ceiling": 0.8819340329835083,
+     "share": 0.6326976135730917
+    },
+    "news": {
+     "metric": 0.5057033781017671,
+     "ceiling": 1.0,
+     "share": 0.5057033781017671
+    },
+    "finance": {
+     "metric": 0.6829558998808105,
+     "ceiling": 0.9845238095238096,
+     "share": 0.6936916032646684
+    },
+    "agentic_rare": {
+     "metric": 0.291979657984635,
+     "ceiling": 1.0,
+     "share": 0.291979657984635
+    },
+    "legal": {
+     "metric": 0.6915322580645161,
+     "ceiling": 0.9724409448818898,
+     "share": 0.7111303382525793
+    }
+   }
+  },
+  "runs": {
+   "scholar": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 4,
+    "runs_over_low": 1,
+    "runs_all_failed": 0,
+    "query_runs": 2668,
+    "failed": 211,
+    "failed_frac": 0.07908545727136432
+   },
+   "news": {
+    "bench_runs": 153,
+    "runs": 153,
+    "runs_with_errors": 5,
+    "runs_over_low": 1,
+    "runs_all_failed": 1,
+    "query_runs": 3043,
+    "failed": 24,
+    "failed_frac": 0.007886953664147224
+   },
+   "finance": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 1,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 840,
+    "failed": 1,
+    "failed_frac": 0.0011904761904761906
+   },
+   "agentic_rare": {
+    "bench_runs": 6,
+    "runs": 6,
+    "runs_with_errors": 1,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 600,
+    "failed": 1,
+    "failed_frac": 0.0016666666666666668
+   },
+   "legal": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 5,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 508,
+    "failed": 12,
+    "failed_frac": 0.023622047244094488
+   }
+  },
+  "zero_error_runs": {
+   "overall": 0.5519361681464071,
+   "bench": {
+    "scholar": {
+     "metric": 0.5119047619047619,
+     "ceiling": 0.88003663003663,
+     "share": 0.5816857440166493
+    },
+    "news": {
+     "metric": 0.5050667130234942,
+     "ceiling": 1.0,
+     "share": 0.5050667130234942
+    },
+    "finance": {
+     "metric": 0.6847222222222222,
+     "ceiling": 0.9833333333333333,
+     "share": 0.6963276836158192
+    },
+    "agentic_rare": {
+     "metric": 0.2908864143617871,
+     "ceiling": 1.0,
+     "share": 0.2908864143617871
+    },
+    "legal": {
+     "metric": 0.6666666666666666,
+     "ceiling": 0.9722222222222222,
+     "share": 0.6857142857142857
+    }
+   }
+  },
+  "low_error_runs": {
+   "overall": 0.564531524431133,
+   "bench": {
+    "scholar": {
+     "metric": 0.5487858719646799,
+     "ceiling": 0.8849206349206349,
+     "share": 0.6201526445520149
+    },
+    "news": {
+     "metric": 0.5057033781017671,
+     "ceiling": 1.0,
+     "share": 0.5057033781017671
+    },
+    "finance": {
+     "metric": 0.6829558998808105,
+     "ceiling": 0.9845238095238096,
+     "share": 0.6936916032646684
+    },
+    "agentic_rare": {
+     "metric": 0.291979657984635,
+     "ceiling": 1.0,
+     "share": 0.291979657984635
+    },
+    "legal": {
+     "metric": 0.6915322580645161,
+     "ceiling": 0.9724409448818898,
+     "share": 0.7111303382525793
+    }
+   }
+  },
+  "failures_zero": {
+   "overall": 0.5525838322699226,
+   "bench": {
+    "scholar": {
+     "metric": 0.5138680659670165,
+     "ceiling": 0.8819340329835083,
+     "share": 0.5826604334891627
+    },
+    "news": {
+     "metric": 0.501621009761894,
+     "ceiling": 1.0,
+     "share": 0.501621009761894
+    },
+    "finance": {
+     "metric": 0.6821428571428572,
+     "ceiling": 0.9845238095238096,
+     "share": 0.6928657799274486
+    },
+    "agentic_rare": {
+     "metric": 0.29143995436543974,
+     "ceiling": 1.0,
+     "share": 0.29143995436543974
+    },
+    "legal": {
+     "metric": 0.6751968503937008,
+     "ceiling": 0.9724409448818898,
+     "share": 0.694331983805668
+    }
+   }
+  }
+ },
+ "2026-W41": {
+  "figure": {
+   "overall": 0.5318263951060679,
+   "bench": {
+    "scholar": {
+     "metric": 0.5531752104055088,
+     "ceiling": 0.904434250764526,
+     "share": 0.6116256764246877
+    },
+    "news": {
+     "metric": 0.4858455930150229,
+     "ceiling": 1.0,
+     "share": 0.4858455930150229
+    },
+    "finance": {
+     "metric": 0.6396648044692738,
+     "ceiling": 0.9833333333333333,
+     "share": 0.6505065808162106
+    },
+    "agentic_rare": {
+     "metric": 0.29636956580410395,
+     "ceiling": 1.0,
+     "share": 0.29636956580410395
+    },
+    "legal": {
+     "metric": 0.5912596401028277,
+     "ceiling": 0.9617346938775511,
+     "share": 0.6147845594703142
+    }
+   }
+  },
+  "runs": {
+   "scholar": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 2,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 2616,
+    "failed": 2,
+    "failed_frac": 0.0007645259938837921
+   },
+   "news": {
+    "bench_runs": 138,
+    "runs": 138,
+    "runs_with_errors": 2,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 2751,
+    "failed": 2,
+    "failed_frac": 0.0007270083605961468
+   },
+   "finance": {
+    "bench_runs": 3,
+    "runs": 3,
+    "runs_with_errors": 2,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 360,
+    "failed": 2,
+    "failed_frac": 0.005555555555555556
+   },
+   "agentic_rare": {
+    "bench_runs": 4,
+    "runs": 4,
+    "runs_with_errors": 3,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 400,
+    "failed": 3,
+    "failed_frac": 0.0075
+   },
+   "legal": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 2,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 392,
+    "failed": 3,
+    "failed_frac": 0.007653061224489796
+   }
+  },
+  "zero_error_runs": {
+   "overall": 0.532783752329864,
+   "bench": {
+    "scholar": {
+     "metric": 0.5489130434782609,
+     "ceiling": 0.9021739130434783,
+     "share": 0.608433734939759
+    },
+    "news": {
+     "metric": 0.48632905154007733,
+     "ceiling": 1.0,
+     "share": 0.48632905154007733
+    },
+    "finance": {
+     "metric": 0.6583333333333333,
+     "ceiling": 1.0,
+     "share": 0.6583333333333333
+    },
+    "agentic_rare": {
+     "metric": 0.3108226418361502,
+     "ceiling": 1.0,
+     "share": 0.3108226418361502
+    },
+    "legal": {
+     "metric": 0.5785714285714286,
+     "ceiling": 0.9642857142857143,
+     "share": 0.6000000000000001
+    }
+   }
+  },
+  "low_error_runs": {
+   "overall": 0.5318263951060679,
+   "bench": {
+    "scholar": {
+     "metric": 0.5531752104055088,
+     "ceiling": 0.904434250764526,
+     "share": 0.6116256764246877
+    },
+    "news": {
+     "metric": 0.4858455930150229,
+     "ceiling": 1.0,
+     "share": 0.4858455930150229
+    },
+    "finance": {
+     "metric": 0.6396648044692738,
+     "ceiling": 0.9833333333333333,
+     "share": 0.6505065808162106
+    },
+    "agentic_rare": {
+     "metric": 0.29636956580410395,
+     "ceiling": 1.0,
+     "share": 0.29636956580410395
+    },
+    "legal": {
+     "metric": 0.5912596401028277,
+     "ceiling": 0.9617346938775511,
+     "share": 0.6147845594703142
+    }
+   }
+  },
+  "failures_zero": {
+   "overall": 0.5295105637714573,
+   "bench": {
+    "scholar": {
+     "metric": 0.5527522935779816,
+     "ceiling": 0.904434250764526,
+     "share": 0.6111580726965342
+    },
+    "news": {
+     "metric": 0.485482208128699,
+     "ceiling": 1.0,
+     "share": 0.485482208128699
+    },
+    "finance": {
+     "metric": 0.6361111111111111,
+     "ceiling": 0.9833333333333333,
+     "share": 0.6468926553672316
+    },
+    "agentic_rare": {
+     "metric": 0.2939403070680047,
+     "ceiling": 1.0,
+     "share": 0.2939403070680047
+    },
+    "legal": {
+     "metric": 0.5867346938775511,
+     "ceiling": 0.9617346938775511,
+     "share": 0.610079575596817
+    }
+   }
+  }
+ },
+ "2026-W42": {
+  "figure": {
+   "overall": 0.5435294413048565,
+   "bench": {
+    "scholar": {
+     "metric": 0.5288264559555166,
+     "ceiling": 0.9004088785046729,
+     "share": 0.5873181268866976
+    },
+    "news": {
+     "metric": 0.4900807891283004,
+     "ceiling": 1.0,
+     "share": 0.4900807891283004
+    },
+    "finance": {
+     "metric": 0.6916666666666667,
+     "ceiling": 0.9819444444444444,
+     "share": 0.7043847241867044
+    },
+    "agentic_rare": {
+     "metric": 0.32195832575204975,
+     "ceiling": 1.0,
+     "share": 0.32195832575204975
+    },
+    "legal": {
+     "metric": 0.5938242280285035,
+     "ceiling": 0.9672897196261683,
+     "share": 0.6139052405705302
+    }
+   }
+  },
+  "runs": {
+   "scholar": {
+    "bench_runs": 9,
+    "runs": 9,
+    "runs_with_errors": 4,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 3424,
+    "failed": 7,
+    "failed_frac": 0.0020443925233644858
+   },
+   "news": {
+    "bench_runs": 142,
+    "runs": 142,
+    "runs_with_errors": 2,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 2832,
+    "failed": 2,
+    "failed_frac": 0.0007062146892655367
+   },
+   "finance": {
+    "bench_runs": 6,
+    "runs": 6,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 720,
+    "failed": 0,
+    "failed_frac": 0.0
+   },
+   "agentic_rare": {
+    "bench_runs": 4,
+    "runs": 4,
+    "runs_with_errors": 0,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 400,
+    "failed": 0,
+    "failed_frac": 0.0
+   },
+   "legal": {
+    "bench_runs": 8,
+    "runs": 8,
+    "runs_with_errors": 4,
+    "runs_over_low": 0,
+    "runs_all_failed": 0,
+    "query_runs": 428,
+    "failed": 7,
+    "failed_frac": 0.016355140186915886
+   }
+  },
+  "zero_error_runs": {
+   "overall": 0.5340426963675854,
+   "bench": {
+    "scholar": {
+     "metric": 0.5319148936170213,
+     "ceiling": 0.9026595744680851,
+     "share": 0.5892751915144372
+    },
+    "news": {
+     "metric": 0.4889386747281698,
+     "ceiling": 1.0,
+     "share": 0.4889386747281698
+    },
+    "finance": {
+     "metric": 0.6916666666666667,
+     "ceiling": 0.9819444444444444,
+     "share": 0.7043847241867044
+    },
+    "agentic_rare": {
+     "metric": 0.32195832575204975,
+     "ceiling": 1.0,
+     "share": 0.32195832575204975
+    },
+    "legal": {
+     "metric": 0.5490196078431373,
+     "ceiling": 0.9705882352941176,
+     "share": 0.5656565656565657
+    }
+   }
+  },
+  "low_error_runs": {
+   "overall": 0.5435294413048565,
+   "bench": {
+    "scholar": {
+     "metric": 0.5288264559555166,
+     "ceiling": 0.9004088785046729,
+     "share": 0.5873181268866976
+    },
+    "news": {
+     "metric": 0.4900807891283004,
+     "ceiling": 1.0,
+     "share": 0.4900807891283004
+    },
+    "finance": {
+     "metric": 0.6916666666666667,
+     "ceiling": 0.9819444444444444,
+     "share": 0.7043847241867044
+    },
+    "agentic_rare": {
+     "metric": 0.32195832575204975,
+     "ceiling": 1.0,
+     "share": 0.32195832575204975
+    },
+    "legal": {
+     "metric": 0.5938242280285035,
+     "ceiling": 0.9672897196261683,
+     "share": 0.6139052405705302
+    }
+   }
+  },
+  "failures_zero": {
+   "overall": 0.5412113364557982,
+   "bench": {
+    "scholar": {
+     "metric": 0.5277453271028038,
+     "ceiling": 0.9004088785046729,
+     "share": 0.586117418099254
+    },
+    "news": {
+     "metric": 0.48973147994146626,
+     "ceiling": 1.0,
+     "share": 0.48973147994146626
+    },
+    "finance": {
+     "metric": 0.6916666666666667,
+     "ceiling": 0.9819444444444444,
+     "share": 0.7043847241867044
+    },
+    "agentic_rare": {
+     "metric": 0.32195832575204975,
+     "ceiling": 1.0,
+     "share": 0.32195832575204975
+    },
+    "legal": {
+     "metric": 0.5841121495327103,
+     "ceiling": 0.9672897196261683,
+     "share": 0.6038647342995169
+    }
+   }
+  }
+ },
+ "2026-W43": {
+  "figure": {
+   "overall": 0.5121524289236944,
+   "bench": {
+    "scholar": {
+     "metric": 0.4983388704318937,
+     "ceiling": 0.9008498583569405,
+     "share": 0.5531874882467247
+    },
+    "news": {
+     "metric": 0.46302494806667127,
+     "ceiling": 1.0,
+     "share": 0.46302494806667127
+    },
+    "finance": {
+     "metric": 0.65,
+     "ceiling": 0.9944444444444445,
+     "share": 0.6536312849162011
+    },
+    "agentic_rare": {
+     "metric": 0.30725421465376396,
+     "ceiling": 1.0,
+     "share": 0.30725421465376396
+    },
+    "legal": {
+     "metric": 0.5697674418604651,
+     "ceiling": 0.9761904761904762,
+     "share": 0.5836642087351106
+    }
+   }
+  },
+  "runs": {
+   "scholar": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 4,
+    "runs_over_low": 4,
+    "runs_all_failed": 4,
+    "query_runs": 2824,
+    "failed": 1620,
+    "failed_frac": 0.5736543909348442
+   },
+   "news": {
+    "bench_runs": 165,
+    "runs": 165,
+    "runs_with_errors": 88,
+    "runs_over_low": 88,
+    "runs_all_failed": 88,
+    "query_runs": 3282,
+    "failed": 1743,
+    "failed_frac": 0.5310786106032906
+   },
+   "finance": {
+    "bench_runs": 6,
+    "runs": 6,
+    "runs_with_errors": 3,
+    "runs_over_low": 3,
+    "runs_all_failed": 3,
+    "query_runs": 720,
+    "failed": 360,
+    "failed_frac": 0.5
+   },
+   "agentic_rare": {
+    "bench_runs": 7,
+    "runs": 7,
+    "runs_with_errors": 4,
+    "runs_over_low": 4,
+    "runs_all_failed": 3,
+    "query_runs": 700,
+    "failed": 373,
+    "failed_frac": 0.5328571428571428
+   },
+   "legal": {
+    "bench_runs": 6,
+    "runs": 6,
+    "runs_with_errors": 3,
+    "runs_over_low": 3,
+    "runs_all_failed": 3,
+    "query_runs": 336,
+    "failed": 164,
+    "failed_frac": 0.4880952380952381
+   }
+  },
+  "zero_error_runs": {
+   "overall": 0.5127182493707905,
+   "bench": {
+    "scholar": {
+     "metric": 0.4983388704318937,
+     "ceiling": 0.9011627906976745,
+     "share": 0.5529953917050691
+    },
+    "news": {
+     "metric": 0.46302494806667127,
+     "ceiling": 1.0,
+     "share": 0.46302494806667127
+    },
+    "finance": {
+     "metric": 0.65,
+     "ceiling": 0.9972222222222222,
+     "share": 0.6518105849582173
+    },
+    "agentic_rare": {
+     "metric": 0.30893397481860535,
+     "ceiling": 1.0,
+     "share": 0.30893397481860535
+    },
+    "legal": {
+     "metric": 0.5697674418604651,
+     "ceiling": 0.9709302325581395,
+     "share": 0.5868263473053893
+    }
+   }
+  },
+  "low_error_runs": {
+   "overall": 0.5127182493707905,
+   "bench": {
+    "scholar": {
+     "metric": 0.4983388704318937,
+     "ceiling": 0.9011627906976745,
+     "share": 0.5529953917050691
+    },
+    "news": {
+     "metric": 0.46302494806667127,
+     "ceiling": 1.0,
+     "share": 0.46302494806667127
+    },
+    "finance": {
+     "metric": 0.65,
+     "ceiling": 0.9972222222222222,
+     "share": 0.6518105849582173
+    },
+    "agentic_rare": {
+     "metric": 0.30893397481860535,
+     "ceiling": 1.0,
+     "share": 0.30893397481860535
+    },
+    "legal": {
+     "metric": 0.5697674418604651,
+     "ceiling": 0.9709302325581395,
+     "share": 0.5868263473053893
+    }
+   }
+  },
+  "failures_zero": {
+   "overall": 0.24207489816727862,
+   "bench": {
+    "scholar": {
+     "metric": 0.21246458923512748,
+     "ceiling": 0.9008498583569405,
+     "share": 0.2358490566037736
+    },
+    "news": {
+     "metric": 0.21532027426414058,
+     "ceiling": 1.0,
+     "share": 0.21532027426414058
+    },
+    "finance": {
+     "metric": 0.325,
+     "ceiling": 0.9944444444444445,
+     "share": 0.3268156424581006
+    },
+    "agentic_rare": {
+     "metric": 0.1336090297055004,
+     "ceiling": 1.0,
+     "share": 0.1336090297055004
+    },
+    "legal": {
+     "metric": 0.2916666666666667,
+     "ceiling": 0.9761904761904762,
+     "share": 0.2987804878048781
+    }
+   }
+  }
+ },
+ "rows_after_cutoff_with_errors": [
+  {
+   "ts": "2026-10-27T14:52Z",
+   "bench": "scholar",
+   "num_queries": 416,
+   "num_scored_raw": 416,
+   "search_errors": 2
+  },
+  {
+   "ts": "2026-10-28T10:03Z",
+   "bench": "news",
+   "num_queries": 20,
+   "num_scored_raw": 20,
+   "search_errors": 1
+  },
+  {
+   "ts": "2026-10-28T11:48Z",
+   "bench": "news",
+   "num_queries": 20,
+   "num_scored_raw": 19,
+   "search_errors": 1
+  }
+ ],
+ "news_daily": {
+  "2026-10-12": {
+   "runs": 22,
+   "clean_runs": 21,
+   "failed_frac": 0.0022727272727272726,
+   "share": 0.5240776973151634,
+   "share_clean_runs": 0.51701872351772
+  },
+  "2026-10-13": {
+   "runs": 15,
+   "clean_runs": 15,
+   "failed_frac": 0.0,
+   "share": 0.545368948117444,
+   "share_clean_runs": 0.545368948117444
+  },
+  "2026-10-14": {
+   "runs": 17,
+   "clean_runs": 17,
+   "failed_frac": 0.0,
+   "share": 0.4737656831475592,
+   "share_clean_runs": 0.4737656831475592
+  },
+  "2026-10-15": {
+   "runs": 23,
+   "clean_runs": 23,
+   "failed_frac": 0.0,
+   "share": 0.4566537442612864,
+   "share_clean_runs": 0.4566537442612864
+  },
+  "2026-10-16": {
+   "runs": 20,
+   "clean_runs": 19,
+   "failed_frac": 0.0025,
+   "share": 0.4827398603404395,
+   "share_clean_runs": 0.48356563857521767
+  },
+  "2026-10-17": {
+   "runs": 25,
+   "clean_runs": 25,
+   "failed_frac": 0.0,
+   "share": 0.4859901198444007,
+   "share_clean_runs": 0.4859901198444007
+  },
+  "2026-10-18": {
+   "runs": 20,
+   "clean_runs": 20,
+   "failed_frac": 0.0,
+   "share": 0.4788458932404888,
+   "share_clean_runs": 0.4788458932404888
+  },
+  "2026-10-19": {
+   "runs": 21,
+   "clean_runs": 21,
+   "failed_frac": 0.0,
+   "share": 0.5062248165390406,
+   "share_clean_runs": 0.5062248165390406
+  },
+  "2026-10-20": {
+   "runs": 24,
+   "clean_runs": 24,
+   "failed_frac": 0.0,
+   "share": 0.4591181475715765,
+   "share_clean_runs": 0.4591181475715765
+  },
+  "2026-10-21": {
+   "runs": 24,
+   "clean_runs": 24,
+   "failed_frac": 0.0,
+   "share": 0.42927718482007415,
+   "share_clean_runs": 0.42927718482007415
+  },
+  "2026-10-22": {
+   "runs": 23,
+   "clean_runs": 8,
+   "failed_frac": 0.6521739130434783,
+   "share": 0.4603214095800221,
+   "share_clean_runs": 0.4603214095800221
+  },
+  "2026-10-23": {
+   "runs": 25,
+   "clean_runs": 0,
+   "failed_frac": 1.0,
+   "share": null,
+   "share_clean_runs": null
+  },
+  "2026-10-24": {
+   "runs": 24,
+   "clean_runs": 0,
+   "failed_frac": 1.0,
+   "share": null,
+   "share_clean_runs": null
+  },
+  "2026-10-25": {
+   "runs": 24,
+   "clean_runs": 0,
+   "failed_frac": 1.0,
+   "share": null,
+   "share_clean_runs": null
+  }
+ }
+}

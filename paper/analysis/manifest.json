@@ -380,10 +380,6 @@
    "source": "history_v3.jsonl",
    "weeks": "2026-W36..2026-W43"
   },
-  "figure_overlap": {
-   "source": "independence.json",
-   "scope": "all runs"
-  },
   "adjacent_pairs": {
    "files": [
     "audit/adjacent_pairs.json",
@@ -462,6 +458,7 @@
   "audit/caselaw_identity/sample.json",
   "audit/ceiling_drop.json",
   "audit/ceramic_rawops.json",
+  "audit/claude_weekly.json",
   "audit/cluster_pairs.json",
   "audit/exact_more/exact_sample.json",
   "audit/exact_more/labels_part1.json",
@@ -473,6 +470,7 @@
   "audit/exclusion_bounds.json",
   "audit/failure_profile.json",
   "audit/finance_bias.json",
+  "audit/finance_bias_table1.json",
   "audit/fresh/guideline.md",
   "audit/fresh/labels_900/labels_part1.json",
   "audit/fresh/labels_900/labels_part10.json",
@@ -551,6 +549,7 @@
   "audit/lists100/lists.json",
   "audit/loo_all.json",
   "audit/matched_pairs.json",
+  "audit/matched_pairs_paper.json",
   "audit/matched_support.json",
   "audit/misses/finance_all.json",
   "audit/misses/finance_labels_part1.json",
@@ -563,6 +562,7 @@
   "audit/paired/paired_legal.jsonl",
   "audit/paired/paired_legal_analysis.json",
   "audit/pairs_survive.json",
+  "audit/pairs_survive_paper.json",
   "audit/profiles/profile_audit_mine.json",
   "audit/profiles/profile_audit_production.json",
   "audit/profiles/profile_audit_queries.json",
@@ -642,6 +642,7 @@
   "audit/sample.json",
   "audit/scholar_rejects.json",
   "audit/scholar_strata.json",
+  "audit/snippet_length.json",
   "audit/strict_vs_readings.json",
   "audit/trunc_ci.json",
   "audit/unquoted_overall.json",
@@ -649,6 +650,7 @@
   "audit/v2hits/v2hits_part1.json",
   "audit/v2hits/v2hits_part2.json",
   "audit/v2hits/v2labels_part1.json",
-  "audit/v2hits/v2labels_part2.json"
+  "audit/v2hits/v2labels_part2.json",
+  "audit/weekly_tau.json"
  ]
 }
