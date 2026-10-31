@@ -1,5 +1,4 @@
 import asyncio
-import re
 from collections.abc import Awaitable, Callable, Sequence
 from typing import Any
 
@@ -10,34 +9,16 @@ from needle.shared.search.base import (
     latency_stats,
     search_all,
 )
+from needle.shared.search.errors import account_side, representative_error
 
 ULTIMATE = "ultimate"
-ACCOUNT_STATUSES = frozenset({401, 402, 403, 432, 433})
-MESSAGE_STATUSES = frozenset({None, 400, 429})
-ACCOUNT_MESSAGE = re.compile(
-    r"credit[ _]balance|not enough credits|insufficient[ _]credits|usage limit"
-    r"|\bquota\b|insufficient_quota|billing|api[ _-]?key",
-    re.IGNORECASE,
-)
-HTTP_STATUS = re.compile(r"(\d{3}):")
-
-
-def account_side(error: dict[str, str]) -> bool:
-    kind, message = error.get("error_type"), error.get("error_message") or ""
-    if kind not in ("http_error", "api_error"):
-        return False
-    status = HTTP_STATUS.match(message) if kind == "http_error" else None
-    code = int(status.group(1)) if status else None
-    return code in ACCOUNT_STATUSES or (
-        code in MESSAGE_STATUSES and ACCOUNT_MESSAGE.search(message) is not None
-    )
 
 
 def counted(pq: dict) -> bool:
     return pq["search_error"] is None or not account_side(pq["search_error"])
 
 
-def answered(per_query: list[dict]) -> list[dict]:
+def scored_queries(per_query: list[dict]) -> list[dict]:
     return [pq for pq in per_query if counted(pq)]
 
 
@@ -90,10 +71,7 @@ def ultimate_per_query(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
             pq["n_results"] = len(pq["results"])
             pq["hit_rank"] = 1 if hit else None
         else:
-            pq["search_error"] = next(
-                (e["search_error"] for e in entries if not account_side(e["search_error"])),
-                pq["search_error"],
-            )
+            pq["search_error"] = representative_error([e["search_error"] for e in entries])
         out.append(pq)
     return out
 
@@ -101,7 +79,7 @@ def ultimate_per_query(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
 def recall_summary(
     per_query: list[dict], latency: dict | None, scored: list[dict] | None = None
 ) -> dict[str, Any]:
-    scored = answered(per_query if scored is None else scored)
+    scored = scored_queries(per_query if scored is None else scored)
     for pq in per_query:
         pq["score"] = None
     for pq in scored:

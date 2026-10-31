@@ -9,6 +9,7 @@ MAX_QUERY_CHARS = 2000
 class TinyFishClient(HttpSearchClient):
     engine = "tinyfish"
     base_url = "https://api.search.tinyfish.ai"
+    min_interval_s = 2.0
 
     async def search(
         self, query: str, *, num_results: int = 10

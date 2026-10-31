@@ -7,11 +7,11 @@ from needle.finance.judge import judge_answer
 from needle.finance.models import FRESHNESS_LADDER, cues_for
 from needle.shared.llm import LLMClient
 from needle.shared.recall import (
-    answered,
     first_rank,
     group_recall,
     recall_summary,
     run_known_item_eval,
+    scored_queries,
     ultimate_per_query,
 )
 from needle.shared.search import (
@@ -53,7 +53,7 @@ def _judge_uncertain(pq: dict) -> bool:
 
 
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
-    scored = [pq for pq in answered(per_query) if not _judge_uncertain(pq)]
+    scored = [pq for pq in scored_queries(per_query) if not _judge_uncertain(pq)]
     return {
         **recall_summary(per_query, latency, scored),
         "judged_results": sum(pq["judged"] for pq in per_query),

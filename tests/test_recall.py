@@ -1,12 +1,7 @@
 import pytest
 
-from needle.shared.recall import (
-    ULTIMATE,
-    account_side,
-    classify_misses,
-    recall_summary,
-    ultimate_per_query,
-)
+from needle.shared.recall import ULTIMATE, classify_misses, recall_summary, ultimate_per_query
+from needle.shared.search.errors import account_side
 
 
 def _http(message):
@@ -41,6 +36,16 @@ def _http(message):
         _http('429: {"error":"insufficient_credits"}'),
         _http('429: {"error":{"message":"You exceeded your current quota."}}'),
         {"error_type": "api_error", "error_message": "monthly usage limit reached"},
+        _http(
+            '429: {"error":{"code":"RATE_LIMIT_EXCEEDED","message":"Rate limit exceeded. Request a'
+            ' higher limit at https://agent.tinyfish.ai/wallet"}}'
+        ),
+        _http("429: Too Many Requests"),
+        _http(
+            '429: {"type":"ErrorResponse","error":{"status":429,"code":"RATE_LIMITED",'
+            '"detail":"Request rate limit exceeded for plan.","meta":{"plan":"Free",'
+            '"rate_limit":1,"rate_current":1,"quota_limit":2000,"quota_current":13}}}'
+        ),
     ],
 )
 def test_account_side_failures(error):
@@ -50,27 +55,16 @@ def test_account_side_failures(error):
 @pytest.mark.parametrize(
     "error",
     [
-        _http(
-            '429: {"error":{"code":"RATE_LIMIT_EXCEEDED","message":"Rate limit exceeded. Request a'
-            ' higher limit at https://agent.tinyfish.ai/wallet"}}'
-        ),
         _http('400: {"error":{"message":"Output blocked by content filtering policy"}}'),
         _http('400: {"message":"invalid domain","key_metadata":{"credits_remaining":991}}'),
         _http('422: {"message":"No search results available for query billing error resolution"}'),
         _http("503: Our servers are currently overloaded"),
         _http("500: Internal Server Error"),
-        _http("429"),
-        _http(
-            '429: {"type":"ErrorResponse","error":{"status":429,"code":"RATE_LIMITED",'
-            '"detail":"Request rate limit exceeded for plan.","meta":{"plan":"Free",'
-            '"rate_limit":1,"rate_current":1,"quota_limit":2000,"quota_current":13}}}'
-        ),
         _http("500: usage limit exceeded upstream"),
         {"error_type": "transport", "error_message": "ReadTimeout"},
         {"error_type": "api_error", "error_message": "max_uses_exceeded"},
         {"error_type": "api_error", "error_message": "Bing didn't return any results."},
         {"error_type": "bad_json", "error_message": "Expecting value"},
-        {"error_type": "all_engines_failed", "error_message": "every engine errored"},
     ],
 )
 def test_service_side_failures(error):
@@ -86,16 +80,15 @@ def test_recall_summary_zeroes_service_and_excludes_account_failures():
     summary = recall_summary(per_query, None)
     assert summary["recall_at_k"] == 0.5
     assert summary["num_scored"] == 2
-    assert summary["search_errors"] == 2
-    assert summary["account_errors"] == 1
-    assert summary["service_errors"] == 1
+    errors = ("search_errors", "account_errors", "service_errors")
+    assert [summary[k] for k in errors] == [2, 1, 1]
     assert [pq["score"] for pq in per_query] == [1.0, 0.0, None]
 
 
 def test_ultimate_counts_query_when_any_failure_is_service_side():
-    entries = [_pq(error=_http("401: no")), _pq(error=_http("429: slow down"))]
+    entries = [_pq(error=_http("401: no")), _pq(error=_http("503: down"))]
     out = ultimate_per_query([entries], cap=5)
-    assert out[0]["search_error"] == _http("429: slow down")
+    assert out[0]["search_error"] == _http("503: down")
     assert recall_summary(out, None)["num_scored"] == 1
     both_account = ultimate_per_query([[_pq(error=_http("401: no"))] * 2], cap=5)
     assert recall_summary(both_account, None)["num_scored"] == 0

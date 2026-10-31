@@ -16,7 +16,7 @@ from needle.shared.metrics import (
     dcg_at_k,
     normalize_url,
 )
-from needle.shared.recall import ULTIMATE, account_side, error_counts
+from needle.shared.recall import ULTIMATE, error_counts
 from needle.shared.search import (
     SearchClient,
     SearchResult,
@@ -24,6 +24,7 @@ from needle.shared.search import (
     latency_stats,
     search_all,
 )
+from needle.shared.search.errors import account_side, representative_error
 
 
 @dataclass(frozen=True)
@@ -66,8 +67,7 @@ def _score_query(
     }
     if search_error is not None:
         if idcg and not account_side(search_error):
-            out["dcg"] = 0.0
-            out["ndcg"] = 0.0
+            out["dcg"] = out["ndcg"] = 0.0
         return out
     results = results or []
     out["n_results"] = len(results)
@@ -100,9 +100,8 @@ def _score_query(
 
 
 def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int) -> dict[str, Any]:
-    errors = [s.error for s in run.searches if s.error is not None]
-    if errors and len(errors) == len(run.searches):
-        error = next((e for e in errors if not account_side(e)), errors[0])
+    if run.searches and all(s.error is not None for s in run.searches):
+        error = representative_error([s.error for s in run.searches if s.error is not None])
         return _score_query(query, None, error, [], k=k, profile=run.profile)
     best: dict[str, tuple[SearchResult, Judgement | None]] = {}
     for search, judgements in zip(run.searches, run.judgements, strict=True):

@@ -94,34 +94,25 @@ async def test_run_ndcg_excludes_search_error_without_ideal():
     assert errored["search_error"]["error_type"] == "http_error"
 
 
-async def test_run_ndcg_service_failure_scores_zero_when_pool_exists():
-    err = {"error_type": "http_error", "error_message": "503: overloaded"}
+@pytest.mark.parametrize(
+    ("message", "account", "ndcg"),
+    [("503: overloaded", 0, 0.0), ("401: Unauthorized", 1, None)],
+)
+async def test_run_ndcg_failure_when_pool_exists(message, account, ndcg):
+    err = {"error_type": "http_error", "error_message": message}
     good = FakeEngine([SearchResult(url="https://g1", title="GOODDOC one")])
     broken = FakeEngine([], error=err)
     report = await run_ndcg([q("q1")], {"good": good, "broken": broken}, FakeJudge())
     b = report["engines"]["broken"]
-    assert b["search_errors"] == 1
-    assert b["service_errors"] == 1
-    assert b["account_errors"] == 0
-    assert b["num_scored"] == 1
-    assert b["mean_ndcg"] == 0.0
-    assert b["per_query"][0]["ndcg"] == 0.0
-    assert b["per_query"][0]["score"] == 0.0
+    assert (b["search_errors"], b["account_errors"], b["service_errors"]) == (
+        1,
+        account,
+        1 - account,
+    )
+    assert b["num_scored"] == 1 - account
+    assert b["per_query"][0]["ndcg"] == ndcg
+    assert b["per_query"][0]["score"] == ndcg
     assert report["engines"]["good"]["mean_ndcg"] == pytest.approx(1.0)
-
-
-async def test_run_ndcg_account_failure_excluded_when_pool_exists():
-    err = {"error_type": "http_error", "error_message": "401: Unauthorized"}
-    good = FakeEngine([SearchResult(url="https://g1", title="GOODDOC one")])
-    broken = FakeEngine([], error=err)
-    report = await run_ndcg([q("q1")], {"good": good, "broken": broken}, FakeJudge())
-    b = report["engines"]["broken"]
-    assert b["search_errors"] == 1
-    assert b["account_errors"] == 1
-    assert b["service_errors"] == 0
-    assert b["num_scored"] == 0
-    assert b["per_query"][0]["ndcg"] is None
-    assert b["per_query"][0]["score"] is None
 
 
 async def test_run_ndcg_excludes_queries_with_empty_pool():

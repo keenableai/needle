@@ -62,10 +62,13 @@ endpoint (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
 `parallel` = advanced, `parallel-turbo` = turbo,
 `perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
 `brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). A failed
-search scores zero when the engine's side caused it (rate limit, timeout,
-server error, content filter, a rejected query). The mean skips it only when
-our own account caused it: HTTP 401, 402 or 403, or a 400, 429 or API error
-that names our credit balance, quota, billing or API key. The mean also
+search scores zero when the engine's side caused it (timeout, server error,
+content filter, a rejected query). The mean skips it only when our own
+account or plan caused it: HTTP 401, 402, 403, 429, 432 or 433, or a 400 or
+API error that names our credits, quota, usage limit, billing or API key.
+Clients pace requests to the vendor's rate limit (`min_interval_s`) and retry
+a 429 up to 6 times with exponential backoff, holding their concurrency slot
+while they wait. The mean also
 skips queries whose judging failed. The report lists `search_errors`, split
 into `account_errors` and `service_errors`, and `judge_errors`;
 `num_scored` counts the queries in the mean.

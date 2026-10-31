@@ -103,16 +103,14 @@ async def test_run_answers_metrics_and_breakdowns():
             ),
             EMP_Q.text: (
                 None,
-                {"error_type": "http_error", "error_message": "429: rate limit exceeded"},
+                {"error_type": "http_error", "error_message": "503: service unavailable"},
             ),
         }
     )
     report = await run_answers([CEO_Q, REV_Q, EMP_Q], {"fake": engine}, num_results=5)
     e = report["engines"]["fake"]
     assert e["num_scored"] == 3
-    assert e["search_errors"] == 1
-    assert e["account_errors"] == 0
-    assert e["service_errors"] == 1
+    assert (e["search_errors"], e["account_errors"], e["service_errors"]) == (1, 0, 1)
     assert e["recall_at_k"] == pytest.approx(2 / 3)
     assert e["mrr_at_k"] == pytest.approx((1 / 2 + 1 / 1) / 3)
     assert e["by_field"]["ceo"] == {"n": 1, "recall_at_k": 1.0}
@@ -138,9 +136,7 @@ async def test_run_answers_excludes_account_failure():
     e = report["engines"]["fake"]
     assert e["num_scored"] == 1
     assert e["recall_at_k"] == 1.0
-    assert e["search_errors"] == 1
-    assert e["account_errors"] == 1
-    assert e["service_errors"] == 0
+    assert (e["search_errors"], e["account_errors"], e["service_errors"]) == (1, 1, 0)
     assert "employees" not in e["by_field"]
     errored = next(pq for pq in e["per_query"] if pq["query"] == EMP_Q.text)
     assert errored["score"] is None

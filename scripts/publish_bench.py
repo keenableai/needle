@@ -26,6 +26,14 @@ def _latency_fields(e: dict) -> dict:
     }
 
 
+def _count_fields(report: dict, e: dict) -> dict:
+    return {
+        "num_scored": e["num_scored"],
+        "num_queries": report["num_queries"],
+        **{k: e[k] for k in ("search_errors", "account_errors", "service_errors")},
+    }
+
+
 def _ndcg_rows(report: dict, ts: str, bench: str) -> list[dict]:
     return [
         {
@@ -33,11 +41,7 @@ def _ndcg_rows(report: dict, ts: str, bench: str) -> list[dict]:
             "bench": bench,
             "engine": name,
             "ndcg": e["mean_ndcg"],
-            "num_scored": e["num_scored"],
-            "num_queries": report["num_queries"],
-            "search_errors": e["search_errors"],
-            "account_errors": e["account_errors"],
-            "service_errors": e["service_errors"],
+            **_count_fields(report, e),
             "judge_errors": e["judge_errors"],
             **_latency_fields(e),
         }
@@ -67,16 +71,7 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
             bucket = e["by_bucket"].get(b, {})
             row[f"{b}_recall"] = bucket.get("recall_at_k")
             row[f"{b}_n"] = bucket.get("n")
-        row.update(
-            {
-                "num_scored": e["num_scored"],
-                "num_queries": report["num_queries"],
-                "search_errors": e["search_errors"],
-                "account_errors": e["account_errors"],
-                "service_errors": e["service_errors"],
-                **_latency_fields(e),
-            }
-        )
+        row.update({**_count_fields(report, e), **_latency_fields(e)})
         rows.append(row)
     return rows
 
@@ -95,11 +90,7 @@ def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> l
                 f"{suites[0]}_n": e["by_bucket"].get(suites[0], {}).get("n"),
                 f"{suites[1]}_recall": e["by_bucket"].get(suites[1], {}).get("recall_at_k"),
                 f"{suites[1]}_n": e["by_bucket"].get(suites[1], {}).get("n"),
-                "num_scored": e["num_scored"],
-                "num_queries": report["num_queries"],
-                "search_errors": e["search_errors"],
-                "account_errors": e["account_errors"],
-                "service_errors": e["service_errors"],
+                **_count_fields(report, e),
                 **_latency_fields(e),
             }
         )

@@ -95,7 +95,19 @@ def test_money_table_reading_scales_bare_figures():
     eps = cues_for("eps_diluted")
     assert not gold_in_text("money", -3.98, text="Diluted (3.98) (1.02)", cues=eps)
     assert gold_in_text("money", -3.98, text="Diluted EPS (3.98) (1.02)", cues=eps)
-    assert gold_in_text("money", 801e6, text="801 723", cues=cues_for("operating_income"))
+    assert not gold_in_text("money", 801e6, text="801 723", cues=cues_for("operating_income"))
+
+
+def test_money_table_reading_needs_money_context_and_no_scale_word():
+    assert not gold_in_text("money", 801e6, text="The company has 801 employees")
+    assert gold_in_text("money", 801e6, text="(in millions) Q3 2026\n801 723")
+    assert gold_in_text("money", 801e6, text="Total revenues | 801 | 723")
+    assert not gold_in_text("money", 1.5e6, text="Revenue was $1.5 billion")
+    assert not gold_in_text("money", 801e3, text="Net income of 801 million")
+    assert not gold_in_text("money", 2.5e6, text="Revenue 2.5B")
+    assert not gold_in_text("money", 1.5e6, text="Revenue was $1.5 billion.")
+    assert gold_in_text("money", 1.5e9, text="Revenue was $1.5 billion")
+    assert gold_in_text("money", -69.7e6, text="Operating loss of $(69.7) million for Q1")
 
 
 def test_money_table_reading_parenthesized_losses():

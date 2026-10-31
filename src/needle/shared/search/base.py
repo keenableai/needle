@@ -173,6 +173,7 @@ class HttpSearchClient:
     ssl_context: ssl.SSLContext | bool = True
     retry_attempts: int = RETRY_ATTEMPTS
     retry_base_s: float = RETRY_BASE_S
+    min_interval_s: float = 0.0
 
     def __init__(
         self,
@@ -191,6 +192,7 @@ class HttpSearchClient:
         self.latencies_ms: list[float] = []
         self._client: httpx.AsyncClient | None = None
         self._sem = asyncio.Semaphore(max_concurrency)
+        self._next_send_at = 0.0
 
     def set_max_concurrency(self, max_concurrency: int) -> None:
         if max_concurrency < 1:
@@ -216,6 +218,13 @@ class HttpSearchClient:
             await self._client.aclose()
             self._client = None
 
+    async def _pace(self) -> None:
+        now = time.monotonic()
+        wait = self._next_send_at - now
+        self._next_send_at = max(now, self._next_send_at) + self.min_interval_s
+        if wait > 0:
+            await asyncio.sleep(wait)
+
     async def _send(
         self, method: str, url: str, **kwargs: Any
     ) -> tuple[httpx.Response | None, float, dict[str, str] | None]:
@@ -223,16 +232,17 @@ class HttpSearchClient:
 
         async def send() -> httpx.Response:
             nonlocal elapsed_ms
-            async with self._sem:
-                note_request_time()
-                started = time.perf_counter()
-                resp = await self._http().request(method, url, **kwargs)
-                elapsed_ms = (time.perf_counter() - started) * 1000.0
+            await self._pace()
+            note_request_time()
+            started = time.perf_counter()
+            resp = await self._http().request(method, url, **kwargs)
+            elapsed_ms = (time.perf_counter() - started) * 1000.0
             return resp
 
-        resp, err = await send_with_retry(
-            send, attempts=self.retry_attempts, base_s=self.retry_base_s
-        )
+        async with self._sem:
+            resp, err = await send_with_retry(
+                send, attempts=self.retry_attempts, base_s=self.retry_base_s
+            )
         if resp is None:
             assert err is not None
             return None, 0.0, {"error_type": err[0], "error_message": err[1]}
