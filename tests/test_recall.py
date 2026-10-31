@@ -1,6 +1,12 @@
 import pytest
 
-from needle.shared.recall import account_side, recall_summary, ultimate_per_query
+from needle.shared.recall import (
+    ULTIMATE,
+    account_side,
+    classify_misses,
+    recall_summary,
+    ultimate_per_query,
+)
 
 
 def _http(message):
@@ -23,6 +29,18 @@ def _http(message):
         ),
         {"error_type": "api_error", "error_message": "Invalid API key"},
         {"error_type": "api_error", "error_message": "missing api_key"},
+        _http(
+            '432: {"detail":{"error":"This request exceeds your plan\'s set usage limit. Please'
+            ' upgrade your plan or contact support@tavily.com"}}'
+        ),
+        _http(
+            '433: {"detail":{"error":"This request exceeds the pay-as-you-go limit. You can'
+            ' increase your limit on the Tavily dashboard."}}'
+        ),
+        _http('400: {"message":"Not enough credits","statusCode":400}'),
+        _http('429: {"error":"insufficient_credits"}'),
+        _http('429: {"error":{"message":"You exceeded your current quota."}}'),
+        {"error_type": "api_error", "error_message": "monthly usage limit reached"},
     ],
 )
 def test_account_side_failures(error):
@@ -42,6 +60,12 @@ def test_account_side_failures(error):
         _http("503: Our servers are currently overloaded"),
         _http("500: Internal Server Error"),
         _http("429"),
+        _http(
+            '429: {"type":"ErrorResponse","error":{"status":429,"code":"RATE_LIMITED",'
+            '"detail":"Request rate limit exceeded for plan.","meta":{"plan":"Free",'
+            '"rate_limit":1,"rate_current":1,"quota_limit":2000,"quota_current":13}}}'
+        ),
+        _http("500: usage limit exceeded upstream"),
         {"error_type": "transport", "error_message": "ReadTimeout"},
         {"error_type": "api_error", "error_message": "max_uses_exceeded"},
         {"error_type": "api_error", "error_message": "Bing didn't return any results."},
@@ -75,3 +99,25 @@ def test_ultimate_counts_query_when_any_failure_is_service_side():
     assert recall_summary(out, None)["num_scored"] == 1
     both_account = ultimate_per_query([[_pq(error=_http("401: no"))] * 2], cap=5)
     assert recall_summary(both_account, None)["num_scored"] == 0
+
+
+def test_classify_misses_counts_service_failures_and_skips_account_failures():
+    service, account = _http("503: down"), _http("401: no")
+    hit = dict(_pq(hit_rank=1), results=[{"url": "https://gold"}], n_results=1)
+    query_outs = [
+        [hit, _pq(error=service), _pq(error=account)],
+        [_pq(error=service), _pq(error=service), _pq(error=account)],
+        [_pq(error=account), _pq(error=account), _pq(error=account)],
+    ]
+    names = ["a", "b", "c"]
+    engines_out = {name: {} for name in names}
+    engines_out[ULTIMATE] = recall_summary(ultimate_per_query(query_outs, cap=5), None)
+    classify_misses(query_outs, names, engines_out)
+    assert engines_out["a"]["misses_system_specific"] == 0
+    assert engines_out["a"]["misses_universal"] == 1
+    assert engines_out["b"]["misses_system_specific"] == 1
+    assert engines_out["b"]["misses_universal"] == 1
+    assert engines_out["c"]["misses_system_specific"] == 0
+    assert engines_out["c"]["misses_universal"] == 0
+    assert engines_out[ULTIMATE]["num_scored"] == 2
+    assert engines_out[ULTIMATE]["misses_universal"] == 1

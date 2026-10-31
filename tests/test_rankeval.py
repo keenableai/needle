@@ -303,7 +303,29 @@ async def test_run_ndcg_ultimate_unscored_when_all_engines_fail():
     ult = report["engines"]["ultimate"]
     assert ult["search_errors"] == 1
     assert ult["num_scored"] == 0
-    assert ult["per_query"][0]["search_error"]["error_type"] == "all_engines_failed"
+    assert ult["per_query"][0]["search_error"] == err
+
+
+async def test_run_ndcg_ultimate_records_first_service_error_when_all_engines_fail():
+    unauthorized = {"error_type": "http_error", "error_message": "401: Unauthorized"}
+    overloaded = {"error_type": "http_error", "error_message": "503: overloaded"}
+    engines = {
+        "a": FakeEngine([], error=unauthorized),
+        "b": FakeEngine([], error=overloaded),
+        "c": FakeEngine([], error={"error_type": "transport", "error_message": "x"}),
+    }
+    ult = (await run_ndcg([q("q1")], engines, FakeJudge()))["engines"]["ultimate"]
+    assert ult["per_query"][0]["search_error"] == overloaded
+    assert (ult["account_errors"], ult["service_errors"]) == (0, 1)
+
+
+async def test_run_ndcg_ultimate_records_first_error_when_every_failure_is_account_side():
+    unauthorized = {"error_type": "http_error", "error_message": "401: Unauthorized"}
+    no_credits = {"error_type": "http_error", "error_message": "402: no credits"}
+    engines = {"a": FakeEngine([], error=unauthorized), "b": FakeEngine([], error=no_credits)}
+    ult = (await run_ndcg([q("q1")], engines, FakeJudge()))["engines"]["ultimate"]
+    assert ult["per_query"][0]["search_error"] == unauthorized
+    assert (ult["account_errors"], ult["service_errors"]) == (1, 0)
 
 
 async def test_run_ndcg_pooled_judge_error_drops_query_for_all_engines():

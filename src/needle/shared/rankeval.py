@@ -100,8 +100,9 @@ def _score_query(
 
 
 def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int) -> dict[str, Any]:
-    if all(s.error is not None for s in run.searches):
-        error = {"error_type": "all_engines_failed", "error_message": "every engine errored"}
+    errors = [s.error for s in run.searches if s.error is not None]
+    if errors and len(errors) == len(run.searches):
+        error = next((e for e in errors if not account_side(e)), errors[0])
         return _score_query(query, None, error, [], k=k, profile=run.profile)
     best: dict[str, tuple[SearchResult, Judgement | None]] = {}
     for search, judgements in zip(run.searches, run.judgements, strict=True):

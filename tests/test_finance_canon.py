@@ -9,6 +9,7 @@ from needle.finance.canon import (
     text_amounts,
     text_years,
 )
+from needle.finance.models import cues_for
 
 
 def test_squad_norm_replaces_punctuation_with_spaces():
@@ -91,13 +92,16 @@ def test_money_table_reading_scales_bare_figures():
     assert gold_in_text("money", 185_808_000, text="Net income 185,808 172,114")
     assert gold_in_text("money", 2_598_000_000, text="Operating Income - (d)\n\n2,598")
     assert not gold_in_text("money", 801e6, text="Operating income 801.9 723")
-    assert not gold_in_text("numeric_band", 801e6, text="801 employees")
+    eps = cues_for("eps_diluted")
+    assert not gold_in_text("money", -3.98, text="Diluted (3.98) (1.02)", cues=eps)
+    assert gold_in_text("money", -3.98, text="Diluted EPS (3.98) (1.02)", cues=eps)
+    assert gold_in_text("money", 801e6, text="801 723", cues=cues_for("operating_income"))
 
 
 def test_money_table_reading_parenthesized_losses():
     assert gold_in_text("money", -458e6, text="Net loss (458) (312)")
     assert not gold_in_text("money", 458e6, text="Net loss (458) (312)")
-    eps = ("eps", "per share", "earnings per")
+    eps = cues_for("eps_diluted")
     assert gold_in_text("money", -3.98, text="Diluted EPS $(3.98) $(1.02)", cues=eps)
     assert not gold_in_text("money", -3.98, text="Diluted $(3.98) $(1.02)", cues=eps)
 

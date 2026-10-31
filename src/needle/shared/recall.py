@@ -12,9 +12,13 @@ from needle.shared.search.base import (
 )
 
 ULTIMATE = "ultimate"
-ACCOUNT_STATUSES = frozenset({401, 402, 403})
+ACCOUNT_STATUSES = frozenset({401, 402, 403, 432, 433})
 MESSAGE_STATUSES = frozenset({None, 400, 429})
-ACCOUNT_MESSAGE = re.compile(r"credit[ _]balance|quota|billing|api[ _-]?key", re.IGNORECASE)
+ACCOUNT_MESSAGE = re.compile(
+    r"credit[ _]balance|not enough credits|insufficient[ _]credits|usage limit"
+    r"|\bquota\b|insufficient_quota|billing|api[ _-]?key",
+    re.IGNORECASE,
+)
 HTTP_STATUS = re.compile(r"(\d{3}):")
 
 
@@ -29,10 +33,12 @@ def account_side(error: dict[str, str]) -> bool:
     )
 
 
+def counted(pq: dict) -> bool:
+    return pq["search_error"] is None or not account_side(pq["search_error"])
+
+
 def answered(per_query: list[dict]) -> list[dict]:
-    return [
-        pq for pq in per_query if pq["search_error"] is None or not account_side(pq["search_error"])
-    ]
+    return [pq for pq in per_query if counted(pq)]
 
 
 def error_counts(per_query: list[dict]) -> dict[str, int]:
@@ -132,7 +138,7 @@ def classify_misses(
         system_specific = universal = 0
         for entries, others_found in zip(query_outs, any_hit, strict=True):
             pq = entries[idx]
-            if pq["search_error"] is not None or pq["hit_rank"] is not None:
+            if not counted(pq) or pq["hit_rank"] is not None:
                 continue
             if others_found:
                 system_specific += 1
@@ -143,9 +149,7 @@ def classify_misses(
     if ULTIMATE in engines_out:
         engines_out[ULTIMATE]["misses_system_specific"] = 0
         engines_out[ULTIMATE]["misses_universal"] = sum(
-            1
-            for pq in engines_out[ULTIMATE]["per_query"]
-            if pq["search_error"] is None and pq["hit_rank"] is None
+            1 for pq in engines_out[ULTIMATE]["per_query"] if counted(pq) and pq["hit_rank"] is None
         )
 
 
