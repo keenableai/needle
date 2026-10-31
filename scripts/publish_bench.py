@@ -36,6 +36,8 @@ def _ndcg_rows(report: dict, ts: str, bench: str) -> list[dict]:
             "num_scored": e["num_scored"],
             "num_queries": report["num_queries"],
             "search_errors": e["search_errors"],
+            "account_errors": e["account_errors"],
+            "service_errors": e["service_errors"],
             "judge_errors": e["judge_errors"],
             **_latency_fields(e),
         }
@@ -70,6 +72,8 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
                 "num_scored": e["num_scored"],
                 "num_queries": report["num_queries"],
                 "search_errors": e["search_errors"],
+                "account_errors": e["account_errors"],
+                "service_errors": e["service_errors"],
                 **_latency_fields(e),
             }
         )
@@ -94,6 +98,8 @@ def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> l
                 "num_scored": e["num_scored"],
                 "num_queries": report["num_queries"],
                 "search_errors": e["search_errors"],
+                "account_errors": e["account_errors"],
+                "service_errors": e["service_errors"],
                 **_latency_fields(e),
             }
         )

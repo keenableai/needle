@@ -146,7 +146,7 @@ async def run_answers(
         pq["det_rank"] = det_rank
         pq["hit_rank"] = det_rank
         judge_matches: list[bool | None] = [None] * len(results)
-        if judge is not None:
+        if judge is not None and query.field_type != "money":
             cutoff = det_rank - 1 if det_rank is not None else len(results)
             verdicts = await asyncio.gather(*[judge_result(query, r) for r in results[:cutoff]])
             pq["judged"] = len(verdicts)

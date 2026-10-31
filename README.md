@@ -61,10 +61,14 @@ endpoint (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
 `exa-instant` = instant, `exa-lite` = lite,
 `parallel` = advanced, `parallel-turbo` = turbo,
 `perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
-`brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). The mean skips queries whose
-search or judging failed
-(via `num_scored`; the report lists `search_errors` / `judge_errors`) and
-does not score them as zero.
+`brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). A failed
+search scores zero when the engine's side caused it (rate limit, timeout,
+server error, content filter, a rejected query). The mean skips it only when
+our own account caused it: HTTP 401, 402 or 403, or a 400, 429 or API error
+that names our credit balance, quota, billing or API key. The mean also
+skips queries whose judging failed. The report lists `search_errors`, split
+into `account_errors` and `service_errors`, and `judge_errors`;
+`num_scored` counts the queries in the mean.
 
 `claude-search` and `chatgpt-search` go through a model's server-side web
 search tool, since neither vendor exposes the search index directly. The
@@ -136,10 +140,13 @@ known-item filing retrieval, gold = the accession number. ~50% of
 `after:`/`before:`), tagged in `query_origin.syntax`.
 
 A deterministic matcher scores each field: nickname-tolerant person names,
-a 2% band for money, 15% for employee counts, country aliases,
+a 0.1% band for money, 15% for employee counts, country aliases,
 registrable-domain match for websites, and required cue words for
-low-entropy fields so a stray number cannot score. `--judge` adds an LLM
-backstop, consulted only for rejected results ranked ahead of the first
+low-entropy fields so a stray number cannot score. Money also matches a
+bare table figure in thousands or millions (`801` for $801M, `185,808` for
+$185.8M) and a parenthesized loss (`(458)`, `$(3.98)`); a year or a
+percentage never counts. `--judge` adds an LLM backstop for non-money
+fields, consulted only for rejected results ranked ahead of the first
 deterministic hit — it can upgrade a miss but never revoke a hit. The report
 breaks down by field, suite, syntax, cap tier, and freshness, and splits
 misses into system-specific vs universal. Snippet-only checks give a lower

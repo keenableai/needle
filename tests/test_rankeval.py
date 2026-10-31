@@ -72,7 +72,7 @@ async def test_run_ndcg_ranks_engines():
     assert b == 0.0
 
 
-async def test_run_ndcg_excludes_search_errors_from_mean():
+async def test_run_ndcg_excludes_search_error_without_ideal():
     good = [SearchResult(url="https://g1", title="GOODDOC one")]
 
     class FlakyEngine:
@@ -94,18 +94,34 @@ async def test_run_ndcg_excludes_search_errors_from_mean():
     assert errored["search_error"]["error_type"] == "http_error"
 
 
-async def test_run_ndcg_search_error_excluded_when_pool_exists():
-    err = {"error_type": "http_error", "error_message": "503"}
+async def test_run_ndcg_service_failure_scores_zero_when_pool_exists():
+    err = {"error_type": "http_error", "error_message": "503: overloaded"}
     good = FakeEngine([SearchResult(url="https://g1", title="GOODDOC one")])
     broken = FakeEngine([], error=err)
     report = await run_ndcg([q("q1")], {"good": good, "broken": broken}, FakeJudge())
     b = report["engines"]["broken"]
     assert b["search_errors"] == 1
-    assert b["num_scored"] == 0
+    assert b["service_errors"] == 1
+    assert b["account_errors"] == 0
+    assert b["num_scored"] == 1
     assert b["mean_ndcg"] == 0.0
+    assert b["per_query"][0]["ndcg"] == 0.0
+    assert b["per_query"][0]["score"] == 0.0
+    assert report["engines"]["good"]["mean_ndcg"] == pytest.approx(1.0)
+
+
+async def test_run_ndcg_account_failure_excluded_when_pool_exists():
+    err = {"error_type": "http_error", "error_message": "401: Unauthorized"}
+    good = FakeEngine([SearchResult(url="https://g1", title="GOODDOC one")])
+    broken = FakeEngine([], error=err)
+    report = await run_ndcg([q("q1")], {"good": good, "broken": broken}, FakeJudge())
+    b = report["engines"]["broken"]
+    assert b["search_errors"] == 1
+    assert b["account_errors"] == 1
+    assert b["service_errors"] == 0
+    assert b["num_scored"] == 0
     assert b["per_query"][0]["ndcg"] is None
     assert b["per_query"][0]["score"] is None
-    assert report["engines"]["good"]["mean_ndcg"] == pytest.approx(1.0)
 
 
 async def test_run_ndcg_excludes_queries_with_empty_pool():

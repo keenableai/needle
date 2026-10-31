@@ -72,10 +72,44 @@ def test_person_alias_forms():
     )
 
 
-def test_money_two_percent_band():
+def test_money_tenth_percent_band():
     assert gold_in_text("money", 416161000000, text="revenue of $416.16 billion in fiscal 2025")
     assert gold_in_text("money", 416161000000, text="reported $416.2B revenue")
     assert not gold_in_text("money", 416161000000, text="about $390 billion")
+    assert not gold_in_text("money", 29_500_000, text="net income of $30 million")
+    assert not gold_in_text("money", 416161000000, text="revenue of $410 billion")
+
+
+def test_numeric_band_keeps_fifteen_percent():
+    cues = ("employees",)
+    assert gold_in_text("numeric_band", 36000, text="about 31,000 employees", cues=cues)
+    assert not gold_in_text("numeric_band", 36000, text="about 30,000 employees", cues=cues)
+
+
+def test_money_table_reading_scales_bare_figures():
+    assert gold_in_text("money", 801e6, text="Operating income 801 723")
+    assert gold_in_text("money", 185_808_000, text="Net income 185,808 172,114")
+    assert gold_in_text("money", 2_598_000_000, text="Operating Income - (d)\n\n2,598")
+    assert not gold_in_text("money", 801e6, text="Operating income 801.9 723")
+    assert not gold_in_text("numeric_band", 801e6, text="801 employees")
+
+
+def test_money_table_reading_parenthesized_losses():
+    assert gold_in_text("money", -458e6, text="Net loss (458) (312)")
+    assert not gold_in_text("money", 458e6, text="Net loss (458) (312)")
+    eps = ("eps", "per share", "earnings per")
+    assert gold_in_text("money", -3.98, text="Diluted EPS $(3.98) $(1.02)", cues=eps)
+    assert not gold_in_text("money", -3.98, text="Diluted $(3.98) $(1.02)", cues=eps)
+
+
+def test_money_table_reading_skips_years_percentages_and_fractions():
+    assert not gold_in_text("money", 2_024_000, text="fiscal 2024 results")
+    assert not gold_in_text("money", 2_024_000_000, text="fiscal 2024 results")
+    assert not gold_in_text("money", 12e6, text="margin grew 12% year over year")
+    assert not gold_in_text("money", 12e6, text="margin grew 12 percent")
+    assert not gold_in_text("money", 3e9, text="shares trade at 3x sales")
+    assert not gold_in_text("money", 2_500_000_000, text="revenue 2,500,000 units")
+    assert not gold_in_text("money", 500_000, text="EPS of 0.5 per share")
 
 
 def test_amount_match_skips_bare_years():
