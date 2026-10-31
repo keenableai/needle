@@ -3,7 +3,7 @@ import json
 import sys
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAMILIES, NAMES, ULT, load, overall, shares  # noqa: E402
+from common import BENCHES, FAMILIES, NAMES, ULT, account_errors, load, overall, shares  # noqa: E402
 
 hist, pairs_json, out_path = sys.argv[1:4]
 rows = load(hist)
@@ -12,6 +12,7 @@ window = [r for r in rows if r["ts"] in table_runs]
 keep = [e for e in sorted({r["engine"] for r in window} - {ULT}) if e not in FAMILIES or e == "brave-llmcontext"]
 sh, ult = shares(window, keep)
 base = {e: overall(sh, e) for e in keep}
+ceiling_n = {(r["bench"], r["ts"]): r["num_scored"] for r in window if r["engine"] == ULT}
 
 
 def rank(e, v):
@@ -20,14 +21,14 @@ def rank(e, v):
 
 res = {}
 for e in keep:
-    if e not in ACCOUNT_SIDE_FAILURES:
+    if not any(account_errors(r) for r in window if r["engine"] == e):
         continue
     lo_sh, hi_sh = {}, {}
     frac = {}
     for b, m in BENCHES:
         br = [r for r in window if r["bench"] == b and r["engine"] == e]
         scored = sum(r["num_scored"] for r in br)
-        excluded = sum(r.get("search_errors") or 0 for r in br)
+        excluded = sum(ceiling_n[(b, r["ts"])] - r["num_scored"] for r in br)
         f = excluded / (scored + excluded) if scored + excluded else 0.0
         frac[b] = f
         v = sh[e][b][0] or 0.0

@@ -7,11 +7,13 @@ import sys
 
 from needle.shared.metrics import normalize_url
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from common import account_side  # noqa: E402
+
 site, out_path = sys.argv[1], sys.argv[2]
 table_runs = {ts.replace(":", "") for ts in json.load(open(sys.argv[3]))["runs"]} if len(sys.argv) > 3 else None
 LO, HI = "2026-10-17", "2026-10-30"
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
-ACCOUNT = {"perplexity", "exa", "kagi", "parallel", "claude-search"}
 GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
 K = 5
 BENCHES = {"news": ("hfnews", "ndcg.json", "judged"), "agentic_rare": ("hfrare", "agentic_rare.json", "judged"),
@@ -54,7 +56,7 @@ for bench, (folder, report, kind) in BENCHES.items():
             contrib = {}
             for e, pq in pqs.items():
                 r = pq[qi]
-                if r.get("search_error") and e in ACCOUNT:
+                if r.get("search_error") and account_side(r["search_error"]):
                     continue
                 if kind == "judged":
                     best = {}

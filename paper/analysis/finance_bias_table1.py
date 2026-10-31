@@ -4,10 +4,10 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import ACCOUNT_SIDE_FAILURES, load  # noqa: E402
+from common import account_side, load  # noqa: E402
 
 here = os.path.dirname(os.path.abspath(__file__))
-site, final_hist, v3_hist = sys.argv[1], sys.argv[2], sys.argv[3]
+site, final_hist, paper_hist = sys.argv[1], sys.argv[2], sys.argv[3]
 table = json.load(open(os.path.join(here, "manifest.json")))["results"]["table_results"]
 TABLE_RUNS, ENGINES = set(table["runs"]), table["engines"]
 MONEY = {"revenue", "net_income", "operating_income", "eps_diluted"}
@@ -30,16 +30,16 @@ def recall(rows):
     return {e: (s / n, n) for e, (s, n) in acc.items() if n}
 
 
-v3_rows = finance_rows(v3_hist)
-runs = sorted({r["ts"] for r in v3_rows})
-before, after = recall(finance_rows(final_hist)), recall(v3_rows)
+paper_rows = finance_rows(paper_hist)
+runs = sorted({r["ts"] for r in paper_rows})
+before, after = recall(finance_rows(final_hist)), recall(paper_rows)
 strata = collections.defaultdict(lambda: collections.defaultdict(lambda: [0, 0, 0]))
 for ts in runs:
     d = os.path.join(site, "hf", ts.replace(":", ""))
     rep = json.load(open(os.path.join(d, "recall.json")))
     for e in ENGINES:
         for q in json.load(open(os.path.join(d, rep["engines"][e]["per_query_path"])))["per_query"]:
-            if e in ACCOUNT_SIDE_FAILURES and q.get("search_error"):
+            if q.get("search_error") and account_side(q["search_error"]):
                 continue
             f = q.get("field") or ""
             st = strata[e]["money" if f in MONEY else "head" if f in HEAD else "other"]

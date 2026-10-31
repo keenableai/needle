@@ -46,8 +46,6 @@ for i in range(0, len(pairs), 2):
                 for r in pq.get("results") or []:
                     compliance[eng][0] += host_ok(r["url"], site)
                     compliance[eng][1] += 1
-                if hit and not host_ok(pq["results"][int(pq["hit_rank"]) - 1]["url"], site):
-                    hit = False
             obs[eng][(bucket, target)][syntax] = hit
 
 engines = sorted(obs)

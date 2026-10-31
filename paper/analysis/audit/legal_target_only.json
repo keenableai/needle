@@ -78,14 +78,14 @@
  },
  {
   "engine": "kagi",
-  "recall": 0.6255144032921811,
-  "target_pooled": 0.5876543209876544,
-  "target_lo": 0.570838583339016,
-  "target_hi": 0.600268179268648,
-  "target_own": 0.5308641975308642,
+  "recall": 0.6229508196721312,
+  "target_pooled": 0.5852459016393443,
+  "target_lo": 0.5684990809482824,
+  "target_hi": 0.597808063779842,
+  "target_own": 0.5286885245901639,
   "own_fraction": 0.5,
   "n_caselaw": 128,
-  "n_cfr": 358
+  "n_cfr": 360
  },
  {
   "engine": "brave",

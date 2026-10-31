@@ -11,11 +11,11 @@
      0.0
     ],
     [
-     "claude-search",
+     "chatgpt-search",
      -0.0
     ],
     [
-     "exa",
+     "claude-search",
      -0.0
     ]
    ],
@@ -42,8 +42,8 @@
      0.003
     ],
     [
-     "parallel",
-     0.001
+     "chatgpt-search",
+     -0.001
     ],
     [
      "claude-search",

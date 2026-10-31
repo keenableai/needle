@@ -4,7 +4,7 @@ import sys
 from datetime import datetime
 
 sys.path.insert(0, sys.argv[2])
-from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAMILIES, FMT, ULT, load, overall, shares, window  # noqa: E402
+from common import BENCHES, FAMILIES, FMT, ULT, account_errors, load, overall, shares, window  # noqa: E402
 
 rows = load(sys.argv[1])
 w, end = window(rows, 30)
@@ -39,7 +39,7 @@ dropped = collections.Counter()
 for b, m in BENCHES:
     by_ts = collections.defaultdict(set)
     for r in w:
-        if r["bench"] == b and ((r.get(m) is not None and r["num_scored"]) or r["engine"] in ACCOUNT_SIDE_FAILURES):
+        if r["bench"] == b and ((r.get(m) is not None and r["num_scored"]) or account_errors(r)):
             by_ts[r["ts"]].add(r["engine"])
     full = {ts for ts, es in by_ts.items() if all(e in es for e in names)}
     dropped[b] = (len(by_ts) - len(full), len(by_ts))

@@ -5,10 +5,11 @@ import sys
 from datetime import datetime
 
 sys.path.insert(0, sys.argv[2])
-from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAMILIES, FMT, ULT, load, overall, shares, window  # noqa: E402
+from common import BENCHES, FAMILIES, FMT, ULT, account_errors, load, overall, run_dirs, scored_failures, shares, window  # noqa: E402
 
 CUTOFF = datetime(2026, 10, 26, 22, 19)
 rows = load(sys.argv[1])
+runs = run_dirs(sys.argv[3])
 w, end = window(rows, 30)
 engines = sorted({r["engine"] for r in w} - {ULT})
 keep = [e for e in engines if e not in FAMILIES or e == "brave-llmcontext"]
@@ -16,7 +17,7 @@ full_ts = set()
 for b, m in BENCHES:
     by_ts = collections.defaultdict(set)
     for r in w:
-        if r["bench"] == b and ((r.get(m) is not None and r["num_scored"]) or r["engine"] in ACCOUNT_SIDE_FAILURES):
+        if r["bench"] == b and ((r.get(m) is not None and r["num_scored"]) or account_errors(r)):
             by_ts[r["ts"]].add(r["engine"])
     full_ts |= {ts for ts, es in by_ts.items() if all(e in es for e in keep)}
 wc = [r for r in w if r["ts"] in full_ts]
@@ -58,9 +59,8 @@ def excluded(rs):
     for r in rs:
         r = copy.copy(r)
         m = dict(BENCHES)[r["bench"]]
-        err = r.get("search_errors") or 0
-        if err and r.get(m) is not None and r["engine"] not in ACCOUNT_SIDE_FAILURES:
-            good = r["num_scored"] - err
+        if r["service_errors"] and r.get(m) is not None:
+            good = r["num_scored"] - scored_failures(runs[(r["bench"], r["ts"])], r["bench"], r["engine"])[1]
             if good <= 0:
                 continue
             r[m] = r[m] * r["num_scored"] / good

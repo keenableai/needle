@@ -6,8 +6,8 @@
  },
  "scoring_rules": {
   "service_side_failure": "scored zero",
-  "account_side_failure": "excluded (perplexity, exa, kagi, parallel, claude-search families)",
-  "site_hit": "requested host only",
+  "account_side_failure": "excluded (classified per error record by common.account_side)",
+  "site_hit": "gold identity on any host",
   "money_band": 0.001,
   "money_readings": [
    "prose",
@@ -16,7 +16,7 @@
    "parenthesized loss"
   ],
   "money_backstop": false,
-  "duplicate_penalty": "every query",
+  "duplicate_penalty": "skipped for site: queries",
   "snippet_cap_chars": 2000
  },
  "judge": {
@@ -28,7 +28,7 @@
  "second_judge_and_raters": "Claude Opus 5.5",
  "results": {
   "table_results": {
-   "source": "history_v3.jsonl",
+   "source": "history_v5.jsonl",
    "rule": "runs since 2026-10-17 in which every listed configuration ran",
    "runs": [
     "2026-10-17T21:51Z",
@@ -344,15 +344,15 @@
     "parallel",
     "brave-llmcontext",
     "linkup",
-    "brave",
     "context",
+    "brave",
     "deepseek",
     "you",
+    "chatgpt-search",
+    "kagi",
     "claude-search",
     "firecrawl",
     "octen",
-    "kagi",
-    "chatgpt-search",
     "google",
     "jina",
     "tavily",
@@ -362,7 +362,7 @@
    ]
   },
   "table_ci": {
-   "source": "history_v3.jsonl + audit/matched_pairs.json",
+   "source": "history_v5.jsonl + audit/matched_pairs_paper.json",
    "same_runs_as": "table_results"
   },
   "matched_support_full_window": {
@@ -371,13 +371,13 @@
    "matched_query_runs": 6801
   },
   "figure_results_a": {
-   "source": "history_v3.jsonl",
+   "source": "history_v5.jsonl",
    "bench": "scholar",
    "window_days": 30,
    "window_end": "2026-10-29"
   },
   "figure_results_b": {
-   "source": "history_v3.jsonl",
+   "source": "history_v5.jsonl",
    "weeks": "2026-W36..2026-W43"
   },
   "adjacent_pairs": {

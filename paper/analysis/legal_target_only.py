@@ -4,6 +4,9 @@ import json
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from common import account_side  # noqa: E402
+
 site, here = sys.argv[1], os.path.dirname(os.path.abspath(__file__))
 LO, HI = "2026-10-17", "2026-10-30"
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
@@ -33,7 +36,7 @@ for d in sorted(glob.glob(os.path.join(site, "hflegal", "*"))):
         if not os.path.isfile(pth):
             continue
         for q in json.load(open(pth))["per_query"]:
-            if q.get("search_error") and e in {"perplexity", "exa", "kagi", "parallel", "claude-search"}:
+            if q.get("search_error") and account_side(q["search_error"]):
                 continue
             b = "caselaw" if q.get("bucket") == "caselaw" else "code"
             hits[e][b][1] += 1

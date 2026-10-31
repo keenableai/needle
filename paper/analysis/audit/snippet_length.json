@@ -323,7 +323,7 @@
    "n_results": 24681,
    "n_empty": 448,
    "runs": 257,
-   "news_ndcg5": 0.34431978127351914,
+   "news_ndcg5": 0.3569941290504585,
    "news_rank": 13
   },
   "claude-search": {
@@ -332,7 +332,7 @@
    "n_results": 16280,
    "n_empty": 2876,
    "runs": 257,
-   "news_ndcg5": 0.46375742576674783,
+   "news_ndcg5": 0.46347044716169417,
    "news_rank": 12
   },
   "parallel": {
@@ -449,7 +449,7 @@
    "n_results": 25557,
    "n_empty": 516,
    "runs": 257,
-   "news_ndcg5": 0.20990635427001367,
+   "news_ndcg5": 0.20998915756558367,
    "news_rank": 20
   }
  },

@@ -9,8 +9,8 @@
    "finance_recall_strict": 0.8825757575757576,
    "finance_share_paper": 0.9038901601830663,
    "finance_share_strict": 0.89272030651341,
-   "overall_paper": 0.7295513957096992,
-   "overall_strict": 0.7273174249757679,
+   "overall_paper": 0.7295513957096991,
+   "overall_strict": 0.7273174249757678,
    "rank_paper": 1,
    "rank_strict": 1
   },
@@ -19,7 +19,7 @@
    "finance_recall_strict": 0.8583333333333333,
    "finance_share_paper": 0.9212814645308925,
    "finance_share_strict": 0.868199233716475,
-   "overall_paper": 0.6839103167227394,
+   "overall_paper": 0.6839103167227393,
    "overall_strict": 0.6732938705598558,
    "rank_paper": 2,
    "rank_strict": 2
@@ -29,7 +29,7 @@
    "finance_recall_strict": 0.8393939393939394,
    "finance_share_paper": 0.8916857360793288,
    "finance_share_strict": 0.8490421455938697,
-   "overall_paper": 0.6658711815240175,
+   "overall_paper": 0.6658711815240174,
    "overall_strict": 0.6573424634269255,
    "rank_paper": 3,
    "rank_strict": 3
@@ -39,8 +39,8 @@
    "finance_recall_strict": 0.8340909090909091,
    "finance_share_paper": 0.9069412662090007,
    "finance_share_strict": 0.8436781609195403,
-   "overall_paper": 0.6510387591363778,
-   "overall_strict": 0.6383861380784858,
+   "overall_paper": 0.6511758216394319,
+   "overall_strict": 0.6385232005815398,
    "rank_paper": 4,
    "rank_strict": 4
   },
@@ -49,8 +49,8 @@
    "finance_recall_strict": 0.7954545454545454,
    "finance_share_paper": 0.8527841342486651,
    "finance_share_strict": 0.8045977011494252,
-   "overall_paper": 0.6418436957017228,
-   "overall_strict": 0.6322064090818749,
+   "overall_paper": 0.6418436957017227,
+   "overall_strict": 0.6322064090818748,
    "rank_paper": 5,
    "rank_strict": 5
   },
@@ -59,10 +59,20 @@
    "finance_recall_strict": 0.7848484848484848,
    "finance_share_paper": 0.794050343249428,
    "finance_share_strict": 0.7938697318007663,
-   "overall_paper": 0.5713249858343069,
-   "overall_strict": 0.5712888635445745,
+   "overall_paper": 0.5713503824248013,
+   "overall_strict": 0.5713142601350689,
    "rank_paper": 6,
    "rank_strict": 6
+  },
+  "context": {
+   "finance_recall_paper": 0.7780303030303031,
+   "finance_recall_strict": 0.7613636363636364,
+   "finance_share_paper": 0.7833714721586575,
+   "finance_share_strict": 0.7701149425287356,
+   "overall_paper": 0.5703796311898436,
+   "overall_strict": 0.5677283252638592,
+   "rank_paper": 7,
+   "rank_strict": 8
   },
   "brave": {
    "finance_recall_paper": 0.7606060606060606,
@@ -70,27 +80,17 @@
    "finance_share_paper": 0.7658276125095347,
    "finance_share_strict": 0.7655172413793103,
    "overall_paper": 0.5701706386033993,
-   "overall_strict": 0.5701085643773546,
-   "rank_paper": 7,
-   "rank_strict": 7
-  },
-  "context": {
-   "finance_recall_paper": 0.7780303030303031,
-   "finance_recall_strict": 0.7613636363636364,
-   "finance_share_paper": 0.7833714721586575,
-   "finance_share_strict": 0.7701149425287356,
-   "overall_paper": 0.5682939872439621,
-   "overall_strict": 0.5656426813179778,
+   "overall_strict": 0.5701085643773545,
    "rank_paper": 8,
-   "rank_strict": 8
+   "rank_strict": 7
   },
   "deepseek": {
    "finance_recall_paper": 0.8037878787878788,
    "finance_recall_strict": 0.7575757575757576,
    "finance_share_paper": 0.8093058733791,
    "finance_share_strict": 0.7662835249042146,
-   "overall_paper": 0.5646496050383984,
-   "overall_strict": 0.5560451353434213,
+   "overall_paper": 0.5646531354426705,
+   "overall_strict": 0.5560486657476933,
    "rank_paper": 9,
    "rank_strict": 9
   },
@@ -100,19 +100,39 @@
    "finance_share_paper": 0.7452326468344774,
    "finance_share_strict": 0.7455938697318008,
    "overall_paper": 0.5549727048582154,
-   "overall_strict": 0.55504494943768,
+   "overall_strict": 0.5550449494376801,
    "rank_paper": 10,
    "rank_strict": 10
+  },
+  "chatgpt-search": {
+   "finance_recall_paper": 0.7941666666666667,
+   "finance_recall_strict": 0.7425,
+   "finance_share_paper": 0.7996186117467582,
+   "finance_share_strict": 0.7510344827586207,
+   "overall_paper": 0.5213566265979056,
+   "overall_strict": 0.511639800800278,
+   "rank_paper": 11,
+   "rank_strict": 12
+  },
+  "kagi": {
+   "finance_recall_paper": 0.7175,
+   "finance_recall_strict": 0.7133333333333334,
+   "finance_share_paper": 0.7224256292906179,
+   "finance_share_strict": 0.7215325670498085,
+   "overall_paper": 0.5189327130914329,
+   "overall_strict": 0.518754100643271,
+   "rank_paper": 12,
+   "rank_strict": 11
   },
   "claude-search": {
    "finance_recall_paper": 0.6642857142857143,
    "finance_recall_strict": 0.6511904761904762,
    "finance_share_paper": 0.6688460281137627,
    "finance_share_strict": 0.6586754241926656,
-   "overall_paper": 0.5087242595414897,
-   "overall_strict": 0.5066901387572702,
-   "rank_paper": 11,
-   "rank_strict": 11
+   "overall_paper": 0.5084591266075084,
+   "overall_strict": 0.5064250058232889,
+   "rank_paper": 13,
+   "rank_strict": 13
   },
   "firecrawl": {
    "finance_recall_paper": 0.8128787878787879,
@@ -121,8 +141,8 @@
    "finance_share_strict": 0.7501915708812261,
    "overall_paper": 0.5035228465812601,
    "overall_strict": 0.4898693224661247,
-   "rank_paper": 12,
-   "rank_strict": 14
+   "rank_paper": 14,
+   "rank_strict": 15
   },
   "octen": {
    "finance_recall_paper": 0.7151515151515152,
@@ -131,28 +151,8 @@
    "finance_share_strict": 0.7049808429118775,
    "overall_paper": 0.4991717730458472,
    "overall_strict": 0.496155737204119,
-   "rank_paper": 13,
-   "rank_strict": 13
-  },
-  "kagi": {
-   "finance_recall_paper": 0.7166666666666667,
-   "finance_recall_strict": 0.7133333333333334,
-   "finance_share_paper": 0.7215865751334859,
-   "finance_share_strict": 0.7215325670498085,
-   "overall_paper": 0.49620519952511,
-   "overall_strict": 0.49619439790837455,
-   "rank_paper": 14,
-   "rank_strict": 12
-  },
-  "chatgpt-search": {
-   "finance_recall_paper": 0.7219696969696969,
-   "finance_recall_strict": 0.675,
-   "finance_share_paper": 0.7269260106788711,
-   "finance_share_strict": 0.6827586206896552,
-   "overall_paper": 0.48108225382286457,
-   "overall_strict": 0.4722487758250214,
    "rank_paper": 15,
-   "rank_strict": 16
+   "rank_strict": 14
   },
   "google": {
    "finance_recall_paper": 0.7348484848484849,
@@ -162,15 +162,15 @@
    "overall_paper": 0.47461355805673155,
    "overall_strict": 0.4736080958755415,
    "rank_paper": 16,
-   "rank_strict": 15
+   "rank_strict": 16
   },
   "jina": {
    "finance_recall_paper": 0.718939393939394,
    "finance_recall_strict": 0.7022727272727273,
    "finance_share_paper": 0.7238749046529368,
    "finance_share_strict": 0.7103448275862069,
-   "overall_paper": 0.42458238623920536,
-   "overall_strict": 0.4218763708258594,
+   "overall_paper": 0.43556809714724043,
+   "overall_strict": 0.4328620817338944,
    "rank_paper": 17,
    "rank_strict": 17
   },
@@ -179,8 +179,8 @@
    "finance_recall_strict": 0.7643939393939394,
    "finance_share_paper": 0.8268497330282227,
    "finance_share_strict": 0.7731800766283525,
-   "overall_paper": 0.42242364297340657,
-   "overall_strict": 0.4116897116934325,
+   "overall_paper": 0.4228182077690768,
+   "overall_strict": 0.41208427648910273,
    "rank_paper": 18,
    "rank_strict": 19
   },
@@ -189,8 +189,8 @@
    "finance_recall_strict": 0.628030303030303,
    "finance_share_paper": 0.6346300533943554,
    "finance_share_strict": 0.6352490421455939,
-   "overall_paper": 0.42125636313262255,
-   "overall_strict": 0.4213801608828702,
+   "overall_paper": 0.4212866777110106,
+   "overall_strict": 0.4214104754612583,
    "rank_paper": 19,
    "rank_strict": 18
   },
@@ -199,18 +199,18 @@
    "finance_recall_strict": 0.7159090909090909,
    "finance_share_paper": 0.7330282227307399,
    "finance_share_strict": 0.7241379310344828,
-   "overall_paper": 0.3747314149242505,
-   "overall_strict": 0.37295335658499906,
+   "overall_paper": 0.37598246189702217,
+   "overall_strict": 0.3742044035577708,
    "rank_paper": 20,
    "rank_strict": 20
   },
   "ceramic": {
-   "finance_recall_paper": 0.4265151515151515,
+   "finance_recall_paper": 0.42727272727272725,
    "finance_recall_strict": 0.4265151515151515,
-   "finance_share_paper": 0.429443173150267,
+   "finance_share_paper": 0.4302059496567506,
    "finance_share_strict": 0.4314176245210728,
-   "overall_paper": 0.13905328999761327,
-   "overall_strict": 0.13944818027177444,
+   "overall_paper": 0.14356550065989207,
+   "overall_strict": 0.1438078356327565,
    "rank_paper": 21,
    "rank_strict": 21
   }

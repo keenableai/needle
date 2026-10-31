@@ -4,15 +4,23 @@ import sys
 from datetime import datetime
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAILURE_EXCLUDED_SINCE, FMT, load, overall, shares
+from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAILURE_EXCLUDED_SINCE, FMT, load, overall, run_dirs, scored_failures, shares
 
 E = "claude-search"
 LOW = 0.1
-hist, out = sys.argv[1], sys.argv[2]
+hist, site, out = sys.argv[1], sys.argv[2], sys.argv[3]
 rows = load(hist)
 ACCOUNT_SIDE_FAILURES.discard(E)
 zeroed = load(hist)
 ACCOUNT_SIDE_FAILURES.add(E)
+runs = run_dirs(site)
+for r in zeroed:
+    if r["engine"] == E and r.get("account_errors"):
+        acc = scored_failures(runs[(r["bench"], r["ts"])], r["bench"], E)[0]
+        m = dict(BENCHES)[r["bench"]]
+        if acc:
+            r[m] = (r[m] or 0) * r["num_scored"] / (r["num_scored"] + acc)
+            r["num_scored"] += acc
 
 
 def weeks(rs):

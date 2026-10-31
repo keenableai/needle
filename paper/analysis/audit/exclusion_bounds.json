@@ -1,16 +1,31 @@
 {
- "claude-search": {
-  "overall": 0.5087242595414896,
-  "excluded_scored_zero": 0.3323137547583864,
-  "excluded_scored_as_ceiling": 0.6830701538583841,
+ "chatgpt-search": {
+  "overall": 0.5213566265979056,
+  "excluded_scored_zero": 0.48495723536957314,
+  "excluded_scored_as_ceiling": 0.5653585891695545,
   "excluded_fraction": {
-   "scholar": 0.337344398340249,
-   "news": 0.36592069100903024,
-   "finance": 0.36363636363636365,
-   "agentic_rare": 0.39814814814814814,
-   "legal": 0.2887323943661972
+   "scholar": 0.19730290456431535,
+   "news": 0.03550295857988166,
+   "finance": 0.09090909090909091,
+   "agentic_rare": 0.07829181494661921,
+   "legal": 0.0
   },
   "rank": 11,
+  "rank_scored_zero": 15,
+  "rank_scored_as_ceiling": 9
+ },
+ "claude-search": {
+  "overall": 0.5084591266075084,
+  "excluded_scored_zero": 0.3347721215217804,
+  "excluded_scored_as_ceiling": 0.6777465218129539,
+  "excluded_fraction": {
+   "scholar": 0.3360995850622407,
+   "news": 0.36252465483234714,
+   "finance": 0.36363636363636365,
+   "agentic_rare": 0.3638790035587189,
+   "legal": 0.2887323943661972
+  },
+  "rank": 13,
   "rank_scored_zero": 20,
   "rank_scored_as_ceiling": 3
  },
@@ -29,49 +44,49 @@
   "rank_scored_zero": 4,
   "rank_scored_as_ceiling": 2
  },
- "kagi": {
-  "overall": 0.49620519952511,
-  "excluded_scored_zero": 0.444480851032819,
-  "excluded_scored_as_ceiling": 0.5600520832062081,
+ "jina": {
+  "overall": 0.43556809714724043,
+  "excluded_scored_zero": 0.42868929465901545,
+  "excluded_scored_as_ceiling": 0.44130340254283285,
   "excluded_fraction": {
-   "scholar": 0.08713692946058091,
-   "news": 0.1534526854219949,
-   "finance": 0.09090909090909091,
-   "agentic_rare": 0.1724137931034483,
-   "legal": 0.07394366197183098
-  },
-  "rank": 14,
-  "rank_scored_zero": 16,
-  "rank_scored_as_ceiling": 10
- },
- "parallel": {
-  "overall": 0.6510387591363778,
-  "excluded_scored_zero": 0.6485195169698772,
-  "excluded_scored_as_ceiling": 0.6533469079334586,
-  "excluded_fraction": {
-   "scholar": 0.0,
-   "news": 0.01971608832807571,
-   "finance": 0.0,
-   "agentic_rare": 0.004420866489832007,
-   "legal": 0.0
-  },
-  "rank": 4,
-  "rank_scored_zero": 4,
-  "rank_scored_as_ceiling": 4
- },
- "perplexity": {
-  "overall": 0.6658711815240174,
-  "excluded_scored_zero": 0.6658711815240174,
-  "excluded_scored_as_ceiling": 0.6658711815240174,
-  "excluded_fraction": {
-   "scholar": 0.0,
+   "scholar": 0.06307053941908713,
    "news": 0.0,
    "finance": 0.0,
    "agentic_rare": 0.0,
    "legal": 0.0
   },
-  "rank": 3,
-  "rank_scored_zero": 3,
-  "rank_scored_as_ceiling": 3
+  "rank": 17,
+  "rank_scored_zero": 17,
+  "rank_scored_as_ceiling": 17
+ },
+ "kagi": {
+  "overall": 0.5189327130914329,
+  "excluded_scored_zero": 0.46769388881558915,
+  "excluded_scored_as_ceiling": 0.576825504850109,
+  "excluded_fraction": {
+   "scholar": 0.08713692946058091,
+   "news": 0.15128205128205127,
+   "finance": 0.09090909090909091,
+   "agentic_rare": 0.14590747330960854,
+   "legal": 0.07042253521126761
+  },
+  "rank": 12,
+  "rank_scored_zero": 16,
+  "rank_scored_as_ceiling": 6
+ },
+ "parallel": {
+  "overall": 0.6511758216394319,
+  "excluded_scored_zero": 0.6490398468302416,
+  "excluded_scored_as_ceiling": 0.6529057245422731,
+  "excluded_fraction": {
+   "scholar": 0.0,
+   "news": 0.01932938856015779,
+   "finance": 0.0,
+   "agentic_rare": 0.0,
+   "legal": 0.0
+  },
+  "rank": 4,
+  "rank_scored_zero": 4,
+  "rank_scored_as_ceiling": 4
  }
 }

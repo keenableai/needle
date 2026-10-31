@@ -5,9 +5,11 @@ import os
 import random
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from common import account_side  # noqa: E402
+
 site, pairs_json, out_json = sys.argv[1], sys.argv[2], sys.argv[3]
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
-ACCOUNT = {"perplexity", "exa", "kagi", "parallel", "claude-search"}
 BENCHES = {"scholar": ("hfscholar", "scholar.json", "hit"), "news": ("hfnews", "ndcg.json", "ndcg"), "finance": ("hf", "recall.json", "hit"),
            "agentic_rare": ("hfrare", "agentic_rare.json", "ndcg"), "legal": ("hflegal", "legal.json", "hit")}
 table_runs = {ts.replace(":", "") for ts in json.load(open(pairs_json))["runs"]}
@@ -56,7 +58,7 @@ for bench, (folder, report, kind) in BENCHES.items():
             for e in KEEP:
                 pq = pqs[e][qi]
                 failed = pq.get("search_error") is not None
-                vals[e] = None if (failed and e in ACCOUNT) else (0.0 if failed else value(pq, kind))
+                vals[e] = None if (failed and account_side(pq["search_error"])) else (0.0 if failed else value(pq, kind))
             clusters[pk.get(text, text)].append({"u": value(pqs["ultimate"][qi], kind), "vals": vals})
     clusters_by_bench[bench] = list(clusters.values())
     print(bench, "clusters", len(clusters), "query-runs", sum(len(v) for v in clusters.values()), flush=True)

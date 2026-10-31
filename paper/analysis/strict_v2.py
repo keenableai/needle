@@ -9,13 +9,6 @@ from needle.finance.models import cues_for
 
 K = 5
 TIGHT = 0.001
-SITE_RE = re.compile(r"site:(\S+)")
-
-
-def host_ok(url, site):
-    from urllib.parse import urlsplit
-    h = (urlsplit(url).hostname or "").lower()
-    return h == site or h.endswith("." + site)
 
 
 NUM_RE = re.compile(r"(?<![\w.])(\()?\s*\$?\s*(-)?(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*(\))?(?![\w.])(?!\s*(?:%|percent\b|per cent\b|x\b|times\b))")
@@ -120,15 +113,11 @@ def process(run):
             if g is None:
                 continue
             gg = g["gold"]
-            site = SITE_RE.search(pq["query"])
-            site = site.group(1).lower().strip('"') if site else None
             if gg["field_type"] == "money":
                 aliases = tuple(str(a) for a in gg["aliases"] or [])
                 hit = False
                 for i, r in enumerate(pq["results"][:K]):
                     ok, is_new = match_v2(gg["value"], aliases, text_of(r), cues_for(gg["field"]))
-                    if ok and site and not host_ok(r["url"], site):
-                        ok = False
                     if ok:
                         hit = True
                         if is_new:
@@ -139,8 +128,6 @@ def process(run):
                         break
             else:
                 hit = pq["hit_rank"] is not None
-                if hit and site and not host_ok(pq["results"][pq["hit_rank"] - 1]["url"], site):
-                    hit = False
             hits += hit
             any_hit[pq["query"]] |= hit
         lat = e.get("latency") or {}

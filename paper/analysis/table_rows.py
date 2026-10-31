@@ -4,7 +4,7 @@ import collections
 import json
 import statistics
 
-from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAMILIES, NAMES, ULT, bootstrap, load, overall, shares, window
+from common import BENCHES, FAMILIES, NAMES, ULT, account_errors, bootstrap, load, overall, shares, window
 
 hist, out = sys.argv[1], sys.argv[2]
 matched = json.load(open(sys.argv[3])) if len(sys.argv) > 3 else None
@@ -16,7 +16,7 @@ full_ts = set()
 for b, m in BENCHES:
     by_ts = collections.defaultdict(set)
     for r in w:
-        if r["bench"] == b and ((r.get(m) is not None and r["num_scored"]) or r["engine"] in ACCOUNT_SIDE_FAILURES):
+        if r["bench"] == b and ((r.get(m) is not None and r["num_scored"]) or account_errors(r)):
             by_ts[r["ts"]].add(r["engine"])
     full_ts |= {ts for ts, es in by_ts.items() if all(e in es for e in keep0)}
 w = [r for r in w if r["ts"] in full_ts]
@@ -25,7 +25,7 @@ ci = bootstrap(w, engines)
 keep = [e for e in engines if e not in FAMILIES or e == "brave-llmcontext"]
 table = sorted(((overall(sh, e), e) for e in keep if overall(sh, e) is not None), reverse=True)
 
-NOTE = {"keenable": r"\smash{$^\dagger$}", "chatgpt-search": r"\smash{$^\ddagger$}",
+NOTE = {"keenable": r"\smash{$^\dagger$}", "chatgpt-search": r"\smash{$^{\ddagger\S}$}",
         "claude-search": r"\smash{$^{\ddagger\S}$}", "kagi": r"\smash{$^\S$}"}
 
 
@@ -39,9 +39,10 @@ def signed(x):
 
 def fail(e):
     rs = [r for r in w if r["engine"] == e]
-    pct = 100 * sum(r.get("search_errors") or 0 for r in rs) / max(1, sum(r.get("num_queries") or 0 for r in rs))
-    na = r"\textcolor{muted}{--}"
-    return (na, f"{pct:.1f}") if e in ACCOUNT_SIDE_FAILURES else (f"{pct:.1f}", na)
+    nq = max(1, sum(r.get("num_queries") or 0 for r in rs))
+    acc = sum(account_errors(r) for r in rs)
+    svc = sum(r.get("search_errors") or 0 for r in rs) - acc
+    return f"{100 * svc / nq:.1f}", f"{100 * acc / nq:.1f}" if acc else r"\textcolor{muted}{--}"
 
 
 def p50(e):

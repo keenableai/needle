@@ -4,9 +4,11 @@ import json
 import os
 import sys
 
+sys.path.insert(0, __file__.rsplit("/", 1)[0])
+from common import account_side  # noqa: E402
+
 site, pairs_json, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
-ACCOUNT = {"perplexity", "exa", "kagi", "parallel", "claude-search"}
 table_runs = {ts.replace(":", "") for ts in json.load(open(pairs_json))["runs"]}
 
 hits = collections.defaultdict(lambda: collections.defaultdict(lambda: [0, 0]))
@@ -29,7 +31,7 @@ for d in sorted(glob.glob(os.path.join(site, "hfscholar", "*"))):
         if not os.path.isfile(p):
             continue
         for q in json.load(open(p))["per_query"]:
-            if q.get("search_error") and e in ACCOUNT:
+            if q.get("search_error") and account_side(q["search_error"]):
                 continue
             m = meta.get(q["query"]) or meta.get(q["query"][:60])
             if m is None:

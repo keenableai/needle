@@ -13,21 +13,17 @@
   "2026-10-28T04:37Z"
  ],
  "net_min": -0.03058478244918918,
- "net_max": 0.00475259556827356,
- "reported_spread": 0.4884848484848485,
- "corrected_spread": 0.4540550434734757,
+ "net_max": 0.004610550113728112,
+ "reported_spread": 0.4877272727272728,
+ "corrected_spread": 0.4534395131704454,
  "adjacent_swaps": [
-  [
-   "chatgpt-search",
-   "jina"
-  ],
   [
    "jina",
    "kagi"
   ]
  ],
  "positions_changed": 2,
- "discordant_pairs": 3,
+ "discordant_pairs": 1,
  "corrected_order": [
   "exa",
   "parallel",
@@ -37,6 +33,7 @@
   "tavily",
   "firecrawl",
   "deepseek",
+  "chatgpt-search",
   "linkup",
   "context",
   "brave",
@@ -45,7 +42,6 @@
   "tinyfish",
   "kagi",
   "jina",
-  "chatgpt-search",
   "octen",
   "claude-search",
   "bing",
@@ -173,6 +169,21 @@
    "n_per_query": 1320
   },
   {
+   "engine": "chatgpt-search",
+   "reported": 0.7941666666666667,
+   "money_recall": 0.6487455197132618,
+   "extension_share": 0.2222222222222221,
+   "head_recall": 0.8369565217391305,
+   "other_recall": 0.8383594692400482,
+   "fp": 0.026233050847457598,
+   "fn": 0.008166666666666664,
+   "net": -0.018066384180790936,
+   "money_prevalence": 0.2325,
+   "money_answered": 1.0,
+   "n_scored": 1200,
+   "n_per_query": 1200
+  },
+  {
    "engine": "linkup",
    "reported": 0.7886363636363637,
    "money_recall": 0.6339869281045752,
@@ -263,21 +274,6 @@
    "n_per_query": 1320
   },
   {
-   "engine": "chatgpt-search",
-   "reported": 0.7219696969696969,
-   "money_recall": 0.5915032679738561,
-   "extension_share": 0.20261437908496696,
-   "head_recall": 0.7549019607843137,
-   "other_recall": 0.7620614035087719,
-   "fp": 0.023848228043143266,
-   "fn": 0.007424242424242426,
-   "net": -0.01642398561890084,
-   "money_prevalence": 0.2318181818181818,
-   "money_answered": 0.9117647058823529,
-   "n_scored": 1320,
-   "n_per_query": 1320
-  },
-  {
    "engine": "jina",
    "reported": 0.718939393939394,
    "money_recall": 0.4673202614379088,
@@ -294,14 +290,14 @@
   },
   {
    "engine": "kagi",
-   "reported": 0.7166666666666667,
-   "money_recall": 0.3821428571428574,
-   "extension_share": 0.01428571428571414,
+   "reported": 0.7175,
+   "money_recall": 0.38571428571428606,
+   "extension_share": 0.017857142857142794,
    "head_recall": 0.9456521739130435,
    "other_recall": 0.8043478260869565,
-   "fp": 0.02126689870863597,
-   "fn": 0.014416666666666663,
-   "net": -0.006850232041969306,
+   "fp": 0.021339815375302634,
+   "fn": 0.014333333333333325,
+   "net": -0.00700648204196931,
    "money_prevalence": 0.23333333333333334,
    "money_answered": 1.0,
    "n_scored": 1200,
@@ -354,14 +350,14 @@
   },
   {
    "engine": "ceramic",
-   "reported": 0.4265151515151515,
-   "money_recall": 0.0784313725490194,
-   "extension_share": 0.0,
+   "reported": 0.42727272727272725,
+   "money_recall": 0.08169934640522845,
+   "extension_share": 0.0032679738562090515,
    "head_recall": 0.5196078431372549,
    "other_recall": 0.5328947368421053,
-   "fp": 0.010550434734756748,
-   "fn": 0.015303030303030308,
-   "net": 0.00475259556827356,
+   "fp": 0.010616722613544623,
+   "fn": 0.015227272727272735,
+   "net": 0.004610550113728112,
    "money_prevalence": 0.2318181818181818,
    "money_answered": 0.738562091503268,
    "n_scored": 1320,

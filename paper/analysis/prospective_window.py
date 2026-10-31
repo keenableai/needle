@@ -1,23 +1,16 @@
 import glob
 import json
 import os
-import re
 import sys
 from pathlib import Path
 from urllib.parse import urlsplit
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import BENCHES, FAMILIES, NAMES, ULT, load, overall, shares  # noqa: E402
+from common import BENCHES, FAMILIES, NAMES, REPORT_FILES, ULT, classify, load, overall, shares  # noqa: E402
 from strict_v2 import process as finance_process  # noqa: E402
 
 site, hist_path, pairs_json, out_rows, out_json = sys.argv[1:6]
 REPORTS = {"news": ("ndcg.json", "mean_ndcg", "ndcg"), "agentic_rare": ("agentic_rare.json", "mean_ndcg", "ndcg"), "scholar": ("scholar.json", "recall_at_k", "recall")}
-SITE_RE = re.compile(r"site:(\S+)")
-
-
-def host_ok(url, s):
-    h = (urlsplit(url).hostname or "").lower()
-    return h == s or h.endswith("." + s)
 
 
 def ts_of(name):
@@ -65,9 +58,6 @@ for d in sorted(glob.glob(os.path.join(site, "legal", "*"))):
                 errs += 1
                 continue
             hit = pq.get("hit_rank") is not None
-            m = SITE_RE.search(pq["query"])
-            if hit and m and not host_ok(pq["results"][pq["hit_rank"] - 1]["url"], m.group(1).lower().strip('"')):
-                hit = False
             hits += hit
             any_hit[pq["query"]] = any_hit.get(pq["query"], False) or hit
         lat = e.get("latency") or {}
@@ -77,6 +67,8 @@ for d in sorted(glob.glob(os.path.join(site, "finance", "*"))):
     if os.path.exists(os.path.join(d, "recall.json")) and os.path.exists(os.path.join(d, "gold.jsonl")):
         frows, _ = finance_process(d)
         rows.extend(frows)
+rows, unsplit = classify(rows, {(b, ts_of(os.path.basename(d))): d for b in REPORT_FILES for d in glob.glob(os.path.join(site, b, "*"))})
+assert not unsplit, unsplit
 with open(out_rows, "w") as f:
     for r in rows:
         f.write(json.dumps(r) + "\n")

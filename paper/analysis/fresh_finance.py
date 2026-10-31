@@ -1,25 +1,16 @@
 import collections
 import json
 import random
-import re
 import sys
-from urllib.parse import urlsplit
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import ULT, load, wmean  # noqa: E402
+from common import ULT, account_side, load, wmean  # noqa: E402
 from strict_v2 import match_v2, text_of  # noqa: E402
 from needle.finance.models import cues_for  # noqa: E402
 
 queries_path, report_path, hist_path, pairs_json, out_dir = sys.argv[1:6]
 K = 5
-SITE_RE = re.compile(r"site:(\S+)")
 rng = random.Random(1030)
-
-
-def host_ok(url, site):
-    h = (urlsplit(url).hostname or "").lower()
-    return h == site or h.endswith("." + site)
-
 
 gold = {}
 for line in open(queries_path):
@@ -39,17 +30,14 @@ for eng, e in rep["engines"].items():
         gg = g["gold"]
         if pq.get("search_error") is not None:
             err += 1
-            continue
+            if account_side(pq["search_error"]):
+                continue
         n += 1
-        site = SITE_RE.search(pq["query"])
-        site = site.group(1).lower().strip('"') if site else None
         hit = False
         if gg["field_type"] == "money":
             aliases = tuple(str(a) for a in gg["aliases"] or [])
             for i, r in enumerate(pq["results"][:K]):
                 ok, is_new = match_v2(gg["value"], aliases, text_of(r), cues_for(gg["field"]))
-                if ok and site and not host_ok(r["url"], site):
-                    ok = False
                 if ok:
                     hit = True
                     prov = json.loads(g["query_origin"]).get("provenance", {}) if isinstance(g["query_origin"], str) else g["query_origin"].get("provenance", {})
@@ -60,8 +48,6 @@ for eng, e in rep["engines"].items():
                     break
         else:
             hit = pq["hit_rank"] is not None
-            if hit and site and not host_ok(pq["results"][pq["hit_rank"] - 1]["url"], site):
-                hit = False
             if hit:
                 r = pq["results"][pq["hit_rank"] - 1]
                 prov = json.loads(g["query_origin"]).get("provenance", {}) if isinstance(g["query_origin"], str) else g["query_origin"].get("provenance", {})

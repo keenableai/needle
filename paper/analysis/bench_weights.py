@@ -3,7 +3,7 @@ import json
 import sys
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAMILIES, NAMES, ULT, load, overall, shares, window
+from common import BENCHES, FAMILIES, NAMES, ULT, account_errors, load, overall, shares, window
 
 hist, out = sys.argv[1], sys.argv[2]
 rows = load(hist)
@@ -14,7 +14,7 @@ full_ts = set()
 for b, m in BENCHES:
     by_ts = collections.defaultdict(set)
     for r in w:
-        if r["bench"] == b and ((r.get(m) is not None and r["num_scored"]) or r["engine"] in ACCOUNT_SIDE_FAILURES):
+        if r["bench"] == b and ((r.get(m) is not None and r["num_scored"]) or account_errors(r)):
             by_ts[r["ts"]].add(r["engine"])
     full_ts |= {ts for ts, es in by_ts.items() if all(e in es for e in keep0)}
 w = [r for r in w if r["ts"] in full_ts]

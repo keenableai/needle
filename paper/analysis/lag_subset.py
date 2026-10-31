@@ -6,10 +6,12 @@ import random
 import sys
 from datetime import datetime
 
+sys.path.insert(0, __file__.rsplit("/", 1)[0])
+from common import account_side  # noqa: E402
+
 site = sys.argv[1]
 LO, HI = "2026-10-17", "2026-10-30"
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
-ACCOUNT_SIDE = {"perplexity", "exa", "kagi", "parallel", "claude-search"}
 rng = random.Random(3)
 
 
@@ -42,7 +44,7 @@ for d in sorted(glob.glob(os.path.join(site, "hfnews", "*"))):
         t0 = min(t.values())
         spread = (max(t.values()) - t0).total_seconds()
         for e, r in recs.items():
-            if r.get("search_error") and e in ACCOUNT_SIDE:
+            if r.get("search_error") and account_side(r["search_error"]):
                 continue
             rows.append({"run": name, "q": qi, "e": e, "score": float(r.get("score") or 0.0), "lag": (t[e] - t0).total_seconds(), "spread": spread})
         times_all.extend(t.values())
