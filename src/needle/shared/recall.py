@@ -1,4 +1,5 @@
 import asyncio
+import re
 from collections.abc import Awaitable, Callable, Sequence
 from typing import Any
 
@@ -11,10 +12,43 @@ from needle.shared.search.base import (
 )
 
 ULTIMATE = "ultimate"
+ACCOUNT_STATUSES = frozenset({401, 402, 403, 432, 433})
+MESSAGE_STATUSES = frozenset({None, 400, 429})
+ACCOUNT_MESSAGE = re.compile(
+    r"credit[ _]balance|not enough credits|insufficient[ _]credits|usage limit"
+    r"|\bquota\b|insufficient_quota|billing|api[ _-]?key",
+    re.IGNORECASE,
+)
+HTTP_STATUS = re.compile(r"(\d{3}):")
+
+
+def account_side(error: dict[str, str]) -> bool:
+    kind, message = error.get("error_type"), error.get("error_message") or ""
+    if kind not in ("http_error", "api_error"):
+        return False
+    status = HTTP_STATUS.match(message) if kind == "http_error" else None
+    code = int(status.group(1)) if status else None
+    return code in ACCOUNT_STATUSES or (
+        code in MESSAGE_STATUSES and ACCOUNT_MESSAGE.search(message) is not None
+    )
+
+
+def counted(pq: dict) -> bool:
+    return pq["search_error"] is None or not account_side(pq["search_error"])
 
 
 def answered(per_query: list[dict]) -> list[dict]:
-    return [pq for pq in per_query if pq["search_error"] is None]
+    return [pq for pq in per_query if counted(pq)]
+
+
+def error_counts(per_query: list[dict]) -> dict[str, int]:
+    errors = [pq["search_error"] for pq in per_query if pq["search_error"] is not None]
+    account = sum(1 for e in errors if account_side(e))
+    return {
+        "search_errors": len(errors),
+        "account_errors": account,
+        "service_errors": len(errors) - account,
+    }
 
 
 def first_rank(flags: Sequence[object]) -> int | None:
@@ -55,6 +89,11 @@ def ultimate_per_query(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
             pq["results"] = (([hit] if hit else []) + rest)[:cap]
             pq["n_results"] = len(pq["results"])
             pq["hit_rank"] = 1 if hit else None
+        else:
+            pq["search_error"] = next(
+                (e["search_error"] for e in entries if not account_side(e["search_error"])),
+                pq["search_error"],
+            )
         out.append(pq)
     return out
 
@@ -72,7 +111,7 @@ def recall_summary(
         "recall_at_k": len(hits) / len(scored) if scored else 0.0,
         "mrr_at_k": sum(1.0 / pq["hit_rank"] for pq in hits) / len(scored) if scored else 0.0,
         "num_scored": len(scored),
-        "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
+        **error_counts(per_query),
         "latency": latency,
         "per_query": per_query,
     }
@@ -99,7 +138,7 @@ def classify_misses(
         system_specific = universal = 0
         for entries, others_found in zip(query_outs, any_hit, strict=True):
             pq = entries[idx]
-            if pq["search_error"] is not None or pq["hit_rank"] is not None:
+            if not counted(pq) or pq["hit_rank"] is not None:
                 continue
             if others_found:
                 system_specific += 1
@@ -110,9 +149,7 @@ def classify_misses(
     if ULTIMATE in engines_out:
         engines_out[ULTIMATE]["misses_system_specific"] = 0
         engines_out[ULTIMATE]["misses_universal"] = sum(
-            1
-            for pq in engines_out[ULTIMATE]["per_query"]
-            if pq["search_error"] is None and pq["hit_rank"] is None
+            1 for pq in engines_out[ULTIMATE]["per_query"] if counted(pq) and pq["hit_rank"] is None
         )
 
 

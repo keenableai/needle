@@ -58,6 +58,13 @@ AMOUNT_SCALES = {
     "thousand": 1e3,
     "k": 1e3,
 }
+TABLE_FIGURE_RE = re.compile(
+    r"(?<![\w.])(\()?\s*\$?\s*(-)?(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*(\))?(?![\w.])"
+    r"(?!\s*(?:%|percent\b|per cent\b|x\b|times\b))"
+)
+TABLE_FIGURE_SCALES = (1.0, 1e3, 1e6)
+MONEY_REL_TOL = 0.001
+HEADCOUNT_REL_TOL = 0.15
 
 
 def squad_norm(value: Any) -> str:
@@ -257,6 +264,32 @@ def _match_amount(value: Any, aliases: tuple[str, ...], raw_text: str, *, rel_to
     return False
 
 
+def table_figures(raw_text: str) -> list[tuple[float, bool]]:
+    out = []
+    for match in TABLE_FIGURE_RE.finditer(raw_text):
+        paren_open, minus, digits, decimals, paren_close = match.groups()
+        amount = float(digits.replace(",", "") + (decimals or ""))
+        negative = bool(paren_open and paren_close) or bool(minus)
+        year_like = "," not in digits and not decimals and 1900 <= amount <= 2100
+        out.append((-amount if negative else amount, year_like))
+    return out
+
+
+def _match_table_figure(value: Any, raw_text: str, *, rel_tol: float) -> bool:
+    gold = parse_amount(value)
+    if not gold:
+        return False
+    for figure, year_like in table_figures(raw_text):
+        if abs(figure) < 1:
+            continue
+        for scale in TABLE_FIGURE_SCALES:
+            if scale > 1 and (abs(figure) >= 1e6 or year_like):
+                continue
+            if abs(figure * scale - gold) / abs(gold) <= rel_tol:
+                return True
+    return False
+
+
 FIELD_TYPES = frozenset(
     {"person", "entity", "year", "country", "domain", "exact_id", "money", "numeric_band"}
 )
@@ -288,7 +321,9 @@ def gold_in_text(
     if field_type == "exact_id":
         return _match_exact_id(value, aliases, raw, url)
     if field_type == "money":
-        return _match_amount(value, aliases, raw, rel_tol=0.02)
+        return _match_amount(value, aliases, raw, rel_tol=MONEY_REL_TOL) or _match_table_figure(
+            value, raw, rel_tol=MONEY_REL_TOL
+        )
     if field_type == "numeric_band":
-        return _match_amount(value, aliases, raw, rel_tol=0.15)
+        return _match_amount(value, aliases, raw, rel_tol=HEADCOUNT_REL_TOL)
     raise ValueError(f"unknown field_type {field_type!r}")

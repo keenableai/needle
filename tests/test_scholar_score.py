@@ -17,6 +17,8 @@ class FakeEngine:
 
     async def search(self, query, *, num_results=10):
         entry = self._table.get(query)
+        if isinstance(entry, dict) and isinstance(entry.get("error"), dict):
+            return None, entry["error"]
         if isinstance(entry, dict) and entry.get("error"):
             return None, {"error_type": "http_error", "error_message": "boom"}
         return (entry or [])[:num_results], None
@@ -72,15 +74,29 @@ async def test_recall_mrr_and_rank():
     }
 
 
-async def test_search_error_excluded_from_mean():
+async def test_service_error_scores_zero():
     queries = [_gold("q1", "title", {"arxiv": "2506.00001"}, "2506.00001")]
     engine = FakeEngine("exa", {"q1": {"error": True}})
     report = await run_papers(queries, {"exa": engine}, num_results=5)
     e = report["engines"]["exa"]
-    assert e["num_scored"] == 0
+    assert e["num_scored"] == 1
     assert e["search_errors"] == 1
+    assert e["service_errors"] == 1
     assert e["recall_at_k"] == 0.0
     assert e["mrr_at_k"] == 0.0
+    assert e["per_query"][0]["score"] == 0.0
+    assert e["by_bucket"] == {"title": {"n": 1, "recall_at_k": 0.0}}
+
+
+async def test_account_error_excluded_from_mean():
+    queries = [_gold("q1", "title", {"arxiv": "2506.00001"}, "2506.00001")]
+    error = {"error_type": "http_error", "error_message": "401: Unauthorized"}
+    engine = FakeEngine("exa", {"q1": {"error": error}})
+    report = await run_papers(queries, {"exa": engine}, num_results=5)
+    e = report["engines"]["exa"]
+    assert e["num_scored"] == 0
+    assert e["search_errors"] == 1
+    assert e["account_errors"] == 1
     assert e["per_query"][0]["score"] is None
     assert e["by_bucket"] == {}
 
@@ -185,11 +201,11 @@ async def test_ultimate_pools_hits_across_engines():
     assert pq1["n_results"] == 3
 
 
-async def test_ultimate_excludes_query_when_all_engines_fail():
+async def test_ultimate_scores_zero_when_all_engines_fail():
     queries = [_gold("q1", "title", {"arxiv": "2506.00001"}, "2506.00001")]
     report = await run_papers(queries, {"e": FakeEngine("e", {"q1": {"error": True}})})
     ult = report["engines"]["ultimate"]
-    assert ult["num_scored"] == 0
+    assert ult["num_scored"] == 1
     assert ult["search_errors"] == 1
     assert ult["recall_at_k"] == 0.0
 
