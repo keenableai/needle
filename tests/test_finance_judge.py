@@ -176,6 +176,48 @@ async def test_judge_no_keeps_miss():
     assert e["recall_at_k"] == 0.0 and e["num_scored"] == 1 and e["judge_upgrades"] == 0
 
 
+async def test_judge_skips_money_fields_only():
+    income_q = GoldQuery(
+        text="nvidia q1 fiscal 2026 net income",
+        field="net_income",
+        field_type="money",
+        value=18_775_000_000,
+        aliases=(),
+        bucket="filings",
+        freshness_window="1y",
+    )
+    staff_q = GoldQuery(
+        text="nvidia number of employees",
+        field="employees",
+        field_type="numeric_band",
+        value=36000,
+        aliases=(),
+        bucket="finance",
+        freshness_window="1y",
+    )
+    engine = FakeEngine(
+        {
+            income_q.text: (
+                [
+                    _r("https://a.com", "NVIDIA Q1", "net income of about $18.8 billion"),
+                    _r("https://b.com", "Statement", "Net income 18,775 14,881"),
+                ],
+                None,
+            ),
+            staff_q.text: ([_r("https://c.com", "NVIDIA", "a staff of thirty-six thousand")], None),
+        }
+    )
+    llm = FakeJudgeLLM(["yes"])
+    report = await run_answers([income_q, staff_q], {"fake": engine}, judge=llm)
+    e = report["engines"]["fake"]
+    income, staff = e["per_query"]
+    assert len(llm.prompts) == 1
+    assert income["judged"] == 0 and income["det_rank"] == 2 and income["hit_rank"] == 2
+    assert [r["judge_match"] for r in income["results"]] == [None, None]
+    assert staff["judged"] == 1 and staff["det_rank"] is None and staff["hit_rank"] == 1
+    assert e["judge_upgrades"] == 1
+
+
 async def test_judge_error_excludes_unresolved_miss():
     engine = FakeEngine({CEO_Q.text: ([_r("https://a.com", "NVIDIA", "GPU maker")], None)})
     err = {"error_type": "http_error", "error_message": "429"}

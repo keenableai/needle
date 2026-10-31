@@ -3,12 +3,12 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from needle.shared.recall import (
-    answered,
     build_match_rows,
     first_rank,
     group_recall,
     recall_summary,
     run_known_item_eval,
+    scored_queries,
 )
 from needle.shared.search import (
     DEFAULT_SNIPPET_CHARS,
@@ -144,7 +144,7 @@ def ids_match(gold: GoldLegal, found: LegalIds, *, result_text: str) -> bool:
 
 
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
-    scored = answered(per_query)
+    scored = scored_queries(per_query)
     return {
         **recall_summary(per_query, latency),
         "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),

@@ -5,6 +5,7 @@ from datetime import UTC, date, datetime, timedelta
 import httpx
 import pytest
 
+from needle.shared.retry import RATE_LIMIT_ATTEMPTS, RETRY_ATTEMPTS
 from needle.shared.search import (
     BraveClient,
     BraveLlmContextClient,
@@ -1587,16 +1588,56 @@ async def test_retries_429_then_succeeds(monkeypatch):
     assert len(c.latencies_ms) == 1
 
 
-async def test_retries_exhausted_returns_last_error(monkeypatch):
-    monkeypatch.setattr(search_base, "RETRY_BASE_S", 0.0)
-    http = _SeqHttp([_Resp(429), _Resp(429), _Resp(429)])
+@pytest.mark.parametrize(
+    ("status", "attempts"), [(429, RATE_LIMIT_ATTEMPTS), (503, RETRY_ATTEMPTS)]
+)
+async def test_retries_exhausted_returns_last_error(monkeypatch, status, attempts):
+    http = _SeqHttp([_Resp(status)] * RATE_LIMIT_ATTEMPTS)
     c = KeenableClient()
+    c.retry_base_s = 0.0
     monkeypatch.setattr(c, "_http", lambda: http)
     results, err = await c.search("q")
     assert results is None
-    assert err == {"error_type": "http_error", "error_message": "429: boom"}
-    assert http.requests == 3
+    assert err == {"error_type": "http_error", "error_message": f"{status}: boom"}
+    assert http.requests == attempts
     assert c.latencies_ms == []
+
+
+async def test_min_interval_spaces_requests(monkeypatch):
+    sent = []
+
+    class _TimedHttp:
+        async def request(self, method, url, **kwargs):
+            sent.append(asyncio.get_running_loop().time())
+            return _Resp(200, {"results": []})
+
+    c = KeenableClient()
+    c.set_max_concurrency(3)
+    c.min_interval_s = 0.05
+    monkeypatch.setattr(c, "_http", lambda: _TimedHttp())
+    await asyncio.gather(*[c.search(q) for q in "abc"])
+    gaps = [b - a for a, b in zip(sent, sent[1:], strict=False)]
+    assert len(sent) == 3 and min(gaps) >= 0.045
+
+
+async def test_backoff_holds_the_concurrency_slot(monkeypatch):
+    http = _SeqHttp([_Resp(429), _Resp(200, {"results": []}), _Resp(200, {"results": []})])
+    order = []
+    c = KeenableClient()
+    c.retry_base_s = 0.01
+    monkeypatch.setattr(c, "_http", lambda: http)
+
+    async def run(q):
+        await c.search(q)
+        order.append(q)
+
+    await asyncio.gather(run("a"), run("b"))
+    assert order == ["a", "b"]
+    assert http.requests == 3
+
+
+def test_tinyfish_stays_under_its_rate_limit():
+    assert TinyFishClient.min_interval_s >= 60 / 30
 
 
 async def test_non_retryable_status_fails_fast(monkeypatch):
