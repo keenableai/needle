@@ -160,22 +160,38 @@ async def run_known_item_eval(
         for out, search in zip(entries, searches, strict=True):
             out["queried_at"] = search.queried_at
 
-    engines_out: dict[str, dict[str, Any]] = {}
-    for idx, name in enumerate(engine_names):
-        per_query = [entries[idx] for entries in query_outs]
-        engines_out[name] = summary(per_query, latency_stats(engines[name].latencies_ms))
-    if engine_names:
-        engines_out[ULTIMATE] = summary(ultimate_fn(query_outs, cap=num_results), None)
-        engines_out[ULTIMATE]["mrr_at_k"] = None
-        for pq in engines_out[ULTIMATE]["per_query"]:
-            pq["queried_at"] = None
-
-    classify_misses(query_outs, engine_names, engines_out)
-
     return {
         "num_queries": len(queries),
         "num_results": num_results,
         "snippet_chars": snippet_chars,
         **(extra or {}),
-        "engines": engines_out,
+        "engines": summarize_engines(
+            query_outs,
+            {name: latency_stats(engines[name].latencies_ms) for name in engine_names},
+            summary,
+            ultimate_fn,
+            cap=num_results,
+        ),
     }
+
+
+def summarize_engines(
+    query_outs: list[list[dict]],
+    latencies: dict[str, dict | None],
+    summary: Callable[[list[dict], dict | None], dict[str, Any]],
+    ultimate_fn: Callable[..., list[dict]],
+    *,
+    cap: int,
+) -> dict[str, dict[str, Any]]:
+    engine_names = list(latencies)
+    engines_out: dict[str, dict[str, Any]] = {}
+    for idx, name in enumerate(engine_names):
+        per_query = [entries[idx] for entries in query_outs]
+        engines_out[name] = summary(per_query, latencies[name])
+    if engine_names:
+        engines_out[ULTIMATE] = summary(ultimate_fn(query_outs, cap=cap), None)
+        engines_out[ULTIMATE]["mrr_at_k"] = None
+        for pq in engines_out[ULTIMATE]["per_query"]:
+            pq["queried_at"] = None
+    classify_misses(query_outs, engine_names, engines_out)
+    return engines_out
