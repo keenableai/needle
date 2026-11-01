@@ -1,7 +1,7 @@
 {
  "engines": {
   "keenable": {
-   "table": 0.7295513957096991,
+   "table": 0.7315618385358376,
    "prospective": 0.7134503517901016,
    "rank_table": 1,
    "rank_prospective": 2,
@@ -9,7 +9,7 @@
    "requests": 1224
   },
   "exa": {
-   "table": 0.6839103167227393,
+   "table": 0.6846049796885835,
    "prospective": 0.6371115054486844,
    "rank_table": 2,
    "rank_prospective": 4,
@@ -17,7 +17,7 @@
    "requests": 1224
   },
   "perplexity": {
-   "table": 0.6658711815240174,
+   "table": 0.6689967688017532,
    "prospective": 0.7238599701239337,
    "rank_table": 3,
    "rank_prospective": 1,
@@ -25,7 +25,7 @@
    "requests": 1224
   },
   "parallel": {
-   "table": 0.6511758216394319,
+   "table": 0.648680572436059,
    "prospective": 0.6578883452133887,
    "rank_table": 4,
    "rank_prospective": 3,
@@ -33,7 +33,7 @@
    "requests": 1224
   },
   "brave-llmcontext": {
-   "table": 0.6418436957017227,
+   "table": 0.6460255422017384,
    "prospective": 0.6174965418132606,
    "rank_table": 5,
    "rank_prospective": 5,
@@ -41,31 +41,31 @@
    "requests": 1224
   },
   "linkup": {
-   "table": 0.5713503824248013,
+   "table": 0.5757800746767822,
    "prospective": 0.5753526872073573,
    "rank_table": 6,
    "rank_prospective": 7,
    "errors": 0,
    "requests": 1224
   },
-  "context": {
-   "table": 0.5703796311898436,
-   "prospective": 0.5198084095254865,
-   "rank_table": 7,
-   "rank_prospective": 11,
-   "errors": 0,
-   "requests": 1224
-  },
   "brave": {
-   "table": 0.5701706386033993,
+   "table": 0.5734457943579162,
    "prospective": 0.559078133205444,
-   "rank_table": 8,
+   "rank_table": 7,
    "rank_prospective": 9,
    "errors": 0,
    "requests": 1224
   },
+  "context": {
+   "table": 0.5707256301479259,
+   "prospective": 0.5198084095254865,
+   "rank_table": 8,
+   "rank_prospective": 11,
+   "errors": 0,
+   "requests": 1224
+  },
   "deepseek": {
-   "table": 0.5646531354426705,
+   "table": 0.5685247090018553,
    "prospective": 0.5839326004697443,
    "rank_table": 9,
    "rank_prospective": 6,
@@ -73,7 +73,7 @@
    "requests": 1224
   },
   "you": {
-   "table": 0.5549727048582154,
+   "table": 0.5580631412760251,
    "prospective": 0.5601129659887943,
    "rank_table": 10,
    "rank_prospective": 8,
@@ -81,15 +81,15 @@
    "requests": 1224
   },
   "chatgpt-search": {
-   "table": 0.5213566265979056,
-   "prospective": 0.5319595249683495,
+   "table": 0.5145934395671152,
+   "prospective": 0.5329589942327935,
    "rank_table": 11,
    "rank_prospective": 10,
    "errors": 67,
    "requests": 1224
   },
   "firecrawl": {
-   "table": 0.5035228465812601,
+   "table": 0.5068808200104599,
    "prospective": 0.47680279063414843,
    "rank_table": 12,
    "rank_prospective": 13,
@@ -97,7 +97,7 @@
    "requests": 1224
   },
   "octen": {
-   "table": 0.4991717730458472,
+   "table": 0.502343310773161,
    "prospective": 0.4967605050400451,
    "rank_table": 13,
    "rank_prospective": 12,
@@ -105,47 +105,47 @@
    "requests": 1224
   },
   "google": {
-   "table": 0.47461355805673155,
+   "table": 0.47729394861143487,
    "prospective": 0.43003611890830606,
    "rank_table": 14,
    "rank_prospective": 15,
    "errors": 0,
    "requests": 1224
   },
-  "jina": {
-   "table": 0.43556809714724043,
-   "prospective": 0.369759119361626,
+  "tinyfish": {
+   "table": 0.44499164158919935,
+   "prospective": 0.37396225451305465,
    "rank_table": 15,
    "rank_prospective": 16,
-   "errors": 37,
-   "requests": 1224
-  },
-  "tavily": {
-   "table": 0.4228182077690768,
-   "prospective": 0.3536736135659916,
-   "rank_table": 16,
-   "rank_prospective": 17,
-   "errors": 1,
+   "errors": 291,
    "requests": 1224
   },
   "bing": {
-   "table": 0.4212866777110106,
+   "table": 0.44137233038403895,
    "prospective": 0.457973260062895,
-   "rank_table": 17,
+   "rank_table": 16,
    "rank_prospective": 14,
    "errors": 0,
    "requests": 1224
   },
-  "tinyfish": {
-   "table": 0.37598246189702217,
-   "prospective": 0.32589145805287767,
+  "jina": {
+   "table": 0.4378160542503893,
+   "prospective": 0.36986662618143773,
+   "rank_table": 17,
+   "rank_prospective": 17,
+   "errors": 37,
+   "requests": 1224
+  },
+  "tavily": {
+   "table": 0.4258644661281877,
+   "prospective": 0.3536736135659916,
    "rank_table": 18,
    "rank_prospective": 18,
-   "errors": 291,
+   "errors": 1,
    "requests": 1224
   },
   "ceramic": {
-   "table": 0.14356550065989207,
+   "table": 0.1471400832524029,
    "prospective": 0.1387495508310039,
    "rank_table": 19,
    "rank_prospective": 19,
@@ -153,13 +153,13 @@
    "requests": 1224
   }
  },
- "tau_b_overall": 0.8362573099415205,
+ "tau_b_overall": 0.8596491228070176,
  "bench_tau": {
-  "scholar": 0.7426900584795322,
-  "news": 0.847953216374269,
-  "finance": 0.7894736842105263,
-  "agentic_rare": 0.8596491228070176,
-  "legal": 0.7309941520467836
+  "scholar": 0.7076023391812866,
+  "news": 0.8245614035087719,
+  "finance": 0.8011695906432749,
+  "agentic_rare": 0.8947368421052632,
+  "legal": 0.7426900584795322
  },
  "goto": {
   "google": [

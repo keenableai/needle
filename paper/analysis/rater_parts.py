@@ -3,6 +3,8 @@ import os
 import random
 import sys
 
+from needle.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult, capped_snippet
+
 items_path, pages_path, out_dir, n_parts = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])
 items = json.load(open(items_path))
 pages = json.load(open(pages_path))
@@ -16,7 +18,7 @@ for it in items:
         "query": it["query"],
         "url": it["url"],
         "title": it["title"],
-        "snippet": (it["snippet"] or "")[:2000],
+        "snippet": capped_snippet(SearchResult(url=it["url"], snippet=it["snippet"]), DEFAULT_SNIPPET_CHARS),
         "page_excerpt": (page.get("content") or "")[:3000],
     })
 

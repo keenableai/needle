@@ -2,34 +2,27 @@ import glob
 import json
 import os
 import sys
-from pathlib import Path
 from urllib.parse import urlsplit
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import BENCHES, FAMILIES, NAMES, REPORT_FILES, ULT, classify, load, overall, shares  # noqa: E402
-from strict_v2 import process as finance_process  # noqa: E402
+from common import BENCHES, FAMILIES, NAMES, ULT, load, overall, shares  # noqa: E402
 
 site, hist_path, pairs_json, out_rows, out_json = sys.argv[1:6]
-REPORTS = {"news": ("ndcg.json", "mean_ndcg", "ndcg"), "agentic_rare": ("agentic_rare.json", "mean_ndcg", "ndcg"), "scholar": ("scholar.json", "recall_at_k", "recall")}
+REPORTS = {"news": "ndcg.json", "agentic_rare": "agentic_rare.json", "scholar": "scholar.json"}
 
 
 def ts_of(name):
     return name[:13] + ":" + name[13:15] + "Z"
 
 
-rows = []
 goto = {}
-for bench, (report, key, metric) in REPORTS.items():
+for bench, report in REPORTS.items():
     for d in sorted(glob.glob(os.path.join(site, bench, "*"))):
         p = os.path.join(d, report)
         if not os.path.exists(p):
             continue
         rep = json.load(open(p))
-        nq = rep["num_queries"]
         for eng, e in rep["engines"].items():
-            lat = e.get("latency") or {}
-            rows.append({"ts": ts_of(os.path.basename(d)), "bench": bench, "engine": eng, metric: e.get(key), "num_scored": e.get("num_scored", nq),
-                         "num_queries": nq, "search_errors": e.get("search_errors", 0), "p50_ms": lat.get("p50_ms"), "p95_ms": lat.get("p95_ms")})
             pq_path = os.path.join(d, e.get("per_query_path", ""))
             if eng in ("google", "jina") and os.path.isfile(pq_path):
                 n = g = 0
@@ -40,35 +33,10 @@ for bench, (report, key, metric) in REPORTS.items():
                 goto.setdefault(eng, [0, 0])
                 goto[eng][0] += g
                 goto[eng][1] += n
-for d in sorted(glob.glob(os.path.join(site, "legal", "*"))):
-    rep_p = os.path.join(d, "legal.json")
-    if not os.path.exists(rep_p):
-        continue
-    rep = json.load(open(rep_p))
-    nq = rep["num_queries"]
-    any_hit = {}
-    for eng, e in rep["engines"].items():
-        p = os.path.join(d, e.get("per_query_path", ""))
-        if eng == ULT or not os.path.isfile(p):
-            continue
-        hits = errs = n = 0
-        for pq in json.load(open(p))["per_query"]:
-            n += 1
-            if pq.get("search_error") is not None:
-                errs += 1
-                continue
-            hit = pq.get("hit_rank") is not None
-            hits += hit
-            any_hit[pq["query"]] = any_hit.get(pq["query"], False) or hit
-        lat = e.get("latency") or {}
-        rows.append({"ts": ts_of(os.path.basename(d)), "bench": "legal", "engine": eng, "recall": hits / n if n else None, "num_scored": n, "num_queries": n, "search_errors": errs, "p50_ms": lat.get("p50_ms"), "p95_ms": lat.get("p95_ms")})
-    rows.append({"ts": ts_of(os.path.basename(d)), "bench": "legal", "engine": ULT, "recall": sum(any_hit.values()) / nq, "num_scored": nq, "num_queries": nq, "search_errors": 0, "p50_ms": None, "p95_ms": None})
-for d in sorted(glob.glob(os.path.join(site, "finance", "*"))):
-    if os.path.exists(os.path.join(d, "recall.json")) and os.path.exists(os.path.join(d, "gold.jsonl")):
-        frows, _ = finance_process(d)
-        rows.extend(frows)
-rows, unsplit = classify(rows, {(b, ts_of(os.path.basename(d))): d for b in REPORT_FILES for d in glob.glob(os.path.join(site, b, "*"))})
-assert not unsplit, unsplit
+hist = load(hist_path)
+post = {(b, ts_of(os.path.basename(d))) for b, _ in BENCHES for d in glob.glob(os.path.join(site, b, "*"))}
+rows = [r for r in hist if (r["bench"], r["ts"]) in post]
+assert {(r["bench"], r["ts"]) for r in rows} == post, post - {(r["bench"], r["ts"]) for r in rows}
 with open(out_rows, "w") as f:
     for r in rows:
         f.write(json.dumps(r) + "\n")
@@ -76,7 +44,7 @@ print("rows", len(rows), "runs per bench", {b: len({r["ts"] for r in rows if r["
 print("goto share", {e: round(v[0] / v[1], 3) for e, v in goto.items() if v[1]})
 
 pro = load(out_rows)
-table = [r for r in load(hist_path) if r["ts"] in set(json.load(open(pairs_json))["runs"])]
+table = [r for r in hist if r["ts"] in set(json.load(open(pairs_json))["runs"])]
 keep = [e for e in sorted({r["engine"] for r in table} - {ULT}) if e not in FAMILIES or e == "brave-llmcontext"]
 sh_t, ult_t = shares(table, keep)
 sh_p, ult_p = shares(pro, keep)

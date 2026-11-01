@@ -1,11 +1,15 @@
 {
  "news": {
-  "queries": 5101,
-  "empty_ceiling": 69,
-  "share": 0.013526759458929621,
+  "queries": 4581,
+  "empty_ceiling": 65,
+  "share": 0.014189041693953285,
   "zero_variant": {
    "tau_b": 1.0,
    "max_moves": [
+    [
+     "claude-search",
+     -0.0
+    ],
     [
      "kagi",
      0.0
@@ -13,44 +17,49 @@
     [
      "chatgpt-search",
      -0.0
-    ],
-    [
-     "claude-search",
-     -0.0
     ]
    ],
    "order_changes": []
   }
  },
  "agentic_rare": {
-  "queries": 1300,
-  "empty_ceiling": 176,
-  "share": 0.13538461538461538,
+  "queries": 1200,
+  "empty_ceiling": 158,
+  "share": 0.13166666666666665,
   "quoted": {
-   "queries": 551,
-   "empty_ceiling": 149
+   "queries": 504,
+   "empty_ceiling": 134
   },
   "unquoted": {
-   "queries": 749,
-   "empty_ceiling": 27
+   "queries": 696,
+   "empty_ceiling": 24
   },
   "zero_variant": {
-   "tau_b": 1.0,
+   "tau_b": 0.9904761904761905,
    "max_moves": [
     [
      "kagi",
-     0.003
-    ],
-    [
-     "chatgpt-search",
-     -0.001
+     0.002
     ],
     [
      "claude-search",
+     0.001
+    ],
+    [
+     "chatgpt-search",
      -0.0
     ]
    ],
-   "order_changes": []
+   "order_changes": [
+    [
+     "octen",
+     "claude-search"
+    ],
+    [
+     "claude-search",
+     "octen"
+    ]
+   ]
   }
  }
 }

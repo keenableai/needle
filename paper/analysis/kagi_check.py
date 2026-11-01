@@ -5,7 +5,7 @@ import os
 import sys
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAMILIES, ULT, load, overall, shares, window
+from common import BENCHES, FAMILIES, ULT, load, overall, shares, window
 
 site, hist, pairs_json = sys.argv[1], sys.argv[2], sys.argv[3]
 table_runs = {ts.replace(":", "") for ts in json.load(open(pairs_json))["runs"]}

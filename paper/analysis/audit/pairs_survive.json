@@ -1,20 +1,38 @@
 {
  "counts": {
-  "run_pointwise": 187,
-  "run_bonferroni": 179,
-  "day_pointwise": 186,
-  "day_bonferroni": 178,
+  "run_pointwise": 188,
+  "run_bonferroni": 178,
+  "day_pointwise": 185,
+  "day_bonferroni": 174,
   "matched_pointwise": 189,
-  "matched_bonferroni": 175,
-  "all_three_pointwise": 180,
-  "all_three_bonferroni": 172
+  "matched_bonferroni": 171,
+  "all_three_pointwise": 176,
+  "all_three_bonferroni": 164
  },
  "lost": [
   [
+   "exa",
+   "brave-llmcontext",
+   "",
+   "matched"
+  ],
+  [
+   "parallel",
+   "linkup",
+   "",
+   "matched"
+  ],
+  [
+   "parallel",
+   "brave",
+   "",
+   "matched"
+  ],
+  [
    "linkup",
    "you",
-   "day",
-   ""
+   "",
+   "matched"
   ],
   [
    "context",
@@ -23,31 +41,55 @@
    "matched"
   ],
   [
-   "deepseek",
+   "context",
+   "kagi",
+   "",
+   "matched"
+  ],
+  [
+   "context",
+   "claude-search",
+   "",
+   "matched"
+  ],
+  [
    "chatgpt-search",
-   "",
-   "matched"
-  ],
-  [
-   "firecrawl",
-   "bing",
-   "",
-   "matched"
-  ],
-  [
-   "octen",
-   "google",
-   "",
-   "matched"
-  ],
-  [
-   "octen",
-   "bing",
+   "claude-search",
    "day",
    "matched"
   ],
   [
    "chatgpt-search",
+   "bing",
+   "",
+   "matched"
+  ],
+  [
+   "kagi",
+   "claude-search",
+   "day",
+   "matched"
+  ],
+  [
+   "firecrawl",
+   "claude-search",
+   "day",
+   "matched"
+  ],
+  [
+   "firecrawl",
+   "bing",
+   "day",
+   "matched"
+  ],
+  [
+   "octen",
+   "claude-search",
+   "day",
+   "matched"
+  ],
+  [
+   "google",
    "tinyfish",
    "",
    "matched"

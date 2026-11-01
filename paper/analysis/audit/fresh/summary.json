@@ -1,14 +1,14 @@
 {
  "num_queries": 307,
  "ceiling": 0.996742671009772,
- "table1_ceiling": 0.9931818181818182,
- "tau_b_shares": 0.7925925925925926,
- "mean_abs_dshare": 0.046211323404041924,
+ "table1_ceiling": 0.9925,
+ "tau_b_shares": 0.8074074074074075,
+ "mean_abs_dshare": 0.04703322714536581,
  "engines": {
   "keenable": {
    "recall": 0.9511400651465798,
    "share": 0.9542483660130718,
-   "table_share": 0.9038901601830663,
+   "table_share": 0.9093410664013716,
    "errors": 0,
    "by_type": {
     "money": [
@@ -48,7 +48,7 @@
   "exa": {
    "recall": 0.9543973941368078,
    "share": 0.957516339869281,
-   "table_share": 0.9212814645308925,
+   "table_share": 0.9288148508773786,
    "errors": 0,
    "by_type": {
     "money": [
@@ -88,7 +88,7 @@
   "google": {
    "recall": 0.6677524429967426,
    "share": 0.6699346405228758,
-   "table_share": 0.7398932112890924,
+   "table_share": 0.7433905552145291,
    "errors": 0,
    "by_type": {
     "money": [
@@ -128,7 +128,7 @@
   "bing": {
    "recall": 0.6319218241042345,
    "share": 0.6339869281045751,
-   "table_share": 0.6346300533943554,
+   "table_share": 0.6804830495155487,
    "errors": 0,
    "by_type": {
     "money": [
@@ -168,7 +168,7 @@
   "brave": {
    "recall": 0.7719869706840391,
    "share": 0.7745098039215687,
-   "table_share": 0.7658276125095347,
+   "table_share": 0.7745857645420825,
    "errors": 0,
    "by_type": {
     "money": [
@@ -208,7 +208,7 @@
   "brave-llmcontext": {
    "recall": 0.9413680781758957,
    "share": 0.9444444444444444,
-   "table_share": 0.8527841342486651,
+   "table_share": 0.864713197079361,
    "errors": 0,
    "by_type": {
     "money": [
@@ -248,7 +248,7 @@
   "parallel": {
    "recall": 0.9446254071661238,
    "share": 0.9477124183006536,
-   "table_share": 0.9069412662090007,
+   "table_share": 0.9136534081175567,
    "errors": 0,
    "by_type": {
     "money": [
@@ -288,7 +288,7 @@
   "perplexity": {
    "recall": 0.9381107491856677,
    "share": 0.9411764705882353,
-   "table_share": 0.8916857360793288,
+   "table_share": 0.9015427151447302,
    "errors": 0,
    "by_type": {
     "money": [
@@ -328,7 +328,7 @@
   "tavily": {
    "recall": 0.8762214983713354,
    "share": 0.8790849673202614,
-   "table_share": 0.8268497330282227,
+   "table_share": 0.83398598734204,
    "errors": 0,
    "by_type": {
     "money": [
@@ -366,13 +366,13 @@
    }
   },
   "linkup": {
-   "recall": 0.8697068403908795,
-   "share": 0.8725490196078431,
-   "table_share": 0.794050343249428,
+   "recall": 0.8664495114006515,
+   "share": 0.869281045751634,
+   "table_share": 0.8026443048602918,
    "errors": 0,
    "by_type": {
     "money": [
-     113,
+     112,
      146
     ],
     "country": [
@@ -408,7 +408,7 @@
   "tinyfish": {
    "recall": 0.6188925081433225,
    "share": 0.6209150326797386,
-   "table_share": 0.7330282227307399,
+   "table_share": 0.7357703786804394,
    "errors": 0,
    "by_type": {
     "money": [
@@ -448,7 +448,7 @@
   "octen": {
    "recall": 0.7817589576547231,
    "share": 0.7843137254901961,
-   "table_share": 0.7200610221205187,
+   "table_share": 0.7351748281603552,
    "errors": 0,
    "by_type": {
     "money": [
@@ -488,7 +488,7 @@
   "ceramic": {
    "recall": 0.4169381107491857,
    "share": 0.41830065359477125,
-   "table_share": 0.4302059496567506,
+   "table_share": 0.44443385581023626,
    "errors": 0,
    "by_type": {
     "money": [
@@ -528,7 +528,7 @@
   "firecrawl": {
    "recall": 0.7817589576547231,
    "share": 0.7843137254901961,
-   "table_share": 0.8184591914569032,
+   "table_share": 0.8258245566581577,
    "errors": 0,
    "by_type": {
     "money": [
@@ -568,7 +568,7 @@
   "jina": {
    "recall": 0.6905537459283387,
    "share": 0.6928104575163399,
-   "table_share": 0.7238749046529368,
+   "table_share": 0.7309891755735585,
    "errors": 2,
    "by_type": {
     "money": [
@@ -608,7 +608,7 @@
   "context": {
    "recall": 0.7296416938110749,
    "share": 0.7320261437908496,
-   "table_share": 0.7833714721586575,
+   "table_share": 0.7880804943722155,
    "errors": 0,
    "by_type": {
     "money": [
@@ -646,13 +646,13 @@
    }
   },
   "chatgpt-search": {
-   "recall": 0.7947882736156352,
-   "share": 0.7973856209150327,
-   "table_share": 0.7996186117467582,
+   "recall": 0.7980456026058632,
+   "share": 0.8006535947712419,
+   "table_share": 0.8155505917019154,
    "errors": 1,
    "by_type": {
     "money": [
-     102,
+     103,
      146
     ],
     "country": [
@@ -687,9 +687,9 @@
   }
  },
  "pool": {
-  "exact": 1237,
+  "exact": 1239,
   "other": 2526,
-  "reading": 339
+  "reading": 337
  },
- "sample": 489
+ "sample": 487
 }

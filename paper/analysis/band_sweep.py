@@ -1,13 +1,16 @@
+import functools
 import json
 import random
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
+from unittest.mock import patch
 
 src, hf_dir, out_json, sample_json = sys.argv[1], Path(sys.argv[2]), sys.argv[3], sys.argv[4]
 sys.path.insert(0, src)
-from needle.finance.canon import _match_amount, gold_in_text
-from needle.finance.models import FIELD_SPECS, cues_for
+from needle.finance import canon
+from needle.finance.models import cues_for
+from needle.shared.search import SearchResult, titled_snippet
 
 ENGINES = [
     "keenable", "exa", "brave-llmcontext", "perplexity", "parallel", "brave", "you", "linkup",
@@ -17,36 +20,16 @@ ENGINES = [
 MONEY_TOLS = [0.0, 0.001, 0.005, 0.01, 0.02, 0.05, 0.10]
 HEAD_TOLS = [0.0, 0.01, 0.05, 0.15, 0.25, 0.50]
 K = 5
+canon.text_amounts = functools.lru_cache(maxsize=None)(canon.text_amounts)
 
 
 def text_of(r):
-    return " ".join(p for p in (r.get("title"), (r.get("snippet") or "")[:2000]) if p)
+    return titled_snippet(SearchResult(url=r["url"], title=r.get("title"), snippet=r.get("snippet")), 0)
 
 
-_cache = {}
-
-
-def amount_match(value, aliases, text, tol, cues):
-    from needle.finance.canon import cached_squad_norm, parse_amount, phrase_in, squad_norm, text_amounts
-    key = (text, cues)
-    if key not in _cache:
-        norm = squad_norm(text)
-        cue_ok = not cues or any(phrase_in(cached_squad_norm(c), norm) for c in cues)
-        _cache[key] = (cue_ok, text_amounts(text, skip_year_like=True) if cue_ok else [])
-    cue_ok, amounts = _cache[key]
-    if not cue_ok:
-        return False
-    for form in [f for f in [value, *aliases] if f not in (None, "")]:
-        gold = parse_amount(form)
-        if gold is None:
-            continue
-        for amount in amounts:
-            if gold == 0:
-                if abs(amount) < 1:
-                    return True
-            elif abs(amount - gold) / abs(gold) <= tol:
-                return True
-    return False
+def amount_match(ft, value, aliases, text, tol, cues):
+    with patch.multiple(canon, MONEY_REL_TOL=tol, HEADCOUNT_REL_TOL=tol, _match_table_figure=lambda *a, **k: False):
+        return canon.gold_in_text(ft, value, aliases, text=text, cues=cues)
 
 
 gold = {}
@@ -104,13 +87,13 @@ for run in runs:
                 default = 0.02 if ft == "money" else 0.15
                 tight = 0.001 if ft == "money" else 0.01
                 for t in tols:
-                    hit = any(amount_match(g["value"], aliases, text_of(r), t, cues) for r in results)
+                    hit = any(amount_match(ft, g["value"], aliases, text_of(r), t, cues) for r in results)
                     sweep[ft][t][eng][0] += hit
                     sweep[ft][t][eng][1] += 1
                 for rank, r in enumerate(results):
                     if not r["det_match"]:
                         continue
-                    tight_hit = amount_match(g["value"], aliases, text_of(r), tight, cues)
+                    tight_hit = amount_match(ft, g["value"], aliases, text_of(r), tight, cues)
                     kind = f"{ft}_exact" if tight_hit else f"{ft}_banded"
                     kinds[kind] += 1
                     pool[kind].append((run.name, eng, pq["query"], g, rank, r))

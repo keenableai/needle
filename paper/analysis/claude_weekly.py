@@ -4,23 +4,20 @@ import sys
 from datetime import datetime
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAILURE_EXCLUDED_SINCE, FMT, load, overall, run_dirs, scored_failures, shares
+from common import BENCHES, FMT, account_errors, load, overall, shares
 
 E = "claude-search"
 LOW = 0.1
-hist, site, out = sys.argv[1], sys.argv[2], sys.argv[3]
+CUTOFF = datetime(2026, 10, 26, 22, 19)
+hist, out = sys.argv[1], sys.argv[2]
 rows = load(hist)
-ACCOUNT_SIDE_FAILURES.discard(E)
 zeroed = load(hist)
-ACCOUNT_SIDE_FAILURES.add(E)
-runs = run_dirs(site)
 for r in zeroed:
-    if r["engine"] == E and r.get("account_errors"):
-        acc = scored_failures(runs[(r["bench"], r["ts"])], r["bench"], E)[0]
+    acc = account_errors(r) if r["engine"] == E else 0
+    if acc:
         m = dict(BENCHES)[r["bench"]]
-        if acc:
-            r[m] = (r[m] or 0) * r["num_scored"] / (r["num_scored"] + acc)
-            r["num_scored"] += acc
+        r[m] = (r[m] or 0) * r["num_scored"] / (r["num_scored"] + acc)
+        r["num_scored"] += acc
 
 
 def weeks(rs):
@@ -63,7 +60,7 @@ for k in keys:
 
 raw = [json.loads(l) for l in open(hist) if l.strip()]
 late = sorted((r["ts"], r["bench"], r["num_queries"], r["num_scored"], r["search_errors"]) for r in raw
-              if r["engine"] == E and r.get("search_errors") and datetime.strptime(r["ts"], FMT) >= FAILURE_EXCLUDED_SINCE)
+              if r["engine"] == E and r.get("search_errors") and datetime.strptime(r["ts"], FMT) >= CUTOFF)
 res["rows_after_cutoff_with_errors"] = [dict(zip(("ts", "bench", "num_queries", "num_scored_raw", "search_errors"), t))
                                          for t in late]
 

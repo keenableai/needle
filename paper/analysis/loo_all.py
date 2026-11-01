@@ -1,31 +1,25 @@
 import collections
 import glob
 import json
-import math
 import os
 import sys
 
-from needle.shared.metrics import normalize_url
+from needle.shared.metrics import dcg_at_k, normalize_url
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import account_side  # noqa: E402
+from needle.shared.search.errors import account_side  # noqa: E402
+from strict_v2 import finance_run  # noqa: E402
 
 site, out_path = sys.argv[1], sys.argv[2]
 table_runs = {ts.replace(":", "") for ts in json.load(open(sys.argv[3]))["runs"]} if len(sys.argv) > 3 else None
 LO, HI = "2026-10-17", "2026-10-30"
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
-GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
-K = 5
 BENCHES = {"news": ("hfnews", "ndcg.json", "judged"), "agentic_rare": ("hfrare", "agentic_rare.json", "judged"),
            "scholar": ("hfscholar", "scholar.json", "hit"), "finance": ("hf", "recall.json", "hit"), "legal": ("hflegal", "legal.json", "hit")}
 
 
-def dcg(ratings):
-    return sum(GAIN.get(r, 0.0) / math.log2(i + 2) for i, r in enumerate(ratings[:K]))
-
-
 def idcg(pool):
-    return dcg(sorted(pool.values(), reverse=True)[:K])
+    return dcg_at_k(sorted(pool.values(), reverse=True))
 
 
 result = {}
@@ -50,13 +44,15 @@ for bench, (folder, report, kind) in BENCHES.items():
                     pqs[e] = json.load(open(p))["per_query"]
         if len(pqs) < 19:
             continue
+        if bench == "finance":
+            pqs = {e: v["per_query"] for e, v in finance_run(d)[0]["engines"].items() if e in pqs}
         nruns += 1
         n = len(next(iter(pqs.values())))
         for qi in range(n):
             contrib = {}
             for e, pq in pqs.items():
                 r = pq[qi]
-                if r.get("search_error") and account_side(r["search_error"]):
+                if (r.get("search_error") and account_side(r["search_error"])) or (bench == "finance" and r["score"] is None):
                     continue
                 if kind == "judged":
                     best = {}
@@ -65,7 +61,7 @@ for bench, (folder, report, kind) in BENCHES.items():
                             continue
                         key = normalize_url(x["url"])
                         best[key] = max(best.get(key, 0), x["rating"])
-                    contrib[e] = (best, dcg(r.get("penalized_ratings") or []))
+                    contrib[e] = (best, dcg_at_k(r.get("penalized_ratings") or []))
                 else:
                     contrib[e] = (r.get("hit_rank") is not None, None)
             if not contrib:

@@ -4,6 +4,8 @@ import os
 import random
 import sys
 
+from needle.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult, capped_snippet
+
 site, pairs_json, out_dir = sys.argv[1], sys.argv[2], sys.argv[3]
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
 table_runs = {ts.replace(":", "") for ts in json.load(open(pairs_json))["runs"]}
@@ -42,7 +44,7 @@ for bench, folder, report in (("news", "hfnews", "ndcg.json"), ("agentic_rare", 
             for r in (pqs[e][qi].get("results") or [])[:5]:
                 u = r["url"]
                 if u not in seen:
-                    seen[u] = {"id": len(items) + len(seen), "today": today, "query": q, "url": u, "title": r.get("title") or "", "snippet": (r.get("snippet") or "")[:2000],
+                    seen[u] = {"id": len(items) + len(seen), "today": today, "query": q, "url": u, "title": r.get("title") or "", "snippet": capped_snippet(SearchResult(url=r["url"], snippet=r.get("snippet")), DEFAULT_SNIPPET_CHARS),
                                "judge_rating": r.get("rating"), "bench": bench}
                 urls.append(u)
             per_engine[e] = urls

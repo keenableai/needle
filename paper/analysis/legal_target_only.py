@@ -4,11 +4,10 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import account_side  # noqa: E402
+from needle.shared.search.errors import account_side
 
 site, here = sys.argv[1], os.path.dirname(os.path.abspath(__file__))
-LO, HI = "2026-10-17", "2026-10-30"
+RUNS = set(json.load(open(os.path.join(here, "audit", "adjacent_pairs.json")))["runs"])
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
 labels = {x["id"]: x["label"] for x in json.load(open(os.path.join(here, "audit", "caselaw_identity", "labels.json")))}
 sample = json.load(open(os.path.join(here, "audit", "caselaw_identity", "sample.json")))
@@ -26,7 +25,7 @@ wh = (p + z * z / (2 * n) + z * ((p * (1 - p) + z * z / (4 * n)) / n) ** 0.5) / 
 hits = collections.defaultdict(lambda: {"caselaw": [0, 0], "code": [0, 0]})
 for d in sorted(glob.glob(os.path.join(site, "hflegal", "*"))):
     name = os.path.basename(d)
-    if not (LO <= name[:10] < HI) or not os.path.exists(os.path.join(d, "legal.json")):
+    if name[:13] + ":" + name[13:15] + "Z" not in RUNS or not os.path.exists(os.path.join(d, "legal.json")):
         continue
     rep = json.load(open(os.path.join(d, "legal.json")))
     for e in KEEP:

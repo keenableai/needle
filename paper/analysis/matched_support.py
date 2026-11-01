@@ -5,10 +5,13 @@ import os
 import random
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from needle.shared.search.errors import account_side  # noqa: E402
+from strict_v2 import finance_run  # noqa: E402
+
 site, out_json = sys.argv[1], sys.argv[2]
 LO, HI = "2026-10-17", "2026-10-30"
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
-ACCOUNT = {"perplexity", "exa", "kagi", "parallel", "claude-search"}
 BENCHES = {
     "scholar": ("hfscholar", "scholar.json", "hit"),
     "news": ("hfnews", "ndcg.json", "ndcg"),
@@ -65,14 +68,16 @@ for bench, (folder, report, kind) in BENCHES.items():
         present = [e for e in KEEP if e in pqs]
         if len(present) < 20 or "ultimate" not in pqs:
             continue
+        if bench == "finance":
+            pqs = {e: v["per_query"] for e, v in finance_run(d)[0]["engines"].items() if e in pqs}
         n_runs += 1
         for qi in range(len(pqs["ultimate"])):
-            acct_fail = any(pqs[e][qi].get("search_error") is not None for e in present if e in ACCOUNT)
+            acct_fail = any(pqs[e][qi].get("search_error") is not None and account_side(pqs[e][qi]["search_error"]) for e in present)
             vals = {}
             for e in present:
                 pq = pqs[e][qi]
                 failed = pq.get("search_error") is not None
-                vals[e] = None if (failed and e in ACCOUNT) else (0.0 if failed else value(pq, kind))
+                vals[e] = pq["score"] if bench == "finance" else None if (failed and account_side(pq["search_error"])) else (0.0 if failed else value(pq, kind))
             rows.append({"u": value(pqs["ultimate"][qi], kind), "vals": vals, "acct_fail": acct_fail})
     per_bench[bench] = rows
     retained[bench] = {"runs": n_runs, "queries": len(rows), "matched_queries": sum(1 for r in rows if not r["acct_fail"])}

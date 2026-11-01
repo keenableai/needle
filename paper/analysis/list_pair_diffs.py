@@ -1,15 +1,13 @@
 import collections
 import glob
 import json
-import math
 import random
 import sys
 
-from needle.shared.metrics import normalize_url
+from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
 L, out_path = sys.argv[1], sys.argv[2]
 rng = random.Random(21)
-GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
 items = {it["id"]: it for it in json.load(open(f"{L}/items_key.json"))}
 lists = json.load(open(f"{L}/lists.json"))
 labels = {}
@@ -19,14 +17,10 @@ for p in glob.glob(sys.argv[3] if len(sys.argv) > 3 else f"{L}/labels_L_part*.js
 by_url = {(it["query"], it["url"]): it["id"] for it in items.values()}
 
 
-def dcg(gs):
-    return sum(GAIN.get(g, 0.0) / math.log2(i + 2) for i, g in enumerate(gs[:5]))
-
-
 def grades(lst, which):
     per, pool = {}, {}
     for e, urls in lst["engines"].items():
-        gs, seen = [], set()
+        gs = []
         for u in urls:
             i = by_url.get((lst["query"], u))
             g = 0
@@ -34,10 +28,9 @@ def grades(lst, which):
                 g = labels.get(i, 0) if which == "rater" else int(items[i].get("judge_rating") or 0)
             k = normalize_url(u)
             pool[k] = max(pool.get(k, 0), g)
-            gs.append(0 if k in seen else g)
-            seen.add(k)
-        per[e] = dcg(gs)
-    ideal = dcg(sorted(pool.values(), reverse=True))
+            gs.append(g)
+        per[e] = dcg_at_k(apply_redundancy_penalties(urls, gs, query_text=lst["query"]))
+    ideal = dcg_at_k(sorted(pool.values(), reverse=True))
     return {e: v / ideal for e, v in per.items()} if ideal > 0 else None
 
 

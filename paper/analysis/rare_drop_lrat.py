@@ -12,12 +12,6 @@ runs = json.load(open(pairs_json))["runs"]
 table_runs = {ts.replace(":", "") for v in (runs.values() if isinstance(runs, dict) else [runs]) for ts in v}
 t = pq.read_table(hf_hub_download("keenable-ai/needle-results", "agentic/rare_entity.parquet", repo_type="dataset"))
 source = dict(zip(t.column("query_text").to_pylist(), t.column("source").to_pylist()))
-GAIN = {4: 1.0, 3: 0.667, 2: 0.117}
-import math
-
-
-def dcg(rs):
-    return sum(GAIN.get(r, 0.0) / math.log2(i + 2) for i, r in enumerate(rs[:5]))
 
 
 tot = collections.defaultdict(lambda: [0.0, 0])

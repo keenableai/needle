@@ -3,8 +3,8 @@ import random
 import sys
 from pathlib import Path
 
-from needle.finance.canon import cached_squad_norm, parse_amount, phrase_in, squad_norm, text_amounts
-from needle.finance.models import cues_for
+sys.path.insert(0, str(Path(__file__).parent))
+from strict_v2 import gold_queries, gold_rows, prose_hit  # noqa: E402
 
 hf_dir, sample_json, out_json, n_new = Path(sys.argv[1]), sys.argv[2], sys.argv[3], int(sys.argv[4])
 LO, HI = "2026-10-17", "2026-10-30"
@@ -16,37 +16,13 @@ ENGINES = [
 rng = random.Random(23)
 
 
-def text_of(r):
-    return " ".join(p for p in (r.get("title"), (r.get("snippet") or "")[:2000]) if p)
-
-
-def amount_match(value, aliases, text, tol, cues):
-    norm = squad_norm(text)
-    if cues and not any(phrase_in(cached_squad_norm(c), norm) for c in cues):
-        return False
-    amounts = text_amounts(text, skip_year_like=True)
-    for form in [f for f in [value, *aliases] if f not in (None, "")]:
-        gold = parse_amount(form)
-        if gold is None:
-            continue
-        for amount in amounts:
-            if gold == 0:
-                if abs(amount) < 1:
-                    return True
-            elif abs(amount - gold) / abs(gold) <= tol:
-                return True
-    return False
-
-
 old = json.load(open(sample_json))
 seen = {(s["run"], s["engine"], s["query"], s["url"]) for s in old}
 pool = []
 for run in sorted(p for p in hf_dir.iterdir() if p.is_dir() and LO <= p.name[:10] < HI):
-    gold = {}
-    for line in open(run / "gold.jsonl"):
-        if line.strip():
-            g = json.loads(line)
-            gold[g["query_text"]] = g["gold"]
+    rows = gold_rows(run / "gold.jsonl")
+    gold = {g["query_text"]: g["gold"] for g in rows}
+    queries = gold_queries(rows)
     for eng in ENGINES:
         p = run / "recall" / f"{eng}.json"
         if not p.exists():
@@ -57,12 +33,10 @@ for run in sorted(p for p in hf_dir.iterdir() if p.is_dir() and LO <= p.name[:10
             g = gold.get(pq["query"])
             if g is None or g["field_type"] != "money":
                 continue
-            aliases = tuple(str(a) for a in g["aliases"] or [])
-            cues = cues_for(g["field"])
             for rank, r in enumerate(pq["results"][:5]):
                 if not r.get("det_match"):
                     continue
-                if amount_match(g["value"], aliases, text_of(r), 0.001, cues) and (run.name, eng, pq["query"], r["url"]) not in seen:
+                if prose_hit(queries[pq["query"]], r) and (run.name, eng, pq["query"], r["url"]) not in seen:
                     pool.append((run.name, eng, pq["query"], g, rank, r))
 print("exact-stratum pool (window runs, not yet audited):", len(pool))
 sample = []

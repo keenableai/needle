@@ -5,11 +5,12 @@ import sys
 
 from scipy.stats import spearmanr
 
+from needle.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult, capped_snippet
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from common import NAMES, load, shares
 
 hist, site, out_json = sys.argv[1], sys.argv[2], sys.argv[3]
-CAP = 2000
 spec = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "manifest.json")))["results"]["table_results"]
 engines, runs = spec["engines"], set(spec["runs"])
 rows = [r for r in load(hist) if r["ts"] in runs]
@@ -33,7 +34,7 @@ for ts in sorted({r["ts"] for r in rows if r["bench"] == "news"}):
             continue
         engine_runs[e] += 1
         for pq in json.load(open(p))["per_query"]:
-            lengths[e] += [len((r.get("snippet") or "")[:CAP]) for r in pq.get("results") or []]
+            lengths[e] += [len(capped_snippet(SearchResult(url=r["url"], snippet=r.get("snippet")), DEFAULT_SNIPPET_CHARS)) for r in pq.get("results") or []]
 
 med = {e: statistics.median(lengths[e]) for e in engines}
 by_len = sorted(engines, key=lambda e: med[e])

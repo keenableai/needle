@@ -3,7 +3,7 @@ import json
 import sys
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import ACCOUNT_SIDE_FAILURES, BENCHES, FAMILIES, NAMES, ULT, load, overall, shares, window
+from common import BENCHES, FAMILIES, NAMES, ULT, load, overall, shares, window
 
 hist, pairs_json = sys.argv[1], sys.argv[2]
 rows = load(hist)

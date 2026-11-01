@@ -1,25 +1,21 @@
 import json
-import math
 import sys
 from collections import defaultdict
 from pathlib import Path
+from unittest.mock import patch
 
-from needle.shared.metrics import normalize_url
+from needle.shared.metrics import GAIN, dcg_at_k, normalize_url
 
 hf_dir = Path(sys.argv[1])
 K = 5
 GAINS = {
-    "default": {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0},
+    "default": dict(GAIN),
     "linear": {4: 1.0, 3: 0.75, 2: 0.5, 1: 0.25, 0: 0.0},
     "exp2": {4: 1.0, 3: 7 / 15, 2: 3 / 15, 1: 1 / 15, 0: 0.0},
     "binary>=3": {4: 1.0, 3: 1.0, 2: 0.0, 1: 0.0, 0: 0.0},
     "binary=4": {4: 1.0, 3: 0.0, 2: 0.0, 1: 0.0, 0: 0.0},
     "binary>=2": {4: 1.0, 3: 1.0, 2: 1.0, 1: 0.0, 0: 0.0},
 }
-
-
-def dcg(r, g):
-    return sum(g.get(x, 0.0) / math.log2(i + 2) for i, x in enumerate(r[:K]))
 
 
 runs = sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / "ndcg.json").exists())
@@ -51,15 +47,16 @@ print("queries", len(queries))
 
 def scores(g, include_zero):
     acc = defaultdict(list)
-    for pool, ratings in queries:
-        idcg = dcg(pool, g)
-        if idcg <= 0:
-            if include_zero:
-                for name in ratings:
-                    acc[name].append(0.0)
-            continue
-        for name, r in ratings.items():
-            acc[name].append(dcg(r, g) / idcg)
+    with patch.dict(GAIN, g, clear=True):
+        for pool, ratings in queries:
+            idcg = dcg_at_k(pool, k=K)
+            if idcg <= 0:
+                if include_zero:
+                    for name in ratings:
+                        acc[name].append(0.0)
+                continue
+            for name, r in ratings.items():
+                acc[name].append(dcg_at_k(r, k=K) / idcg)
     return {k: sum(v) / len(v) for k, v in acc.items() if len(v) >= 500}
 
 

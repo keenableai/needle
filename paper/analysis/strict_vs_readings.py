@@ -1,13 +1,25 @@
 import json
+import os
 import sys
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
 from common import FAMILIES, NAMES, ULT, load, overall, shares  # noqa: E402
+from strict_v2 import finance_run, prose_hit, rescore  # noqa: E402
+from publish_bench import finance_rows  # noqa: E402
+from needle.shared.recall import first_rank  # noqa: E402
 
-paper_hist, strict_hist, pairs_json, out_path = sys.argv[1:5]
+paper_hist, site, pairs_json, out_path = sys.argv[1:5]
 table_runs = set(json.load(open(pairs_json))["runs"])
 paper = [r for r in load(paper_hist) if r["ts"] in table_runs]
-strict = [r for r in paper if r["bench"] != "finance"] + [r for r in load(strict_hist) if r["ts"] in table_runs and r["bench"] == "finance"]
+strict = [r for r in paper if r["bench"] != "finance"]
+for ts in sorted({r["ts"] for r in paper if r["bench"] == "finance"}):
+    rep, queries = finance_run(os.path.join(site, "hf", ts.replace(":", "")))
+    for e in rep["engines"].values():
+        for pq in e["per_query"]:
+            q = queries[pq["query"]]
+            if q.field_type == "money" and pq["search_error"] is None:
+                pq["hit_rank"] = first_rank([prose_hit(q, r) for r in pq["results"]])
+    strict += finance_rows(rescore(rep, "finance"), ts)
 keep = [e for e in sorted({r["engine"] for r in paper} - {ULT}) if e not in FAMILIES or e == "brave-llmcontext"]
 sp, up = shares(paper, keep)
 ss, us = shares(strict, keep)

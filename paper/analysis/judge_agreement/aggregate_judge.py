@@ -1,10 +1,9 @@
 import json
-import math
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from needle.shared.metrics import normalize_url
+from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
 sample_dir = Path(sys.argv[1])
 MINQ = int(sys.argv[2]) if len(sys.argv) > 2 else 6
@@ -76,13 +75,6 @@ print("confusion (gpt rows, opus cols)")
 for i in range(5):
     print(i, [conf[(i, j)] for j in range(5)])
 
-GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
-
-
-def dcg(r):
-    return sum(GAIN.get(x, 0.0) / math.log2(i + 2) for i, x in enumerate(r[:5]))
-
-
 def engine_scores(rating_of):
     per_engine = defaultdict(list)
     for q in queries:
@@ -91,20 +83,16 @@ def engine_scores(rating_of):
         for name, m in q["engines"].items():
             if any(i not in rating_of for i in m["positions"]):
                 continue
-            seen = set()
-            rs = []
-            for i in m["positions"]:
-                u = normalize_url(key[i]["url"])
-                r = rating_of[i]
-                rs.append(0 if u in seen else r)
-                seen.add(u)
-                pool[u] = max(pool.get(u, 0), r)
-            eng_ratings[name] = rs
-        idcg = dcg(sorted(pool.values(), reverse=True))
+            urls = [key[i]["url"] for i in m["positions"]]
+            rs = [rating_of[i] for i in m["positions"]]
+            for u, r in zip(urls, rs):
+                pool[normalize_url(u)] = max(pool.get(normalize_url(u), 0), r)
+            eng_ratings[name] = apply_redundancy_penalties(urls, rs, query_text=q["query"])
+        idcg = dcg_at_k(sorted(pool.values(), reverse=True))
         if idcg <= 0:
             continue
         for name, rs in eng_ratings.items():
-            per_engine[name].append(dcg(rs) / idcg)
+            per_engine[name].append(dcg_at_k(rs) / idcg)
     return {k: sum(v) / len(v) for k, v in per_engine.items() if len(v) >= MINQ}
 
 

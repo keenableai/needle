@@ -6,8 +6,8 @@ from pathlib import Path
 
 src, hf_dir, table_tex = sys.argv[1], Path(sys.argv[2]), sys.argv[3]
 sys.path.insert(0, src)
-from needle.finance.canon import cached_squad_norm, parse_amount, phrase_in, squad_norm, text_amounts  # noqa: E402
-from needle.finance.models import cues_for  # noqa: E402
+sys.path.insert(0, str(Path(__file__).parent))
+from strict_v2 import gold_queries, gold_rows, prose_hit  # noqa: E402
 
 NAMES = {
     "keenable": "Keenable", "exa": "Exa", "brave-llmcontext": "Brave (LLM ctx)", "perplexity": "Perplexity",
@@ -17,43 +17,12 @@ NAMES = {
     "jina": "Jina", "tavily": "Tavily", "tinyfish": "TinyFish", "ceramic": "Ceramic",
 }
 K = 5
-TIGHT = 0.001
-_cache = {}
-
-
-def text_of(r):
-    return " ".join(p for p in (r.get("title"), (r.get("snippet") or "")[:2000]) if p)
-
-
-def amount_match(value, aliases, text, tol, cues):
-    key = (text, cues)
-    if key not in _cache:
-        norm = squad_norm(text)
-        cue_ok = not cues or any(phrase_in(cached_squad_norm(c), norm) for c in cues)
-        _cache[key] = (cue_ok, text_amounts(text, skip_year_like=True) if cue_ok else [])
-    cue_ok, amounts = _cache[key]
-    if not cue_ok:
-        return False
-    for form in [f for f in [value, *aliases] if f not in (None, "")]:
-        gold = parse_amount(form)
-        if gold is None:
-            continue
-        for amount in amounts:
-            if gold == 0:
-                if abs(amount) < 1:
-                    return True
-            elif abs(amount - gold) / abs(gold) <= tol:
-                return True
-    return False
 
 
 gold = {}
 runs = sorted(p for p in hf_dir.iterdir() if p.is_dir())
 for run in runs:
-    for line in open(run / "gold.jsonl"):
-        if line.strip():
-            g = json.loads(line)
-            gold[g["query_text"]] = g["gold"]
+    gold.update(gold_queries(gold_rows(run / "gold.jsonl")))
 
 cur = defaultdict(lambda: [0, 0])
 strict = defaultdict(lambda: [0, 0])
@@ -72,9 +41,8 @@ for run in runs:
                 continue
             qk = (run.name, pq["query"])
             hit_cur = pq["hit_rank"] is not None
-            if g["field_type"] == "money":
-                aliases = tuple(str(a) for a in g["aliases"] or [])
-                hit_strict = any(amount_match(g["value"], aliases, text_of(r), TIGHT, cues_for(g["field"])) for r in pq["results"][:K])
+            if g.field_type == "money":
+                hit_strict = any(prose_hit(g, r) for r in pq["results"][:K])
             else:
                 hit_strict = hit_cur
             cur[eng][0] += hit_cur; cur[eng][1] += 1

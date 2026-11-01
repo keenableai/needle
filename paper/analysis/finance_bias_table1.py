@@ -4,7 +4,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import account_side, load  # noqa: E402
+from common import load  # noqa: E402
+from needle.shared.search.errors import account_side  # noqa: E402
 
 here = os.path.dirname(os.path.abspath(__file__))
 site, final_hist, paper_hist = sys.argv[1], sys.argv[2], sys.argv[3]

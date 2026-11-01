@@ -4,10 +4,13 @@ import json
 import os
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from needle.shared.search.errors import account_side  # noqa: E402
+from strict_v2 import finance_run  # noqa: E402
+
 site, history, out_json = sys.argv[1], sys.argv[2], sys.argv[3]
 LO, HI = "2026-10-17", "2026-10-30"
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
-ACCOUNT = {"perplexity", "exa", "kagi", "parallel", "claude-search"}
 BENCHES = {
     "scholar": ("hfscholar", "scholar.json", "hit"),
     "news": ("hfnews", "ndcg.json", "ndcg"),
@@ -25,8 +28,8 @@ for line in open(history):
     if r["bench"] not in BENCHES or not (LO <= r["ts"][:10] < HI) or r["engine"] not in KEEP:
         continue
     total[(r["engine"], r["bench"])] += r.get("num_queries") or 0
-    if r["engine"] in ACCOUNT:
-        excluded[(r["engine"], r["bench"])] += r.get("search_errors") or 0
+    if r.get("account_errors"):
+        excluded[(r["engine"], r["bench"])] += r["account_errors"]
 
 
 def value(pq, kind):
@@ -83,6 +86,8 @@ for bench, (folder, report, kind) in BENCHES.items():
         present = [e for e in KEEP if e in pqs]
         if len(present) < 20 or "ultimate" not in pqs:
             continue
+        if bench == "finance":
+            pqs = {e: v["per_query"] for e, v in finance_run(d)[0]["engines"].items() if e in pqs}
         n_runs += 1
         nq = len(pqs["ultimate"])
         n_q += nq
@@ -94,7 +99,7 @@ for bench, (folder, report, kind) in BENCHES.items():
             for e in present:
                 pq = pqs[e][qi]
                 failed = pq.get("search_error") is not None
-                if failed and e in ACCOUNT:
+                if failed and account_side(pq["search_error"]):
                     answered = False
                     continue
                 if failed:
@@ -133,5 +138,5 @@ for e in order_b:
     flag = " *" if abs(s - b) >= 1.0 or rb != rs else ""
     print(f"  {e:17s} base {b:5.1f} (rank {rb:2d})  strict {s:5.1f} (rank {rs:2d}){flag}")
 print("account-side excluded query-runs by engine|bench (excluded/total):")
-for e in sorted(ACCOUNT):
+for e in sorted({e for e, _ in excluded}):
     print("  ", e, {b: f"{excluded[(e, b)]}/{total[(e, b)]}" for b in BENCHES})

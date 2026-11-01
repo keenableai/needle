@@ -1,15 +1,16 @@
 import collections
 import copy
-import re
+import glob
+import json
+import os
 import sys
-from datetime import datetime
 
 sys.path.insert(0, sys.argv[2])
-from common import BENCHES, FAMILIES, FMT, ULT, account_errors, load, overall, run_dirs, scored_failures, shares, window  # noqa: E402
+from common import BENCHES, FAMILIES, ULT, account_errors, load, overall, shares, window  # noqa: E402
 
-CUTOFF = datetime(2026, 10, 26, 22, 19)
+REPORTS = {"news": ("hfnews", "ndcg.json"), "agentic_rare": ("hfrare", "agentic_rare.json")}
 rows = load(sys.argv[1])
-runs = run_dirs(sys.argv[3])
+runs = {(b, os.path.basename(d)[:13] + ":" + os.path.basename(d)[13:15] + "Z"): d for b, (folder, _) in REPORTS.items() for d in glob.glob(os.path.join(sys.argv[3], folder, "*"))}
 w, end = window(rows, 30)
 engines = sorted({r["engine"] for r in w} - {ULT})
 keep = [e for e in engines if e not in FAMILIES or e == "brave-llmcontext"]
@@ -54,13 +55,22 @@ for e in names:
         print(f"   {e:18s} common {base[e]*100:.1f} (rank {names.index(e)+1}) -> 30-day {ov30[e]*100:.1f} (rank {r30.index(e)+1})")
 
 
+def answered(r):
+    if r["bench"] not in REPORTS:
+        return r["num_queries"] - r["search_errors"]
+    d = runs[(r["bench"], r["ts"])]
+    rep = json.load(open(os.path.join(d, REPORTS[r["bench"]][1])))
+    pqs = [json.load(open(os.path.join(d, rep["engines"][e]["per_query_path"])))["per_query"] for e in (r["engine"], ULT)]
+    return sum(q["search_error"] is None and u["ndcg"] is not None for q, u in zip(*pqs, strict=True))
+
+
 def excluded(rs):
     out = []
     for r in rs:
         r = copy.copy(r)
         m = dict(BENCHES)[r["bench"]]
-        if r["service_errors"] and r.get(m) is not None:
-            good = r["num_scored"] - scored_failures(runs[(r["bench"], r["ts"])], r["bench"], r["engine"])[1]
+        if r["search_errors"] and r["engine"] != ULT and r.get(m) is not None:
+            good = answered(r)
             if good <= 0:
                 continue
             r[m] = r[m] * r["num_scored"] / good

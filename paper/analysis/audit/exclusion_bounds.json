@@ -1,92 +1,77 @@
 {
  "chatgpt-search": {
-  "overall": 0.5213566265979056,
-  "excluded_scored_zero": 0.48495723536957314,
-  "excluded_scored_as_ceiling": 0.5653585891695545,
+  "overall": 0.5145934395671152,
+  "excluded_scored_zero": 0.4824395096485998,
+  "excluded_scored_as_ceiling": 0.5452334238947962,
   "excluded_fraction": {
    "scholar": 0.19730290456431535,
-   "news": 0.03550295857988166,
-   "finance": 0.09090909090909091,
-   "agentic_rare": 0.07829181494661921,
+   "news": 0.0,
+   "finance": 0.11666666666666667,
+   "agentic_rare": 0.0,
    "legal": 0.0
   },
   "rank": 11,
-  "rank_scored_zero": 15,
-  "rank_scored_as_ceiling": 9
+  "rank_scored_zero": 14,
+  "rank_scored_as_ceiling": 11
  },
  "claude-search": {
-  "overall": 0.5084591266075084,
-  "excluded_scored_zero": 0.3347721215217804,
-  "excluded_scored_as_ceiling": 0.6777465218129539,
+  "overall": 0.45091224230014093,
+  "excluded_scored_zero": 0.3466738779071725,
+  "excluded_scored_as_ceiling": 0.5202479615862873,
   "excluded_fraction": {
    "scholar": 0.3360995850622407,
-   "news": 0.36252465483234714,
-   "finance": 0.36363636363636365,
-   "agentic_rare": 0.3638790035587189,
-   "legal": 0.2887323943661972
-  },
-  "rank": 13,
-  "rank_scored_zero": 20,
-  "rank_scored_as_ceiling": 3
- },
- "exa": {
-  "overall": 0.6839103167227393,
-  "excluded_scored_zero": 0.649611745680264,
-  "excluded_scored_as_ceiling": 0.690667692261671,
-  "excluded_fraction": {
-   "scholar": 0.0,
-   "news": 0.015779092702169626,
-   "finance": 0.09090909090909091,
+   "news": 0.0,
+   "finance": 0.32083333333333336,
    "agentic_rare": 0.0,
-   "legal": 0.09859154929577464
+   "legal": 0.2109375
   },
-  "rank": 2,
-  "rank_scored_zero": 4,
-  "rank_scored_as_ceiling": 2
+  "rank": 16,
+  "rank_scored_zero": 20,
+  "rank_scored_as_ceiling": 11
  },
  "jina": {
-  "overall": 0.43556809714724043,
-  "excluded_scored_zero": 0.42868929465901545,
-  "excluded_scored_as_ceiling": 0.44130340254283285,
+  "overall": 0.4378160542503893,
+  "excluded_scored_zero": 0.4289879472939682,
+  "excluded_scored_as_ceiling": 0.4442687218444523,
   "excluded_fraction": {
    "scholar": 0.06307053941908713,
    "news": 0.0,
-   "finance": 0.0,
+   "finance": 0.013333333333333334,
+   "agentic_rare": 0.0,
+   "legal": 0.0
+  },
+  "rank": 19,
+  "rank_scored_zero": 19,
+  "rank_scored_as_ceiling": 18
+ },
+ "kagi": {
+  "overall": 0.513137573581982,
+  "excluded_scored_zero": 0.47515342700855756,
+  "excluded_scored_as_ceiling": 0.5317058129006738,
+  "excluded_fraction": {
+   "scholar": 0.08713692946058091,
+   "news": 0.0,
+   "finance": 0.1175,
+   "agentic_rare": 0.0,
+   "legal": 0.078125
+  },
+  "rank": 12,
+  "rank_scored_zero": 15,
+  "rank_scored_as_ceiling": 11
+ },
+ "tinyfish": {
+  "overall": 0.44499164158919935,
+  "excluded_scored_zero": 0.3756538070965102,
+  "excluded_scored_as_ceiling": 0.5203080256303968,
+  "excluded_fraction": {
+   "scholar": 0.7149377593360996,
+   "news": 0.0,
+   "finance": 0.008333333333333333,
    "agentic_rare": 0.0,
    "legal": 0.0
   },
   "rank": 17,
-  "rank_scored_zero": 17,
-  "rank_scored_as_ceiling": 17
- },
- "kagi": {
-  "overall": 0.5189327130914329,
-  "excluded_scored_zero": 0.46769388881558915,
-  "excluded_scored_as_ceiling": 0.576825504850109,
-  "excluded_fraction": {
-   "scholar": 0.08713692946058091,
-   "news": 0.15128205128205127,
-   "finance": 0.09090909090909091,
-   "agentic_rare": 0.14590747330960854,
-   "legal": 0.07042253521126761
-  },
-  "rank": 12,
-  "rank_scored_zero": 16,
-  "rank_scored_as_ceiling": 6
- },
- "parallel": {
-  "overall": 0.6511758216394319,
-  "excluded_scored_zero": 0.6490398468302416,
-  "excluded_scored_as_ceiling": 0.6529057245422731,
-  "excluded_fraction": {
-   "scholar": 0.0,
-   "news": 0.01932938856015779,
-   "finance": 0.0,
-   "agentic_rare": 0.0,
-   "legal": 0.0
-  },
-  "rank": 4,
-  "rank_scored_zero": 4,
-  "rank_scored_as_ceiling": 4
+  "rank_scored_zero": 20,
+  "rank_scored_as_ceiling": 11
  }
 }

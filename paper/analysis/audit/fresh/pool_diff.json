@@ -1,0 +1,98 @@
+{
+ "old_reading": 339,
+ "dashboard_reading": 337,
+ "dropped": [
+  {
+   "engine": "brave",
+   "query": "reynolds consumer products q1 fiscal 2025 net income",
+   "label": "no"
+  },
+  {
+   "engine": "exa",
+   "query": "general electric q2 fiscal 2026 net income",
+   "label": "yes"
+  },
+  {
+   "engine": "linkup",
+   "query": "\"caterpillar\" q3 fiscal 2010 net income",
+   "label": "yes"
+  }
+ ],
+ "added": [
+  {
+   "engine": "chatgpt-search",
+   "query": "northrop grumman q3 fiscal 2025 net income"
+  }
+ ],
+ "kept": {
+  "yes": 236,
+  "unclear": 95,
+  "no": 5
+ },
+ "kept_by_engine": {
+  "brave": {
+   "yes": 3
+  },
+  "brave-llmcontext": {
+   "yes": 29,
+   "unclear": 9,
+   "no": 1
+  },
+  "ceramic": {
+   "yes": 2,
+   "no": 2
+  },
+  "chatgpt-search": {
+   "unclear": 9,
+   "yes": 18
+  },
+  "context": {
+   "yes": 9,
+   "unclear": 3
+  },
+  "exa": {
+   "yes": 42,
+   "unclear": 2
+  },
+  "firecrawl": {
+   "unclear": 30,
+   "yes": 13
+  },
+  "google": {
+   "unclear": 5,
+   "yes": 2
+  },
+  "jina": {
+   "yes": 12
+  },
+  "keenable": {
+   "yes": 14,
+   "unclear": 6
+  },
+  "linkup": {
+   "yes": 3
+  },
+  "octen": {
+   "yes": 9,
+   "unclear": 2,
+   "no": 1
+  },
+  "parallel": {
+   "yes": 36,
+   "unclear": 12
+  },
+  "perplexity": {
+   "yes": 28,
+   "unclear": 4
+  },
+  "tavily": {
+   "yes": 12,
+   "unclear": 11,
+   "no": 1
+  },
+  "tinyfish": {
+   "unclear": 2,
+   "yes": 4
+  }
+ }
+}

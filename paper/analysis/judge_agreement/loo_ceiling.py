@@ -1,26 +1,19 @@
 import json
-import math
 import re
 import sys
 from collections import defaultdict
 from pathlib import Path
 
-from needle.shared.metrics import normalize_url
+from needle.shared.metrics import dcg_at_k, normalize_url
 
 hf_dir, out_json = Path(sys.argv[1]), sys.argv[2]
-GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
 SITE_RE = re.compile(r"\bsite:")
 K = 5
 SKIP = {"ultimate"}
 
 
-def dcg(ratings):
-    return sum(GAIN.get(r, 0.0) / math.log2(i + 2) for i, r in enumerate(ratings[:K]))
-
-
 def idcg_from_pool(best):
-    ordered = sorted(best.values(), reverse=True)[:K]
-    return dcg(ordered)
+    return dcg_at_k(sorted(best.values(), reverse=True), k=K)
 
 
 runs = sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / "ndcg.json").exists())
@@ -56,7 +49,7 @@ for run in runs:
                     continue
                 key = normalize_url(r["url"])
                 best[key] = max(best.get(key, 0), r["rating"])
-            contrib[name] = (best, dcg(pq["penalized_ratings"]))
+            contrib[name] = (best, dcg_at_k(pq["penalized_ratings"], k=K))
             for r in pq["results"]:
                 snip_len[name].append(len(r.get("snippet") or ""))
         pool = {}

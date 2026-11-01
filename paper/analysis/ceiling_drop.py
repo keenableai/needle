@@ -3,8 +3,7 @@ import json
 import os
 import sys
 
-sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import account_side  # noqa: E402
+from needle.shared.search.errors import account_side
 
 site, pairs_json, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()

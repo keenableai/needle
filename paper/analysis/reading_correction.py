@@ -1,22 +1,24 @@
 import collections
-import glob
 import json
+import os
 import sys
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
 from common import BENCHES, FAMILIES, NAMES, ULT, load, overall, shares  # noqa: E402
+from strict_v2 import finance_run, prose_hit  # noqa: E402
 
-hist, pairs_json, v2_glob, precision_json, out_path = sys.argv[1:6]
+hist, pairs_json, site, precision_json, out_path = sys.argv[1:6]
 rows = load(hist)
 table_runs = set(json.load(open(pairs_json))["runs"])
 window = [r for r in rows if r["ts"] in table_runs]
 keep = [e for e in sorted({r["engine"] for r in window} - {ULT}) if e not in FAMILIES or e == "brave-llmcontext"]
-run_dirs = {ts.replace(":", "") for ts in table_runs}
 reading = collections.Counter()
-for f in glob.glob(v2_glob):
-    for h in json.load(open(f))["new_hits"]:
-        if h["run"] in run_dirs:
-            reading[h["engine"]] += 1
+for ts in sorted({r["ts"] for r in window if r["bench"] == "finance"}):
+    rep, queries = finance_run(os.path.join(site, "hf", ts.replace(":", "")))
+    for e, x in rep["engines"].items():
+        for pq in x["per_query"]:
+            q = queries[pq["query"]]
+            reading[e] += q.field_type == "money" and pq["hit_rank"] is not None and not prose_hit(q, pq["results"][pq["hit_rank"] - 1])
 prec = json.load(open(precision_json))
 pooled = prec["money_reading"]["precision"]
 per = {e: v for e, v in prec["money_by_engine"].items()}

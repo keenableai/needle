@@ -1,18 +1,13 @@
 import json
-import math
 import sys
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
-from needle.shared.metrics import GAIN, normalize_url
+from needle.shared.metrics import dcg_at_k, normalize_url
 
 hf_dir = Path(sys.argv[1])
 CORE = ["bing", "brave", "brave-llmcontext", "ceramic", "exa", "firecrawl", "google", "kagi", "keenable", "octen", "parallel", "perplexity", "tavily", "tinyfish", "you"]
-
-
-def dcg(r):
-    return sum(GAIN.get(x, 0.0) / math.log2(i + 2) for i, x in enumerate(r[:5]))
 
 
 full = defaultdict(lambda: defaultdict(list))
@@ -39,12 +34,12 @@ for run in sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / "ndcg.json"
                 pool_all[u] = max(pool_all.get(u, 0), r["rating"])
                 if name in CORE:
                     pool_core[u] = max(pool_core.get(u, 0), r["rating"])
-        ia = dcg(sorted(pool_all.values(), reverse=True))
-        ic = dcg(sorted(pool_core.values(), reverse=True))
+        ia = dcg_at_k(sorted(pool_all.values(), reverse=True))
+        ic = dcg_at_k(sorted(pool_core.values(), reverse=True))
         for name, pq in d.items():
             if name not in CORE:
                 continue
-            d_ = dcg(pq["penalized_ratings"])
+            d_ = dcg_at_k(pq["penalized_ratings"])
             if ia > 0:
                 full[week][name].append(d_ / ia)
             if ic > 0:

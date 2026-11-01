@@ -9,10 +9,10 @@ here = os.path.dirname(os.path.abspath(__file__))
 site, pairs_json, hist, src, out_json = sys.argv[1:6]
 sys.path.insert(0, here)
 sys.path.insert(0, src)
-from common import account_side, load  # noqa: E402
+from common import load  # noqa: E402
 from common import overall as c_overall, shares as c_shares  # noqa: E402
-from needle.finance.models import cues_for  # noqa: E402
-from strict_v2 import K, match_v2, text_of  # noqa: E402
+from needle.shared.search.errors import account_side  # noqa: E402
+from strict_v2 import finance_run  # noqa: E402
 
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
 BENCHES = {"scholar": ("hfscholar", "scholar.json", "recall"), "news": ("hfnews", "ndcg.json", "ndcg"), "finance": ("hf", "recall.json", "recall"),
@@ -22,28 +22,18 @@ table_runs = set(pairs_ref["runs"])
 rng = random.Random(11)
 
 
-def finance_hit(pq, g):
-    if g is None:
-        return 0.0
-    gg = g["gold"]
-    if gg["field_type"] != "money":
-        return float(pq["hit_rank"] is not None)
-    aliases = tuple(str(a) for a in gg["aliases"] or [])
-    return float(any(match_v2(gg["value"], aliases, text_of(r), cues_for(gg["field"]))[0] for r in pq["results"][:K]))
-
-
-def answered_value(bench, q, gold):
+def answered_value(bench, q):
     if bench in ("news", "agentic_rare"):
         return q["ndcg"]
     if bench == "finance":
-        return finance_hit(q, gold.get(q["query"]))
+        return q["score"]
     return float(q["hit_rank"] is not None)
 
 
-def values(bench, eng, pq, gold, ult_hits, ceiling):
+def values(bench, eng, pq, ult_hits, ceiling):
     if eng == "ultimate" and bench in ("finance", "legal"):
         return [float(ult_hits[q["query"]]) for q in pq]
-    return [(None if account_side(q["search_error"]) or not c else 0.0) if q["search_error"] is not None else answered_value(bench, q, gold)
+    return [(None if account_side(q["search_error"]) or not c else 0.0) if q["search_error"] is not None else answered_value(bench, q)
             for q, c in zip(pq, ceiling)]
 
 
@@ -70,18 +60,14 @@ for bench, (folder, report, m) in BENCHES.items():
         if "ultimate" not in pqs or any(e not in pqs for e in KEEP):
             check[f"{bench}: run skipped, per-query files missing"] += 1
             continue
-        gold = {}
         if bench == "finance":
-            for line in open(os.path.join(d, "gold.jsonl")):
-                if line.strip():
-                    g = json.loads(line)
-                    gold[g["query_text"]] = g
+            pqs = {e: v["per_query"] for e, v in finance_run(d)[0]["engines"].items()}
         ult_hits = collections.defaultdict(bool)
         ceiling = [q["ndcg"] is not None for q in pqs["ultimate"]] if m == "ndcg" else [True] * len(pqs["ultimate"])
         engines = [e for e in pqs if e != "ultimate"] + ["ultimate"] if bench in ("finance", "legal") else KEEP + ["ultimate"]
         vals = {}
         for e in engines:
-            v = values(bench, e, pqs[e], gold, ult_hits, ceiling)
+            v = values(bench, e, pqs[e], ult_hits, ceiling)
             if bench in ("finance", "legal") and e != "ultimate":
                 for q, x in zip(pqs[e], v):
                     ult_hits[q["query"]] |= bool(x)
@@ -206,7 +192,7 @@ for e in order_t1:
 print("matched support: adjacent separated", adj_sep, "of", len(order_m) - 1, "; all pairs separated", sep_pt, "of", len(pairs), "; Bonferroni", sep_bf)
 print("fully separated (Bonferroni):", fully)
 print("unseparated:", unsep)
-json.dump({"scorer": "paper, as production (site: hit on any host; finance 0.1% band, table readings, no money backstop; rare duplicate penalty skipped for site: queries; account-side failures by error record excluded, service-side failures zero, on nDCG only where the ceiling is non-empty)",
+json.dump({"scorer": "production (finance money rematched by scripts/backfill_scores.rematch_money; other benches use the stored per-query scores; account-side failures by needle.shared.search.errors.account_side excluded, service-side failures zero, on nDCG only where the ceiling is non-empty)",
            "runs": {b: len(r) for b, r in runs_by_bench.items()}, "queries": {b: sum(x["queries"] for x in r) for b, r in runs_by_bench.items()},
            "matched_queries": {b: sum(x["matched"] for x in r) for b, r in runs_by_bench.items()}, "row_check": dict(check), "row_mismatches": mismatch,
            "table1": table1, "table1_same_runs": table1_sub, "base_minus_table1_points": dev,

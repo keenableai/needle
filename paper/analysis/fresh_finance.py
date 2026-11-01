@@ -4,20 +4,18 @@ import random
 import sys
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import ULT, account_side, load, wmean  # noqa: E402
-from strict_v2 import match_v2, text_of  # noqa: E402
-from needle.finance.models import cues_for  # noqa: E402
+from common import ULT, load, wmean  # noqa: E402
+from strict_v2 import gold_queries, gold_rows, prose_hit, rematch_money  # noqa: E402
+from needle.shared.search.errors import account_side  # noqa: E402
 
 queries_path, report_path, hist_path, pairs_json, out_dir = sys.argv[1:6]
-K = 5
 rng = random.Random(1030)
 
-gold = {}
-for line in open(queries_path):
-    if line.strip():
-        g = json.loads(line)
-        gold[g["query_text"]] = g
+rows = gold_rows(queries_path)
+gold = {g["query_text"]: g for g in rows}
+queries = gold_queries(rows)
 rep = json.load(open(report_path))
+rematch_money(rep, rows)
 hits_pool = collections.defaultdict(list)
 recall, errors, any_hit = {}, {}, collections.defaultdict(bool)
 by_type = collections.defaultdict(lambda: collections.defaultdict(lambda: [0, 0]))
@@ -33,28 +31,21 @@ for eng, e in rep["engines"].items():
             if account_side(pq["search_error"]):
                 continue
         n += 1
-        hit = False
-        if gg["field_type"] == "money":
-            aliases = tuple(str(a) for a in gg["aliases"] or [])
-            for i, r in enumerate(pq["results"][:K]):
-                ok, is_new = match_v2(gg["value"], aliases, text_of(r), cues_for(gg["field"]))
-                if ok:
-                    hit = True
-                    prov = json.loads(g["query_origin"]).get("provenance", {}) if isinstance(g["query_origin"], str) else g["query_origin"].get("provenance", {})
-                    hits_pool["reading" if is_new else "exact"].append({
-                        "kind": "money_reading" if is_new else "money_exact", "engine": eng, "query": pq["query"], "company": prov.get("entity"),
-                        "field": gg["field"], "field_type": "money", "gold": gg["value"], "aliases": gg["aliases"], "rank": i + 1,
-                        "title": r.get("title"), "url": r["url"], "snippet": (r.get("snippet") or "")[:2000]})
-                    break
-        else:
-            hit = pq["hit_rank"] is not None
-            if hit:
-                r = pq["results"][pq["hit_rank"] - 1]
-                prov = json.loads(g["query_origin"]).get("provenance", {}) if isinstance(g["query_origin"], str) else g["query_origin"].get("provenance", {})
+        hit = pq["hit_rank"] is not None
+        if hit:
+            r = pq["results"][pq["hit_rank"] - 1]
+            prov = json.loads(g["query_origin"]).get("provenance", {}) if isinstance(g["query_origin"], str) else g["query_origin"].get("provenance", {})
+            if gg["field_type"] == "money":
+                is_new = not prose_hit(queries[pq["query"]], r)
+                hits_pool["reading" if is_new else "exact"].append({
+                    "kind": "money_reading" if is_new else "money_exact", "engine": eng, "query": pq["query"], "company": prov.get("entity"),
+                    "field": gg["field"], "field_type": "money", "gold": gg["value"], "aliases": gg["aliases"], "rank": pq["hit_rank"],
+                    "title": r.get("title"), "url": r["url"], "snippet": r["snippet"]})
+            else:
                 hits_pool["other"].append({
                     "kind": "other_field", "engine": eng, "query": pq["query"], "company": prov.get("entity"),
                     "field": gg["field"], "field_type": gg["field_type"], "gold": gg["value"], "aliases": gg["aliases"], "rank": pq["hit_rank"],
-                    "title": r.get("title"), "url": r["url"], "snippet": (r.get("snippet") or "")[:2000]})
+                    "title": r.get("title"), "url": r["url"], "snippet": r["snippet"]})
         by_type[eng][gg["field_type"]][0] += hit
         by_type[eng][gg["field_type"]][1] += 1
         h += hit

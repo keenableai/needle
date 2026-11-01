@@ -6,8 +6,7 @@ import random
 import sys
 from datetime import datetime
 
-sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import account_side  # noqa: E402
+from needle.shared.search.errors import account_side
 
 site = sys.argv[1]
 LO, HI = "2026-10-17", "2026-10-30"

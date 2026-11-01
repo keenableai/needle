@@ -231,33 +231,7 @@
   "2026-10-28T07:57Z",
   "2026-10-28T09:00Z",
   "2026-10-28T10:03Z",
-  "2026-10-28T10:59Z",
-  "2026-10-28T11:48Z",
-  "2026-10-28T11:59Z",
-  "2026-10-28T13:12Z",
-  "2026-10-28T14:01Z",
-  "2026-10-28T15:01Z",
-  "2026-10-28T15:57Z",
-  "2026-10-28T17:01Z",
-  "2026-10-28T17:57Z",
-  "2026-10-28T19:03Z",
-  "2026-10-28T19:56Z",
-  "2026-10-28T20:57Z",
-  "2026-10-28T21:53Z",
-  "2026-10-28T22:52Z",
-  "2026-10-28T23:49Z",
-  "2026-10-29T01:14Z",
-  "2026-10-29T01:51Z",
-  "2026-10-29T02:59Z",
-  "2026-10-29T03:54Z",
-  "2026-10-29T04:55Z",
-  "2026-10-29T05:52Z",
-  "2026-10-29T07:06Z",
-  "2026-10-29T07:57Z",
-  "2026-10-29T09:01Z",
-  "2026-10-29T10:03Z",
-  "2026-10-29T10:56Z",
-  "2026-10-29T11:53Z"
+  "2026-10-28T10:59Z"
  ],
  "runs_without_artifact": [
   "2026-10-21T19:51Z"
@@ -265,214 +239,214 @@
  "engines": {
   "bing": {
    "name": "Bing (SearchAPI)",
-   "median_chars": 117.0,
-   "n_results": 24780,
-   "n_empty": 111,
-   "runs": 257,
-   "news_ndcg5": 0.29214360486628765,
-   "news_rank": 16
+   "median_chars": 117,
+   "n_results": 22255,
+   "n_empty": 104,
+   "runs": 231,
+   "news_ndcg5": 0.288333515157481,
+   "news_rank": 15
   },
   "google": {
    "name": "Google (Serper)",
-   "median_chars": 143.0,
-   "n_results": 25570,
-   "n_empty": 212,
-   "runs": 257,
-   "news_ndcg5": 0.2607910831954258,
+   "median_chars": 143,
+   "n_results": 22977,
+   "n_empty": 200,
+   "runs": 231,
+   "news_ndcg5": 0.2616029809948969,
    "news_rank": 18
   },
   "tinyfish": {
    "name": "TinyFish",
    "median_chars": 144,
-   "n_results": 25579,
-   "n_empty": 171,
-   "runs": 257,
-   "news_ndcg5": 0.2547129745932144,
+   "n_results": 22983,
+   "n_empty": 159,
+   "runs": 231,
+   "news_ndcg5": 0.25558013404723356,
    "news_rank": 19
-  },
-  "firecrawl": {
-   "name": "Firecrawl",
-   "median_chars": 152,
-   "n_results": 25451,
-   "n_empty": 199,
-   "runs": 256,
-   "news_ndcg5": 0.28468153356454884,
-   "news_rank": 17
   },
   "kagi": {
    "name": "Kagi",
    "median_chars": 152,
    "n_results": 21695,
    "n_empty": 154,
-   "runs": 257,
-   "news_ndcg5": 0.3182723577912191,
+   "runs": 231,
+   "news_ndcg5": 0.3007303371927132,
    "news_rank": 14
+  },
+  "firecrawl": {
+   "name": "Firecrawl",
+   "median_chars": 153,
+   "n_results": 22855,
+   "n_empty": 174,
+   "runs": 230,
+   "news_ndcg5": 0.2864865516084082,
+   "news_rank": 16
   },
   "context": {
    "name": "Context",
-   "median_chars": 186,
-   "n_results": 25601,
-   "n_empty": 102,
-   "runs": 257,
-   "news_ndcg5": 0.4756264412557033,
+   "median_chars": 174,
+   "n_results": 23001,
+   "n_empty": 95,
+   "runs": 231,
+   "news_ndcg5": 0.46881682153074333,
    "news_rank": 11
   },
   "chatgpt-search": {
    "name": "ChatGPT search",
-   "median_chars": 428,
-   "n_results": 24681,
-   "n_empty": 448,
-   "runs": 257,
-   "news_ndcg5": 0.3569941290504585,
-   "news_rank": 13
+   "median_chars": 429,
+   "n_results": 22081,
+   "n_empty": 400,
+   "runs": 231,
+   "news_ndcg5": 0.34040009238132873,
+   "news_rank": 12
   },
   "claude-search": {
    "name": "Claude search",
-   "median_chars": 641.0,
-   "n_results": 16280,
-   "n_empty": 2876,
-   "runs": 257,
-   "news_ndcg5": 0.46347044716169417,
-   "news_rank": 12
+   "median_chars": 605,
+   "n_results": 13685,
+   "n_empty": 2510,
+   "runs": 231,
+   "news_ndcg5": 0.2757898942882314,
+   "news_rank": 17
   },
   "parallel": {
    "name": "Parallel",
    "median_chars": 913,
-   "n_results": 25105,
+   "n_results": 22505,
    "n_empty": 8,
-   "runs": 257,
-   "news_ndcg5": 0.5525200144180863,
-   "news_rank": 8
+   "runs": 231,
+   "news_ndcg5": 0.5346532085709064,
+   "news_rank": 9
   },
   "brave": {
    "name": "Brave",
-   "median_chars": 1117,
-   "n_results": 25605,
+   "median_chars": 1113,
+   "n_results": 23005,
    "n_empty": 0,
-   "runs": 257,
-   "news_ndcg5": 0.5565156127229449,
+   "runs": 231,
+   "news_ndcg5": 0.5574308616470088,
    "news_rank": 7
   },
   "you": {
    "name": "You.com",
-   "median_chars": 1120,
-   "n_results": 25505,
-   "n_empty": 25,
-   "runs": 256,
-   "news_ndcg5": 0.5512656812120172,
-   "news_rank": 9
+   "median_chars": 1116,
+   "n_results": 22905,
+   "n_empty": 24,
+   "runs": 230,
+   "news_ndcg5": 0.5525394017675772,
+   "news_rank": 8
   },
   "brave-llmcontext": {
    "name": "Brave (LLM ctx)",
-   "median_chars": 1157,
-   "n_results": 25605,
+   "median_chars": 1158,
+   "n_results": 23005,
    "n_empty": 0,
-   "runs": 257,
-   "news_ndcg5": 0.6400266108133857,
-   "news_rank": 2
+   "runs": 231,
+   "news_ndcg5": 0.6421985327379252,
+   "news_rank": 1
   },
   "tavily": {
    "name": "Tavily",
-   "median_chars": 1160,
-   "n_results": 25503,
+   "median_chars": 1160.0,
+   "n_results": 22940,
    "n_empty": 0,
-   "runs": 257,
-   "news_ndcg5": 0.30317137505373015,
-   "news_rank": 15
+   "runs": 231,
+   "news_ndcg5": 0.30286104503585054,
+   "news_rank": 13
   },
   "keenable": {
    "name": "Keenable",
-   "median_chars": 1317,
-   "n_results": 25605,
+   "median_chars": 1318,
+   "n_results": 23005,
    "n_empty": 0,
-   "runs": 257,
-   "news_ndcg5": 0.6118132384890055,
+   "runs": 231,
+   "news_ndcg5": 0.6088076007279061,
    "news_rank": 4
   },
   "perplexity": {
    "name": "Perplexity",
-   "median_chars": 1364,
-   "n_results": 25601,
+   "median_chars": 1366,
+   "n_results": 23001,
    "n_empty": 0,
-   "runs": 257,
-   "news_ndcg5": 0.642863240927001,
-   "news_rank": 1
+   "runs": 231,
+   "news_ndcg5": 0.6402822437611668,
+   "news_rank": 2
   },
   "exa": {
    "name": "Exa",
-   "median_chars": 1402.0,
-   "n_results": 25204,
+   "median_chars": 1390.0,
+   "n_results": 22804,
    "n_empty": 1,
-   "runs": 257,
-   "news_ndcg5": 0.6093502954802245,
+   "runs": 231,
+   "news_ndcg5": 0.5991173145902632,
    "news_rank": 5
   },
   "linkup": {
    "name": "Linkup",
-   "median_chars": 1580.0,
-   "n_results": 25582,
+   "median_chars": 1580,
+   "n_results": 22987,
    "n_empty": 0,
-   "runs": 257,
-   "news_ndcg5": 0.565930781709362,
+   "runs": 231,
+   "news_ndcg5": 0.5674345715133458,
    "news_rank": 6
   },
   "octen": {
    "name": "Octen",
-   "median_chars": 1603,
-   "n_results": 25605,
+   "median_chars": 1601,
+   "n_results": 23005,
    "n_empty": 0,
-   "runs": 257,
-   "news_ndcg5": 0.512861044061446,
+   "runs": 231,
+   "news_ndcg5": 0.5107820319909183,
    "news_rank": 10
   },
   "ceramic": {
    "name": "Ceramic",
-   "median_chars": 1967,
-   "n_results": 21607,
+   "median_chars": 1967.0,
+   "n_results": 19388,
    "n_empty": 0,
-   "runs": 256,
-   "news_ndcg5": 0.03962179533205116,
+   "runs": 230,
+   "news_ndcg5": 0.03958250973517266,
    "news_rank": 21
   },
   "deepseek": {
    "name": "DeepSeek",
-   "median_chars": 1978,
-   "n_results": 25433,
+   "median_chars": 1980,
+   "n_results": 22835,
    "n_empty": 0,
-   "runs": 257,
-   "news_ndcg5": 0.6324221078457125,
+   "runs": 231,
+   "news_ndcg5": 0.6345093515486944,
    "news_rank": 3
   },
   "jina": {
    "name": "Jina",
    "median_chars": 2000,
-   "n_results": 25557,
-   "n_empty": 516,
-   "runs": 257,
-   "news_ndcg5": 0.20998915756558367,
+   "n_results": 22961,
+   "n_empty": 462,
+   "runs": 231,
+   "news_ndcg5": 0.21017856357378192,
    "news_rank": 20
   }
  },
  "summary": {
   "median_range": [
-   117.0,
+   117,
    2000
   ],
   "shortest": "bing",
   "longest": "jina",
   "below_200": {
-   "bing": 16,
+   "bing": 15,
    "google": 18,
    "tinyfish": 19,
-   "firecrawl": 17,
    "kagi": 14,
+   "firecrawl": 16,
    "context": 11
   },
   "longest_two": {
    "deepseek": 3,
    "jina": 20
   },
-  "spearman_median_length_vs_news_ndcg5": 0.3475154454151247,
-  "spearman_p": 0.12269274597457834
+  "spearman_median_length_vs_news_ndcg5": 0.34285714285714286,
+  "spearman_p": 0.12813141007326184
  }
 }

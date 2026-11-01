@@ -7,31 +7,31 @@
   "query_runs_of_texts_on_more_than_one_day": 260
  },
  "news": {
-  "query_runs": 5121,
-  "distinct_texts": 4803,
-  "texts_in_more_than_one_run": 230,
-  "query_runs_of_repeated_texts": 548,
-  "query_runs_of_texts_on_more_than_one_day": 215
+  "query_runs": 4601,
+  "distinct_texts": 4318,
+  "texts_in_more_than_one_run": 207,
+  "query_runs_of_repeated_texts": 490,
+  "query_runs_of_texts_on_more_than_one_day": 192
  },
  "finance": {
-  "query_runs": 1320,
-  "distinct_texts": 1033,
-  "texts_in_more_than_one_run": 170,
-  "query_runs_of_repeated_texts": 457,
-  "query_runs_of_texts_on_more_than_one_day": 457
+  "query_runs": 1200,
+  "distinct_texts": 953,
+  "texts_in_more_than_one_run": 149,
+  "query_runs_of_repeated_texts": 396,
+  "query_runs_of_texts_on_more_than_one_day": 394
  },
  "agentic_rare": {
-  "query_runs": 1300,
-  "distinct_texts": 1184,
-  "texts_in_more_than_one_run": 112,
-  "query_runs_of_repeated_texts": 228,
-  "query_runs_of_texts_on_more_than_one_day": 222
+  "query_runs": 1200,
+  "distinct_texts": 1100,
+  "texts_in_more_than_one_run": 96,
+  "query_runs_of_repeated_texts": 196,
+  "query_runs_of_texts_on_more_than_one_day": 190
  },
  "legal": {
-  "query_runs": 568,
-  "distinct_texts": 558,
-  "texts_in_more_than_one_run": 8,
-  "query_runs_of_repeated_texts": 18,
-  "query_runs_of_texts_on_more_than_one_day": 18
+  "query_runs": 512,
+  "distinct_texts": 506,
+  "texts_in_more_than_one_run": 5,
+  "query_runs_of_repeated_texts": 11,
+  "query_runs_of_texts_on_more_than_one_day": 11
  }
 }

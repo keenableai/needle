@@ -25,8 +25,9 @@ ci = bootstrap(w, engines)
 keep = [e for e in engines if e not in FAMILIES or e == "brave-llmcontext"]
 table = sorted(((overall(sh, e), e) for e in keep if overall(sh, e) is not None), reverse=True)
 
-NOTE = {"keenable": r"\smash{$^\dagger$}", "chatgpt-search": r"\smash{$^{\ddagger\S}$}",
-        "claude-search": r"\smash{$^{\ddagger\S}$}", "kagi": r"\smash{$^\S$}"}
+NOTE = {"chatgpt-search": r"\smash{$^{\dagger\S}$}",
+        "claude-search": r"\smash{$^{\dagger\S}$}", "kagi": r"\smash{$^\S$}",
+        "tinyfish": r"\smash{$^\S$}"}
 
 
 def fmt(x):
@@ -40,9 +41,7 @@ def signed(x):
 def fail(e):
     rs = [r for r in w if r["engine"] == e]
     nq = max(1, sum(r.get("num_queries") or 0 for r in rs))
-    acc = sum(account_errors(r) for r in rs)
-    svc = sum(r.get("search_errors") or 0 for r in rs) - acc
-    return f"{100 * svc / nq:.1f}", f"{100 * acc / nq:.1f}" if acc else r"\textcolor{muted}{--}"
+    return f"{100 * sum(r.get('search_errors') or 0 for r in rs) / nq:.1f}"
 
 
 def p50(e):
@@ -51,16 +50,15 @@ def p50(e):
 
 
 best = {b: max(sh[e][b][0] for _, e in table) for b, _ in BENCHES}
-lines = [r"\textit{ceiling (pooled)} & \textit{100} & & " + " & ".join(rf"\textit{{{fmt(ult[b])}}}" for b, _ in BENCHES) + r" & & & \\"]
+lines = [r"\textit{ceiling (pooled)} & \textit{100} & & " + " & ".join(rf"\textit{{{fmt(ult[b])}}}" for b, _ in BENCHES) + r" & & \\"]
 for o, e in table:
     lo, hi = ci[e]
     cells = []
     for b, _ in BENCHES:
         v = sh[e][b][0]
         cells.append(rf"\textbf{{{fmt(v)}}}" if round(v, 3) == round(best[b], 3) else fmt(v))
-    svc, acc = fail(e)
     lines.append(rf"{NAMES[e]}{NOTE.get(e, '')} & {o * 100:.1f} & \shareci{{{lo * 100:.1f}}}{{{hi * 100:.1f}}} & "
-                 + " & ".join(cells) + rf" & {svc} & {acc} & {p50(e)} \\")
+                 + " & ".join(cells) + rf" & {fail(e)} & {p50(e)} \\")
 open(out, "w").write("\n".join(lines) + "\n")
 
 ci_lines = []

@@ -6,7 +6,8 @@ import random
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import account_side  # noqa: E402
+from needle.shared.search.errors import account_side  # noqa: E402
+from strict_v2 import finance_run  # noqa: E402
 
 site, pairs_json, out_json = sys.argv[1], sys.argv[2], sys.argv[3]
 KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
@@ -51,6 +52,8 @@ for bench, (folder, report, kind) in BENCHES.items():
                     pqs[e] = json.load(open(p))["per_query"]
         if "ultimate" not in pqs or len([e for e in KEEP if e in pqs]) < 21:
             continue
+        if bench == "finance":
+            pqs = {e: v["per_query"] for e, v in finance_run(d)[0]["engines"].items() if e in pqs}
         pk = paper_key(d) if bench == "scholar" else {}
         for qi in range(len(pqs["ultimate"])):
             text = pqs["ultimate"][qi]["query"]
@@ -58,7 +61,7 @@ for bench, (folder, report, kind) in BENCHES.items():
             for e in KEEP:
                 pq = pqs[e][qi]
                 failed = pq.get("search_error") is not None
-                vals[e] = None if (failed and account_side(pq["search_error"])) else (0.0 if failed else value(pq, kind))
+                vals[e] = pq["score"] if bench == "finance" else None if (failed and account_side(pq["search_error"])) else (0.0 if failed else value(pq, kind))
             clusters[pk.get(text, text)].append({"u": value(pqs["ultimate"][qi], kind), "vals": vals})
     clusters_by_bench[bench] = list(clusters.values())
     print(bench, "clusters", len(clusters), "query-runs", sum(len(v) for v in clusters.values()), flush=True)

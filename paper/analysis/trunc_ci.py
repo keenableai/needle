@@ -1,11 +1,10 @@
 import json
-import math
 import random
 import sys
 from collections import defaultdict
 from pathlib import Path
 
-from needle.shared.metrics import normalize_url
+from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
 full_dir, trunc_dir, out_path = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
 rng = random.Random(13)
@@ -22,11 +21,6 @@ def load(d):
 
 
 opus, trunc = load(full_dir), load(trunc_dir)
-GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
-
-
-def dcg(r):
-    return sum(GAIN.get(x, 0.0) / math.log2(i + 2) for i, x in enumerate(r[:5]))
 
 
 def per_query(rating_of):
@@ -36,16 +30,13 @@ def per_query(rating_of):
         for name, m in q["engines"].items():
             if any(i not in rating_of for i in m["positions"]):
                 continue
-            seen, rs = set(), []
-            for i in m["positions"]:
-                u = normalize_url(key[i]["url"])
-                r = rating_of[i]
-                rs.append(0 if u in seen else r)
-                seen.add(u)
-                pool[u] = max(pool.get(u, 0), r)
-            eng[name] = rs
-        idcg = dcg(sorted(pool.values(), reverse=True))
-        rows.append({name: dcg(rs) / idcg for name, rs in eng.items()} if idcg > 0 else {})
+            urls = [key[i]["url"] for i in m["positions"]]
+            rs = [rating_of[i] for i in m["positions"]]
+            for u, r in zip(urls, rs):
+                pool[normalize_url(u)] = max(pool.get(normalize_url(u), 0), r)
+            eng[name] = apply_redundancy_penalties(urls, rs, query_text=q["query"])
+        idcg = dcg_at_k(sorted(pool.values(), reverse=True))
+        rows.append({name: dcg_at_k(rs) / idcg for name, rs in eng.items()} if idcg > 0 else {})
     return rows
 
 
