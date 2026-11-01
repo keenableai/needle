@@ -9,12 +9,27 @@ from needle.shared.search.base import (
     latency_stats,
     search_all,
 )
+from needle.shared.search.errors import account_side, representative_error
 
 ULTIMATE = "ultimate"
 
 
-def answered(per_query: list[dict]) -> list[dict]:
-    return [pq for pq in per_query if pq["search_error"] is None]
+def counted(pq: dict) -> bool:
+    return pq["search_error"] is None or not account_side(pq["search_error"])
+
+
+def scored_queries(per_query: list[dict]) -> list[dict]:
+    return [pq for pq in per_query if counted(pq)]
+
+
+def error_counts(per_query: list[dict]) -> dict[str, int]:
+    errors = [pq["search_error"] for pq in per_query if pq["search_error"] is not None]
+    account = sum(1 for e in errors if account_side(e))
+    return {
+        "search_errors": len(errors),
+        "account_errors": account,
+        "service_errors": len(errors) - account,
+    }
 
 
 def first_rank(flags: Sequence[object]) -> int | None:
@@ -55,6 +70,8 @@ def ultimate_per_query(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
             pq["results"] = (([hit] if hit else []) + rest)[:cap]
             pq["n_results"] = len(pq["results"])
             pq["hit_rank"] = 1 if hit else None
+        else:
+            pq["search_error"] = representative_error([e["search_error"] for e in entries])
         out.append(pq)
     return out
 
@@ -62,7 +79,7 @@ def ultimate_per_query(query_outs: list[list[dict]], *, cap: int) -> list[dict]:
 def recall_summary(
     per_query: list[dict], latency: dict | None, scored: list[dict] | None = None
 ) -> dict[str, Any]:
-    scored = answered(per_query if scored is None else scored)
+    scored = scored_queries(per_query if scored is None else scored)
     for pq in per_query:
         pq["score"] = None
     for pq in scored:
@@ -72,7 +89,7 @@ def recall_summary(
         "recall_at_k": len(hits) / len(scored) if scored else 0.0,
         "mrr_at_k": sum(1.0 / pq["hit_rank"] for pq in hits) / len(scored) if scored else 0.0,
         "num_scored": len(scored),
-        "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
+        **error_counts(per_query),
         "latency": latency,
         "per_query": per_query,
     }
@@ -99,7 +116,7 @@ def classify_misses(
         system_specific = universal = 0
         for entries, others_found in zip(query_outs, any_hit, strict=True):
             pq = entries[idx]
-            if pq["search_error"] is not None or pq["hit_rank"] is not None:
+            if not counted(pq) or pq["hit_rank"] is not None:
                 continue
             if others_found:
                 system_specific += 1
@@ -110,9 +127,7 @@ def classify_misses(
     if ULTIMATE in engines_out:
         engines_out[ULTIMATE]["misses_system_specific"] = 0
         engines_out[ULTIMATE]["misses_universal"] = sum(
-            1
-            for pq in engines_out[ULTIMATE]["per_query"]
-            if pq["search_error"] is None and pq["hit_rank"] is None
+            1 for pq in engines_out[ULTIMATE]["per_query"] if counted(pq) and pq["hit_rank"] is None
         )
 
 
@@ -145,22 +160,38 @@ async def run_known_item_eval(
         for out, search in zip(entries, searches, strict=True):
             out["queried_at"] = search.queried_at
 
-    engines_out: dict[str, dict[str, Any]] = {}
-    for idx, name in enumerate(engine_names):
-        per_query = [entries[idx] for entries in query_outs]
-        engines_out[name] = summary(per_query, latency_stats(engines[name].latencies_ms))
-    if engine_names:
-        engines_out[ULTIMATE] = summary(ultimate_fn(query_outs, cap=num_results), None)
-        engines_out[ULTIMATE]["mrr_at_k"] = None
-        for pq in engines_out[ULTIMATE]["per_query"]:
-            pq["queried_at"] = None
-
-    classify_misses(query_outs, engine_names, engines_out)
-
     return {
         "num_queries": len(queries),
         "num_results": num_results,
         "snippet_chars": snippet_chars,
         **(extra or {}),
-        "engines": engines_out,
+        "engines": summarize_engines(
+            query_outs,
+            {name: latency_stats(engines[name].latencies_ms) for name in engine_names},
+            summary,
+            ultimate_fn,
+            cap=num_results,
+        ),
     }
+
+
+def summarize_engines(
+    query_outs: list[list[dict]],
+    latencies: dict[str, dict | None],
+    summary: Callable[[list[dict], dict | None], dict[str, Any]],
+    ultimate_fn: Callable[..., list[dict]],
+    *,
+    cap: int,
+) -> dict[str, dict[str, Any]]:
+    engine_names = list(latencies)
+    engines_out: dict[str, dict[str, Any]] = {}
+    for idx, name in enumerate(engine_names):
+        per_query = [entries[idx] for entries in query_outs]
+        engines_out[name] = summary(per_query, latencies[name])
+    if engine_names:
+        engines_out[ULTIMATE] = summary(ultimate_fn(query_outs, cap=cap), None)
+        engines_out[ULTIMATE]["mrr_at_k"] = None
+        for pq in engines_out[ULTIMATE]["per_query"]:
+            pq["queried_at"] = None
+    classify_misses(query_outs, engine_names, engines_out)
+    return engines_out

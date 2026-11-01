@@ -16,7 +16,7 @@ from needle.shared.metrics import (
     dcg_at_k,
     normalize_url,
 )
-from needle.shared.recall import ULTIMATE
+from needle.shared.recall import ULTIMATE, error_counts
 from needle.shared.search import (
     SearchClient,
     SearchResult,
@@ -24,6 +24,7 @@ from needle.shared.search import (
     latency_stats,
     search_all,
 )
+from needle.shared.search.errors import account_side, representative_error
 
 
 @dataclass(frozen=True)
@@ -65,6 +66,8 @@ def _score_query(
         "search_error": search_error,
     }
     if search_error is not None:
+        if idcg and not account_side(search_error):
+            out["dcg"] = out["ndcg"] = 0.0
         return out
     results = results or []
     out["n_results"] = len(results)
@@ -97,8 +100,8 @@ def _score_query(
 
 
 def _ultimate_query(query: EvalQuery, run: QueryRun, *, num_results: int, k: int) -> dict[str, Any]:
-    if all(s.error is not None for s in run.searches):
-        error = {"error_type": "all_engines_failed", "error_message": "every engine errored"}
+    if run.searches and all(s.error is not None for s in run.searches):
+        error = representative_error([s.error for s in run.searches if s.error is not None])
         return _score_query(query, None, error, [], k=k, profile=run.profile)
     best: dict[str, tuple[SearchResult, Judgement | None]] = {}
     for search, judgements in zip(run.searches, run.judgements, strict=True):
@@ -138,7 +141,7 @@ def _summarize(per_query: list[dict[str, Any]], *, latencies_ms: list[float]) ->
     return {
         "mean_ndcg": sum(scored) / len(scored) if scored else 0.0,
         "num_scored": len(scored),
-        "search_errors": sum(1 for pq in per_query if pq["search_error"] is not None),
+        **error_counts(per_query),
         "judge_errors": sum(pq["judge_errors"] for pq in per_query),
         "latency": latency_stats(latencies_ms),
         "per_query": per_query,
