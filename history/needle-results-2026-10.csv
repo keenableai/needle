@@ -1,0 +1,25 @@
+engine,engine_id,overall,overall_ci_low,overall_ci_high,scholar,news,finance,agentic_rare,legal,price_usd_per_1k,price_plan,p50_latency_ms,p95_latency_ms,unique_urls_share
+Keenable,keenable-realtime,0.7094,0.6939,0.7213,0.7648,0.6278,0.9012,0.4951,0.7583,1,Dedicated capacity — at 100+ RPS,143,349,0.1177
+perplexity,perplexity,0.6939,0.673,0.7134,0.6784,0.6448,0.9179,0.4799,0.7483,5,flat rate,1137,1648,0.1181
+perplexity-fast,perplexity-fast,0.6798,0.6618,0.6961,0.6228,0.6415,0.9112,0.4685,0.755,1,fast search — $1 / 1k requests,164,241,0.1063
+exa,exa,0.6721,0.6537,0.6901,0.5635,0.6455,0.938,0.4618,0.7517,7,pay-as-you-go,1453,3420,0.0873
+parallel,parallel,0.6718,0.6551,0.6865,0.6671,0.5909,0.9447,0.418,0.7384,5,pay-as-you-go,2417,3862,0.0731
+exa-lite,exa-lite,0.6457,0.5577,0.6652,0.5045,0.6479,0.9464,0.4519,0.678,4,pay-as-you-go,480,670,0.0873
+brave-llmcontext,brave-llmcontext,0.629,0.6138,0.6433,0.578,0.6241,0.8727,0.4344,0.6358,5,flat rate,1211,2359,0.0227
+exa-instant,exa-instant,0.5984,0.5839,0.6111,0.4116,0.572,0.9234,0.4429,0.6424,4,pay-as-you-go,466,685,0.0823
+context.dev,context,0.5947,0.568,0.6182,0.7512,0.5128,0.8275,0.3421,0.5397,0.5,"Scale — $499/mo / 1M credits, 1 credit per 10 results",1335,4166,0.0841
+deepseek,deepseek,0.5796,0.5676,0.5906,0.3198,0.6299,0.8409,0.3953,0.7119,0.75,pay-as-you-go — $0.75 / 1k requests,583,727,0.1608
+parallel-turbo,parallel-turbo,0.5709,0.5522,0.5887,0.4889,0.4602,0.8945,0.3453,0.6656,1,pay-as-you-go,337,511,0.0926
+linkup,linkup,0.5644,0.5452,0.581,0.5161,0.5574,0.8308,0.3979,0.5199,5,"pay-as-you-go — standard depth, searchResults",1305,2011,0.0812
+brave,brave,0.5633,0.5488,0.5758,0.5296,0.548,0.7973,0.3422,0.5993,5,flat rate,515,751,0.0089
+you,you,0.5528,0.5383,0.5653,0.5066,0.5438,0.7856,0.3352,0.5927,5,Web Search API plan,513,680,0.0064
+chatgpt-search,chatgpt-search,0.525,0.5018,0.5444,0.3283,0.3781,0.8057,0.3879,0.7252,10,"web_search tool — $10 / 1k calls, plus tokens",42827,55018,0.084
+octen,octen,0.5017,0.4832,0.5221,0.3297,0.5209,0.7588,0.3231,0.5762,1,pay-as-you-go,204,386,0.0831
+firecrawl,firecrawl,0.4974,0.4737,0.5202,0.5296,0.2873,0.8576,0.2795,0.5331,1.2,"Scale — $599/mo / 1M credits, 2 credits per search",821,3597,0.0088
+google/serper,google,0.4733,0.4588,0.4873,0.5057,0.2625,0.7822,0.2565,0.5596,0.3,"Serper Ultimate — $3,750 / 12.5M credits",1577,3248,0.0186
+kagi,kagi,0.4716,0.3776,0.5292,0.6082,0.2687,0.5653,0.243,0.6729,12,pay-as-you-go,1212,2090,0.018
+jina,jina,0.4282,0.4092,0.4486,0.5328,0.2067,0.7394,0.1592,0.5027,3.4,"$0.05 / 1M tokens, ≈68k tokens per search",16857,24986,0.0097
+tavily,tavily,0.417,0.3991,0.4328,0.3247,0.3117,0.8425,0.275,0.3311,5,Growth — $500/mo / 100k credits,1767,3358,0.0247
+bing/searchapi,bing,0.4041,0.3505,0.456,0.4561,0.2823,0.5645,0.1678,0.5497,1,"SearchApi.io Octo 5M — $5,000/mo",1743,7051,0.0223
+tinyfish,tinyfish,0.3993,0.368,0.454,0.2692,0.249,0.7605,0.2409,0.4768,0,free,2029,4395,0.0224
+claude-search,claude-search,0.3407,0.2475,0.4338,0.4206,0.3188,0.3643,0.1972,0.4026,10,"web search tool — $10 / 1k searches, plus tokens",34909,50660,0.0365
