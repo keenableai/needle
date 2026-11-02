@@ -1,5 +1,4 @@
 import json
-import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -12,8 +11,7 @@ def host(u):
     return (urlsplit(u).hostname or "").lower().removeprefix("www.")
 
 
-def scan(hf_dir, report, per_dir, gold_file):
-    hits = Counter()
+def scan(hf_dir, report, gold_file):
     hosts = Counter()
     in_url = 0
     total = 0
@@ -43,16 +41,13 @@ def scan(hf_dir, report, per_dir, gold_file):
                             t, sec = x.split(":")
                             tokens.append(f"title-{t}/section-{sec}")
                             tokens.append(f"title-{t}/part-{sec.split('.')[0]}/section-{sec}")
-                        if k == "docket":
-                            tokens.append(x.lower())
                 url = r["url"].lower()
                 total += 1
-                hit_url = any(tok.lower() in url for tok in tokens if tok)
-                in_url += hit_url
+                in_url += any(tok.lower() in url for tok in tokens if tok)
                 hosts[host(r["url"])] += 1
     print(f"{report}: hits {total}, id in URL {in_url} ({in_url/total:.3f})")
     print("  top hosts:", hosts.most_common(12))
 
 
-scan(scholar_dir, "scholar.json", "scholar", "scholar.jsonl")
-scan(legal_dir, "legal.json", "legal", "legal.jsonl")
+scan(scholar_dir, "scholar.json", "scholar.jsonl")
+scan(legal_dir, "legal.json", "legal.jsonl")

@@ -4,8 +4,11 @@ import sys
 from collections import Counter
 from pathlib import Path
 
+from common import tau_b
+
 hf_dir, sweep_json, sample_json, out_json = Path(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4]
-ENGINES = list(json.load(open(sweep_json))["sweep"]["money"]["0.02"]["per_engine"])
+sw = json.load(open(sweep_json))["sweep"]
+ENGINES = list(sw["money"]["0.02"]["per_engine"])
 rng = random.Random(11)
 
 gold = {}
@@ -33,7 +36,6 @@ for run in runs:
             pool[key].append((run.name, eng, pq["query"], g, pq["hit_rank"], r))
 
 sample = json.load(open(sample_json))
-start = len(sample)
 for key, n in (("money", 50), ("other", 20)):
     for run_id, eng, q, g, rank, r in rng.sample(pool[key], min(n, len(pool[key]))):
         sample.append({
@@ -44,27 +46,9 @@ for key, n in (("money", 50), ("other", 20)):
 json.dump(sample, open(out_json, "w"), indent=1)
 print("pool", {k: len(v) for k, v in pool.items()}, "sample", len(sample), Counter(s["kind"] for s in sample))
 
-def tau_b(a, b):
-    n = len(a); c = d = ta = tb = 0
-    for i in range(n):
-        for j in range(i + 1, n):
-            x, y = a[i] - a[j], b[i] - b[j]
-            if x == 0 and y == 0:
-                continue
-            if x == 0:
-                ta += 1
-            elif y == 0:
-                tb += 1
-            elif x * y > 0:
-                c += 1
-            else:
-                d += 1
-    return (c - d) / (((c + d + ta) * (c + d + tb)) ** 0.5)
-
-sw = json.load(open(sweep_json))["sweep"]
 for ft, default in (("money", "0.02"), ("numeric_band", "0.15")):
     base = sw[ft][default]["per_engine"]
     engs = list(base)
     for t, v in sw[ft].items():
         vals = [v["per_engine"][e] for e in engs]
-        print(ft, t, "recall %.3f" % v["recall"], "tau_b %.3f" % tau_b(vals, [base[e] for e in engs]))
+        print(ft, t, f"recall {v['recall']:.3f}", f"tau_b {tau_b(vals, [base[e] for e in engs]):.3f}")

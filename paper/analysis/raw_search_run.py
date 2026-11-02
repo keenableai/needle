@@ -5,14 +5,14 @@ from dataclasses import asdict
 
 from dotenv import load_dotenv
 
-load_dotenv("/home/yallen/needle/.env")
+load_dotenv()
 
-from needle.shared.cli import aclose_all, build_clients_or_exit  # noqa: E402
-from needle.shared.search import DEFAULT_SNIPPET_CHARS  # noqa: E402
-from needle.shared.search.base import search_all  # noqa: E402
+from needle.shared.cli import aclose_all, build_clients_or_exit
+from needle.shared.search import DEFAULT_SNIPPET_CHARS
+from needle.shared.search.base import search_all
 
 queries_path, out, engines = sys.argv[1], sys.argv[2], sys.argv[3]
-texts = [json.loads(l)["query_text"] for l in open(queries_path) if l.strip()]
+texts = [json.loads(line)["query_text"] for line in open(queries_path) if line.strip()]
 clients = build_clients_or_exit(engines, snippet_chars=DEFAULT_SNIPPET_CHARS)
 for name, k in (("chatgpt-search", 4), ("claude-search", 2), ("jina", 2)):
     if name in clients:

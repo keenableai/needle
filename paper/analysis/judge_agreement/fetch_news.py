@@ -13,7 +13,7 @@ def get(path, dest):
         return dest
     dest.parent.mkdir(parents=True, exist_ok=True)
     err = None
-    for attempt in range(3):
+    for _ in range(3):
         try:
             with urllib.request.urlopen(f"{BASE}/{path}", timeout=120) as r:
                 dest.write_bytes(r.read())
@@ -24,7 +24,7 @@ def get(path, dest):
     return None
 
 
-ids = [l.strip() for l in open(ids_txt) if l.strip()][::step]
+ids = [line.strip() for line in open(ids_txt) if line.strip()][::step]
 print(len(ids), "runs", ids[0], ids[-1], flush=True)
 jobs = []
 for rid in ids:
@@ -33,7 +33,7 @@ for rid in ids:
         continue
     rep = json.load(open(p))
     jobs.append((f"{rid}/fresh.jsonl", out_dir / rid / "fresh.jsonl"))
-    for name, e in rep["engines"].items():
+    for e in rep["engines"].values():
         if "per_query_path" in e:
             jobs.append((f"{rid}/{e['per_query_path']}", out_dir / rid / e["per_query_path"]))
 print(len(jobs), "files", flush=True)

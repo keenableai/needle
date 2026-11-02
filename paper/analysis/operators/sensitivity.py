@@ -6,6 +6,9 @@ from unittest.mock import patch
 
 from needle.shared.metrics import GAIN, dcg_at_k, normalize_url
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from common import tau_b
+
 hf_dir = Path(sys.argv[1])
 K = 5
 GAINS = {
@@ -22,7 +25,7 @@ runs = sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / "ndcg.json").ex
 queries = []
 for run in runs:
     rep = json.load(open(run / "ndcg.json"))
-    eng = {}
+    by_query = {}
     for name, e in rep["engines"].items():
         p = run / e.get("per_query_path", "")
         if name == "ultimate" or not p.exists():
@@ -30,8 +33,8 @@ for run in runs:
         for pq in json.load(open(p))["per_query"]:
             if pq["search_error"] is not None or pq.get("judge_errors"):
                 continue
-            eng.setdefault(pq["query"], {})[name] = pq
-    for q, d in eng.items():
+            by_query.setdefault(pq["query"], {})[name] = pq
+    for d in by_query.values():
         pool = {}
         ratings = {}
         for name, pq in d.items():
@@ -58,24 +61,6 @@ def scores(g, include_zero):
             for name, r in ratings.items():
                 acc[name].append(dcg_at_k(r, k=K) / idcg)
     return {k: sum(v) / len(v) for k, v in acc.items() if len(v) >= 500}
-
-
-def tau_b(a, b):
-    n = len(a); c = d = ta = tb = 0
-    for i in range(n):
-        for j in range(i + 1, n):
-            x, y = a[i] - a[j], b[i] - b[j]
-            if x == 0 and y == 0:
-                continue
-            if x == 0:
-                ta += 1
-            elif y == 0:
-                tb += 1
-            elif x * y > 0:
-                c += 1
-            else:
-                d += 1
-    return (c - d) / (((c + d + ta) * (c + d + tb)) ** 0.5)
 
 
 base = scores(GAINS["default"], False)

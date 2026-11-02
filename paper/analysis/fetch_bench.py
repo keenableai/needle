@@ -7,6 +7,7 @@ from pathlib import Path
 
 runs_json, out_dir, report, since, until = sys.argv[1], Path(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5]
 BASE = "https://huggingface.co/datasets/keenable-ai/needle-results/resolve/main/runs"
+QUERY_FILES = {"recall.json": "gold.jsonl", "legal.json": "legal.jsonl", "scholar.json": "scholar.jsonl"}
 
 
 def get(path, dest):
@@ -34,7 +35,9 @@ for r in runs:
     if p is None:
         continue
     rep = json.load(open(p))
-    for name, e in rep["engines"].items():
+    if QUERY_FILES.get(report) in r["artifacts"]:
+        jobs.append((f"{rid}/{QUERY_FILES[report]}", out_dir / rid / QUERY_FILES[report]))
+    for e in rep["engines"].values():
         if "per_query_path" in e:
             jobs.append((f"{rid}/{e['per_query_path']}", out_dir / rid / e["per_query_path"]))
 print(len(jobs), "files", flush=True)

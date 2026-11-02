@@ -1,42 +1,44 @@
 import json
+import os
 import sys
-from collections import Counter, defaultdict
+from collections import Counter
 
-sample_json, sweep_json = sys.argv[1], sys.argv[2]
-label_files = sys.argv[3:]
-sample = {s["id"]: s for s in json.load(open(sample_json))}
-labels = {}
-for f in label_files:
-    for row in json.load(open(f)):
-        labels[row["id"]] = row["label"].strip().lower()
-missing = sorted(set(sample) - set(labels))
-print("labeled", len(labels), "missing", missing)
+from common import wilson
 
-yes = Counter()
-tot = Counter()
-for i, s in sample.items():
-    if i not in labels:
-        continue
-    tot[s["kind"]] += 1
-    yes[s["kind"]] += labels[i] == "yes"
+audit_dir = sys.argv[1]
+
+
+def load(path):
+    return json.load(open(os.path.join(audit_dir, path)))
+
+
+def labels(*paths):
+    return {int(x["id"]): x["label"].strip().lower() for p in paths for x in load(p)}
+
+
+strata = [
+    (load("sample.json"), labels("labels_part1.json", "labels_part2.json", "labels_part3.json"), labels("exact_more/labels_recheck_orig.json")),
+    (load("exact_more/exact_sample.json"), labels("exact_more/labels_part1.json", "exact_more/labels_part2.json"), labels("exact_more/labels_recheck.json")),
+]
+yes, tot = Counter(), Counter()
+for sample, first, recheck in strata:
+    for s in sample:
+        tot[s["kind"]] += 1
+        yes[s["kind"]] += recheck.get(s["id"], first[s["id"]]) == "yes"
+rechecked = sum(len(r) for _, _, r in strata)
+reversed_ = sum(v == "yes" for _, _, r in strata for v in r.values())
+print(f"first-pass rejections rechecked on full text {rechecked}, reversed {reversed_}")
 for k in sorted(tot):
-    print(f"{k:22s} {yes[k]:3d}/{tot[k]:3d} = {yes[k]/tot[k]:.3f}")
-
-kinds = json.load(open(sweep_json))["kinds"]
+    lo, hi = wilson(yes[k], tot[k])
+    print(f"{k:22s} {yes[k]:3d}/{tot[k]:3d} = {yes[k] / tot[k]:.3f}  Wilson {lo:.2f}-{hi:.2f}")
+kinds = load("band_sweep.json")["kinds"]
 
 
 def weighted(parts):
-    n = sum(kinds[k] for k in parts)
-    return sum(kinds[k] * yes[k] / tot[k] for k in parts) / n
+    return sum(kinds[k] * yes[k] / tot[k] for k in parts) / sum(kinds[k] for k in parts)
 
 
-print("money det precision (weighted)   %.3f" % weighted(["money_exact", "money_banded"]))
-print("headcount det precision (weighted) %.3f" % weighted(["numeric_band_exact", "numeric_band_banded"]))
 others = [k for k in kinds if k.startswith("other_")]
-print("other det precision (weighted)   %.3f" % weighted(others))
-allk = [k for k in kinds]
-print("all det precision (weighted)     %.3f" % weighted(allk))
-no_reasons = [(sample[i]["kind"], sample[i]["gold"], sample[i]["query"]) for i, l in labels.items() if l == "no"]
-print("NO items:")
-for r in no_reasons:
-    print("  ", r)
+lo, hi = wilson(sum(yes[k] for k in others), sum(tot[k] for k in others))
+print(f"other fields {sum(yes[k] for k in others)}/{sum(tot[k] for k in others)}  Wilson {lo:.2f}-{hi:.2f}")
+print(f"weighted precision: money {weighted(['money_exact', 'money_banded']):.3f}  headcount {weighted(['numeric_band_exact', 'numeric_band_banded']):.3f}  other {weighted(others):.3f}  all {weighted(list(kinds)):.3f}")

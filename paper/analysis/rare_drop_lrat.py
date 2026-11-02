@@ -8,11 +8,9 @@ import pyarrow.parquet as pq
 from huggingface_hub import hf_hub_download
 
 site, pairs_json, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
-runs = json.load(open(pairs_json))["runs"]
-table_runs = {ts.replace(":", "") for v in (runs.values() if isinstance(runs, dict) else [runs]) for ts in v}
+table_runs = {ts.replace(":", "") for ts in json.load(open(pairs_json))["runs"]}
 t = pq.read_table(hf_hub_download("keenable-ai/needle-results", "agentic/rare_entity.parquet", repo_type="dataset"))
-source = dict(zip(t.column("query_text").to_pylist(), t.column("source").to_pylist()))
-
+source = dict(zip(t.column("query_text").to_pylist(), t.column("source").to_pylist(), strict=True))
 
 tot = collections.defaultdict(lambda: [0.0, 0])
 tot_drop = collections.defaultdict(lambda: [0.0, 0])
@@ -28,7 +26,7 @@ for d in sorted(glob.glob(os.path.join(site, "hfrare", "*"))):
             continue
         per[e] = {q["query"]: q for q in json.load(open(p))["per_query"]}
     queries = set.union(*[set(v) for v in per.values()])
-    for q in queries:
+    for q in sorted(queries):
         s = source.get(q, "unknown")
         src_count[s] += 1
         for e in per:

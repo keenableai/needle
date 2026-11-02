@@ -6,9 +6,7 @@ from dataclasses import replace
 
 from dotenv import load_dotenv
 
-load_dotenv("/home/yallen/needle/.env")
-
-from needle.scholar.generate import (  # noqa: E402
+from needle.scholar.generate import (
     ARXIV_DOMAINS,
     HEALTH_DOMAIN,
     OVERSAMPLE,
@@ -23,12 +21,13 @@ from needle.scholar.generate import (  # noqa: E402
     query_ok,
     title_is_specific,
 )
-from needle.scholar.projection import LLM_BUCKETS  # noqa: E402
-from needle.scholar.sources import ArxivClient, EuropePmcClient  # noqa: E402
-from needle.shared.cli import aclose_all, current_hour, require_openrouter_client, resolve_seed  # noqa: E402
-from needle.shared.concurrency import bounded_gather  # noqa: E402
-from needle.shared.llm import resolve_llm_model  # noqa: E402
+from needle.scholar.projection import LLM_BUCKETS
+from needle.scholar.sources import ArxivClient, EuropePmcClient
+from needle.shared.cli import aclose_all, current_hour, require_openrouter_client, resolve_seed
+from needle.shared.concurrency import bounded_gather
+from needle.shared.llm import resolve_llm_model
 
+load_dotenv()
 out_path = sys.argv[1]
 per_cell = int(sys.argv[2]) if len(sys.argv) > 2 else 10
 age_buckets = ("7d", "30d", "1y")

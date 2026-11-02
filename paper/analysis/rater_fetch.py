@@ -3,9 +3,9 @@ import os
 import subprocess
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor
 
 import yaml
-from concurrent.futures import ThreadPoolExecutor
 
 items_path, out_path = sys.argv[1], sys.argv[2]
 attempts = int(sys.argv[3]) if len(sys.argv) > 3 else 2

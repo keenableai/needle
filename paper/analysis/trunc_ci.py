@@ -1,8 +1,9 @@
 import json
 import random
 import sys
-from collections import defaultdict
 from pathlib import Path
+
+from common import pct, tau_b
 
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
@@ -32,7 +33,7 @@ def per_query(rating_of):
                 continue
             urls = [key[i]["url"] for i in m["positions"]]
             rs = [rating_of[i] for i in m["positions"]]
-            for u, r in zip(urls, rs):
+            for u, r in zip(urls, rs, strict=True):
                 pool[normalize_url(u)] = max(pool.get(normalize_url(u), 0), r)
             eng[name] = apply_redundancy_penalties(urls, rs, query_text=q["query"])
         idcg = dcg_at_k(sorted(pool.values(), reverse=True))
@@ -52,14 +53,8 @@ def shares(rows, idx):
     return out
 
 
-def tau_b(a, b):
-    c = d = 0
-    for i in range(len(a)):
-        for j in range(i + 1, len(a)):
-            x = (a[i] - a[j]) * (b[i] - b[j])
-            c += x > 0
-            d += x < 0
-    return (c - d) / (c + d) if c + d else float("nan")
+def ci(vals):
+    return pct(vals, .025), pct(vals, .975)
 
 
 idx = list(range(len(queries)))
@@ -75,19 +70,15 @@ for _ in range(2000):
     boots.append({"tau": tau_b([a[e] for e in names], [b[e] for e in names]), "mad": sum(abs(a[e] - b[e]) for e in names) / len(names),
                   "d": {e: b[e] - a[e] for e in names}, "lead_gap": (b[lead_f[0]] - b[lead_f[1]]), "lead_gap_full": (a[lead_f[0]] - a[lead_f[1]])})
 
-
-def ci(vals):
-    v = sorted(vals)
-    return v[int(.025 * len(v))], v[int(.975 * len(v))]
-
-
-print("tau_b %.3f ci %s" % (tau_b([sf[e] for e in names], [st[e] for e in names]), tuple(round(x, 2) for x in ci([b["tau"] for b in boots]))))
-print("mean|d| %.3f ci %s" % (sum(abs(sf[e] - st[e]) for e in names) / len(names), tuple(round(x, 3) for x in ci([b["mad"] for b in boots]))))
-res = {"tau_b": tau_b([sf[e] for e in names], [st[e] for e in names]), "tau_ci": ci([b["tau"] for b in boots]), "mad": sum(abs(sf[e] - st[e]) for e in names) / len(names), "mad_ci": ci([b["mad"] for b in boots]), "engines": {}}
+tau = tau_b([sf[e] for e in names], [st[e] for e in names])
+mad = sum(abs(sf[e] - st[e]) for e in names) / len(names)
+print(f"tau_b {tau:.3f} ci {tuple(round(x, 2) for x in ci([b['tau'] for b in boots]))}")
+print(f"mean|d| {mad:.3f} ci {tuple(round(x, 3) for x in ci([b['mad'] for b in boots]))}")
+res = {"tau_b": tau, "tau_ci": ci([b["tau"] for b in boots]), "mad": mad, "mad_ci": ci([b["mad"] for b in boots]), "engines": {}}
 for e in sorted(names, key=lambda e: -abs(st[e] - sf[e])):
     lo, hi = ci([b["d"][e] for b in boots])
     res["engines"][e] = {"full": sf[e], "trunc": st[e], "delta": st[e] - sf[e], "ci": (lo, hi)}
     if abs(st[e] - sf[e]) > 0.08:
         print(f"  {e:18s} full {sf[e]:.3f} trunc {st[e]:.3f} d {st[e]-sf[e]:+.3f} ci [{lo:+.3f},{hi:+.3f}]")
-print("leader %s vs %s: full gap %+.3f ci %s; trunc gap %+.3f ci %s" % (lead_f[0], lead_f[1], sf[lead_f[0]] - sf[lead_f[1]], tuple(round(x, 3) for x in ci([b["lead_gap_full"] for b in boots])), st[lead_f[0]] - st[lead_f[1]], tuple(round(x, 3) for x in ci([b["lead_gap"] for b in boots]))))
+print(f"leader {lead_f[0]} vs {lead_f[1]}: full gap {sf[lead_f[0]] - sf[lead_f[1]]:+.3f} ci {tuple(round(x, 3) for x in ci([b['lead_gap_full'] for b in boots]))}; trunc gap {st[lead_f[0]] - st[lead_f[1]]:+.3f} ci {tuple(round(x, 3) for x in ci([b['lead_gap'] for b in boots]))}")
 json.dump(res, open(out_path, "w"), indent=1)

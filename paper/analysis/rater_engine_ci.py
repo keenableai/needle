@@ -35,7 +35,7 @@ def spearman(x, y):
         return r
     rx, ry = rk(x), rk(y)
     mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
-    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry, strict=True))
     vx = sum((a - mx) ** 2 for a in rx) ** 0.5
     vy = sum((b - my) ** 2 for b in ry) ** 0.5
     return cov / (vx * vy) if vx and vy else float("nan")

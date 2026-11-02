@@ -1,19 +1,35 @@
-import os, sys
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import collections
 import random
+import sys
 from datetime import datetime
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
-from common import (AXIS, COLORS, FMT, GRID, INK, INK2, MUTED, NAMES, SURFACE, ULT, bootstrap, bucket_recall, load,
-                    overall, shares, window)
+from common import (
+    AXIS,
+    COLORS,
+    FMT,
+    GRID,
+    INK,
+    INK2,
+    MUTED,
+    NAMES,
+    SURFACE,
+    ULT,
+    bootstrap,
+    bucket_recall,
+    load,
+    overall,
+    pct,
+    shares,
+    window,
+)
 
 hist, out = sys.argv[1], sys.argv[2]
 rows = load(hist)
-w, end = window(rows, 30)
+w, _ = window(rows, 30)
 rnd = random.Random(1926)
 MARKERS = {"keenable": "o", "exa": "s", "perplexity": "^", "parallel": "D", "google": "v", "chatgpt-search": "P",
            "claude-search": "X", "ultimate": "o"}
@@ -49,16 +65,11 @@ def label_ends(ax, ends, x, gap, dx, floor):
     pos[-1] = max(pos[-1], floor)
     for i in range(len(pos) - 2, -1, -1):
         pos[i] = max(pos[i], pos[i + 1] + gap)
-    for (y, label, color), p in zip(ends, pos):
+    for (y, label, color), p in zip(ends, pos, strict=True):
         ax.annotate(label, xy=(x, y), xytext=(x + dx, p), fontsize=7.5, color=color, va="center", ha="left",
                     annotation_clip=False,
-                    arrowprops=dict(arrowstyle="-", color=MUTED, lw=0.4, shrinkA=0, shrinkB=1)
+                    arrowprops={"arrowstyle": "-", "color": MUTED, "lw": 0.4, "shrinkA": 0, "shrinkB": 1}
                     if abs(p - y) > gap * 0.15 else None)
-
-
-def pct(xs, p):
-    xs = sorted(xs)
-    return xs[min(len(xs) - 1, int(p * len(xs)))]
 
 
 def bucket_ci(rs, engine, bucket, n=2000):
@@ -80,7 +91,7 @@ def bucket_ci(rs, engine, bucket, n=2000):
 
 def series(ax, xs, ys, cis, e):
     c = COLORS[e]
-    for x, y, (lo, hi) in zip(xs, ys, cis):
+    for x, (lo, hi) in zip(xs, cis, strict=True):
         ax.plot([x, x], [lo, hi], color=c, lw=0.8, alpha=0.6, solid_capstyle="butt", zorder=2)
     ax.plot(xs, ys, "--" if e == ULT else "-", color=c, marker=MARKERS[e], ms=3.2, mec=SURFACE, mew=0.4,
             lw=0.9 if e == ULT else 1.0, zorder=3)
@@ -125,7 +136,7 @@ ends = []
 for i, e in enumerate(series_b):
     pts = [(j + (i - 3) * 0.05, overall(wk[k], e) * 100, [v * 100 for v in ci[k][e]])
            for j, k in enumerate(keys) if overall(wk[k], e) is not None and e in ci[k]]
-    xs, ys, cis = zip(*pts)
+    xs, ys, cis = zip(*pts, strict=True)
     series(ax2, xs, ys, cis, e)
     ends.append((ys[-1], short(e), INK))
 last = len(keys) - 1
@@ -139,6 +150,6 @@ ax2.set_xlabel("week starting", labelpad=2)
 ax2.set_title("b  Weekly overall share, %", loc="left", x=-0.14)
 clean(ax2)
 
-fig.savefig(out)
+fig.savefig(out, metadata={"CreationDate": None})
 
 print("wrote", out, "weeks", keys)

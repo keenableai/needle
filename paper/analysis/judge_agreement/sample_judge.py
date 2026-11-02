@@ -7,15 +7,17 @@ from needle.shared.judge import QueryProfile, build_judge_input, judge_instructi
 from needle.shared.metrics import normalize_url
 
 hf_dir, out_dir, n_queries, n_parts = Path(sys.argv[1]), Path(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
+report = sys.argv[5] if len(sys.argv) > 5 else "ndcg"
+cap = int(sys.argv[6]) if len(sys.argv) > 6 else None
 rng = random.Random(7)
 out_dir.mkdir(parents=True, exist_ok=True)
-runs = sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / "ndcg.json").exists() and len(list((p / "ndcg").glob("*.json"))) >= 15)
+runs = sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / f"{report}.json").exists() and len(list((p / report).glob("*.json"))) >= 15)
 step = len(runs) / n_queries
 chosen_runs = [runs[int(i * step + step / 2)] for i in range(n_queries)]
 
 items, key, queries = [], {}, []
 for qi, run in enumerate(chosen_runs):
-    rep = json.load(open(run / "ndcg.json"))
+    rep = json.load(open(run / f"{report}.json"))
     engines = {}
     for name, e in rep["engines"].items():
         p = run / e.get("per_query_path", "")
@@ -43,7 +45,8 @@ for qi, run in enumerate(chosen_runs):
         membership[name] = {"positions": positions, "penalized": pq["penalized_ratings"], "ndcg": pq["ndcg"]}
     profile = QueryProfile(**{k: tuple(v) if isinstance(v, list) else v for k, v in profile_d.items()})
     for u in uniq.values():
-        prompt = build_judge_input(q, url=u["url"], title=u["title"], content=u["snippet"], today=today, profile=profile)
+        content = u["snippet"] if cap is None else (u["snippet"] or "")[:cap]
+        prompt = build_judge_input(q, url=u["url"], title=u["title"], content=content, today=today, profile=profile)
         items.append({"id": u["id"], "q": qi, "prompt": prompt})
         key[u["id"]] = {"q": qi, "gpt": u["gpt"], "url": u["url"]}
     queries.append({"q": qi, "run": run.name, "query": q, "today": today, "profile": profile_d, "engines": membership})

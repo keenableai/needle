@@ -4,15 +4,16 @@ import json
 import random
 import sys
 
+from common import tau_b
+
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
-L = sys.argv[1]
-out_path = sys.argv[2]
+L, out_path, labels_glob = sys.argv[1:4]
 rng = random.Random(8)
 items = {it["id"]: it for it in json.load(open(f"{L}/items_key.json"))}
 lists = json.load(open(f"{L}/lists.json"))
 labels = {}
-for p in glob.glob(sys.argv[3] if len(sys.argv) > 3 else f"{L}/labels_L_part*.json"):
+for p in glob.glob(labels_glob):
     for r in json.load(open(p)):
         labels[int(r["id"])] = int(r["grade"])
 by_url = {}
@@ -26,7 +27,7 @@ def list_ndcg(lst, grade_of):
     pool = {}
     for e, urls in lst["engines"].items():
         gs = [grade_of(lst["query"], u) for u in urls]
-        for u, g in zip(urls, gs):
+        for u, g in zip(urls, gs, strict=True):
             pool[normalize_url(u)] = max(pool.get(normalize_url(u), 0), g)
         per[e] = dcg_at_k(apply_redundancy_penalties(urls, gs, query_text=lst["query"]))
     ideal = dcg_at_k(sorted(pool.values(), reverse=True))
@@ -52,20 +53,10 @@ def spearman(x, y):
         return r
     rx, ry = rk(x), rk(y)
     mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
-    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry, strict=True))
     vx = sum((a - mx) ** 2 for a in rx) ** 0.5
     vy = sum((b - my) ** 2 for b in ry) ** 0.5
     return cov / (vx * vy)
-
-
-def tau_b(a, b):
-    c = d = 0
-    for i in range(len(a)):
-        for j in range(i + 1, len(a)):
-            x = (a[i] - a[j]) * (b[i] - b[j])
-            c += x > 0
-            d += x < 0
-    return (c - d) / (c + d) if c + d else float("nan")
 
 
 def shares(sel, grade_of):
@@ -82,7 +73,7 @@ def shares(sel, grade_of):
 
 result = {}
 for bench in ("news", "agentic_rare", "all"):
-    sel = [l for l in lists if bench == "all" or l["bench"] == bench]
+    sel = [lst for lst in lists if bench == "all" or lst["bench"] == bench]
     sj, sr = shares(sel, judge_grade), shares(sel, rater_grade)
     names = sorted(e for e in sj if e in sr)
     rho = spearman([sj[e] for e in names], [sr[e] for e in names])
@@ -104,6 +95,7 @@ for bench in ("news", "agentic_rare", "all"):
 rated = {i: g for i, g in labels.items() if items[i].get("judge_rating") is not None}
 ex = sum(1 for i, g in rated.items() if items[i]["judge_rating"] == g) / len(rated)
 w1 = sum(1 for i, g in rated.items() if abs(items[i]["judge_rating"] - g) <= 1) / len(rated)
-print("item-level exact %.3f within1 %.3f mean judge %.2f rater %.2f" % (ex, w1, sum(items[i]["judge_rating"] for i in rated) / len(rated), sum(rated.values()) / len(rated)))
+mean_judge = sum(items[i]["judge_rating"] for i in rated) / len(rated)
+print(f"item-level exact {ex:.3f} within1 {w1:.3f} mean judge {mean_judge:.2f} rater {sum(rated.values()) / len(rated):.2f}")
 result["item_level"] = {"exact": ex, "within1": w1}
 json.dump(result, open(out_path, "w"), indent=1)

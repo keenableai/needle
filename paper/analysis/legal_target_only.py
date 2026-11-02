@@ -4,11 +4,12 @@ import json
 import os
 import sys
 
+from common import KEEP, order_tau
+
 from needle.shared.search.errors import account_side
 
 site, here = sys.argv[1], os.path.dirname(os.path.abspath(__file__))
 RUNS = set(json.load(open(os.path.join(here, "audit", "adjacent_pairs.json")))["runs"])
-KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
 labels = {x["id"]: x["label"] for x in json.load(open(os.path.join(here, "audit", "caselaw_identity", "labels.json")))}
 sample = json.load(open(os.path.join(here, "audit", "caselaw_identity", "sample.json")))
 frac = collections.defaultdict(lambda: [0, 0])
@@ -58,23 +59,11 @@ rows.sort(key=lambda r: -r[1])
 order_rec = [r[0] for r in rows]
 order_pooled = [r[0] for r in sorted(rows, key=lambda r: -r[2])]
 order_own = [r[0] for r in sorted(rows, key=lambda r: -r[5])]
-
-
-def tau(a, b):
-    c = d = 0
-    for i in range(len(a)):
-        for j in range(i + 1, len(a)):
-            x = (a.index(a[i]) - a.index(a[j])) * (b.index(a[i]) - b.index(a[j]))
-            c += x > 0
-            d += x < 0
-    return (c - d) / (c + d)
-
-
 print(f"pooled target fraction {pooled:.2f} (Wilson {wl:.2f}-{wh:.2f}), caselaw queries per engine {rows[0][7]}, CFR {rows[0][8]}")
 for r in rows:
     print(f"{r[0]:17s} legal R@5 {r[1]:.3f} -> target-only pooled {r[2]:.3f} [{r[3]:.3f},{r[4]:.3f}]  own-fraction {r[5]:.3f} (f={r[6]:.2f})")
-print("drop pooled: %.3f to %.3f" % (min(r[1] - r[2] for r in rows), max(r[1] - r[2] for r in rows)))
-print("tau_b order reported vs pooled-corrected %.3f, vs own-fraction %.3f" % (tau(order_rec, order_pooled), tau(order_rec, order_own)))
+print(f"drop pooled: {min(r[1] - r[2] for r in rows):.3f} to {max(r[1] - r[2] for r in rows):.3f}")
+print(f"tau_b order reported vs pooled-corrected {order_tau(order_rec, order_pooled):.3f}, vs own-fraction {order_tau(order_rec, order_own):.3f}")
 print("own-fraction order:", order_own)
-json.dump([dict(zip(("engine", "recall", "target_pooled", "target_lo", "target_hi", "target_own", "own_fraction", "n_caselaw", "n_cfr"), r)) for r in rows],
+json.dump([dict(zip(("engine", "recall", "target_pooled", "target_lo", "target_hi", "target_own", "own_fraction", "n_caselaw", "n_cfr"), r, strict=True)) for r in rows],
           open(os.path.join(here, "audit", "legal_target_only.json"), "w"), indent=1)

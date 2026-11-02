@@ -1,13 +1,14 @@
 import json
-import re
 import sys
 from collections import defaultdict
 from pathlib import Path
 
 from needle.shared.metrics import dcg_at_k, normalize_url
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from common import tau_b
+
 hf_dir, out_json = Path(sys.argv[1]), sys.argv[2]
-SITE_RE = re.compile(r"\bsite:")
 K = 5
 SKIP = {"ultimate"}
 
@@ -28,7 +29,7 @@ for run in runs:
     rep = json.load(open(run / "ndcg.json"))
     engines = {}
     for name, e in rep["engines"].items():
-        if name in SKIP or "per_query_path" not in name and "per_query_path" not in e:
+        if name in SKIP or "per_query_path" not in e:
             continue
         p = run / e["per_query_path"]
         if not p.exists():
@@ -60,7 +61,7 @@ for run in runs:
         if idcg <= 0:
             continue
         n_queries += 1
-        for name, (best, d) in contrib.items():
+        for name, (_, d) in contrib.items():
             sum_full[name] += d / idcg
             n_full[name] += 1
             pool_wo = {}
@@ -95,25 +96,6 @@ for name in rank_full:
     o = out[name]
     print(f"{name:20s} n={o['n']:5d} full={o['full']:.3f} loo={o['loo']:.3f} d={o['delta']:+.3f} >1:{o['exceed_frac']:.3f} snip={o['snippet_median']}")
 
-
-def tau_b(a, b):
-    n = len(a); c = d = ta = tb = 0
-    for i in range(n):
-        for j in range(i + 1, n):
-            x, y = a[i] - a[j], b[i] - b[j]
-            if x == 0 and y == 0:
-                continue
-            if x == 0:
-                ta += 1
-            elif y == 0:
-                tb += 1
-            elif x * y > 0:
-                c += 1
-            else:
-                d += 1
-    return (c - d) / (((c + d + ta) * (c + d + tb)) ** 0.5)
-
-
 names = list(out)
 print("tau_b full vs loo", round(tau_b([out[n]["full"] for n in names], [out[n]["loo"] for n in names]), 3))
 print("order full:", rank_full)
@@ -129,7 +111,7 @@ def spearman(a, b):
         return r
     ra, rb = ranks(a), ranks(b)
     ma, mb = sum(ra) / len(ra), sum(rb) / len(rb)
-    cov = sum((x - ma) * (y - mb) for x, y in zip(ra, rb))
+    cov = sum((x - ma) * (y - mb) for x, y in zip(ra, rb, strict=True))
     va = sum((x - ma) ** 2 for x in ra) ** 0.5
     vb = sum((y - mb) ** 2 for y in rb) ** 0.5
     return cov / (va * vb)

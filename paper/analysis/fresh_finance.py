@@ -3,10 +3,11 @@ import json
 import random
 import sys
 
-sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import ULT, load, wmean  # noqa: E402
-from strict_v2 import gold_queries, gold_rows, prose_hit, rematch_money  # noqa: E402
-from needle.shared.search.errors import account_side  # noqa: E402
+from common import ULT, load, wmean
+from finance_runs import gold_queries, gold_rows, prose_hit, rematch_money
+
+from needle.shared.cli import as_obj
+from needle.shared.search.errors import account_side
 
 queries_path, report_path, hist_path, pairs_json, out_dir = sys.argv[1:6]
 rng = random.Random(1030)
@@ -34,11 +35,11 @@ for eng, e in rep["engines"].items():
         hit = pq["hit_rank"] is not None
         if hit:
             r = pq["results"][pq["hit_rank"] - 1]
-            prov = json.loads(g["query_origin"]).get("provenance", {}) if isinstance(g["query_origin"], str) else g["query_origin"].get("provenance", {})
+            prov = as_obj(g["query_origin"]).get("provenance", {})
             if gg["field_type"] == "money":
-                is_new = not prose_hit(queries[pq["query"]], r)
-                hits_pool["reading" if is_new else "exact"].append({
-                    "kind": "money_reading" if is_new else "money_exact", "engine": eng, "query": pq["query"], "company": prov.get("entity"),
+                is_reading = not prose_hit(queries[pq["query"]], r)
+                hits_pool["reading" if is_reading else "exact"].append({
+                    "kind": "money_reading" if is_reading else "money_exact", "engine": eng, "query": pq["query"], "company": prov.get("entity"),
                     "field": gg["field"], "field_type": "money", "gold": gg["value"], "aliases": gg["aliases"], "rank": pq["hit_rank"],
                     "title": r.get("title"), "url": r["url"], "snippet": r["snippet"]})
             else:
@@ -93,11 +94,9 @@ for kind, cap in (("reading", 10 ** 6), ("exact", 100), ("other", 50)):
 rng.shuffle(sample)
 for i, s in enumerate(sample):
     s["id"] = i
-json.dump(sample, open(f"{out_dir}/sample.json", "w"), indent=1)
-for n in range(0, len(sample), 50):
-    json.dump([{k: v for k, v in s.items() if k not in ("engine", "kind")} for s in sample[n:n + 50]], open(f"{out_dir}/part{n // 50 + 1}.json", "w"), indent=0, ensure_ascii=False)
+json.dump(sample, open(f"{out_dir}/dashboard_sample.json", "w"), indent=1)
 json.dump({"num_queries": nq, "ceiling": ult, "table1_ceiling": t1_ult, "tau_b_shares": tau, "mean_abs_dshare": mad,
            "engines": {e: {"recall": recall[e], "share": fresh_share[e], "table_share": t1_share[e], "errors": errors[e],
-                           "by_type": {k: v for k, v in by_type[e].items()}} for e in engines},
+                           "by_type": dict(by_type[e])} for e in engines},
            "pool": {k: len(v) for k, v in hits_pool.items()}, "sample": len(sample)}, open(f"{out_dir}/summary.json", "w"), indent=1)
-print("sample", len(sample), "parts", (len(sample) + 49) // 50)
+print("sample", len(sample))

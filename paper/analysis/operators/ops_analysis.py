@@ -7,7 +7,6 @@ hf_dir = Path(sys.argv[1])
 runs = sorted(p for p in hf_dir.iterdir() if p.is_dir())
 hits = defaultdict(lambda: defaultdict(lambda: [0, 0]))
 ceiling = defaultdict(lambda: [0, 0])
-nq = defaultdict(int)
 for run in runs:
     syntax = {}
     for line in open(run / "gold.jsonl"):
@@ -18,7 +17,6 @@ for run in runs:
             syntax[g["query_text"]] = f"{grp}/{o.get('syntax', 'plain')}"
     rep = json.load(open(run / "recall.json"))
     per_q_any = defaultdict(bool)
-    seen_q = set()
     for eng, e in rep["engines"].items():
         if eng == "ultimate" or "per_query_path" not in e:
             continue
@@ -33,15 +31,13 @@ for run in runs:
             hits[eng][sx][0] += hit
             hits[eng][sx][1] += 1
             per_q_any[pq["query"]] |= hit
-            seen_q.add(pq["query"])
-    for q in seen_q:
+    for q, found in per_q_any.items():
         sx = syntax.get(q, "plain")
-        ceiling[sx][0] += per_q_any[q]
+        ceiling[sx][0] += found
         ceiling[sx][1] += 1
-        nq[sx] += 1
 
-syntaxes = sorted(nq, key=lambda s: -nq[s])
-print("queries by syntax", {s: nq[s] for s in syntaxes})
+syntaxes = sorted(ceiling, key=lambda s: -ceiling[s][1])
+print("queries by syntax", {s: ceiling[s][1] for s in syntaxes})
 print("ceiling", {s: round(ceiling[s][0] / ceiling[s][1], 3) for s in syntaxes})
 rows = []
 for eng in hits:

@@ -3,8 +3,7 @@ import random
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent))
-from strict_v2 import gold_queries, gold_rows, prose_hit  # noqa: E402
+from finance_runs import gold_queries, gold_rows, prose_hit
 
 hf_dir, sample_json, out_json, n_new = Path(sys.argv[1]), sys.argv[2], sys.argv[3], int(sys.argv[4])
 LO, HI = "2026-10-17", "2026-10-30"
@@ -14,7 +13,6 @@ ENGINES = [
     "claude-search", "jina", "tavily", "tinyfish", "ceramic",
 ]
 rng = random.Random(23)
-
 
 old = json.load(open(sample_json))
 seen = {(s["run"], s["engine"], s["query"], s["url"]) for s in old}

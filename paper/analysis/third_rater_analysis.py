@@ -4,6 +4,8 @@ import json
 import random
 import sys
 
+from common import pct
+
 raters_dir, out_path = sys.argv[1], sys.argv[2]
 extra = sys.argv[3:]
 rng = random.Random(3)
@@ -32,7 +34,7 @@ judge = {i: key[i]["judge_rating"] for i in ids}
 def kappa_q(xs, ys):
     n, k = len(xs), 5
     obs = [[0] * k for _ in range(k)]
-    for x, y in zip(xs, ys):
+    for x, y in zip(xs, ys, strict=True):
         obs[max(0, min(4, x))][max(0, min(4, y))] += 1
     rx = [sum(r) for r in obs]
     cy = [sum(obs[i][j] for i in range(k)) for j in range(k)]
@@ -56,7 +58,7 @@ def spearman(a, b):
         return r
     ra, rb = ranks(a), ranks(b)
     ma, mb = sum(ra) / len(ra), sum(rb) / len(rb)
-    cov = sum((x - ma) * (y - mb) for x, y in zip(ra, rb))
+    cov = sum((x - ma) * (y - mb) for x, y in zip(ra, rb, strict=True))
     va = sum((x - ma) ** 2 for x in ra) ** 0.5
     vb = sum((y - mb) ** 2 for y in rb) ** 0.5
     return cov / (va * vb) if va and vb else float("nan")
@@ -73,7 +75,7 @@ def engine_means(grade, sel):
 def stats(sel, name):
     g = {i: R[name][i]["page_grade"] for i in sel}
     s = {i: R[name][i]["snippet_grade"] for i in sel}
-    em_j, em_r = engine_means(judge, sel), engine_means(g, sel)
+    em_j, em_r, em_c = engine_means(judge, sel), engine_means(g, sel), engine_means(consensus, sel)
     common = sorted(set(em_j) & set(em_r))
     return {
         "n": len(sel),
@@ -84,18 +86,17 @@ def stats(sel, name):
         "within1_vs_judge": sum(abs(g[i] - judge[i]) <= 1 for i in sel) / len(sel),
         "mean": sum(g[i] for i in sel) / len(sel),
         "spearman_engines_vs_judge": spearman([em_j[e] for e in common], [em_r[e] for e in common]),
-        "spearman_engines_vs_consensus": spearman([engine_means(consensus, sel)[e] for e in common], [em_r[e] for e in common]),
+        "spearman_engines_vs_consensus": spearman([em_c[e] for e in common], [em_r[e] for e in common]),
         "engines": len(common),
     }
 
 
-def ci(fn, qk, b=500):
+def ci(name, metric, qk, b=500):
     vals = []
     for _ in range(b):
         samp = [qk[rng.randrange(len(qk))] for _ in qk]
-        vals.append(fn([i for q in samp for i in groups[q]]))
-    vals.sort()
-    return vals[int(.025 * b)], vals[int(.975 * b)]
+        vals.append(stats([i for q in samp for i in groups[q]], name)[metric])
+    return pct(vals, .025), pct(vals, .975)
 
 
 res = {}
@@ -105,9 +106,9 @@ for name in R:
         sel = [i for i in ids if pred(i)]
         qk = [q for q in qkeys if pred(groups[q][0])]
         st = stats(sel, name)
-        st["ci_kappa_vs_judge_page"] = ci(lambda x: stats(x, name)["kappa_vs_judge_page"], qk)
-        st["ci_kappa_vs_consensus"] = ci(lambda x: stats(x, name)["kappa_vs_consensus"], qk)
-        st["ci_spearman_engines_vs_judge"] = ci(lambda x: stats(x, name)["spearman_engines_vs_judge"], qk, 300)
+        st["ci_kappa_vs_judge_page"] = ci(name, "kappa_vs_judge_page", qk)
+        st["ci_kappa_vs_consensus"] = ci(name, "kappa_vs_consensus", qk)
+        st["ci_spearman_engines_vs_judge"] = ci(name, "spearman_engines_vs_judge", qk, 300)
         res[name][bench] = st
         print(name, bench, {k: (round(v, 3) if isinstance(v, float) else v) for k, v in st.items()}, flush=True)
 if len(R) >= 2:

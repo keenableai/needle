@@ -2,153 +2,153 @@
  "engines": {
   "keenable": {
    "table": 0.7315618385358376,
-   "prospective": 0.7134503517901016,
+   "later_day": 0.7134503517901016,
    "rank_table": 1,
-   "rank_prospective": 2,
+   "rank_later_day": 2,
    "errors": 0,
    "requests": 1224
   },
   "exa": {
    "table": 0.6846049796885835,
-   "prospective": 0.6371115054486844,
+   "later_day": 0.6371115054486844,
    "rank_table": 2,
-   "rank_prospective": 4,
+   "rank_later_day": 4,
    "errors": 0,
    "requests": 1224
   },
   "perplexity": {
    "table": 0.6689967688017532,
-   "prospective": 0.7238599701239337,
+   "later_day": 0.7238599701239337,
    "rank_table": 3,
-   "rank_prospective": 1,
+   "rank_later_day": 1,
    "errors": 0,
    "requests": 1224
   },
   "parallel": {
    "table": 0.648680572436059,
-   "prospective": 0.6578883452133887,
+   "later_day": 0.6578883452133887,
    "rank_table": 4,
-   "rank_prospective": 3,
+   "rank_later_day": 3,
    "errors": 0,
    "requests": 1224
   },
   "brave-llmcontext": {
    "table": 0.6460255422017384,
-   "prospective": 0.6174965418132606,
+   "later_day": 0.6174965418132606,
    "rank_table": 5,
-   "rank_prospective": 5,
+   "rank_later_day": 5,
    "errors": 0,
    "requests": 1224
   },
   "linkup": {
    "table": 0.5757800746767822,
-   "prospective": 0.5753526872073573,
+   "later_day": 0.5753526872073573,
    "rank_table": 6,
-   "rank_prospective": 7,
+   "rank_later_day": 7,
    "errors": 0,
    "requests": 1224
   },
   "brave": {
    "table": 0.5734457943579162,
-   "prospective": 0.559078133205444,
+   "later_day": 0.559078133205444,
    "rank_table": 7,
-   "rank_prospective": 9,
+   "rank_later_day": 9,
    "errors": 0,
    "requests": 1224
   },
   "context": {
    "table": 0.5707256301479259,
-   "prospective": 0.5198084095254865,
+   "later_day": 0.5198084095254865,
    "rank_table": 8,
-   "rank_prospective": 11,
+   "rank_later_day": 11,
    "errors": 0,
    "requests": 1224
   },
   "deepseek": {
    "table": 0.5685247090018553,
-   "prospective": 0.5839326004697443,
+   "later_day": 0.5839326004697443,
    "rank_table": 9,
-   "rank_prospective": 6,
+   "rank_later_day": 6,
    "errors": 0,
    "requests": 1224
   },
   "you": {
    "table": 0.5580631412760251,
-   "prospective": 0.5601129659887943,
+   "later_day": 0.5601129659887943,
    "rank_table": 10,
-   "rank_prospective": 8,
+   "rank_later_day": 8,
    "errors": 0,
    "requests": 1224
   },
   "chatgpt-search": {
    "table": 0.5145934395671152,
-   "prospective": 0.5329589942327935,
+   "later_day": 0.5329589942327935,
    "rank_table": 11,
-   "rank_prospective": 10,
+   "rank_later_day": 10,
    "errors": 67,
    "requests": 1224
   },
   "firecrawl": {
    "table": 0.5068808200104599,
-   "prospective": 0.47680279063414843,
+   "later_day": 0.47680279063414843,
    "rank_table": 12,
-   "rank_prospective": 13,
+   "rank_later_day": 13,
    "errors": 0,
    "requests": 1224
   },
   "octen": {
    "table": 0.502343310773161,
-   "prospective": 0.4967605050400451,
+   "later_day": 0.4967605050400451,
    "rank_table": 13,
-   "rank_prospective": 12,
+   "rank_later_day": 12,
    "errors": 0,
    "requests": 1224
   },
   "google": {
    "table": 0.47729394861143487,
-   "prospective": 0.43003611890830606,
+   "later_day": 0.43003611890830606,
    "rank_table": 14,
-   "rank_prospective": 15,
+   "rank_later_day": 15,
    "errors": 0,
    "requests": 1224
   },
   "tinyfish": {
    "table": 0.44499164158919935,
-   "prospective": 0.37396225451305465,
+   "later_day": 0.37396225451305465,
    "rank_table": 15,
-   "rank_prospective": 16,
+   "rank_later_day": 16,
    "errors": 291,
    "requests": 1224
   },
   "bing": {
    "table": 0.44137233038403895,
-   "prospective": 0.457973260062895,
+   "later_day": 0.457973260062895,
    "rank_table": 16,
-   "rank_prospective": 14,
+   "rank_later_day": 14,
    "errors": 0,
    "requests": 1224
   },
   "jina": {
    "table": 0.4378160542503893,
-   "prospective": 0.36986662618143773,
+   "later_day": 0.36986662618143773,
    "rank_table": 17,
-   "rank_prospective": 17,
+   "rank_later_day": 17,
    "errors": 37,
    "requests": 1224
   },
   "tavily": {
    "table": 0.4258644661281877,
-   "prospective": 0.3536736135659916,
+   "later_day": 0.3536736135659916,
    "rank_table": 18,
-   "rank_prospective": 18,
+   "rank_later_day": 18,
    "errors": 1,
    "requests": 1224
   },
   "ceramic": {
    "table": 0.1471400832524029,
-   "prospective": 0.1387495508310039,
+   "later_day": 0.1387495508310039,
    "rank_table": 19,
-   "rank_prospective": 19,
+   "rank_later_day": 19,
    "errors": 0,
    "requests": 1224
   }

@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 
 from needle.shared.search.ceramic import CeramicClient
 
-load_dotenv("/home/yallen/needle/.env")
+load_dotenv()
 queries_path, out_path, n = sys.argv[1], sys.argv[2], int(sys.argv[3])
-rows = [json.loads(l) for l in open(queries_path) if l.strip()]
+rows = [json.loads(line) for line in open(queries_path) if line.strip()]
 site_rows = [r for r in rows if "site:" in r["query_text"]][:n]
 client = CeramicClient(api_key=os.environ["CERAMIC_API_KEY"])
 
@@ -49,7 +49,10 @@ async def main():
         print(f"{host:22s} raw host-share {rec['raw_host_share']:.2f} ({len(raw)}) stripped {rec['stripped_host_share']:.2f} ({len(strip)}) jaccard {rec['overlap']:.2f}", flush=True)
     ok = [o for o in out if "error" not in o]
     if ok:
-        print("mean host share raw %.2f stripped %.2f; mean jaccard %.2f; queries %d" % (sum(o["raw_host_share"] for o in ok) / len(ok), sum(o["stripped_host_share"] for o in ok) / len(ok), sum(o["overlap"] for o in ok) / len(ok), len(ok)))
+        raw_share = sum(o["raw_host_share"] for o in ok) / len(ok)
+        stripped_share = sum(o["stripped_host_share"] for o in ok) / len(ok)
+        jaccard = sum(o["overlap"] for o in ok) / len(ok)
+        print(f"mean host share raw {raw_share:.2f} stripped {stripped_share:.2f}; mean jaccard {jaccard:.2f}; queries {len(ok)}")
     json.dump(out, open(out_path, "w"), indent=1)
     await client.aclose()
 

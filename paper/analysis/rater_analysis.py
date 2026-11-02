@@ -5,6 +5,8 @@ import os
 import random
 import sys
 
+from common import pct
+
 items_path, raters_dir, out_json = sys.argv[1], sys.argv[2], sys.argv[3]
 rng = random.Random(9)
 items = {it["id"]: it for it in json.load(open(items_path))}
@@ -26,7 +28,7 @@ print("items labeled by both", len(ids), "of", len(items), "A", len(A), "B", len
 def qkappa(x, y, k=5):
     n = len(x)
     o = [[0] * k for _ in range(k)]
-    for a, b in zip(x, y):
+    for a, b in zip(x, y, strict=True):
         o[a][b] += 1
     rx = [sum(o[i]) for i in range(k)]
     ry = [sum(o[i][j] for i in range(k)) for j in range(k)]
@@ -52,7 +54,7 @@ def rank(v):
 def spearman(x, y):
     rx, ry = rank(x), rank(y)
     mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
-    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry, strict=True))
     vx = sum((a - mx) ** 2 for a in rx) ** 0.5
     vy = sum((b - my) ** 2 for b in ry) ** 0.5
     return cov / (vx * vy) if vx and vy else float("nan")
@@ -60,7 +62,7 @@ def spearman(x, y):
 
 def agree(x, y):
     n = len(x)
-    return {"n": n, "exact": sum(a == b for a, b in zip(x, y)) / n, "within1": sum(abs(a - b) <= 1 for a, b in zip(x, y)) / n, "kappa_q": qkappa(x, y), "spearman": spearman(x, y), "mean_x": sum(x) / n, "mean_y": sum(y) / n}
+    return {"n": n, "exact": sum(a == b for a, b in zip(x, y, strict=True)) / n, "within1": sum(abs(a - b) <= 1 for a, b in zip(x, y, strict=True)) / n, "kappa_q": qkappa(x, y), "spearman": spearman(x, y), "mean_x": sum(x) / n, "mean_y": sum(y) / n}
 
 
 def boot_kappa(x, y, groups, n=1000):
@@ -72,8 +74,7 @@ def boot_kappa(x, y, groups, n=1000):
     for _ in range(n):
         idx = [i for _ in clusters for i in clusters[rng.randrange(len(clusters))]]
         ks.append(qkappa([x[i] for i in idx], [y[i] for i in idx]))
-    ks.sort()
-    return ks[int(0.025 * n)], ks[int(0.975 * n)]
+    return pct(ks, 0.025), pct(ks, 0.975)
 
 
 def g(rec, key):
@@ -88,8 +89,8 @@ for bench in ("news", "agentic_rare", "all"):
     b_page = [g(B[i], "page_grade") for i in sel]
     a_snip = [g(A[i], "snippet_grade") for i in sel]
     b_snip = [g(B[i], "snippet_grade") for i in sel]
-    cons = [round((a + b) / 2 + 1e-9) for a, b in zip(a_page, b_page)]
-    cons_snip = [round((a + b) / 2 + 1e-9) for a, b in zip(a_snip, b_snip)]
+    cons = [round((a + b) / 2 + 1e-9) for a, b in zip(a_page, b_page, strict=True)]
+    cons_snip = [round((a + b) / 2 + 1e-9) for a, b in zip(a_snip, b_snip, strict=True)]
     missing = sum(1 for i in sel if A[i].get("page_missing") or B[i].get("page_missing"))
     r = {
         "n": len(sel), "page_missing_either": missing,
@@ -98,14 +99,14 @@ for bench in ("news", "agentic_rare", "all"):
         "judge_vs_A_snippet": agree(judge, a_snip), "judge_vs_B_snippet": agree(judge, b_snip),
         "judge_vs_consensus_page": agree(judge, cons), "judge_vs_consensus_snippet": agree(judge, cons_snip),
         "snippet_to_page_shift": {
-            "A_mean": sum(p - s for p, s in zip(a_page, a_snip)) / len(sel),
-            "B_mean": sum(p - s for p, s in zip(b_page, b_snip)) / len(sel),
-            "A_changed": sum(p != s for p, s in zip(a_page, a_snip)) / len(sel),
-            "B_changed": sum(p != s for p, s in zip(b_page, b_snip)) / len(sel),
-            "A_up": sum(p > s for p, s in zip(a_page, a_snip)) / len(sel),
-            "A_down": sum(p < s for p, s in zip(a_page, a_snip)) / len(sel),
-            "B_up": sum(p > s for p, s in zip(b_page, b_snip)) / len(sel),
-            "B_down": sum(p < s for p, s in zip(b_page, b_snip)) / len(sel),
+            "A_mean": sum(p - s for p, s in zip(a_page, a_snip, strict=True)) / len(sel),
+            "B_mean": sum(p - s for p, s in zip(b_page, b_snip, strict=True)) / len(sel),
+            "A_changed": sum(p != s for p, s in zip(a_page, a_snip, strict=True)) / len(sel),
+            "B_changed": sum(p != s for p, s in zip(b_page, b_snip, strict=True)) / len(sel),
+            "A_up": sum(p > s for p, s in zip(a_page, a_snip, strict=True)) / len(sel),
+            "A_down": sum(p < s for p, s in zip(a_page, a_snip, strict=True)) / len(sel),
+            "B_up": sum(p > s for p, s in zip(b_page, b_snip, strict=True)) / len(sel),
+            "B_down": sum(p < s for p, s in zip(b_page, b_snip, strict=True)) / len(sel),
         },
         "ci_kappa_A_vs_B_page": boot_kappa(a_page, b_page, [items[i]["query"] for i in sel]),
         "ci_kappa_judge_vs_consensus_page": boot_kappa(judge, cons, [items[i]["query"] for i in sel]),
@@ -115,16 +116,16 @@ for bench in ("news", "agentic_rare", "all"):
     plain = [i for i in sel if i not in set(quoted)]
     r["quoted_queries"] = {"items": len(quoted), "queries": len({items[i]["query"] for i in quoted}),
                            "wrapped": len({items[i]["query"] for i in quoted if items[i]["query"].strip().lower().startswith("query:")}),
-                           "consensus_zero_share": sum(1 for i, c in zip(sel, cons) if i in set(quoted) and c == 0) / max(1, len(quoted)),
-                           "judge_zero_share": sum(1 for i, j in zip(sel, judge) if i in set(quoted) and j == 0) / max(1, len(quoted))}
+                           "consensus_zero_share": sum(1 for i, c in zip(sel, cons, strict=True) if i in set(quoted) and c == 0) / max(1, len(quoted)),
+                           "judge_zero_share": sum(1 for i, j in zip(sel, judge, strict=True) if i in set(quoted) and j == 0) / max(1, len(quoted))}
     if plain:
         pj = [int(items[i]["judge_rating"]) for i in plain]
         pa = [g(A[i], "page_grade") for i in plain]
         pb = [g(B[i], "page_grade") for i in plain]
-        pc = [round((a + b) / 2 + 1e-9) for a, b in zip(pa, pb)]
+        pc = [round((a + b) / 2 + 1e-9) for a, b in zip(pa, pb, strict=True)]
         r["unquoted_only"] = {"n": len(plain), "A_vs_B_page": agree(pa, pb), "judge_vs_consensus_page": agree(pj, pc)}
     per_eng = collections.defaultdict(lambda: [[], []])
-    for i, j, c in zip(sel, judge, cons):
+    for i, j, c in zip(sel, judge, cons, strict=True):
         for e, _rank in items[i]["engines"]:
             per_eng[e][0].append(j)
             per_eng[e][1].append(c)

@@ -7,7 +7,7 @@ from pathlib import Path
 hf_dir, out_json, n = Path(sys.argv[1]), sys.argv[2], int(sys.argv[3])
 rng = random.Random(31)
 pool = []
-for run in sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / "legal.json").exists()):
+for run in sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / "legal.json").exists() and (p / "legal.jsonl").exists()):
     gold = {}
     for line in open(run / "legal.jsonl"):
         if line.strip():

@@ -1,5 +1,4 @@
 import json
-import sys
 
 here = __file__.rsplit("/", 1)[0] + "/audit/"
 run = json.load(open(here + "adjacent_pairs.json"))
@@ -8,12 +7,8 @@ mat = json.load(open(here + "matched_pairs.json"))
 order = run["order"]
 
 
-def key(a, b, d):
-    return d.get(f"{a}|{b}") or d.get(f"{b}|{a}")
-
-
 def sep(a, b, d, field):
-    v = key(a, b, d)
+    v = d.get(f"{a}|{b}") or d.get(f"{b}|{a}")
     return bool(v and v.get(field))
 
 
@@ -38,8 +33,7 @@ print(counts)
 print("Bonferroni pairs separated on the primary estimate but not under day resampling or matched support:", len(lost))
 for x in lost:
     print("  ", x)
-sens = [x for x in lost if {x[0], x[1]} & {"bing", "chatgpt-search", "parallel"}]
-print("of which involve Bing/ChatGPT/Parallel:", len(sens))
 fully = [e for e in order if all(sep(e, f, run["all_pairs"], "separated_bonferroni") and sep(e, f, day["all_pairs"], "separated_bonferroni") and sep(e, f, mat["pairs"], "sep_bonferroni") for f in order if f != e)]
 print("separated from every other engine under all three (Bonferroni):", fully)
-json.dump({"counts": counts, "lost": lost, "fully_all_three": fully}, open(here + "pairs_survive.json", "w"), indent=1)
+json.dump({"counts": counts, "lost": lost, "fully_all_three": fully},
+          open(here + "pairs_survive.json", "w"), indent=1)

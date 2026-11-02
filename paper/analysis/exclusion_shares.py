@@ -2,7 +2,6 @@ import collections
 import json
 import sys
 
-sys.path.insert(0, __file__.rsplit("/", 1)[0])
 from common import BENCHES, account_errors
 
 hist, pairs = sys.argv[1], sys.argv[2]

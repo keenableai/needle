@@ -11,7 +11,7 @@ rng = random.Random(4)
 def qkappa(x, y, k=5):
     n = len(x)
     o = [[0] * k for _ in range(k)]
-    for a, b in zip(x, y):
+    for a, b in zip(x, y, strict=True):
         o[a][b] += 1
     rx = [sum(o[i]) for i in range(k)]
     ry = [sum(o[i][j] for i in range(k)) for j in range(k)]
@@ -31,7 +31,7 @@ def agree(x, y, groups):
         idx = [i for _ in clusters for i in clusters[rng.randrange(len(clusters))]]
         ks.append(qkappa([x[i] for i in idx], [y[i] for i in idx]))
     ks.sort()
-    return {"n": n, "exact": round(sum(a == b for a, b in zip(x, y)) / n, 3), "within1": round(sum(abs(a - b) <= 1 for a, b in zip(x, y)) / n, 3),
+    return {"n": n, "exact": round(sum(a == b for a, b in zip(x, y, strict=True)) / n, 3), "within1": round(sum(abs(a - b) <= 1 for a, b in zip(x, y, strict=True)) / n, 3),
             "kappa_q": round(qkappa(x, y), 3), "kappa_ci": (round(ks[25], 3), round(ks[974], 3)), "mean_x": round(sum(x) / n, 2), "mean_y": round(sum(y) / n, 2)}
 
 

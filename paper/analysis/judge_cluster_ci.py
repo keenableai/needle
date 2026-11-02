@@ -1,8 +1,9 @@
 import json
 import random
 import sys
-from collections import defaultdict
 from pathlib import Path
+
+from common import pct
 
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
@@ -11,12 +12,14 @@ rng = random.Random(9)
 
 def spearman(a, b):
     def ranks(v):
-        order = sorted(range(len(v)), key=lambda i: v[i]); r = [0.0] * len(v)
+        order = sorted(range(len(v)), key=lambda i: v[i])
+        r = [0.0] * len(v)
         for pos, i in enumerate(order):
             r[i] = pos
         return r
-    ra, rb = ranks(a), ranks(b); ma, mb = sum(ra) / len(ra), sum(rb) / len(rb)
-    return sum((x - ma) * (y - mb) for x, y in zip(ra, rb)) / (sum((x - ma) ** 2 for x in ra) ** 0.5 * sum((y - mb) ** 2 for y in rb) ** 0.5)
+    ra, rb = ranks(a), ranks(b)
+    ma, mb = sum(ra) / len(ra), sum(rb) / len(rb)
+    return sum((x - ma) * (y - mb) for x, y in zip(ra, rb, strict=True)) / (sum((x - ma) ** 2 for x in ra) ** 0.5 * sum((y - mb) ** 2 for y in rb) ** 0.5)
 
 
 def run(sample_dir, minq):
@@ -32,13 +35,14 @@ def run(sample_dir, minq):
     def per_query_scores(rating_of):
         out = []
         for q in queries:
-            pool = {}; eng = {}
+            pool = {}
+            eng = {}
             for name, m in q["engines"].items():
                 if any(i not in rating_of for i in m["positions"]):
                     continue
                 urls = [key[i]["url"] for i in m["positions"]]
                 rs = [rating_of[i] for i in m["positions"]]
-                for u, r in zip(urls, rs):
+                for u, r in zip(urls, rs, strict=True):
                     pool[normalize_url(u)] = max(pool.get(normalize_url(u), 0), r)
                 eng[name] = apply_redundancy_penalties(urls, rs, query_text=q["query"])
             idcg = dcg_at_k(sorted(pool.values(), reverse=True))
@@ -57,8 +61,8 @@ def run(sample_dir, minq):
         return spearman([sum(sg[e]) / len(sg[e]) for e in names], [sum(so[e]) / len(so[e]) for e in names])
 
     point = agree(range(len(queries)))
-    boots = sorted(v for v in (agree([rng.randrange(len(queries)) for _ in queries]) for _ in range(2000)) if v is not None)
-    print(f"{sample_dir}: engine-level Spearman {point:.3f}, query-cluster bootstrap 95% CI {boots[int(0.025*len(boots))]:.2f}..{boots[int(0.975*len(boots))]:.2f}")
+    boots = [v for v in (agree([rng.randrange(len(queries)) for _ in queries]) for _ in range(2000)) if v is not None]
+    print(f"{sample_dir}: engine-level Spearman {point:.3f}, query-cluster bootstrap 95% CI {pct(boots, .025):.2f}..{pct(boots, .975):.2f}")
 
 
 run(sys.argv[1], 6)

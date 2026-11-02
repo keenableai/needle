@@ -49,7 +49,7 @@ for run in sorted(p for p in sch_dir.iterdir() if p.is_dir() and (p / "scholar.j
         if line.strip():
             g = json.loads(line)
             o = json.loads(g["query_origin"])
-            meta[g["query_text"]] = (o["bucket"], o["provenance"]["title"], o["provenance"].get("url"))
+            meta[g["query_text"]] = (o["bucket"], o["provenance"]["title"])
     rep = json.load(open(run / "scholar.json"))
     for eng, e in rep["engines"].items():
         p = run / e.get("per_query_path", "")
@@ -63,7 +63,7 @@ for run in sorted(p for p in sch_dir.iterdir() if p.is_dir() and (p / "scholar.j
                 sch_pool.append((run.name, eng, pq, m))
 print("scholar body/question misses pool", len(sch_pool))
 sch_items = []
-for run, eng, pq, (bucket, title, url) in rng.sample(sch_pool, 100):
+for run, eng, pq, (bucket, title) in rng.sample(sch_pool, 100):
     sch_items.append({
         "id": len(sch_items), "run": run, "engine": eng, "bucket": bucket, "query": pq["query"], "target_title": title,
         "results": [{"rank": i + 1, "title": r.get("title"), "url": r["url"], "snippet": (r.get("snippet") or "")[:500]} for i, r in enumerate(pq["results"][:10])],

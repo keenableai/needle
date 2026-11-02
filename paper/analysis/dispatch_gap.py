@@ -4,9 +4,10 @@ import os
 import sys
 from datetime import datetime
 
+from common import KEEP, pct
+
 site = sys.argv[1]
 LO, HI = "2026-10-17", "2026-10-30"
-KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
 
 
 def ts(s):
@@ -16,7 +17,7 @@ def ts(s):
 gaps = []
 spans = []
 order_first = {}
-for bench, folder, report in (("news", "hfnews", "ndcg.json"), ("agentic_rare", "hfrare", "agentic_rare.json")):
+for folder, report in (("hfnews", "ndcg.json"), ("hfrare", "agentic_rare.json")):
     for d in sorted(glob.glob(os.path.join(site, folder, "*"))):
         name = os.path.basename(d)
         if not (LO <= name[:10] < HI) or not os.path.exists(os.path.join(d, report)):
@@ -43,15 +44,8 @@ for bench, folder, report in (("news", "hfnews", "ndcg.json"), ("agentic_rare", 
             order_first[first] = order_first.get(first, 0) + 1
         if run_times:
             spans.append((max(run_times) - min(run_times)).total_seconds())
-gaps.sort()
-spans.sort()
-
-
-def pct(xs, p):
-    return xs[min(len(xs) - 1, int(p * len(xs)))]
-
 
 print("queries", len(gaps), "runs", len(spans))
-print("same-query dispatch spread across engines (s): median %.0f, p90 %.0f, max %.0f" % (pct(gaps, .5), pct(gaps, .9), gaps[-1]))
-print("whole-run span (s): median %.0f, p90 %.0f" % (pct(spans, .5), pct(spans, .9)))
+print(f"same-query dispatch spread across engines (s): median {pct(gaps, .5):.0f}, p90 {pct(gaps, .9):.0f}, max {max(gaps):.0f}")
+print(f"whole-run span (s): median {pct(spans, .5):.0f}, p90 {pct(spans, .9):.0f}")
 print("engine dispatched first most often:", sorted(order_first.items(), key=lambda kv: -kv[1])[:5])

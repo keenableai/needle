@@ -1,13 +1,15 @@
+import collections
 import glob
 import json
 import os
 import random
 import sys
 
+from common import KEEP
+
 from needle.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult, capped_snippet
 
 site, pairs_json, out_dir, per_bench, seed = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]), int(sys.argv[5])
-KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
 table_runs = {ts.replace(":", "") for ts in json.load(open(pairs_json))["runs"]}
 rng = random.Random(seed)
 os.makedirs(out_dir, exist_ok=True)
@@ -48,10 +50,7 @@ for bench, folder, report in (("news", "hfnews", "ndcg.json"), ("agentic_rare", 
                                "judge_rating": r.get("rating"), "bench": bench}
                 urls.append(u)
             per_engine[e] = urls
-        base = len(items)
-        for u, it in seen.items():
-            it["id"] = base + list(seen).index(u)
-            items.append(it)
+        items.extend(seen.values())
         lists.append({"bench": bench, "run": name, "qi": qi, "query": q, "today": today, "engines": per_engine, "penalized": {e: pqs[e][qi].get("penalized_ratings") for e in KEEP}, "ndcg": {e: pqs[e][qi].get("ndcg") for e in KEEP}})
 
 json.dump(items, open(os.path.join(out_dir, "items_key.json"), "w"))
@@ -63,4 +62,4 @@ parts = [order[i:i + size] for i in range(0, len(order), size)]
 os.makedirs(os.path.join(out_dir, "rater_L"), exist_ok=True)
 for i, part in enumerate(parts):
     json.dump([{k: v for k, v in it.items() if k not in ("judge_rating", "bench")} for it in part], open(os.path.join(out_dir, "rater_L", f"part{i + 1}.json"), "w"), indent=0)
-print("queries", len(lists), "items", len(items), "parts", len(parts), "judge dist", sorted(__import__("collections").Counter(it["judge_rating"] for it in items).items(), key=str))
+print("queries", len(lists), "items", len(items), "parts", len(parts), "judge dist", sorted(collections.Counter(it["judge_rating"] for it in items).items(), key=str))

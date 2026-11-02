@@ -1,11 +1,10 @@
 import json
 import sys
 
-sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import NAMES  # noqa: E402
+from common import NAMES
 
 out = sys.argv[1]
-files = dict(zip(sys.argv[2::2], sys.argv[3::2]))
+files = dict(zip(sys.argv[2::2], sys.argv[3::2], strict=False))
 data = {b: json.load(open(p))["engines"] for b, p in files.items()}
 COLS = [("finance", "filing", ("quoted", "site", "date")), ("legal", "caselaw", ("quoted", "site", "date")), ("legal", "code", ("quoted", "site"))]
 cols = [(b, bk, vs) for b, bk, vs in COLS if b in data]
@@ -32,8 +31,7 @@ head1 = [""]
 rules = []
 start = 2
 for b, bk, vs in cols:
-    n = first if b == "finance" else data[b]
-    targets = n.get(engines[0], {}).get(bk, {}).get("n", "?")
+    targets = data[b].get(engines[0], {}).get(bk, {}).get("n", "?")
     head1.append(rf"\multicolumn{{{1 + len(vs)}}}{{c}}{{{title[bk]} ({targets} targets)}}")
     rules.append(rf"\cmidrule(lr){{{start}-{start + len(vs)}}}")
     start += 1 + len(vs)

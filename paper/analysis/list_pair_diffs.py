@@ -1,4 +1,3 @@
-import collections
 import glob
 import json
 import random
@@ -6,12 +5,12 @@ import sys
 
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
-L, out_path = sys.argv[1], sys.argv[2]
+L, out_path, labels_glob = sys.argv[1:4]
 rng = random.Random(21)
 items = {it["id"]: it for it in json.load(open(f"{L}/items_key.json"))}
 lists = json.load(open(f"{L}/lists.json"))
 labels = {}
-for p in glob.glob(sys.argv[3] if len(sys.argv) > 3 else f"{L}/labels_L_part*.json"):
+for p in glob.glob(labels_glob):
     for r in json.load(open(p)):
         labels[int(r["id"])] = int(r["grade"])
 by_url = {(it["query"], it["url"]): it["id"] for it in items.values()}
@@ -34,7 +33,7 @@ def grades(lst, which):
     return {e: v / ideal for e, v in per.items()} if ideal > 0 else None
 
 
-pre = {which: [grades(l, which) for l in lists] for which in ("judge", "rater")}
+pre = {which: [grades(lst, which) for lst in lists] for which in ("judge", "rater")}
 PAIRS = [("keenable", "exa"), ("exa", "perplexity"), ("keenable", "parallel"), ("keenable", "claude-search"), ("brave-llmcontext", "linkup"),
          ("you", "claude-search"), ("claude-search", "chatgpt-search"), ("bing", "tinyfish"), ("tinyfish", "ceramic"), ("keenable", "ceramic")]
 
@@ -56,7 +55,8 @@ for a, b in PAIRS:
         samp = [rng.randrange(n) for _ in range(n)]
         bj.append(share_diff(samp, "judge", a, b))
         br.append(share_diff(samp, "rater", a, b))
-    bj.sort(); br.sort()
+    bj.sort()
+    br.sort()
     res[f"{a}|{b}"] = {"judge": pj, "judge_ci": (bj[25], bj[974]), "rater": pr, "rater_ci": (br[25], br[974])}
     print(f"{a+'-'+b:32s} {100*pj:+5.1f} [{100*bj[25]:+5.1f},{100*bj[974]:+5.1f}]  {100*pr:+5.1f} [{100*br[25]:+5.1f},{100*br[974]:+5.1f}]")
 json.dump(res, open(out_path, "w"), indent=1)

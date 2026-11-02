@@ -3,15 +3,13 @@ import json
 import os
 import sys
 
-sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import BENCHES, FAMILIES, NAMES, ULT, load, overall, shares  # noqa: E402
-from strict_v2 import finance_run, prose_hit  # noqa: E402
+from common import NAMES, kept_engines, load, order_tau, overall, shares
+from finance_runs import finance_run, prose_hit
 
 hist, pairs_json, site, precision_json, out_path = sys.argv[1:6]
-rows = load(hist)
 table_runs = set(json.load(open(pairs_json))["runs"])
-window = [r for r in rows if r["ts"] in table_runs]
-keep = [e for e in sorted({r["engine"] for r in window} - {ULT}) if e not in FAMILIES or e == "brave-llmcontext"]
+window = [r for r in load(hist) if r["ts"] in table_runs]
+keep = kept_engines({r["engine"] for r in window})
 reading = collections.Counter()
 for ts in sorted({r["ts"] for r in window if r["bench"] == "finance"}):
     rep, queries = finance_run(os.path.join(site, "hf", ts.replace(":", "")))
@@ -21,7 +19,7 @@ for ts in sorted({r["ts"] for r in window if r["bench"] == "finance"}):
             reading[e] += q.field_type == "money" and pq["hit_rank"] is not None and not prose_hit(q, pq["results"][pq["hit_rank"] - 1])
 prec = json.load(open(precision_json))
 pooled = prec["money_reading"]["precision"]
-per = {e: v for e, v in prec["money_by_engine"].items()}
+per = prec["money_by_engine"]
 
 
 def p_engine(e):
@@ -44,22 +42,10 @@ o0 = {e: overall(sh0, e) for e in keep if overall(sh0, e) is not None}
 o1 = {e: overall(sh1, e) for e in keep if overall(sh1, e) is not None}
 order0 = sorted(o0, key=lambda e: -o0[e])
 order1 = sorted(o1, key=lambda e: -o1[e])
-
-
-def tau_b(a, b):
-    c = d = 0
-    for i in range(len(a)):
-        for j in range(i + 1, len(a)):
-            x = (a.index(a[i]) - a.index(a[j])) * (b.index(a[i]) - b.index(a[j]))
-            c += x > 0
-            d += x < 0
-    return (c - d) / (c + d)
-
-
 fin_order0 = sorted(keep, key=lambda e: -(sh0[e]["finance"][1] or 0))
 fin_order1 = sorted(keep, key=lambda e: -(sh1[e]["finance"][1] or 0))
 res = {"pooled_precision": pooled, "engines": {}}
-print(f"finance order tau_b {tau_b(fin_order0, fin_order1):.3f}; overall order tau_b {tau_b(order0, order1):.3f}")
+print(f"finance order tau_b {order_tau(fin_order0, fin_order1):.3f}; overall order tau_b {order_tau(order0, order1):.3f}")
 for e in order0:
     infl = reading[e] * (1 - p_engine(e)) / scored[e] if scored[e] else 0
     res["engines"][e] = {"reading_hits": reading[e], "finance_scored": scored[e], "precision_used": p_engine(e), "finance_recall_drop": infl,

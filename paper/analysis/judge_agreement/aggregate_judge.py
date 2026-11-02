@@ -5,6 +5,9 @@ from pathlib import Path
 
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from common import tau_b
+
 sample_dir = Path(sys.argv[1])
 MINQ = int(sys.argv[2]) if len(sys.argv) > 2 else 6
 key = {int(k): v for k, v in json.load(open(sample_dir / "key.json")).items()}
@@ -20,13 +23,13 @@ a = [key[i]["gpt"] for i in ids]
 b = [labels[i] for i in ids]
 n = len(ids)
 
-exact = sum(x == y for x, y in zip(a, b)) / n
-within1 = sum(abs(x - y) <= 1 for x, y in zip(a, b)) / n
+exact = sum(x == y for x, y in zip(a, b, strict=True)) / n
+within1 = sum(abs(x - y) <= 1 for x, y in zip(a, b, strict=True)) / n
 
 
 def kappa(a, b, weight):
     cats = range(5)
-    obs = Counter(zip(a, b))
+    obs = Counter(zip(a, b, strict=True))
     pa, pb = Counter(a), Counter(b)
     num = sum(weight(i, j) * obs[(i, j)] for i in cats for j in cats)
     den = sum(weight(i, j) * pa[i] * pb[j] / n for i in cats for j in cats)
@@ -41,7 +44,7 @@ k0 = kappa(a, b, lambda i, j: float(i != j))
 def binary_kappa(a, b, thr):
     x = [int(v >= thr) for v in a]
     y = [int(v >= thr) for v in b]
-    po = sum(i == j for i, j in zip(x, y)) / n
+    po = sum(i == j for i, j in zip(x, y, strict=True)) / n
     pe = (sum(x) * sum(y) + (n - sum(x)) * (n - sum(y))) / n / n
     return (po - pe) / (1 - pe), po
 
@@ -61,7 +64,7 @@ def spearman(a, b):
         return r
     ra, rb = ranks(a), ranks(b)
     ma, mb = sum(ra) / len(ra), sum(rb) / len(rb)
-    cov = sum((x - ma) * (y - mb) for x, y in zip(ra, rb))
+    cov = sum((x - ma) * (y - mb) for x, y in zip(ra, rb, strict=True))
     return cov / (sum((x - ma) ** 2 for x in ra) ** 0.5 * sum((y - mb) ** 2 for y in rb) ** 0.5)
 
 
@@ -70,10 +73,11 @@ for thr in (2, 3, 4):
     k, po = binary_kappa(a, b, thr)
     print(f"binary >= {thr}: kappa={k:.3f} agreement={po:.3f}")
 print("mean rating gpt", sum(a) / n, "opus", sum(b) / n)
-conf = Counter(zip(a, b))
+conf = Counter(zip(a, b, strict=True))
 print("confusion (gpt rows, opus cols)")
 for i in range(5):
     print(i, [conf[(i, j)] for j in range(5)])
+
 
 def engine_scores(rating_of):
     per_engine = defaultdict(list)
@@ -85,7 +89,7 @@ def engine_scores(rating_of):
                 continue
             urls = [key[i]["url"] for i in m["positions"]]
             rs = [rating_of[i] for i in m["positions"]]
-            for u, r in zip(urls, rs):
+            for u, r in zip(urls, rs, strict=True):
                 pool[normalize_url(u)] = max(pool.get(normalize_url(u), 0), r)
             eng_ratings[name] = apply_redundancy_penalties(urls, rs, query_text=q["query"])
         idcg = dcg_at_k(sorted(pool.values(), reverse=True))
@@ -99,26 +103,7 @@ def engine_scores(rating_of):
 gpt_rating = {i: key[i]["gpt"] for i in key}
 sg = engine_scores(gpt_rating)
 so = engine_scores(labels)
-names = sorted(set(sg) & set(so), key=lambda k: -sg[k])
-
-
-def tau_b(a, b):
-    n = len(a); c = d = ta = tb = 0
-    for i in range(n):
-        for j in range(i + 1, n):
-            x, y = a[i] - a[j], b[i] - b[j]
-            if x == 0 and y == 0:
-                continue
-            if x == 0:
-                ta += 1
-            elif y == 0:
-                tb += 1
-            elif x * y > 0:
-                c += 1
-            else:
-                d += 1
-    return (c - d) / (((c + d + ta) * (c + d + tb)) ** 0.5)
-
+names = sorted(set(sg) & set(so), key=lambda k: (-sg[k], k))
 
 print("engines", len(names))
 for k in names:

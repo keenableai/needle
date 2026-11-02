@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 from needle.shared.llm import OpenRouterClient
 
-load_dotenv("/home/yallen/needle/.env")
+load_dotenv()
 raters_dir, model, out_path = sys.argv[1:4]
 concurrency = int(sys.argv[4]) if len(sys.argv) > 4 else 8
 items = json.load(open(f"{raters_dir}/items_key.json"))

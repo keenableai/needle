@@ -38,7 +38,7 @@ for r in json.load(open(runs_json)):
         if p is None:
             continue
         rep = json.load(open(p))
-        for name, e in rep["engines"].items():
+        for e in rep["engines"].values():
             if "per_query_path" in e:
                 jobs.append((f"{rid}/{e['per_query_path']}", out_dir / bench / rid / e["per_query_path"]))
         for extra in EXTRA.get(bench, []):

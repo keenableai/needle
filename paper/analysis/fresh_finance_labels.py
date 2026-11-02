@@ -1,8 +1,9 @@
 import collections
 import glob
 import json
-import math
 import sys
+
+from common import wilson
 
 audit_dir, out_path = sys.argv[1], sys.argv[2]
 sample = {s["id"]: s for s in json.load(open(f"{audit_dir}/sample.json"))}
@@ -12,16 +13,6 @@ for f in sorted(glob.glob(f"{audit_dir}/labels_part*.json")):
         labels[int(row["id"])] = row["label"]
 missing = sorted(set(sample) - set(labels))
 assert not missing, missing[:10]
-
-
-def wilson(k, n, z=1.96):
-    if not n:
-        return (float("nan"), float("nan"))
-    p = k / n
-    d = 1 + z * z / n
-    c = (p + z * z / (2 * n)) / d
-    h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return c - h, c + h
 
 
 res = {}

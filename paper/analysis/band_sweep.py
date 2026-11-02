@@ -6,12 +6,11 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from unittest.mock import patch
 
-src, hf_dir, out_json, sample_json = sys.argv[1], Path(sys.argv[2]), sys.argv[3], sys.argv[4]
-sys.path.insert(0, src)
 from needle.finance import canon
 from needle.finance.models import cues_for
 from needle.shared.search import SearchResult, titled_snippet
 
+hf_dir, out_json, sample_json = Path(sys.argv[1]), sys.argv[2], sys.argv[3]
 ENGINES = [
     "keenable", "exa", "brave-llmcontext", "perplexity", "parallel", "brave", "you", "linkup",
     "deepseek", "context", "kagi", "firecrawl", "chatgpt-search", "google", "octen", "bing",
@@ -54,9 +53,7 @@ pool = defaultdict(list)
 rng = random.Random(7)
 
 for run in runs:
-    rep = json.load(open(run / "recall.json"))
-    judged_run = bool(rep.get("judged"))
-    stats["judged_runs"] += judged_run
+    stats["judged_runs"] += bool(json.load(open(run / "recall.json")).get("judged"))
     for eng in ENGINES:
         p = run / "recall" / f"{eng}.json"
         if not p.exists():
@@ -84,7 +81,6 @@ for run in runs:
             results = pq["results"][:K]
             if ft in sweep:
                 tols = MONEY_TOLS if ft == "money" else HEAD_TOLS
-                default = 0.02 if ft == "money" else 0.15
                 tight = 0.001 if ft == "money" else 0.01
                 for t in tols:
                     hit = any(amount_match(ft, g["value"], aliases, text_of(r), t, cues) for r in results)
@@ -123,13 +119,13 @@ def kendall(a, b):
 out = {"stats": {k: (dict(v) if isinstance(v, Counter) else v) for k, v in stats.items()}, "sweep": {}}
 for ft, tols in sweep.items():
     default = 0.02 if ft == "money" else 0.15
-    base_rank = [tols[default][e][0] / tols[default][e][1] for e in ENGINES if tols[default][e][1]]
     engs = [e for e in ENGINES if tols[default][e][1]]
+    base_rank = [tols[default][e][0] / tols[default][e][1] for e in engs]
     out["sweep"][ft] = {}
     for t, d in tols.items():
         vals = [d[e][0] / d[e][1] for e in engs]
         out["sweep"][ft][str(t)] = {"recall": recall(d), "tau_vs_default": kendall(vals, base_rank),
-                                    "per_engine": dict(zip(engs, vals))}
+                                    "per_engine": dict(zip(engs, vals, strict=True))}
 out["kinds"] = dict(kinds)
 out["other_recall"] = recall(other_hits)
 json.dump(out, open(out_json, "w"), indent=1)

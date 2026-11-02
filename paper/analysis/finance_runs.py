@@ -3,12 +3,12 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "scripts"))
-from backfill_scores import rematch_money, rescore  # noqa: E402
+from backfill_scores import rematch_money, rescore
 
-from needle.finance.canon import MONEY_REL_TOL, _match_amount  # noqa: E402
-from needle.finance.cli import _gold_query  # noqa: E402
-from needle.finance.score import result_answers  # noqa: E402
-from needle.shared.search import SearchResult, titled_snippet  # noqa: E402
+from needle.finance.canon import MONEY_REL_TOL, _match_amount
+from needle.finance.cli import _gold_query
+from needle.finance.score import result_answers
+from needle.shared.search import SearchResult, titled_snippet
 
 
 def gold_rows(path):

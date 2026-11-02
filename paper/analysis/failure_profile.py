@@ -4,9 +4,9 @@ import json
 import os
 import sys
 
-sys.path.insert(0, __file__.rsplit("/", 1)[0])
-from common import FAMILIES, ULT  # noqa: E402
-from needle.shared.search.errors import account_side  # noqa: E402
+from common import FAMILIES, ULT
+
+from needle.shared.search.errors import account_side
 
 site, pairs_json, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
 BENCHES = {"scholar": ("hfscholar", "scholar.json"), "news": ("hfnews", "ndcg.json"), "finance": ("hf", "recall.json"), "agentic_rare": ("hfrare", "agentic_rare.json"), "legal": ("hflegal", "legal.json")}

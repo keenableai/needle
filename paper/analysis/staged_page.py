@@ -4,6 +4,8 @@ import random
 import sys
 from collections import defaultdict
 
+from common import pct
+
 raters_dir, staged_dir, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
 rng = random.Random(11)
 key = {str(x["id"]): x for x in json.load(open(raters_dir + "/items_key.json"))}
@@ -31,7 +33,7 @@ def kappa_q(xs, ys):
     n = len(xs)
     k = 5
     obs = [[0] * k for _ in range(k)]
-    for x, y in zip(xs, ys):
+    for x, y in zip(xs, ys, strict=True):
         obs[x][y] += 1
     rx = [sum(r) for r in obs]
     cy = [sum(obs[i][j] for i in range(k)) for j in range(k)]
@@ -67,14 +69,13 @@ def stats(sel):
     }
 
 
-def ci(fn, qk, b=1000):
+def ci(fn, qk):
     vals = []
-    for _ in range(b):
+    for _ in range(400):
         samp = [qk[rng.randrange(len(qk))] for _ in qk]
         sel = [i for q in samp for i in groups[q]]
         vals.append(fn(sel))
-    vals.sort()
-    return vals[int(.025 * b)], vals[int(.975 * b)]
+    return pct(vals, .025), pct(vals, .975)
 
 
 res = {}
@@ -82,10 +83,10 @@ for name, pred in (("all", lambda i: True), ("news", lambda i: key[i]["bench"] =
     sel = [i for i in ids if pred(i)]
     qk = [q for q in qkeys if pred(groups[q][0])]
     s = stats(sel)
-    s["ci_staged_changed_A"] = ci(lambda x: stats(x)["staged_changed_A"], qk, 400)
-    s["ci_staged_shift_A"] = ci(lambda x: stats(x)["staged_shift_A"], qk, 400)
-    s["ci_kappa_judge_vs_staged"] = ci(lambda x: stats(x)["kappa_judge_vs_staged"], qk, 400)
-    s["ci_kappa_staged_vs_inpromptA"] = ci(lambda x: stats(x)["kappa_staged_vs_inpromptA"], qk, 400)
+    s["ci_staged_changed_A"] = ci(lambda x: stats(x)["staged_changed_A"], qk)
+    s["ci_staged_shift_A"] = ci(lambda x: stats(x)["staged_shift_A"], qk)
+    s["ci_kappa_judge_vs_staged"] = ci(lambda x: stats(x)["kappa_judge_vs_staged"], qk)
+    s["ci_kappa_staged_vs_inpromptA"] = ci(lambda x: stats(x)["kappa_staged_vs_inpromptA"], qk)
     res[name] = s
     print(name, json.dumps({k: (round(v, 3) if isinstance(v, float) else v) for k, v in s.items()}, default=lambda v: [round(x, 3) for x in v]))
 json.dump(res, open(out_path, "w"), indent=1)

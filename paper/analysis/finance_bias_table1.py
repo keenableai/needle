@@ -3,17 +3,17 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import load  # noqa: E402
-from needle.shared.search.errors import account_side  # noqa: E402
+from common import load
+
+from needle.shared.search.errors import account_side
 
 here = os.path.dirname(os.path.abspath(__file__))
-site, final_hist, paper_hist = sys.argv[1], sys.argv[2], sys.argv[3]
+site, final_hist, hist = sys.argv[1], sys.argv[2], sys.argv[3]
 table = json.load(open(os.path.join(here, "manifest.json")))["results"]["table_results"]
 TABLE_RUNS, ENGINES = set(table["runs"]), table["engines"]
 MONEY = {"revenue", "net_income", "operating_income", "eps_diluted"}
 HEAD = {"employees"}
-FP_MONEY_STRICT, FP_MONEY_EXT, FN_MONEY = 1 - 130 / 140, 1 - 73 / 80, 10 / 100
+FP_MONEY_EXACT, FP_MONEY_EXT, FN_MONEY = 1 - 130 / 140, 1 - 73 / 80, 10 / 100
 FP_HEAD, FP_OTHER = 1 - 37 / 40, 1 - 58 / 59
 
 
@@ -31,9 +31,9 @@ def recall(rows):
     return {e: (s / n, n) for e, (s, n) in acc.items() if n}
 
 
-paper_rows = finance_rows(paper_hist)
-runs = sorted({r["ts"] for r in paper_rows})
-before, after = recall(finance_rows(final_hist)), recall(paper_rows)
+fin_rows = finance_rows(hist)
+runs = sorted({r["ts"] for r in fin_rows})
+before, after = recall(finance_rows(final_hist)), recall(fin_rows)
 strata = collections.defaultdict(lambda: collections.defaultdict(lambda: [0, 0, 0]))
 for ts in runs:
     d = os.path.join(site, "hf", ts.replace(":", ""))
@@ -62,16 +62,17 @@ for e in sorted(ENGINES, key=lambda e: -after[e][0]):
     r_m = (R - p_h * r_h - p_o * r_o) / p_m
     x_m = min(max(0.0, R - before[e][0]) / p_m, r_m)
     a_m = 1 - u_m / n_m
-    fp = p_m * (FP_MONEY_STRICT * (r_m - x_m) + FP_MONEY_EXT * x_m) + p_h * FP_HEAD * r_h + p_o * FP_OTHER * r_o
+    fp = p_m * (FP_MONEY_EXACT * (r_m - x_m) + FP_MONEY_EXT * x_m) + p_h * FP_HEAD * r_h + p_o * FP_OTHER * r_o
     fn = p_m * FN_MONEY * max(0.0, a_m - r_m)
-    rows.append(dict(engine=e, reported=R, money_recall=r_m, extension_share=x_m, head_recall=r_h, other_recall=r_o,
-                     fp=fp, fn=fn, net=fn - fp, money_prevalence=p_m, money_answered=a_m, n_scored=N, n_per_query=n_tot))
+    rows.append({"engine": e, "reported": R, "money_recall": r_m, "extension_share": x_m, "head_recall": r_h,
+                 "other_recall": r_o, "fp": fp, "fn": fn, "net": fn - fp, "money_prevalence": p_m,
+                 "money_answered": a_m, "n_scored": N, "n_per_query": n_tot})
     print(f"{e:17s} R {R:.3f} money r {r_m:.3f} ext {x_m:.3f} head {r_h:.2f} other {r_o:.2f} answered {a_m:.3f} | FP {fp:.3f} FN {fn:.3f} net {fn - fp:+.3f}  (p_money {p_m:.3f}, n {N}/{n_tot})")
 
 cor = {x["engine"]: x["reported"] + x["net"] for x in rows}
 order_rep = [x["engine"] for x in rows]
 order_cor = sorted(order_rep, key=lambda e: -cor[e])
-adjacent = [(a, b) for a, b in zip(order_rep, order_rep[1:]) if cor[a] < cor[b]]
+adjacent = [(a, b) for a, b in zip(order_rep, order_rep[1:], strict=False) if cor[a] < cor[b]]
 discordant = sum(1 for i, a in enumerate(order_rep) for b in order_rep[i + 1:] if cor[a] < cor[b])
 summary = {
     "runs": runs,
@@ -80,10 +81,10 @@ summary = {
     "reported_spread": max(x["reported"] for x in rows) - min(x["reported"] for x in rows),
     "corrected_spread": max(cor.values()) - min(cor.values()),
     "adjacent_swaps": adjacent,
-    "positions_changed": sum(1 for a, b in zip(order_rep, order_cor) if a != b),
+    "positions_changed": sum(1 for a, b in zip(order_rep, order_cor, strict=True) if a != b),
     "discordant_pairs": discordant,
     "corrected_order": order_cor,
 }
-print("net range %+.3f to %+.3f; reported spread %.3f, corrected %.3f" % (summary["net_min"], summary["net_max"], summary["reported_spread"], summary["corrected_spread"]))
+print(f"net range {summary['net_min']:+.3f} to {summary['net_max']:+.3f}; reported spread {summary['reported_spread']:.3f}, corrected {summary['corrected_spread']:.3f}")
 print("adjacent swaps:", adjacent, "positions changed:", summary["positions_changed"], "discordant pairs:", discordant)
 json.dump({**summary, "engines": rows}, open(os.path.join(here, "audit", "finance_bias_table1.json"), "w"), indent=1)

@@ -1,21 +1,15 @@
 import collections
 import json
 import random
-import re
 import sys
-from urllib.parse import urlsplit
+
+from common import SITE_RE, host_ok, pct
 
 out_json = sys.argv[1]
 pairs = sys.argv[2:]
 rng = random.Random(5)
-SITE_RE = re.compile(r"site:(\S+)")
 VARIANTS = ("quoted", "site", "date")
 BUCKET_ORDER = ("caselaw", "code", "filing")
-
-
-def host_ok(url, site):
-    h = (urlsplit(url).hostname or "").lower()
-    return h == site or h.endswith("." + site)
 
 
 obs = collections.defaultdict(lambda: collections.defaultdict(dict))
@@ -50,7 +44,6 @@ for i in range(0, len(pairs), 2):
 
 engines = sorted(obs)
 summary = {}
-rows = {}
 for eng in engines:
     summary[eng] = {}
     for bucket in BUCKET_ORDER:
@@ -72,8 +65,7 @@ for eng in engines:
             for _ in range(2000):
                 s = [diffs[rng.randrange(len(diffs))] for _ in diffs]
                 boots.append(sum(s) / len(s))
-            boots.sort()
-            cell[v] = {"mean": sum(diffs) / len(diffs), "lo": boots[int(0.025 * len(boots))], "hi": boots[int(0.975 * len(boots))], "n": len(diffs), "var_recall": sum(int(obs[eng][(bucket, t)][v]) for t in targets if v in obs[eng][(bucket, t)]) / len(diffs)}
+            cell[v] = {"mean": sum(diffs) / len(diffs), "lo": pct(boots, .025), "hi": pct(boots, .975), "n": len(diffs), "var_recall": sum(int(obs[eng][(bucket, t)][v]) for t in targets if v in obs[eng][(bucket, t)]) / len(diffs)}
         summary[eng][bucket] = cell
     summary[eng]["site_compliance"] = compliance[eng][0] / compliance[eng][1] if compliance[eng][1] else None
     summary[eng]["errors"] = errors[eng]

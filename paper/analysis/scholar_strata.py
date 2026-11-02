@@ -4,14 +4,15 @@ import json
 import os
 import sys
 
+from common import KEEP
+
 from needle.shared.search.errors import account_side
 
 site, pairs_json, out_path = sys.argv[1], sys.argv[2], sys.argv[3]
-KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
 table_runs = {ts.replace(":", "") for ts in json.load(open(pairs_json))["runs"]}
 
 hits = collections.defaultdict(lambda: collections.defaultdict(lambda: [0, 0]))
-meta_counts = collections.Counter()
+unmatched = 0
 for d in sorted(glob.glob(os.path.join(site, "hfscholar", "*"))):
     name = os.path.basename(d)
     if name not in table_runs or not os.path.exists(os.path.join(d, "scholar.json")):
@@ -34,13 +35,13 @@ for d in sorted(glob.glob(os.path.join(site, "hfscholar", "*"))):
                 continue
             m = meta.get(q["query"]) or meta.get(q["query"][:60])
             if m is None:
-                meta_counts["unmatched"] += 1
+                unmatched += 1
                 continue
             dom, age, bucket = m
-            for key in ((f"domain:{dom}"), (f"age:{age}"), (f"bucket:{bucket}"), "all"):
+            for key in (f"domain:{dom}", f"age:{age}", f"bucket:{bucket}", "all"):
                 hits[e][key][1] += 1
                 hits[e][key][0] += q.get("hit_rank") is not None
-print("unmatched", meta_counts["unmatched"])
+print("unmatched", unmatched)
 strata = sorted({k for e in hits for k in hits[e]})
 res = {}
 print(f"{'stratum':28s} {'n':>5s} {'keenable':>9s} {'exa':>7s} {'gap':>6s} {'leader':>14s}")

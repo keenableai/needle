@@ -3,12 +3,10 @@ import os
 import statistics
 import sys
 
+from common import NAMES, load, shares
 from scipy.stats import spearmanr
 
 from needle.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult, capped_snippet
-
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import NAMES, load, shares
 
 hist, site, out_json = sys.argv[1], sys.argv[2], sys.argv[3]
 spec = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "manifest.json")))["results"]["table_results"]
@@ -19,7 +17,7 @@ ndcg = {e: sh[e]["news"][0] for e in engines}
 rank = {e: i + 1 for i, e in enumerate(sorted(engines, key=lambda e: -ndcg[e]))}
 
 lengths = {e: [] for e in engines}
-engine_runs = {e: 0 for e in engines}
+engine_runs = dict.fromkeys(engines, 0)
 used, skipped = [], []
 for ts in sorted({r["ts"] for r in rows if r["bench"] == "news"}):
     d = os.path.join(site, "hfnews", ts.replace(":", ""))

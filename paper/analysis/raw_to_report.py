@@ -29,13 +29,13 @@ for q in raw["queries"]:
             results = [SearchResult(url=r["url"], title=collapse(r.get("title")), snippet=collapse(r.get("snippet")), published_date=r.get("published_date")) for r in s["results"][:5]]
             det = [result_answers(g, r, snippet_chars=DEFAULT_SNIPPET_CHARS) for r in results]
             pq["hit_rank"] = first_rank(det)
-            pq["results"] = [{"url": r.url, "title": r.title, "snippet": capped_snippet(r, DEFAULT_SNIPPET_CHARS), "det_match": d} for r, d in zip(results, det)]
+            pq["results"] = [{"url": r.url, "title": r.title, "snippet": capped_snippet(r, DEFAULT_SNIPPET_CHARS), "det_match": d} for r, d in zip(results, det, strict=True)]
         else:
             engines[e]["search_errors"] += 1
         engines[e]["per_query"].append(pq)
 for e, v in engines.items():
     scored = [p for p in v["per_query"] if p["search_error"] is None]
     v["recall_at_k"] = sum(p["hit_rank"] is not None for p in scored) / len(scored) if scored else None
-    print(f"{e:16s} production-rule recall {v['recall_at_k']:.3f} scored {len(scored)} errs {v['search_errors']}")
+    print(f"{e:16s} recall {v['recall_at_k']:.3f} scored {len(scored)} errs {v['search_errors']}")
 json.dump({"num_queries": len(raw["queries"]), "num_results": 5, "snippet_chars": DEFAULT_SNIPPET_CHARS, "engines": engines}, open(out_path, "w"))
 print("wrote", out_path)

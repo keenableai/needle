@@ -2,9 +2,9 @@ import json
 import re
 import sys
 
-R = sys.argv[1]
-items = json.load(open(f"{R}/items_key.json"))
-pages = json.load(open(f"{R}/pages.json"))
+raters_dir = sys.argv[1]
+items = json.load(open(f"{raters_dir}/items_key.json"))
+pages = json.load(open(f"{raters_dir}/pages.json"))
 
 
 def spans(q):
@@ -12,7 +12,6 @@ def spans(q):
 
 
 tot = snip_has = page_has = page_only = no_page = 0
-by_bench = {}
 for it in items:
     sp = spans(it["query"])
     if not sp:

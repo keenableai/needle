@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from needle.shared.judge import judge_instructions, parse_judgement
 from needle.shared.llm import OpenRouterClient
 
-load_dotenv("/home/yallen/needle/.env")
+load_dotenv()
 items_glob, out_path = sys.argv[1], sys.argv[2]
 items = []
 for p in sorted(glob.glob(items_glob)):

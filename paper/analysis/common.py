@@ -1,7 +1,10 @@
 import collections
 import json
+import math
 import random
+import re
 from datetime import datetime, timedelta
+from urllib.parse import urlsplit
 
 FMT = "%Y-%m-%dT%H:%MZ"
 BENCHES = [("scholar", "recall"), ("news", "ndcg"), ("finance", "recall"), ("agentic_rare", "ndcg"), ("legal", "recall")]
@@ -10,6 +13,7 @@ FAMILIES = {
     "keenable-realtime": "keenable", "exa-instant": "exa", "exa-lite": "exa",
     "parallel-turbo": "parallel", "perplexity-fast": "perplexity", "brave-llmcontext": "brave",
 }
+KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
 NAMES = {
     "keenable": "Keenable", "exa": "Exa", "brave-llmcontext": "Brave (LLM ctx)", "perplexity": "Perplexity",
     "parallel": "Parallel", "brave": "Brave", "you": "You.com", "linkup": "Linkup", "deepseek": "DeepSeek",
@@ -28,7 +32,7 @@ MUTED = "#898781"
 GRID = "#e1e0d9"
 AXIS = "#c3c2b7"
 SURFACE = "#fcfcfb"
-BLUES = ["#ffffff", "#e6f0fc", "#cde2fb", "#b7d3f6", "#9ec5f4", "#86b6ef", "#6da7ec", "#5598e7", "#3987e5", "#2a78d6"]
+SITE_RE = re.compile(r"site:(\S+)")
 
 
 def account_errors(r):
@@ -36,7 +40,7 @@ def account_errors(r):
 
 
 def load(path):
-    rows = [json.loads(l) for l in open(path) if l.strip()]
+    rows = [json.loads(line) for line in open(path) if line.strip()]
     return [r for r in rows if r["bench"] in dict(BENCHES)]
 
 
@@ -44,6 +48,24 @@ def window(rows, days, end=None):
     end = end or max(datetime.strptime(r["ts"], FMT) for r in rows)
     cut = end - timedelta(days=days)
     return [r for r in rows if cut < datetime.strptime(r["ts"], FMT) <= end], end
+
+
+def kept_engines(engines):
+    return [e for e in sorted(set(engines) - {ULT}) if e not in FAMILIES or e == "brave-llmcontext"]
+
+
+def table_window(rows, days=30):
+    w, _ = window(rows, days)
+    engines = sorted({r["engine"] for r in w} - {ULT})
+    keep = kept_engines(engines)
+    full_ts = set()
+    for b, m in BENCHES:
+        by_ts = collections.defaultdict(set)
+        for r in w:
+            if r["bench"] == b and ((r.get(m) is not None and r["num_scored"]) or account_errors(r)):
+                by_ts[r["ts"]].add(r["engine"])
+        full_ts |= {ts for ts, es in by_ts.items() if all(e in es for e in keep)}
+    return [r for r in w if r["ts"] in full_ts], engines, keep
 
 
 def wmean(rs, metric):
@@ -100,11 +122,27 @@ def bootstrap(rs, engines, n=2000, seed=1926):
             if accn[e]:
                 samples[e].append(acc[e] / accn[e])
 
-    def pct(xs, p):
-        xs = sorted(xs)
-        return xs[min(len(xs) - 1, int(p * len(xs)))]
-
     return {e: (pct(v, .025), pct(v, .975)) for e, v in samples.items()}
+
+
+def pct(xs, p):
+    xs = sorted(xs)
+    return xs[min(len(xs) - 1, int(p * len(xs)))]
+
+
+def ci(xs):
+    v = [x for x in xs if x == x]
+    return pct(v, .025), pct(v, .975)
+
+
+def wilson(k, n, z=1.96):
+    if not n:
+        return (float("nan"), float("nan"))
+    p = k / n
+    d = 1 + z * z / n
+    c = (p + z * z / (2 * n)) / d
+    h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+    return c - h, c + h
 
 
 def bucket_recall(rs, engine, bucket):
@@ -114,13 +152,29 @@ def bucket_recall(rs, engine, bucket):
     return sum(v * n for v, n in pairs) / den if den else None
 
 
-def weekly_shares(rows, engines, weeks):
-    byweek = collections.defaultdict(list)
-    for r in rows:
-        byweek[datetime.strptime(r["ts"], FMT).strftime("%G-W%V")].append(r)
-    keys = sorted(byweek)[-weeks - 1:-1]
-    out = {}
-    for k in keys:
-        sh, _ = shares(byweek[k], engines)
-        out[k] = {e: overall(sh, e) for e in engines}
-    return out
+def tau_b(x, y):
+    c = d = tx = ty = 0
+    for i in range(len(x)):
+        for j in range(i + 1, len(x)):
+            dx, dy = x[i] - x[j], y[i] - y[j]
+            if dx == 0 and dy == 0:
+                continue
+            if dx == 0:
+                tx += 1
+            elif dy == 0:
+                ty += 1
+            elif dx * dy > 0:
+                c += 1
+            else:
+                d += 1
+    den = ((c + d + tx) * (c + d + ty)) ** 0.5
+    return (c - d) / den if den else float("nan")
+
+
+def order_tau(a, b):
+    return tau_b(range(len(a)), [b.index(e) for e in a])
+
+
+def host_ok(url, site):
+    h = (urlsplit(url).hostname or "").lower()
+    return h == site or h.endswith("." + site)

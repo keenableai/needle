@@ -4,11 +4,12 @@ from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
 
+from common import tau_b
+
 from needle.shared.metrics import dcg_at_k, normalize_url
 
 hf_dir = Path(sys.argv[1])
 CORE = ["bing", "brave", "brave-llmcontext", "ceramic", "exa", "firecrawl", "google", "kagi", "keenable", "octen", "parallel", "perplexity", "tavily", "tinyfish", "you"]
-
 
 full = defaultdict(lambda: defaultdict(list))
 core = defaultdict(lambda: defaultdict(list))
@@ -24,7 +25,7 @@ for run in sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / "ndcg.json"
             if pq["search_error"] is not None or pq.get("judge_errors") or pq["ndcg"] is None:
                 continue
             eng.setdefault(pq["query"], {})[name] = pq
-    for q, d in eng.items():
+    for d in eng.values():
         pool_all, pool_core = {}, {}
         for name, pq in d.items():
             for r in pq["results"]:
@@ -45,31 +46,12 @@ for run in sorted(p for p in hf_dir.iterdir() if p.is_dir() and (p / "ndcg.json"
             if ic > 0:
                 core[week][name].append(min(1.0, d_ / ic))
 
-
-def tau_b(a, b):
-    n = len(a); c = d = ta = tb = 0
-    for i in range(n):
-        for j in range(i + 1, n):
-            x, y = a[i] - a[j], b[i] - b[j]
-            if x == 0 and y == 0:
-                continue
-            if x == 0:
-                ta += 1
-            elif y == 0:
-                tb += 1
-            elif x * y > 0:
-                c += 1
-            else:
-                d += 1
-    return (c - d) / (((c + d + ta) * (c + d + tb)) ** 0.5)
-
-
 weeks = sorted(full)
 print("weeks", weeks)
 for w in weeks:
     f = {e: sum(v) / len(v) for e, v in full[w].items()}
     c = {e: sum(v) / len(v) for e, v in core[w].items()}
     names = sorted(set(f) & set(c))
-    print(w, "tau_b full-pool vs core-pool shares %.3f" % tau_b([f[e] for e in names], [c[e] for e in names]),
-          "mean core-full diff %+.3f" % (sum(c[e] - f[e] for e in names) / len(names)),
-          "keenable %.3f/%.3f perplexity %.3f/%.3f" % (f.get("keenable", 0), c.get("keenable", 0), f.get("perplexity", 0), c.get("perplexity", 0)))
+    print(w, f"tau_b full-pool vs core-pool shares {tau_b([f[e] for e in names], [c[e] for e in names]):.3f}",
+          f"mean core-full diff {sum(c[e] - f[e] for e in names) / len(names):+.3f}",
+          f"keenable {f.get('keenable', 0):.3f}/{c.get('keenable', 0):.3f} perplexity {f.get('perplexity', 0):.3f}/{c.get('perplexity', 0):.3f}")

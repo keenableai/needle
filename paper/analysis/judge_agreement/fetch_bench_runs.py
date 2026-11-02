@@ -24,7 +24,7 @@ def get(path, dest):
                 print("FAIL", path, e)
                 return None
             time.sleep(30 * (attempt + 1))
-        except (ConnectionError, OSError) as e:
+        except OSError:
             time.sleep(10 * (attempt + 1))
     print("FAIL", path, "429")
     return None
@@ -39,7 +39,7 @@ for rid in ids:
         continue
     rep = json.load(open(p))
     jobs.append((f"{rid}/{bench}.jsonl", out_dir / rid / f"{bench}.jsonl"))
-    for name, e in rep["engines"].items():
+    for e in rep["engines"].values():
         if "per_query_path" in e:
             jobs.append((f"{rid}/{e['per_query_path']}", out_dir / rid / e["per_query_path"]))
 print(len(jobs), "files", flush=True)

@@ -6,9 +6,9 @@ from needle.finance.canon import MONEY_REL_TOL, _match_amount, gold_in_text
 from needle.finance.models import cues_for
 from needle.shared.search import SearchResult, titled_snippet
 
-A = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit", "v2hits")
-hits = json.load(open(os.path.join(A, "v2hits_all.json")))
-labels = {x["id"]: x["verdict"] for p in ("v2labels_part1.json", "v2labels_part2.json") for x in json.load(open(os.path.join(A, p)))}
+A = os.path.join(os.path.dirname(os.path.abspath(__file__)), "audit", "table_reading")
+hits = json.load(open(os.path.join(A, "hits.json")))
+labels = {x["id"]: x["verdict"] for p in ("labels_part1.json", "labels_part2.json") for x in json.load(open(os.path.join(A, p)))}
 c = collections.Counter()
 for h in hits:
     text = titled_snippet(SearchResult(url=h["url"], title=h["title"], snippet=h["snippet"]), 0)

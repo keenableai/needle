@@ -1,16 +1,10 @@
 import json
-import re
 import sys
 from collections import defaultdict
 from pathlib import Path
-from urllib.parse import urlsplit
 
-SITE_RE = re.compile(r"site:(\S+)")
-
-
-def host_ok(url, site):
-    h = (urlsplit(url).hostname or "").lower()
-    return h == site or h.endswith("." + site)
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from common import SITE_RE, host_ok
 
 
 def scan(hf_dir, report, qfile, bucket_of):

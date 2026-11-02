@@ -568,11 +568,12 @@ of \S\ref{sec:results}:
 \begin{quote}\footnotesize
 \begin{verbatim}
 python analysis/table_rows.py \
-    history.jsonl \
-    table_results.tex
+  history.jsonl \
+  table_results.tex \
+  analysis/audit/matched_pairs.json
 python analysis/adjacent_pairs.py \
-    history.jsonl \
-    audit/adjacent_pairs.json
+  history.jsonl \
+  analysis/audit/adjacent_pairs.json
 \end{verbatim}
 \end{quote}
 \end{minipage}\par\medskip\noindent
@@ -961,7 +962,7 @@ frequency, a deterministic matcher with a 2\% money band has precision
 the gold .61--.80, headcount banded .80--.97, other fields .91--1.00). Almost every remaining false positive is a neighboring quarter
 or a related line item (basic or adjusted instead of diluted EPS, adjusted
 net income) that falls within 2\%, or a table whose column headers the
-snippet omits.
+snippet omits (\texttt{aggregate\_audit.py}).
 
 \paragraph{Table reading.} The matcher also reads unit-less table figures
 and parenthesized losses (Appendix~\ref{app:examples}). We sampled 80
@@ -1039,7 +1040,7 @@ Brave (LLM ctx) 1.8 and ChatGPT search 1.6; every other engine loses
 under 1. The finance order keeps $\tau_b$ .90 and the overall order .98:
 ranks 1 to 10 do not move, and ChatGPT search--Kagi and Firecrawl--Octen
 swap. A period-aware table reading is future work. Dropping the table
-reading (\texttt{strict\_vs\_readings.py})
+reading (\texttt{no\_table\_reading.py})
 lowers finance recall by 0.1 to 7.5 points (Firecrawl 7.5, Parallel 6.8,
 Tavily 5.7, Exa 5.6, ChatGPT search 5.5, Brave (LLM ctx) 5.4, DeepSeek and
 Perplexity 4.6, the rest under 2) and the finance ceiling from .993 to
@@ -1154,7 +1155,7 @@ matched query support over the whole window (every engine scored on
 the 4,048 query-runs no engine lost to an account-side failure;
 Appendix~\ref{app:checks}) with its run-resampled interval; and the bench
 shares. Both shares in the $\Delta$ matched column come from the per-query
-artifacts (\texttt{matched\_pairs\_paper.py}); their base exceeds the Share
+artifacts (\texttt{matched\_pairs.py}); their base exceeds the Share
 column by up to 6.3 points (Claude search; Appendix~\ref{app:examples}).}
 \label{tab:ci}
 \end{table*}
@@ -1201,7 +1202,7 @@ than the other engines, we also apply a
 matched-support rule: a query-run is dropped for every engine when an
 account-side failure occurred on it, and other failures stay zeros.
 We applied the rule to the whole Table~\ref{tab:results} window (230 of its
-232 news runs and every other run; \texttt{matched\_pairs\_paper.py}),
+232 news runs and every other run; \texttt{matched\_pairs.py}),
 scoring each query-run from the per-query artifacts with the dashboard's
 scoring code. On finance, scholar and legal this per-query base reproduces
 every dashboard row; on news and rare it excludes the account-side
@@ -1223,14 +1224,14 @@ first and second, and Tavily and Ceramic last. On matched support the paired tes
 210 pairs pointwise and 171 with the Bonferroni adjustment, with only
 Keenable and Ceramic separated from every other engine. Across the three
 estimates (run-level, day-level and matched support;
-\texttt{pairs\_survive\_paper.py}) 164 of the 210 pairs stay separated
+\texttt{pairs\_survive.py}) 164 of the 210 pairs stay separated
 under the adjustment in all of them. Fourteen adjusted primary separations
 fail at least one check: Claude search against ChatGPT search, Kagi,
 Firecrawl and Octen, and Firecrawl--Bing, fail day-level resampling and
 matched support; Exa--Brave (LLM ctx), Parallel--Linkup, Parallel--Brave,
 Linkup--You.com, Context against ChatGPT search, Kagi and Claude search,
 ChatGPT search--Bing and Google--TinyFish fail matched support
-(\texttt{audit/pairs\_survive\_paper.json}). We keep the unequal-support estimate as the primary one because it
+(\texttt{audit/pairs\_survive.json}). We keep the unequal-support estimate as the primary one because it
 uses all 12,353 query-runs rather than 4,048, and print the matched-support
 change beside it in Table~\ref{tab:ci}.
 
@@ -1387,7 +1388,7 @@ run of 30 October to the finance run of 03:08 UTC on 31 October, 28 news
 runs and one scholar, rare, legal and finance run each (1,224 query-runs
 per engine), as the dashboard publishes them; its news and rare runs
 leave out every failure
-(\texttt{prospective\_window.py}, \texttt{audit/prospective\_window.json}).
+(\texttt{later\_day.py}, \texttt{audit/later\_day.json}).
 Nineteen configurations have all five benches: Claude search has no finance
 run because the account's credit had lapsed, and every Kagi request failed.
 The overall order agrees with Table~\ref{tab:results} at $\tau_b$ .86 (per
@@ -1480,7 +1481,7 @@ list metric, Gemini 4 Argon and Grok 4.7 graded 100 complete pools (50 news
 and 50 rare queries from the Table~\ref{tab:results} runs, every top-5 list
 of all 21 engines, 5,698 unique results, snippet only), one item per call
 under the written guideline with its page rules removed (\texttt{list\_sample\_big.py},
-\texttt{api\_grader.py}, \texttt{audit/lists100/}). Recomputing every
+\texttt{api\_grader.py}, \texttt{list\_analysis.py}, \texttt{list\_pair\_diffs.py}, \texttt{audit/lists100/}). Recomputing every
 engine's pooled nDCG@5 from each rater's grades ranks the 21 engines
 against the judge at Spearman .94 (query-resampled 95\% interval .89--.97;
 $\tau_b$ .85) for Gemini and .94 (.87--.96; $\tau_b$ .83) for Grok, with

@@ -6,11 +6,12 @@ import random
 import re
 import sys
 
+from common import KEEP
+
 site, out_dir, n_queries, per_query = sys.argv[1], sys.argv[2], int(sys.argv[3]), int(sys.argv[4])
 rng = random.Random(7)
 os.makedirs(out_dir, exist_ok=True)
 
-KEEP = "keenable exa google bing brave brave-llmcontext parallel perplexity tavily linkup tinyfish octen ceramic you firecrawl kagi jina context deepseek claude-search chatgpt-search".split()
 BENCHES = {"news": ("hfnews", "ndcg.json"), "agentic_rare": ("hfrare", "agentic_rare.json")}
 LO, HI = "2026-10-17", "2026-10-30"
 

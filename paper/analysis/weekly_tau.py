@@ -1,12 +1,11 @@
 import collections
+import itertools
 import json
 import sys
 from datetime import datetime
 
-from scipy.stats import kendalltau
-
-sys.path.insert(0, __file__.rsplit("/", 1)[0])
 from common import FAMILIES, FMT, ULT, load, overall, shares
+from scipy.stats import kendalltau
 
 hist, out = sys.argv[1], sys.argv[2]
 rows = load(hist)
@@ -22,7 +21,7 @@ def table1(e):
 
 def adjacent(wk, panel=None):
     taus = []
-    for a, b in zip(keys, keys[1:]):
+    for a, b in itertools.pairwise(keys):
         common = sorted((set(wk[a]) & set(wk[b])) if panel is None else panel)
         taus.append({"weeks": [a, b], "n": len(common),
                      "tau_b": kendalltau([wk[a][e] for e in common], [wk[b][e] for e in common]).statistic})
@@ -51,6 +50,6 @@ for name, keep in (("table1", table1), ("all_configs", lambda e: True)):
     print(name, "pool", list(r["pool"].values()), "leaders", sorted(set(r["leader"].values())), "panel", len(panel))
     for lab in ("adjacent", "adjacent_panel"):
         a = r[lab]
-        print("  %-15s" % lab, " ".join("%.3f" % t["tau_b"] for t in a["pairs"]),
-              "range %.3f-%.3f mean %.3f" % (a["min"], a["max"], a["mean"]))
+        print(f"  {lab:<15}", " ".join(f"{t['tau_b']:.3f}" for t in a["pairs"]),
+              f"range {a['min']:.3f}-{a['max']:.3f} mean {a['mean']:.3f}")
 json.dump(res, open(out, "w"), indent=1)
