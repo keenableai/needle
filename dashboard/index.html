@@ -1174,8 +1174,9 @@ function seriesFor(bench, metric, rows) {
   const out = {};
   for (const e of ENGINES) out[e] = [];
   for (const r of rows) {
-    if (r.bench === bench && r[metric] != null && r.num_scored > 0 && out[r.engine]) {
-      out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
+    const field = r.engine === ULTIMATE_ENGINE && metric === "mrr" ? "recall" : metric;
+    if (r.bench === bench && r[field] != null && r.num_scored > 0 && out[r.engine]) {
+      out[r.engine].push({ t: new Date(r.ts), v: r[field] });
     }
   }
   for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
