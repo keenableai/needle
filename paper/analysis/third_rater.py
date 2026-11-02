@@ -7,6 +7,7 @@ import sys
 from dotenv import load_dotenv
 
 from needle.shared.llm import OpenRouterClient
+from needle.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult, capped_snippet
 
 load_dotenv()
 raters_dir, model, out_path = sys.argv[1:4]
@@ -15,7 +16,7 @@ items = json.load(open(f"{raters_dir}/items_key.json"))
 pages = json.load(open(f"{raters_dir}/pages.json"))
 guideline = open(f"{raters_dir}/guideline.md").read()
 done = json.load(open(out_path)) if os.path.exists(out_path) else {}
-todo = [it for it in items if str(it["id"]) not in done]
+todo = [it for it in items if "error" in done.get(str(it["id"]), {"error": "missing"})]
 print("items", len(items), "todo", len(todo), "model", model, flush=True)
 llm = OpenRouterClient(api_key=os.environ["OPENROUTER_API_KEY"], model=model)
 sem = asyncio.Semaphore(concurrency)
@@ -24,7 +25,7 @@ SYSTEM = guideline + "\n\nYou grade one item at a time. Reply with one JSON obje
 
 def prompt_for(it):
     page = (pages.get(str(it["id"])) or {}).get("content") or ""
-    body = {"id": it["id"], "today": it["today"], "query": it["query"], "url": it["url"], "title": it["title"], "snippet": it["snippet"], "page_excerpt": page[:3000]}
+    body = {"id": it["id"], "today": it["today"], "query": it["query"], "url": it["url"], "title": it["title"], "snippet": capped_snippet(SearchResult(url=it["url"], snippet=it["snippet"]), DEFAULT_SNIPPET_CHARS), "page_excerpt": page[:3000]}
     return json.dumps(body, ensure_ascii=False, indent=1)
 
 

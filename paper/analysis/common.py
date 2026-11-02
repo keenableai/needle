@@ -178,3 +178,18 @@ def order_tau(a, b):
 def host_ok(url, site):
     h = (urlsplit(url).hostname or "").lower()
     return h == site or h.endswith("." + site)
+
+
+def spearman(x, y):
+    def ranks(v):
+        counts, start, below = collections.Counter(v), {}, 0
+        for a in sorted(counts):
+            start[a] = below
+            below += counts[a]
+        return [start[a] + (counts[a] + 1) / 2 for a in v]
+    rx, ry = ranks(x), ranks(y)
+    mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
+    sxx, syy = sum((a - mx) ** 2 for a in rx), sum((b - my) ** 2 for b in ry)
+    if not sxx or not syy:
+        return float("nan")
+    return sum((a - mx) * (b - my) for a, b in zip(rx, ry, strict=True)) / (sxx ** 0.5 * syy ** 0.5)

@@ -3,23 +3,11 @@ import random
 import sys
 from pathlib import Path
 
-from common import pct
+from common import ci, spearman
 
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
 rng = random.Random(9)
-
-
-def spearman(a, b):
-    def ranks(v):
-        order = sorted(range(len(v)), key=lambda i: v[i])
-        r = [0.0] * len(v)
-        for pos, i in enumerate(order):
-            r[i] = pos
-        return r
-    ra, rb = ranks(a), ranks(b)
-    ma, mb = sum(ra) / len(ra), sum(rb) / len(rb)
-    return sum((x - ma) * (y - mb) for x, y in zip(ra, rb, strict=True)) / (sum((x - ma) ** 2 for x in ra) ** 0.5 * sum((y - mb) ** 2 for y in rb) ** 0.5)
 
 
 def run(sample_dir, minq):
@@ -50,7 +38,7 @@ def run(sample_dir, minq):
         return out
 
     pg, po = per_query_scores(gpt), per_query_scores(opus)
-    engines = [e for e in set().union(*pg) if sum(1 for s in pg if e in s) >= minq]
+    engines = [e for e in sorted(set().union(*pg, *po)) if all(sum(1 for s in p if e in s) >= minq for p in (pg, po))]
 
     def agree(idx):
         sg = {e: [pg[i][e] for i in idx if e in pg[i]] for e in engines}
@@ -62,8 +50,9 @@ def run(sample_dir, minq):
 
     point = agree(range(len(queries)))
     boots = [v for v in (agree([rng.randrange(len(queries)) for _ in queries]) for _ in range(2000)) if v is not None]
-    print(f"{sample_dir}: engine-level Spearman {point:.3f}, query-cluster bootstrap 95% CI {pct(boots, .025):.2f}..{pct(boots, .975):.2f}")
+    lo, hi = ci(boots)
+    print(f"{sample_dir}: {len(engines)} engines, engine-level Spearman {point:.3f}, query-cluster bootstrap 95% CI {lo:.2f}..{hi:.2f} ({len(boots)} resamples)")
+    return {"queries": len(queries), "minq": minq, "engines": engines, "spearman": point, "ci": [lo, hi], "resamples": len(boots)}
 
 
-run(sys.argv[1], 6)
-run(sys.argv[2], 4)
+json.dump({"news": run(sys.argv[1], 6), "rare": run(sys.argv[2], 4)}, open(sys.argv[3], "w"), indent=1)

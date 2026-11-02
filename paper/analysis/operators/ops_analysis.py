@@ -1,53 +1,54 @@
 import json
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 
-hf_dir = Path(sys.argv[1])
-runs = sorted(p for p in hf_dir.iterdir() if p.is_dir())
-hits = defaultdict(lambda: defaultdict(lambda: [0, 0]))
-ceiling = defaultdict(lambda: [0, 0])
-for run in runs:
-    syntax = {}
-    for line in open(run / "gold.jsonl"):
-        if line.strip():
-            g = json.loads(line)
-            o = json.loads(g["query_origin"])
-            grp = "filing" if g["gold"]["field"] == "filing" else "fact"
-            syntax[g["query_text"]] = f"{grp}/{o.get('syntax', 'plain')}"
-    rep = json.load(open(run / "recall.json"))
-    per_q_any = defaultdict(bool)
-    for eng, e in rep["engines"].items():
-        if eng == "ultimate" or "per_query_path" not in e:
-            continue
-        p = run / e["per_query_path"]
-        if not p.exists():
-            continue
-        for pq in json.load(open(p))["per_query"]:
-            if pq["search_error"] is not None:
-                continue
-            sx = syntax.get(pq["query"], "plain")
-            hit = pq["hit_rank"] is not None
-            hits[eng][sx][0] += hit
-            hits[eng][sx][1] += 1
-            per_q_any[pq["query"]] |= hit
-    for q, found in per_q_any.items():
-        sx = syntax.get(q, "plain")
-        ceiling[sx][0] += found
-        ceiling[sx][1] += 1
+from needle.finance.projection import QUOTED_SPAN_RE as FINANCE_QUOTE
+from needle.legal.projection import QUOTED_SPAN_RE as LEGAL_QUOTE
+from needle.shared.search.queryops import parse_ops
 
-syntaxes = sorted(ceiling, key=lambda s: -ceiling[s][1])
-print("queries by syntax", {s: ceiling[s][1] for s in syntaxes})
-print("ceiling", {s: round(ceiling[s][0] / ceiling[s][1], 3) for s in syntaxes})
-rows = []
-for eng in hits:
-    r = {s: (hits[eng][s][0] / hits[eng][s][1] if hits[eng][s][1] else None) for s in syntaxes}
-    rows.append((eng, r))
-rows.sort(key=lambda x: -(x[1]["fact/plain"] or 0))
-print(f"{'engine':18s}" + "".join(f"{s:>9s}" for s in syntaxes))
-for eng, r in rows:
-    print(f"{eng:18s}" + "".join(f"{(r[s] if r[s] is not None else float('nan')):9.3f}" for s in syntaxes))
-mean = {s: sum(r[s] for _, r in rows if r[s] is not None) / sum(1 for _, r in rows if r[s] is not None) for s in syntaxes}
-print("mean over engines", {s: round(v, 3) for s, v in mean.items()})
-share = {s: round(mean[s] / (ceiling[s][0] / ceiling[s][1]), 3) for s in syntaxes}
-print("mean share of ceiling", share)
+BENCHES = {"finance": ("recall.json", "gold.jsonl", FINANCE_QUOTE), "legal": ("legal.json", "legal.jsonl", LEGAL_QUOTE)}
+
+
+def group(bench, row):
+    if bench == "legal":
+        return json.loads(row["query_origin"])["bucket"]
+    return "filing" if row["gold"]["field"] == "filing" else row["gold"]["field_type"]
+
+
+def count(bench, runs_dir):
+    report, queries, quote = BENCHES[bench]
+    runs = sorted(p for p in Path(runs_dir).iterdir() if (p / report).exists())
+    groups = defaultdict(Counter)
+    for run in runs:
+        rows = {}
+        for line in open(run / queries):
+            if line.strip():
+                row = json.loads(line)
+                rows[row["query_text"]] = row
+        asked = set()
+        for e in json.load(open(run / report))["engines"].values():
+            p = run / e.get("per_query_path", "")
+            if p.is_file():
+                asked |= {q["query"] for q in json.load(open(p))["per_query"]}
+        for q in sorted(asked):
+            row = rows[q]
+            ops = parse_ops(q)
+            has_op = bool(ops.sites or ops.after or ops.before)
+            has_quote = bool(quote.search(q))
+            c = groups[group(bench, row)]
+            c["query_runs"] += 1
+            c["operator_or_quote"] += has_op or has_quote
+            c["operator"] += has_op
+            c["quote"] += has_quote
+            c[f"syntax_{json.loads(row['query_origin']).get('syntax', 'plain')}"] += 1
+    return {"runs": [r.name for r in runs], "groups": {g: dict(sorted(c.items())) for g, c in sorted(groups.items())}}
+
+
+finance_dir, legal_dir, out_json = sys.argv[1:4]
+out = {"finance": count("finance", finance_dir), "legal": count("legal", legal_dir)}
+json.dump(out, open(out_json, "w"), indent=1)
+for bench, v in out.items():
+    print(bench, len(v["runs"]), "runs")
+    for g, c in v["groups"].items():
+        print(f"  {g:14s} {c['operator_or_quote']:4d} of {c['query_runs']:4d} with an operator or quote ({c['quote']} quote)")

@@ -6,7 +6,7 @@ import sys
 from common import NAMES, kept_engines, load, order_tau, overall, shares
 from finance_runs import finance_run, prose_hit
 
-hist, pairs_json, site, precision_json, out_path = sys.argv[1:6]
+hist, pairs_json, site, pool_diff_json, out_path = sys.argv[1:6]
 table_runs = set(json.load(open(pairs_json))["runs"])
 window = [r for r in load(hist) if r["ts"] in table_runs]
 keep = kept_engines({r["engine"] for r in window})
@@ -17,9 +17,9 @@ for ts in sorted({r["ts"] for r in window if r["bench"] == "finance"}):
         for pq in x["per_query"]:
             q = queries[pq["query"]]
             reading[e] += q.field_type == "money" and pq["hit_rank"] is not None and not prose_hit(q, pq["results"][pq["hit_rank"] - 1])
-prec = json.load(open(precision_json))
-pooled = prec["money_reading"]["precision"]
-per = prec["money_by_engine"]
+graded = json.load(open(pool_diff_json))
+pooled = graded["graded_current"]["precision"]
+per = graded["graded_current_by_engine"]
 
 
 def p_engine(e):
@@ -44,8 +44,8 @@ order0 = sorted(o0, key=lambda e: -o0[e])
 order1 = sorted(o1, key=lambda e: -o1[e])
 fin_order0 = sorted(keep, key=lambda e: -(sh0[e]["finance"][1] or 0))
 fin_order1 = sorted(keep, key=lambda e: -(sh1[e]["finance"][1] or 0))
-res = {"pooled_precision": pooled, "engines": {}}
-print(f"finance order tau_b {order_tau(fin_order0, fin_order1):.3f}; overall order tau_b {order_tau(order0, order1):.3f}")
+res = {"pooled_precision": pooled, "finance_order_tau_b": order_tau(fin_order0, fin_order1), "overall_order_tau_b": order_tau(order0, order1), "engines": {}}
+print(f"finance order tau_b {res['finance_order_tau_b']:.3f}; overall order tau_b {res['overall_order_tau_b']:.3f}")
 for e in order0:
     infl = reading[e] * (1 - p_engine(e)) / scored[e] if scored[e] else 0
     res["engines"][e] = {"reading_hits": reading[e], "finance_scored": scored[e], "precision_used": p_engine(e), "finance_recall_drop": infl,

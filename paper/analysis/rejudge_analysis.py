@@ -5,6 +5,8 @@ import os
 import random
 import sys
 
+from common import ci
+
 rng = random.Random(4)
 
 
@@ -30,11 +32,11 @@ def agree(x, y, groups):
     for _ in range(1000):
         idx = [i for _ in clusters for i in clusters[rng.randrange(len(clusters))]]
         ks.append(qkappa([x[i] for i in idx], [y[i] for i in idx]))
-    ks.sort()
-    return {"n": n, "exact": round(sum(a == b for a, b in zip(x, y, strict=True)) / n, 3), "within1": round(sum(abs(a - b) <= 1 for a, b in zip(x, y, strict=True)) / n, 3),
-            "kappa_q": round(qkappa(x, y), 3), "kappa_ci": (round(ks[25], 3), round(ks[974], 3)), "mean_x": round(sum(x) / n, 2), "mean_y": round(sum(y) / n, 2)}
+    return {"n": n, "exact": sum(a == b for a, b in zip(x, y, strict=True)) / n, "within1": sum(abs(a - b) <= 1 for a, b in zip(x, y, strict=True)) / n,
+            "kappa_q": qkappa(x, y), "kappa_ci": ci(ks), "mean_x": sum(x) / n, "mean_y": sum(y) / n}
 
 
+out = {}
 for bench, site_dir, rej_path in (("news", sys.argv[1], sys.argv[3]), ("rare", sys.argv[2], sys.argv[4])):
     key = json.load(open(os.path.join(site_dir, "key.json")))
     claude = {}
@@ -50,6 +52,8 @@ for bench, site_dir, rej_path in (("news", sys.argv[1], sys.argv[3]), ("rare", s
     print(f"== {bench}: items {len(ids)} (key {len(key)}, claude {len(claude)}, rejudged {sum(1 for r in rej.values() if r.get('rating') is not None)}, errors {sum(1 for r in rej.values() if r.get('error'))})")
     if not ids:
         continue
-    print("  GPT with dates vs GPT without dates:", agree(g_date, g_nodate, q))
-    print("  GPT without dates vs Claude:        ", agree(g_nodate, cl, q))
-    print("  GPT with dates vs Claude:           ", agree(g_date, cl, q))
+    out[bench] = {"dates_vs_nodates": agree(g_date, g_nodate, q), "nodates_vs_claude": agree(g_nodate, cl, q), "dates_vs_claude": agree(g_date, cl, q)}
+    print("  GPT with dates vs GPT without dates:", out[bench]["dates_vs_nodates"])
+    print("  GPT without dates vs Claude:        ", out[bench]["nodates_vs_claude"])
+    print("  GPT with dates vs Claude:           ", out[bench]["dates_vs_claude"])
+json.dump(out, open(sys.argv[5], "w"), indent=1)

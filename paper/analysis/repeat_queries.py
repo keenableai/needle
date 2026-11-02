@@ -10,7 +10,7 @@ BENCHES = {"scholar": ("hfscholar", "scholar.json"), "news": ("hfnews", "ndcg.js
 res = {}
 for bench, (folder, report) in BENCHES.items():
     runs_of = collections.defaultdict(set)
-    nq = 0
+    nq = nruns = 0
     for d in sorted(glob.glob(os.path.join(site, folder, "*"))):
         name = os.path.basename(d)
         if name not in table_runs or not os.path.exists(os.path.join(d, report)):
@@ -22,6 +22,7 @@ for bench, (folder, report) in BENCHES.items():
         p = os.path.join(d, e["per_query_path"])
         if not os.path.isfile(p):
             continue
+        nruns += 1
         for q in json.load(open(p))["per_query"]:
             runs_of[q["query"]].add(name)
             nq += 1
@@ -29,6 +30,10 @@ for bench, (folder, report) in BENCHES.items():
     repeated_runs = sum(len(v) for v in runs_of.values() if len(v) > 1)
     days = {q: {r[:10] for r in v} for q, v in runs_of.items()}
     cross_day = sum(len(v) for q, v in runs_of.items() if len(days[q]) > 1)
-    res[bench] = {"query_runs": nq, "distinct_texts": len(runs_of), "texts_in_more_than_one_run": repeated_texts, "query_runs_of_repeated_texts": repeated_runs, "query_runs_of_texts_on_more_than_one_day": cross_day}
-    print(f"{bench:13s} query-runs {nq:6d} distinct {len(runs_of):6d} repeated texts {repeated_texts:5d} ({repeated_runs / nq if nq else 0:.1%} of query-runs) cross-day {cross_day / nq if nq else 0:.1%}")
+    after_first = repeated_runs - repeated_texts
+    res[bench] = {"runs": nruns, "query_runs": nq, "distinct_texts": len(runs_of), "texts_in_more_than_one_run": repeated_texts,
+                  "query_runs_of_repeated_texts": repeated_runs, "query_runs_after_first": after_first,
+                  "query_runs_of_texts_on_more_than_one_day": cross_day, "share_repeated": repeated_runs / nq,
+                  "share_after_first": after_first / nq, "share_cross_day": cross_day / nq}
+    print(f"{bench:13s} runs {nruns:4d} query-runs {nq:6d} distinct {len(runs_of):6d} repeated texts {repeated_texts:5d} ({repeated_runs / nq:.1%} of query-runs, {after_first / nq:.1%} after the first) cross-day {cross_day / nq:.1%}")
 json.dump(res, open(out_path, "w"), indent=1)

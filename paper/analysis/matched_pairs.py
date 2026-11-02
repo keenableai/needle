@@ -8,31 +8,14 @@ import sys
 from common import KEEP, ci, load, order_tau
 from common import overall as c_overall
 from common import shares as c_shares
-from finance_runs import finance_run
+from query_values import BENCHES, load_run, values
 
 from needle.shared.search.errors import account_side
 
 site, pairs_json, hist, out_json = sys.argv[1:5]
-BENCHES = {"scholar": ("hfscholar", "scholar.json", "recall"), "news": ("hfnews", "ndcg.json", "ndcg"), "finance": ("hf", "recall.json", "recall"),
-           "agentic_rare": ("hfrare", "agentic_rare.json", "ndcg"), "legal": ("hflegal", "legal.json", "recall")}
 pairs_ref = json.load(open(pairs_json))
 table_runs = set(pairs_ref["runs"])
 rng = random.Random(11)
-
-
-def answered_value(bench, q):
-    if bench in ("news", "agentic_rare"):
-        return q["ndcg"]
-    if bench == "finance":
-        return q["score"]
-    return float(q["hit_rank"] is not None)
-
-
-def values(bench, eng, pq, ult_hits, ceiling):
-    if eng == "ultimate" and bench in ("finance", "legal"):
-        return [float(ult_hits[q["query"]]) for q in pq]
-    return [(None if account_side(q["search_error"]) or not c else 0.0) if q["search_error"] is not None else answered_value(bench, q)
-            for q, c in zip(pq, ceiling, strict=False)]
 
 
 def is_account(q):
@@ -52,14 +35,10 @@ for bench, (folder, report, m) in BENCHES.items():
         ts = name[:13] + ":" + name[13:15] + "Z"
         if ts not in table_runs or not os.path.exists(os.path.join(d, report)):
             continue
-        rep = json.load(open(os.path.join(d, report)))
-        pqs = {e: json.load(open(os.path.join(d, v["per_query_path"])))["per_query"] for e, v in rep["engines"].items()
-               if os.path.isfile(os.path.join(d, v.get("per_query_path", "")))}
-        if "ultimate" not in pqs or any(e not in pqs for e in KEEP):
+        pqs = load_run(d, bench)
+        if pqs is None:
             check[f"{bench}: run skipped, per-query files missing"] += 1
             continue
-        if bench == "finance":
-            pqs = {e: v["per_query"] for e, v in finance_run(d)[0]["engines"].items()}
         ult_hits = collections.defaultdict(bool)
         ceiling = [q["ndcg"] is not None for q in pqs["ultimate"]] if m == "ndcg" else [True] * len(pqs["ultimate"])
         engines = [e for e in pqs if e != "ultimate"] + ["ultimate"] if bench in ("finance", "legal") else KEEP + ["ultimate"]

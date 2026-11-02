@@ -6,7 +6,7 @@ from pathlib import Path
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from common import tau_b
+from common import spearman, tau_b
 
 sample_dir = Path(sys.argv[1])
 MINQ = int(sys.argv[2]) if len(sys.argv) > 2 else 6
@@ -47,25 +47,6 @@ def binary_kappa(a, b, thr):
     po = sum(i == j for i, j in zip(x, y, strict=True)) / n
     pe = (sum(x) * sum(y) + (n - sum(x)) * (n - sum(y))) / n / n
     return (po - pe) / (1 - pe), po
-
-
-def spearman(a, b):
-    def ranks(v):
-        order = sorted(range(len(v)), key=lambda i: v[i])
-        r = [0.0] * len(v)
-        i = 0
-        while i < len(order):
-            j = i
-            while j + 1 < len(order) and v[order[j + 1]] == v[order[i]]:
-                j += 1
-            for t in range(i, j + 1):
-                r[order[t]] = (i + j) / 2
-            i = j + 1
-        return r
-    ra, rb = ranks(a), ranks(b)
-    ma, mb = sum(ra) / len(ra), sum(rb) / len(rb)
-    cov = sum((x - ma) * (y - mb) for x, y in zip(ra, rb, strict=True))
-    return cov / (sum((x - ma) ** 2 for x in ra) ** 0.5 * sum((y - mb) ** 2 for y in rb) ** 0.5)
 
 
 print(f"n={n} exact={exact:.3f} within1={within1:.3f} kappa_quad={kq:.3f} kappa_lin={kl:.3f} kappa_unw={k0:.3f} spearman={spearman(a, b):.3f}")

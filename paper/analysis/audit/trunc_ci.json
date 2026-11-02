@@ -1,14 +1,92 @@
 {
- "tau_b": 0.7354497354497355,
- "tau_ci": [
-  0.3439153439153439,
-  0.8306878306878307
+ "queries": 8,
+ "minq": 6,
+ "resamples": 2000,
+ "order_full": [
+  "brave-llmcontext",
+  "exa",
+  "keenable",
+  "keenable-realtime",
+  "perplexity",
+  "perplexity-fast",
+  "brave",
+  "exa-instant",
+  "you",
+  "parallel",
+  "octen",
+  "context",
+  "tavily",
+  "chatgpt-search",
+  "bing",
+  "tinyfish",
+  "kagi",
+  "firecrawl",
+  "google",
+  "parallel-turbo",
+  "claude-search",
+  "ceramic",
+  "jina"
  ],
- "mad": 0.08231399913726747,
+ "order_trunc": [
+  "brave-llmcontext",
+  "exa-instant",
+  "context",
+  "perplexity",
+  "keenable",
+  "keenable-realtime",
+  "perplexity-fast",
+  "brave",
+  "parallel",
+  "exa",
+  "octen",
+  "bing",
+  "you",
+  "tavily",
+  "tinyfish",
+  "google",
+  "chatgpt-search",
+  "kagi",
+  "firecrawl",
+  "claude-search",
+  "parallel-turbo",
+  "jina",
+  "ceramic"
+ ],
+ "tau_b": 0.7301587301587301,
+ "tau_b_ci": [
+  0.3968253968253968,
+  0.8412698412698413
+ ],
+ "spearman": 0.8793870489372219,
+ "spearman_ci": [
+  0.5224913494809688,
+  0.9475511814475535
+ ],
+ "mad": 0.08417039591349389,
  "mad_ci": [
-  0.059415188700546295,
-  0.13082940489390094
+  0.058636040135103054,
+  0.1368800784921256
  ],
+ "leader_gap": {
+  "full": {
+   "leader": "brave-llmcontext",
+   "second": "exa",
+   "gap": 0.01146695299962408,
+   "ci": [
+    -0.12303934875041733,
+    0.15517685116786883
+   ]
+  },
+  "trunc": {
+   "leader": "brave-llmcontext",
+   "second": "exa-instant",
+   "gap": 0.0613466273504516,
+   "ci": [
+    -0.10713371054993637,
+    0.2570704522850882
+   ]
+  }
+ },
  "engines": {
   "exa": {
    "full": 0.7283478425460272,
@@ -44,6 +122,24 @@
    "ci": [
     -0.2328774309742998,
     -0.04650315595257026
+   ]
+  },
+  "perplexity": {
+   "full": 0.6780312030326285,
+   "trunc": 0.5433475058842724,
+   "delta": -0.13468369714835615,
+   "ci": [
+    -0.261195792887994,
+    -0.0014329138984824352
+   ]
+  },
+  "perplexity-fast": {
+   "full": 0.6697309861721911,
+   "trunc": 0.5409498708751806,
+   "delta": -0.12878111529701042,
+   "ci": [
+    -0.2438752249931987,
+    -0.002446874440431346
    ]
   },
   "brave-llmcontext": {
@@ -163,6 +259,15 @@
     0.09929249938660248
    ]
   },
+  "claude-search": {
+   "full": 0.23167668006856051,
+   "trunc": 0.257850990888204,
+   "delta": 0.026174310819643498,
+   "ci": [
+    -0.12479946628325156,
+    0.15436479334721415
+   ]
+  },
   "jina": {
    "full": 0.09800450601982787,
    "trunc": 0.0732031576566913,
@@ -190,5 +295,17 @@
     0.11698800286557931
    ]
   }
- }
+ },
+ "ci_excludes_zero": [
+  "exa",
+  "bing",
+  "keenable",
+  "keenable-realtime",
+  "perplexity",
+  "perplexity-fast",
+  "brave-llmcontext",
+  "google",
+  "tinyfish",
+  "kagi"
+ ]
 }

@@ -4,7 +4,7 @@ import json
 import random
 import sys
 
-from common import tau_b
+from common import ci, spearman, tau_b
 
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
@@ -44,21 +44,6 @@ def rater_grade(q, u):
     return labels.get(i, 0) if i is not None else 0
 
 
-def spearman(x, y):
-    def rk(v):
-        s = sorted(range(len(v)), key=lambda i: v[i])
-        r = [0.0] * len(v)
-        for pos, i in enumerate(s):
-            r[i] = pos
-        return r
-    rx, ry = rk(x), rk(y)
-    mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
-    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry, strict=True))
-    vx = sum((a - mx) ** 2 for a in rx) ** 0.5
-    vy = sum((b - my) ** 2 for b in ry) ** 0.5
-    return cov / (vx * vy)
-
-
 def shares(sel, grade_of):
     acc = collections.defaultdict(list)
     for lst in sel:
@@ -84,14 +69,14 @@ for bench in ("news", "agentic_rare", "all"):
         a, b = shares(samp, judge_grade), shares(samp, rater_grade)
         nm = [e for e in names if e in a and e in b]
         boots.append(spearman([a[e] for e in nm], [b[e] for e in nm]))
-    boots.sort()
+    lo, hi = ci(boots)
     oj = sorted(names, key=lambda e: -sj[e])
     orr = sorted(names, key=lambda e: -sr[e])
     mad = sum(abs(sj[e] - sr[e]) for e in names) / len(names)
-    print(f"{bench}: queries {len(sel)} engines {len(names)} spearman {rho:.3f} [{boots[25]:.3f},{boots[974]:.3f}] tau_b {tb:.3f} mean|diff| {mad:.3f}")
+    print(f"{bench}: queries {len(sel)} engines {len(names)} spearman {rho:.3f} [{lo:.3f},{hi:.3f}] tau_b {tb:.3f} mean|diff| {mad:.3f}")
     print("   judge order:", oj[:6], "...", oj[-3:])
     print("   rater order:", orr[:6], "...", orr[-3:])
-    result[bench] = {"queries": len(sel), "spearman": rho, "ci": (boots[25], boots[974]), "tau_b": tb, "mean_abs_diff": mad, "judge_shares": sj, "rater_shares": sr}
+    result[bench] = {"queries": len(sel), "spearman": rho, "ci": (lo, hi), "tau_b": tb, "mean_abs_diff": mad, "judge_shares": sj, "rater_shares": sr}
 rated = {i: g for i, g in labels.items() if items[i].get("judge_rating") is not None}
 ex = sum(1 for i, g in rated.items() if items[i]["judge_rating"] == g) / len(rated)
 w1 = sum(1 for i, g in rated.items() if abs(items[i]["judge_rating"] - g) <= 1) / len(rated)

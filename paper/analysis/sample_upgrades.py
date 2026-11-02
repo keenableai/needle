@@ -4,11 +4,9 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from common import tau_b
-
 hf_dir, sweep_json, sample_json, out_json = Path(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4]
-sw = json.load(open(sweep_json))["sweep"]
-ENGINES = list(sw["money"]["0.02"]["per_engine"])
+bs = json.load(open(sweep_json))
+ENGINES = list(bs["sweep"]["money"][str(bs["reference"]["money"])]["per_engine"])
 rng = random.Random(11)
 
 gold = {}
@@ -45,10 +43,3 @@ for key, n in (("money", 50), ("other", 20)):
         })
 json.dump(sample, open(out_json, "w"), indent=1)
 print("pool", {k: len(v) for k, v in pool.items()}, "sample", len(sample), Counter(s["kind"] for s in sample))
-
-for ft, default in (("money", "0.02"), ("numeric_band", "0.15")):
-    base = sw[ft][default]["per_engine"]
-    engs = list(base)
-    for t, v in sw[ft].items():
-        vals = [v["per_engine"][e] for e in engs]
-        print(ft, t, f"recall {v['recall']:.3f}", f"tau_b {tau_b(vals, [base[e] for e in engs]):.3f}")

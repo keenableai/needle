@@ -1,0 +1,32 @@
+{
+ "news": {
+  "engines": 21,
+  "spearman": 0.8909090909090909,
+  "ci": [
+   0.7385515167046668,
+   0.9415584415584416
+  ],
+  "items_per_engine_min": 42,
+  "items_per_engine_max": 76
+ },
+ "agentic_rare": {
+  "engines": 21,
+  "spearman": 0.7064935064935065,
+  "ci": [
+   0.4995128551854783,
+   0.9366677986702986
+  ],
+  "items_per_engine_min": 37,
+  "items_per_engine_max": 68
+ },
+ "all": {
+  "engines": 21,
+  "spearman": 0.8428571428571429,
+  "ci": [
+   0.6779220779220779,
+   0.9467532467532468
+  ],
+  "items_per_engine_min": 83,
+  "items_per_engine_max": 140
+ }
+}

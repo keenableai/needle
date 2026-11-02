@@ -3,6 +3,8 @@
   "dashboard": 0.9925,
   "no_reading": 0.9875
  },
+ "finance_tau_b": 0.8380952380952381,
+ "overall_tau_b": 0.9714285714285714,
  "engines": {
   "keenable": {
    "finance_recall": 0.9025210084033614,

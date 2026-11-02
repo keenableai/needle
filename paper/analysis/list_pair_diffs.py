@@ -3,6 +3,8 @@ import json
 import random
 import sys
 
+from common import ci
+
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
 L, out_path, labels_glob = sys.argv[1:4]
@@ -55,8 +57,7 @@ for a, b in PAIRS:
         samp = [rng.randrange(n) for _ in range(n)]
         bj.append(share_diff(samp, "judge", a, b))
         br.append(share_diff(samp, "rater", a, b))
-    bj.sort()
-    br.sort()
-    res[f"{a}|{b}"] = {"judge": pj, "judge_ci": (bj[25], bj[974]), "rater": pr, "rater_ci": (br[25], br[974])}
-    print(f"{a+'-'+b:32s} {100*pj:+5.1f} [{100*bj[25]:+5.1f},{100*bj[974]:+5.1f}]  {100*pr:+5.1f} [{100*br[25]:+5.1f},{100*br[974]:+5.1f}]")
+    cj, cr = ci(bj), ci(br)
+    res[f"{a}|{b}"] = {"judge": pj, "judge_ci": cj, "rater": pr, "rater_ci": cr}
+    print(f"{a+'-'+b:32s} {100*pj:+5.1f} [{100*cj[0]:+5.1f},{100*cj[1]:+5.1f}]  {100*pr:+5.1f} [{100*cr[0]:+5.1f},{100*cr[1]:+5.1f}]")
 json.dump(res, open(out_path, "w"), indent=1)

@@ -29,8 +29,9 @@ order0 = sorted(o0, key=lambda e: -o0[e])
 order1 = sorted(o1, key=lambda e: -o1[e])
 fin_order0 = sorted(keep, key=lambda e: -(sh0[e]["finance"][1] or 0))
 fin_order1 = sorted(keep, key=lambda e: -(sh1[e]["finance"][1] or 0))
-print(f"finance ceiling dashboard {u0['finance']:.3f} no reading {u1['finance']:.3f}; finance order tau_b {order_tau(fin_order0, fin_order1):.3f}; overall order tau_b {order_tau(order0, order1):.3f}")
-res = {"finance_ceiling": {"dashboard": u0["finance"], "no_reading": u1["finance"]}, "engines": {}}
+fin_tau, overall_tau = order_tau(fin_order0, fin_order1), order_tau(order0, order1)
+print(f"finance ceiling dashboard {u0['finance']:.3f} no reading {u1['finance']:.3f}; finance order tau_b {fin_tau:.3f}; overall order tau_b {overall_tau:.3f}")
+res = {"finance_ceiling": {"dashboard": u0["finance"], "no_reading": u1["finance"]}, "finance_tau_b": fin_tau, "overall_tau_b": overall_tau, "engines": {}}
 for e in order0:
     d_rec = (sh0[e]["finance"][0] or 0) - (sh1[e]["finance"][0] or 0)
     res["engines"][e] = {"finance_recall": sh0[e]["finance"][0], "finance_recall_no_reading": sh1[e]["finance"][0], "finance_share": sh0[e]["finance"][1], "finance_share_no_reading": sh1[e]["finance"][1],

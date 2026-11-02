@@ -439,6 +439,39 @@
   },
   "no_table_reading": {
    "file": "audit/no_table_reading.json"
+  },
+  "judge_cluster_ci": {
+   "file": "audit/judge_cluster_ci.json"
+  },
+  "dispatch_gap": {
+   "file": "audit/dispatch_gap.json"
+  },
+  "loo_ceiling": {
+   "files": [
+    "audit/news_check_runs.json",
+    "audit/loo_ceiling.json"
+   ]
+  },
+  "sensitivity": {
+   "file": "audit/sensitivity.json"
+  },
+  "rare_drop_lrat": {
+   "file": "audit/rare_drop_lrat.json"
+  },
+  "operator_counts": {
+   "file": "audit/ops_counts.json"
+  },
+  "fresh_finance": {
+   "dir": "audit/fresh"
+  },
+  "precision_audit": {
+   "file": "audit/precision_audit.json"
+  },
+  "loo_all": {
+   "file": "audit/loo_all.json"
+  },
+  "rejudge_agreement": {
+   "file": "judge_agreement/rejudge_nodates/rejudge_agreement.json"
   }
  },
  "not_recoverable": [
@@ -456,6 +489,7 @@
   "audit/ceramic_rawops.json",
   "audit/claude_weekly.json",
   "audit/cluster_pairs.json",
+  "audit/dispatch_gap.json",
   "audit/exact_more/exact_sample.json",
   "audit/exact_more/labels_part1.json",
   "audit/exact_more/labels_part2.json",
@@ -467,6 +501,7 @@
   "audit/failure_profile.json",
   "audit/finance_bias_table1.json",
   "audit/fresh/dashboard_sample.json",
+  "audit/fresh/generated.jsonl",
   "audit/fresh/guideline.md",
   "audit/fresh/labels_part1.json",
   "audit/fresh/labels_part10.json",
@@ -481,9 +516,11 @@
   "audit/fresh/pool_diff.json",
   "audit/fresh/precision.json",
   "audit/fresh/queries.jsonl",
+  "audit/fresh/raw_out.json.gz",
   "audit/fresh/reading_correction.json",
   "audit/fresh/sample.json",
   "audit/fresh/summary.json",
+  "audit/judge_cluster_ci.json",
   "audit/labels_part1.json",
   "audit/labels_part2.json",
   "audit/labels_part3.json",
@@ -501,6 +538,7 @@
   "audit/lists100/list_pair_diffs_grok.json",
   "audit/lists100/lists.json",
   "audit/loo_all.json",
+  "audit/loo_ceiling.json",
   "audit/matched_pairs.json",
   "audit/misses/finance_all.json",
   "audit/misses/finance_labels_part1.json",
@@ -509,12 +547,15 @@
   "audit/misses/scholar_all.json",
   "audit/misses/scholar_labels_part1.json",
   "audit/misses/scholar_labels_part2.json",
+  "audit/news_check_runs.json",
   "audit/no_table_reading.json",
+  "audit/ops_counts.json",
   "audit/paired/paired_finance.jsonl",
   "audit/paired/paired_finance_analysis.json",
   "audit/paired/paired_legal.jsonl",
   "audit/paired/paired_legal_analysis.json",
   "audit/pairs_survive.json",
+  "audit/precision_audit.json",
   "audit/profiles/profile_audit_mine.json",
   "audit/profiles/profile_audit_production.json",
   "audit/profiles/profile_audit_queries.json",
@@ -574,6 +615,7 @@
   "audit/raters/labels_gemini.json",
   "audit/raters/labels_grok.json",
   "audit/raters/pages.json",
+  "audit/raters/rater_engine_ci.json",
   "audit/raters/rater_results.json",
   "audit/raters/staged/guideline_snippet.md",
   "audit/raters/staged/labels_S_part1.json",
@@ -591,6 +633,7 @@
   "audit/sample.json",
   "audit/scholar_rejects.json",
   "audit/scholar_strata.json",
+  "audit/sensitivity.json",
   "audit/snippet_length.json",
   "audit/table_reading/hits.json",
   "audit/table_reading/labels_part1.json",

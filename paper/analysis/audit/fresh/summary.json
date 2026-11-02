@@ -1,8 +1,12 @@
 {
  "num_queries": 307,
+ "searches_started": [
+  "2026-10-31T00:47:30.269Z",
+  "2026-10-31T01:38:00.363Z"
+ ],
  "ceiling": 0.996742671009772,
  "table1_ceiling": 0.9925,
- "tau_b_shares": 0.8074074074074075,
+ "tau_b_shares": 0.8044335210322533,
  "mean_abs_dshare": 0.04703322714536581,
  "engines": {
   "keenable": {
@@ -687,9 +691,9 @@
   }
  },
  "pool": {
-  "exact": 1239,
+  "exact": 1240,
   "other": 2526,
-  "reading": 337
+  "reading": 336
  },
- "sample": 487
+ "sample": 486
 }

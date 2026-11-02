@@ -1,0 +1,275 @@
+{
+ "runs": 230,
+ "first": "2026-10-17T21:51Z",
+ "last": "2026-10-28T10:59Z",
+ "query_runs": {
+  "scored": 4516,
+  "judge_error": 59,
+  "empty_ceiling": 6
+ },
+ "largest_delta": {
+  "engine": "deepseek",
+  "delta": 0.0109,
+  "n": 4516
+ },
+ "max_other_abs_delta": 0.0049,
+ "max_exceed_frac": 0.0073,
+ "emptied": 11,
+ "tau_b": 0.9733,
+ "order_full": [
+  "brave-llmcontext",
+  "perplexity",
+  "perplexity-fast",
+  "deepseek",
+  "keenable",
+  "keenable-realtime",
+  "exa",
+  "linkup",
+  "brave",
+  "you",
+  "parallel",
+  "exa-instant",
+  "octen",
+  "context",
+  "claude-search",
+  "parallel-turbo",
+  "chatgpt-search",
+  "kagi",
+  "tavily",
+  "bing",
+  "firecrawl",
+  "google",
+  "tinyfish",
+  "jina",
+  "ceramic"
+ ],
+ "order_loo": [
+  "brave-llmcontext",
+  "deepseek",
+  "perplexity",
+  "perplexity-fast",
+  "exa",
+  "keenable",
+  "keenable-realtime",
+  "linkup",
+  "brave",
+  "you",
+  "parallel",
+  "exa-instant",
+  "octen",
+  "context",
+  "claude-search",
+  "parallel-turbo",
+  "chatgpt-search",
+  "kagi",
+  "tavily",
+  "bing",
+  "firecrawl",
+  "google",
+  "tinyfish",
+  "jina",
+  "ceramic"
+ ],
+ "engines": {
+  "brave-llmcontext": {
+   "n": 4516,
+   "full": 0.6423,
+   "loo": 0.6461,
+   "delta": 0.0038,
+   "exceed_frac": 0.0024,
+   "emptied": 0
+  },
+  "perplexity": {
+   "n": 4516,
+   "full": 0.64,
+   "loo": 0.6409,
+   "delta": 0.0009,
+   "exceed_frac": 0.0009,
+   "emptied": 0
+  },
+  "perplexity-fast": {
+   "n": 4516,
+   "full": 0.6379,
+   "loo": 0.6384,
+   "delta": 0.0005,
+   "exceed_frac": 0.0007,
+   "emptied": 0
+  },
+  "deepseek": {
+   "n": 4516,
+   "full": 0.634,
+   "loo": 0.645,
+   "delta": 0.0109,
+   "exceed_frac": 0.0073,
+   "emptied": 1
+  },
+  "keenable": {
+   "n": 4516,
+   "full": 0.6086,
+   "loo": 0.6088,
+   "delta": 0.0002,
+   "exceed_frac": 0.0002,
+   "emptied": 0
+  },
+  "keenable-realtime": {
+   "n": 4516,
+   "full": 0.6072,
+   "loo": 0.6072,
+   "delta": 0.0,
+   "exceed_frac": 0.0,
+   "emptied": 0
+  },
+  "exa": {
+   "n": 4476,
+   "full": 0.6045,
+   "loo": 0.6094,
+   "delta": 0.0049,
+   "exceed_frac": 0.002,
+   "emptied": 0
+  },
+  "linkup": {
+   "n": 4516,
+   "full": 0.5676,
+   "loo": 0.5687,
+   "delta": 0.0011,
+   "exceed_frac": 0.0002,
+   "emptied": 1
+  },
+  "brave": {
+   "n": 4516,
+   "full": 0.5576,
+   "loo": 0.558,
+   "delta": 0.0005,
+   "exceed_frac": 0.0,
+   "emptied": 0
+  },
+  "you": {
+   "n": 4516,
+   "full": 0.5524,
+   "loo": 0.5533,
+   "delta": 0.0009,
+   "exceed_frac": 0.0011,
+   "emptied": 0
+  },
+  "parallel": {
+   "n": 4418,
+   "full": 0.5465,
+   "loo": 0.5479,
+   "delta": 0.0014,
+   "exceed_frac": 0.0009,
+   "emptied": 1
+  },
+  "exa-instant": {
+   "n": 4476,
+   "full": 0.5152,
+   "loo": 0.5173,
+   "delta": 0.002,
+   "exceed_frac": 0.0011,
+   "emptied": 1
+  },
+  "octen": {
+   "n": 4516,
+   "full": 0.511,
+   "loo": 0.5132,
+   "delta": 0.0022,
+   "exceed_frac": 0.0013,
+   "emptied": 0
+  },
+  "context": {
+   "n": 4516,
+   "full": 0.4692,
+   "loo": 0.471,
+   "delta": 0.0018,
+   "exceed_frac": 0.0013,
+   "emptied": 0
+  },
+  "claude-search": {
+   "n": 2678,
+   "full": 0.4636,
+   "loo": 0.4656,
+   "delta": 0.002,
+   "exceed_frac": 0.0007,
+   "emptied": 1
+  },
+  "parallel-turbo": {
+   "n": 4418,
+   "full": 0.4578,
+   "loo": 0.4619,
+   "delta": 0.0041,
+   "exceed_frac": 0.0027,
+   "emptied": 0
+  },
+  "chatgpt-search": {
+   "n": 4336,
+   "full": 0.3538,
+   "loo": 0.3551,
+   "delta": 0.0013,
+   "exceed_frac": 0.0002,
+   "emptied": 2
+  },
+  "kagi": {
+   "n": 4265,
+   "full": 0.3183,
+   "loo": 0.3187,
+   "delta": 0.0004,
+   "exceed_frac": 0.0,
+   "emptied": 0
+  },
+  "tavily": {
+   "n": 4516,
+   "full": 0.3033,
+   "loo": 0.3041,
+   "delta": 0.0008,
+   "exceed_frac": 0.0002,
+   "emptied": 0
+  },
+  "bing": {
+   "n": 4516,
+   "full": 0.288,
+   "loo": 0.2885,
+   "delta": 0.0005,
+   "exceed_frac": 0.0002,
+   "emptied": 1
+  },
+  "firecrawl": {
+   "n": 4516,
+   "full": 0.2863,
+   "loo": 0.2866,
+   "delta": 0.0003,
+   "exceed_frac": 0.0,
+   "emptied": 0
+  },
+  "google": {
+   "n": 4516,
+   "full": 0.2614,
+   "loo": 0.2615,
+   "delta": 0.0001,
+   "exceed_frac": 0.0,
+   "emptied": 3
+  },
+  "tinyfish": {
+   "n": 4516,
+   "full": 0.2555,
+   "loo": 0.2557,
+   "delta": 0.0002,
+   "exceed_frac": 0.0,
+   "emptied": 0
+  },
+  "jina": {
+   "n": 4516,
+   "full": 0.2097,
+   "loo": 0.2106,
+   "delta": 0.0009,
+   "exceed_frac": 0.0002,
+   "emptied": 0
+  },
+  "ceramic": {
+   "n": 4516,
+   "full": 0.0396,
+   "loo": 0.0403,
+   "delta": 0.0007,
+   "exceed_frac": 0.0002,
+   "emptied": 0
+  }
+ }
+}

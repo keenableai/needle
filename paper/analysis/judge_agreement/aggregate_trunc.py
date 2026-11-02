@@ -6,7 +6,7 @@ from pathlib import Path
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-from common import tau_b
+from common import spearman, tau_b
 
 full_dir, trunc_dir = Path(sys.argv[1]), Path(sys.argv[2])
 key = {int(k): v for k, v in json.load(open(full_dir / "key.json")).items()}
@@ -68,18 +68,6 @@ def engine_scores(rating_of):
         for name, rs in eng.items():
             per[name].append(dcg_at_k(rs) / idcg)
     return {k: sum(v) / len(v) for k, v in per.items() if len(v) >= 6}
-
-
-def spearman(a, b):
-    def ranks(v):
-        order = sorted(range(len(v)), key=lambda i: v[i])
-        r = [0.0] * len(v)
-        for pos, i in enumerate(order):
-            r[i] = pos
-        return r
-    ra, rb = ranks(a), ranks(b)
-    ma, mb = sum(ra) / len(ra), sum(rb) / len(rb)
-    return sum((x - ma) * (y - mb) for x, y in zip(ra, rb, strict=True)) / (sum((x - ma) ** 2 for x in ra) ** 0.5 * sum((y - mb) ** 2 for y in rb) ** 0.5)
 
 
 so, st, sg = engine_scores(opus), engine_scores(trunc), engine_scores(gpt)

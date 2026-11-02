@@ -251,9 +251,10 @@ top-heavy after ERR \citep{chapelle2009err}, and a repeated URL scores zero
 every snippet is capped at 2,000 characters. The \emph{ceiling} of a query
 keeps the best rating per deduplicated URL over every configuration that
 ran, variants included, sorted by rating; an engine's \ndcg takes the
-ceiling's list as the ideal. A judged query on which no configuration
-reaches a rating of 2 is dropped; finance, scholar and legal keep every query
-(Appendices~\ref{app:example} and~\ref{app:checks}).
+ceiling's list as the ideal. A judged query-run is dropped when any of its
+judgements failed or no configuration reaches a rating of 2. Scholar and
+legal drop no query for judging, and finance drops an engine's query only
+when its backstop judgement failed and no result matched (Appendices~\ref{app:example} and~\ref{app:checks}).
 
 \textbf{Identifier and answer matching.} Scholar and legal scan result URLs
 and snippets for arXiv ids, DOIs, PMIDs, reporter citations, docket numbers
@@ -324,10 +325,10 @@ legal run, each within its bench's run-to-run spread (Appendix~\ref{app:checks})
 
 \textbf{A \texttt{site:} restriction lowers caselaw recall.} In one paired
 run on 30 October, outside Table~\ref{tab:results}, adding \texttt{site:courtlistener.com}
-to the same 80 caselaw captions lowers mean recall@5 by .36, from .85. Fourteen of
+to the same 80 caselaw captions lowers mean recall@5 by .36, from .85. Fifteen of
 18 engines lose beyond their 95\% intervals (Appendix~\ref{app:opsres}).
-Restricting to the source host raises recall on SEC
-filings by .35 and on CFR sections by .25.
+Restricting filings to \texttt{sec.gov} raises their recall by .35, and
+CFR sections to \texttt{law.cornell.edu} by .25.
 
 These results support choosing a search API by bench and by pairwise
 tests, not by rank.
@@ -609,7 +610,7 @@ Figure~\ref{fig:results}b & every run in ISO weeks 36--43 (pool grows from 18 to
 Figure~\ref{fig:results}a & 31 scholar, 29 Sep--28 Oct & 332--420 queries per run & 7 lines, 19 dots and the ceiling \\
 Paired differences (\S\ref{sec:results}) & Table~\ref{tab:results} runs; 2,000 run- or day-level resamples & 12.4k query-runs & 21 \\
 Matched support & Table~\ref{tab:results} runs (230 of 232 news) & 4,048 of these runs' 12,313 query-runs & 21 \\
-Dispatch lag & 249 news runs with timestamps & 4,959 query-runs, 100,801 pairs & 21 \\
+Dispatch lag & 249 news runs with timestamps & 4,959 query-runs (4,868 scored), 98,933 scored pairs & 21 \\
 Blinded raters$^\ast$ & 17--29 Oct runs with $\geq$19 engines & 1,200 results, 200 queries & 21, hidden \\
 Second judge$^\ast$ & 8 news and 8 rare runs & 803 and 566 results & 23 \\
 List-level raters$^\ast$ & 100 complete pools (50 news, 50 rare) from Table~\ref{tab:results} runs & 5,698 results & 21, hidden \\
@@ -631,19 +632,21 @@ annotator. The machine-readable version is
 
 \paragraph{Dispatch order.} Within a run the engines are queried
 concurrently, and each engine works through the query list one request at
-a time. Across 37 of the news and rare runs of 17--29 October, the
-first and the last engine to
-receive the same query are a median of 16 minutes apart (90th percentile
-54 minutes); the two slowest engines create this spread. Mean lag is under
-30 seconds for 18 engines, 2.3 minutes for Jina, 4.8 for Claude search and
+a time. Across the 249 news runs of 17--29 October that record dispatch
+times (4,959 query-runs; \texttt{dispatch\_gap.py}), the first and the last
+engine to receive the same query are a median of 6.5 minutes apart (90th
+percentile 12.2 minutes), and three engines create this spread: without
+Jina, Claude search and ChatGPT search the median is 31 seconds. Over
+answered requests, the mean lag behind the first engine is under 30 seconds
+for the other 18 engines, 2.3 minutes for Jina, 4.8 for Claude search and
 6.6 for ChatGPT search, so on hourly news the slowest engines see the web
-later than the fastest. We recomputed news nDCG on the 249 news runs of
-17--29 October that record dispatch times (4,959 query-runs, 100,801 engine--query pairs;
+later than the fastest. We recomputed news nDCG on the 4,868 scored
+query-runs of these runs (98,933 engine--query pairs;
 \texttt{lag\_subset.py}), keeping only the pairs dispatched within 5
 minutes of the first engine. The filter keeps 96\% of pairs. The order of
 the 21 engines is unchanged (Kendall's $\tau_b$ 1.0, where 1 means the same
-order), and no mean nDCG moves by more than .009 (Claude search $-.009$,
-query-resampled 95\% interval $-.023$ to $+.003$).
+order), and no mean nDCG moves by more than .010 (Claude search $-.010$,
+query-resampled 95\% interval $-.024$ to $+.005$).
 
 \paragraph{Vendor format change.} From the hourly news run of 02:56 UTC on
 30 October 2026, Google results fetched through Serper, and Jina results,
@@ -653,29 +656,35 @@ results in each later run that day (\texttt{goto\_onset.py}). The title and snip
 the news judge is unaffected, but the URL-based scholar, legal and filing
 matchers score such results as misses.
 The window of Table~\ref{tab:results} ends on 28 October and contains no
-such URL.
+such URL. In the paired finance run of 30 October
+(Appendix~\ref{app:opsres}), Context returned such links on 15\% of its
+results (\texttt{paired\_analysis.py}).
 
 {\emergencystretch=2em \paragraph{Licenses and release.} The rare stream is
 the \texttt{agentic/queries.parquet} artifact of the results dataset,
 sampled from three published agent-trajectory datasets: the DeepResearchGym
 search logs of \citet{ning2026agentic}
 ({\def\UrlBreaks{\do\/\do-}\url{cx-cmu/deepresearchgym-agentic-search-logs}},
-CC BY 4.0; 60\% of sampled queries), the OpenResearcher trajectories of
+CC BY 4.0; 59\% of sampled queries), the OpenResearcher trajectories of
 \citet{li2026openresearcher} (\url{OpenResearcher/OpenResearcher-Dataset},
 MIT; 39\%) and the LRAT-Train pairs of \citet{zhou2026lrat}
 (\url{Yuqi-Zhou/LRAT-Train}, no license stated on its card as of 30
 October 2026; 1\%). The repository describes the stream's filter
-(English-only language identification, rare-word test, URL and identifier
-removal, near-duplicate cap). The sources' terms govern the query texts;
+(English-only language identification; rare-word test; removal of queries
+with a link, a host name under eight common top-level domains, or a hash,
+wallet or vehicle identifier; near-duplicate cap). The sources' terms govern the query texts;
 our code is MIT, and our CC BY 4.0 covers only our results, judgments and
 metadata. The next artifact revision drops the LRAT-derived queries unless
 their authors grant a license. These queries are 113 of the 6,901 filtered
 queries and 17 of the 1,200 rare query-runs of Table~\ref{tab:results}, and
-dropping them changes no engine's mean rare nDCG by more than .002
-(\texttt{rare\_drop\_lrat.py}). A regular-expression scan of the 1,988 rare
-queries released with the window's runs found no e-mail address, URL or
-key-like string; queries do name people, as the public source documents do,
-so a human reads the queries of each new artifact revision before release.
+dropping them changes no engine's mean rare nDCG by more than .003
+(\texttt{rare\_drop\_lrat.py}). A regular-expression scan in the same script
+of the 1,100 rare queries released with the window's runs finds no e-mail
+address and no \texttt{http} or \texttt{www} link; 66 contain a host-like
+name (61 in a \texttt{site:} operator) and 4 hold a token of 20 or more
+characters that mixes upper case, lower case and digits, such as an opaque
+identifier. Queries also name people, as the public source documents do, so
+a human reads the queries of each new artifact revision before release.
 Removal requests go to the repository issue tracker. The per-query
 artifacts also redistribute the titles, URLs and snippets the APIs
 returned; we publish them as evaluation records under the vendors' terms as
@@ -764,7 +773,7 @@ phrases are always passed through in the query text. In the 24 finance runs
 of Appendix~\ref{app:finance} and the 10 legal runs of 18--28 October 2026,
 an operator or quoted phrase appears in 335 of 667 money, 333 of 445
 filing, 64 of 128 caselaw and 200 of 400 CFR query-runs; 100 of the CFR
-query-runs quote the span.
+query-runs quote the span (\texttt{ops\_analysis.py}).
 
 \begin{table*}[t]
 \centering\footnotesize
@@ -902,24 +911,26 @@ headcount within 15\%, and its LLM backstop may upgrade a non-money miss
 (Appendix~\ref{app:examples}). We checked the bands and the backstop on the
 24 daily finance runs from 29 September to 28 October
 2026, a longer span than the 10 runs of Table~\ref{tab:results}. These
-runs cover 21 engines and 56,678 scored engine--query pairs, of which
-13,140 ask for a quarterly money figure and 4,393 for a headcount.
+runs cover 21 engines and 56,760 engine--query pairs without an
+account-side failure, of which 13,149 ask for a quarterly money figure and
+4,393 for a headcount (\texttt{band\_sweep.py}).
 
 \paragraph{Tolerance sweep.} Table~\ref{tab:sweep} scores the stored
-results under other bands. A 2\% money band buys 9 recall points over the
-0.1\% band, and the 15\% headcount band buys 10 points over 1\%. Counting
-individual matched results, 21.7\% of money matches and 35.6\% of
-headcount matches under the 2\% and 15\% bands fail at 0.1\% and 1\%.
+results under other bands (\texttt{band\_sweep.py}). A 2\% money band would
+add 9 recall points to the 0.1\% band, and the 15\% headcount band adds 10
+points over 1\%. Counting individual matched results, 21.7\% of the money
+matches within 2\% lie outside 0.1\%, and 35.6\% of the headcount matches
+within 15\% lie outside 1\%.
 
 \begin{table}[h]
 \centering\footnotesize
 \setlength{\tabcolsep}{2.8pt}
 \begin{tabular}{@{}lrrrrrrr@{}}
 \toprule
-Money band & 0 & .1\% & .5\% & 1\% & \textbf{2\%} & 5\% & 10\% \\
+Money band & 0 & \textbf{.1\%} & .5\% & 1\% & 2\% & 5\% & 10\% \\
 \midrule
-recall@5 & .363 & .447 & .498 & .518 & \textbf{.541} & .583 & .629 \\
-$\tau_b$ vs.\ 2\% & .96 & .98 & .95 & .94 & 1 & .91 & .89 \\
+recall@5 & .363 & \textbf{.447} & .498 & .517 & .541 & .583 & .628 \\
+$\tau_b$ vs.\ .1\% & .97 & 1 & .95 & .94 & .98 & .91 & .88 \\
 \midrule
 Headcount band & 0 & 1\% & 5\% & \textbf{15\%} & 25\% & 50\% & \\
 \midrule
@@ -927,18 +938,18 @@ recall@5 & .794 & .811 & .863 & \textbf{.915} & .919 & .935 & \\
 $\tau_b$ vs.\ 15\% & .73 & .77 & .81 & 1 & .93 & .79 & \\
 \bottomrule
 \end{tabular}
-\caption{Wider bands raise recall at every step. The engine order barely
-moves across money bands of 0.1--1\% ($\tau_b \geq .94$) and moves more
-across headcount bands. The matcher uses 0.1\% and 15\%. Deterministic
+\caption{Wider bands raise recall at every step. The bold bands are the
+matcher's. The engine order barely moves across money bands up to 2\%
+($\tau_b \geq .94$) and moves more across headcount bands. Deterministic
 recall@5 without backstop or table reading over all engine--query pairs of
 the 24 audit runs, and Kendall's $\tau_b$ of the 21 engines' order against
 the bold band (1 means the same order), by tolerance.}
 \label{tab:sweep}
 \end{table}
 
-\paragraph{Precision audit.} Run on every field behind a 2\% money band,
-the LLM backstop judged 12,919 engine--query pairs the matcher missed and
-upgraded 3,187 (24.7\%); 2,621 of the
+\paragraph{Precision audit.} On these runs, an LLM backstop on every field
+behind a 2\% money band judged 12,919 engine--query pairs that band missed
+and upgraded 3,187 (24.7\%); 2,621 of the
 upgrades are money queries (49\% of money misses), against 1.8\% of
 identifier misses. We sampled 399 results: 80 money results
 0.1--2\% from the gold, 140 money hits within 0.1\% (the
@@ -946,23 +957,27 @@ identifier misses. We sampled 399 results: 80 money results
 Table~\ref{tab:results} window), 40 headcount hits that depend on the band (1--15\%) and 10 within 1\%, 59
 hits on the other field types in proportion to their frequency, and 70
 backstop upgrades (50 money, 20 other). One LLM annotator per item (Claude
-Opus 5.5, in sessions of 50 to 100 items, without the matcher's verdict or
-the engine's name) judged whether the result states the gold value on the
-full 2,000-character text the matcher reads, with reporting rounding
-allowed and a value for a different period or line item counted as wrong;
-21 of the 58 hits rejected in a first pass on 700 characters reversed on
-the full text. Money hits within 0.1\% are right at .93, banded headcount
+Opus 5.5) judged whether the result states the gold value, with reporting
+rounding allowed and a value for a different period or line item counted
+as wrong. A first pass read 700 characters per result. The 58 hits it
+rejected were judged again on the full 2,000-character text the matcher
+reads, and 21 reversed (\texttt{audit\_recheck.py}). The 33 rejected
+backstop upgrades were not judged again, so the upgrade rates below may be
+low. Money hits within 0.1\% are right at .93, banded headcount
 hits at .93 and other-field hits at .98; all 10 headcount hits within 1\%
 hold. Two strata are weak, and the matcher accepts neither: money results
 0.1--2\% from the gold (.71) and money upgrades of the backstop, which is
 lenient on money (.36) and sound elsewhere (.95 on 20). Weighted by hit
-frequency, a deterministic matcher with a 2\% money band has precision
-.97 overall, .97 on headcounts, .98 on the other fields and .88 on money
-(95\% Wilson intervals: money within 0.1\% .87--.96, money 0.1--2\% from
-the gold .61--.80, headcount banded .80--.97, other fields .91--1.00). Almost every remaining false positive is a neighboring quarter
-or a related line item (basic or adjusted instead of diluted EPS, adjusted
-net income) that falls within 2\%, or a table whose column headers the
-snippet omits (\texttt{aggregate\_audit.py}).
+frequency, the matcher without its table reading has precision .98
+overall, .93 on money, .97 on headcounts and .98 on the other fields; a
+2\% money band would lower its money precision to .88 and its overall
+precision to .97 (95\% Wilson intervals: money within 0.1\% .87--.96,
+money 0.1--2\% from the gold .61--.80, headcount banded .80--.97, other
+fields .91--1.00). Most money false positives within 0.1\% are a figure
+whose period or line item the snippet leaves open (a table without column
+headers, an EPS figure not marked as diluted); most of those 0.1--2\% from
+the gold are a neighboring quarter or a related line item, such as
+adjusted net income or basic EPS (\texttt{aggregate\_audit.py}).
 
 \paragraph{Table reading.} The matcher also reads unit-less table figures
 and parenthesized losses (Appendix~\ref{app:examples}). We sampled 80
@@ -970,74 +985,86 @@ results whose unit-less figure or parenthesized loss equals the gold in
 thousands or millions: 73 are confirmed (.91, Wilson .83--.96), and four of
 the seven others are tables that stop before the queried row, two a
 different period. The table reading, which scales a bare figure only after
-a money word, matches 73 of the 80, and 71 of them are confirmed. The
-non-money backstop supplies under 2\% of finance hits. A figure within
+a money word, matches 73 of the 80, and 71 of them are confirmed. On the
+24 audit runs, the non-money backstop supplies at most 1.4\% of finance
+hits (\texttt{aggregate\_audit.py}). A figure within
 0.1\% can still be a neighboring quarter's identical value, so money is the
 matcher's weak spot.
 
-\paragraph{False negatives.} We also sampled 100 money query-runs that the
-matcher without its table reading scores as misses, across engines and runs, and asked an LLM
+\paragraph{False negatives.} We also sampled 100 money query-runs, across
+engines and runs, that the matcher without its table reading misses even
+with a 2\% money band, and asked an LLM
 annotator (Claude Opus 5.5) whether any of the five results states the gold
 value for the right company, period and metric. The annotator found the
 value in 29 (95\% interval .21--.39) and a near miss (a different period or
 line item) in 2 more; 20 of the 29 were at rank 1 or 2. Nearly all of the
 29 use formats this matcher does not read: bare table figures in millions or
 thousands without a unit word (``801'' for \$801M), losses in parentheses
-(``(458)'') and prose rounding beyond 0.1\% (``\$30 million'' for \$29.5M).
+(``(458)'') and losses stated in words (``Operating loss was \$56.3 million'').
 The table reading recovers 19 of these 29 and matches 1 of the 71 others.
-About a tenth of the remaining misses still hold the answer, mostly as
-prose rounded beyond 0.1\%; against this, .07 of exact-band hits and .09 of
-the sampled table figures are false positives. We apply these rates by stratum
+Of the 80 that stay misses, 10 (.125) still hold the answer, and a money
+result 0.1--2\% from the gold states it .71 of the time (precision audit).
+Against this, weighted by hit frequency, .07 of exact-band money hits, .03
+of headcount hits and .02 of other-field hits are false positives, and so
+are 2 of the 73 table-reading hits (.03). We apply these rates by stratum
 (\texttt{finance\_bias\_table1.py}, on the 10 finance runs and 21 engines of
-Table~\ref{tab:results}, with account-side failures excluded; money queries
+Table~\ref{tab:results}, with account-side failures and the queries the
+scorer drops after judge errors excluded; money queries
 are 23\% of the window's finance queries, headcount 8\% and the other fields
 69\%). For an engine with field shares $p_m$, $p_h$, $p_o$, per-field
-recall $r_m$, $r_h$, $r_o$, table-reading share $x_m$ of its money queries
-and share $a_m$ of its money queries with at least one result, expected
-false positives are $p_m[.07(r_m-x_m)+.09x_m] + .07\,p_h r_h + .02\,p_o r_o$
-and expected false negatives $.10\,p_m(a_m-r_m)$. The net correction runs
-from $-.032$ for Keenable and Parallel and $-.031$ for Exa through $-.014$
-for Brave and Context to $-.008$ for Claude search, $-.004$ for Bing and
-$+.002$ for Ceramic. False hits and missed answers therefore do not cancel:
-reported finance recall runs .02 to .03 high for the engines above .80,
-about .01 high in the middle and .002 low for Ceramic. Correcting every
-engine compresses the finance spread from .481 to .448 and moves Octen
-(reported .730) below Kagi (.728) and Jina (.726). The per-engine miss samples (0 to 3 recovered misses each) cannot
-show whether the error rates differ by engine.
+recall $r_m$, $r_h$, $r_o$, share $x_m$ of its money queries that only the table reading matches,
+share $a_m$ of its money queries with at least one result and share $b_m$
+that miss with a result 0.1--2\% from the gold (367 of the window's 2,282
+money misses with results), expected false positives are
+$p_m[.07(r_m-x_m)+.03x_m] + .03\,p_h r_h + .02\,p_o r_o$ and expected
+false negatives $p_m[.71\,b_m+.125(a_m-r_m-b_m)]$. The net correction runs
+from $-.025$ for Keenable, $-.020$ for Parallel and $-.017$ for Exa to
+$+.015$ for Claude search and $+.021$ for Ceramic. False hits and missed
+answers therefore do not cancel: reported finance recall runs .002 to .025
+high for the nine engines above .80 and .001 to .021 low for the twelve
+below. Correcting every engine compresses the finance spread from .481 to
+.443, puts Perplexity (reported .895) just above Keenable (.903), .879
+against .878 after correction, and ChatGPT search (.809) above DeepSeek
+(.818), .808 against .803. With the corrected recall over the reported
+ceiling as the finance share, the overall order keeps $\tau_b$ .99: Kagi
+passes ChatGPT search, and Keenable leads Exa by 4.5 points. The miss
+sample is too small to show whether the error rates differ by engine.
 
 \paragraph{Fresh window.} To validate the
 matcher on unseen data, we generated finance queries with the production
 generator on 30 October 2026, kept all 146 money queries (net income,
 operating income, diluted EPS) and a stratified 161 of the other fields, and
-ran the 307 queries through 17 configurations between 00:47 and 01:44 UTC
+sent the 307 queries to 17 configurations between 00:47 and 01:38 UTC
 on 31 October (\texttt{fresh\_finance.py}, \texttt{audit/fresh/}). Claude
 search was left out because the account's credit had run out. Google and
 Jina carried the redirect URLs of Appendix~\ref{app:examples}, which hide
-the host but not the text the money and name matchers read. Two Claude Opus 5.5 annotators
-read the matcher's full 2,000-character text and graded every
-table-reading hit but one (336), 100 exact-band money hits and 50
+the host but not the text the money and name matchers read. One LLM annotator per item
+(Claude Opus 5.5, in 10 sessions of up to 50 items) read at least the
+matcher's full 2,000-character text and graded every
+table-reading hit but one (335), 100 exact-band money hits and 50
 other-field hits.
 Each graded item is the first matching result in a query's top five, so
 the precision below is that of query-level recall@5 decisions.
-Exact-band precision is .93 (93 yes, 6 unclear, 1 no), as in the precision
-audit. The table reading is weaker and engine-specific. Of its 336
-graded hits, 236 state the gold figure for the right period (.70, Wilson
+Exact-band precision is .93 (93 yes, 6 unclear, 1 no;
+\texttt{fresh\_finance\_labels.py}), as in the precision
+audit. The table reading is weaker and engine-specific. Of its 335
+graded hits (\texttt{fresh\_pool\_diff.py}), 235 state the gold figure for the right period (.70, Wilson
 .65--.75), 95 show the figure in a table whose period columns the snippet
 does not label, and 5 contradict it. We treat the 95 as unresolved:
 precision is .70 if an unresolved hit counts as wrong and .99 if only
-contradictions do. The unlabeled hits concentrate where snippets are table
-dumps: Firecrawl 13 of 43 confirmed, Tavily 12 of 24, Parallel 36 of 48,
-Brave (LLM ctx) 29 of 39, against Exa 42 of 44 and Perplexity 28 of 32. Of
+contradictions do. Confirmed shares differ by engine: Firecrawl 13 of 43, Tavily 12 of 24,
+ChatGPT search 18 of 27, Keenable 14 of 20, Brave (LLM ctx) 29 of 39 and
+Parallel 36 of 48, against Perplexity 27 of 31 and Exa 42 of 44. Of
 the 50 other-field hits, 39 are confirmed; of the other 11, 4 are
-\texttt{website} hits matched on the URL host, which the annotators did not
-see, and 2 are headcounts inside the 15\% band, so the rule-consistent
-figure is .90. To bound the effect on Table~\ref{tab:results}, we multiply
+\texttt{website} hits matched on the URL host, which the guideline told the
+annotators to ignore, and 2 are headcounts inside the 15\% band, so the rule-consistent
+figure is .90 (\texttt{fresh\_finance\_labels.py}). To bound the effect on Table~\ref{tab:results}, we multiply
 each engine's table-reading hits in the window by its fresh unconfirmed
 share (its own where 20 or more hits were audited, .30 otherwise) and
 subtract the result from finance recall (\texttt{reading\_correction.py}).
-Firecrawl loses 5.7 points, Tavily 2.7, DeepSeek and Parallel 2.2,
-Brave (LLM ctx) 1.8 and ChatGPT search 1.6; every other engine loses
-under 1. The finance order keeps $\tau_b$ .90 and the overall order .98:
+Firecrawl loses 6.0 points, Tavily 3.2, Parallel 2.3, DeepSeek 2.2,
+Brave (LLM ctx) 2.1, ChatGPT search 2.1 and Keenable 1.3; every other
+engine loses 1.0 or less. The finance order keeps $\tau_b$ .90 and the overall order .98:
 ranks 1 to 10 do not move, and ChatGPT search--Kagi and Firecrawl--Octen
 swap. A period-aware table reading is future work. Dropping the table
 reading (\texttt{no\_table\_reading.py})
@@ -1048,7 +1075,7 @@ Perplexity 4.6, the rest under 2) and the finance ceiling from .993 to
 1 to 3 are unchanged, and Parallel--Brave (LLM ctx), ChatGPT search--Kagi
 and Firecrawl--Octen swap. As a check of the
 finance column, the fresh run's engine shares agree with the
-Table~\ref{tab:results} finance shares at $\tau_b$ .81 with a mean absolute
+Table~\ref{tab:results} finance shares at $\tau_b$ .80 with a mean absolute
 difference of .05 (\texttt{audit/fresh/summary.json}), and the same five
 engines lead (Exa .96, Keenable .95, Parallel .95, Brave (LLM ctx) .94,
 Perplexity .94, against .86--.93 in the table). Half its queries are money
@@ -1064,41 +1091,48 @@ Table~\ref{tab:results}, such as Parallel Turbo or Exa Instant, appear here.
 Table~\ref{tab:sensitivity} collects the alternative views of the engine
 order from this appendix and Appendix~\ref{app:finance}.
 
-\paragraph{Leave-one-engine-out ceiling.} On every sixth hourly news run from
-29 September to 29 October 2026 (111 runs, 1,909 query-runs with a non-empty
-ceiling) we recomputed each engine's \ndcg against a ceiling pooled from the
-other engines only. Because every returned result is judged, the ceiling can
+\paragraph{Leave-one-engine-out ceiling.} On 230 of the 232 news runs of
+Table~\ref{tab:results}, 17--28 October 2026 (4,516 query-runs with a
+ceiling; \texttt{loo\_ceiling.py}, \texttt{audit/news\_check\_runs.json}),
+we recomputed the \ndcg of each of the 25 configurations from the per-query
+artifacts with the dashboard's scoring code (account-side failures left
+out) against a ceiling pooled from the other 24 configurations only; a
+variant of the same engine stays in the pool. Because every returned result is judged, the ceiling can
 only fall when an engine leaves the pool, so the left-out engine's share can
-only rise. The largest change is +.013 (DeepSeek, which joined on 17 October
-and so has 578 query-runs). Every other engine moves by .004 or less, and
-the engine order is identical (Kendall $\tau_b=1$, where 1 means the same
-order). An engine beats its
-leave-one-out ceiling on at most 1\% of queries. On the
-Table~\ref{tab:results} window the same check for every bench
+only rise. The largest change is +.011 (DeepSeek). Every other
+configuration moves by .005 or less. DeepSeek passes both Perplexity
+configurations and Exa passes both Keenable configurations; the rest of
+the order is unchanged (Kendall $\tau_b=.97$). An engine beats its
+leave-one-out ceiling on at most 1\% of queries. With a ceiling pooled
+from the 21 engines of Table~\ref{tab:results} only, the same check for every bench
 (\texttt{loo\_all.py}) moves no scholar, finance or legal share by more
 than .007, no news share by more than .012 and no rare share by more
 than .037 (ChatGPT search). The overall share moves by at most 0.8
 points, and only Context and DeepSeek swap in the overall order. A judged
-query whose pool the removal empties is dropped for that engine (12 of
-4,563 news and 22 of 1,051 rare engine--query cases).
+query whose pool the removal empties is dropped for that engine (11
+engine--query cases over 4,515 news and 22 over 1,042 rare query-runs).
 
 \paragraph{Empty ceilings.} A judged query that no engine answers with a
-rating of 2 or more has an empty ceiling and is dropped: 65 of the 4,581
-news query-runs in 230 of the window's 232 news runs (1.4\%) and 158 of the
-1,200 rare query-runs (13.2\%; 134 of the 504 quoted and 24 of the 696
-unquoted). Scoring them as zero for every engine and for the ceiling
+rating of 2 or more has an empty ceiling and is dropped: 6 of the 4,522
+fully judged news query-runs in 230 of the window's 232 news runs (0.1\%)
+and 147 of the 1,189 fully judged rare query-runs (12.4\%; 129 of the 499
+quoted and 18 of the 690 unquoted). A query-run with a failed judgement is
+dropped as well (59 of the 4,581 news and 11 of the 1,200 rare query-runs).
+Scoring the empty-ceiling query-runs as zero for every engine and for the ceiling
 instead lowers every absolute mean nDCG in proportion but changes no bench
 share by more than .002 and swaps only Octen and Claude search on rare
 (\texttt{ceiling\_drop.py}), because
 the zeros enter the engine mean and the ceiling mean alike. The absolute
 nDCG columns of Table~\ref{tab:results} are therefore conditional means.
 
-\paragraph{Sensitivity to scoring choices.} On the 111 news runs of the
-leave-one-out check we recomputed news shares under other gain mappings and
-compared engine orders with the default by Kendall $\tau_b$: linear gains
-$\{1,.75,.5,.25,0\}$ give .95 (one engine moves four places), the
-exponential mapping $(2^r-1)/15$ gives .97, binary relevance at rating
-$\geq3$ gives .93, at $=4$ .87, and at $\geq2$ .81. Ranking
+\paragraph{Sensitivity to scoring choices.} On the 230 news runs of the
+leave-one-out check we recomputed the news shares of the 25 configurations
+under other gain mappings and compared their orders with the default by
+Kendall $\tau_b$ (\texttt{sensitivity.py}, \texttt{audit/sensitivity.json}):
+linear gains $\{1,.75,.5,.25,0\}$ and the exponential mapping $(2^r-1)/15$
+both give .95 (no configuration moves more than two places), binary
+relevance at rating $\geq3$ gives .98, at $=4$ .81 (Octen rises five
+places), and at $\geq2$ .87 (Exa and Parallel rise five). Ranking
 Table~\ref{tab:results} by the mean of the five absolute metrics instead of
 share of ceiling gives $\tau_b=.99$; Context and DeepSeek swap 8th and
 9th.
@@ -1135,8 +1169,9 @@ occurrences after the first, the shares are 21\%, 8\%, 6\%, 3\% and 1\%
 cross-day repetition of 33\% of finance, 16\% of rare and 4\% of news
 query-runs. Resampling clusters of identical query text instead of runs
 (for scholar, the paper behind the four queries; \texttt{cluster\_pairs.py})
-separates 192 of the 210 pairs pointwise and 182 after the Bonferroni
-adjustment, with Keenable--Exa at $+4.6$ ($+3.6$ to $+5.6$). The paper
+separates 188 of the 210 pairs pointwise and 180 after the Bonferroni
+adjustment, with Keenable--Exa at $+4.7$ ($+3.7$ to $+5.7$); its intervals
+are narrower than the run-level ones for 145 of the 210 pairs. The paper
 reports the run-level counts.
 
 \begin{table*}[t]
@@ -1250,7 +1285,8 @@ between 42.9 and 44.4 (43.8); no other engine has account-side exclusions in
 the Table~\ref{tab:results} runs and so no range. The
 excluded fraction counts account-side failures and, on finance, the
 queries of the 19 October run that the scorer drops after judge errors,
-not the empty-ceiling queries that every engine drops. Without the assumption
+not the news and rare query-runs that every engine drops for an empty
+ceiling or a failed judgement. Without the assumption
 Claude search and TinyFish range over ranks 11 to 20, Kagi over 11 to 15,
 ChatGPT search over 11 to 14 and Jina over 18 to 19; ranks 1 to 10, and so
 the Keenable--Exa margin of 4.7 points, hold under either extreme.
@@ -1261,7 +1297,8 @@ runs since 17 October, when the last engine joined, in which all 21
 configurations ran. The only gaps are the query-runs excluded for
 account-side failures on finance, scholar and legal: 2.5\% for Jina, 4.7\%
 for Kagi, 8.7\% for ChatGPT search, 16.9\% for Claude search and 27.9\% for
-TinyFish. Kagi's whole-run failures in the news and rare runs of 27--28
+TinyFish, plus the finance queries of the 19 October run that the scorer
+drops after judge errors. Kagi's whole-run failures in the news and rare runs of 27--28
 October score zero; the dashboard has no Kagi score for later news and
 rare runs (Appendix~\ref{app:examples}), so the window of those benches
 ends there. Over the eight weeks of
@@ -1292,28 +1329,28 @@ Alternative view & What moves & Order vs.\ Table~\ref{tab:results} & Leader and 
 \midrule
 Matched query support (4,048 query-runs) & Bing $+4.1$, Brave (LLM ctx) $+2.5$, Parallel $-2.1$, Brave $+1.8$, Keenable and You.com $+1.6$; others within $\pm1.7$ & $\tau_b$ .89; 171 of 210 pairs separated (adjusted) & Keenable, $+7.2$ \\
 Day-level resampling & intervals widen & 174 of 210 pairs separated (adjusted) & Keenable, $+4.7$ \\
-Query-cluster resampling (identical text; scholar: paper) & intervals narrow & 182 of 210 pairs separated (adjusted) & Keenable, $+4.6$ \\
+Query-cluster resampling (identical text; scholar: paper) & most intervals narrow & 180 of 210 pairs separated (adjusted) & Keenable, $+4.7$ \\
 Excluded requests scored zero or at the ceiling & Claude search 34.7--52.0, TinyFish 37.6--52.0, Kagi 47.5--53.2, ChatGPT search 48.2--54.5 & Claude search and TinyFish ranks 11--20, Kagi 11--15, ChatGPT search 11--14; ranks 1--10 unchanged & Keenable, $+4.7$ \\
 Ceiling pooled without the scored engine & overall share $\leq 0.8$ points; rare share $\leq .037$ & Context and DeepSeek swap & Keenable, $+4.2$ \\
 One bench dropped (each of five) & lead from $+1.2$ (no scholar) to $+6.4$ (no finance) & $\tau_b$ .86--.93 & Keenable in all five \\
 Rare column from unquoted queries only & rare: Exa, Perplexity, Brave (LLM ctx) lead; Keenable fourth & overall $\tau_b$ .96 & Keenable, $+3.3$ \\
-Snippets cut to 200 characters (8 news queries) & news shares move .084 on average & news $\tau_b$ .73 & leader and bottom three unchanged \\
-Finance error corrected by stratum & finance spread .48 to .45 & Octen falls below Kagi and Jina on finance & Keenable \\
+Snippets cut to 200 characters (8 news queries) & news shares move .084 on average & news $\tau_b$ .73 vs.\ the second judge's full-snippet order & leader and bottom two unchanged \\
+Finance error corrected by stratum & finance recall $-2.5$ (Keenable) to $+2.1$ (Ceramic); finance spread .48 to .44 & on finance, Perplexity passes Keenable and ChatGPT search passes DeepSeek; overall $\tau_b$ .99, Kagi passes ChatGPT search & Keenable, $+4.5$ \\
 Finance without the table reading (Appendix~\ref{app:finance}) & finance recall $-0.1$ to $-7.5$ (Firecrawl, Parallel, Tavily, Exa most) & finance $\tau_b$ .84; overall $\tau_b$ .97; ranks 1--3 unchanged, three adjacent swaps & Keenable, $+5.5$ \\
-Fresh finance run, 31 Oct 2026 (307 queries, 17 engines; finance column only; Appendix~\ref{app:finance}) & finance shares move .05 on average & finance $\tau_b$ .81; same five engines lead & Exa .96, Keenable .95 on finance \\
+Fresh finance run, 31 Oct 2026 (307 queries, 17 engines; finance column only; Appendix~\ref{app:finance}) & finance shares move .05 on average & finance $\tau_b$ .80; same five engines lead & Exa .96, Keenable .95 on finance \\
 Later day, all benches (30 Oct 2026; 19 engines) & one scholar and one legal run move the leaders & overall $\tau_b$ .86; same five lead, Ceramic last & Perplexity 72.4, Keenable 71.3 \\
-Rater grades instead of the judge (100 complete pools, Gemini 4 and Grok 4.7; not a full overall score) & engine nDCG shares move .06--.07 on average & Spearman .94 ($\tau_b$ .83--.85) & same five engines lead and same three trail; Keenable--Exa unresolved under the judge and both raters \\
-Empty-ceiling queries scored zero & absolute news and rare means fall 1.4\% and 13.2\% & shares move $\leq .002$; one rare swap & Keenable, $+4.7$ \\
+Rater grades instead of the judge (100 complete pools, Gemini 4 and Grok 4.7; not a full overall score) & engine nDCG shares move .06--.07 on average & Spearman .94 vs.\ the judge ($\tau_b$ .83--.85) & same five engines lead and same three trail; Keenable--Exa unresolved under the judge and both raters \\
+Empty-ceiling queries scored zero & absolute news and rare means fall 0.1\% and 12.4\% & shares move $\leq .002$; one rare swap & Keenable, $+4.7$ \\
 \bottomrule
 \end{tabular}
 \caption{Every
 retrospective view that recomputes the full overall score keeps Keenable
 first and Ceramic last, while the later day of 30 October puts Perplexity
-first by 1.1 points. The two sampled checks (200-character snippets, rater
-grades) preserve the top group and the bottom three but not the order
-within the top group. Rows give the alternative views analyzed in this
+first by 1.1 points. The rater-grade check preserves the top group and the bottom three but
+not the order within the top group; the 200-character check preserves the
+leader and the bottom two but not the top group. Rows give the alternative views analyzed in this
 paper; columns give what each view moves, its order against
-Table~\ref{tab:results}, and the leader with its lead over Exa.}
+Table~\ref{tab:results} or the named reference, and the leader with its lead over Exa.}
 \label{tab:sensitivity}
 \end{table*}
 
@@ -1414,7 +1451,7 @@ and 6.8 points. One day is a direction check, not a new leaderboard.
 results & 600 & 600 & 1,200 \\
 page missing for a rater & 43 & 85 & 128 \\
 $\kappa$, rater A vs.\ B (page) & .94 & .94 & .94 \\
-$\kappa$, judge vs.\ consensus (page) & .73 & .80 & .77 \\
+$\kappa$, judge vs.\ consensus (page) & .72 & .80 & .77 \\
 \quad 95\% CI & .67--.77 & .75--.84 & .74--.81 \\
 within one level, judge vs.\ consensus & .86 & .91 & .88 \\
 mean rating, judge / consensus & 1.83 / 2.32 & 1.38 / 1.61 & 1.60 / 1.97 \\
@@ -1423,9 +1460,9 @@ staged snippet-only grade $\neq$ page grade (A), 400 items & .28 & .22 & .25 \\
 $\kappa$, judge vs.\ staged snippet-only & .78 & .85 & .82 \\
 Spearman $\rho$ on 21 engine means & .89 & .71 & .84 \\
 \midrule
-$\kappa$, Gemini 4 vs.\ consensus / judge & .91 / .75 & .92 / .80 & .92 / .78 \\
+$\kappa$, Gemini 4 vs.\ consensus / judge & .91 / .74 & .92 / .81 & .92 / .78 \\
 $\kappa$, Grok 4.7 vs.\ consensus / judge & .90 / .75 & .88 / .81 & .90 / .79 \\
-Spearman $\rho$ on 21 engines, Gemini / Grok vs.\ judge & .85 / .82 & .73 / .72 & .84 / .85 \\
+Spearman $\rho$ on 21 engines, Gemini / Grok vs.\ judge & .83 / .81 & .73 / .73 & .83 / .85 \\
 \bottomrule
 \end{tabular}
 \caption{Blinded raters from three vendors (two Claude Opus 5.5
@@ -1459,7 +1496,7 @@ quadratic $\kappa$ .94 (query-resampled 95\% CI .93--.95), Gemini and Grok
 agree with each other at .92, and they agree with the judge at .78 and .79
 (.75--.82). Raters from three vendors therefore agree with one another more
 than any agrees with the GPT-6 judge, and all three rate higher than the
-judge (mean rating 1.88 for Gemini and for Grok, 1.97 for the Claude
+judge (mean rating 1.88 for Gemini, 1.87 for Grok, 1.97 for the Claude
 consensus, 1.60 for the judge). Because the Claude raters saw the page
 while writing the snippet grade, a staged check (\texttt{staged\_page.py},
 \texttt{audit/raters/staged/}) re-graded 400 items with a fetched, unbroken
@@ -1471,7 +1508,7 @@ noise to a quarter of grades but no systematic shift at this sample size.
 The snippet-only grade agrees with the judge, which also sees only
 snippets, at $\kappa$ .82 (.77--.85). At the engine level the judge and the
 Claude consensus rank the 21 engines at Spearman .89 on news (.74--.94) and
-.71 on rare (.50--.94), with 37 to 61 items per engine, so the rare figure
+.71 on rare (.50--.94), with 37 to 76 items per engine, so the rare figure
 is coarse (\texttt{rater\_engine\_ci.py}). The absence of a net page effect
 is pooled over engines; the sample does not test engine-specific page
 bias.
@@ -1491,7 +1528,7 @@ under the judge and both raters (Keenable, Exa, Perplexity, DeepSeek, Brave
 Kagi, Ceramic). The leading paired differences keep their sign under the
 judge, Gemini and Grok (Keenable--Parallel $+.204$, $+.168$ and $+.137$;
 Keenable--Ceramic $+.53$, $+.60$ and $+.56$), but Keenable--Exa is $+.035$
-($-.024$ to $+.090$) by the judge, $+.037$ ($-.016$ to $+.089$) by Gemini
+($-.024$ to $+.091$) by the judge, $+.037$ ($-.016$ to $+.089$) by Gemini
 and $.000$ ($-.053$ to $+.053$) by Grok, so 100 pools do not separate the
 top two under the judge or either rater.
 
@@ -1528,8 +1565,8 @@ rate the same results under the same prompts, eight queries per bench.}
 double-quoted span, and 30 are wrapped as \texttt{query: "..."} by the
 source agent, so they are scored on a phrase no page contains. Dropping
 the wrapped queries changes no rare share by more than .002. The quoted and unquoted query-runs rank engines
-differently. On the 672 scored unquoted query-runs (696 issued, 24 dropped
-for an empty ceiling), Exa, Perplexity and Brave (LLM ctx) lead and
+differently. On the 672 scored unquoted query-runs (696 issued; 18 dropped
+for an empty ceiling and 6 for a failed judgement), Exa, Perplexity and Brave (LLM ctx) lead and
 Keenable is fourth ($\tau_b$ .90 against the full rare order). On the
 quoted query-runs, Keenable, ChatGPT search and Brave (LLM ctx) lead, and Parallel,
 Perplexity, Exa and Linkup lose .14 to .18 of their rare bench share
@@ -1544,7 +1581,8 @@ unique result of eight news queries, one from each of eight runs between
 30 September and 24 October 2026 (803 results; 23 of the 25 configurations active then had
 complete lists for at least six queries), and of eight rare queries from the
 eight daily runs of 22--29 October (566 unique results, 23 engines with
-complete lists for at least four queries). The second judge, Claude Opus
+complete lists for at least four queries with a nonzero ceiling under each
+judge). The second judge, Claude Opus
 5.5, rated them under the same instructions in six independent sessions,
 without access to the production ratings. The artifacts do not store the
 published date the API returned, so the second judge saw title, URL and
@@ -1557,11 +1595,12 @@ its mean rating falls from 2.43 to 2.19: the published date is a large
 input for news. Without dates the rerun agrees with the second judge at
 $\kappa$ .76 (.68--.82), against .79 with dates, so the model difference is
 about as large as the date effect. On rare, where dates seldom matter, the
-rerun matches the dated ratings at $\kappa$ .97 and the second judge at .91
-(.81--.95). Table~\ref{tab:agree} gives the agreement of the second judge
-with the production judge (GPT-6), with engine shares recomputed for each
-judge against a ceiling pooled from that judge's ratings (Spearman
-intervals .76--.97 on news and .40--.95 on rare). The second judge is
+rerun matches the dated ratings at $\kappa$ .97 and the second judge at .90
+(.81--.95; \texttt{rejudge.py}, \texttt{rejudge\_analysis.py}). Table~\ref{tab:agree} gives the agreement of the second judge
+with the production judge (GPT-6; \texttt{aggregate\_judge.py}), with
+engine shares recomputed for each judge against a ceiling pooled from that
+judge's ratings (query-resampled Spearman intervals .76--.97 on news and
+.47--.96 on rare; \texttt{judge\_cluster\_ci.py}). The second judge is
 stricter: its mean news rating is 2.22 against 2.43, and 68\% of
 disagreements go that way. Its two largest news drops are Parallel Turbo
 and Claude search ($-$.20 each), engines whose snippets often paraphrase
@@ -1587,16 +1626,18 @@ correlation with news share is .34 (\texttt{snippet\_length.py},
 and Ceramic rank 20th and 21st but DeepSeek ranks third. To bound the
 effect of snippet length, the second judge rated the same 803 results again
 with every snippet cut to 200 characters. Against its own full-snippet
-ratings, exact agreement is .60, agreement within one level .94 and the
-quadratic $\kappa$ .80. Kendall $\tau_b$ between the two engine orders is
-.73 (query-resampled interval .34--.83; \texttt{trunc\_ci.py}) and Spearman
-$\rho$ .88, with a mean absolute share difference of .084 (.06--.13). The
-cap compresses the field: the losses of Exa ($-.22$, interval $-.41$ to
+ratings (\texttt{aggregate\_trunc.py}), exact agreement is .60, agreement within one level .94 and the
+quadratic $\kappa$ .80. Over the 23 configurations of
+Table~\ref{tab:agree}, Kendall $\tau_b$ between the two engine orders is
+.73 (query-resampled interval .40--.84; \texttt{trunc\_ci.py}) and Spearman
+$\rho$ .88 (.52--.95), with a mean absolute share difference of .084
+(.06--.14). The cap compresses the field: the intervals of 10 of the 23
+configurations exclude zero, among them the losses of Exa ($-.22$, interval $-.41$ to
 $-.08$), Keenable ($-.14$, $-.23$ to $-.05$) and Brave (LLM ctx) ($-.12$,
-$-.22$ to $-.04$) and the gains of Bing ($+.14$, $+.10$ to $+.19$) and
-Google ($+.09$, $+.04$ to $+.15$) exclude zero. The interval of the
+$-.21$ to $-.04$) and the gains of Bing ($+.14$, $+.10$ to $+.19$) and
+Google ($+.09$, $+.04$ to $+.15$). The interval of the
 leader's margin over the second engine includes zero both with full
-snippets and at 200 characters, and the leader and the bottom three do not
+snippets and at 200 characters, and the leader and the bottom two do not
 change. Eight queries thus establish the direction of the length effect
 but not its size per engine.
 
@@ -1620,9 +1661,9 @@ coverage, ranking or the operator's implementation. Plain recall@5 and the paire
 on the same targets, one run per bench on 30 October 2026; a change
 printed in dark grey and marked $^{\dagger}$ has a target-resampled 95\%
 interval that includes zero, the others exclude it. Google and Jina
-returned redirect URLs on 43\% and 36\% of their results in this run
-(Appendix~\ref{app:examples}); Keenable's finance cells rest on 229 of 320
-requests.}
+returned redirect URLs on 38--43\% and 34--38\% of their results, and
+Context on 15\% of its finance results (Appendix~\ref{app:examples});
+Keenable's finance cells rest on 229 of 320 requests.}
 \label{tab:paired}
 \end{table*}
 
@@ -1635,31 +1676,36 @@ brackets the filing or decision date by 45 days). We ran the variants of
 each target adjacently through 18 configurations in one run per bench on
 30 October 2026 (\texttt{paired\_analysis.py}, \texttt{audit/paired/}; no
 Kagi, You.com or DeepSeek). Google and Jina returned redirect URLs
-(Appendix~\ref{app:examples}) on 43\% and 36\% of their results, so their
+(Appendix~\ref{app:examples}) on 38--43\% and 34--38\% of their results on
+the two benches, and Context on 15\% of its finance results, so their
 rows in Table~\ref{tab:paired} measure that change too. Keenable ran
 without an API key, so the public rate limit refused 91 of its 320 finance
 requests (229 answered). On the 80 filing targets the quoted span raises
-recall@5 by .10 on average (target-resampled 95\% intervals exclude zero
-for 9 of 18 engines; none loses), \texttt{site:sec.gov} by .35 (16 of 18
+recall@5 by .10 on average (target-resampled 95\% intervals lie above zero
+for 8 of 18 engines and below it for none), \texttt{site:sec.gov} by .35 (16 of 18
 gain), and the 90-day date window changes it by $-.02$. On the 80 caselaw
 captions, \texttt{site:courtlistener.com} lowers recall@5 by .36 on
-average and for 14 of 18 engines beyond their intervals, from ChatGPT
+average and for 15 of 18 engines beyond their intervals, from ChatGPT
 search ($-.88$) and TinyFish ($-.68$) to Keenable and Brave (LLM ctx)
-($-.03$ each) and Ceramic (0); the quoted caption changes recall by $-.04$ and the date
+($-.03$ each) and Ceramic (0); the quoted caption changes recall by $-.05$ and the date
 window by $-.11$. On the 80 CFR sections the quoted span adds .18 (12 of 17
-engines) and \texttt{site:ecfr.gov} adds .25 (10 of 17). This run does not
-separate coverage, ranking and operator implementation. In the legal run
-Claude search has no CFR cell and its caselaw cells rest on 30 targets
-(credit lapse), Tavily's CFR cells rest on 29 targets and TinyFish's
-caselaw cells on 34 to 42 (rate limits), and Jina returned no results for
-29 captions. Failures fall on whole targets, so each engine's difference
-uses the targets it answered; if those targets differ in operator effect
+engines) and \texttt{site:law.cornell.edu} adds .25 (10 of 17). This run does not
+separate coverage, ranking and operator implementation. Failures follow the
+rule of Appendix~\ref{app:examples}: an account-side failure leaves the
+target out of that engine's difference, and any other failure scores zero.
+In the legal run Claude search has no CFR cell and its caselaw cells rest
+on 29 or 30 targets (credit lapse), and Tavily's CFR cells rest on 29
+targets and TinyFish's caselaw and CFR cells on 34 to 42 and 59 to 61
+(rate limits). ChatGPT search's 3 failed caption requests, Bing's 1 and
+TinyFish's 2 failed filing requests, and Jina's HTTP 422 errors on 35
+filing, 28 caption and 1 CFR request score zero. If the targets left out differ in operator effect
 from the rest, the estimate is biased in a way the interval does not show.
-Excluding Google and Jina leaves the caselaw \texttt{site:} loss at $-.36$
-(14 of 16 engines beyond their intervals), and restricting to the 14
-engines with all 80 captions answered gives $-.35$. Without Google and
-Jina, the filing \texttt{site:} gain is $+.33$ and the CFR gains are $+.14$
-(quoted) and $+.20$ (\texttt{site:}).
+Excluding the engines with redirect URLs on more than 1\% of their results
+(Google and Jina, and Context on filings) leaves the caselaw \texttt{site:}
+loss at $-.35$ (13 of 16 engines beyond their intervals), the filing
+\texttt{site:} gain at $+.32$ and the CFR gains at $+.14$ (quoted) and
+$+.20$ (\texttt{site:}); restricting to the 14 engines with no failed
+caption request gives a caselaw \texttt{site:} loss of $-.32$.
 
 
 \paragraph{Operator compliance.} For every \texttt{site:} query of the 24

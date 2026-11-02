@@ -1,7 +1,117 @@
 {
- "old_reading": 339,
- "dashboard_reading": 337,
- "dropped": [
+ "graded": 339,
+ "current": 336,
+ "graded_current": {
+  "n": 335,
+  "yes": 235,
+  "unclear": 95,
+  "no": 5,
+  "precision": 0.7014925373134329,
+  "wilson": [
+   0.650430165986768,
+   0.747986085146505
+  ],
+  "not_contradicted": 0.9850746268656716
+ },
+ "graded_current_by_engine": {
+  "brave": {
+   "n": 3,
+   "yes": 3,
+   "unclear": 0,
+   "no": 0
+  },
+  "brave-llmcontext": {
+   "n": 39,
+   "yes": 29,
+   "unclear": 9,
+   "no": 1
+  },
+  "ceramic": {
+   "n": 4,
+   "yes": 2,
+   "unclear": 0,
+   "no": 2
+  },
+  "chatgpt-search": {
+   "n": 27,
+   "yes": 18,
+   "unclear": 9,
+   "no": 0
+  },
+  "context": {
+   "n": 12,
+   "yes": 9,
+   "unclear": 3,
+   "no": 0
+  },
+  "exa": {
+   "n": 44,
+   "yes": 42,
+   "unclear": 2,
+   "no": 0
+  },
+  "firecrawl": {
+   "n": 43,
+   "yes": 13,
+   "unclear": 30,
+   "no": 0
+  },
+  "google": {
+   "n": 7,
+   "yes": 2,
+   "unclear": 5,
+   "no": 0
+  },
+  "jina": {
+   "n": 12,
+   "yes": 12,
+   "unclear": 0,
+   "no": 0
+  },
+  "keenable": {
+   "n": 20,
+   "yes": 14,
+   "unclear": 6,
+   "no": 0
+  },
+  "linkup": {
+   "n": 3,
+   "yes": 3,
+   "unclear": 0,
+   "no": 0
+  },
+  "octen": {
+   "n": 12,
+   "yes": 9,
+   "unclear": 2,
+   "no": 1
+  },
+  "parallel": {
+   "n": 48,
+   "yes": 36,
+   "unclear": 12,
+   "no": 0
+  },
+  "perplexity": {
+   "n": 31,
+   "yes": 27,
+   "unclear": 4,
+   "no": 0
+  },
+  "tavily": {
+   "n": 24,
+   "yes": 12,
+   "unclear": 11,
+   "no": 1
+  },
+  "tinyfish": {
+   "n": 6,
+   "yes": 4,
+   "unclear": 2,
+   "no": 0
+  }
+ },
+ "graded_not_current": [
   {
    "engine": "brave",
    "query": "reynolds consumer products q1 fiscal 2025 net income",
@@ -16,83 +126,17 @@
    "engine": "linkup",
    "query": "\"caterpillar\" q3 fiscal 2010 net income",
    "label": "yes"
+  },
+  {
+   "engine": "perplexity",
+   "query": "\"keurig dr pepper\" q3 fiscal 2024 operating income",
+   "label": "yes"
   }
  ],
- "added": [
+ "current_not_graded": [
   {
    "engine": "chatgpt-search",
    "query": "northrop grumman q3 fiscal 2025 net income"
   }
- ],
- "kept": {
-  "yes": 236,
-  "unclear": 95,
-  "no": 5
- },
- "kept_by_engine": {
-  "brave": {
-   "yes": 3
-  },
-  "brave-llmcontext": {
-   "yes": 29,
-   "unclear": 9,
-   "no": 1
-  },
-  "ceramic": {
-   "yes": 2,
-   "no": 2
-  },
-  "chatgpt-search": {
-   "unclear": 9,
-   "yes": 18
-  },
-  "context": {
-   "yes": 9,
-   "unclear": 3
-  },
-  "exa": {
-   "yes": 42,
-   "unclear": 2
-  },
-  "firecrawl": {
-   "unclear": 30,
-   "yes": 13
-  },
-  "google": {
-   "unclear": 5,
-   "yes": 2
-  },
-  "jina": {
-   "yes": 12
-  },
-  "keenable": {
-   "yes": 14,
-   "unclear": 6
-  },
-  "linkup": {
-   "yes": 3
-  },
-  "octen": {
-   "yes": 9,
-   "unclear": 2,
-   "no": 1
-  },
-  "parallel": {
-   "yes": 36,
-   "unclear": 12
-  },
-  "perplexity": {
-   "yes": 28,
-   "unclear": 4
-  },
-  "tavily": {
-   "yes": 12,
-   "unclear": 11,
-   "no": 1
-  },
-  "tinyfish": {
-   "unclear": 2,
-   "yes": 4
-  }
- }
+ ]
 }

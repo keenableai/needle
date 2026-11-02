@@ -1,0 +1,134 @@
+{
+ "finance": {
+  "runs": [
+   "2026-09-29T0432Z",
+   "2026-09-30T0420Z",
+   "2026-10-01T0439Z",
+   "2026-10-02T0416Z",
+   "2026-10-03T0413Z",
+   "2026-10-04T0431Z",
+   "2026-10-06T0427Z",
+   "2026-10-08T0443Z",
+   "2026-10-11T0453Z",
+   "2026-10-12T0445Z",
+   "2026-10-15T0443Z",
+   "2026-10-16T0424Z",
+   "2026-10-17T0446Z",
+   "2026-10-18T0338Z",
+   "2026-10-18T0953Z",
+   "2026-10-19T0444Z",
+   "2026-10-20T0502Z",
+   "2026-10-21T0454Z",
+   "2026-10-23T0409Z",
+   "2026-10-24T0341Z",
+   "2026-10-25T0326Z",
+   "2026-10-26T0336Z",
+   "2026-10-27T0448Z",
+   "2026-10-28T0437Z"
+  ],
+  "groups": {
+   "country": {
+    "operator": 0,
+    "operator_or_quote": 0,
+    "query_runs": 226,
+    "quote": 0,
+    "syntax_plain": 226
+   },
+   "domain": {
+    "operator": 0,
+    "operator_or_quote": 0,
+    "query_runs": 227,
+    "quote": 0,
+    "syntax_plain": 227
+   },
+   "entity": {
+    "operator": 0,
+    "operator_or_quote": 0,
+    "query_runs": 107,
+    "quote": 0,
+    "syntax_plain": 107
+   },
+   "exact_id": {
+    "operator": 0,
+    "operator_or_quote": 0,
+    "query_runs": 436,
+    "quote": 0,
+    "syntax_plain": 436
+   },
+   "filing": {
+    "operator": 224,
+    "operator_or_quote": 333,
+    "query_runs": 445,
+    "quote": 109,
+    "syntax_date": 111,
+    "syntax_plain": 112,
+    "syntax_quoted": 109,
+    "syntax_site": 113
+   },
+   "money": {
+    "operator": 0,
+    "operator_or_quote": 335,
+    "query_runs": 667,
+    "quote": 335,
+    "syntax_plain": 332,
+    "syntax_quoted": 335
+   },
+   "numeric_band": {
+    "operator": 0,
+    "operator_or_quote": 0,
+    "query_runs": 223,
+    "quote": 0,
+    "syntax_plain": 223
+   },
+   "person": {
+    "operator": 0,
+    "operator_or_quote": 0,
+    "query_runs": 220,
+    "quote": 0,
+    "syntax_plain": 220
+   },
+   "year": {
+    "operator": 0,
+    "operator_or_quote": 0,
+    "query_runs": 329,
+    "quote": 0,
+    "syntax_plain": 329
+   }
+  }
+ },
+ "legal": {
+  "runs": [
+   "2026-10-18T2126Z",
+   "2026-10-19T2149Z",
+   "2026-10-20T2140Z",
+   "2026-10-21T2136Z",
+   "2026-10-23T2037Z",
+   "2026-10-24T2034Z",
+   "2026-10-25T2036Z",
+   "2026-10-26T2130Z",
+   "2026-10-27T1944Z",
+   "2026-10-28T1944Z"
+  ],
+  "groups": {
+   "caselaw": {
+    "operator": 40,
+    "operator_or_quote": 64,
+    "query_runs": 128,
+    "quote": 24,
+    "syntax_date": 17,
+    "syntax_plain": 64,
+    "syntax_quoted": 24,
+    "syntax_site": 23
+   },
+   "code": {
+    "operator": 100,
+    "operator_or_quote": 200,
+    "query_runs": 400,
+    "quote": 100,
+    "syntax_plain": 200,
+    "syntax_quoted": 100,
+    "syntax_site": 100
+   }
+  }
+ }
+}

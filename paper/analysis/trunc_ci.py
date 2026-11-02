@@ -3,10 +3,11 @@ import random
 import sys
 from pathlib import Path
 
-from common import pct, tau_b
+from common import ci, spearman, tau_b
 
 from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
+MINQ = 6
 full_dir, trunc_dir, out_path = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
 rng = random.Random(13)
 key = {int(k): v for k, v in json.load(open(full_dir / "key.json")).items()}
@@ -42,43 +43,57 @@ def per_query(rating_of):
 
 
 pf, pt = per_query(opus), per_query(trunc)
-names = sorted(set.intersection(*[set(r) for r in pf if r]) & set.intersection(*[set(r) for r in pt if r]))
+names = [e for e in sorted(set().union(*pf, *pt)) if all(sum(1 for r in p if e in r) >= MINQ for p in (pf, pt))]
 
 
 def shares(rows, idx):
     out = {}
     for e in names:
-        vals = [rows[i][e] for i in idx if rows[i] and e in rows[i]]
+        vals = [rows[i][e] for i in idx if e in rows[i]]
         out[e] = sum(vals) / len(vals)
     return out
 
 
-def ci(vals):
-    return pct(vals, .025), pct(vals, .975)
+def order(s):
+    return sorted(names, key=lambda e: (-s[e], e))
+
+
+def stats(a, b):
+    x, y = [a[e] for e in names], [b[e] for e in names]
+    return {"tau_b": tau_b(x, y), "spearman": spearman(x, y), "mad": sum(abs(p - q) for p, q in zip(x, y, strict=True)) / len(names)}
 
 
 idx = list(range(len(queries)))
 sf, st = shares(pf, idx), shares(pt, idx)
-lead_f = sorted(names, key=lambda e: -sf[e])
-print("engines", len(names), "queries", len(queries))
-print("full order:", lead_f[:5], "...", lead_f[-3:])
-print("trunc order:", sorted(names, key=lambda e: -st[e])[:5])
+lead = {"full": order(sf)[:2], "trunc": order(st)[:2]}
+point = stats(sf, st)
 boots = []
 for _ in range(2000):
     samp = [rng.randrange(len(queries)) for _ in queries]
     a, b = shares(pf, samp), shares(pt, samp)
-    boots.append({"tau": tau_b([a[e] for e in names], [b[e] for e in names]), "mad": sum(abs(a[e] - b[e]) for e in names) / len(names),
-                  "d": {e: b[e] - a[e] for e in names}, "lead_gap": (b[lead_f[0]] - b[lead_f[1]]), "lead_gap_full": (a[lead_f[0]] - a[lead_f[1]])})
+    boots.append({**stats(a, b), "d": {e: b[e] - a[e] for e in names},
+                  "gap": {"full": a[lead["full"][0]] - a[lead["full"][1]], "trunc": b[lead["trunc"][0]] - b[lead["trunc"][1]]}})
 
-tau = tau_b([sf[e] for e in names], [st[e] for e in names])
-mad = sum(abs(sf[e] - st[e]) for e in names) / len(names)
-print(f"tau_b {tau:.3f} ci {tuple(round(x, 2) for x in ci([b['tau'] for b in boots]))}")
-print(f"mean|d| {mad:.3f} ci {tuple(round(x, 3) for x in ci([b['mad'] for b in boots]))}")
-res = {"tau_b": tau, "tau_ci": ci([b["tau"] for b in boots]), "mad": mad, "mad_ci": ci([b["mad"] for b in boots]), "engines": {}}
-for e in sorted(names, key=lambda e: -abs(st[e] - sf[e])):
-    lo, hi = ci([b["d"][e] for b in boots])
-    res["engines"][e] = {"full": sf[e], "trunc": st[e], "delta": st[e] - sf[e], "ci": (lo, hi)}
-    if abs(st[e] - sf[e]) > 0.08:
-        print(f"  {e:18s} full {sf[e]:.3f} trunc {st[e]:.3f} d {st[e]-sf[e]:+.3f} ci [{lo:+.3f},{hi:+.3f}]")
-print(f"leader {lead_f[0]} vs {lead_f[1]}: full gap {sf[lead_f[0]] - sf[lead_f[1]]:+.3f} ci {tuple(round(x, 3) for x in ci([b['lead_gap_full'] for b in boots]))}; trunc gap {st[lead_f[0]] - st[lead_f[1]]:+.3f} ci {tuple(round(x, 3) for x in ci([b['lead_gap'] for b in boots]))}")
+res = {"queries": len(queries), "minq": MINQ, "resamples": len(boots), "order_full": order(sf), "order_trunc": order(st)}
+for k in ("tau_b", "spearman", "mad"):
+    res[k] = point[k]
+    res[k + "_ci"] = ci([b[k] for b in boots])
+res["leader_gap"] = {}
+for cond, s in (("full", sf), ("trunc", st)):
+    res["leader_gap"][cond] = {"leader": lead[cond][0], "second": lead[cond][1], "gap": s[lead[cond][0]] - s[lead[cond][1]], "ci": ci([b["gap"][cond] for b in boots])}
+res["engines"] = {}
+for e in sorted(names, key=lambda e: (-abs(st[e] - sf[e]), e)):
+    res["engines"][e] = {"full": sf[e], "trunc": st[e], "delta": st[e] - sf[e], "ci": ci([b["d"][e] for b in boots])}
+res["ci_excludes_zero"] = [e for e, v in res["engines"].items() if v["ci"][0] > 0 or v["ci"][1] < 0]
+
+print("engines", len(names), "queries", len(queries))
+print("full order:", res["order_full"][:5], "...", res["order_full"][-3:])
+print("trunc order:", res["order_trunc"][:5], "...", res["order_trunc"][-3:])
+for k in ("tau_b", "spearman", "mad"):
+    print(f"{k} {res[k]:.3f} ci ({res[k + '_ci'][0]:.3f}, {res[k + '_ci'][1]:.3f})")
+for e in res["ci_excludes_zero"]:
+    v = res["engines"][e]
+    print(f"  {e:18s} full {v['full']:.3f} trunc {v['trunc']:.3f} d {v['delta']:+.3f} ci [{v['ci'][0]:+.3f},{v['ci'][1]:+.3f}]")
+for cond, g in res["leader_gap"].items():
+    print(f"{cond}: leader {g['leader']} over {g['second']} gap {g['gap']:+.3f} ci ({g['ci'][0]:+.3f}, {g['ci'][1]:+.3f})")
 json.dump(res, open(out_path, "w"), indent=1)

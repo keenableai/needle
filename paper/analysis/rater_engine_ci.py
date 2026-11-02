@@ -4,7 +4,9 @@ import json
 import random
 import sys
 
-R = sys.argv[1]
+from common import ci
+
+R, out_path = sys.argv[1:3]
 rng = random.Random(5)
 items = {it["id"]: it for it in json.load(open(f"{R}/items_key.json"))}
 
@@ -53,6 +55,7 @@ def engine_rho(ids):
     return spearman([sum(per[e][0]) / len(per[e][0]) for e in names], [sum(per[e][1]) / len(per[e][1]) for e in names]), len(names)
 
 
+out = {}
 for bench in ("news", "agentic_rare", "all"):
     ids = [i for i in items if (bench == "all" or items[i]["bench"] == bench) and items[i]["judge_rating"] is not None]
     byq = collections.defaultdict(list)
@@ -64,6 +67,8 @@ for bench in ("news", "agentic_rare", "all"):
     for _ in range(1000):
         samp = [i for _k in range(len(qs)) for i in qs[rng.randrange(len(qs))]]
         boots.append(engine_rho(samp)[0])
-    boots.sort()
+    lo, hi = ci(boots)
     per_eng = collections.Counter(e for i in ids for e, _ in items[i]["engines"])
-    print(f"{bench}: engines {n_eng} spearman {point:.3f} query-bootstrap 95% [{boots[25]:.3f}, {boots[974]:.3f}] items per engine median {sorted(per_eng.values())[len(per_eng)//2]} min {min(per_eng.values())}")
+    out[bench] = {"engines": n_eng, "spearman": point, "ci": [lo, hi], "items_per_engine_min": min(per_eng.values()), "items_per_engine_max": max(per_eng.values())}
+    print(f"{bench}: engines {n_eng} spearman {point:.3f} query-bootstrap 95% [{lo:.3f}, {hi:.3f}] items per engine {min(per_eng.values())} to {max(per_eng.values())}")
+json.dump(out, open(out_path, "w"), indent=1)

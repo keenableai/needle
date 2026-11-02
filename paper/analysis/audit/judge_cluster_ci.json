@@ -1,0 +1,72 @@
+{
+ "news": {
+  "queries": 8,
+  "minq": 6,
+  "engines": [
+   "bing",
+   "brave",
+   "brave-llmcontext",
+   "ceramic",
+   "chatgpt-search",
+   "claude-search",
+   "context",
+   "exa",
+   "exa-instant",
+   "firecrawl",
+   "google",
+   "jina",
+   "kagi",
+   "keenable",
+   "keenable-realtime",
+   "octen",
+   "parallel",
+   "parallel-turbo",
+   "perplexity",
+   "perplexity-fast",
+   "tavily",
+   "tinyfish",
+   "you"
+  ],
+  "spearman": 0.9031141868512109,
+  "ci": [
+   0.7567968363816114,
+   0.968363816114681
+  ],
+  "resamples": 2000
+ },
+ "rare": {
+  "queries": 8,
+  "minq": 4,
+  "engines": [
+   "bing",
+   "brave",
+   "brave-llmcontext",
+   "ceramic",
+   "chatgpt-search",
+   "context",
+   "deepseek",
+   "exa",
+   "exa-instant",
+   "firecrawl",
+   "google",
+   "jina",
+   "keenable",
+   "keenable-realtime",
+   "linkup",
+   "octen",
+   "parallel",
+   "parallel-turbo",
+   "perplexity",
+   "perplexity-fast",
+   "tavily",
+   "tinyfish",
+   "you"
+  ],
+  "spearman": 0.8740413198020512,
+  "ci": [
+   0.4688672500026741,
+   0.9601586412321514
+  ],
+  "resamples": 1993
+ }
+}

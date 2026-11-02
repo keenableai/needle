@@ -6,11 +6,15 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from unittest.mock import patch
 
+from common import tau_b
+
 from needle.finance import canon
 from needle.finance.models import cues_for
-from needle.shared.search import SearchResult, titled_snippet
+from needle.shared.search import DEFAULT_SNIPPET_CHARS, SearchResult, titled_snippet
+from needle.shared.search.errors import account_side
 
 hf_dir, out_json, sample_json = Path(sys.argv[1]), sys.argv[2], sys.argv[3]
+REFERENCE = {"money": canon.MONEY_REL_TOL, "numeric_band": canon.HEADCOUNT_REL_TOL}
 ENGINES = [
     "keenable", "exa", "brave-llmcontext", "perplexity", "parallel", "brave", "you", "linkup",
     "deepseek", "context", "kagi", "firecrawl", "chatgpt-search", "google", "octen", "bing",
@@ -23,7 +27,7 @@ canon.text_amounts = functools.lru_cache(maxsize=None)(canon.text_amounts)
 
 
 def text_of(r):
-    return titled_snippet(SearchResult(url=r["url"], title=r.get("title"), snippet=r.get("snippet")), 0)
+    return titled_snippet(SearchResult(url=r["url"], title=r.get("title"), snippet=r.get("snippet")), DEFAULT_SNIPPET_CHARS)
 
 
 def amount_match(ft, value, aliases, text, tol, cues):
@@ -59,7 +63,7 @@ for run in runs:
         if not p.exists():
             continue
         for pq in json.load(open(p))["per_query"]:
-            if pq["search_error"] is not None:
+            if pq["search_error"] is not None and account_side(pq["search_error"]):
                 continue
             g = gold.get(pq["query"])
             if g is None:
@@ -81,7 +85,7 @@ for run in runs:
             results = pq["results"][:K]
             if ft in sweep:
                 tols = MONEY_TOLS if ft == "money" else HEAD_TOLS
-                tight = 0.001 if ft == "money" else 0.01
+                tight = REFERENCE["money"] if ft == "money" else 0.01
                 for t in tols:
                     hit = any(amount_match(ft, g["value"], aliases, text_of(r), t, cues) for r in results)
                     sweep[ft][t][eng][0] += hit
@@ -107,34 +111,26 @@ def recall(d):
     return sum(h for h, _ in pairs) / sum(n for _, n in pairs)
 
 
-def kendall(a, b):
-    s = 0
-    n = len(a)
-    for i in range(n):
-        for j in range(i + 1, n):
-            s += 1 if (a[i] - a[j]) * (b[i] - b[j]) > 0 else -1 if (a[i] - a[j]) * (b[i] - b[j]) < 0 else 0
-    return s / (n * (n - 1) / 2)
-
-
-out = {"stats": {k: (dict(v) if isinstance(v, Counter) else v) for k, v in stats.items()}, "sweep": {}}
+out = {"reference": REFERENCE, "stats": {k: (dict(v) if isinstance(v, Counter) else v) for k, v in stats.items()}, "sweep": {}}
 for ft, tols in sweep.items():
-    default = 0.02 if ft == "money" else 0.15
-    engs = [e for e in ENGINES if tols[default][e][1]]
-    base_rank = [tols[default][e][0] / tols[default][e][1] for e in engs]
+    ref = REFERENCE[ft]
+    engs = [e for e in ENGINES if tols[ref][e][1]]
+    base = [tols[ref][e][0] / tols[ref][e][1] for e in engs]
     out["sweep"][ft] = {}
     for t, d in tols.items():
         vals = [d[e][0] / d[e][1] for e in engs]
-        out["sweep"][ft][str(t)] = {"recall": recall(d), "tau_vs_default": kendall(vals, base_rank),
+        out["sweep"][ft][str(t)] = {"recall": recall(d), "tau_b_vs_reference": tau_b(vals, base),
                                     "per_engine": dict(zip(engs, vals, strict=True))}
 out["kinds"] = dict(kinds)
+out["banded_share"] = {ft: kinds[f"{ft}_banded"] / (kinds[f"{ft}_banded"] + kinds[f"{ft}_exact"]) for ft in sweep}
 out["other_recall"] = recall(other_hits)
 json.dump(out, open(out_json, "w"), indent=1)
 
 print(json.dumps(out["stats"], indent=1))
 for ft in sweep:
-    print(ft)
+    print(ft, "reference", REFERENCE[ft], "banded share", f"{out['banded_share'][ft]:.3f}")
     for t, v in out["sweep"][ft].items():
-        print(f"  tol {t:>5}: recall {v['recall']:.3f}  tau vs default {v['tau_vs_default']:.3f}")
+        print(f"  tol {t:>5}: recall {v['recall']:.3f}  tau_b vs reference {v['tau_b_vs_reference']:.3f}")
 print("hit kinds", dict(kinds))
 
 plan = {"money_banded": 80, "money_exact": 40, "numeric_band_banded": 40, "numeric_band_exact": 10}

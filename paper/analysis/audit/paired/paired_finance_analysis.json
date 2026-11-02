@@ -12,11 +12,11 @@
      "var_recall": 0.3
     },
     "site": {
-     "mean": 0.4050632911392405,
-     "lo": 0.3037974683544304,
-     "hi": 0.5189873417721519,
-     "n": 79,
-     "var_recall": 0.6835443037974683
+     "mean": 0.3875,
+     "lo": 0.275,
+     "hi": 0.5,
+     "n": 80,
+     "var_recall": 0.675
     },
     "date": {
      "mean": 0.0125,
@@ -24,10 +24,15 @@
      "hi": 0.1,
      "n": 80,
      "var_recall": 0.3
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1556,
+     "service_errors": 1
     }
    },
-   "site_compliance": 1.0,
-   "errors": 1
+   "redirect_share": 0.0
   },
   "brave": {
    "filing": {
@@ -53,10 +58,14 @@
      "hi": 0.0375,
      "n": 80,
      "var_recall": 0.1625
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1504
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "brave-llmcontext": {
    "filing": {
@@ -82,10 +91,14 @@
      "hi": -0.05,
      "n": 80,
      "var_recall": 0.1375
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1533
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "ceramic": {
    "filing": {
@@ -111,10 +124,14 @@
      "hi": 0.0,
      "n": 80,
      "var_recall": 0.0
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1152
     }
    },
-   "site_compliance": 0.01384083044982699,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "chatgpt-search": {
    "filing": {
@@ -140,10 +157,14 @@
      "hi": 0.125,
      "n": 80,
      "var_recall": 0.5
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1538
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "claude-search": {
    "filing": {
@@ -169,10 +190,14 @@
      "hi": 0.2,
      "n": 80,
      "var_recall": 0.625
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1600
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "context": {
    "filing": {
@@ -195,13 +220,17 @@
     "date": {
      "mean": 0.025,
      "lo": -0.05,
-     "hi": 0.1,
+     "hi": 0.0875,
      "n": 80,
      "var_recall": 0.1375
+    },
+    "counts": {
+     "redirect_results": 188,
+     "requests": 320,
+     "results": 1228
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.15309446254071662
   },
   "exa": {
    "filing": {
@@ -217,20 +246,24 @@
     "site": {
      "mean": 0.275,
      "lo": 0.175,
-     "hi": 0.3875,
+     "hi": 0.375,
      "n": 80,
      "var_recall": 0.7875
     },
     "date": {
      "mean": 0.1375,
-     "lo": 0.025,
+     "lo": 0.0125,
      "hi": 0.2625,
      "n": 80,
      "var_recall": 0.65
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1585
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "firecrawl": {
    "filing": {
@@ -256,10 +289,14 @@
      "hi": 0.0875,
      "n": 80,
      "var_recall": 0.1875
+    },
+    "counts": {
+     "redirect_results": 4,
+     "requests": 320,
+     "results": 1521
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0026298487836949377
   },
   "google": {
    "filing": {
@@ -281,25 +318,29 @@
     },
     "date": {
      "mean": -0.025,
-     "lo": -0.0875,
+     "lo": -0.1,
      "hi": 0.05,
      "n": 80,
      "var_recall": 0.05
+    },
+    "counts": {
+     "redirect_results": 603,
+     "requests": 320,
+     "results": 1398
     }
    },
-   "site_compliance": 0.5357142857142857,
-   "errors": 0
+   "redirect_share": 0.4313304721030043
   },
   "jina": {
    "filing": {
     "plain": 0.15,
     "n": 80,
     "quoted": {
-     "mean": 0.19642857142857142,
-     "lo": 0.07142857142857142,
-     "hi": 0.32142857142857145,
-     "n": 56,
-     "var_recall": 0.3392857142857143
+     "mean": 0.0875,
+     "lo": -0.025,
+     "hi": 0.1875,
+     "n": 80,
+     "var_recall": 0.2375
     },
     "site": {
      "mean": 0.4875,
@@ -309,15 +350,20 @@
      "var_recall": 0.6375
     },
     "date": {
-     "mean": -0.057971014492753624,
-     "lo": -0.15942028985507245,
-     "hi": 0.028985507246376812,
-     "n": 69,
-     "var_recall": 0.08695652173913043
+     "mean": -0.075,
+     "lo": -0.1625,
+     "hi": 0.0125,
+     "n": 80,
+     "var_recall": 0.075
+    },
+    "counts": {
+     "redirect_results": 462,
+     "requests": 320,
+     "results": 1351,
+     "service_errors": 35
     }
    },
-   "site_compliance": 0.5842391304347826,
-   "errors": 35
+   "redirect_share": 0.34196891191709844
   },
   "keenable": {
    "filing": {
@@ -339,14 +385,19 @@
     },
     "date": {
      "mean": -0.15384615384615385,
-     "lo": -0.28846153846153844,
-     "hi": 0.0,
+     "lo": -0.3076923076923077,
+     "hi": -0.019230769230769232,
      "n": 52,
      "var_recall": 0.40384615384615385
+    },
+    "counts": {
+     "account_errors": 91,
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1145
     }
    },
-   "site_compliance": 1.0,
-   "errors": 91
+   "redirect_share": 0.0
   },
   "linkup": {
    "filing": {
@@ -354,15 +405,15 @@
     "n": 80,
     "quoted": {
      "mean": -0.0125,
-     "lo": -0.0625,
-     "hi": 0.0375,
+     "lo": -0.075,
+     "hi": 0.05,
      "n": 80,
      "var_recall": 0.25
     },
     "site": {
      "mean": 0.5375,
-     "lo": 0.4125,
-     "hi": 0.6625,
+     "lo": 0.425,
+     "hi": 0.65,
      "n": 80,
      "var_recall": 0.8
     },
@@ -372,10 +423,14 @@
      "hi": -0.075,
      "n": 80,
      "var_recall": 0.1
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1600
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "octen": {
    "filing": {
@@ -401,10 +456,14 @@
      "hi": 0.0875,
      "n": 80,
      "var_recall": 0.075
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1594
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "parallel": {
    "filing": {
@@ -430,10 +489,14 @@
      "hi": 0.125,
      "n": 80,
      "var_recall": 0.5875
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1600
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "perplexity": {
    "filing": {
@@ -441,7 +504,7 @@
     "n": 80,
     "quoted": {
      "mean": 0.0625,
-     "lo": -0.025,
+     "lo": -0.0375,
      "hi": 0.175,
      "n": 80,
      "var_recall": 0.725
@@ -449,20 +512,24 @@
     "site": {
      "mean": 0.075,
      "lo": -0.0375,
-     "hi": 0.2,
+     "hi": 0.1875,
      "n": 80,
      "var_recall": 0.7375
     },
     "date": {
      "mean": 0.025,
      "lo": -0.1,
-     "hi": 0.1375,
+     "hi": 0.15,
      "n": 80,
      "var_recall": 0.6875
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1570
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "tavily": {
    "filing": {
@@ -471,86 +538,234 @@
     "quoted": {
      "mean": 0.0375,
      "lo": 0.0,
-     "hi": 0.075,
+     "hi": 0.0875,
      "n": 80,
      "var_recall": 0.1625
     },
     "site": {
      "mean": 0.3875,
-     "lo": 0.2625,
+     "lo": 0.25,
      "hi": 0.5125,
      "n": 80,
      "var_recall": 0.5125
     },
     "date": {
      "mean": -0.075,
-     "lo": -0.175,
-     "hi": 0.0125,
+     "lo": -0.1625,
+     "hi": 0.025,
      "n": 80,
      "var_recall": 0.05
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1327
     }
    },
-   "site_compliance": 1.0,
-   "errors": 0
+   "redirect_share": 0.0
   },
   "tinyfish": {
    "filing": {
-    "plain": 0.12658227848101267,
-    "n": 79,
+    "plain": 0.125,
+    "n": 80,
     "quoted": {
-     "mean": 0.189873417721519,
-     "lo": 0.08860759493670886,
-     "hi": 0.2911392405063291,
-     "n": 79,
-     "var_recall": 0.31645569620253167
+     "mean": 0.1875,
+     "lo": 0.0875,
+     "hi": 0.2875,
+     "n": 80,
+     "var_recall": 0.3125
     },
     "site": {
-     "mean": 0.4810126582278481,
-     "lo": 0.3670886075949367,
-     "hi": 0.5949367088607594,
-     "n": 79,
-     "var_recall": 0.6075949367088608
+     "mean": 0.475,
+     "lo": 0.3625,
+     "hi": 0.5875,
+     "n": 80,
+     "var_recall": 0.6
     },
     "date": {
-     "mean": -0.038461538461538464,
-     "lo": -0.1282051282051282,
-     "hi": 0.05128205128205128,
-     "n": 78,
-     "var_recall": 0.08974358974358974
+     "mean": -0.0375,
+     "lo": -0.125,
+     "hi": 0.05,
+     "n": 80,
+     "var_recall": 0.0875
+    },
+    "counts": {
+     "redirect_results": 0,
+     "requests": 320,
+     "results": 1263,
+     "service_errors": 2
     }
    },
-   "site_compliance": 1.0,
-   "errors": 2
+   "redirect_share": 0.0
   }
  },
+ "redirect_min": 0.01,
  "pooled": {
-  "caselaw": {},
-  "code": {},
-  "filing": {
-   "quoted": {
-    "engine_mean": 0.10132233273056059,
-    "min": -0.0125,
-    "max": 0.3,
-    "engines": 18,
-    "sig_down": 0,
-    "sig_up": 9
-   },
-   "site": {
-    "engine_mean": 0.35146409595249256,
-    "min": 0.0,
-    "max": 0.625,
-    "engines": 18,
-    "sig_down": 0,
-    "sig_up": 16
-   },
-   "date": {
-    "engine_mean": -0.015987705933358107,
-    "min": -0.1625,
-    "max": 0.1375,
-    "engines": 18,
-    "sig_down": 2,
-    "sig_up": 1
+  "all": {
+   "caselaw": {},
+   "code": {},
+   "filing": {
+    "quoted": {
+     "engine_mean": 0.09513888888888888,
+     "min": -0.0125,
+     "max": 0.3,
+     "engines": 18,
+     "sig_down": 0,
+     "sig_up": 8,
+     "plain_mean": 0.2822420634920635
+    },
+    "site": {
+     "engine_mean": 0.3501543209876543,
+     "min": 0.0,
+     "max": 0.625,
+     "engines": 18,
+     "sig_down": 0,
+     "sig_up": 16,
+     "plain_mean": 0.2822420634920635
+    },
+    "date": {
+     "engine_mean": -0.01688034188034188,
+     "min": -0.1625,
+     "max": 0.1375,
+     "engines": 18,
+     "sig_down": 3,
+     "sig_up": 1,
+     "plain_mean": 0.2822420634920635
+    }
    }
+  },
+  "no_redirect": {
+   "caselaw": {},
+   "code": {},
+   "filing": {
+    "quoted": {
+     "engine_mean": 0.0775,
+     "min": -0.0125,
+     "max": 0.3,
+     "engines": 15,
+     "sig_down": 0,
+     "sig_up": 6,
+     "plain_mean": 0.3161904761904762
+    },
+    "site": {
+     "engine_mean": 0.3210185185185185,
+     "min": 0.0,
+     "max": 0.625,
+     "engines": 15,
+     "sig_down": 0,
+     "sig_up": 13,
+     "plain_mean": 0.3161904761904762
+    },
+    "date": {
+     "engine_mean": -0.015256410256410256,
+     "min": -0.1625,
+     "max": 0.1375,
+     "engines": 15,
+     "sig_down": 3,
+     "sig_up": 1,
+     "plain_mean": 0.3161904761904762
+    }
+   }
+  },
+  "no_failures": {
+   "caselaw": {},
+   "code": {},
+   "filing": {
+    "quoted": {
+     "engine_mean": 0.09285714285714286,
+     "min": -0.0125,
+     "max": 0.3,
+     "engines": 14,
+     "sig_down": 0,
+     "sig_up": 6,
+     "plain_mean": 0.2857142857142857
+    },
+    "site": {
+     "engine_mean": 0.3339285714285714,
+     "min": 0.0,
+     "max": 0.625,
+     "engines": 14,
+     "sig_down": 0,
+     "sig_up": 12,
+     "plain_mean": 0.2857142857142857
+    },
+    "date": {
+     "engine_mean": -0.0035714285714285704,
+     "min": -0.1625,
+     "max": 0.1375,
+     "engines": 14,
+     "sig_down": 2,
+     "sig_up": 1,
+     "plain_mean": 0.2857142857142857
+    }
+   }
+  }
+ },
+ "pooled_engines": {
+  "all": {
+   "caselaw": [],
+   "code": [],
+   "filing": [
+    "bing",
+    "brave",
+    "brave-llmcontext",
+    "ceramic",
+    "chatgpt-search",
+    "claude-search",
+    "context",
+    "exa",
+    "firecrawl",
+    "google",
+    "jina",
+    "keenable",
+    "linkup",
+    "octen",
+    "parallel",
+    "perplexity",
+    "tavily",
+    "tinyfish"
+   ]
+  },
+  "no_redirect": {
+   "caselaw": [],
+   "code": [],
+   "filing": [
+    "bing",
+    "brave",
+    "brave-llmcontext",
+    "ceramic",
+    "chatgpt-search",
+    "claude-search",
+    "exa",
+    "firecrawl",
+    "keenable",
+    "linkup",
+    "octen",
+    "parallel",
+    "perplexity",
+    "tavily",
+    "tinyfish"
+   ]
+  },
+  "no_failures": {
+   "caselaw": [],
+   "code": [],
+   "filing": [
+    "brave",
+    "brave-llmcontext",
+    "ceramic",
+    "chatgpt-search",
+    "claude-search",
+    "context",
+    "exa",
+    "firecrawl",
+    "google",
+    "linkup",
+    "octen",
+    "parallel",
+    "perplexity",
+    "tavily"
+   ]
   }
  }
 }

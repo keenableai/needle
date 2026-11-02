@@ -1,37 +1,62 @@
 {
  "scholar": {
+  "runs": 12,
   "query_runs": 4820,
   "distinct_texts": 4679,
   "texts_in_more_than_one_run": 119,
   "query_runs_of_repeated_texts": 260,
-  "query_runs_of_texts_on_more_than_one_day": 260
+  "query_runs_after_first": 141,
+  "query_runs_of_texts_on_more_than_one_day": 260,
+  "share_repeated": 0.05394190871369295,
+  "share_after_first": 0.02925311203319502,
+  "share_cross_day": 0.05394190871369295
  },
  "news": {
+  "runs": 231,
   "query_runs": 4601,
   "distinct_texts": 4318,
   "texts_in_more_than_one_run": 207,
   "query_runs_of_repeated_texts": 490,
-  "query_runs_of_texts_on_more_than_one_day": 192
+  "query_runs_after_first": 283,
+  "query_runs_of_texts_on_more_than_one_day": 192,
+  "share_repeated": 0.10649858726363834,
+  "share_after_first": 0.06150836774614214,
+  "share_cross_day": 0.041730058682895026
  },
  "finance": {
+  "runs": 10,
   "query_runs": 1200,
   "distinct_texts": 953,
   "texts_in_more_than_one_run": 149,
   "query_runs_of_repeated_texts": 396,
-  "query_runs_of_texts_on_more_than_one_day": 394
+  "query_runs_after_first": 247,
+  "query_runs_of_texts_on_more_than_one_day": 394,
+  "share_repeated": 0.33,
+  "share_after_first": 0.20583333333333334,
+  "share_cross_day": 0.3283333333333333
  },
  "agentic_rare": {
+  "runs": 12,
   "query_runs": 1200,
   "distinct_texts": 1100,
   "texts_in_more_than_one_run": 96,
   "query_runs_of_repeated_texts": 196,
-  "query_runs_of_texts_on_more_than_one_day": 190
+  "query_runs_after_first": 100,
+  "query_runs_of_texts_on_more_than_one_day": 190,
+  "share_repeated": 0.16333333333333333,
+  "share_after_first": 0.08333333333333333,
+  "share_cross_day": 0.15833333333333333
  },
  "legal": {
+  "runs": 10,
   "query_runs": 512,
   "distinct_texts": 506,
   "texts_in_more_than_one_run": 5,
   "query_runs_of_repeated_texts": 11,
-  "query_runs_of_texts_on_more_than_one_day": 11
+  "query_runs_after_first": 6,
+  "query_runs_of_texts_on_more_than_one_day": 11,
+  "share_repeated": 0.021484375,
+  "share_after_first": 0.01171875,
+  "share_cross_day": 0.021484375
  }
 }
