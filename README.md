@@ -275,7 +275,7 @@ engine's per-query results)
 and refreshes `daily_queries.jsonl` at the dataset root: a rolling window of
 the queries evaluated by runs from the last 24 hours
 (`scripts/daily_queries.py`; `backfill` rebuilds it from the archive). The
-workflow needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, and the
+workflow needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, `COURTLISTENER_API_TOKEN`, and the
 per-engine keys.
 
 The deployed site also serves the results page at

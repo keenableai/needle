@@ -52,6 +52,7 @@ env:
   DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  COURTLISTENER_API_TOKEN: ${{ secrets.COURTLISTENER_API_TOKEN }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/needle-results
   ENGINES: keenable-realtime,keenable,exa,exa-lite,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,linkup,perplexity-fast,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,deepseek,claude-search,chatgpt-search
