@@ -5,6 +5,7 @@ const CODE_LICENSE = "https://opensource.org/license/mit";
 const DATE_PUBLISHED = "2026-08-27";
 const HOME_URL = "https://keenable.ai/";
 const SEARCH_API_URL = "https://docs.keenable.ai/";
+const HOME_MODE = "the realtime mode of Keenable's Search API";
 const REPO = "https://github.com/keenableai/needle";
 const HF_DATASET = "https://huggingface.co/datasets/keenable-ai/needle-results";
 const DATASET_NAME = "NEEDLE: web search API benchmark results";
@@ -116,7 +117,7 @@ function leadText({ summary, overall, verticals, lastRun, cellOf }) {
     const fastest = Math.min(...summary.engines.map((x) => x.p50 ?? Infinity));
     const latency = cellOf(home.x, "p50 latency");
     const price = home.x.price ? `, at ${cellOf(home.x, "$ / 1k queries")} per 1,000 queries` : "";
-    sentences.push(`${proseName(home.x)}'s Search API has `
+    sentences.push(`${proseName(home.x)}, ${HOME_MODE}, has `
       + `${home.x.p50 === fastest ? `the lowest median latency, ${latency}` : `a median latency of ${latency}`}`
       + `${price}.`);
   }

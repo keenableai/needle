@@ -965,7 +965,7 @@
     <p>Every run builds each client with the same snippet budget of 2,000 characters. Keenable, Exa and Ceramic accept a request-side length parameter, so they get it in the request (snippet_max_length=2000, highlights.maxCharacters=2000, maxDescriptionLength=2000). The other engines have no such parameter; we clip whatever they return to the same 2,000 characters before judging and answer matching (Appendix C). Requests time out at 30 s (60 s for Perplexity, Parallel and Jina, 180 s for claude-search and chatgpt-search) and retry up to 3 times with exponential backoff on transport errors, 429, and 5xx.</p>
     <table>
       <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
-      <tr><td>Keenable</td><td>Keenable POST /v1/search</td><td>mode=realtime, snippet_max_length=2000; query verbatim with site: kept in the text, after:/before: → published_after:/published_before: tokens; no count parameter — we keep the first k results</td></tr>
+      <tr><td>Keenable Realtime</td><td>Keenable POST /v1/search</td><td>mode=realtime (the API default is pro), snippet_max_length=2000; query verbatim with site: kept in the text, after:/before: → published_after:/published_before: tokens; no count parameter — we keep the first k results</td></tr>
       <tr><td>google/serper</td><td>Serper.dev (Google SERP) POST /search</td><td>q = query verbatim (operators kept as text), num=min(k,100), gl=us, hl=en; knowledge-graph and answer-box entries fold into the ranking</td></tr>
       <tr><td>bing/searchapi</td><td>SearchApi.io GET /search</td><td>engine=bing, q = query verbatim (operators kept as text), num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
       <tr><td>brave</td><td>Brave GET /web/search</td><td>q = query text with site: kept, clipped to 75 words / 600 chars; count=min(k,20), country=us, search_lang=en, result_filter=web, text_decorations=false; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; extra_snippets joined with newlines, falling back to description when absent</td></tr>
@@ -973,7 +973,7 @@
       <tr><td>exa</td><td>Exa POST /search</td><td>type=auto, numResults=k, contents.highlights.maxCharacters=2000; site: → includeDomains, after:/before: → startPublishedDate/endPublishedDate (full-day UTC bounds)</td></tr>
       <tr><td>exa-lite</td><td>Exa POST /search</td><td>same as exa but type=lite</td></tr>
       <tr><td>exa-instant</td><td>Exa POST /search</td><td>same as exa but type=instant</td></tr>
-      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=basic, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
+      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=advanced, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
       <tr><td>parallel-turbo</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=turbo</td></tr>
       <tr><td>perplexity</td><td>Perplexity POST /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → search_after_date_filter/search_before_date_filter (MM/DD/YYYY)</td></tr>
       <tr><td>perplexity-fast</td><td>Perplexity POST /search</td><td>same as perplexity but search_type=fast (perplexity leaves the field unset, so it takes the API default web)</td></tr>
@@ -1001,7 +1001,7 @@
         <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results)</td>
         <td><a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF: keenable-ai/needle-results</a>, runs/&lt;run-id&gt;/</td></tr>
       <tr><td>query files</td>
-        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, agentic_rare.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
         <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, independence.json, runs.json, ci_scores.jsonl, ci.json</td>
@@ -1077,7 +1077,7 @@ function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
 
-const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable"],
+const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable Realtime"],
   ["google", "google/serper"], ["bing", "bing/searchapi"], ["context", "context.dev"]]);
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
@@ -1255,7 +1255,7 @@ function drawChart(card, series, opts) {
     return rows;
   };
   const W = 860, H = 220;
-  const M = { top: 12, right: 92, bottom: 26, left: 40 };
+  const M = { top: 12, right: 120, bottom: 26, left: 40 };
   const iw = W - M.left - M.right, ih = H - M.top - M.bottom;
   let t0 = zoom ? zoom[0] : stamps[0], t1 = zoom ? zoom[1] : stamps[stamps.length - 1];
   if (t0 === t1) { t0 -= 3600e3; t1 += 3600e3; }
