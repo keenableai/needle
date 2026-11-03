@@ -104,3 +104,152 @@ def test_publish_writes_catalog(tmp_path):
     assert catalog["name"] == "NEEDLE"
     assert catalog["benches"]["news"]["latest"] == "latest_news.json"
     assert catalog["updated"] == "2026-08-17T00:00Z"
+
+
+LD_RE = re.compile(r'<script type="application/ld\+json">\s*(.*?)\s*</script>', re.S)
+BASE = "https://keenableai.github.io/needle/"
+DOI = "https://doi.org/10.5281/zenodo.22095155"
+HISTORY = f"{BASE}data/history.jsonl"
+CATALOG = f"{BASE}data/catalog.json"
+SCORE_KEYS = {"mean_ndcg", "recall_at_k", "mrr_at_k", "ndcg", "recall"}
+
+EXPECTED_TYPES = {
+    "index": {"WebSite", "Dataset", "FAQPage", "Organization", "Question", "Answer", "DataDownload"},
+    "compare": {"WebPage", "WebSite", "BreadcrumbList", "ListItem", "FAQPage", "Question", "Answer"},
+    "methodology": {"HowTo", "HowToStep", "BreadcrumbList", "ListItem", "FAQPage", "Question", "Answer"},
+    "news": {"Dataset", "Organization", "DataDownload", "BreadcrumbList", "ListItem"},
+    "finance": {"Dataset", "Organization", "DataDownload", "BreadcrumbList", "ListItem"},
+    "scholar": {"Dataset", "Organization", "DataDownload", "BreadcrumbList", "ListItem"},
+    "legal": {"Dataset", "Organization", "DataDownload", "BreadcrumbList", "ListItem"},
+}
+
+INDEX_FAQ = {
+    "What problem does NEEDLE solve?",
+    "How often does NEEDLE run?",
+    "Which metrics does NEEDLE report?",
+    "How should I cite NEEDLE?",
+}
+COMPARE_FAQ = {
+    "How does NEEDLE compare two search APIs?",
+    "Which metrics does the comparison use?",
+}
+METHOD_FAQ = {
+    "Does NEEDLE fetch landing pages?",
+    "Can a provider overfit NEEDLE?",
+}
+
+
+def _ld_blocks(doc: str) -> list[object]:
+    blocks = [json.loads(m.group(1)) for m in LD_RE.finditer(doc)]
+    assert blocks, "missing JSON-LD"
+    return blocks
+
+
+def _collect(obj, types: set[str], nodes: dict[str, list]) -> None:
+    if isinstance(obj, dict):
+        typ = obj.get("@type")
+        if isinstance(typ, str):
+            types.add(typ)
+            nodes.setdefault(typ, []).append(obj)
+        elif isinstance(typ, list):
+            for t in typ:
+                types.add(t)
+                nodes.setdefault(t, []).append(obj)
+        for v in obj.values():
+            _collect(v, types, nodes)
+    elif isinstance(obj, list):
+        for v in obj:
+            _collect(v, types, nodes)
+
+
+def _walk_keys(obj, keys: set[str]) -> None:
+    if isinstance(obj, dict):
+        keys.update(obj)
+        for v in obj.values():
+            _walk_keys(v, keys)
+    elif isinstance(obj, list):
+        for v in obj:
+            _walk_keys(v, keys)
+
+
+def test_jsonld_is_valid_and_typed():
+    for key, path in PAGES.items():
+        doc = path.read_text(encoding="utf-8")
+        types: set[str] = set()
+        nodes: dict[str, list] = {}
+        for block in _ld_blocks(doc):
+            assert isinstance(block, dict)
+            assert block.get("@context") == "https://schema.org"
+            _collect(block, types, nodes)
+        missing = EXPECTED_TYPES[key] - types
+        assert not missing, f"{key}: missing @type {missing}"
+
+
+def test_jsonld_home_dataset_and_faq():
+    types: set[str] = set()
+    nodes: dict[str, list] = {}
+    for block in _ld_blocks(PAGES["index"].read_text(encoding="utf-8")):
+        _collect(block, types, nodes)
+    site = nodes["WebSite"][0]
+    assert site["name"] == "NEEDLE"
+    assert site["url"] == BASE
+    dataset = nodes["Dataset"][0]
+    assert dataset["url"] == BASE
+    assert dataset["identifier"] == DOI
+    downloads = {d["contentUrl"] for d in dataset["distribution"]}
+    assert downloads == {HISTORY, CATALOG}
+    questions = {q["name"] for q in nodes["FAQPage"][0]["mainEntity"]}
+    assert questions == INDEX_FAQ
+    for q in nodes["Question"]:
+        assert q["acceptedAnswer"]["text"].strip()
+
+
+def test_jsonld_compare_and_methodology():
+    types: set[str] = set()
+    nodes: dict[str, list] = {}
+    for block in _ld_blocks(PAGES["compare"].read_text(encoding="utf-8")):
+        _collect(block, types, nodes)
+    page = nodes["WebPage"][0]
+    assert page["url"] == f"{BASE}compare/"
+    crumbs = [i["item"] for i in nodes["BreadcrumbList"][0]["itemListElement"]]
+    assert crumbs == [BASE, f"{BASE}compare/"]
+    assert {q["name"] for q in nodes["FAQPage"][0]["mainEntity"]} == COMPARE_FAQ
+
+    types = set()
+    nodes = {}
+    for block in _ld_blocks(PAGES["methodology"].read_text(encoding="utf-8")):
+        _collect(block, types, nodes)
+    howto = nodes["HowTo"][0]
+    assert len(howto["step"]) == 4
+    assert {q["name"] for q in nodes["FAQPage"][0]["mainEntity"]} == METHOD_FAQ
+    crumbs = [i["item"] for i in nodes["BreadcrumbList"][0]["itemListElement"]]
+    assert crumbs == [BASE, f"{BASE}methodology/"]
+
+
+def test_jsonld_vertical_datasets_point_at_latest_files():
+    for bench in ("news", "finance", "scholar", "legal"):
+        types: set[str] = set()
+        nodes: dict[str, list] = {}
+        for block in _ld_blocks(PAGES[bench].read_text(encoding="utf-8")):
+            _collect(block, types, nodes)
+        dataset = nodes["Dataset"][0]
+        assert dataset["url"] == f"{BASE}{bench}/"
+        assert f"NEEDLE {bench}" in dataset["name"]
+        downloads = {d["contentUrl"] for d in dataset["distribution"]}
+        assert downloads == {HISTORY, f"{BASE}data/latest_{bench}.json"}
+        crumbs = [i["item"] for i in nodes["BreadcrumbList"][0]["itemListElement"]]
+        assert crumbs == [BASE, f"{BASE}{bench}/"]
+
+
+def test_jsonld_does_not_embed_live_scores():
+    keys: set[str] = set()
+    for path in PAGES.values():
+        for block in _ld_blocks(path.read_text(encoding="utf-8")):
+            _walk_keys(block, keys)
+    assert not (keys & SCORE_KEYS)
+
+
+def test_dashboard_still_reads_rankeval_result_fields():
+    src = (DASH / "index.html").read_text(encoding="utf-8")
+    for field in ("title", "url", "snippet", "rating", "penalized", "label", "reasoning", "gates"):
+        assert f"r.{field}" in src, field
