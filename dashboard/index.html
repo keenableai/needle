@@ -973,7 +973,7 @@
       <tr><td>exa</td><td>Exa POST /search</td><td>type=auto, numResults=k, contents.highlights.maxCharacters=2000; site: → includeDomains, after:/before: → startPublishedDate/endPublishedDate (full-day UTC bounds)</td></tr>
       <tr><td>exa-lite</td><td>Exa POST /search</td><td>same as exa but type=lite</td></tr>
       <tr><td>exa-instant</td><td>Exa POST /search</td><td>same as exa but type=instant</td></tr>
-      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=basic, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
+      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=advanced, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
       <tr><td>parallel-turbo</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=turbo</td></tr>
       <tr><td>perplexity</td><td>Perplexity POST /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → search_after_date_filter/search_before_date_filter (MM/DD/YYYY)</td></tr>
       <tr><td>perplexity-fast</td><td>Perplexity POST /search</td><td>same as perplexity but search_type=fast (perplexity leaves the field unset, so it takes the API default web)</td></tr>
@@ -1001,7 +1001,7 @@
         <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results)</td>
         <td><a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF: keenable-ai/needle-results</a>, runs/&lt;run-id&gt;/</td></tr>
       <tr><td>query files</td>
-        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, agentic_rare.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
         <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, independence.json, runs.json, ci_scores.jsonl, ci.json</td>

@@ -57,7 +57,7 @@ Every engine issues one request at a time, so latency samples are comparable
 across engines. Per-engine tuning uses env vars: `TAVILY_DEPTH`, `LINKUP_DEPTH`, `NEEDLE_CLAUDE_SEARCH_MODEL`
 (default `claude-sonnet-5`), `NEEDLE_CHATGPT_SEARCH_MODEL` (default `gpt-5.5`); the engine
 entry fixes Keenable's, Exa's, Parallel's and Perplexity's modes and Brave's
-endpoint (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
+endpoint (`keenable-realtime` = realtime, `exa` = auto,
 `exa-instant` = instant, `exa-lite` = lite,
 `parallel` = advanced, `parallel-turbo` = turbo,
 `perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
