@@ -493,7 +493,7 @@
   .hero h1 {
     font-family: var(--font-display); font-size: 40px; font-weight: 400;
     line-height: 0.96; letter-spacing: 0.008em; margin: 0 0 16px; text-wrap: balance;
-    max-width: 18ch;
+    max-width: 14em;
   }
   .lede {
     font-size: 17px; font-weight: 300; line-height: 1.55; color: var(--text-primary);
@@ -579,7 +579,9 @@
   @media (max-width: 860px) {
     .issue-grid, .vert-grid, .fact-grid { grid-template-columns: 1fr; }
     .hero h1 { font-size: 32px; max-width: none; }
-    .nav-toggle { display: inline-flex; align-items: center; }
-    .site-links { display: none; flex-basis: 100%; }
+    .wordmark { order: 1; }
+    .nav-toggle { display: inline-flex; align-items: center; order: 2; }
+    .site-nav .header-actions { order: 3; }
+    .site-links { display: none; flex-basis: 100%; order: 4; }
     .site-nav.open .site-links { display: flex; }
   }

@@ -2616,6 +2616,13 @@ async function initRunBrowser() {
     runSel.disabled = matching.length === 0;
   }
 
+  for (const b of BENCHES) {
+    const artifacts = RUN_ARTIFACT[b];
+    if (runs.some((r) => artifacts.some((a) => r.artifacts.includes(a)))) {
+      benchSel.value = b;
+      break;
+    }
+  }
   populateRuns();
   benchSel.addEventListener("change", () => { populateRuns(); renderRunDetail(runs); });
   runSel.addEventListener("change", () => renderRunDetail(runs));
