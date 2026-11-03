@@ -285,6 +285,7 @@ per-engine keys.
 ```bash
 uv sync
 uv run pytest   # deterministic, no network
+make preview    # http://127.0.0.1:8765/ — dashboard + live published data; Ctrl+C to stop
 ```
 
 ## Citation
