@@ -181,6 +181,8 @@ def test_docket_match_handles_suffix_and_list():
         ("25-949(L)", True),
         ("25-977; 25-949", True),
         ("25-949 (L)", True),
+        ("25  - 949", True),
+        ("25\t–\t949", True),
         ("25-9490(L)", False),
     ]:
         gold = GoldLegal(

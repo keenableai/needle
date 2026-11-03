@@ -22,7 +22,7 @@ JUSTIA_US_RE = re.compile(
     r"supreme\.justia\.com/cases/federal/us/(\d{1,4})/(\d{1,5})", re.IGNORECASE
 )
 CITE_RE = re.compile(r"(\d{1,4})\s+([A-Za-z][\w.'’]*(?:\s[A-Za-z][\w.'’]*){0,3}?)\s+(\d{1,5})")
-DOCKET_RE = re.compile(r"\b(\d{2})\s?[-–]\s?(\d{1,5})\b|\b(\d{2})([aA])(\d{1,4})\b")
+DOCKET_RE = re.compile(r"\b(\d{2})\s*[-–]\s*(\d{1,5})\b|\b(\d{2})([aA])(\d{1,4})\b")
 CFR_TEXT_RE = re.compile(
     r"(\d{1,2})\s*C\.?\s?F\.?\s?R\.?\s*(?:part\s*)?(?:§+\s*)?(\d+\.[\w.\-]+)", re.IGNORECASE
 )
