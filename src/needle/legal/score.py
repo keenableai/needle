@@ -21,9 +21,6 @@ CLUSTER_URL_RE = re.compile(r"courtlistener\.com/opinion/(\d+)/", re.IGNORECASE)
 JUSTIA_US_RE = re.compile(
     r"supreme\.justia\.com/cases/federal/us/(\d{1,4})/(\d{1,5})", re.IGNORECASE
 )
-JUSTIA_APPELLATE_RE = re.compile(
-    r"law\.justia\.com/cases/federal/appellate-courts/[a-z0-9]+/(\d{2}-\d{1,5})", re.IGNORECASE
-)
 CITE_RE = re.compile(r"(\d{1,4})\s+([A-Za-z][\w.'’]*(?:\s[A-Za-z][\w.'’]*){0,3}?)\s+(\d{1,5})")
 DOCKET_RE = re.compile(r"\b(\d{2})\s?[-–]\s?(\d{1,5})\b|\b(\d{2})([aA])(\d{1,4})\b")
 CFR_TEXT_RE = re.compile(
@@ -54,10 +51,6 @@ def norm_citation(raw: str) -> str | None:
     if not reporter:
         return None
     return f"{m.group(1)}:{reporter}:{m.group(3)}"
-
-
-def norm_docket(raw: str) -> str:
-    return re.sub(r"[\s–]", "", raw.replace("–", "-")).lower()
 
 
 def extract_dockets(text: str) -> set[str]:
@@ -95,8 +88,6 @@ def extract_legal_ids(result: SearchResult, *, snippet_chars: int) -> LegalIds:
         ids.clusters.add(m.group(1))
     for m in JUSTIA_US_RE.finditer(url):
         ids.cites.add(f"{m.group(1)}:us:{m.group(2)}")
-    for m in JUSTIA_APPELLATE_RE.finditer(url):
-        ids.dockets.add(norm_docket(m.group(1)))
     for m in CITE_RE.finditer(text):
         reporter = norm_reporter(m.group(2))
         if reporter in REPORTER_ALLOWED:

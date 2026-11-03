@@ -175,10 +175,14 @@ async def test_run_legal_reports_when_each_engine_was_queried(monkeypatch):
 
 
 def test_docket_match_handles_suffix_and_list():
-    result = _r("https://example.com", snippet="No. 25-949 Fresh Mix v. Pisanelli")
-    found = extract_legal_ids(result, snippet_chars=500)
-    text = "no. 25-949 fresh mix v. pisanelli"
-    for docket in ("25-949(L)", "25-977; 25-949", "25-949 (L)"):
+    snippet = "No. 25-949 Fresh Mix v. Pisanelli"
+    found = extract_legal_ids(_r("https://example.com", snippet=snippet), snippet_chars=500)
+    for docket, expected in [
+        ("25-949(L)", True),
+        ("25-977; 25-949", True),
+        ("25-949 (L)", True),
+        ("25-9490(L)", False),
+    ]:
         gold = GoldLegal(
             text="q",
             case_key="1",
@@ -187,13 +191,4 @@ def test_docket_match_handles_suffix_and_list():
             docket=docket,
             party_tokens=("pisanelli",),
         )
-        assert ids_match(gold, found, result_text=text), docket
-    gold = GoldLegal(
-        text="q",
-        case_key="1",
-        bucket="caselaw",
-        syntax="plain",
-        docket="25-9490(L)",
-        party_tokens=("pisanelli",),
-    )
-    assert not ids_match(gold, found, result_text=text)
+        assert ids_match(gold, found, result_text=snippet.lower()) is expected, docket
