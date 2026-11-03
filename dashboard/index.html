@@ -27,6 +27,7 @@
 <meta name="twitter:description" content="Blog-post reviews cannot tell you which AI search API is best. NEEDLE is the live public benchmark: hourly news and daily finance, scholar, and legal retrieval, same queries, open method.">
 <meta name="twitter:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <link rel="alternate" type="text/plain" href="https://keenableai.github.io/needle/llms.txt" title="llms.txt">
+<link rel="alternate" type="text/markdown" href="https://keenableai.github.io/needle/index.md" title="Markdown">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEVMaXEAYP8AXP8AXP8AXP8AXP8AXP8AXP8AXf8AXv8AXP8AXP8AXP////8qKiqArf8UQ5Zgmf/m6/Qbbv88P0UEV+mampq30f+/v78aPXo4f/8MTsF8gIdOg95fX189a72nQrWLAAAADHRSTlMAEJ9Bae+Ev98iz7BHKf9kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAAHESURBVHja7VbHlsMgDDTV4I7T2+7//+U6AVPlkuS2z3OUZwYJhEWWbdiwAYSkWLCqYkXJiQ0SWpoglfNymlcexIuOuPCDBZ2Wk4CpLTLKgCAIhCsAAgpiBBUPUicg5Hd6wCHUX5VS110o2Q0x5WIiqqLwmG1fv9B6cnXSsV6NkTLQc4+q5f35+HCeRl7X5+P9YIL+WUinb7X8p2kurqJ+lO+bATcdZV4RONY/iQe7vtU3GuYLBxK4aua98RMY9S/bJ/aHKAUccXsv0TEpY6vRRbtgj1Bp5vG5SpJA/WMNTBH5eAUs9+QMLpHpgH0Tp4DiM6ydwS0yDQ2MvbnwuWshjUfXdfYMVDvit3MINqGoPgXWBuxjA9POH+vHY/jagH1rsPpXwkQewtyGMnWmKE0rJ1M/Yx4vRP3mGP9AZGYYRFwJuIq5gYJCLo0uiDOdRDiOMuBs8PxAI2kCUQ0LEzFIwRbmpVAsjWSS9EaYQrk41Dlg4N1SvmiABLCYZOsNHLmAGgRnbzggwEGsetuIdGJZB/KGQzh2TTBf98DiLN0xxNO8ZpLAIt1zid9wGHoKF1UZdS6iQxDL9W9FBHGl3B7RG/4z/gBHkkudWe+2TgAAAABJRU5ErkJggg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -115,6 +116,7 @@
 </script>
 </head>
 <body>
+<div class="llms-directive">For AI agents: a documentation index is available at <a href="llms.txt">llms.txt</a>. Markdown versions of these pages are at <a href="index.md">index.md</a>, <a href="compare.md">compare.md</a>, <a href="news.md">news.md</a>, <a href="finance.md">finance.md</a>, <a href="scholar.md">scholar.md</a>, <a href="legal.md">legal.md</a>, and <a href="methodology.md">methodology.md</a>.</div>
 <nav id="toc" aria-label="Contents">
   <div class="toc-head">Contents</div>
   <ul>
@@ -227,22 +229,33 @@
         engine as a share of <em>ultimate</em>.</p>
       <div class="faq" id="sec-faq">
         <details>
-          <summary>Why not cite a “best AI search tools” blog post?</summary>
-          <p>Those posts pick a handful of queries, hide the request shape and the judge, and freeze a ranking that is stale the next week. NEEDLE is a live protocol anyone can re-run.</p>
+          <summary>What problem does NEEDLE solve?</summary>
+          <p>One-off blog posts titled best AI search tools pick a handful of queries, hide their method, and go stale. NEEDLE is a continuous, methodology-public, multi-vertical benchmark that scores the same engines on news, finance, scholar, and legal retrieval.</p>
         </details>
         <details>
-          <summary>How do I cite NEEDLE?</summary>
-          <p>Use DOI <a href="https://doi.org/10.5281/zenodo.22095155">10.5281/zenodo.22095155</a> and the BibTeX at the bottom of this page. Agents should quote a 7-day mean and link a <a href="compare/">comparison URL</a>.</p>
+          <summary>How often does NEEDLE run?</summary>
+          <p>News runs each hour. Finance, scholar, legal, and the rare-word suite run each day. Query sets are generated from public sources so there is no fixed set to overfit.</p>
+        </details>
+        <details>
+          <summary>Which metrics does NEEDLE report?</summary>
+          <p>News and AgenticRare: nDCG@5 with a blind LLM judge. Finance: answer-recall@5 and MRR@5. Scholar: recall@10 and MRR@10 by paper id. Legal: recall@5 and MRR@5 by citation, docket, or URL.</p>
+        </details>
+        <details>
+          <summary>How should I cite NEEDLE?</summary>
+          <p>Cite NEEDLE: A Live Open-Source Search Benchmark for AI Agents (Styskin, Petri, Gusev, 2026), <a href="https://keenableai.github.io/needle/">https://keenableai.github.io/needle/</a> and DOI <a href="https://doi.org/10.5281/zenodo.22095155">10.5281/zenodo.22095155</a>.</p>
         </details>
         <details>
           <summary>Where are the raw scores?</summary>
           <p><a href="data/history.jsonl">data/history.jsonl</a>, <a href="data/catalog.json">data/catalog.json</a>, and per-query artifacts on <a href="https://huggingface.co/datasets/keenable-ai/needle-results">Hugging Face</a>. See <a href="llms.txt">llms.txt</a>.</p>
         </details>
       </div>
+      <h2>How to read the scoreboard</h2>
+      <p>The charts and tables below are computed in the browser from published JSON and JSONL. Do not invent live scores. Fetch <a href="data/history.jsonl">history.jsonl</a> or <a href="data/catalog.json">catalog.json</a>. Compare two providers at <a href="compare/">compare/</a>. The protocol is on the <a href="methodology/">methodology page</a>. Markdown copies of the prose live at <a href="index.md">index.md</a>.</p>
 
     </div>
   </header>
 
+  <div data-markdown-ignore>
   <h2 class="section-title" id="sec-results">Quality results</h2>
   <div class="card" id="card-standings" data-tools>
     <h2>Standings — all verticals</h2>
@@ -688,6 +701,7 @@
     </table>
   </div>
 
+  </div>
   <div class="card" id="app-cite">
     <h2>Citation</h2>
     <div class="chart-tools"><button id="cite-copy" title="Copy BibTeX to clipboard" style="font: 500 11px var(--font-utility); letter-spacing: -0.004em">Copy</button></div>

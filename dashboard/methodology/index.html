@@ -27,6 +27,7 @@
 <meta name="twitter:description" content="The NEEDLE protocol: same query, uniform snippets, blind judge, fresh gold. Why blog-post AI search reviews are not an evaluation, and how to reproduce a score.">
 <meta name="twitter:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <link rel="alternate" type="text/plain" href="https://keenableai.github.io/needle/llms.txt" title="llms.txt">
+<link rel="alternate" type="text/markdown" href="https://keenableai.github.io/needle/methodology.md" title="Markdown">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEVMaXEAYP8AXP8AXP8AXP8AXP8AXP8AXP8AXf8AXv8AXP8AXP8AXP////8qKiqArf8UQ5Zgmf/m6/Qbbv88P0UEV+mampq30f+/v78aPXo4f/8MTsF8gIdOg95fX189a72nQrWLAAAADHRSTlMAEJ9Bae+Ev98iz7BHKf9kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAAHESURBVHja7VbHlsMgDDTV4I7T2+7//+U6AVPlkuS2z3OUZwYJhEWWbdiwAYSkWLCqYkXJiQ0SWpoglfNymlcexIuOuPCDBZ2Wk4CpLTLKgCAIhCsAAgpiBBUPUicg5Hd6wCHUX5VS110o2Q0x5WIiqqLwmG1fv9B6cnXSsV6NkTLQc4+q5f35+HCeRl7X5+P9YIL+WUinb7X8p2kurqJ+lO+bATcdZV4RONY/iQe7vtU3GuYLBxK4aua98RMY9S/bJ/aHKAUccXsv0TEpY6vRRbtgj1Bp5vG5SpJA/WMNTBH5eAUs9+QMLpHpgH0Tp4DiM6ydwS0yDQ2MvbnwuWshjUfXdfYMVDvit3MINqGoPgXWBuxjA9POH+vHY/jagH1rsPpXwkQewtyGMnWmKE0rJ1M/Yx4vRP3mGP9AZGYYRFwJuIq5gYJCLo0uiDOdRDiOMuBs8PxAI2kCUQ0LEzFIwRbmpVAsjWSS9EaYQrk41Dlg4N1SvmiABLCYZOsNHLmAGgRnbzggwEGsetuIdGJZB/KGQzh2TTBf98DiLN0xxNO8ZpLAIt1zid9wGHoKF1UZdS6iQxDL9W9FBHGl3B7RG/4z/gBHkkudWe+2TgAAAABJRU5ErkJggg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -102,6 +103,7 @@
 </script>
 </head>
 <body>
+<div class="llms-directive">For AI agents: a documentation index is available at <a href="../llms.txt">llms.txt</a>. Markdown versions of these pages are at <a href="../index.md">index.md</a>, <a href="../compare.md">compare.md</a>, <a href="../news.md">news.md</a>, <a href="../finance.md">finance.md</a>, <a href="../scholar.md">scholar.md</a>, <a href="../legal.md">legal.md</a>, and <a href="../methodology.md">methodology.md</a>.</div>
 <nav class="site-nav topbar" aria-label="Needle">
   <a class="wordmark" href="../">NEEDLE</a>
   <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
@@ -162,6 +164,16 @@
   url    = {https://keenableai.github.io/needle/},
   doi    = {10.5281/zenodo.22095155}
 }</pre>
+    <div class="faq">
+      <details>
+        <summary>Does NEEDLE fetch landing pages?</summary>
+        <p>No. Engines are scored on the ranking, titles, and snippets they returned, with a uniform snippet budget.</p>
+      </details>
+      <details>
+        <summary>Can a provider overfit NEEDLE?</summary>
+        <p>News queries are generated each hour and the other gold sets each day from public sources. There is no committed query set.</p>
+      </details>
+    </div>
   </section>
 <footer class="site-footer">
   <div>NEEDLE is an MIT-licensed benchmark from <a href="https://keenable.ai">Keenable</a>. Cite <a href="https://doi.org/10.5281/zenodo.22095155">DOI 10.5281/zenodo.22095155</a>.</div>

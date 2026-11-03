@@ -1,3 +1,4 @@
+import hashlib
 import html
 import importlib.util
 import json
@@ -39,7 +40,15 @@ def _load(name: str, path: Path):
 
 
 def test_static_geo_files_exist():
-    for name in ("robots.txt", "sitemap.xml", "llms.txt", "llms-full.txt"):
+    for name in (
+        "robots.txt",
+        "sitemap.xml",
+        "llms.txt",
+        "llms-full.txt",
+        "skill.md",
+        ".nojekyll",
+        "index.md",
+    ):
         assert (DASH / name).is_file(), name
 
 
@@ -67,8 +76,24 @@ def test_llms_and_sitemap_point_at_public_urls():
     for path in pages:
         url = f"https://keenableai.github.io/needle/{path}"
         assert url in sitemap, url
-        assert url.rstrip("/") in llms or url in llms
+    md_pages = (
+        "index.md",
+        "compare.md",
+        "news.md",
+        "finance.md",
+        "scholar.md",
+        "legal.md",
+        "methodology.md",
+        "skill.md",
+    )
+    for path in md_pages:
+        url = f"https://keenableai.github.io/needle/{path}"
+        assert url in sitemap, url
+        assert url in llms, url
+    assert llms.lstrip().startswith("# NEEDLE")
+    assert re.search(r"^> ", llms, re.M)
     assert "https://keenableai.github.io/needle/llms.txt" in sitemap
+    assert "https://keenableai.github.io/needle/llms-full.txt" in sitemap
     assert "doi.org/10.5281/zenodo.22095155" in llms
     robots = (DASH / "robots.txt").read_text(encoding="utf-8")
     assert "Sitemap: https://keenableai.github.io/needle/sitemap.xml" in robots
@@ -114,9 +139,33 @@ CATALOG = f"{BASE}data/catalog.json"
 SCORE_KEYS = {"mean_ndcg", "recall_at_k", "mrr_at_k", "ndcg", "recall"}
 
 EXPECTED_TYPES = {
-    "index": {"WebSite", "Dataset", "FAQPage", "Organization", "Question", "Answer", "DataDownload"},
-    "compare": {"WebPage", "WebSite", "BreadcrumbList", "ListItem", "FAQPage", "Question", "Answer"},
-    "methodology": {"HowTo", "HowToStep", "BreadcrumbList", "ListItem", "FAQPage", "Question", "Answer"},
+    "index": {
+        "WebSite",
+        "Dataset",
+        "FAQPage",
+        "Organization",
+        "Question",
+        "Answer",
+        "DataDownload",
+    },
+    "compare": {
+        "WebPage",
+        "WebSite",
+        "BreadcrumbList",
+        "ListItem",
+        "FAQPage",
+        "Question",
+        "Answer",
+    },
+    "methodology": {
+        "HowTo",
+        "HowToStep",
+        "BreadcrumbList",
+        "ListItem",
+        "FAQPage",
+        "Question",
+        "Answer",
+    },
     "news": {"Dataset", "Organization", "DataDownload", "BreadcrumbList", "ListItem"},
     "finance": {"Dataset", "Organization", "DataDownload", "BreadcrumbList", "ListItem"},
     "scholar": {"Dataset", "Organization", "DataDownload", "BreadcrumbList", "ListItem"},
@@ -253,3 +302,126 @@ def test_dashboard_still_reads_rankeval_result_fields():
     src = (DASH / "index.html").read_text(encoding="utf-8")
     for field in ("title", "url", "snippet", "rating", "penalized", "label", "reasoning", "gates"):
         assert f"r.{field}" in src, field
+
+
+MD_PAGES = {
+    "index": DASH / "index.md",
+    "compare": DASH / "compare.md",
+    "methodology": DASH / "methodology.md",
+    "news": DASH / "news.md",
+    "finance": DASH / "finance.md",
+    "scholar": DASH / "scholar.md",
+    "legal": DASH / "legal.md",
+}
+
+DIR_MD = {
+    "compare": DASH / "compare" / "index.md",
+    "methodology": DASH / "methodology" / "index.md",
+    "news": DASH / "news" / "index.md",
+    "finance": DASH / "finance" / "index.md",
+    "scholar": DASH / "scholar" / "index.md",
+    "legal": DASH / "legal" / "index.md",
+}
+
+DIRECTIVE_RE = re.compile(
+    r'<div class="llms-directive">[\s\S]*?<a href="[^"]*llms\.txt">llms\.txt</a>',
+)
+DISPLAY_NONE_RE = re.compile(r"display\s*:\s*none", re.I)
+
+
+def test_html_pages_have_llms_directive_near_body_top():
+    for key, path in PAGES.items():
+        doc = path.read_text(encoding="utf-8")
+        body = doc.split("<body>", 1)[1]
+        head = body[:2000]
+        assert DIRECTIVE_RE.search(head), key
+        before_nav = body.split("<nav", 1)[0]
+        assert "llms-directive" in before_nav, key
+        directive = re.search(r'<div class="llms-directive">[\s\S]*?</div>', body)
+        assert directive, key
+        assert not DISPLAY_NONE_RE.search(directive.group(0))
+        assert ".md" in directive.group(0)
+
+
+def test_llms_directive_css_is_clip_not_display_none():
+    css = (DASH / "assets" / "needle.css").read_text(encoding="utf-8")
+    block = re.search(r"\.llms-directive\s*\{([^}]+)\}", css)
+    assert block
+    rules = block.group(1)
+    assert "clip:" in rules
+    assert "display:none" not in rules.replace(" ", "")
+
+
+def test_markdown_twins_exist_and_stay_small():
+    for key, path in {**MD_PAGES, **DIR_MD}.items():
+        text = path.read_text(encoding="utf-8")
+        assert len(text) < 100_000, (key, len(text))
+        assert text.lstrip().startswith("> ")
+        assert "llms.txt" in text.split("\n", 3)[0]
+        assert not re.search(r"function\s+\w+\s*\(", text)
+
+
+def test_markdown_covers_html_faq_and_headings():
+    home_md = MD_PAGES["index"].read_text(encoding="utf-8")
+    home_html = PAGES["index"].read_text(encoding="utf-8")
+    assert _h1(home_html) in home_md
+    for q in INDEX_FAQ:
+        assert q in home_html
+        assert q in home_md
+    assert "How to read the scoreboard" in home_html
+    assert "How to read the scoreboard" in home_md
+    assert "data-markdown-ignore" in home_html
+    cmp_md = MD_PAGES["compare"].read_text(encoding="utf-8")
+    cmp_html = PAGES["compare"].read_text(encoding="utf-8")
+    assert _h1(cmp_html) in cmp_md
+    for q in COMPARE_FAQ:
+        assert q in cmp_html
+        assert q in cmp_md
+    method_md = MD_PAGES["methodology"].read_text(encoding="utf-8")
+    method_html = PAGES["methodology"].read_text(encoding="utf-8")
+    assert _h1(method_html) in method_md
+    for q in METHOD_FAQ:
+        assert q in method_html
+        assert q in method_md
+
+
+def test_skill_md_and_discovery():
+    skill = (DASH / "skill.md").read_text(encoding="utf-8")
+    assert skill.startswith("---\n")
+    assert "name: needle" in skill
+    assert "description:" in skill
+    assert "license: MIT" in skill
+    assert "do not invent" in skill.lower() or "Never invent" in skill
+    assert "/mcp" in skill and "not an MCP" in skill
+    copies = (
+        DASH / ".well-known" / "skills" / "needle" / "SKILL.md",
+        DASH / ".well-known" / "skills" / "default" / "skill.md",
+        DASH / ".well-known" / "agent-skills" / "needle" / "SKILL.md",
+    )
+    raw = (DASH / "skill.md").read_bytes()
+    for path in copies:
+        assert path.read_bytes() == raw, path
+    digest = hashlib.sha256(raw).hexdigest()
+    agent = json.loads((DASH / ".well-known" / "agent-skills" / "index.json").read_text())
+    assert agent["skills"][0]["name"] == "needle"
+    assert agent["skills"][0]["digest"] == f"sha256:{digest}"
+    skills = json.loads((DASH / ".well-known" / "skills" / "index.json").read_text())
+    assert skills["skills"][0]["name"] == "needle"
+    assert "https://keenableai.github.io/needle/skill.md" in (DASH / "sitemap.xml").read_text()
+
+
+def test_llms_full_is_a_real_snapshot():
+    text = (DASH / "llms-full.txt").read_text(encoding="utf-8")
+    assert text.lstrip().startswith("# NEEDLE")
+    for needle in (
+        "methodology.md",
+        "history.jsonl",
+        "catalog.json",
+        "compare.md",
+        "10.5281/zenodo.22095155",
+        "nDCG@5",
+        "answer-recall@5",
+    ):
+        assert needle in text
+    assert len(text) > 2000
+    assert "not an MCP" in text

@@ -11,7 +11,7 @@ BLURB = ("NEEDLE is the live public benchmark for AI search APIs: "
          "hourly news and daily finance, scholar, rare-word, and legal "
          "suites. Same queries, open method — not a blog-post review.")
 RESERVED_DIRS = {"compare", "methodology", "news", "finance", "scholar",
-                 "legal", "assets", "data", "og"}
+                 "legal", "assets", "data", "og", ".well-known"}
 
 VERTICALS = {"news": "News", "finance": "Finance", "scholar": "Scholar",
              "agentic_rare": "AgenticRare", "legal": "Legal"}

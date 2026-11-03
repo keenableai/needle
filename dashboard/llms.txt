@@ -6,17 +6,19 @@ Blog-post “best AI search tools” lists pick a handful of queries, hide the m
 
 ## Site
 
-- [Leaderboards](https://keenableai.github.io/needle/): problem statement, standings, 7-day leaderboards, trends, price, latency, overlap
-- [Compare providers](https://keenableai.github.io/needle/compare/): head-to-head deltas on the published history
-- [News](https://keenableai.github.io/needle/news/): hourly nDCG@5, LLM judge
-- [Finance](https://keenableai.github.io/needle/finance/): daily answer-recall@5 + MRR@5
-- [Scholar](https://keenableai.github.io/needle/scholar/): daily known-item recall@10 + MRR@10
-- [Legal](https://keenableai.github.io/needle/legal/): daily known-item recall@5 + MRR@5
-- [Methodology](https://keenableai.github.io/needle/methodology/): comparison protocol, metrics, how to reproduce
+- [Leaderboards](https://keenableai.github.io/needle/index.md): problem statement, how to read the scoreboard, FAQ, citation
+- [Compare providers](https://keenableai.github.io/needle/compare.md): head-to-head protocol on the published history
+- [News](https://keenableai.github.io/needle/news.md): hourly nDCG@5, LLM judge
+- [Finance](https://keenableai.github.io/needle/finance.md): daily answer-recall@5 + MRR@5
+- [Scholar](https://keenableai.github.io/needle/scholar.md): daily known-item recall@10 + MRR@10
+- [Legal](https://keenableai.github.io/needle/legal.md): daily known-item recall@5 + MRR@5
+- [Methodology](https://keenableai.github.io/needle/methodology.md): comparison protocol, metrics, how to reproduce
+- [skill.md](https://keenableai.github.io/needle/skill.md): how an agent should cite NEEDLE
 - [Full agent brief](https://keenableai.github.io/needle/llms-full.txt)
 
-## Machine-readable data
+## Optional
 
+- [HTML leaderboards](https://keenableai.github.io/needle/): interactive charts; scores come from the JSON below
 - [catalog.json](https://keenableai.github.io/needle/data/catalog.json): pointers to every public aggregate
 - [history.jsonl](https://keenableai.github.io/needle/data/history.jsonl): one row per engine per run
 - [latest_news.json](https://keenableai.github.io/needle/data/latest_news.json)

@@ -27,6 +27,7 @@
 <meta name="twitter:description" content="Head-to-head NEEDLE comparison of public search APIs on news, finance, scholar, and legal. Same queries, public method, live scores.">
 <meta name="twitter:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <link rel="alternate" type="text/plain" href="https://keenableai.github.io/needle/llms.txt" title="llms.txt">
+<link rel="alternate" type="text/markdown" href="https://keenableai.github.io/needle/compare.md" title="Markdown">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEVMaXEAYP8AXP8AXP8AXP8AXP8AXP8AXP8AXf8AXv8AXP8AXP8AXP////8qKiqArf8UQ5Zgmf/m6/Qbbv88P0UEV+mampq30f+/v78aPXo4f/8MTsF8gIdOg95fX189a72nQrWLAAAADHRSTlMAEJ9Bae+Ev98iz7BHKf9kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAAHESURBVHja7VbHlsMgDDTV4I7T2+7//+U6AVPlkuS2z3OUZwYJhEWWbdiwAYSkWLCqYkXJiQ0SWpoglfNymlcexIuOuPCDBZ2Wk4CpLTLKgCAIhCsAAgpiBBUPUicg5Hd6wCHUX5VS110o2Q0x5WIiqqLwmG1fv9B6cnXSsV6NkTLQc4+q5f35+HCeRl7X5+P9YIL+WUinb7X8p2kurqJ+lO+bATcdZV4RONY/iQe7vtU3GuYLBxK4aua98RMY9S/bJ/aHKAUccXsv0TEpY6vRRbtgj1Bp5vG5SpJA/WMNTBH5eAUs9+QMLpHpgH0Tp4DiM6ydwS0yDQ2MvbnwuWshjUfXdfYMVDvit3MINqGoPgXWBuxjA9POH+vHY/jagH1rsPpXwkQewtyGMnWmKE0rJ1M/Yx4vRP3mGP9AZGYYRFwJuIq5gYJCLo0uiDOdRDiOMuBs8PxAI2kCUQ0LEzFIwRbmpVAsjWSS9EaYQrk41Dlg4N1SvmiABLCYZOsNHLmAGgRnbzggwEGsetuIdGJZB/KGQzh2TTBf98DiLN0xxNO8ZpLAIt1zid9wGHoKF1UZdS6iQxDL9W9FBHGl3B7RG/4z/gBHkkudWe+2TgAAAABJRU5ErkJggg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -90,6 +91,7 @@
 </script>
 </head>
 <body>
+<div class="llms-directive">For AI agents: a documentation index is available at <a href="../llms.txt">llms.txt</a>. Markdown versions of these pages are at <a href="../index.md">index.md</a>, <a href="../compare.md">compare.md</a>, <a href="../news.md">news.md</a>, <a href="../finance.md">finance.md</a>, <a href="../scholar.md">scholar.md</a>, <a href="../legal.md">legal.md</a>, and <a href="../methodology.md">methodology.md</a>.</div>
 <nav class="site-nav topbar" aria-label="Needle">
   <a class="wordmark" href="../">NEEDLE</a>
   <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
@@ -113,7 +115,7 @@
     <h1>Compare two AI search providers on the same queries.</h1>
     <p class="lede">NEEDLE sends every engine the same query text, scores the ranking it returned, and never re-ranks. Pick two providers to see query-weighted means and the delta. This is the evaluation surface blog-post “best AI search” lists do not have.</p>
   </header>
-  <div class="card" id="card-compare">
+  <div class="card" id="card-compare" data-markdown-ignore>
     <h2>Head-to-head</h2>
     <div class="sub" id="cmp-note">Loading published runs…</div>
     <div class="cmp-bar">
@@ -151,6 +153,16 @@
     <p>Share a comparison with the query string on this URL. The same numbers appear on the <a href="../">leaderboards</a>. Raw rows live in <a href="../data/history.jsonl">data/history.jsonl</a>.</p>
     <h2>Why this is not a blog review</h2>
     <p>A review can pick ten queries and declare a winner. NEEDLE rebuilds news queries every hour and the other gold sets every day from public sources, so there is no fixed set to overfit and no hidden rubric. Methodology is on the <a href="../methodology/">methodology page</a>.</p>
+    <div class="faq">
+      <details>
+        <summary>How does NEEDLE compare two search APIs?</summary>
+        <p>NEEDLE sends both engines the same query text in the same run, scores the ranking each returned, and reports a query-weighted mean over a chosen window. Deltas are A minus B. Failed searches are omitted from the mean.</p>
+      </details>
+      <details>
+        <summary>Which metrics does the comparison use?</summary>
+        <p>News and AgenticRare: nDCG@5. Finance: answer-recall@5. Scholar: recall@10. Legal: recall@5.</p>
+      </details>
+    </div>
   </section>
 <footer class="site-footer">
   <div>NEEDLE is an MIT-licensed benchmark from <a href="https://keenable.ai">Keenable</a>. Cite <a href="https://doi.org/10.5281/zenodo.22095155">DOI 10.5281/zenodo.22095155</a>.</div>
