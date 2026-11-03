@@ -172,3 +172,25 @@ async def test_run_legal_reports_when_each_engine_was_queried(monkeypatch):
     assert report["engines"]["a"]["per_query"][0]["queried_at"] == "2026-07-01T00:00:01.000Z"
     assert report["engines"]["b"]["per_query"][0]["queried_at"] == "2026-07-01T00:00:02.000Z"
     assert report["engines"]["ultimate"]["per_query"][0]["queried_at"] is None
+
+
+def test_docket_match_handles_suffix_and_list():
+    snippet = "No. 25-949 Fresh Mix v. Pisanelli"
+    found = extract_legal_ids(_r("https://example.com", snippet=snippet), snippet_chars=500)
+    for docket, expected in [
+        ("25-949(L)", True),
+        ("25-977; 25-949", True),
+        ("25-949 (L)", True),
+        ("25  - 949", True),
+        ("25\t–\t949", True),
+        ("25-9490(L)", False),
+    ]:
+        gold = GoldLegal(
+            text="q",
+            case_key="1",
+            bucket="caselaw",
+            syntax="plain",
+            docket=docket,
+            party_tokens=("pisanelli",),
+        )
+        assert ids_match(gold, found, result_text=snippet.lower()) is expected, docket
