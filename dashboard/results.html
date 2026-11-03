@@ -131,7 +131,11 @@
   match does not accept.</li>
 <li>We score what the engine returned: ranking, titles and snippets, with the same 2,000-character snippet
   budget for every engine. We do not fetch pages and we do not re-rank.</li>
-<li>Failed searches are left out of the mean and reported as errors. They are not scored as zero.</li>
+<li>A failed search scores zero when the engine caused it: a timeout, a server error, a content filter or a
+  rejected query. We leave a failed search out of the mean only when our own account or plan caused it, such as
+  an expired key, a used-up quota or a rate limit. Reports count both kinds of error.</li>
+<li>Keenable Realtime is the Keenable Search API with <code>mode=realtime</code>, its fastest mode. The API's
+  default mode is <code>pro</code>.</li>
 <li>Keenable operates NEEDLE, and the judge has not yet had a systematic human-agreement audit. The queries,
   prompts and raw results are public, so anyone can score any result again.</li>
 </ul>
