@@ -60,6 +60,13 @@ def norm_docket(raw: str) -> str:
     return re.sub(r"[\s–]", "", raw.replace("–", "-")).lower()
 
 
+def extract_dockets(text: str) -> set[str]:
+    return {
+        f"{m.group(1)}-{m.group(2)}" if m.group(1) else f"{m.group(3)}a{m.group(5)}".lower()
+        for m in DOCKET_RE.finditer(text)
+    }
+
+
 @dataclass
 class LegalIds:
     clusters: set[str] = field(default_factory=set)
@@ -94,11 +101,7 @@ def extract_legal_ids(result: SearchResult, *, snippet_chars: int) -> LegalIds:
         reporter = norm_reporter(m.group(2))
         if reporter in REPORTER_ALLOWED:
             ids.cites.add(f"{m.group(1)}:{reporter}:{m.group(3)}")
-    for m in DOCKET_RE.finditer(f"{text} {url}"):
-        if m.group(1):
-            ids.dockets.add(f"{m.group(1)}-{m.group(2)}")
-        else:
-            ids.dockets.add(f"{m.group(3)}a{m.group(5)}".lower())
+    ids.dockets |= extract_dockets(f"{text} {url}")
     for m in CFR_TEXT_RE.finditer(text):
         ids.cfr.add(f"{int(m.group(1))}:{m.group(2).rstrip('.')}")
     for pat in CFR_URL_RES:
@@ -129,7 +132,7 @@ def ids_match(gold: GoldLegal, found: LegalIds, *, result_text: str) -> bool:
         return True
     if gold.cfr and gold.cfr in found.cfr:
         return True
-    if gold.docket and norm_docket(gold.docket) in found.dockets:
+    if extract_dockets(gold.docket) & found.dockets:
         if any(
             token.strip()
             and re.search(
