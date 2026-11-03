@@ -1,12 +1,12 @@
 [project]
 name = "needle"
 version = "0.1.4"
-description = "NEEDLE — search/retrieval benchmarks and query-stream generators from Keenable.ai"
+description = "NEEDLE — the live public benchmark for AI search and retrieval APIs"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Keenable.ai" }]
-keywords = ["search", "retrieval", "benchmark", "eval", "queries", "rss", "trends"]
+keywords = ["search", "retrieval", "benchmark", "eval", "AI search", "GEO", "nDCG", "leaderboard", "queries", "rss", "trends"]
 dependencies = [
     "httpx>=0.27",
     "defusedxml>=0.7",

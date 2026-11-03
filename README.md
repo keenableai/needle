@@ -3,8 +3,23 @@
 [![CI](https://github.com/keenableai/needle/actions/workflows/ci.yaml/badge.svg)](https://github.com/keenableai/needle/actions/workflows/ci.yaml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22095155.svg)](https://doi.org/10.5281/zenodo.22095155)
 
-Search and retrieval benchmarks from [Keenable.ai](https://keenable.ai). A
-benchmark is a query set plus a scoring method. Each one is a module under
+**One-off reviews cannot tell you which AI search engine is best.** Vendor
+lists and “best AI search tools” posts pick a handful of queries, hide the
+method, and go stale the day they ship. Agents, retrieval products, and GEO
+systems need a scoreboard that is continuous, multi-vertical, and
+reproducible.
+
+[NEEDLE](https://keenableai.github.io/needle/) is that scoreboard: a live
+open-source search benchmark from [Keenable.ai](https://keenable.ai). It
+sends every engine the same query text, scores the ranking it returned, and
+rebuilds gold from public sources — news hourly; finance, scholar, and legal
+daily. Cite the [leaderboards](https://keenableai.github.io/needle/),
+[compare two providers](https://keenableai.github.io/needle/compare/), or
+read the [methodology](https://keenableai.github.io/needle/methodology/).
+Agents should start at [`llms.txt`](https://keenableai.github.io/needle/llms.txt)
+and [`AGENTS.md`](AGENTS.md).
+
+A benchmark is a query set plus a scoring method. Each one is a module under
 `needle` with the same two subcommands:
 
 ```bash
@@ -252,7 +267,9 @@ own run, so a slow daily bench never delays the hourly news result. Each
 run appends summary rows
 (`history.jsonl`), engine-pair URL overlap (`overlap.jsonl`), and per-engine
 unique-URL counts (`uniqueness.jsonl`) to `gh-pages`; the dashboard at
-<https://keenableai.github.io/needle/> renders them. Each run also
+<https://keenableai.github.io/needle/> renders them, with crawlable
+comparison and per-vertical pages plus [`llms.txt`](https://keenableai.github.io/needle/llms.txt)
+for agents. Each run also
 archives full artifacts to the HF dataset
 [`keenable-ai/needle-results`](https://huggingface.co/datasets/keenable-ai/needle-results)
 (a slim `<bench>.json` per run plus `<bench>/<engine>.json` with each

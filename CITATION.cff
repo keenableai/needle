@@ -5,7 +5,7 @@ title: "NEEDLE: a live search and retrieval benchmark"
 version: 0.1.4
 date-released: 2026-08-27
 doi: 10.5281/zenodo.22095155
-url: "https://github.com/keenableai/needle"
+url: "https://keenableai.github.io/needle/"
 repository-code: "https://github.com/keenableai/needle"
 license: MIT
 keywords:
@@ -13,6 +13,11 @@ keywords:
   - information-retrieval
   - benchmark
   - evaluation
+  - AI search
+  - GEO
+  - retrieval
+  - nDCG
+  - leaderboard
 authors:
   - name: "Keenable"
     website: "https://keenable.ai"
