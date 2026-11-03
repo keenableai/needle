@@ -965,7 +965,7 @@
     <p>Every run builds each client with the same snippet budget of 2,000 characters. Keenable, Exa and Ceramic accept a request-side length parameter, so they get it in the request (snippet_max_length=2000, highlights.maxCharacters=2000, maxDescriptionLength=2000). The other engines have no such parameter; we clip whatever they return to the same 2,000 characters before judging and answer matching (Appendix C). Requests time out at 30 s (60 s for Perplexity, Parallel and Jina, 180 s for claude-search and chatgpt-search) and retry up to 3 times with exponential backoff on transport errors, 429, and 5xx.</p>
     <table>
       <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
-      <tr><td>Keenable Realtime</td><td>Keenable POST /v1/search</td><td>mode=realtime, snippet_max_length=2000; query verbatim with site: kept in the text, after:/before: → published_after:/published_before: tokens; no count parameter — we keep the first k results</td></tr>
+      <tr><td>Keenable</td><td>Keenable POST /v1/search</td><td>mode=realtime, snippet_max_length=2000; query verbatim with site: kept in the text, after:/before: → published_after:/published_before: tokens; no count parameter — we keep the first k results</td></tr>
       <tr><td>google/serper</td><td>Serper.dev (Google SERP) POST /search</td><td>q = query verbatim (operators kept as text), num=min(k,100), gl=us, hl=en; knowledge-graph and answer-box entries fold into the ranking</td></tr>
       <tr><td>bing/searchapi</td><td>SearchApi.io GET /search</td><td>engine=bing, q = query verbatim (operators kept as text), num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
       <tr><td>brave</td><td>Brave GET /web/search</td><td>q = query text with site: kept, clipped to 75 words / 600 chars; count=min(k,20), country=us, search_lang=en, result_filter=web, text_decorations=false; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; extra_snippets joined with newlines, falling back to description when absent</td></tr>
@@ -1077,7 +1077,7 @@ function markHome(node, engine) {
   if (engine === HOME_ENGINE) node.classList.add("home");
 }
 
-const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable Realtime"],
+const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable"],
   ["google", "google/serper"], ["bing", "bing/searchapi"], ["context", "context.dev"]]);
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
