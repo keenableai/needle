@@ -2,8 +2,11 @@ import importlib.util
 import json
 from pathlib import Path
 
+import yaml
+
+ROOT = Path(__file__).parents[1]
 SPEC = importlib.util.spec_from_file_location(
-    "daily_queries", Path(__file__).parents[1] / "scripts" / "daily_queries.py"
+    "daily_queries", ROOT / "scripts" / "daily_queries.py"
 )
 assert SPEC and SPEC.loader
 daily_queries = importlib.util.module_from_spec(SPEC)
@@ -12,6 +15,14 @@ SPEC.loader.exec_module(daily_queries)
 
 def test_benches_include_agentic_rare():
     assert ("agentic_rare", "agentic_rare.jsonl", ("agentic_rare.json",)) in daily_queries.BENCHES
+
+
+def test_dataset_card_has_a_config_for_each_bench():
+    front_matter = (ROOT / "dataset" / "README.md").read_text(encoding="utf-8").split("---\n")[1]
+    configs = yaml.safe_load(front_matter)["configs"]
+    assert {c["config_name"]: c["data_files"] for c in configs} == {
+        bench: f"runs/*/{queries}" for bench, queries, _ in daily_queries.BENCHES
+    }
 
 
 def test_news_reports_accept_pre_switch_artifacts():

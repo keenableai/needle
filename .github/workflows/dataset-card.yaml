@@ -15,11 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
+      - uses: astral-sh/setup-uv@v5
       - name: Upload README.md
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_DATASET: keenable-ai/needle-results
         run: |
-          uv run hf upload "$HF_DATASET" dataset/README.md README.md \
-            --repo-type dataset --commit-message "Dataset card from ${GITHUB_SHA::7}"
+          uvx --from 'huggingface-hub>=1.22' hf upload keenable-ai/needle-results \
+            dataset/README.md README.md --repo-type dataset \
+            --commit-message "Dataset card from ${GITHUB_SHA::7}"

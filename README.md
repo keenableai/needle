@@ -62,9 +62,7 @@ endpoint (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
 `parallel` = advanced, `parallel-turbo` = turbo,
 `perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
 `brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). The
-dashboard and the results page show `keenable-realtime` as Keenable Realtime
-and leave out `keenable` (pro, the API default) and `ceramic`; their results
-stay in the raw data on Hugging Face. A failed
+dashboard and the results page show `keenable-realtime` as Keenable Realtime. A failed
 search scores zero when the engine's side caused it (timeout, server error,
 content filter, a rejected query). The mean skips it only when our own
 account or plan caused it: HTTP 401, 402, 403, 429, 432 or 433, or a 400 or
