@@ -7,8 +7,14 @@ import fire
 
 from needle.scholar.generate import QUERY_BUCKETS
 from needle.shared.ci import ci_payload, score_row, updated_scores
-from needle.shared.io import append_jsonl, load_jsonl, write_json, write_jsonl
-from needle.shared.overlap import FAMILIES, TS_FMT, overlap_rows, uniqueness_rows
+from needle.shared.io import load_jsonl, write_json, write_jsonl
+from needle.shared.overlap import (
+    FAMILIES,
+    TS_FMT,
+    independence_totals,
+    overlap_rows,
+    uniqueness_rows,
+)
 
 
 def _latency_fields(e: dict) -> dict:
@@ -20,6 +26,14 @@ def _latency_fields(e: dict) -> dict:
     }
 
 
+def _count_fields(report: dict, e: dict) -> dict:
+    return {
+        "num_scored": e["num_scored"],
+        "num_queries": report["num_queries"],
+        **{k: e[k] for k in ("search_errors", "account_errors", "service_errors")},
+    }
+
+
 def _ndcg_rows(report: dict, ts: str, bench: str) -> list[dict]:
     return [
         {
@@ -27,9 +41,7 @@ def _ndcg_rows(report: dict, ts: str, bench: str) -> list[dict]:
             "bench": bench,
             "engine": name,
             "ndcg": e["mean_ndcg"],
-            "num_scored": e["num_scored"],
-            "num_queries": report["num_queries"],
-            "search_errors": e["search_errors"],
+            **_count_fields(report, e),
             "judge_errors": e["judge_errors"],
             **_latency_fields(e),
         }
@@ -59,14 +71,7 @@ def scholar_rows(report: dict, ts: str) -> list[dict]:
             bucket = e["by_bucket"].get(b, {})
             row[f"{b}_recall"] = bucket.get("recall_at_k")
             row[f"{b}_n"] = bucket.get("n")
-        row.update(
-            {
-                "num_scored": e["num_scored"],
-                "num_queries": report["num_queries"],
-                "search_errors": e["search_errors"],
-                **_latency_fields(e),
-            }
-        )
+        row.update({**_count_fields(report, e), **_latency_fields(e)})
         rows.append(row)
     return rows
 
@@ -85,9 +90,7 @@ def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, str]) -> l
                 f"{suites[0]}_n": e["by_bucket"].get(suites[0], {}).get("n"),
                 f"{suites[1]}_recall": e["by_bucket"].get(suites[1], {}).get("recall_at_k"),
                 f"{suites[1]}_n": e["by_bucket"].get(suites[1], {}).get("n"),
-                "num_scored": e["num_scored"],
-                "num_queries": report["num_queries"],
-                "search_errors": e["search_errors"],
+                **_count_fields(report, e),
                 **_latency_fields(e),
             }
         )
@@ -122,12 +125,11 @@ def write_run_report(report: dict, path: Path) -> None:
         write_json(e, str(engine_dir / f"{name}.json"), indent=None)
 
 
-def _publish_rows(path: Path, new_rows: list[dict], ts: str, republish: bool) -> None:
-    if republish and path.exists():
-        kept = [row for row in load_jsonl(path) if row["ts"] != ts]
-        write_jsonl(kept + new_rows, str(path))
-    else:
-        append_jsonl(new_rows, str(path))
+def _merged_rows(path: Path, new_rows: list[dict], ts: str, republish: bool) -> list[dict]:
+    rows = load_jsonl(path)
+    if republish:
+        rows = [row for row in rows if row["ts"] != ts]
+    return rows + new_rows
 
 
 def publish(
@@ -250,9 +252,25 @@ def publish(
 
     republish = any(r.get("id") == run_id for r in runs)
 
-    _publish_rows(data / "history.jsonl", rows, ts, republish)
-    for name, new_rows in (("overlap.jsonl", overlap), ("uniqueness.jsonl", uniqueness)):
-        _publish_rows(data / name, new_rows, ts, republish)
+    history = _merged_rows(data / "history.jsonl", rows, ts, republish)
+    newest = max((row["ts"] for row in history), default=ts)
+    week_start = (datetime.strptime(newest, TS_FMT) - timedelta(days=7)).strftime(TS_FMT)
+    for row in history:
+        if row["ts"] < week_start:
+            row.pop("lat_ms", None)
+    write_jsonl(history, str(data / "history.jsonl"))
+    overlap_all = _merged_rows(data / "overlap.jsonl", overlap, ts, republish)
+    uniqueness_all = _merged_rows(data / "uniqueness.jsonl", uniqueness, ts, republish)
+    write_jsonl(overlap_all, str(data / "overlap.jsonl"))
+    write_jsonl(uniqueness_all, str(data / "uniqueness.jsonl"))
+    write_json(
+        {
+            "all": independence_totals(overlap_all, uniqueness_all),
+            "week": independence_totals(overlap_all, uniqueness_all, since=week_start),
+        },
+        str(data / "independence.json"),
+        indent=None,
+    )
 
     scores = updated_scores(load_jsonl(data / "ci_scores.jsonl"), score_rows, ts)
     if scores:

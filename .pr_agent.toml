@@ -1,0 +1,11 @@
+# Qodo configuration.
+#
+# Review-every-push keeps the review in sync with the latest commits, which the
+# auto-approve workflow (.github/workflows/auto-approve.yml) depends on: it
+# approves the PR whenever Qodo publishes a completed review, quoting the
+# verdict. Self-review checkboxes and the classic pr-agent auto-approval keys
+# are deliberately absent: the former needs a hidden manual click, the latter
+# are dead on this platform (verified 2026-09-07).
+
+[github_app]
+handle_push_trigger = true

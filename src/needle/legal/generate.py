@@ -18,7 +18,7 @@ from needle.legal.projection import (
 )
 from needle.legal.sources import CourtListenerClient, EcfrClient, month_windows
 from needle.shared.concurrency import bounded_gather
-from needle.shared.llm import LLMClient
+from needle.shared.llm import GENERATION_MAX_TOKENS, REASONING_EFFORT, LLMClient
 from needle.shared.sampling import dedupe_by, interleave
 
 CODE_OVERSAMPLE = 3
@@ -46,6 +46,7 @@ async def _caselaw_rows(
     courts: tuple[str, ...],
     per_court: int,
     months_back: int,
+    months_per_court: int,
     seed: int,
     hour_ts: datetime,
     now: datetime,
@@ -57,8 +58,11 @@ async def _caselaw_rows(
     seen_clusters: set[int] = set()
 
     async def fetch_court(court: str) -> list[Case]:
+        picked = random.Random(f"{seed}:{court}").sample(
+            windows, min(months_per_court, len(windows))
+        )
         lists = await bounded_gather(
-            windows,
+            picked,
             lambda w: courtlistener.opinions(court, filed_after=w[0], filed_before=w[1]),
             concurrency=2,
         )
@@ -125,7 +129,9 @@ async def _code_rows(
             return title_num, None, None, "fetch"
         try:
             text, err = await llm.complete(
-                build_code_prompt(section), max_tokens=1024, reasoning_effort="minimal"
+                build_code_prompt(section),
+                max_tokens=GENERATION_MAX_TOKENS,
+                reasoning_effort=REASONING_EFFORT,
             )
         except Exception as exc:
             return title_num, None, None, ("llm_error", str(exc)[:200])
@@ -189,6 +195,7 @@ async def run_generate(
     courts: tuple[str, ...],
     per_court: int,
     months_back: int,
+    months_per_court: int,
     titles: tuple[int, ...],
     per_title: int,
     seed: int,
@@ -203,6 +210,7 @@ async def run_generate(
                 courts=courts,
                 per_court=per_court,
                 months_back=months_back,
+                months_per_court=months_per_court,
                 seed=seed,
                 hour_ts=hour_ts,
                 now=now,

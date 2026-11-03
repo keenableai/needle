@@ -7,11 +7,14 @@ from needle.shared.search.brave import BraveClient, BraveLlmContextClient
 from needle.shared.search.ceramic import CeramicClient
 from needle.shared.search.chatgpt import ChatGptSearchClient
 from needle.shared.search.claude import ClaudeSearchClient
+from needle.shared.search.context import ContextDevClient
+from needle.shared.search.deepseek import DeepSeekClient
 from needle.shared.search.exa import ExaClient
 from needle.shared.search.firecrawl import FirecrawlClient
 from needle.shared.search.jina import JinaClient
 from needle.shared.search.kagi import KagiClient
 from needle.shared.search.keenable import KeenableClient
+from needle.shared.search.linkup import LinkupClient
 from needle.shared.search.octen import OctenClient
 from needle.shared.search.parallel import ParallelClient
 from needle.shared.search.perplexity import PerplexityClient
@@ -73,8 +76,11 @@ def _build_parallel(mode: str) -> Callable[[str | None, int], SearchClient]:
     return build
 
 
-def _build_perplexity(api_key: str | None, snippet_chars: int) -> SearchClient:
-    return PerplexityClient(api_key=api_key or "")
+def _build_perplexity(search_type: str | None) -> Callable[[str | None, int], SearchClient]:
+    def build(api_key: str | None, snippet_chars: int) -> SearchClient:
+        return PerplexityClient(api_key=api_key or "", search_type=search_type)
+
+    return build
 
 
 def _build_octen(api_key: str | None, snippet_chars: int) -> SearchClient:
@@ -87,6 +93,10 @@ def _build_ceramic(api_key: str | None, snippet_chars: int) -> SearchClient:
 
 def _build_tavily(api_key: str | None, snippet_chars: int) -> SearchClient:
     return TavilyClient(api_key=api_key or "", search_depth=os.environ.get("TAVILY_DEPTH", "basic"))
+
+
+def _build_linkup(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return LinkupClient(api_key=api_key or "", depth=os.environ.get("LINKUP_DEPTH", "standard"))
 
 
 def _build_tinyfish(api_key: str | None, snippet_chars: int) -> SearchClient:
@@ -109,6 +119,14 @@ def _build_jina(api_key: str | None, snippet_chars: int) -> SearchClient:
     return JinaClient(api_key=api_key or "", snippet_chars=snippet_chars)
 
 
+def _build_context(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return ContextDevClient(api_key=api_key or "", description_chars=snippet_chars)
+
+
+def _build_deepseek(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return DeepSeekClient(api_key=api_key or "")
+
+
 def _build_claude(api_key: str | None, snippet_chars: int) -> SearchClient:
     return ClaudeSearchClient(api_key=api_key or "")
 
@@ -128,6 +146,7 @@ ENGINES: dict[str, EngineSpec] = {
     "exa-instant": EngineSpec(
         key_env="EXA_API_KEY", key_required=True, build=_build_exa("instant")
     ),
+    "exa-lite": EngineSpec(key_env="EXA_API_KEY", key_required=True, build=_build_exa("lite")),
     "google": EngineSpec(key_env="SERPER_API_KEY", key_required=True, build=_build_serper),
     "bing": EngineSpec(
         key_env="SEARCHAPI_API_KEY", key_required=True, build=_build_searchapi("bing")
@@ -143,9 +162,13 @@ ENGINES: dict[str, EngineSpec] = {
         key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("turbo")
     ),
     "perplexity": EngineSpec(
-        key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity
+        key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity(None)
+    ),
+    "perplexity-fast": EngineSpec(
+        key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity("fast")
     ),
     "tavily": EngineSpec(key_env="TAVILY_API_KEY", key_required=True, build=_build_tavily),
+    "linkup": EngineSpec(key_env="LINKUP_API_KEY", key_required=True, build=_build_linkup),
     "tinyfish": EngineSpec(key_env="TINYFISH_API_KEY", key_required=True, build=_build_tinyfish),
     "octen": EngineSpec(key_env="OCTEN_API_KEY", key_required=True, build=_build_octen),
     "ceramic": EngineSpec(key_env="CERAMIC_API_KEY", key_required=True, build=_build_ceramic),
@@ -153,6 +176,8 @@ ENGINES: dict[str, EngineSpec] = {
     "firecrawl": EngineSpec(key_env="FIRECRAWL_API_KEY", key_required=True, build=_build_firecrawl),
     "kagi": EngineSpec(key_env="KAGI_API_KEY", key_required=True, build=_build_kagi),
     "jina": EngineSpec(key_env="JINA_API_KEY", key_required=True, build=_build_jina),
+    "context": EngineSpec(key_env="CONTEXT_DEV_API_KEY", key_required=True, build=_build_context),
+    "deepseek": EngineSpec(key_env="DEEPSEEK_API_KEY", key_required=True, build=_build_deepseek),
     "claude-search": EngineSpec(
         key_env="ANTHROPIC_API_KEY", key_required=True, build=_build_claude
     ),

@@ -1,20 +1,25 @@
 import asyncio
-from datetime import date
+import re
+from datetime import UTC, date, datetime, timedelta
 
 import httpx
 import pytest
 
+from needle.shared.retry import RATE_LIMIT_ATTEMPTS, RETRY_ATTEMPTS
 from needle.shared.search import (
     BraveClient,
     BraveLlmContextClient,
     CeramicClient,
     ChatGptSearchClient,
     ClaudeSearchClient,
+    ContextDevClient,
+    DeepSeekClient,
     ExaClient,
     FirecrawlClient,
     JinaClient,
     KagiClient,
     KeenableClient,
+    LinkupClient,
     OctenClient,
     ParallelClient,
     PerplexityClient,
@@ -30,6 +35,7 @@ from needle.shared.search import (
     search_all,
 )
 from needle.shared.search import base as search_base
+from needle.shared.search.context import _freshness
 from needle.shared.search.factory import ENGINES
 from needle.shared.search.queryops import parse_ops
 
@@ -95,7 +101,8 @@ async def test_keenable_snippet_falls_back_to_description(monkeypatch):
     assert calls["headers"] == {"X-Keenable-Title": "keenbench", "X-API-Key": "k"}
 
 
-async def test_exa_maps_fields_and_builds_body(monkeypatch):
+@pytest.mark.parametrize("search_type", ["auto", "instant", "lite"])
+async def test_exa_maps_fields_and_builds_body(monkeypatch, search_type):
     payload = {
         "results": [
             {
@@ -107,7 +114,7 @@ async def test_exa_maps_fields_and_builds_body(monkeypatch):
             },
         ]
     }
-    c = ExaClient(api_key="x")
+    c = ExaClient(api_key="x", search_type=search_type)
     fake, calls = _canned(payload)
     monkeypatch.setattr(c, "_request_json", fake)
 
@@ -119,7 +126,7 @@ async def test_exa_maps_fields_and_builds_body(monkeypatch):
     assert calls["json"] == {
         "query": "hi",
         "numResults": 5,
-        "type": "auto",
+        "type": search_type,
         "contents": {"highlights": {"maxCharacters": 10000}},
     }
     assert calls["headers"] == {"x-api-key": "x"}
@@ -133,7 +140,7 @@ async def test_exa_omits_contents_when_highlights_and_text_disabled(monkeypatch)
     assert "contents" not in calls["json"]
 
 
-@pytest.mark.parametrize("chars,expected", [(500, 500), (20000, 10000), (0, 10000)])
+@pytest.mark.parametrize("chars,expected", [(500, 500), (2000, 2000), (20000, 10000), (0, 10000)])
 async def test_exa_clamps_highlight_chars(monkeypatch, chars, expected):
     c = ExaClient(api_key="x", highlight_chars=chars)
     fake, calls = _canned({"results": []})
@@ -387,8 +394,6 @@ async def test_brave_llmcontext_maps_fields_and_builds_body(monkeypatch):
         "q": "hi",
         "country": "us",
         "search_lang": "en",
-        "maximum_number_of_urls": 5,
-        "maximum_number_of_tokens_per_url": 769,
     }
     assert calls["headers"] == {"Accept": "application/json", "X-Subscription-Token": "k"}
 
@@ -413,34 +418,15 @@ async def test_brave_llmcontext_published_date_prefers_parseable_iso(monkeypatch
     assert results[0].published_date == expected
 
 
-@pytest.mark.parametrize("chars,expected", [(2000, 769), (500, 512), (40000, 8192), (0, None)])
-async def test_brave_llmcontext_clamps_token_budget(monkeypatch, chars, expected):
+@pytest.mark.parametrize("chars,expected", [(5, "one\nt"), (0, "one\ntwo")])
+async def test_brave_llmcontext_clips_snippet(monkeypatch, chars, expected):
     c = BraveLlmContextClient(api_key="k", snippet_chars=chars)
-    fake, calls = _canned({"grounding": {"generic": []}})
+    fake, _ = _canned(
+        {"grounding": {"generic": [{"url": "https://a", "snippets": ["one", "two"]}]}}
+    )
     monkeypatch.setattr(c, "_request_json", fake)
-    await c.search("hi")
-    assert calls["json"].get("maximum_number_of_tokens_per_url") == expected
-
-
-async def test_brave_llmcontext_clamps_max_urls(monkeypatch):
-    c = BraveLlmContextClient(api_key="k")
-    fake, calls = _canned({"grounding": {"generic": []}})
-    monkeypatch.setattr(c, "_request_json", fake)
-    await c.search("hi", num_results=60)
-    assert calls["json"]["maximum_number_of_urls"] == 50
-
-
-async def test_brave_llmcontext_sends_sites_as_goggle_not_query_text(monkeypatch):
-    c = BraveLlmContextClient(api_key="k")
-    fake, calls = _canned({"grounding": {"generic": []}})
-    monkeypatch.setattr(c, "_request_json", fake)
-
-    await c.search("acme site:sec.gov site:nasdaq.com")
-    assert calls["json"]["q"] == "acme"
-    assert calls["json"]["goggles"] == "$discard\n$site=sec.gov\n$site=nasdaq.com"
-
-    await c.search("acme")
-    assert "goggles" not in calls["json"]
+    results, _ = await c.search("hi")
+    assert results[0].snippet == expected
 
 
 async def test_brave_llmcontext_tolerates_malformed_payload(monkeypatch):
@@ -501,6 +487,35 @@ async def test_tavily_maps_fields_and_builds_body(monkeypatch):
     assert results[0].snippet == "ca"
     assert results[0].published_date == "2026-07-01"
     assert calls["json"] == {"query": "hi", "max_results": 20, "search_depth": "basic"}
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_linkup_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "results": [
+            {"type": "image", "name": "pic", "url": "https://img", "content": ""},
+            {"type": "text", "name": "A &amp; B", "url": "https://a", "content": "it&#x27;s ca"},
+            {"type": "text", "name": "B", "url": "https://b", "content": "cb"},
+            {"type": "text", "name": "no url", "content": "x"},
+        ]
+    }
+    c = LinkupClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=1)
+    assert err is None
+    assert [r.url for r in results] == ["https://a"]
+    assert results[0].title == "A & B"
+    assert results[0].snippet == "it's ca"
+    assert results[0].published_date is None
+    assert calls["url"] == "https://api.linkup.so/v1/search"
+    assert calls["json"] == {
+        "q": "hi",
+        "depth": "standard",
+        "outputType": "searchResults",
+        "maxResults": 1,
+    }
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
@@ -659,6 +674,109 @@ async def test_jina_tolerates_null_data(monkeypatch):
     assert results == []
 
 
+async def test_context_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "results": [
+            {"url": "https://a", "title": "A", "description": "da", "relevance": "high"},
+            {"url": "https://b", "title": "", "description": ""},
+            {"title": "no url"},
+            "junk",
+        ],
+        "query": "acme filing",
+    }
+    c = ContextDevClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(OPS_QUERY, num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b"]
+    assert results[0].title == "A"
+    assert results[0].snippet == "da"
+    assert results[1].title is None
+    assert results[1].snippet is None
+    assert calls["method"] == "POST"
+    assert calls["url"] == "https://api.context.dev/v1/web/search"
+    assert calls["json"] == {
+        "query": "acme filing",
+        "numResults": 10,
+        "country": "us",
+        "queryFanout": False,
+        "includeDomains": ["sec.gov"],
+    }
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_context_requests_descriptions_up_to_snippet_chars(monkeypatch):
+    c = ContextDevClient(api_key="k", description_chars=2000)
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search("acme filing")
+    assert calls["json"]["descriptionMaxCharacters"] == 2000
+
+
+async def test_context_clamps_num_results_and_clips_query(monkeypatch):
+    c = ContextDevClient(api_key="k")
+    fake, calls = _canned({"results": None})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=200)
+    assert err is None
+    assert results == []
+    assert calls["json"]["numResults"] == 100
+    assert "includeDomains" not in calls["json"]
+    assert "freshness" not in calls["json"]
+
+    long_query = " ".join(f"word{i}" for i in range(100))
+    await c.search(long_query)
+    sent = calls["json"]["query"]
+    assert len(sent) <= 500
+    assert long_query.startswith(sent)
+    assert not sent.endswith(" ")
+
+
+async def test_context_maps_recent_after_to_freshness(monkeypatch):
+    c = ContextDevClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    after = (datetime.now(UTC).date() - timedelta(days=3)).isoformat()
+    await c.search(f"hello after:{after}")
+    assert calls["json"]["freshness"] == "last_week"
+    assert "includeDomains" not in calls["json"]
+
+
+@pytest.mark.parametrize(
+    "now, after, expected",
+    [
+        (datetime(2026, 9, 17, 15, 30, tzinfo=UTC), "2026-09-18", None),
+        (datetime(2026, 9, 17, 15, 30, tzinfo=UTC), "2026-09-17", "last_24_hours"),
+        (datetime(2026, 9, 17, 15, 30, tzinfo=UTC), "2026-09-16", "last_week"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2026-09-16", "last_24_hours"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2026-09-16", "last_week"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2026-09-10", "last_week"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2026-09-10", "last_month"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2026-08-17", "last_month"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2026-08-17", "last_year"),
+        (datetime(2026, 9, 17, 0, 0, tzinfo=UTC), "2025-09-16", "last_year"),
+        (datetime(2026, 9, 17, 0, 0, 1, tzinfo=UTC), "2025-09-16", None),
+    ],
+)
+def test_context_freshness_covers_after_midnight(now, after, expected):
+    assert _freshness(parse_ops(f"hello after:{after}"), now=now) == expected
+
+
+async def test_context_omits_freshness_for_future_after(monkeypatch):
+    c = ContextDevClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    after = (datetime.now(UTC).date() + timedelta(days=1)).isoformat()
+    await c.search(f"hello after:{after}")
+    assert "freshness" not in calls["json"]
+
+
 async def test_octen_maps_fields_and_builds_body(monkeypatch):
     payload = {
         "data": {
@@ -728,6 +846,63 @@ async def test_ceramic_maps_fields_and_builds_body(monkeypatch):
     assert calls["headers"] == {"Authorization": "Bearer k"}
 
 
+async def test_deepseek_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "results": [
+            {
+                "url": "https://a",
+                "title": "A",
+                "snippet": "short",
+                "summary": "long",
+                "date": "2026-06-01T00:00:00+00:00",
+            },
+            {"url": "https://b", "title": "", "snippet": "only short", "summary": "", "date": None},
+            {"url": "https://c", "title": "C", "snippet": "", "summary": ""},
+            {"title": "no url"},
+        ]
+    }
+    c = DeepSeekClient(api_key="k")
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b", "https://c"]
+    assert results[0].snippet == "long"
+    assert results[0].published_date == "2026-06-01T00:00:00+00:00"
+    assert results[1].title is None
+    assert results[1].snippet == "only short"
+    assert results[1].published_date is None
+    assert results[2].snippet is None
+    assert calls["url"] == "https://api.deepseek.com/v1/tools/search"
+    assert calls["json"] == {"query": "hi lang:en", "count": 5, "need_content": False}
+    assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_deepseek_clips_query_and_keeps_operators(monkeypatch):
+    c = DeepSeekClient(api_key="k")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    await c.search(
+        " ".join(f"word{i}" for i in range(40)) + " site:sec.gov site:x.com after:2026-06-01"
+    )
+    q = calls["json"]["query"]
+    assert len(q) <= 128
+    assert q.startswith("word0 word1 ")
+    assert q.endswith(" site:sec.gov OR site:x.com lang:en after:2026-06-01")
+
+    await c.search("hi", num_results=80)
+    assert calls["json"]["count"] == 50
+
+
+async def test_deepseek_tolerates_null_results(monkeypatch):
+    c = DeepSeekClient(api_key="k")
+    fake, _ = _canned({"results": None})
+    monkeypatch.setattr(c, "_request_json", fake)
+    assert await c.search("hi") == ([], None)
+
+
 async def test_tinyfish_maps_fields_and_builds_params(monkeypatch):
     payload = {
         "results": [
@@ -791,15 +966,15 @@ async def test_brave_clips_query_and_keeps_sites(monkeypatch):
     fake, calls = _canned({"web": {"results": []}})
     monkeypatch.setattr(c, "_request_json", fake)
 
-    await c.search(" ".join(f"w{i}" for i in range(60)) + " site:sec.gov")
+    await c.search(" ".join(f"w{i}" for i in range(90)) + " site:sec.gov")
     q = calls["params"]["q"]
     assert q.endswith("site:sec.gov")
-    assert len(q.split()) <= 50
+    assert len(q.split()) <= 75
 
-    await c.search(" ".join(f"word{i:06d}" for i in range(45)) + " site:sec.gov")
+    await c.search(" ".join(f"word{i:06d}" for i in range(60)) + " site:sec.gov")
     q = calls["params"]["q"]
     assert q.endswith("site:sec.gov")
-    assert len(q) <= 400
+    assert len(q) <= 600
 
 
 async def test_ceramic_clamps_query_words_and_description_chars(monkeypatch):
@@ -921,6 +1096,21 @@ async def test_perplexity_maps_results_and_builds_body(monkeypatch):
         "search_context_size": "low",
     }
     assert calls["headers"] == {"Authorization": "Bearer k"}
+
+
+async def test_perplexity_fast_sets_search_type(monkeypatch):
+    c = PerplexityClient(api_key="k", search_type="fast")
+    fake, calls = _canned({"results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search("hi", num_results=5)
+    assert (results, err) == ([], None)
+    assert calls["json"] == {
+        "query": "hi",
+        "max_results": 5,
+        "search_context_size": "low",
+        "search_type": "fast",
+    }
 
 
 CLAUDE_JSON = (
@@ -1127,6 +1317,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("BRAVE_API_KEY", "bk")
     monkeypatch.setenv("PARALLEL_API_KEY", "pk")
     monkeypatch.setenv("TAVILY_API_KEY", "tk")
+    monkeypatch.setenv("LINKUP_API_KEY", "lk")
     monkeypatch.setenv("PERPLEXITY_API_KEY", "xk")
     monkeypatch.setenv("OCTEN_API_KEY", "ok")
     monkeypatch.setenv("CERAMIC_API_KEY", "ck")
@@ -1135,6 +1326,8 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("TINYFISH_API_KEY", "tfk")
     monkeypatch.setenv("KAGI_API_KEY", "kk")
     monkeypatch.setenv("JINA_API_KEY", "jk")
+    monkeypatch.setenv("CONTEXT_DEV_API_KEY", "cdk")
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "dk")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "ak")
     monkeypatch.setenv("OPENAI_API_KEY", "oak")
     clients = build_search_clients(
@@ -1146,7 +1339,9 @@ def test_factory_builds_new_engines(monkeypatch):
             "brave",
             "parallel",
             "tavily",
+            "linkup",
             "perplexity",
+            "perplexity-fast",
             "octen",
             "ceramic",
             "you",
@@ -1154,6 +1349,8 @@ def test_factory_builds_new_engines(monkeypatch):
             "tinyfish",
             "kagi",
             "jina",
+            "context",
+            "deepseek",
         ]
     )
     assert isinstance(clients["google"], SerperClient)
@@ -1164,8 +1361,15 @@ def test_factory_builds_new_engines(monkeypatch):
     assert isinstance(clients["brave"], BraveClient)
     assert isinstance(clients["parallel"], ParallelClient)
     assert isinstance(clients["tavily"], TavilyClient)
+    assert isinstance(clients["linkup"], LinkupClient)
+    assert clients["linkup"].api_key == "lk"
+    assert clients["linkup"].depth == "standard"
     assert isinstance(clients["perplexity"], PerplexityClient)
     assert clients["perplexity"].api_key == "xk"
+    assert clients["perplexity"].search_type is None
+    assert isinstance(clients["perplexity-fast"], PerplexityClient)
+    assert clients["perplexity-fast"].api_key == "xk"
+    assert clients["perplexity-fast"].search_type == "fast"
     assert isinstance(clients["octen"], OctenClient)
     assert clients["octen"].api_key == "ok"
     assert isinstance(clients["ceramic"], CeramicClient)
@@ -1185,6 +1389,11 @@ def test_factory_builds_new_engines(monkeypatch):
     assert isinstance(clients["jina"], JinaClient)
     assert clients["jina"].api_key == "jk"
     assert clients["jina"].snippet_chars == 0
+    assert isinstance(clients["context"], ContextDevClient)
+    assert clients["context"].api_key == "cdk"
+    assert clients["context"].engine == "context"
+    assert isinstance(clients["deepseek"], DeepSeekClient)
+    assert clients["deepseek"].api_key == "dk"
 
 
 def test_factory_builds_engine_variants(monkeypatch):
@@ -1198,6 +1407,7 @@ def test_factory_builds_engine_variants(monkeypatch):
             "keenable-realtime",
             "exa",
             "exa-instant",
+            "exa-lite",
             "parallel",
             "parallel-turbo",
             "brave",
@@ -1213,6 +1423,10 @@ def test_factory_builds_engine_variants(monkeypatch):
     assert isinstance(clients["exa-instant"], ExaClient)
     assert clients["exa"].search_type == "auto"
     assert clients["exa-instant"].search_type == "instant"
+    assert isinstance(clients["exa-lite"], ExaClient)
+    assert clients["exa-lite"].api_key == "ek"
+    assert clients["exa-lite"].search_type == "lite"
+    assert clients["exa-lite"].highlight_chars == 500
     assert isinstance(clients["parallel-turbo"], ParallelClient)
     assert clients["parallel"].mode == "advanced"
     assert clients["parallel-turbo"].mode == "turbo"
@@ -1267,10 +1481,8 @@ async def test_search_all_is_serial_and_text_major():
     rows = await search_all(engines, ["a", "b"], num_results=5)
     assert counters["peak"] == 1
     assert len(rows) == 2 and all(len(row) == 2 for row in rows)
-    results, err = rows[0][0]
-    assert err is None and results[0].url == "https://e1/a"
-    results, err = rows[1][1]
-    assert results[0].url == "https://e2/b"
+    assert rows[0][0].error is None and rows[0][0].results[0].url == "https://e1/a"
+    assert rows[1][1].results[0].url == "https://e2/b"
     assert await search_all({}, ["a", "b"], num_results=5) == [[], []]
 
 
@@ -1279,10 +1491,8 @@ async def test_search_all_concurrent_overlaps_and_keeps_order():
     rows = await search_all(engines, ["a", "b"], num_results=5, concurrent_search=True)
     assert counters["peak"] > 1
     assert len(rows) == 2 and all(len(row) == 2 for row in rows)
-    results, err = rows[0][0]
-    assert err is None and results[0].url == "https://e1/a"
-    results, err = rows[1][1]
-    assert results[0].url == "https://e2/b"
+    assert rows[0][0].error is None and rows[0][0].results[0].url == "https://e1/a"
+    assert rows[1][1].results[0].url == "https://e2/b"
     assert await search_all({}, ["a"], num_results=5, concurrent_search=True) == [[]]
 
 
@@ -1378,16 +1588,56 @@ async def test_retries_429_then_succeeds(monkeypatch):
     assert len(c.latencies_ms) == 1
 
 
-async def test_retries_exhausted_returns_last_error(monkeypatch):
-    monkeypatch.setattr(search_base, "RETRY_BASE_S", 0.0)
-    http = _SeqHttp([_Resp(429), _Resp(429), _Resp(429)])
+@pytest.mark.parametrize(
+    ("status", "attempts"), [(429, RATE_LIMIT_ATTEMPTS), (503, RETRY_ATTEMPTS)]
+)
+async def test_retries_exhausted_returns_last_error(monkeypatch, status, attempts):
+    http = _SeqHttp([_Resp(status)] * RATE_LIMIT_ATTEMPTS)
     c = KeenableClient()
+    c.retry_base_s = 0.0
     monkeypatch.setattr(c, "_http", lambda: http)
     results, err = await c.search("q")
     assert results is None
-    assert err == {"error_type": "http_error", "error_message": "429: boom"}
-    assert http.requests == 3
+    assert err == {"error_type": "http_error", "error_message": f"{status}: boom"}
+    assert http.requests == attempts
     assert c.latencies_ms == []
+
+
+async def test_min_interval_spaces_requests(monkeypatch):
+    sent = []
+
+    class _TimedHttp:
+        async def request(self, method, url, **kwargs):
+            sent.append(asyncio.get_running_loop().time())
+            return _Resp(200, {"results": []})
+
+    c = KeenableClient()
+    c.set_max_concurrency(3)
+    c.min_interval_s = 0.05
+    monkeypatch.setattr(c, "_http", lambda: _TimedHttp())
+    await asyncio.gather(*[c.search(q) for q in "abc"])
+    gaps = [b - a for a, b in zip(sent, sent[1:], strict=False)]
+    assert len(sent) == 3 and min(gaps) >= 0.045
+
+
+async def test_backoff_holds_the_concurrency_slot(monkeypatch):
+    http = _SeqHttp([_Resp(429), _Resp(200, {"results": []}), _Resp(200, {"results": []})])
+    order = []
+    c = KeenableClient()
+    c.retry_base_s = 0.01
+    monkeypatch.setattr(c, "_http", lambda: http)
+
+    async def run(q):
+        await c.search(q)
+        order.append(q)
+
+    await asyncio.gather(run("a"), run("b"))
+    assert order == ["a", "b"]
+    assert http.requests == 3
+
+
+def test_tinyfish_stays_under_its_rate_limit():
+    assert TinyFishClient.min_interval_s >= 60 / 30
 
 
 async def test_non_retryable_status_fails_fast(monkeypatch):
@@ -1526,8 +1776,7 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             {"grounding": {"generic": []}},
             "json",
             {
-                "q": "acme filing",
-                "goggles": "$discard\n$site=sec.gov",
+                "q": "acme filing site:sec.gov",
                 "freshness": "2026-06-01to2026-06-30",
             },
         ),
@@ -1551,6 +1800,17 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
                 "include_domains": ["sec.gov"],
                 "start_date": "2026-06-01",
                 "end_date": "2026-06-30",
+            },
+        ),
+        (
+            lambda: LinkupClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "q": "acme filing",
+                "includeDomains": ["sec.gov"],
+                "fromDate": "2026-06-01",
+                "toDate": "2026-06-30",
             },
         ),
         (
@@ -1595,6 +1855,16 @@ async def test_brave_freshness_fills_open_ends(monkeypatch):
             {"result": {"results": []}},
             "json",
             {"query": "acme filing"},
+        ),
+        (
+            lambda: DeepSeekClient(api_key="k"),
+            {"results": []},
+            "json",
+            {
+                "query": OPS_QUERY.replace(" after:", " lang:en after:"),
+                "count": 10,
+                "need_content": False,
+            },
         ),
         (
             lambda: TinyFishClient(api_key="k"),
@@ -1668,3 +1938,94 @@ async def test_clients_translate_operators(monkeypatch, make_client, payload, fi
 
     await c.search(OPS_QUERY)
     assert expected.items() <= calls[field].items()
+
+
+class _StampResp:
+    def __init__(self, status_code):
+        self.status_code = status_code
+        self.text = ""
+        self.headers = {}
+
+    def json(self):
+        return {"results": []}
+
+
+class _StampHttp:
+    def __init__(self, fail_first=0, delay_s=0.0):
+        self.fail_first = fail_first
+        self.delay_s = delay_s
+        self.stamps = []
+
+    async def request(self, method, url, **kwargs):
+        sink = search_base._REQUEST_TIMES.get()
+        self.stamps.append(sink[-1] if sink else None)
+        if self.delay_s:
+            await asyncio.sleep(self.delay_s)
+        status = 429 if len(self.stamps) <= self.fail_first else 200
+        return _StampResp(status)
+
+
+class _StampClient(search_base.HttpSearchClient):
+    def __init__(self, engine, http):
+        super().__init__()
+        self.engine = engine
+        self.http = http
+
+    def _http(self):
+        return self.http
+
+    async def search(self, query, *, num_results=10):
+        payload, err = await self._request_json("GET", f"http://x/{query}")
+        if err is not None:
+            return None, err
+        return [], None
+
+
+def test_utc_stamp_is_iso_utc_to_the_millisecond():
+    stamp = search_base.utc_stamp()
+    assert re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z", stamp), stamp
+    assert datetime.fromisoformat(stamp.replace("Z", "+00:00")).tzinfo is UTC
+
+
+async def test_search_all_records_when_each_engine_was_queried():
+    engines = {name: _StampClient(name, _StampHttp()) for name in ("e1", "e2")}
+    before = search_base.utc_stamp()
+    rows = await search_all(engines, ["a", "b"], num_results=5)
+    after = search_base.utc_stamp()
+
+    stamps = [run.queried_at for row in rows for run in row]
+    assert len(stamps) == 4
+    for stamp in stamps:
+        assert stamp is not None and stamp.endswith("Z")
+        assert before <= stamp <= after
+    for qi in (0, 1):
+        for ei, name in enumerate(("e1", "e2")):
+            assert rows[qi][ei].queried_at == engines[name].http.stamps[qi]
+
+
+async def test_queried_at_is_the_first_attempt_of_a_retried_search():
+    http = _StampHttp(fail_first=1)
+    client = _StampClient("e1", http)
+    client.retry_base_s = 0.01
+    rows = await search_all({"e1": client}, ["a"], num_results=5)
+    assert len(http.stamps) == 2
+    assert rows[0][0].queried_at == http.stamps[0]
+    assert http.stamps[0] < http.stamps[1]
+
+
+async def test_queried_at_is_isolated_across_concurrent_searches():
+    engines = {
+        "slow": _StampClient("slow", _StampHttp(delay_s=0.05)),
+        "fast": _StampClient("fast", _StampHttp()),
+    }
+    rows = await search_all(engines, ["a", "b"], num_results=5, concurrent_search=True)
+    for qi in (0, 1):
+        assert rows[qi][0].queried_at == engines["slow"].http.stamps[qi]
+        assert rows[qi][1].queried_at == engines["fast"].http.stamps[qi]
+    assert rows[0][0].queried_at < rows[1][0].queried_at
+
+
+async def test_queried_at_is_none_when_a_client_issues_no_request():
+    engines, _ = _counting_engines()
+    rows = await search_all(engines, ["a"], num_results=5)
+    assert [run.queried_at for run in rows[0]] == [None, None]

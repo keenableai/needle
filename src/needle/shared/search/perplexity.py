@@ -8,8 +8,11 @@ class PerplexityClient(HttpSearchClient):
     engine = "perplexity"
     base_url = "https://api.perplexity.ai"
 
-    def __init__(self, *, api_key: str, timeout_s: float = 60.0) -> None:
+    def __init__(
+        self, *, api_key: str, search_type: str | None = None, timeout_s: float = 60.0
+    ) -> None:
         super().__init__(api_key=api_key, timeout_s=timeout_s)
+        self.search_type = search_type
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -20,6 +23,8 @@ class PerplexityClient(HttpSearchClient):
             "max_results": min(num_results, 20),
             "search_context_size": "low",
         }
+        if self.search_type is not None:
+            body["search_type"] = self.search_type
         if ops.sites:
             body["search_domain_filter"] = list(ops.sites)
         if ops.after:

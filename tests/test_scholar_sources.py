@@ -1,3 +1,4 @@
+import ssl
 from datetime import UTC, datetime
 
 import httpx
@@ -5,12 +6,15 @@ import pytest
 
 from needle.scholar.models import age_bucket, coarse_domain
 from needle.scholar.sources import (
+    ARXIV_API,
+    ARXIV_OAI,
     ArxivClient,
     EuropePmcClient,
     _norm_arxiv_id,
     _norm_doi,
     _parse_dt,
     parse_arxiv_atom,
+    parse_arxiv_oai,
     parse_epmc_result,
 )
 from needle.shared.search.base import SourceError
@@ -179,3 +183,115 @@ async def test_europepmc_recent_raises_on_http_error():
     client._send = _sending(response=httpx.Response(500, text="oops"))
     with pytest.raises(SourceError, match="europepmc: http_error: 500"):
         await client.recent(from_date="2026-06-01", to_date="2026-06-02", n=5, seed=0)
+
+
+OAI = """<?xml version="1.0" encoding="UTF-8"?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/">
+  <ListRecords>
+    <record>
+      <header><identifier>oai:arXiv.org:2606.00065</identifier><datestamp>2026-06-02</datestamp></header>
+      <metadata>
+        <arXiv xmlns="http://arxiv.org/OAI/arXiv/">
+          <id>2606.00065</id>
+          <created>2026-06-01</created>
+          <title>Fresh   Paper</title>
+          <categories>cs.LG stat.ML</categories>
+          <doi>10.1000/abc 10.1000/def</doi>
+          <abstract>Some  abstract.</abstract>
+        </arXiv>
+      </metadata>
+    </record>
+    <record>
+      <header><identifier>oai:arXiv.org:2004.03414</identifier><datestamp>2026-06-02</datestamp></header>
+      <metadata>
+        <arXiv xmlns="http://arxiv.org/OAI/arXiv/">
+          <id>2004.03414</id>
+          <created>2026-06-01</created>
+          <title>Revised Old Paper</title>
+          <categories>econ.EM</categories>
+          <abstract>New version of a 2020 paper.</abstract>
+        </arXiv>
+      </metadata>
+    </record>
+    <record>
+      <header><identifier>oai:arXiv.org:2605.30672</identifier><datestamp>2026-06-02</datestamp></header>
+      <metadata>
+        <arXiv xmlns="http://arxiv.org/OAI/arXiv/">
+          <id>2605.30672</id>
+          <created>2026-05-30</created>
+          <title>Before Window</title>
+          <categories>q-fin.GN</categories>
+          <abstract>Created before the window.</abstract>
+        </arXiv>
+      </metadata>
+    </record>
+    <record>
+      <header><identifier>oai:arXiv.org:2606.00066</identifier><datestamp>2026-06-02</datestamp></header>
+      <metadata>
+        <arXiv xmlns="http://arxiv.org/OAI/arXiv/">
+          <id>2606.00066</id>
+          <created>2026-06-01</created>
+          <title>No Abstract</title>
+          <categories>cs.AI</categories>
+        </arXiv>
+      </metadata>
+    </record>
+  </ListRecords>
+</OAI-PMH>
+"""
+
+
+def test_parse_arxiv_oai():
+    papers = parse_arxiv_oai(OAI, from_date="2026-06-01", to_date="2026-06-02")
+    assert [p.arxiv_id for p in papers] == ["2606.00065"]
+    p = papers[0]
+    assert p.title == "Fresh Paper"
+    assert p.abstract == "Some abstract."
+    assert p.published == datetime(2026, 6, 1, tzinfo=UTC)
+    assert p.url == "https://arxiv.org/abs/2606.00065"
+    assert p.domain == "computer science"
+    assert p.doi == "10.1000/abc"
+    assert parse_arxiv_oai("not xml", from_date="2026-06-01", to_date="2026-06-02") == []
+
+
+def _sending_by_url(responses):
+    calls = []
+
+    async def _send(method, url, **kwargs):
+        calls.append((url, kwargs.get("params")))
+        return responses[url], 0.0, None
+
+    return _send, calls
+
+
+async def test_arxiv_search_falls_back_to_oai_on_406():
+    client = ArxivClient(delay_s=0)
+    client._send, calls = _sending_by_url(
+        {ARXIV_API: httpx.Response(406, text=""), ARXIV_OAI: httpx.Response(200, text=OAI)}
+    )
+    papers = await client.search_domain(
+        "social sciences", from_date="2026-06-01", to_date="2026-06-02"
+    )
+    assert [p.arxiv_id for p in papers] == ["2606.00065", "2606.00065"]
+    assert client.oai_fallbacks == 1
+    oai_calls = [params for url, params in calls if url == ARXIV_OAI]
+    assert [p["set"] for p in oai_calls] == ["econ", "q-fin"]
+    assert oai_calls[0]["from"] == "2026-06-02"
+    assert oai_calls[0]["until"] == "2026-06-06"
+
+
+async def test_arxiv_search_raises_when_oai_also_fails():
+    client = ArxivClient(delay_s=0)
+    client._send, _ = _sending_by_url(
+        {ARXIV_API: httpx.Response(406, text=""), ARXIV_OAI: httpx.Response(503, text="busy")}
+    )
+    with pytest.raises(SourceError, match="arxiv: http_error: 503"):
+        await client.search_domain("computer science", from_date="2026-06-01", to_date="2026-06-02")
+    assert client.oai_fallbacks == 1
+
+
+def test_arxiv_ssl_context_changes_cipher_set():
+    default = {c["name"] for c in httpx.create_ssl_context().get_ciphers()}
+    tuned = {c["name"] for c in ArxivClient.ssl_context.get_ciphers()}
+    assert tuned and tuned < default
+    assert ArxivClient.ssl_context.verify_mode == ssl.CERT_REQUIRED

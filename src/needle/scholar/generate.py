@@ -17,7 +17,7 @@ from needle.scholar.projection import (
 )
 from needle.scholar.sources import ArxivClient, EuropePmcClient
 from needle.shared.concurrency import bounded_gather
-from needle.shared.llm import LLMClient
+from needle.shared.llm import GENERATION_MAX_TOKENS, REASONING_EFFORT, LLMClient
 from needle.shared.retry import MAX_ERROR_CHARS
 from needle.shared.sampling import interleave
 from needle.shared.search.base import SourceError
@@ -167,7 +167,9 @@ async def _bucket_query(
 ) -> tuple[str | None, dict[str, str] | None]:
     try:
         text, err = await llm.complete(
-            build_query_prompt(bucket, paper, body), max_tokens=1024, reasoning_effort="minimal"
+            build_query_prompt(bucket, paper, body),
+            max_tokens=GENERATION_MAX_TOKENS,
+            reasoning_effort=REASONING_EFFORT,
         )
     except Exception as exc:
         return None, {"error_type": "projection_crash", "error_message": str(exc)[:500]}

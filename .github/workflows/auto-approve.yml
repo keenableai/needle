@@ -1,0 +1,86 @@
+name: auto-approve
+
+# Approval bridge for the team's code-review policy (SOC 2 / Vanta "GitHub
+# code changes were approved or provided justification"): every PR is reviewed
+# automatically by Qodo, findings are advisory, human approval is not
+# mandated. Qodo's review lives in a comment, invisible to GitHub's approval
+# model — this workflow makes the review visible: when Qodo posts a completed
+# review, the PR gets an APPROVED review whose body records Qodo's verdict.
+# The approval attests "an automated review happened", NOT "the code is clean".
+# A PR merged before Qodo finishes gets no approval.
+
+on:
+  issue_comment:
+    types: [created, edited]
+
+jobs:
+  approve:
+    name: Approve on Qodo review
+    # Exact-login match: '[' is illegal in GitHub logins, so the [bot] suffix
+    # is unforgeable — a prefix match would accept lookalike user accounts.
+    if: >-
+      github.event.issue.pull_request &&
+      github.event.comment.user.login == 'qodo-code-review[bot]' &&
+      github.event.comment.user.type == 'Bot' &&
+      contains(github.event.comment.body, 'Code Review by Qodo')
+    # Job-level, not workflow-level: a workflow-level group is joined by EVERY
+    # comment on the PR (Sonar, Infracost, plans, Qodo's summary), and those
+    # runs cancelled the one carrying the review before their own `if` skipped
+    # them. Jobs skipped by `if` never join a job-level group, so only Qodo
+    # review events compete here; when its edits land in a burst, the newest wins.
+    concurrency:
+      group: auto-approve-${{ github.event.issue.number }}
+      cancel-in-progress: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
+      # Plain gh, not a marketplace action: both auto-approve actions are
+      # unusable here (fork paywalls private repos; original fails the org's
+      # verified-creators actions policy).
+      - name: Approve with the Qodo verdict
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BODY: ${{ github.event.comment.body }}
+          COMMENT_URL: ${{ github.event.comment.html_url }}
+          REPO: ${{ github.repository }}
+          NUM: ${{ github.event.issue.number }}
+        run: |
+          set -euo pipefail
+          # Quote whatever verdict categories the comment carries, without
+          # encoding Qodo's taxonomy (it changes between releases). A parse
+          # miss must be visible, not silently degraded.
+          verdict=$(printf '%s' "$BODY" | grep -oE '<code>[^<]*\([0-9]+\)</code>' | sed 's/<[^>]*>//g' | paste -sd ', ' -) || true
+          if [ -z "$verdict" ]; then
+            echo "::warning::No verdict categories parsed from the Qodo comment — its format may have changed; approving with a link only."
+            verdict="see the review comment"
+          fi
+          # One attempt: dedupe, then approve. Comment edits re-fire this job,
+          # so each head commit is approved once.
+          approve_once() {
+            local head_sha dup
+            head_sha=$(gh api "repos/$REPO/pulls/$NUM" --jq .head.sha) || return 1
+            dup=$(gh api "repos/$REPO/pulls/$NUM/reviews?per_page=100" --paginate \
+              --jq "[.[] | select(.user.login==\"github-actions[bot]\" and .state==\"APPROVED\" and .commit_id==\"$head_sha\")] | length") || return 1
+            if [ "$dup" -gt 0 ]; then
+              echo "Head $head_sha already carries an auto-approval; nothing to do."
+              return 0
+            fi
+            gh pr review "$NUM" --repo "$REPO" --approve \
+              --body "Auto-approved: Qodo review completed — ${verdict}. Findings are advisory per team policy; verdict source: ${COMMENT_URL} [auto-approve.yml]" || return 1
+          }
+          # Retry: one GitHub API error (HTTP 502 during the 2026-10-12 incident)
+          # used to drop the approval silently. Each attempt re-reads the head and
+          # the dedupe, so a retry after a partial success never double-approves.
+          for attempt in 1 2 3 4; do
+            if approve_once; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 4 ]; then
+              echo "::warning::Approval attempt $attempt failed (GitHub API error?); retrying in $((attempt * 20))s."
+              sleep $((attempt * 20))
+            fi
+          done
+          echo "::error::Approval failed after 4 attempts; re-run this job once GitHub recovers."
+          exit 1

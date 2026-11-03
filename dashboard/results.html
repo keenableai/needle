@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<meta name="description" content="{{DESCRIPTION}}">
+<link rel="canonical" href="{{PAGE_URL}}">
+<link rel="alternate" type="text/plain" href="{{BASE}}llms.txt" title="llms.txt">
+<link rel="alternate" type="text/markdown" href="{{BASE}}results.md" title="NEEDLE results as Markdown">
+<link rel="alternate" type="text/csv" href="{{BASE}}results.csv" title="NEEDLE results as CSV">
+<link rel="alternate" type="application/json" href="{{BASE}}results.json" title="NEEDLE results as JSON">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Keenable">
+<meta property="og:title" content="Web search API benchmark: {{ENGINES}} engines compared">
+<meta property="og:description" content="{{OG_DESCRIPTION}}">
+<meta property="og:url" content="{{PAGE_URL}}">
+<meta property="og:image" content="{{SHARE_PNG}}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="{{SHARE_WIDTH}}">
+<meta property="og:image:height" content="{{SHARE_HEIGHT}}">
+<meta property="og:image:alt" content="{{SHARE_ALT}}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="{{SHARE_ALT}}">
+<script type="application/ld+json">
+{{JSON_LD}}
+</script>
+<style>
+  :root { color-scheme: light dark;
+          --page: #ffffff; --ink: #1f2328; --muted: #59636e; --rule: #d8dee4;
+          --link: #0a57e8; --best: #e4edff; --us: #f4f8ff; --us-edge: #0a57e8; --note: #f6f8fa; }
+  @media (prefers-color-scheme: dark) {
+    :root { --page: #16181c; --ink: #e6e8eb; --muted: #a2abb5; --rule: #343a42;
+            --link: #78a9ff; --best: #1f3358; --us: #1a2030; --us-edge: #78a9ff; --note: #1d2127; }
+  }
+  html { background: var(--page); }
+  body { margin: 0; background: var(--page); color: var(--ink);
+         font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+  a { color: var(--link); }
+  a:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; }
+  h1 { font-size: clamp(26px, 4.4vw, 36px); line-height: 1.15; margin: 8px 0 10px;
+       letter-spacing: -0.01em; max-width: 24em; }
+  h2 { font-size: 21px; line-height: 1.25; margin: 44px 0 10px; }
+  p, li, dd { max-width: 68ch; }
+  .meta { color: var(--muted); margin: 0 0 18px; }
+  .lead { font-size: 18px; line-height: 1.55; margin: 0 0 8px; }
+  .chart { margin: 20px 0 0; max-width: 760px; }
+  .chart img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 6px; }
+  .scroll { overflow-x: auto; margin: 14px 0 6px; border-top: 1px solid var(--rule); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+  caption { text-align: left; color: var(--muted); padding: 10px 0 8px; caption-side: top; }
+  th, td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  thead th { font-size: 13px; font-weight: 600; color: var(--muted); vertical-align: bottom; white-space: normal; }
+  th[scope="row"], thead th:first-child { text-align: left; font-weight: 500; position: sticky; left: 0;
+                                          background: var(--page); }
+  tr.us th[scope="row"], tr.us td { background: var(--us); }
+  tr.us th[scope="row"] { box-shadow: inset 3px 0 0 var(--us-edge); font-weight: 700; padding-left: 12px; }
+  td.best { background: var(--best); }
+  .leaders td:nth-child(n+2), .leaders th:nth-child(n+2) { text-align: left; }
+  .leaders td { white-space: normal; }
+  .small { font-size: 14px; color: var(--muted); }
+  .small p { margin: 6px 0; }
+  .dl a { display: inline-block; margin: 0 14px 6px 0; }
+  dl { margin: 8px 0 0; }
+  dt { font-weight: 600; margin-top: 10px; }
+  dd { margin: 2px 0 0; color: var(--muted); }
+  pre { background: var(--note); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px;
+        overflow-x: auto; font-size: 13px; line-height: 1.5; max-width: 76ch; }
+  ul.plain { padding-left: 20px; margin: 8px 0; }
+  .foot { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--muted); }
+  @media (max-width: 600px) { .lead { font-size: 17px; } }
+  .llms-directive {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  @media print {
+    body { font-size: 12px; }
+    h1 { font-size: 22px; }
+    p, li, dd { max-width: none; }
+    .new-page { break-before: page; }
+    main { max-width: none; padding: 0; }
+    .lead { font-size: 13px; }
+    .chart { display: none; }
+    h2 { margin-top: 20px; break-after: avoid; }
+    .scroll { overflow: visible; }
+    table { font-size: 10px; }
+    th, td { padding: 4px 6px; }
+    th[scope="row"], thead th:first-child { position: static; }
+    tr { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="llms-directive">For AI agents: a documentation index is available at <a href="llms.txt">llms.txt</a>. Markdown versions of these pages are at <a href="index.md">index.md</a> and <a href="results.md">results.md</a>.</div>
+<main>
+<header>
+<h1>{{H1}}</h1>
+<p class="meta">{{BYLINE}} Updated <time datetime="{{LAST_RUN}}">{{UPDATED}}</time>
+  after every benchmark run.</p>
+<p class="lead">{{LEAD}}</p>
+<figure class="chart"><img src="{{SHARE_WEBP}}" width="{{SHARE_WIDTH}}" height="{{SHARE_HEIGHT}}" alt="{{SHARE_ALT}}"></figure>
+</header>
+
+<h2>Leaders by vertical</h2>
+<div class="scroll">
+{{LEADERS_TABLE}}
+</div>
+
+<h2 class="new-page">Results for all {{ENGINES}} engines</h2>
+<div class="scroll">
+{{TABLE}}
+</div>
+<div class="small">
+<p>Scores are shares of the ceiling, a synthetic engine that pools every engine's results per query, so
+  100% is the best result list the whole field found together. Prices are the lowest public self-serve
+  price per 1,000 queries, collected {{PRICES_ASOF}}.</p>
+<p>{{RUNS}}</p>
+</div>
+
+<h2>Download the data</h2>
+<p class="dl"><a href="../results.csv">results.csv</a> <a href="../results.json">results.json</a>
+  <a href="../results.md">results.md</a> <a href="../results.pdf">results.pdf</a></p>
+<p class="small">The files are rewritten after every benchmark run. {{LICENSE}}</p>
+
+{{HISTORY}}
+
+<h2>Methodology</h2>
+<ul class="plain">
+<li>Every engine gets the same query text in each run, one request at a time, so latency is comparable
+  across engines.</li>
+<li>Queries are made fresh from public sources: News every hour, the other verticals every day. There is
+  no fixed set to overfit.</li>
+<li>An LLM judge that does not see the engine name scores News and AgenticRare. Scholar and Legal are
+  known-item tasks: a hit is the known paper, court opinion or regulation. Finance checks whether the results
+  contain the known answer from public registries and SEC filings, with an LLM check of results that the text
+  match does not accept.</li>
+<li>We score what the engine returned: ranking, titles and snippets, with the same 2,000-character snippet
+  budget for every engine. We do not fetch pages and we do not re-rank.</li>
+<li>A failed search scores zero when the engine caused it (timeout, server error, content filter, a rejected
+  query). We leave it out of the mean only when our own account or plan caused it (auth, quota, rate limit,
+  billing). Reports list both kinds of error.</li>
+<li>Keenable operates NEEDLE, and the judge has not yet had a systematic human-agreement audit. The queries,
+  prompts and raw results are public, so anyone can score any result again.</li>
+</ul>
+<p><a href="../#app-protocol">Full methodology and appendices</a></p>
+
+<h2>Columns</h2>
+<dl>
+  <dt>overall</dt>
+  <dd>Mean share of the ceiling across the verticals where the engine has a score, last 7 days, with a 95%
+    confidence interval. A dash marks a vertical with no score.</dd>
+  <dt>{{VERTICALS}}</dt>
+  <dd>Share of the ceiling in each vertical, last 7 days.</dd>
+  <dt>$ / 1k queries</dt>
+  <dd>Lowest public self-serve price per 1,000 queries, without enterprise quotes; collected {{PRICES_ASOF}}.
+    The plan behind each price is in the <a href="../#card-prices">price table</a>.</dd>
+  <dt>p50 latency, p95 latency</dt>
+  <dd>Search latency of successful calls, last 7 days.</dd>
+  <dt>unique URLs</dt>
+  <dd>Share of the engine's URLs that no other engine family returned for the same query and that are
+    relevant, last 7 days. Engines of one family, such as Exa and Exa Instant, do not count against each
+    other.</dd>
+</dl>
+
+<h2>How to cite</h2>
+<p>{{CITATION}}</p>
+<pre>{{BIBTEX}}</pre>
+
+<p class="foot"><a href="../">Interactive dashboard</a>,
+  <a href="https://github.com/keenableai/needle">source code on GitHub</a>,
+  <a href="https://huggingface.co/datasets/keenable-ai/needle-results">raw results on Hugging Face</a>,
+  <a href="https://doi.org/{{DOI}}">DOI</a>.</p>
+</main>
+</body>
+</html>

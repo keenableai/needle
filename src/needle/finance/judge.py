@@ -63,5 +63,5 @@ async def judge_answer(
         snippet=snippet,
     )
     return await complete_parsed(
-        llm, prompt, parse_verdict, retry_suffix=VERDICT_RETRY_SUFFIX, max_tokens=8192
+        llm, prompt, parse_verdict, retry_suffix=VERDICT_RETRY_SUFFIX, max_tokens=16_384
     )

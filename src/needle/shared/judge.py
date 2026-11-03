@@ -7,7 +7,7 @@ from typing import TypeVar
 
 import yaml
 
-from needle.shared.llm import MAX_ERROR_CHARS, LLMClient
+from needle.shared.llm import MAX_ERROR_CHARS, REASONING_EFFORT, LLMClient
 from needle.shared.prompts import render_prompt
 
 T = TypeVar("T")
@@ -240,7 +240,7 @@ async def complete_parsed(
 ) -> tuple[T | None, dict[str, str] | None]:
     for attempt_prompt in (prompt, prompt + retry_suffix):
         text, err = await llm.complete(
-            attempt_prompt, max_tokens=max_tokens, reasoning_effort="", system=system
+            attempt_prompt, max_tokens=max_tokens, reasoning_effort=REASONING_EFFORT, system=system
         )
         if err is not None:
             return None, err
@@ -280,7 +280,7 @@ async def judge_one(
         prompt,
         parse_judgement,
         retry_suffix=PARSE_RETRY_SUFFIX,
-        max_tokens=32_768,
+        max_tokens=65_536,
         system=judge_instructions(),
     )
 
@@ -294,6 +294,6 @@ async def classify_query(
         prompt,
         parse_query_profile,
         retry_suffix=PROFILE_RETRY_SUFFIX,
-        max_tokens=32_768,
+        max_tokens=65_536,
         system=profile_instructions(),
     )

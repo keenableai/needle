@@ -65,6 +65,15 @@ def test_extract_doi_strips_publisher_suffix():
         "10.1002/etc.4890"
     }
     assert extract_doi("https://x.com/doi/10.1002/etc.4890/pdf", "") == {"10.1002/etc.4890"}
+    assert extract_doi(
+        "https://link.springer.com/content/pdf/10.1038/s41467-026-75970-1.pdf", ""
+    ) >= {"10.1038/s41467-026-75970-1"}
+
+
+def test_extract_doi_decodes_percent_encoded_url():
+    assert extract_doi(
+        "https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0348010", ""
+    ) == {"10.1371/journal.pone.0348010"}
 
 
 def test_extract_ids_caps_snippet():
@@ -83,3 +92,14 @@ def test_extract_ids_match_dict():
     result = SearchResult(url="https://arxiv.org/abs/2506.12345", title="T", snippet="")
     ids = extract_ids(result, snippet_chars=500)
     assert ids.as_match_dict() == {"arxiv": ["2506.12345"]}
+
+
+def test_extract_doi_publisher_path_adds_enclosed_doi():
+    found = extract_doi("https://academic.oup.com/x/doi/10.1093/ehjdh/ztag109/8725358", "")
+    assert "10.1093/ehjdh/ztag109" in found
+
+
+def test_extract_doi_resolver_and_text_stay_exact():
+    assert extract_doi("https://doi.org/10.1234/a/b", "") == {"10.1234/a/b"}
+    assert extract_doi("", "see 10.1234/a/b") == {"10.1234/a/b"}
+    assert extract_doi("https://doi.org/10.1234/foo.pdf", "") == {"10.1234/foo.pdf"}

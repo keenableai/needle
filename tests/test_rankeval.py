@@ -4,6 +4,7 @@ import pytest
 
 from needle.shared.rankeval import EvalQuery, run_ndcg
 from needle.shared.search import SearchResult
+from needle.shared.search import base as search_base
 
 TODAY = "2026-07-01"
 PROFILE_YAML = (
@@ -71,7 +72,7 @@ async def test_run_ndcg_ranks_engines():
     assert b == 0.0
 
 
-async def test_run_ndcg_excludes_search_errors_from_mean():
+async def test_run_ndcg_excludes_search_error_without_ideal():
     good = [SearchResult(url="https://g1", title="GOODDOC one")]
 
     class FlakyEngine:
@@ -93,16 +94,24 @@ async def test_run_ndcg_excludes_search_errors_from_mean():
     assert errored["search_error"]["error_type"] == "http_error"
 
 
-async def test_run_ndcg_search_error_scores_zero_when_pool_exists():
-    err = {"error_type": "http_error", "error_message": "503"}
+@pytest.mark.parametrize(
+    ("message", "account", "ndcg"),
+    [("503: overloaded", 0, 0.0), ("401: Unauthorized", 1, None)],
+)
+async def test_run_ndcg_failure_when_pool_exists(message, account, ndcg):
+    err = {"error_type": "http_error", "error_message": message}
     good = FakeEngine([SearchResult(url="https://g1", title="GOODDOC one")])
     broken = FakeEngine([], error=err)
     report = await run_ndcg([q("q1")], {"good": good, "broken": broken}, FakeJudge())
     b = report["engines"]["broken"]
-    assert b["search_errors"] == 1
-    assert b["num_scored"] == 1
-    assert b["mean_ndcg"] == 0.0
-    assert b["per_query"][0]["ndcg"] == 0.0
+    assert (b["search_errors"], b["account_errors"], b["service_errors"]) == (
+        1,
+        account,
+        1 - account,
+    )
+    assert b["num_scored"] == 1 - account
+    assert b["per_query"][0]["ndcg"] == ndcg
+    assert b["per_query"][0]["score"] == ndcg
     assert report["engines"]["good"]["mean_ndcg"] == pytest.approx(1.0)
 
 
@@ -285,7 +294,29 @@ async def test_run_ndcg_ultimate_unscored_when_all_engines_fail():
     ult = report["engines"]["ultimate"]
     assert ult["search_errors"] == 1
     assert ult["num_scored"] == 0
-    assert ult["per_query"][0]["search_error"]["error_type"] == "all_engines_failed"
+    assert ult["per_query"][0]["search_error"] == err
+
+
+async def test_run_ndcg_ultimate_records_first_service_error_when_all_engines_fail():
+    unauthorized = {"error_type": "http_error", "error_message": "401: Unauthorized"}
+    overloaded = {"error_type": "http_error", "error_message": "503: overloaded"}
+    engines = {
+        "a": FakeEngine([], error=unauthorized),
+        "b": FakeEngine([], error=overloaded),
+        "c": FakeEngine([], error={"error_type": "transport", "error_message": "x"}),
+    }
+    ult = (await run_ndcg([q("q1")], engines, FakeJudge()))["engines"]["ultimate"]
+    assert ult["per_query"][0]["search_error"] == overloaded
+    assert (ult["account_errors"], ult["service_errors"]) == (0, 1)
+
+
+async def test_run_ndcg_ultimate_records_first_error_when_every_failure_is_account_side():
+    unauthorized = {"error_type": "http_error", "error_message": "401: Unauthorized"}
+    no_credits = {"error_type": "http_error", "error_message": "402: no credits"}
+    engines = {"a": FakeEngine([], error=unauthorized), "b": FakeEngine([], error=no_credits)}
+    ult = (await run_ndcg([q("q1")], engines, FakeJudge()))["engines"]["ultimate"]
+    assert ult["per_query"][0]["search_error"] == unauthorized
+    assert (ult["account_errors"], ult["service_errors"]) == (1, 0)
 
 
 async def test_run_ndcg_pooled_judge_error_drops_query_for_all_engines():
@@ -348,3 +379,25 @@ async def test_run_ndcg_judges_without_profile_when_classification_fails():
     assert pq["query_profile"] is None
     assert pq["ratings"] == [4]
     assert pq["judge_errors"] == 0
+
+
+async def test_run_ndcg_reports_when_each_engine_was_queried(monkeypatch):
+    stamps = iter(["2026-07-01T00:00:01.000Z", "2026-07-01T00:00:02.000Z"])
+    monkeypatch.setattr("needle.shared.search.base.utc_stamp", lambda: next(stamps), raising=True)
+
+    class StampedEngine(FakeEngine):
+        async def search(self, query, *, num_results=10):
+            search_base.note_request_time()
+            return await super().search(query, num_results=num_results)
+
+    doc = [SearchResult(url="https://a", title="GOODDOC", snippet="GOODDOC")]
+    report = await run_ndcg(
+        [q("one")],
+        {"e1": StampedEngine(doc), "e2": StampedEngine(doc)},
+        FakeJudge(),
+        num_results=1,
+        k=1,
+    )
+    assert report["engines"]["e1"]["per_query"][0]["queried_at"] == "2026-07-01T00:00:01.000Z"
+    assert report["engines"]["e2"]["per_query"][0]["queried_at"] == "2026-07-01T00:00:02.000Z"
+    assert report["engines"]["ultimate"]["per_query"][0]["queried_at"] is None

@@ -39,6 +39,7 @@ env:
   BRAVE_API_KEY: ${{ secrets.BRAVE_API_KEY }}
   PARALLEL_API_KEY: ${{ secrets.PARALLEL_API_KEY }}
   TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
+  LINKUP_API_KEY: ${{ secrets.LINKUP_API_KEY }}
   PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
   OCTEN_API_KEY: ${{ secrets.OCTEN_API_KEY }}
   CERAMIC_API_KEY: ${{ secrets.CERAMIC_API_KEY }}
@@ -47,11 +48,14 @@ env:
   TINYFISH_API_KEY: ${{ secrets.TINYFISH_API_KEY }}
   KAGI_API_KEY: ${{ secrets.KAGI_API_KEY }}
   JINA_API_KEY: ${{ secrets.JINA_API_KEY }}
+  CONTEXT_DEV_API_KEY: ${{ secrets.CONTEXT_DEV_API_KEY }}
+  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  COURTLISTENER_API_TOKEN: ${{ secrets.COURTLISTENER_API_TOKEN }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/needle-results
-  ENGINES: keenable-realtime,keenable,exa-instant,exa,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,claude-search,chatgpt-search
+  ENGINES: keenable-realtime,keenable,exa,exa-lite,google,bing,brave,brave-llmcontext,parallel-turbo,parallel,tavily,linkup,perplexity-fast,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,deepseek,claude-search,chatgpt-search
 
 jobs:
   plan:
@@ -102,7 +106,7 @@ jobs:
           site-data: true
       - run: |
           uv run needle news generate --source rss --out fresh.jsonl
-          uv run needle news run --queries fresh.jsonl --limit 20 \
+          uv run needle news run --queries fresh.jsonl --limit 20 --judge-concurrency 16 \
             --engines "$ENGINES" --out ndcg.json
       - uses: ./.github/actions/publish
         with:
@@ -140,7 +144,7 @@ jobs:
         with:
           site-data: true
       - run: |
-          uv run needle agentic_rare run --limit 100 \
+          uv run needle agentic_rare run --limit 100 --judge-concurrency 16 \
             --engines "$ENGINES" --queries-out agentic_rare.jsonl --out agentic_rare.json
       - uses: ./.github/actions/publish
         with:

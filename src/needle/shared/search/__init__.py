@@ -3,6 +3,7 @@ from needle.shared.search.base import (
     HttpSearchClient,
     SearchClient,
     SearchResult,
+    SearchRun,
     capped_snippet,
     latency_stats,
     search_all,
@@ -12,12 +13,15 @@ from needle.shared.search.brave import BraveClient, BraveLlmContextClient
 from needle.shared.search.ceramic import CeramicClient
 from needle.shared.search.chatgpt import ChatGptSearchClient
 from needle.shared.search.claude import ClaudeSearchClient
+from needle.shared.search.context import ContextDevClient
+from needle.shared.search.deepseek import DeepSeekClient
 from needle.shared.search.exa import ExaClient
 from needle.shared.search.factory import build_search_clients
 from needle.shared.search.firecrawl import FirecrawlClient
 from needle.shared.search.jina import JinaClient
 from needle.shared.search.kagi import KagiClient
 from needle.shared.search.keenable import KeenableClient
+from needle.shared.search.linkup import LinkupClient
 from needle.shared.search.octen import OctenClient
 from needle.shared.search.parallel import ParallelClient
 from needle.shared.search.perplexity import PerplexityClient
@@ -33,19 +37,23 @@ __all__ = [
     "CeramicClient",
     "ChatGptSearchClient",
     "ClaudeSearchClient",
+    "ContextDevClient",
     "DEFAULT_SNIPPET_CHARS",
+    "DeepSeekClient",
     "ExaClient",
     "FirecrawlClient",
     "HttpSearchClient",
     "JinaClient",
     "KagiClient",
     "KeenableClient",
+    "LinkupClient",
     "OctenClient",
     "ParallelClient",
     "PerplexityClient",
     "SearchApiClient",
     "SearchClient",
     "SearchResult",
+    "SearchRun",
     "SerperClient",
     "TavilyClient",
     "TinyFishClient",

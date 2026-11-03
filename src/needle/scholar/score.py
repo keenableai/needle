@@ -9,6 +9,7 @@ from needle.shared.recall import (
     group_recall,
     recall_summary,
     run_known_item_eval,
+    scored_queries,
 )
 from needle.shared.search import DEFAULT_SNIPPET_CHARS, SearchClient, SearchResult
 
@@ -28,7 +29,7 @@ def ids_match(gold: dict[str, str], found: PaperIds) -> bool:
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
     return {
         **recall_summary(per_query, latency),
-        "by_bucket": group_recall(per_query, lambda pq: pq["bucket"]),
+        "by_bucket": group_recall(scored_queries(per_query), lambda pq: pq["bucket"]),
     }
 
 

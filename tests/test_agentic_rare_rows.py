@@ -1,7 +1,7 @@
 import json
 from datetime import UTC, datetime
 
-from needle.agentic_rare.cli import query_row
+from needle.agentic_rare.cli import AgenticRare, query_row
 from needle.shared.identity import query_hash
 
 HOUR_TS = datetime(2026, 8, 6, 7, tzinfo=UTC)
@@ -38,3 +38,22 @@ def test_query_row_sparse_source_row():
     assert origin["subcategory"] == "rare_unknown"
     assert origin["provenance"]["source"] is None
     assert origin["provenance"]["metadata"] is None
+
+
+def test_run_searches_engines_concurrently(tmp_path, monkeypatch):
+    queries = tmp_path / "rare.jsonl"
+    queries.write_text(
+        json.dumps({"query_text": "marmnamarz video game", "length_bucket": "long"}) + "\n",
+        encoding="utf-8",
+    )
+    captured = {}
+
+    def fake_eval(bench, eval_queries, engines, out, **kwargs):
+        captured["bench"] = bench
+        captured["kwargs"] = kwargs
+
+    monkeypatch.setattr("needle.agentic_rare.cli.run_ndcg_eval", fake_eval)
+    AgenticRare().run(queries=str(queries), out=str(tmp_path / "out.json"), engines="keenable")
+
+    assert captured["bench"] == "agentic_rare"
+    assert captured["kwargs"]["concurrent_search"] is True

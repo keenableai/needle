@@ -45,6 +45,11 @@
     --series-17: #7B1FA2;
     --series-18: #00897B;
     --series-19: #D84315;
+    --series-20: #455A64;
+    --series-21: #283593;
+    --series-22: #5D4037;
+    --series-23: #9E9D24;
+    --series-24: #00838F;
   }
   @media screen {
     [data-theme="dark"] {
@@ -80,6 +85,11 @@
       --series-17: #B26BE0;
       --series-18: #2FA88F;
       --series-19: #FF7043;
+      --series-20: #90A4AE;
+      --series-21: #7986CB;
+      --series-22: #A1887F;
+      --series-23: #D4E157;
+      --series-24: #4DD0E1;
     }
   }
   * { box-sizing: border-box; }

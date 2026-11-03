@@ -37,7 +37,7 @@ from needle.finance.registries import (
 )
 from needle.finance.sources import EdgarClient, quarterly_facts
 from needle.shared.concurrency import bounded_gather
-from needle.shared.llm import LLMClient
+from needle.shared.llm import GENERATION_MAX_TOKENS, REASONING_EFFORT, LLMClient
 from needle.shared.sampling import dedupe_by, shuffle_indices
 
 FINANCE_MIN_FIELDS = 4
@@ -298,7 +298,9 @@ async def _filingdoc_rows(
             return "thin"
         try:
             reply, err = await llm.complete(
-                build_filingdoc_prompt(filing, text), max_tokens=1024, reasoning_effort="minimal"
+                build_filingdoc_prompt(filing, text),
+                max_tokens=GENERATION_MAX_TOKENS,
+                reasoning_effort=REASONING_EFFORT,
             )
         except Exception:
             return "llm_error"

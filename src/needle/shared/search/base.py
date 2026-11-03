@@ -1,8 +1,11 @@
 import asyncio
 import json
 import math
+import ssl
 import time
+from contextvars import ContextVar
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 import httpx
@@ -35,6 +38,19 @@ def latency_stats(latencies_ms: list[float]) -> dict[str, float | int | list[flo
         "p95_ms": round(pct(0.95), 1),
         "samples_ms": [round(v, 1) for v in values],
     }
+
+
+_REQUEST_TIMES: ContextVar[list[str] | None] = ContextVar("needle_request_times", default=None)
+
+
+def utc_stamp() -> str:
+    return datetime.now(UTC).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
+def note_request_time() -> None:
+    sink = _REQUEST_TIMES.get()
+    if sink is not None:
+        sink.append(utc_stamp())
 
 
 @dataclass(frozen=True)
@@ -105,23 +121,40 @@ class SearchClient(Protocol):
     def set_max_concurrency(self, max_concurrency: int) -> None: ...
 
 
+@dataclass(frozen=True)
+class SearchRun:
+    results: list[SearchResult] | None
+    error: dict[str, str] | None
+    queried_at: str | None = None
+
+
+async def _one_search(client: "SearchClient", text: str, num_results: int) -> SearchRun:
+    sink: list[str] = []
+    token = _REQUEST_TIMES.set(sink)
+    try:
+        results, error = await client.search(text, num_results=num_results)
+    finally:
+        _REQUEST_TIMES.reset(token)
+    return SearchRun(results=results, error=error, queried_at=sink[0] if sink else None)
+
+
 async def search_all(
     engines: dict[str, "SearchClient"],
     texts: list[str],
     *,
     num_results: int,
     concurrent_search: bool = False,
-) -> list[list[tuple[list[SearchResult] | None, dict[str, str] | None]]]:
+) -> list[list[SearchRun]]:
     if not concurrent_search:
         return [
-            [await client.search(text, num_results=num_results) for client in engines.values()]
+            [await _one_search(client, text, num_results) for client in engines.values()]
             for text in texts
         ]
     return list(
         await asyncio.gather(
             *[
                 asyncio.gather(
-                    *[client.search(text, num_results=num_results) for client in engines.values()]
+                    *[_one_search(client, text, num_results) for client in engines.values()]
                 )
                 for text in texts
             ]
@@ -137,8 +170,10 @@ class HttpSearchClient:
     engine: str = ""
     base_url: str = ""
     default_headers: dict[str, str] = {}
+    ssl_context: ssl.SSLContext | bool = True
     retry_attempts: int = RETRY_ATTEMPTS
     retry_base_s: float = RETRY_BASE_S
+    min_interval_s: float = 0.0
 
     def __init__(
         self,
@@ -157,6 +192,7 @@ class HttpSearchClient:
         self.latencies_ms: list[float] = []
         self._client: httpx.AsyncClient | None = None
         self._sem = asyncio.Semaphore(max_concurrency)
+        self._next_send_at = 0.0
 
     def set_max_concurrency(self, max_concurrency: int) -> None:
         if max_concurrency < 1:
@@ -168,6 +204,7 @@ class HttpSearchClient:
             self._client = httpx.AsyncClient(
                 timeout=self.timeout_s,
                 headers=self.default_headers,
+                verify=self.ssl_context,
                 limits=httpx.Limits(
                     max_connections=100,
                     max_keepalive_connections=20,
@@ -181,6 +218,13 @@ class HttpSearchClient:
             await self._client.aclose()
             self._client = None
 
+    async def _pace(self) -> None:
+        now = time.monotonic()
+        wait = self._next_send_at - now
+        self._next_send_at = max(now, self._next_send_at) + self.min_interval_s
+        if wait > 0:
+            await asyncio.sleep(wait)
+
     async def _send(
         self, method: str, url: str, **kwargs: Any
     ) -> tuple[httpx.Response | None, float, dict[str, str] | None]:
@@ -188,15 +232,17 @@ class HttpSearchClient:
 
         async def send() -> httpx.Response:
             nonlocal elapsed_ms
-            async with self._sem:
-                started = time.perf_counter()
-                resp = await self._http().request(method, url, **kwargs)
-                elapsed_ms = (time.perf_counter() - started) * 1000.0
+            await self._pace()
+            note_request_time()
+            started = time.perf_counter()
+            resp = await self._http().request(method, url, **kwargs)
+            elapsed_ms = (time.perf_counter() - started) * 1000.0
             return resp
 
-        resp, err = await send_with_retry(
-            send, attempts=self.retry_attempts, base_s=self.retry_base_s
-        )
+        async with self._sem:
+            resp, err = await send_with_retry(
+                send, attempts=self.retry_attempts, base_s=self.retry_base_s
+            )
         if resp is None:
             assert err is not None
             return None, 0.0, {"error_type": err[0], "error_message": err[1]}

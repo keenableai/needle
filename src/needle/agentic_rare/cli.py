@@ -108,4 +108,5 @@ class AgenticRare:
             snippet_chars=snippet_chars,
             judge_model=judge_model,
             judge_concurrency=judge_concurrency,
+            concurrent_search=True,
         )

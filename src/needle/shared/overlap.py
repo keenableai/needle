@@ -5,6 +5,7 @@ from needle.shared.metrics import normalize_url
 from needle.shared.recall import ULTIMATE
 
 TS_FMT = "%Y-%m-%dT%H:%MZ"
+UNIQUENESS_START = "2026-08-01T00:00Z"
 
 
 GOOD_LABELS = frozenset({"HM", "FullyM"})
@@ -23,7 +24,9 @@ def _engine_sets(
 FAMILIES = {
     "keenable-realtime": "keenable",
     "exa-instant": "exa",
+    "exa-lite": "exa",
     "parallel-turbo": "parallel",
+    "perplexity-fast": "perplexity",
     "brave-llmcontext": "brave",
 }
 
@@ -114,3 +117,43 @@ def uniqueness_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
             }
         )
     return rows
+
+
+def independence_totals(
+    overlap: list[dict[str, Any]], uniqueness: list[dict[str, Any]], *, since: str = ""
+) -> dict[str, list[dict[str, Any]]]:
+    pairs: dict[tuple[str, str], dict[str, Any]] = {}
+    for r in overlap:
+        if r["ts"] < since:
+            continue
+        a, b = sorted((r["a"], r["b"]))
+        t = pairs.setdefault(
+            (a, b),
+            {
+                "a": a,
+                "b": b,
+                "num_suspect": 0,
+                "low_shared_urls": 0,
+                "num_queries": 0,
+                "shared_urls": 0,
+                "union_urls": 0,
+            },
+        )
+        if r.get("num_suspect") is not None:
+            t["num_suspect"] += r["num_suspect"]
+            t["low_shared_urls"] += r.get("low_shared_urls") or 0
+            t["num_queries"] += r["num_queries"]
+        if r.get("union_urls") is not None:
+            t["shared_urls"] += r["shared_urls"]
+            t["union_urls"] += r["union_urls"]
+    engines: dict[str, dict[str, Any]] = {}
+    for r in uniqueness:
+        if r["ts"] < max(since, UNIQUENESS_START):
+            continue
+        t = engines.setdefault(
+            r["engine"],
+            {"engine": r["engine"], "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0},
+        )
+        for k in ("unique_urls", "total_urls", "unique_relevant_urls"):
+            t[k] += r[k]
+    return {"overlap": list(pairs.values()), "uniqueness": list(engines.values())}

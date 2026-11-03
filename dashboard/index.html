@@ -28,6 +28,7 @@
 <meta name="twitter:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <link rel="alternate" type="text/plain" href="https://keenableai.github.io/needle/llms.txt" title="llms.txt">
 <link rel="alternate" type="text/markdown" href="https://keenableai.github.io/needle/index.md" title="Markdown">
+<meta name="google-site-verification" content="mLmZhVYwO2grOy5wExFSRkDiTlLjQxGJpixi11YI7Q0">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEVMaXEAYP8AXP8AXP8AXP8AXP8AXP8AXP8AXf8AXv8AXP8AXP8AXP////8qKiqArf8UQ5Zgmf/m6/Qbbv88P0UEV+mampq30f+/v78aPXo4f/8MTsF8gIdOg95fX189a72nQrWLAAAADHRSTlMAEJ9Bae+Ev98iz7BHKf9kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAAHESURBVHja7VbHlsMgDDTV4I7T2+7//+U6AVPlkuS2z3OUZwYJhEWWbdiwAYSkWLCqYkXJiQ0SWpoglfNymlcexIuOuPCDBZ2Wk4CpLTLKgCAIhCsAAgpiBBUPUicg5Hd6wCHUX5VS110o2Q0x5WIiqqLwmG1fv9B6cnXSsV6NkTLQc4+q5f35+HCeRl7X5+P9YIL+WUinb7X8p2kurqJ+lO+bATcdZV4RONY/iQe7vtU3GuYLBxK4aua98RMY9S/bJ/aHKAUccXsv0TEpY6vRRbtgj1Bp5vG5SpJA/WMNTBH5eAUs9+QMLpHpgH0Tp4DiM6ydwS0yDQ2MvbnwuWshjUfXdfYMVDvit3MINqGoPgXWBuxjA9POH+vHY/jagH1rsPpXwkQewtyGMnWmKE0rJ1M/Yx4vRP3mGP9AZGYYRFwJuIq5gYJCLo0uiDOdRDiOMuBs8PxAI2kCUQ0LEzFIwRbmpVAsjWSS9EaYQrk41Dlg4N1SvmiABLCYZOsNHLmAGgRnbzggwEGsetuIdGJZB/KGQzh2TTBf98DiLN0xxNO8ZpLAIt1zid9wGHoKF1UZdS6iQxDL9W9FBHGl3B7RG/4z/gBHkkudWe+2TgAAAABJRU5ErkJggg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -145,7 +146,7 @@
     </div>
     <div class="header-actions">
       <a href="https://github.com/keenableai/needle" title="Source on GitHub" aria-label="Source on GitHub"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
-      <button id="export-md" title="Open the current tables as Markdown">MD</button>
+      <a id="export-md" href="results.md" title="This page as Markdown">MD</a>
       <button id="export-pdf" title="Print / save as PDF">PDF</button>
       <button id="theme-toggle" title="Dark theme" aria-label="Dark theme"><svg class="moon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.5 1.5a6.5 6.5 0 1 0 8 8A5.5 5.5 0 0 1 6.5 1.5z"/></svg><svg class="sun" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg></button>
     </div>
@@ -162,7 +163,7 @@
     <div class="fm">
       <p class="lastrun"><span id="updated"></span>
         <span class="cadence">News runs each hour; finance, scholar, legal, and rare-word run
-        each day. Times are UTC.</span></p>
+        each day. Times are UTC.</span><span id="results-link"></span></p>
       <h2 class="section-title" id="sec-problem" style="margin-top:36px">The problem NEEDLE solves</h2>
       <div class="issue-grid">
         <article class="issue">
@@ -263,7 +264,7 @@
       outer ring) per vertical, farther out is better; click a table row to
       toggle an engine &middot;
       <span class="hint" title="The hatched band is performance no single engine currently captures; the orange % is the gap between today's best engine and ultimate.">hatched band?</span></div>
-    <div id="standings"></div>
+    <div id="standings" data-static></div>
   </div>
 
   <div class="card" id="card-leaderboards" data-tools>
@@ -286,32 +287,32 @@
     <div class="lb-panel active" id="card-lb-overall" role="tabpanel">
       <h2>Overall — 7-day mean</h2>
       <div class="sub" id="lb-overall-sub"></div>
-      <div id="lb-overall"></div>
+      <div id="lb-overall" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-scholar" role="tabpanel">
       <h2><span class="vert" data-vert="scholar"></span> — 7-day mean</h2>
       <div class="sub" id="lb-scholar-sub"></div>
-      <div id="lb-scholar"></div>
+      <div id="lb-scholar" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-fresh" role="tabpanel">
       <h2><span class="vert" data-vert="news"></span> — 7-day mean</h2>
       <div class="sub" id="lb-fresh-sub"></div>
-      <div id="lb-fresh"></div>
+      <div id="lb-fresh" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-company" role="tabpanel">
       <h2><span class="vert" data-vert="finance"></span> — 7-day mean</h2>
       <div class="sub" id="lb-company-sub"></div>
-      <div id="lb-company"></div>
+      <div id="lb-company" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-rare" role="tabpanel">
       <h2><span class="vert" data-vert="agentic_rare"></span> — 7-day mean</h2>
       <div class="sub" id="lb-rare-sub"></div>
-      <div id="lb-rare"></div>
+      <div id="lb-rare" data-static></div>
     </div>
     <div class="lb-panel" id="card-lb-legal" role="tabpanel">
       <h2><span class="vert" data-vert="legal"></span> — 7-day mean</h2>
       <div class="sub" id="lb-legal-sub"></div>
-      <div id="lb-legal"></div>
+      <div id="lb-legal" data-static></div>
     </div>
   </div>
 
@@ -435,12 +436,12 @@
   <div class="card" id="card-quality-price" data-tools>
     <h2>Overall quality vs price</h2>
     <div class="sub" id="quality-price-sub"></div>
-    <div id="quality-price"></div>
+    <div id="quality-price" data-static></div>
   </div>
   <div class="card" id="card-prices" data-tools>
     <h2>Price per 1,000 queries</h2>
     <div class="sub" id="prices-sub"></div>
-    <div id="prices-table"></div>
+    <div id="prices-table" data-static></div>
   </div>
 
   <h2 class="section-title" id="sec-latency">Search latency</h2>
@@ -450,13 +451,12 @@
     <h2>Search latency — last 7 days</h2>
     <div class="sub">p50 (filled) to p95 (open), successful calls, log
       scale; hover for values (<a href="#app-protocol">Appendix C</a>)</div>
-    <div id="latency-dumbbell"></div>
+    <div id="latency-dumbbell" data-static></div>
   </div>
 
   <h2 class="section-title" id="sec-overlap">Index independence</h2>
   <p class="section-desc">Repeated overlap on junk or near-identical
-    lists suggests a shared upstream index (all runs, all
-    benchmarks).</p>
+    lists suggests a shared upstream index (all benchmarks).</p>
 
   <div class="card" id="card-def-suspicious">
     <h2>Definition: suspicious sharing</h2>
@@ -474,7 +474,7 @@
         <var>U<sub>B</sub></var>(<var>q</var>)| ≥ 3.</p>
       <p>Each matrix cell shows the share of comparable queries (both
         searches succeeded and at least one returned a result) where the
-        pair shares suspiciously, pooled over all published runs.
+        pair shares suspiciously, pooled over the selected runs.
         Engines that share <em>good</em> results show normal
         ranking behavior. Engines that share junk, or 3+ URLs at once,
         possibly share an upstream index. Results on the known-answer
@@ -487,6 +487,10 @@
     <h2>Index independence — four views</h2>
     <div class="sub">suspicious-sharing matrix, URL-intersection matrix,
       borrowing graph, and per-engine result uniqueness</div>
+    <div class="legend" id="independence-range" role="group" aria-label="Time range">
+      <button type="button" aria-pressed="true" data-range="all runs">all runs</button>
+      <button type="button" aria-pressed="false" data-range="last 7 days">last 7 days</button>
+    </div>
     <div class="lb-tabs" role="tablist" aria-label="Index independence views">
       <button role="tab" aria-selected="true" class="active" data-panel="card-lowshared">suspicious sharing</button>
       <button role="tab" aria-selected="false" data-panel="card-urlshare">URL intersection</button>
@@ -495,24 +499,24 @@
       <div class="tab-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-lowshared" role="tabpanel">
-      <h2>Suspicious sharing (all runs)</h2>
+      <h2>Suspicious sharing (<span class="ind-range">all runs</span>)</h2>
       <div class="sub" id="lowshared-sub"></div>
       <div class="overlap-matrix" id="lowshared-table"></div>
       <div class="overlap-pair" id="lowshared-pair" aria-live="polite"></div>
     </div>
     <div class="lb-panel" id="card-urlshare" role="tabpanel">
-      <h2>URL intersection</h2>
+      <h2>URL intersection (<span class="ind-range">all runs</span>)</h2>
       <div class="sub" id="urlshare-sub"></div>
       <div class="overlap-matrix" id="urlshare-table"></div>
       <div class="overlap-pair" id="urlshare-pair" aria-live="polite"></div>
     </div>
     <div class="lb-panel" id="card-sharegraph" role="tabpanel">
-      <h2>Borrowing graph (all runs)</h2>
+      <h2>Borrowing graph (<span class="ind-range">all runs</span>)</h2>
       <div class="sub" id="sharegraph-sub"></div>
       <div id="sharegraph"></div>
     </div>
     <div class="lb-panel" id="card-uniqueness" role="tabpanel">
-      <h2>Result uniqueness (since Aug 1)</h2>
+      <h2>Result uniqueness (<span class="ind-range">all runs</span>)</h2>
       <div class="sub">share of an engine's URLs that no other engine family
         returned for the same query and that are relevant (judged HM/FullyM
         on the judged verticals, the known-item gold hit on the known-answer
@@ -615,7 +619,7 @@
     <div class="prose">
       <p>We send each engine in a run the same query text. We pin the per-engine request shapes in git (Appendix F). The runner sends requests in sequence, one call at a time across the whole run. Thus the latency percentiles are comparable across engines, and no engine gets concurrent load. Engines see the live web minutes apart in a run, not at the same instant.</p>
       <p>We judge an engine on its own ranking, titles, and snippets. We do not fetch pages and we do not re-rank. We cap the evidence at the same snippet length for each engine, so engines that return more content get no extra signal to the judge or the answer matchers. We judge each distinct combination of URL, title, snippet, and date once per query. We use that rating again where the identical result occurs for other engines (Appendix E gives the full judging setup).</p>
-      <p>We remove failed searches and judgements from the mean and report them as <code>search_errors</code> and <code>judge_errors</code>. An outage decreases <code>num_scored</code> and increases the error rate; it does not decrease the quality score.</p>
+      <p>A failed search scores zero when the engine's side caused it (timeout, server error, content filter, a rejected query); an agent gets nothing back either. We remove a failed search from the mean only when our own account or plan caused it (HTTP 401, 402, 403 or 429, a plan limit, or a message about our credits, quota, billing or API key). We pace each engine to its rate limit and retry a 429 with exponential backoff. We also remove failed judgements. Reports list <code>search_errors</code>, split into <code>account_errors</code> and <code>service_errors</code>, and <code>judge_errors</code>.</p>
       <p>We make fresh <span class="vert" data-vert="news"></span> queries each hour and new known-answer queries each day from public sources (Appendix B), so there is no fixed benchmark set to overfit. We archive the exact queries with each run (Appendix G).</p>
       <p>Each vertical also reports <em>ultimate</em>, a synthetic engine. It pools all engines' results per query and ranks them oracle-style: best judge rating first on the judged verticals, and the gold item first on the known-answer verticals. Its score shows what one engine could get if it always returned the best results that the full field found. This separates "the engine ranked poorly" from "no engine found better results". We do not include <em>ultimate</em> in the overlap and uniqueness statistics.</p>
     </div>
@@ -633,7 +637,7 @@
       <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>applied to engine ratings before scoring: a duplicate URL drops the rating to 0. The pooled ideal is already deduplicated, so no penalty applies there. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
-        <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher, with an LLM-judge backstop for paraphrased answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
+        <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher: a 0.1% band for money, with bare table figures in thousands or millions and parenthesized losses; an LLM-judge backstop for paraphrased non-money answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
         <td>known-item: the gold opinion or CFR section identified by citation, docket (with a party-token check), CFR citation, or URL match.</td></tr>
       <tr><td>latency p50 / p95</td><td>all</td>
@@ -645,7 +649,7 @@
     <h2>Appendix E — LLM judge</h2>
     <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; <span class="vert" data-vert="finance"></span> fallback matcher only; <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are deterministic</div>
     <div class="prose">
-      <p>We judge with <code>openai/gpt-5.6-terra</code> via OpenRouter, temperature 0, one pointwise call per document. We record the model for each run as <code>judge_model</code> in its archived report. The judgement browser shows it when you select a run, so judge changes stay visible in the history.</p>
+      <p>We judge with <code>openai/gpt-6-luna</code> via OpenRouter, high reasoning effort, temperature 0, one pointwise call per document. We record the model for each run as <code>judge_model</code> in its archived report. The judgement browser shows it when you select a run, so judge changes stay visible in the history.</p>
       <p>The judge does not see the engine identity. The prompt contains the query, the document title, the URL, the published date, and the snippet — not the engine name. We judge each distinct combination of URL, title, snippet, and date once per query and use that rating again where the identical result occurs for other engines. We judge the same URL with a different snippet separately, with the same blind judge and rubric.</p>
       <p>A judge preference for a snippet style would be a shared bias across engines. We publish the per-result reasoning with each run, so you can audit this.</p>
       <p>Rubric: 0–4 Needs Met scale (FailsM / SM / HM / FullyM) with hard caps for a wrong entity, stale coverage of dated events, and search-operator compliance ("quoted phrases", site:). The full prompt is one template in the repo: src/needle/shared/prompts/judgement.jinja.</p>
@@ -656,26 +660,31 @@
   <div class="card" id="app-engines">
     <h2>Appendix F — engine configuration</h2>
     <div class="sub">request shapes pinned in git (src/needle/shared/search/); k = 5 results per query except <span class="vert" data-vert="scholar"></span> (10). Engines are live, unversioned APIs; provider-side changes surface as trend shifts.</div>
-    <p>Every run builds each client with the same snippet budget of 2,000 characters. Keenable, Exa, Ceramic and brave-llmcontext accept a request-side length parameter, so they get it in the request (snippet_max_length=2000, highlights.maxCharacters=2000, maxDescriptionLength=2000, and for brave-llmcontext the equivalent per-URL token budget). The other engines have no such parameter; we clip whatever they return to the same 2,000 characters before judging and answer matching (Appendix C). Requests time out at 30 s (60 s for Perplexity, Parallel and Jina, 180 s for claude-search and chatgpt-search) and retry up to 3 times with exponential backoff on transport errors, 429, and 5xx.</p>
+    <p>Every run builds each client with the same snippet budget of 2,000 characters. Keenable, Exa and Ceramic accept a request-side length parameter, so they get it in the request (snippet_max_length=2000, highlights.maxCharacters=2000, maxDescriptionLength=2000). The other engines have no such parameter; we clip whatever they return to the same 2,000 characters before judging and answer matching (Appendix C). Requests time out at 30 s (60 s for Perplexity, Parallel and Jina, 180 s for claude-search and chatgpt-search) and retry up to 3 times with exponential backoff on transport errors, 429, and 5xx.</p>
     <table>
       <tr><th>engine</th><th>API</th><th>pinned request</th></tr>
       <tr><td>Keenable</td><td>Keenable POST /v1/search</td><td>mode=realtime, snippet_max_length=2000; query verbatim with site: kept in the text, after:/before: → published_after:/published_before: tokens; no count parameter — we keep the first k results</td></tr>
       <tr><td>google/serper</td><td>Serper.dev (Google SERP) POST /search</td><td>q = query verbatim (operators kept as text), num=min(k,100), gl=us, hl=en; knowledge-graph and answer-box entries fold into the ranking</td></tr>
       <tr><td>bing/searchapi</td><td>SearchApi.io GET /search</td><td>engine=bing, q = query verbatim (operators kept as text), num=min(k,50); knowledge-graph and answer-box fold in</td></tr>
-      <tr><td>brave</td><td>Brave GET /web/search</td><td>q = query text with site: kept, clipped to 50 words / 400 chars; count=min(k,20), country=us, search_lang=en, result_filter=web, text_decorations=false; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; extra_snippets joined with newlines, falling back to description when absent</td></tr>
-      <tr><td>brave-llmcontext</td><td>Brave POST /llm/context</td><td>q = query text clipped to 50 words / 400 chars; maximum_number_of_urls=k, maximum_number_of_tokens_per_url=769 (the 2,000-char budget at ~2.6 chars/token), country=us, search_lang=en; site: → an inline goggle ($discard plus one $site= rule per host), after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; per-URL snippets joined with newlines, published date from the sources map</td></tr>
+      <tr><td>brave</td><td>Brave GET /web/search</td><td>q = query text with site: kept, clipped to 75 words / 600 chars; count=min(k,20), country=us, search_lang=en, result_filter=web, text_decorations=false; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; extra_snippets joined with newlines, falling back to description when absent</td></tr>
+      <tr><td>brave-llmcontext</td><td>Brave POST /llm/context</td><td>q = query text clipped to 75 words / 600 chars; country=us, search_lang=en; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; per-URL snippets joined with newlines and clipped client-side to the 2,000-char budget, published date from the sources map</td></tr>
       <tr><td>exa</td><td>Exa POST /search</td><td>type=auto, numResults=k, contents.highlights.maxCharacters=2000; site: → includeDomains, after:/before: → startPublishedDate/endPublishedDate (full-day UTC bounds)</td></tr>
+      <tr><td>exa-lite</td><td>Exa POST /search</td><td>same as exa but type=lite</td></tr>
       <tr><td>exa-instant</td><td>Exa POST /search</td><td>same as exa but type=instant</td></tr>
-      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=basic, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
+      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=advanced, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
       <tr><td>parallel-turbo</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=turbo</td></tr>
       <tr><td>perplexity</td><td>Perplexity POST /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → search_after_date_filter/search_before_date_filter (MM/DD/YYYY)</td></tr>
+      <tr><td>perplexity-fast</td><td>Perplexity POST /search</td><td>same as perplexity but search_type=fast (perplexity leaves the field unset, so it takes the API default web)</td></tr>
       <tr><td>tavily</td><td>Tavily POST /search</td><td>search_depth=basic, max_results=min(k,20); site: → include_domains, after:/before: → start_date/end_date (ISO dates)</td></tr>
+      <tr><td>linkup</td><td>Linkup POST /v1/search</td><td>depth=standard, outputType=searchResults, maxResults=k; site: → includeDomains, after:/before: → fromDate/toDate (ISO dates); HTML entities in name/content unescaped, image results dropped; the API returns no published date</td></tr>
       <tr><td>tinyfish</td><td>TinyFish GET api.search.tinyfish.ai</td><td>query = query text clipped to 2,000 chars; no count parameter — we keep the first k results; site: → include_domains (comma-separated), after:/before: → after_date/before_date (ISO dates)</td></tr>
       <tr><td>you</td><td>You.com POST /v1/search</td><td>count=min(k,100); site: → include_domains, after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; web and news sections merge, deduplicated by URL</td></tr>
       <tr><td>firecrawl</td><td>Firecrawl POST /v2/search</td><td>limit=min(k,100), sources=[web]; site: kept in the query text, after:/before: → tbs=cdr:1,cd_min:M/D/YYYY,cd_max:M/D/YYYY</td></tr>
       <tr><td>kagi</td><td>Kagi POST /api/v1/search</td><td>query = query text, limit=min(k,1024); site: → lens.sites_included, after:/before: → filters.after/filters.before (ISO dates); search and news sections merge, deduplicated by URL; HTML markup stripped from titles and snippets</td></tr>
       <tr><td>octen</td><td>Octen POST /search</td><td>query = query text clipped to 500 chars, count=k, language=[en], safesearch=off, highlight.enable=true with max_tokens=512; site: → include_domains, after:/before: → start_time/end_time (full-day UTC bounds); highlight is the snippet</td></tr>
       <tr><td>jina</td><td>Jina GET s.jina.ai</td><td>q = full query with site:/after:/before: kept as Google operators, num=min(k,20); default mode fetches each result page, so the snippet is the page markdown (content) clipped client-side to the 2,000-char budget, falling back to the SERP description when the fetch returns nothing; published date from publishedTime, else the SERP date string</td></tr>
+      <tr><td>context.dev</td><td>Context.dev POST /v1/web/search</td><td>query = query text clipped to 500 chars, numResults=min(max(k,10),100) (API floor is 10), country=us, queryFanout=false; site: → includeDomains, after: (with no before:) → freshness last_24_hours/last_week/last_month/last_year covering that date, before: dropped; snippet is the SERP description, markdown scrape left off</td></tr>
+      <tr><td>deepseek</td><td>DeepSeek POST /v1/tools/search</td><td>query = query text clipped to fit 128 chars with site: (several joined by OR), lang:en and after:/before: as native operators, count=min(k,50), need_content=false; snippet is the long query-aware summary, falling back to the short snippet; published date from date</td></tr>
       <tr><td>claude-search</td><td>Anthropic POST /v1/messages</td><td>model=claude-sonnet-5, max_tokens=32000, tools=[web_search_20250305 with max_uses=1], system prompt asks for a JSON array of every search result with the snippet copied verbatim (≤500 chars); rank = web_search_tool_result order, title/snippet from the JSON row with the same URL, published_date = page_age; the prompt tells the model to pass the query to the tool verbatim (operators kept as text), site: also → allowed_domains</td></tr>
       <tr><td>chatgpt-search</td><td>OpenAI POST /v1/responses</td><td>model=gpt-5.5, reasoning.effort=low, max_output_tokens=32000, tools=[web_search with search_context_size=low], tool_choice forces the search, include=web_search_call.action.sources, same system prompt; rank = action.sources order, title/snippet from the JSON row with the same URL (utm_ parameters stripped); the prompt tells the model to pass the query to the tool verbatim (operators kept as text), site: also → filters.allowed_domains</td></tr>
     </table>
@@ -690,10 +699,10 @@
         <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results)</td>
         <td><a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF: keenable-ai/needle-results</a>, runs/&lt;run-id&gt;/</td></tr>
       <tr><td>query files</td>
-        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, agentic_rare.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
-        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, runs.json, ci_scores.jsonl, ci.json</td>
+        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, independence.json, runs.json, ci_scores.jsonl, ci.json</td>
         <td>data/ on this site (gh-pages)</td></tr>
       <tr><td>prompts &amp; scoring code</td>
         <td>judge prompt (shared/prompts/judgement.jinja), metric implementations, engine clients</td>
@@ -746,10 +755,10 @@ function registerEngines(names) {
 }
 
 registerEngines(["keenable-realtime", "google", "bing", "brave", "brave-llmcontext",
-  "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity", "tavily", "you", "firecrawl",
-  "tinyfish", "kagi", "jina", "octen", "claude-search", "chatgpt-search"]);
+  "exa", "exa-instant", "exa-lite", "parallel", "parallel-turbo", "perplexity-fast", "perplexity", "tavily", "linkup", "you", "firecrawl",
+  "tinyfish", "kagi", "jina", "context", "deepseek", "octen", "claude-search", "chatgpt-search"]);
 
-const SERIES_COUNT = 19;
+const SERIES_COUNT = 24;
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
   const slot = ENGINE_SLOT.get(engine);
@@ -778,7 +787,7 @@ function markHome(node, engine) {
 }
 
 const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable"],
-  ["google", "google/serper"], ["bing", "bing/searchapi"]]);
+  ["google", "google/serper"], ["bing", "bing/searchapi"], ["context", "context.dev"]]);
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
 const VERTICALS = new Map([["news", "News"], ["finance", "Finance"],
@@ -789,10 +798,14 @@ const ENGINE_LOGOS = new Map([
   ["keenable", "data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 177.922 102.29%22 width%3D%22177.922%22 height%3D%22102.29%22 role%3D%22img%22 aria-label%3D%22Keenable icon%22%3E%3Cg transform%3D%22translate(0,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(51.255,21.698)%22 d%3D%22M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3Cg transform%3D%22translate(81.137,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(49.16,21.698)%22 d%3D%22M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E"], ["keenable-realtime", "data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 177.922 102.29%22 width%3D%22177.922%22 height%3D%22102.29%22 role%3D%22img%22 aria-label%3D%22Keenable icon%22%3E%3Cg transform%3D%22translate(0,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(51.255,21.698)%22 d%3D%22M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3Cg transform%3D%22translate(81.137,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(49.16,21.698)%22 d%3D%22M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E"],
   ["google", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAApVBMVEVHcEz4+Pj8/Pz9/f38/Pz59/by8/Pz8/T7+/v9/f309PX29/fy8vP29/f///84qlfsUENHiPT8wBLrTD88rFpJivNEhvUqp006g/T7/PvT4P3rRjjqPSzg8Ojva1uWz6T7ugWWt/j4xcH+78jA4slxv4T85eTtW0v61tRctGaDrPdSj/YtffRmmvb1p6L+3I790mKuuUHykIg+nZ3G2Pv0lCs8o3o82clfAAAADnRSTlMAoetQ0/wdM7c/jGYSeQFEN8MAAAMjSURBVFiF5VdZm6IwEBQURBFQRGOGwxOvUWd0dvf//7QNEpLOAeLDPm09+QFV6erudGKn888wsgeeYTiOYXgD+2227TqmD2A67jsi3Z6vgdNtSXdNHf0ZRxuJgXb1Cr3BK77RRC9gNNLtxuVpEA3ZHLymF6i10W3H9/2aXKp8a38k2FvtFPrSR/tbNp7GSRLH4+y2l172Vf4IC19sDkk8HRNMCeI4OWyE13ikCAj532Qlu1IgSLIj/KIn8z349sHphE8l4uQBv/EkAzB1WTwGmDIkGbQpmnBA8g5Tkc4kEiEPTk0FLJk/1fPFSoAAMmA/TsZZdiCV1PFhCDZ/emP+ieWNRUzj/SYjEgrf9/mmGPIEMH6cgeY5Zhq+P2QCbILgRyWQ3IRv8VFmE5iqg+2KplDi16Dy4LInX2H4bIL40UDjcJUahAS/SeEPuIHG4cgp2K4KhdVBlzEdTHkffj0FwhVs2Q8FKXuH5Tb8LgXCb7DKZSHhcuYvy2bkkzCk2AKBxYxjUmB+fSmwahb45AbL8dptKzApBWZcoPuehUlNBG0tTCoBXxIAVaACX0DgMmegCkoS+TijfRDegcB5XeFcKixAGelYqw4OXHZieEepLwD7he31orSwZs8t2spsouOnQBQEua/BtYzg8sGeVLOdzxOShHtEgHYq/xcNYMZPumq08yxuV/egEIiCVObjTzUFbKyywuJTyScuZIVrGcBkwR1gNtL4tWSHIqqAlpCe0vWFncAvK+BYyGkIJA+nHXWL0xz9zJUUwoOBn6wWEyBBRPmSID8hFAR/ZnMpA/B8BXcLZuKZCVQgKEEUFmAfiLeMHlQIGD8gP4OIChAbk1QfgHi9ogqBjAj9gATIVy1wOvpphBR2EUEES+t0JHBzpPNzVQGhJZz1WOZ3+sJRQAqHRHoudBbW3LKESw6RWJ4Qw2kpNaan8uGeqjR2yyd2ysYY6vj6izbWHXK1F+5hqyMR16xfwG2hgN16PqlF7b+VCqYm/2/YaAq/gu3USmCn3V8327A0Gtgy2v/zG7mOqIEtx1Uv6M3oe0bPtAjMnuG9ytz/jb8i8rQexpJ/GAAAAABJRU5ErkJggg=="], ["bing", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABuklEQVRYhe2WsXXCMBCG/xMNpbIBmSB0aa0wQDJBkgmINrDZwDgLQCZIBuDJKdN5gzCCShrrUhiwCNiI95wq/quz/XP3cZLOBnr1+u+iUKPUJoIrHwBxD2C0vV2AuACJmU3V+k8ApDYSjBjMuj0Tp1sQ2xmA1EbCuRygm8B8BQSpSyBE61NGfFCckUOQgqArm90RBCkAS+8XY7CLQ4sDLR2Q2ozg+Nujmdlskpz0TlcJQHXhqgt5CEBzB1xZFyNaNBUHAJtNEjDqgs49hBRvB4CoW08HbT6tAc3qC7rvAADjXRDYzsKLR10A7CW1kec8lx6/EIC1F4+bTDtJbSLvsmjyXQDAH/uw5PNHy5XP+5ioAwAh3uuEiOTUNEJUz8ST5581eX+rfRJOVylAL7WbFyCxtKnKt/tijJJjEKK9h5Hb1zvVDYA2Eo4NAvbAr7SJzVRQF1pPgU2VrcYtz89m8gcROGlbsmCAHYTNJhqCrlHNfX+DrQGeQ5Cq2s7evw6DCP4eCNXRe+HMcgy6Bth8veXD20cCKNreioa3z9h8LT9P+YMm4aWqXlyHy9Hk/ROAYwgOngu9ev0//QDmCZ48wX3K8AAAAABJRU5ErkJggg=="], ["brave", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAUVBMVEVHcEz/QAD/QQD/////SgD/QwD/OQD/PAD/PgD/KwD/MAD/RwD/KAD/QQD/UAD/OwD/IQD/TQT/NgD/VAn/7un/29P/bU3/jXX/q5r/xLf/CwAIaoj2AAAACnRSTlMAYAv/3qwghzrR7UleYgAAA+lJREFUWIWdV9mi6iAMdGmtUihbocv/f+gNhbCVnuO50QerZhiGIYTbrRXv0QXzwSGUUuTd/Ot1PvMAPAKo17f5r1G2GBD1+C7/0fl0jxAZAIXPdwCQ32bwBYLj2If8mgGBF+3Dn5oxdNMku06G8RsMCKEfQin9DE3mE4SEwPSzBh6DUkEbc+l0BJCZBtwH5lOX7yBOCJ2OAJwFBkwRZi2nRIUpwNDkAgHyA8Co18VCAldEruYJYRYmIGMXdlkDBUFFieDGDwBsdknztq7HBx9mXc3xaHZkIESfAfQaGajt+WOsO+aLfCleyGBcfs5/Pq1AhEc1Bwcw2t/yn08uPECp4nAAyHH+HcDsXsR7YxXYIcBszLZtpkpzX3khDxkqBu9DAy+AsZS6hR8X1HPeLHGq7bs1KEOlwQD5wAATVq04mJAw/0jBSooKjQs7724KxSq4CWiWrSCYh4+M+LUXnFO1ZHNadgfwyWfgCMhy1qti2n8CG6/lbweASCUu2KCSeyNhUa2oFA0AmQjTMYXqbzMN4y6ihq6nAFaenJlLF2wiiLLuJfRMTiLe/TKWPrQ0ABpR/DArv4y5k15+GQuELawiZIhchNltbgdQOHHymylHkDw+SKLT92NzL/RhOyeEVfG4M8GI0SNShIJSFtY7FhSGWZrxuPgLwRXF3QwA5VH5mLCk4bgrYXrzTlzHyMCKWNJuZaSiigMbCXV0tJZBGdRBxAUr2rksD6kqK7TDQo9DQQmcC1TEUJVrCfyGxrIe/WS0YozY9Lyng6E+6x9TBMjNAPLl+0iGcwGUvNURTyZW1GVdmHAVOIX+BDBEEfMdMSuWPzoRPMD9BPCODPJ8ybnOnxGANtqdyCD53sDZzJRMHLYwhfPZCtEHgOTmTbnTmal0WqGI9CzB7XEPAFNwkrEE6qqWFApqWMlF4OF6lgC2dOwPnJuNhdLOXSU1i3MPfJqPfM+g2ebI2KEwNhKwYCzjCxR2wV1zEBi0m60+b3E4yY9ZN7jr0pBBs0e63VOLM7KlOiVnS32HdPRI7a73lTHg1UHgdpZrkgKDZj7UNQSAt6oaBSgEKjK46jf7TAOmbN7iMOp6ZWTQlgDcnDEYwULRkmBAbBMPBpdte9FojiydTKFbDwyuO+YhZwDvo5SC/qnRPBi0bOjjIXMG4CelZ8NUvC94BuQyH6yQGPgbCyekaHUdgx+vPkPJoLqxHAyuJ4AcEoOxui+4+PXq9eou7wvw/nxzbRrwvsCq+wJRVw6q4t21GXy+vve5e9P5zvTl8IHEiQH/w8UVSeQa/Gl4JIEyct79dfhAAhn8x/CBxMHgP4f3MbDuF+v+A4tzcSbr/fGlAAAAAElFTkSuQmCC"], ["brave-llmcontext", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAUVBMVEVHcEz/QAD/QQD/////SgD/QwD/OQD/PAD/PgD/KwD/MAD/RwD/KAD/QQD/UAD/OwD/IQD/TQT/NgD/VAn/7un/29P/bU3/jXX/q5r/xLf/CwAIaoj2AAAACnRSTlMAYAv/3qwghzrR7UleYgAAA+lJREFUWIWdV9mi6iAMdGmtUihbocv/f+gNhbCVnuO50QerZhiGIYTbrRXv0QXzwSGUUuTd/Ot1PvMAPAKo17f5r1G2GBD1+C7/0fl0jxAZAIXPdwCQ32bwBYLj2If8mgGBF+3Dn5oxdNMku06G8RsMCKEfQin9DE3mE4SEwPSzBh6DUkEbc+l0BJCZBtwH5lOX7yBOCJ2OAJwFBkwRZi2nRIUpwNDkAgHyA8Co18VCAldEruYJYRYmIGMXdlkDBUFFieDGDwBsdknztq7HBx9mXc3xaHZkIESfAfQaGajt+WOsO+aLfCleyGBcfs5/Pq1AhEc1Bwcw2t/yn08uPECp4nAAyHH+HcDsXsR7YxXYIcBszLZtpkpzX3khDxkqBu9DAy+AsZS6hR8X1HPeLHGq7bs1KEOlwQD5wAATVq04mJAw/0jBSooKjQs7724KxSq4CWiWrSCYh4+M+LUXnFO1ZHNadgfwyWfgCMhy1qti2n8CG6/lbweASCUu2KCSeyNhUa2oFA0AmQjTMYXqbzMN4y6ihq6nAFaenJlLF2wiiLLuJfRMTiLe/TKWPrQ0ABpR/DArv4y5k15+GQuELawiZIhchNltbgdQOHHymylHkDw+SKLT92NzL/RhOyeEVfG4M8GI0SNShIJSFtY7FhSGWZrxuPgLwRXF3QwA5VH5mLCk4bgrYXrzTlzHyMCKWNJuZaSiigMbCXV0tJZBGdRBxAUr2rksD6kqK7TDQo9DQQmcC1TEUJVrCfyGxrIe/WS0YozY9Lyng6E+6x9TBMjNAPLl+0iGcwGUvNURTyZW1GVdmHAVOIX+BDBEEfMdMSuWPzoRPMD9BPCODPJ8ybnOnxGANtqdyCD53sDZzJRMHLYwhfPZCtEHgOTmTbnTmal0WqGI9CzB7XEPAFNwkrEE6qqWFApqWMlF4OF6lgC2dOwPnJuNhdLOXSU1i3MPfJqPfM+g2ebI2KEwNhKwYCzjCxR2wV1zEBi0m60+b3E4yY9ZN7jr0pBBs0e63VOLM7KlOiVnS32HdPRI7a73lTHg1UHgdpZrkgKDZj7UNQSAt6oaBSgEKjK46jf7TAOmbN7iMOp6ZWTQlgDcnDEYwULRkmBAbBMPBpdte9FojiydTKFbDwyuO+YhZwDvo5SC/qnRPBi0bOjjIXMG4CelZ8NUvC94BuQyH6yQGPgbCyekaHUdgx+vPkPJoLqxHAyuJ4AcEoOxui+4+PXq9eou7wvw/nxzbRrwvsCq+wJRVw6q4t21GXy+vve5e9P5zvTl8IHEiQH/w8UVSeQa/Gl4JIEyct79dfhAAhn8x/CBxMHgP4f3MbDuF+v+A4tzcSbr/fGlAAAAAElFTkSuQmCC"],
   ["exa", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"], ["exa-instant", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"],
+  ["exa-lite", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"],
   ["parallel", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEX///8dHBoAAAASEQ5eXl3x8fGysbGBgYAZGBbPz88pKCbJycgbGhgVFBLX19Z7e3oLCANLSkm7u7uQkJCHh4Zqamlvb27h4eFDQkH5+fk8OzowMC5RUVCampmmpqXBwcCxW53tAAABoklEQVRYhc2X2RaCIBBAZVxwIylTMZf+/y+zzGPDYpAPed84hxmYhWHG8wy02UiDW0pIJ+prlISmfXqaQQAAZzkhJI99Pi3E0NhKt2P3lJ54yi8wgFtkdzotrjNlyv0XbNYRAwxuhgTVTA8rFycVC+UKtbPjgNwLulKUFhJnjHjFdQFqVaCsET1niJggoFDk0Qk89sk2Ska0eFmBCss/gWzTA2Gr4Il3Xs5wcHxfhyBMMFlr2hnpKWW3LpG4Z5iLJgRPuBTKnM/yo7LzSw6syTC/zES6QNIZbgCQYwVMOLlggssaT45xaE4SB02m0EzDU4yfaBQYYzARS8Do1d9itQmn3lBIVOCbkZWzQLWg6QMzKS5cHDpHB49U4vpLmP6KjQmuTtwdxn2J5FONnY6prLL7MR0ay5J2MXFXnPoqqrvL+u6PpY2km0aG801fm4rt56rLoi2U791R/v9sN1m727wBlxrCvqWAMnpQXLuEa6ursN1sV84edG/3D8bw29D149j3MXh2ePBkEFu9P+Poe7YfOjXDd28/fL/vgcb/k7GzfwA4QDbEYc0sKAAAAABJRU5ErkJggg=="], ["parallel-turbo", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEX///8dHBoAAAASEQ5eXl3x8fGysbGBgYAZGBbPz88pKCbJycgbGhgVFBLX19Z7e3oLCANLSkm7u7uQkJCHh4Zqamlvb27h4eFDQkH5+fk8OzowMC5RUVCampmmpqXBwcCxW53tAAABoklEQVRYhc2X2RaCIBBAZVxwIylTMZf+/y+zzGPDYpAPed84hxmYhWHG8wy02UiDW0pIJ+prlISmfXqaQQAAZzkhJI99Pi3E0NhKt2P3lJ54yi8wgFtkdzotrjNlyv0XbNYRAwxuhgTVTA8rFycVC+UKtbPjgNwLulKUFhJnjHjFdQFqVaCsET1niJggoFDk0Qk89sk2Ska0eFmBCss/gWzTA2Gr4Il3Xs5wcHxfhyBMMFlr2hnpKWW3LpG4Z5iLJgRPuBTKnM/yo7LzSw6syTC/zES6QNIZbgCQYwVMOLlggssaT45xaE4SB02m0EzDU4yfaBQYYzARS8Do1d9itQmn3lBIVOCbkZWzQLWg6QMzKS5cHDpHB49U4vpLmP6KjQmuTtwdxn2J5FONnY6prLL7MR0ay5J2MXFXnPoqqrvL+u6PpY2km0aG801fm4rt56rLoi2U791R/v9sN1m727wBlxrCvqWAMnpQXLuEa6ursN1sV84edG/3D8bw29D149j3MXh2ePBkEFu9P+Poe7YfOjXDd28/fL/vgcb/k7GzfwA4QDbEYc0sKAAAAABJRU5ErkJggg=="],
-  ["perplexity", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAASFBMVEUAAAAAAAD9/fqXl5UAAAAAAAD///8HBwcAAAAAAADy8vCnp6X4+PXU1NKLi4pBQUDDw8Hk5OGenpwmJiWRkZB2dnRbW1qxsa/SbbTeAAAACnRSTlME////0jT//vOEODX2gQAAAoJJREFUWIWll9u2qyAMRYV2R6t4v/3/n54EBAPWgoc8dDQIUwjJQoqiKD7vqhSPrazen4Lsr3o+2Fr1h4CM8UjA+eeMF+JTvPMA77wV0Br+I/7cyiJoWHrfVWrx+veeixYCGli5+wJ4cX+FJgrwRrwubhwgYbgDDPgwASBhnL8B5pGepcxAgtqugE3pRwkx2PFN0IWADhvHPSUGOJbWuvuAXcemSwSIBQBaDmixYRHpANHXAHVvAdZ7AKAtA8wpDVglHFv7BECdYcK1LBPwtnSAmbiU+DvaAnkG0JmHxjJz+QVQoI1GWFPSmGtwT9UXQM07uu4BwLbX3wFtYKMZP4btd4BzXsZmAuAyxj54oO4Avrxh9Ry74IuMKNMAlAcL/nSLq4xHAKoem4nAJSIRgNUjN1sLG+5DvT0BoPiY6jmqEZNSntIUB1D4zJxtOZOcuYyMAmjNrfl7KlJLgeiTAFyYmSaSTJn9jAA87eaq3FhR/gmYmaIGANJVCVMEQK9heecfLKuZQgTw62gzepAB6CIA/J0ur+TnOQIwBrfVKIdhGCUHUEbyKsAwjtjpVlCMZJ0AymBpctoB5K0iWU08AXSckrmjVh+Qt5rYk80siJTR+o3SCQrGYJ91xy8AY2cQSUda5DVUBYsDxM4FBzAVoXfhTO4HgOOEN3mw2/JKB9C0acePRJqOAk8FnBVlM7EzspgG6HplBJEBtCyqPg0wKHDJc9YCndVqSAFILuKsmPS64l9pE6VO61yvGtuU78Qp90t18lcZ6EGTEoOOu+HXehcH+AdxCBBrDBBcYC4AMfuuCK88vluW8/z7TlRGLl3lZU6BVfnXvuyLZ/bVN//ynXn9/wfurDA/lO1fuwAAAABJRU5ErkJggg=="], ["tavily", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEMklEQVRYhcWXXVCUVRjHf+e8uyzI4rvDgqPxNXwbHzcK2YzaFNYFgnbn1FVTjWNidduQNXIbU0rjmGmWQobZRaVeOOMQ0Ea22ER+DBe5DMiIAirDtm3Ygu97unj5kI+FhYX6z7w37zznPP/zPOf5n+cRGRkZoBRAJvAGsB1IA1YBNkAQHRTwCBgBbgMXgaNAD4Bt3HkpcBh4ahkczoQA7IA+/hUCW4G3gV81l65nAieAp1fAeThCqUAx0KK5dL0a2PUfOX8cKUBIAuWLda6UQlmpiwYCKJdYF25RWLMmmbi4uOUgkSaB+EitDcOguKiQhlMneOvNvWiaFi2BeBtWqS0IpRROp5Oqqj08WVTME6kpeL1XaP3REw0RmyTC/CtTsXPHdrZtew6MMXSXi6qqPSS53dGkQshIrEzTJDsni927XyfG4bB+GgabNpXy0su7EGLpBRQhAUVpaQnZ2VkTqmktttl54fkyEhKcS46C5tL1moWMhBAMDQ3h83XhTkxkXWoKD0dG+Oz45zQ2nuXWrd4lOYcIIyCEYGBgkMYzZ7np8wGSUCjE9+cu4Gn7GdM0V5bABAmbzYaUE0sEmqahyYi3iI7AYrAYpVw8ASEBDTQt7O2Pj19FcnJSREQiEqFJ30LQ8VsHd/r6cDgcBINBlFIYhjFpo5TitVdf4cWdlTR82ci3350jEAiEFSuRkZ4ecf2YponbnUhRUSHd3T3cv/+AgoL1xMXFTlanEIJ9+/ayZeszjI0+xNPq4cgnx+j4/erSCBiGMRnqpKQkag7sp7KiHI+njXeq36fuYC0lJRumRcFut0+dWNN4cO8edXWHOf3V17P2nzcFUko2btzAn34/w8N+amreo3JHBUJqrNZ1YmMdxK9OwB7rxM4UAUxjSrBMRVJyMvn5eUgpZ5VsWAKmaZKWlsqhjz4gFAoxMDjI5i2bEVLS29NDbe2HhP4J0dzUgveyd9plKyt7lty8XBCCwbv91DecpvHMN9OiuTABpcjNyWHturXEOBzk5ueBUvR29/Du/gNc/qUdKSUHD308a63T6SQrM5Omph84cvQ4165dB5izasISEEBBwXrr8RkPm2manDzVgOentskcyxlCpJTii5P1NLe04vW2Ewj8Ne9zHVYHHI4YCgsLph5MIZD2GCoqynG7E8PWtxACn6+LS5eaCAb/XrBXsGH17dNio5QiIWE1mVlZgMRUimAgQH//AB0dVxkdHZ1305lRmQfKhjU02GeeYmRkhPPnL9Du9XLjRid/3PTR13cHv9+PaZpR9QCP4ZHISE8fBlxz0gMYVzohBFLK5XI8Ab/EGpfmhGDqFdTm0f4ocFtizWpR99dLgAIuSuAY0P4/EGgHPtVcuj4MXMea1VJY+RFNAVewhtNOzaXrAHeBZmAMa4J1ABqWTizXeB4EuoB6oBroRAj+BajZemNynEWXAAAAAElFTkSuQmCC"], ["you", "data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAEAAQAMBEQACEQEDEQH/xAAbAAABBQEBAAAAAAAAAAAAAAAAAwQFBgcBAv/EADUQAAEDAwEECAQFBQAAAAAAAAECAwQABRExBhITIRQiQXGBkaHBUVJTYTIzsbPRFTZEVOH/xAAaAQACAwEBAAAAAAAAAAAAAAAAAwECBAUG/8QAKBEAAgIBBAECBgMAAAAAAAAAAAECAxEEEiExUTJBBRM0UoGxImGh/9oADAMBAAIRAxEAPwDbKsQFABQAhKmxYeOlPobzoFHmfCrwrnP0rJDaQRZsaWD0Z9DmNQk8x4UTrnD1LAJpi9UJCgAoAKAG0+4RLe1xJj6Wx2A6q7hqaZXVOx4gskNpdlTuW17z+W7ejgI+ovBWfDQetdOrQRjzZyLdmeiJhNuXGe20p08R5WC4sknTtrTY1VBtLhFVyxaQ25b5zjSXTxGVY30HHlVItWwTx2S+GTVu2mdbwicnip+dPJQ9jWS3Rp8w4LKfkssSZHmN78Z1Kx2gajvHZWCcJQeJIYnkWqgDK9Tv6bapMwAFTaeqDoVE4HqRTqKvm2qHkiTwsmVvSXpTyn5DinHVnKlKPM16SMIwW2KwjLnJ6SqoaAmtlG1PXyNujkjK1fYAfzjzrHrGo0sZDliu0iFM3yTvcgshaT8QQP8AvlVdK91KJl2MUqpzRA4jvuMOJcZWULTooUuUVJYZKZfrdJ6ZCZkYwVp5gfHQ+tcayGybiOTyiL23ONl5ve3+4mtPw/6mP5/TKWelmdW+DMnlYhR1vFGN7c7M6fpXetthX63gzpN9EpG2avLywnoSmx2qcUEge/lWWesoSzuLKEi77P2RqzsK63EkOfmOY5dw+361yNTqXfLwkPjHaer7Zm7qykhXDkN/gcxyx8D9qjT6h0v+glHJU3LBdWVlJiqWPmbUCDXSWqpkuxe1nU2i5/6TvlUPUVfcG1lxsTTjFpYaeQUOJ3spOo6xrl6iSlY2hseiP26/tWb3tfuJrR8O+pj+f0ylvoZm9uuky3FZgyFMlzAVugc8aa99d+2iu3G9ZwZoya6JWLtZeWXAoy+KO1DiEkHyGfWss9Bp2sbcF1ZIvezt9ZvUdRCeHIb/ADG858R9q42q0sqJeUx8J7jt/vbNnZTlPEkOflt5x4n7VGm00r34SJlLaVBzaW6vL3uk8MfK2gAD3rqLR0xXQrezqb9dD/mueQ/ih6Wn7SdzLpYH3ZNojvPrK3Fb2VHt6xFcnURULXFdDYvKC/W83SzyoSSAp1HUJ03gQRnxAo01vybYz8ETjujgx19h6I+tiS0pp1BwpCxgivVxlGcd0XlGNprs6hVDQJk/sZIWztFECDyc3m1D4gg+4B8Kw6+Cenln2G1vEhTayQt7aGXvnk2QhI+AAHvk+NU0UEqI49wm/wCRGIVWhoqOorbsh5DLCFOOKOEpTqaXNqKzLosuTTLVEMG3MRiQVNp6xHxPM+prz90/mWORoSwsDqlEjK52mDdWuHOjodx+FWik9x1FOpvspeYPBWUVLso152Flxd521r6U19JWA4PZXp3V2aPikJ8WrD8+wiVLXRG7KpW3tPBbdQpDiXSFJUMEHdOorRrWnppNeCtfrQptIFubTTW20KWtTuEpSMknA0FV0uFpot+CZ+pkxZ9jpT+65cl9Hb+mnBcPsPXurJf8RhHivl/4XjW/cuVvt0S3N7kNhLedVaqV3nU1yrLp2vM2OSS6HVKJCgAoAKAEHoUV6Q1IdjtqfaOW3CnrJ8avGycYuKfDIws5BmHGYfdkNMNpedOXHAnrK7zRKycoqLfCDCXIvVCQoAKAP//Z"],
+  ["perplexity", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAASFBMVEUAAAAAAAD9/fqXl5UAAAAAAAD///8HBwcAAAAAAADy8vCnp6X4+PXU1NKLi4pBQUDDw8Hk5OGenpwmJiWRkZB2dnRbW1qxsa/SbbTeAAAACnRSTlME////0jT//vOEODX2gQAAAoJJREFUWIWll9u2qyAMRYV2R6t4v/3/n54EBAPWgoc8dDQIUwjJQoqiKD7vqhSPrazen4Lsr3o+2Fr1h4CM8UjA+eeMF+JTvPMA77wV0Br+I/7cyiJoWHrfVWrx+veeixYCGli5+wJ4cX+FJgrwRrwubhwgYbgDDPgwASBhnL8B5pGepcxAgtqugE3pRwkx2PFN0IWADhvHPSUGOJbWuvuAXcemSwSIBQBaDmixYRHpANHXAHVvAdZ7AKAtA8wpDVglHFv7BECdYcK1LBPwtnSAmbiU+DvaAnkG0JmHxjJz+QVQoI1GWFPSmGtwT9UXQM07uu4BwLbX3wFtYKMZP4btd4BzXsZmAuAyxj54oO4Avrxh9Ry74IuMKNMAlAcL/nSLq4xHAKoem4nAJSIRgNUjN1sLG+5DvT0BoPiY6jmqEZNSntIUB1D4zJxtOZOcuYyMAmjNrfl7KlJLgeiTAFyYmSaSTJn9jAA87eaq3FhR/gmYmaIGANJVCVMEQK9heecfLKuZQgTw62gzepAB6CIA/J0ur+TnOQIwBrfVKIdhGCUHUEbyKsAwjtjpVlCMZJ0AymBpctoB5K0iWU08AXSckrmjVh+Qt5rYk80siJTR+o3SCQrGYJ91xy8AY2cQSUda5DVUBYsDxM4FBzAVoXfhTO4HgOOEN3mw2/JKB9C0acePRJqOAk8FnBVlM7EzspgG6HplBJEBtCyqPg0wKHDJc9YCndVqSAFILuKsmPS64l9pE6VO61yvGtuU78Qp90t18lcZ6EGTEoOOu+HXehcH+AdxCBBrDBBcYC4AMfuuCK88vluW8/z7TlRGLl3lZU6BVfnXvuyLZ/bVN//ynXn9/wfurDA/lO1fuwAAAABJRU5ErkJggg=="], ["perplexity-fast", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAASFBMVEUAAAAAAAD9/fqXl5UAAAAAAAD///8HBwcAAAAAAADy8vCnp6X4+PXU1NKLi4pBQUDDw8Hk5OGenpwmJiWRkZB2dnRbW1qxsa/SbbTeAAAACnRSTlME////0jT//vOEODX2gQAAAoJJREFUWIWll9u2qyAMRYV2R6t4v/3/n54EBAPWgoc8dDQIUwjJQoqiKD7vqhSPrazen4Lsr3o+2Fr1h4CM8UjA+eeMF+JTvPMA77wV0Br+I/7cyiJoWHrfVWrx+veeixYCGli5+wJ4cX+FJgrwRrwubhwgYbgDDPgwASBhnL8B5pGepcxAgtqugE3pRwkx2PFN0IWADhvHPSUGOJbWuvuAXcemSwSIBQBaDmixYRHpANHXAHVvAdZ7AKAtA8wpDVglHFv7BECdYcK1LBPwtnSAmbiU+DvaAnkG0JmHxjJz+QVQoI1GWFPSmGtwT9UXQM07uu4BwLbX3wFtYKMZP4btd4BzXsZmAuAyxj54oO4Avrxh9Ry74IuMKNMAlAcL/nSLq4xHAKoem4nAJSIRgNUjN1sLG+5DvT0BoPiY6jmqEZNSntIUB1D4zJxtOZOcuYyMAmjNrfl7KlJLgeiTAFyYmSaSTJn9jAA87eaq3FhR/gmYmaIGANJVCVMEQK9heecfLKuZQgTw62gzepAB6CIA/J0ur+TnOQIwBrfVKIdhGCUHUEbyKsAwjtjpVlCMZJ0AymBpctoB5K0iWU08AXSckrmjVh+Qt5rYk80siJTR+o3SCQrGYJ91xy8AY2cQSUda5DVUBYsDxM4FBzAVoXfhTO4HgOOEN3mw2/JKB9C0acePRJqOAk8FnBVlM7EzspgG6HplBJEBtCyqPg0wKHDJc9YCndVqSAFILuKsmPS64l9pE6VO61yvGtuU78Qp90t18lcZ6EGTEoOOu+HXehcH+AdxCBBrDBBcYC4AMfuuCK88vluW8/z7TlRGLl3lZU6BVfnXvuyLZ/bVN//ynXn9/wfurDA/lO1fuwAAAABJRU5ErkJggg=="], ["tavily", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEMklEQVRYhcWXXVCUVRjHf+e8uyzI4rvDgqPxNXwbHzcK2YzaFNYFgnbn1FVTjWNidduQNXIbU0rjmGmWQobZRaVeOOMQ0Ea22ER+DBe5DMiIAirDtm3Ygu97unj5kI+FhYX6z7w37zznPP/zPOf5n+cRGRkZoBRAJvAGsB1IA1YBNkAQHRTwCBgBbgMXgaNAD4Bt3HkpcBh4ahkczoQA7IA+/hUCW4G3gV81l65nAieAp1fAeThCqUAx0KK5dL0a2PUfOX8cKUBIAuWLda6UQlmpiwYCKJdYF25RWLMmmbi4uOUgkSaB+EitDcOguKiQhlMneOvNvWiaFi2BeBtWqS0IpRROp5Oqqj08WVTME6kpeL1XaP3REw0RmyTC/CtTsXPHdrZtew6MMXSXi6qqPSS53dGkQshIrEzTJDsni927XyfG4bB+GgabNpXy0su7EGLpBRQhAUVpaQnZ2VkTqmktttl54fkyEhKcS46C5tL1moWMhBAMDQ3h83XhTkxkXWoKD0dG+Oz45zQ2nuXWrd4lOYcIIyCEYGBgkMYzZ7np8wGSUCjE9+cu4Gn7GdM0V5bABAmbzYaUE0sEmqahyYi3iI7AYrAYpVw8ASEBDTQt7O2Pj19FcnJSREQiEqFJ30LQ8VsHd/r6cDgcBINBlFIYhjFpo5TitVdf4cWdlTR82ci3350jEAiEFSuRkZ4ecf2YponbnUhRUSHd3T3cv/+AgoL1xMXFTlanEIJ9+/ayZeszjI0+xNPq4cgnx+j4/erSCBiGMRnqpKQkag7sp7KiHI+njXeq36fuYC0lJRumRcFut0+dWNN4cO8edXWHOf3V17P2nzcFUko2btzAn34/w8N+amreo3JHBUJqrNZ1YmMdxK9OwB7rxM4UAUxjSrBMRVJyMvn5eUgpZ5VsWAKmaZKWlsqhjz4gFAoxMDjI5i2bEVLS29NDbe2HhP4J0dzUgveyd9plKyt7lty8XBCCwbv91DecpvHMN9OiuTABpcjNyWHturXEOBzk5ueBUvR29/Du/gNc/qUdKSUHD308a63T6SQrM5Omph84cvQ4165dB5izasISEEBBwXrr8RkPm2manDzVgOentskcyxlCpJTii5P1NLe04vW2Ewj8Ne9zHVYHHI4YCgsLph5MIZD2GCoqynG7E8PWtxACn6+LS5eaCAb/XrBXsGH17dNio5QiIWE1mVlZgMRUimAgQH//AB0dVxkdHZ1305lRmQfKhjU02GeeYmRkhPPnL9Du9XLjRid/3PTR13cHv9+PaZpR9QCP4ZHISE8fBlxz0gMYVzohBFLK5XI8Ab/EGpfmhGDqFdTm0f4ocFtizWpR99dLgAIuSuAY0P4/EGgHPtVcuj4MXMea1VJY+RFNAVewhtNOzaXrAHeBZmAMa4J1ABqWTizXeB4EuoB6oBroRAj+BajZemNynEWXAAAAAElFTkSuQmCC"], ["you", "data:image/png;base64,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"],
   ["kagi", "data:image/png;base64,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"],
   ["jina", "data:image/png;base64,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"],
+  ["context", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACWElEQVR4AexVS2gTQRj+djfGvEtpPEhF8FBPUhW8Sm3UkyKIiBCiF0+iVZCCivjASrWe9KAEChWhPhBvgoqKDzyFSgVPbcilbfqgaZOmSZvNJtntzDY5JDObdCm0UDbwMTvf/PPPN9/MPxH3XkxomwkRm/yzBFgOWA6YcsDfJOJO0I0H5z2mcC/kwS6/yC14PssNBQ612RAKOHGuw2EKwSMOHN5n52Y1JUDgplgfaUrA+pbiz7YE1HVg+zZg9w4JXlf16SsFDR/+yOjuz+BaeBEDX3PI5DS+xw1YrgCvU9DLLPKsBd8eNSPytAXhLh9a/RISaRVnexdw+1UWHyN5fPmroO/9Ek7eTWE0XmywHDvMCKC7HrjepJeZ0766c4lEde63o/uMG73vshiZKDGZZlIqul5koBTNOUFSV+cKdjrRvsdWTZZ7AtFjVM80ZGy2hN//Ffq5ZjACjh3kPxiVjIED9cejk6w7lbm8lhFAz58XWOG8DgHUiUq/tvXVXNja8do+IyA2VX8HsekSNINjtklAR3t9hxoKGPyRg2qwAJ08u6BCFOgXi0snXHrZsiPGDOPAcKyIh2+yKHKMGI4V9D+V8FUf2lrJdst5dzaL6LngwZVTrjLDNovLGksShhFAOLz+KeN0TwovyQPz/V8eb3/JCD1JI9iXRuBGUhcoKxrc5D44iOMS0dL/eRnHbyW5OHoziU9DeZqaAVcAjYrGS3hMHpjLzzO4P5jFULSgn/3kvIrxhIoJgiVZg6wA8TlV5yjPAx03ujeGAqiIjYAlwHJg6zvQqJJWAAAA///6NLaSAAAABklEQVQDAHBHI7DdQJRaAAAAAElFTkSuQmCC"],
+  ["linkup", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfqCggUECHpi6upAAABf0lEQVQ4y2NgGA6AEcFkUlRnunPnD04FQvm2r/+JX+55jMMo/rnzNViYFXo2K6KKM8MYpRJ5T//9/7BfJfChq6fWt7foCgyzKp4wMDAw/Ocs8Gb+pZL47xKaDd31DAwMDAxirXsm75FgYLA5aARzOoSSNVjLwMDAYDpPKK34pSsDw5HjrqgKLF7dZGBgDOzdXHDv1xYPVgaGe1KoCqxO/mZgSipsmfmTgeGwqDIDA8dPFAU8KmcZmDKiS3YxMDAwPHtsxsCgfB9FgSTbPYaUkKJTDAwMDAz/TpswSWl/UpVlZ2BgYGBhYGBgYJD//DYyqvgCAwMDA5uYgpKnqKxSUizzzdr3MAWyL2yyas4ysErrmmoIfnv756Dv1On/jDpl4QrEhcomnDK1NRV9e2XhjWcMi1mZln7zTtt6E26FsP8WjXi2a6vPP/3FwMDA8K54s30A8/Stv+EK+Nil7k869w4WrK/lrfkX7/mEFN0+vHtfIYW7leHBm7+pkNhGFAAAt/R3CaRv9kwAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMTAtMDhUMjA6MTY6MzMrMDA6MDD6gO4vAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTEwLTA4VDIwOjE2OjMzKzAwOjAwi91WkwAAAA50RVh0U29mdHdhcmUARmlnbWGesZZjAAAAAElFTkSuQmCC"],
+  ["deepseek", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH6goRFBcFt9jBqgAABLpJREFUWMPt12+o3nUZBvDP9Txnwz+bzj8xTCG1FCPBGaGNIEEkMreliCRUhCZaZ/VCobCQIBMiNZJgRyIRzLDEsvQcKYvCjDRGfyBMbCVJKppQ6nRzbXueqxfPmdvOzsz1Ksj7effj+7uv63df131/74c34v89cqAvrJkeiQ7IYY0jsT08g9HshqG10yM4BaekuafR2ZnB6ycwSdDIYHnblWIFlmi2YDNOip6L1eIY3I1rsKWNhLbXRtbRNXgqHbj35t1Qa67YRgYxGOwmsHb9iApOxsWSc3B8dTkGmu3YgqMSh0Lbx/EBsmmgxpN0S3Bn0gtwb+tGPJzYuatCTaRdhbXZA3wpPozPSU56PXK0fQoX4DcRnTxeirsT582f+Ue4Grfj1MaJqWNxKVk2XLt+BEMxLW6QHPP6DZTDEmcmnsbjoclglPTd5ExIcgg5GaeJa8lHw7mSlWXjoA28H18gyw/IkYGchlvLx5suqTF1v9qyx7lTJJeQN4WhRNtX6F0D6ZvL1eSoAwLfm8nR4gbN5e14iJ/T22n3I55wJ+6awgdxxn8PvluO6nUxGFVviVyjiivEpA/bimfVd3B9YvNU5AIsVU/Qp8gUVpZjEgcdEIlkRduvkJW4ifwUl2GgHscNrYfCY9gxu2FoSr2zvIjLxMOpqXKkeAd9X1kXjt/vzKrnyu+kJ+PEJIdVr9GcTYdYMv/uX8htYdueg2mAFZPUfVltnZ0ZbJ6bGTxB76teiXNbN7V9YT8f/sfw5XBhmJvomynxXsl7ZD47z5XtC00xmMjn0HBc9vjKuQ1DcxumxuoxfBaX0k2LlOBYelWbw9W0+vV+iD4aHUv3IbADU2VVs2sU7465mSG6I8kPcAl9ZIHyK8m7wpFNnsR19MUF4FvFb4nNB29dQCCenbjYWWkPX4z63MyUtNo8pD6tfXI3vsPFsdKL6Il4Uic594hN4Q/CgzcuX0BAfz+f6XSsbmLdJ0b7kLh3ZihqRwYPiC/RVxYc+RD5WZMfkre9KtDk92PN32vfsTBQ96ntYhm5LO2h3c/tOTsztKRj6tvzvbynFINwfDhBDHdbxN9wR42NDtq6CAHux7yuPQ8Xj5N9vPAqzOTxK7heF/phYXSEb+j4keBHX9130mfN+rG06yU3YUr7V3ysyS/TTpqKQTnfpIQ/wcuT5umF4hayYlH49nvhcvH87IbhohQHmYzrO7RzRZMTykzas+1sqPFo1Og5+C5uTayab9l71I1tt+8FPAH/RfiMeN54P1fCvAeI5/H56MYgyanltk5lWhyR4aDi+5JtSS4qd8n4I2JQvoav194k8GLjLWWZwcCa9TsWlxTWTY+ME9FVmCGr50u4XWyMbCzHhfNNFg70pfJN3KL+iU/hqsn9v6sS3YoHUldi0+zMcHEC7NqKQvrW8kV1YZLXvIyqjTzTidNfkD6thpG3V1dgJ/4UuRp/Xmw53euGWffJGmcMy8RaXIEzIge/BovR/IjeIL7VZiuW0UPmCbw0WjrYNvWvkdmbp16bwK5Ys36nGKrxEVhNzlKnh6Nl3mWTcfsofoUHU09PVvDF3b6/+I//C86bHkOiB4elk70buqOTeTCeO0DQN+J/Kv4N8i0LCZOZV/cAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMTAtMTdUMjA6MjM6MDUrMDA6MDBhWN3KAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTEwLTE3VDIwOjIzOjA1KzAwOjAwEAVldgAAAABJRU5ErkJggg=="],
   ["firecrawl", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACWUlEQVR42u2XX0hTURjAf3c256RVbmEyVrEyHCIM6yENwoiCoAejPy8x6EUiMqqXQCIjMh/C6qWCAskYPYgvLhgFUYFBZLGgUvBBcWtBfzbQxKXOTW8P9+Gydnd33b1tBJ2Xc78/fOfHd893zncEURRFSjhMlHj8wwChIHyfLCHAyBC018OjS5BOlQCgZgukkjDQDdePFQyhYw8I8ufbxzDQVWSAr+OZcuAWzMSLBJBOwfBgpm7hF4SeFAng6V34Ec7Wfx4pAsD4O/BfVLbNzfxlgFgEug9Bcl7ZvroK0ovw0i9ViKEACwm41gpT33L72J3QuQ/utIGpTFPYVZoB+i5A5JO6T/9VSEyDYIKfMXA4DcrAlzF41pvfLzEtzeJydpXoAnjRB0vple2uwRuQnDMIYHRo5aUai0DgpgEAogjxqLLN7QWLVSULPfJvKQhg4j2IS7nT790P7fcz74WMc2EWhgM6APwd0N8F5nJle20jtPigYXfuGGOvdZRhPAofnivbXHXQfBgEAfb4YPRV7hgFZ0BcVtaXV8C5h2CukOSt29WC6ACwuxTaAAFO34O6JllnXSPpLZXZ/o6NOgA8Tdm6Ix2w98Qf1/MinH0APoWmxNOs3taovgvCH+F8o1SKALU7oOcNlJmV/WenoG0zzCck2VIJvWFYW11gBtxe2NkqywfP5F4cwGaHXUdl+cAp1cW1HUQnb0NVjQyUbzS0SPOmejh+xYCTcL0LLgdhXbW2ztdsAec26AyC1Za/tdX8NoxHpcvF5VH3mwjBBjfYHNp66/+P01ID/AbrBqtU2IrxsQAAAABJRU5ErkJggg=="],
   ["tinyfish", "data:image/png;base64,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"],
   ["octen", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABuVBMVEUAAAADmlYEmFUEmVUDmVUHllUEmFUEl1YEmVYEmVUEmVUAgIADmVYEmFUEmlYDmFUDl1UEmFYEmFUDmFYAmVkFmVgEmFYDmFUFmFgEmVcFmFYFllUDmFYEmFUA/4AGmlMDmFUDmVYAv4ADmFUGm1cEmFUFmlcDmFcGnFcDmVcFm1cEmFQDmFUCmVcDmFYAmVUFmFcAk1gAAAAGllMAm1sEl1UEmlgEmlYDmFYDmFYDmFYDmFYHlVUIl1gGmlkEmFUGm1kDmFUEmFYEmVUFmVcEmVQEl1YDl1YEmFUDmFYDmFUDmVUGmFUDmlcEmVYEmVYEmFUDmVUAnVgAqlUDmFUDmFYHnFUVqlUDl1UEmFUPlloDmFUDmFcDmFYDmVUDmVYEmFYGmFYGmlcEmFgDm1gAmVUApFsDmVUDmVUDmVYDmVYDl1UJlVgDmFUDl1UAlVUEmVUDmVYDmVYEl1gAtm0DmFUDmFULn1UDmVYEmVYDmFUQn2ADmFUMl1EDmlUDmFYDmFUDmFcRmVUDmFYEmFYEmVYDmFYAlloDmVYEmVUDllUDmFYEmFYDmVUDmFYEmFUEmFUDmFX////LIkzyAAAAkXRSTlMAU8nLwCe6drt4tgKsRURX6tCzpBQ3j2M0h2gzr40CK62UBJwpkDWfLJM4fPNw9x4vGgEuHLs6iOjr/akkICvSLvbT0md/gFaB7u/gKkl/QdX+Ggb53yQM+9oR9U+mqOXBXFhDVw8Oou+qp2Ad/PYMPKCbQAf0/hhQr1QQ7RZOsq5SD/F5ypcRtMhOSse2lMt+JXg62gAAAAFiS0dEkpYE7yAAAAAHdElNRQfqCQkTHDTSsAt+AAABT0lEQVQ4y72S5VNCURDFjz4bBX2iItiBqFhgd6JidwfY3d3dcf9jl3HEubw7wzfOh7Ozu7+9NRfwjfz8JV4BgTwQxDwVzAMhCiDUGxCmUgDhEep/aSKj5GgtD8RwI7FUieMBHQfEU0XvCRgS5MQkJKfIqWliIJ08A5nkRjGQRW5CNnmOGMhlzKxFHmP5BWJAVagrAixWXbHikCWUlnK3KOMBfXlFZVV1zb9q63iAVN+geG4eQKM3oEkBNP82DC22Vldsa7fz6uhEl627B72M9fWLP9rAIGN2DNFiw2JghFqjGCO3ioFxak1gcmp6ZtbhdDFzjvkFYFHjUFNicjqXlldW11zk+gZjm1vYpoEdYJfCHvYPGDs0/q1lp9oRjsll4ITCKc7Ize7Nzim7wCX5FXBN4Qa35Hdu4P5BerTg6Vl6eQXe3qUP+q+f0tc3fKMfaOm0O9NUMnUAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMDktMDlUMTk6Mjg6NTIrMDA6MDDzC6KXAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTA5LTA5VDE5OjI4OjUyKzAwOjAwglYaKwAAAABJRU5ErkJggg=="],
@@ -831,6 +844,7 @@ function engineCell(engine, cls = "") {
   return td;
 }
 let history = [];
+let independence = null;
 let ciData = null;
 
 const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
@@ -869,8 +883,9 @@ function seriesFor(bench, metric, rows) {
   const out = {};
   for (const e of ENGINES) out[e] = [];
   for (const r of rows) {
-    if (r.bench === bench && r[metric] != null && r.num_scored > 0 && out[r.engine]) {
-      out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
+    const field = r.engine === ULTIMATE_ENGINE && metric === "mrr" ? "recall" : metric;
+    if (r.bench === bench && r[field] != null && r.num_scored > 0 && out[r.engine]) {
+      out[r.engine].push({ t: new Date(r.ts), v: r[field] });
     }
   }
   for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
@@ -1433,6 +1448,8 @@ function renderStandings(rows) {
   const holder = document.getElementById("standings");
   holder.replaceChildren();
   card._mdRows = null;
+  card._summaryData = null;
+  card._summaryRows = null;
   const { ult, entries } = shareEntries(rows);
   if (!entries.length) {
     holder.appendChild(el("div", { class: "empty" }, "No data in the last 7 days."));
@@ -1450,18 +1467,52 @@ function renderStandings(rows) {
     }
     best.push(m);
   }
+  const header = ["engine", "overall", "overall 95% CI",
+    ...STANDINGS_BENCHES.map(([b]) => verticalName(b))];
+  const engineRow = (x) => {
+    const c = boot.get(x.e);
+    return [displayName(x.e), fmtPct(x.overall),
+      c ? `[${fmtPct(c.lo)}, ${fmtPct(c.hi)}]` : "–",
+      ...x.shares.map((s) => s ? fmtPct(s.share) : "–")];
+  };
   card._mdRows = () => [
-    ["engine", "overall", "overall 95% CI", ...STANDINGS_BENCHES.map(([b]) => verticalName(b))],
+    header,
     ["ultimate (raw)", "100%", "", ...ult.map((u) => u == null ? "–" : fmt3(u))],
     ["gap to ultimate", best[0] == null ? "–" : `−${Math.round((1 - best[0]) * 100)}%`, "",
       ...best.slice(1).map((m) => m == null ? "–" : `−${Math.round((1 - m) * 100)}%`)],
-    ...entries.map((x) => {
-      const c = boot.get(x.e);
-      return [displayName(x.e), fmtPct(x.overall),
-        c ? `[${fmtPct(c.lo)}, ${fmtPct(c.hi)}]` : "–",
-        ...x.shares.map((s) => s ? fmtPct(s.share) : "–")];
-    }),
+    ...entries.map(engineRow),
   ];
+  card._summaryData = () => {
+    const latency = new Map(latencyStats(rows).map((s) => [s.e, s]));
+    const unique = uniquenessAgg(independence.week.uniqueness);
+    const runTimes = STANDINGS_BENCHES.map(([b]) => [...new Set(ciWindowed(rows, b).map((r) => r.ts))].sort());
+    const allTimes = runTimes.flat().sort();
+    return {
+      header: [...header, "$ / 1k queries", "p50 latency", "p95 latency", "unique URLs"],
+      verticals: STANDINGS_BENCHES.map(([b], i) => ({ key: b, runs: runTimes[i].length, lastRun: runTimes[i].at(-1) ?? null })),
+      window: [allTimes[0], allTimes.at(-1)],
+      engines: entries.map((x) => {
+        const c = boot.get(x.e);
+        const price = PRICES.get(x.e) ?? null;
+        const lat = latency.get(x.e);
+        const u = unique.get(x.e);
+        const uniqueShare = u?.total ? u.relUnique / u.total : null;
+        return {
+          engine: x.e, name: displayName(x.e), home: x.e === HOME_ENGINE,
+          overall: x.overall, ci: c ? [c.lo, c.hi] : null,
+          verticals: x.shares.map((s, i) => s && { share: s.share, ci: c?.benches[i] ? [c.benches[i].lo, c.benches[i].hi] : null }),
+          price, p50: lat?.p50 ?? null, p95: lat?.p95 ?? null, unique: uniqueShare,
+          cells: [...engineRow(x),
+            price ? `${fmtUsd(price.usd)}${price.usd === 0 ? " (free plan)" : ""}` : "–",
+            fmtMs(lat?.p50), fmtMs(lat?.p95), uniqueShare == null ? "–" : fmtPct(uniqueShare)],
+        };
+      }),
+    };
+  };
+  card._summaryRows = () => {
+    const data = card._summaryData();
+    return [data.header, ...data.engines.map((x) => x.cells)];
+  };
 
   const W = 560;
   const R = 240;
@@ -1656,22 +1707,27 @@ function renderStandings(rows) {
 
 const PRICES_ASOF = "2026-08-21";
 const PRICES = new Map([
-  ["keenable", { usd: 1.00, plan: "Frontier Tier — at 100 RPS+" }],
-  ["keenable-realtime", { usd: 1.00, plan: "Frontier Tier — at 100 RPS+" }],
+  ["keenable", { usd: 1.00, plan: "Dedicated capacity — at 100+ RPS", url: "https://keenable.ai/pricing" }],
+  ["keenable-realtime", { usd: 1.00, plan: "Dedicated capacity — at 100+ RPS", url: "https://keenable.ai/pricing" }],
   ["google", { usd: 0.30, plan: "Serper Ultimate — $3,750 / 12.5M credits" }],
   ["bing", { usd: 1.00, plan: "SearchApi.io Octo 5M — $5,000/mo" }],
   ["brave", { usd: 5.00, plan: "flat rate" }],
   ["brave-llmcontext", { usd: 5.00, plan: "flat rate" }],
   ["exa", { usd: 7.00, plan: "pay-as-you-go" }],
-  ["exa-instant", { usd: 7.00, plan: "pay-as-you-go" }],
+  ["exa-instant", { usd: 4.00, plan: "pay-as-you-go" }],
+  ["exa-lite", { usd: 4.00, plan: "pay-as-you-go" }],
   ["parallel", { usd: 5.00, plan: "pay-as-you-go" }],
   ["parallel-turbo", { usd: 1.00, plan: "pay-as-you-go" }],
   ["perplexity", { usd: 5.00, plan: "flat rate" }],
+  ["perplexity-fast", { usd: 1.00, plan: "fast search — $1 / 1k requests" }],
   ["tavily", { usd: 5.00, plan: "Growth — $500/mo / 100k credits" }],
+  ["linkup", { usd: 5.00, plan: "pay-as-you-go — standard depth, searchResults" }],
   ["you", { usd: 5.00, plan: "Web Search API plan" }],
   ["firecrawl", { usd: 1.20, plan: "Scale — $599/mo / 1M credits, 2 credits per search" }],
   ["kagi", { usd: 12.00, plan: "pay-as-you-go" }],
   ["jina", { usd: 3.40, plan: "$0.05 / 1M tokens, ≈68k tokens per search" }],
+  ["context", { usd: 0.50, plan: "Scale — $499/mo / 1M credits, 1 credit per 10 results" }],
+  ["deepseek", { usd: 0.75, plan: "pay-as-you-go — $0.75 / 1k requests" }],
   ["octen", { usd: 1.00, plan: "pay-as-you-go" }],
   ["tinyfish", { usd: 0.00, plan: "free" }],
   ["ceramic", { usd: 0.05, plan: "pay-as-you-go" }],
@@ -1703,7 +1759,9 @@ function renderPriceTable() {
     markHome(tr, e);
     tr.appendChild(engineCell(e));
     tr.appendChild(el("td", { class: "num" }, fmtUsd(p.usd)));
-    tr.appendChild(el("td", {}, p.plan));
+    const planCell = el("td", {}, p.url ? null : p.plan);
+    if (p.url) planCell.appendChild(el("a", { href: p.url }, p.plan));
+    tr.appendChild(planCell);
     table.appendChild(tr);
   }
   holder.appendChild(table);
@@ -1876,9 +1934,9 @@ function renderQualityPrice(rows) {
   svg.addEventListener("pointerleave", hideTip);
 }
 
-function renderLatencySummary(rows) {
+function latencyStats(rows) {
   const week = inRange(rows, WEEK_MS);
-  const stats = ENGINES.map((e) => {
+  return ENGINES.map((e) => {
     const er = week.filter((r) => r.engine === e);
     const raw = er.flatMap((r) => r.lat_ms || []);
     const fallback = er.filter((r) => !r.lat_ms?.length);
@@ -1895,6 +1953,10 @@ function renderLatencySummary(rows) {
       n: raw.length,
     };
   }).filter(Boolean);
+}
+
+function renderLatencySummary(rows) {
+  const stats = latencyStats(rows);
   const card = document.getElementById("card-latency-dumbbell");
   card._mdRows = null;
   const holderD = document.getElementById("latency-dumbbell");
@@ -2109,24 +2171,10 @@ function renderOverlap(rows, uniqAgg) {
   shareHolder.replaceChildren();
   graphHolder.replaceChildren();
   const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
-  const pairs = new Map();
-  const seen = new Set();
-  for (const r of rows) {
-    seen.add(r.a);
-    seen.add(r.b);
-    const key = pairKey(r.a, r.b);
-    let agg = pairs.get(key);
-    if (!agg) pairs.set(key, agg = { low2: 0, lowUrls: 0, nLow: 0, shared: 0, union: 0 });
-    if (r.num_suspect != null) {
-      agg.low2 += r.num_suspect;
-      agg.lowUrls += r.low_shared_urls || 0;
-      agg.nLow += r.num_queries;
-    }
-    if (r.union_urls != null) {
-      agg.shared += r.shared_urls;
-      agg.union += r.union_urls;
-    }
-  }
+  const pairs = new Map(rows.map((r) => [pairKey(r.a, r.b), {
+    low2: r.num_suspect, lowUrls: r.low_shared_urls, nLow: r.num_queries, shared: r.shared_urls, union: r.union_urls,
+  }]));
+  const seen = new Set(rows.flatMap((r) => [r.a, r.b]));
   const engines = ENGINES.filter((e) => seen.has(e));
   const rank = new Map(engines.map((e, i) => [e, i]));
   const famRank = (e) => rank.get(ENGINE_FAMILY.get(e) ?? e) ?? rank.get(e);
@@ -2285,37 +2333,33 @@ function renderSharingGraph(holder, engines, pairs, uniqAgg) {
 }
 
 function uniquenessAgg(rows) {
-  const agg = new Map();
-  for (const r of rows) {
-    if (Date.parse(r.ts) < TREND_START) continue;
-    const e = agg.get(r.engine) || { unique: 0, total: 0, relUnique: 0, relDen: 0 };
-    e.unique += r.unique_urls;
-    e.total += r.total_urls;
-    if (r.unique_relevant_urls != null) {
-      e.relUnique += r.unique_relevant_urls;
-      e.relDen += r.total_urls;
-    }
-    agg.set(r.engine, e);
-  }
-  return agg;
+  return new Map(rows.map((r) => [r.engine, { unique: r.unique_urls, total: r.total_urls, relUnique: r.unique_relevant_urls }]));
+}
+
+function renderIndependence(range) {
+  const totals = independence[range === "last 7 days" ? "week" : "all"];
+  for (const span of document.querySelectorAll(".ind-range")) span.textContent = range;
+  const uniqAgg = uniquenessAgg(totals.uniqueness);
+  renderOverlap(totals.overlap, uniqAgg);
+  renderUniqueness(uniqAgg);
 }
 
 function renderUniqueness(agg) {
   const holder = document.getElementById("uniqueness-table");
   holder.replaceChildren();
-  const engines = ENGINES.filter((e) => agg.get(e)?.relDen);
+  const engines = ENGINES.filter((e) => agg.get(e)?.total);
   if (!engines.length) {
     holder.appendChild(el("div", { class: "empty" }, "No uniqueness data yet."));
     return;
   }
-  engines.sort((a, b) => agg.get(b).relUnique / agg.get(b).relDen - agg.get(a).relUnique / agg.get(a).relDen);
+  engines.sort((a, b) => agg.get(b).relUnique / agg.get(b).total - agg.get(a).relUnique / agg.get(a).total);
   const table = el("table");
   const head = el("tr");
   for (const h of ["engine", "", "unique", "URLs"]) head.appendChild(el("th", {}, h));
   table.appendChild(head);
   for (const e of engines) {
     const unique = agg.get(e).relUnique;
-    const total = agg.get(e).relDen;
+    const total = agg.get(e).total;
     const pct = unique / total;
     const tr = el("tr");
     markHome(tr, e);
@@ -2671,46 +2715,75 @@ function rowsToMarkdown(rows) {
   return lines.join("\n");
 }
 
-function buildMarkdown() {
-  drawAllTrends?.();
-  const clean = (s) => s.replace(/\s+/g, " ").trim();
-  const subText = (node) => {
-    if (!node) return "";
-    const copy = node.cloneNode(true);
-    for (const h of copy.querySelectorAll(".hint[title]")) {
-      h.textContent = `${h.textContent} (${h.getAttribute("title")})`;
-    }
-    return clean(copy.textContent);
+function cardRows(card, cell = (c) => c.textContent) {
+  const table = card.querySelector("table");
+  const rows = card._mdRows?.() ?? (table
+    ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map(cell))
+    : null);
+  if (!rows?.length) return null;
+  const keep = rows[0].map((_, i) => rows.some((r) => String(r[i]).trim()));
+  return rows.map((r) => r.filter((_, i) => keep[i]));
+}
+
+function md(node) {
+  const wrap = (s, mark) => {
+    const t = s.trim();
+    return t ? s.replace(t, `${mark}${t}${mark}`) : s;
   };
-  const lines = ["# NEEDLE — search engine benchmarks"];
-  const updated = document.getElementById("updated").textContent;
-  if (updated) lines.push("", updated);
-  for (const card of document.querySelectorAll(".wrap .card, .wrap .lb-panel")) {
-    if (card.closest("#card-runs")) {
-      if (card.id === "card-runs") {
-        lines.push("", `## ${card.querySelector("h2").textContent}`,
-          "", subText(card.querySelector(".sub")) +
-          " (https://huggingface.co/datasets/keenable-ai/needle-results)");
+  const walk = (n) => {
+    if (n.nodeType === Node.TEXT_NODE) return n.textContent;
+    if (n.nodeType !== Node.ELEMENT_NODE) return "";
+    const inner = [...n.childNodes].map(walk).join("");
+    if (n.matches(".hint[title]")) return `${inner} (${n.title})`;
+    switch (n.tagName) {
+      case "A": {
+        const href = n.getAttribute("href");
+        return href.startsWith("#") ? inner : `[${inner.trim()}](${href})`;
       }
-      continue;
+      case "B": return wrap(inner, "**");
+      case "EM": return wrap(inner, "*");
+      case "CODE": return wrap(inner, "`");
+      case "SUB": return `_${inner}`;
+      default: return inner;
     }
-    if (card.querySelector(".lb-panel")) continue;
-    const table = card.querySelector("table");
-    let rows = card._mdRows?.() ?? (table
-      ? [...table.querySelectorAll("tr")].map((tr) => [...tr.children].map((c) => c.textContent))
-      : null);
-    if (rows) {
-      const keep = rows[0].map((_, i) => rows.some((r) => clean(r[i])));
-      rows = rows.map((r) => r.filter((_, i) => keep[i]));
-    }
-    const prose = rows ? [] : [...card.querySelectorAll(".prose p")];
-    if (!rows && !prose.length) continue;
-    lines.push("", `## ${card.querySelector("h2").textContent}`);
-    const sub = subText(card.querySelector(".sub"));
-    if (sub) lines.push("", sub);
-    if (rows) lines.push("", rowsToMarkdown(rows));
-    else for (const p of prose) lines.push("", clean(p.textContent).replace(/\|/g, "\\|"));
+  };
+  return walk(node).replace(/\s+/g, " ").trim();
+}
+
+function buildMarkdown({ byline, lead, license }) {
+  drawAllTrends?.();
+  const header = document.getElementById("top");
+  const lines = [`# ${md(header.querySelector("h1"))}`];
+  const push = (...blocks) => { for (const b of blocks) if (b) lines.push("", b); };
+  const mdHtml = (html) => html && md(Object.assign(document.createElement("div"), { innerHTML: html }));
+
+  push(mdHtml(byline), md(header.querySelector(".lastrun")), mdHtml(lead));
+  for (const n of header.querySelectorAll(".fm > p:not(.lastrun), .fm > ul")) {
+    push(n.tagName === "UL" ? [...n.children].map((li) => `- ${md(li)}`).join("\n") : md(n));
   }
+  const summary = document.getElementById("card-standings")._summaryRows?.();
+  if (summary) push("## Summary — one row per engine", rowsToMarkdown(summary));
+
+  const pushCard = (node, level) => {
+    const h2 = node.querySelector(":scope > h2");
+    if (h2) push(`${"#".repeat(level)} ${md(h2)}`);
+    for (const n of node.querySelectorAll(":scope > .sub, :scope > p, :scope > .prose > p")) push(md(n));
+    const panels = node.querySelectorAll(":scope > .lb-panel");
+    if (panels.length) {
+      for (const p of panels) pushCard(p, h2 ? level + 1 : level);
+    } else if (node.id !== "card-runs") {
+      const rows = cardRows(node, md);
+      if (rows) push(rowsToMarkdown(rows));
+    }
+    const pre = node.querySelector(":scope > pre");
+    if (pre) push("```\n" + pre.textContent.trim() + "\n```");
+  };
+  for (const n of document.querySelectorAll(".wrap > *")) {
+    if (n.matches("h2.section-title")) push(`## ${md(n)}`);
+    else if (n.matches("p.section-desc")) push(md(n));
+    else if (n.matches(".card")) pushCard(n, 3);
+  }
+  push(mdHtml(license));
   return lines.join("\n") + "\n";
 }
 
@@ -2919,10 +2992,6 @@ function revealHash() {
 }
 window.addEventListener("hashchange", revealHash);
 
-document.getElementById("export-md").addEventListener("click", () => {
-  const blob = new Blob([buildMarkdown()], { type: "text/plain;charset=utf-8" });
-  window.open(URL.createObjectURL(blob));
-});
 document.getElementById("export-pdf").addEventListener("click", () => window.print());
 const themeToggle = document.getElementById("theme-toggle");
 const syncThemeToggle = () =>
@@ -3075,10 +3144,9 @@ async function main() {
       .then((r) => (r.ok ? r.text() : ""))
       .catch(() => "")
       .then((text) => text.split("\n").filter(Boolean).map((l) => JSON.parse(l)));
-  const [histRows, overlapRows, uniquenessRows, families, ci] = await Promise.all([
+  const [histRows, indep, families, ci] = await Promise.all([
     fetchRows("data/history.jsonl"),
-    fetchRows("data/overlap.jsonl"),
-    fetchRows("data/uniqueness.jsonl"),
+    fetchJson("data/independence.json").catch(() => ({})),
     fetchJson("data/families.json").catch(() => ({})),
     fetchJson("data/ci.json").catch(() => null),
   ]);
@@ -3100,9 +3168,18 @@ async function main() {
   drawTrends(history);
   renderLatencySummary(history);
   renderAll();
-  const uniqAgg = uniquenessAgg(uniquenessRows.filter((r) => !HIDDEN_ENGINES.has(r.engine)));
-  renderOverlap(overlapRows.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)), uniqAgg);
-  renderUniqueness(uniqAgg);
+  const visible = ({ overlap = [], uniqueness = [] } = {}) => ({
+    overlap: overlap.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)),
+    uniqueness: uniqueness.filter((r) => !HIDDEN_ENGINES.has(r.engine)),
+  });
+  independence = { all: visible(indep.all), week: visible(indep.week) };
+  renderIndependence("all runs");
+  document.getElementById("independence-range").addEventListener("click", (ev) => {
+    const btn = ev.target.closest("button");
+    if (!btn || btn.getAttribute("aria-pressed") === "true") return;
+    for (const b of ev.currentTarget.querySelectorAll("button")) b.setAttribute("aria-pressed", b === btn);
+    renderIndependence(btn.dataset.range);
+  });
   initRunBrowser();
   initChartTools();
   revealHash();

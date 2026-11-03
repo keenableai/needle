@@ -6,6 +6,7 @@ from needle.legal.score import (
     run_legal,
 )
 from needle.shared.search import SearchResult
+from needle.shared.search import base as search_base
 
 
 def _r(url: str, title: str = "", snippet: str = "") -> SearchResult:
@@ -156,3 +157,18 @@ async def test_run_legal_ultimate_row():
     assert pq["hit_rank"] == 1
     assert pq["results"][0]["url"] == hit.url
     assert pq["n_results"] == 2
+
+
+async def test_run_legal_reports_when_each_engine_was_queried(monkeypatch):
+    stamps = iter(["2026-07-01T00:00:01.000Z", "2026-07-01T00:00:02.000Z"])
+    monkeypatch.setattr("needle.shared.search.base.utc_stamp", lambda: next(stamps))
+
+    class StampedEngine(FakeEngine):
+        async def search(self, query, *, num_results=10):
+            search_base.note_request_time()
+            return await super().search(query, num_results=num_results)
+
+    report = await run_legal(GOLD[:1], {"a": StampedEngine([]), "b": StampedEngine([])})
+    assert report["engines"]["a"]["per_query"][0]["queried_at"] == "2026-07-01T00:00:01.000Z"
+    assert report["engines"]["b"]["per_query"][0]["queried_at"] == "2026-07-01T00:00:02.000Z"
+    assert report["engines"]["ultimate"]["per_query"][0]["queried_at"] is None

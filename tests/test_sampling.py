@@ -35,6 +35,27 @@ def test_sample_stratified_covers_every_domain_before_seconds():
     assert domains == {"tech", "sports", "finance"}
 
 
+def test_sample_stratified_keeps_order_when_groups_run_out():
+    recs = [
+        {"topical_domain": domain, "i": i}
+        for domain, count in [("tech", 4), ("sports", 2), ("finance", 3)]
+        for i in range(count)
+    ]
+    picked = sample_stratified(recs, 20, seed=42)
+    assert [(r["topical_domain"], r["i"]) for r in picked] == [
+        ("finance", 1),
+        ("tech", 2),
+        ("sports", 1),
+        ("finance", 2),
+        ("tech", 1),
+        ("sports", 0),
+        ("finance", 0),
+        ("tech", 0),
+        ("tech", 3),
+    ]
+    assert [r["i"] for r in recs[:4]] == [0, 1, 2, 3]
+
+
 def test_sample_stratified_custom_key():
     recs = [{"kind": "a"}, {"kind": "a"}, {"kind": "b"}]
     picked = sample_stratified(recs, 2, seed=1, key="kind")

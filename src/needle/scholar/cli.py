@@ -95,6 +95,8 @@ class Scholar:
             f"short_cells={stats.short_cells}; {stats.source_summary()})",
             file=sys.stderr,
         )
+        if arxiv is not None and arxiv.oai_fallbacks:
+            print(f"scholar: arxiv OAI-PMH fallbacks={arxiv.oai_fallbacks}", file=sys.stderr)
         if stats.drop_samples:
             samples = "; ".join(f"{k}: {v}" for k, v in sorted(stats.drop_samples.items()))
             print(f"scholar first drop errors: {samples}", file=sys.stderr)

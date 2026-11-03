@@ -18,9 +18,12 @@ the filtered artifact and evaluates it like news.
   are crawlable subpages; `assets/` holds shared CSS/JS; `llms.txt`,
   `llms-full.txt`, `robots.txt`, and `sitemap.xml` are for search/GEO.
 - Dashboard data: `scripts/publish_bench.py` publishes `data/history.jsonl`,
-  `overlap.jsonl`, `uniqueness.jsonl`, `latest_*.json`, `runs.json`,
-  `families.json`, and `catalog.json`; per-run artifacts live on the HF
-  dataset `keenable-ai/needle-results` as a slim `<bench>.json` whose engine
+  `overlap.jsonl`, `uniqueness.jsonl`, `independence.json` (their
+  all-runs and last-7-days totals, the only form the dashboard loads),
+  `latest_*.json`, `runs.json`, `families.json`, and `catalog.json`;
+  `history.jsonl` keeps raw `lat_ms` samples only for the last 7 days;
+  per-run artifacts live on the HF dataset
+  `keenable-ai/needle-results` as a slim `<bench>.json` whose engine
   entries carry `per_query_path` pointing at `<bench>/<engine>.json`; the
   dashboard follows the pointer, and `needle.shared.hf.fetch_report` merges
   the files back for scripts. Runs before 2026-09-16 hold one full file.

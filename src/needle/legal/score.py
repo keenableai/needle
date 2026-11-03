@@ -8,6 +8,7 @@ from needle.shared.recall import (
     group_recall,
     recall_summary,
     run_known_item_eval,
+    scored_queries,
 )
 from needle.shared.search import (
     DEFAULT_SNIPPET_CHARS,
@@ -143,11 +144,12 @@ def ids_match(gold: GoldLegal, found: LegalIds, *, result_text: str) -> bool:
 
 
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
+    scored = scored_queries(per_query)
     return {
         **recall_summary(per_query, latency),
-        "by_bucket": group_recall(per_query, lambda pq: pq["bucket"]),
-        "by_syntax": group_recall(per_query, lambda pq: pq["syntax"]),
-        "by_court": group_recall([pq for pq in per_query if pq["court"]], lambda pq: pq["court"]),
+        "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),
+        "by_syntax": group_recall(scored, lambda pq: pq["syntax"]),
+        "by_court": group_recall([pq for pq in scored if pq["court"]], lambda pq: pq["court"]),
     }
 
 

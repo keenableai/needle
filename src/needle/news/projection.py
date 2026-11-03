@@ -3,7 +3,7 @@ from typing import Any, TypeVar
 
 from needle.news.trends import Trend
 from needle.shared.concurrency import bounded_gather
-from needle.shared.llm import LLMClient
+from needle.shared.llm import GENERATION_MAX_TOKENS, REASONING_EFFORT, LLMClient
 from needle.shared.prompts import clean_llm_line, render_prompt
 
 PROJECTION_TEMPLATE = "projection.jinja"
@@ -46,7 +46,9 @@ async def project_batch(
     async def _one(item: T) -> tuple[T, str | None, dict[str, str] | None]:
         try:
             text, err = await llm.complete(
-                build_prompt(item), max_tokens=512, reasoning_effort="minimal"
+                build_prompt(item),
+                max_tokens=GENERATION_MAX_TOKENS,
+                reasoning_effort=REASONING_EFFORT,
             )
         except Exception as exc:
             return item, None, {"error_type": "projection_crash", "error_message": str(exc)[:500]}
