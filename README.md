@@ -61,7 +61,10 @@ endpoint (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
 `exa-instant` = instant, `exa-lite` = lite,
 `parallel` = advanced, `parallel-turbo` = turbo,
 `perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
-`brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). A failed
+`brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). The
+dashboard and the results page show `keenable-realtime` as Keenable Realtime
+and leave out `keenable` (pro, the API default) and `ceramic`; their results
+stay in the raw data on Hugging Face. A failed
 search scores zero when the engine's side caused it (timeout, server error,
 content filter, a rejected query). The mean skips it only when our own
 account or plan caused it: HTTP 401, 402, 403, 429, 432 or 433, or a 400 or
@@ -279,7 +282,9 @@ and refreshes `daily_queries.jsonl` at the dataset root: a rolling window of
 the queries evaluated by runs from the last 24 hours
 (`scripts/daily_queries.py`; `backfill` rebuilds it from the archive). The
 workflow needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, `COURTLISTENER_API_TOKEN`, and the
-per-engine keys.
+per-engine keys. The dataset card is [`dataset/README.md`](dataset/README.md);
+[`dataset-card.yaml`](.github/workflows/dataset-card.yaml) uploads it to the
+dataset when it changes on `main`.
 
 The deployed site also serves the results page at
 <https://keenableai.github.io/needle/results/> with `results.csv`,
