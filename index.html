@@ -972,7 +972,6 @@
       <tr><td>brave-llmcontext</td><td>Brave POST /llm/context</td><td>q = query text clipped to 75 words / 600 chars; country=us, search_lang=en; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; per-URL snippets joined with newlines and clipped client-side to the 2,000-char budget, published date from the sources map</td></tr>
       <tr><td>exa</td><td>Exa POST /search</td><td>type=auto, numResults=k, contents.highlights.maxCharacters=2000; site: → includeDomains, after:/before: → startPublishedDate/endPublishedDate (full-day UTC bounds)</td></tr>
       <tr><td>exa-lite</td><td>Exa POST /search</td><td>same as exa but type=lite</td></tr>
-      <tr><td>exa-instant</td><td>Exa POST /search</td><td>same as exa but type=instant</td></tr>
       <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=advanced, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
       <tr><td>parallel-turbo</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=turbo</td></tr>
       <tr><td>perplexity</td><td>Perplexity POST /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → search_after_date_filter/search_before_date_filter (MM/DD/YYYY)</td></tr>
@@ -1034,7 +1033,7 @@ const RUNS_BASE = "https://huggingface.co/datasets/keenable-ai/needle-results/re
 
 let ENGINES = [];
 const ENGINE_SLOT = new Map();
-const HIDDEN_ENGINES = new Set(["ceramic", "keenable"]);
+const HIDDEN_ENGINES = new Set(["ceramic", "keenable", "exa-instant"]);
 
 function registerEngines(names) {
   for (const name of names) {
@@ -1170,13 +1169,13 @@ const ROLLING_MS = 7 * 86400e3;
 const ROLLING_NOTE = "7-day rolling mean";
 const PCT_NOTE = "% of ultimate's score";
 
-function seriesFor(bench, metric, rows) {
+function seriesFor(bench, metric, weight, rows) {
   const out = {};
   for (const e of ENGINES) out[e] = [];
   for (const r of rows) {
     const field = r.engine === ULTIMATE_ENGINE && metric === "mrr" ? "recall" : metric;
-    if (r.bench === bench && r[field] != null && r.num_scored > 0 && out[r.engine]) {
-      out[r.engine].push({ t: new Date(r.ts), v: r[field] });
+    if (r.bench === bench && r[field] != null && r[weight] > 0 && out[r.engine]) {
+      out[r.engine].push({ t: new Date(r.ts), v: r[field], w: r[weight] });
     }
   }
   for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
@@ -1184,13 +1183,16 @@ function seriesFor(bench, metric, rows) {
 }
 
 function rollingMean(series) {
+  const stamps = [...new Set(ENGINES.flatMap((e) => series[e].map((p) => p.t.getTime())))].sort((a, b) => a - b);
+  const until = new Map(stamps.map((t, i) => [t, stamps[i + 1] ?? Date.now()]));
   const out = {};
   for (const e of ENGINES) {
-    const pts = series[e], ts = pts.map((p) => p.t.getTime());
+    const pts = series[e];
     out[e] = pts.map((p, i) => {
-      let sum = 0, n = 0;
-      for (let j = i; j >= 0 && ts[i] - ts[j] <= ROLLING_MS; j--) { sum += pts[j].v; n++; }
-      return { t: p.t, v: sum / n };
+      const cutoff = Math.min(until.get(p.t.getTime()) - ROLLING_MS, p.t.getTime());
+      let sum = 0, w = 0;
+      for (let j = i; j >= 0 && pts[j].t.getTime() >= cutoff; j--) { sum += pts[j].v * pts[j].w; w += pts[j].w; }
+      return { t: p.t, v: sum / w };
     });
   }
   return out;
@@ -1211,7 +1213,7 @@ function newsSeries(rows) {
   for (const [e, buckets] of byEngine) {
     out[e] = [...buckets]
       .sort(([a], [b]) => a - b)
-      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
+      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n, w: agg.n }));
   }
   return out;
 }
@@ -1463,27 +1465,27 @@ function drawSlice(cardId, series, empty) {
 }
 
 const TREND_SLICES = [
-  ["trend-rare", "agentic_rare", "ndcg"],
-  ["trend-finance-recall", "finance", "recall"],
-  ["trend-finance-mrr", "finance", "mrr"],
-  ["trend-finance-filings", "finance", "filings_recall"],
-  ["trend-finance-filingdoc", "finance", "filingdoc_recall"],
-  ["trend-scholar-recall", "scholar", "recall"],
-  ["trend-scholar-title", "scholar", "title_recall"],
-  ["trend-scholar-body", "scholar", "body_recall"],
-  ["trend-scholar-clue", "scholar", "clue_recall"],
-  ["trend-scholar-tot", "scholar", "tot_recall"],
-  ["trend-legal-recall", "legal", "recall"],
-  ["trend-legal-caselaw", "legal", "caselaw_recall"],
-  ["trend-legal-code", "legal", "code_recall"],
+  ["trend-rare", "agentic_rare", "ndcg", "num_scored"],
+  ["trend-finance-recall", "finance", "recall", "num_scored"],
+  ["trend-finance-mrr", "finance", "mrr", "num_scored"],
+  ["trend-finance-filings", "finance", "filings_recall", "filings_n"],
+  ["trend-finance-filingdoc", "finance", "filingdoc_recall", "filingdoc_n"],
+  ["trend-scholar-recall", "scholar", "recall", "num_scored"],
+  ["trend-scholar-title", "scholar", "title_recall", "title_n"],
+  ["trend-scholar-body", "scholar", "body_recall", "body_n"],
+  ["trend-scholar-clue", "scholar", "clue_recall", "clue_n"],
+  ["trend-scholar-tot", "scholar", "tot_recall", "tot_n"],
+  ["trend-legal-recall", "legal", "recall", "num_scored"],
+  ["trend-legal-caselaw", "legal", "caselaw_recall", "caselaw_n"],
+  ["trend-legal-code", "legal", "code_recall", "code_n"],
 ];
 
 let drawAllTrends = null;
 
 function drawTrends(rows) {
   const pending = new Map([["trend-news", () => drawSlice("trend-news", newsSeries(rows))]]);
-  for (const [id, bench, metric] of TREND_SLICES) {
-    pending.set(id, () => drawSlice(id, seriesFor(bench, metric, rows),
+  for (const [id, bench, metric, weight] of TREND_SLICES) {
+    pending.set(id, () => drawSlice(id, seriesFor(bench, metric, weight, rows),
       `No ${verticalName(bench)} data yet — collected daily.`));
   }
   const flush = (all) => {
