@@ -103,3 +103,10 @@ def test_extract_doi_resolver_and_text_stay_exact():
     assert extract_doi("https://doi.org/10.1234/a/b", "") == {"10.1234/a/b"}
     assert extract_doi("", "see 10.1234/a/b") == {"10.1234/a/b"}
     assert extract_doi("https://doi.org/10.1234/foo.pdf", "") == {"10.1234/foo.pdf"}
+
+
+def test_extract_doi_strips_trailing_punctuation():
+    assert extract_doi("", "doi:10.1038/nature12373; PMID: 23925000") == {"10.1038/nature12373"}
+    assert extract_doi("", "doi:10.1038/nature12373: a study") == {"10.1038/nature12373"}
+    assert extract_doi("https://doi.org/10.1038/nature12373/", "") == {"10.1038/nature12373"}
+    assert extract_doi("https://x.com/doi/10.1002/etc.4890/pdf/", "") == {"10.1002/etc.4890"}
