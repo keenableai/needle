@@ -57,14 +57,21 @@ Every engine issues one request at a time, so latency samples are comparable
 across engines. Per-engine tuning uses env vars: `TAVILY_DEPTH`, `LINKUP_DEPTH`, `NEEDLE_CLAUDE_SEARCH_MODEL`
 (default `claude-sonnet-5`), `NEEDLE_CHATGPT_SEARCH_MODEL` (default `gpt-5.5`); the engine
 entry fixes Keenable's, Exa's, Parallel's and Perplexity's modes and Brave's
-endpoint (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
+endpoint (`keenable-realtime` = realtime, `exa` = auto,
 `exa-instant` = instant, `exa-lite` = lite,
 `parallel` = advanced, `parallel-fast` = fast, `parallel-turbo` = turbo,
 `perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
-`brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). The mean skips queries whose
-search or judging failed
-(via `num_scored`; the report lists `search_errors` / `judge_errors`) and
-does not score them as zero.
+`brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). A failed
+search scores zero when the engine's side caused it (timeout, server error,
+content filter, a rejected query). The mean skips it only when our own
+account or plan caused it: HTTP 401, 402, 403, 429, 432 or 433, or a 400 or
+API error that names our credits, quota, usage limit, billing or API key.
+Clients pace requests to the vendor's rate limit (`min_interval_s`) and retry
+a 429 up to 6 times with exponential backoff, holding their concurrency slot
+while they wait. The mean also
+skips queries whose judging failed. The report lists `search_errors`, split
+into `account_errors` and `service_errors`, and `judge_errors`;
+`num_scored` counts the queries in the mean.
 
 `claude-search` and `chatgpt-search` go through a model's server-side web
 search tool, since neither vendor exposes the search index directly. The
@@ -136,10 +143,13 @@ known-item filing retrieval, gold = the accession number. ~50% of
 `after:`/`before:`), tagged in `query_origin.syntax`.
 
 A deterministic matcher scores each field: nickname-tolerant person names,
-a 2% band for money, 15% for employee counts, country aliases,
+a 0.1% band for money, 15% for employee counts, country aliases,
 registrable-domain match for websites, and required cue words for
-low-entropy fields so a stray number cannot score. `--judge` adds an LLM
-backstop, consulted only for rejected results ranked ahead of the first
+low-entropy fields so a stray number cannot score. Money also matches a
+bare table figure in thousands or millions (`801` for $801M, `185,808` for
+$185.8M) and a parenthesized loss (`(458)`, `$(3.98)`); a year or a
+percentage never counts. `--judge` adds an LLM backstop for non-money
+fields, consulted only for rejected results ranked ahead of the first
 deterministic hit — it can upgrade a miss but never revoke a hit. The report
 breaks down by field, suite, syntax, cap tier, and freshness, and splits
 misses into system-specific vs universal. Snippet-only checks give a lower
@@ -184,7 +194,10 @@ needle legal run --queries legal.jsonl --out legal.json
 
 Two suites (`--suites`): **`caselaw`** — recent published opinions from the
 CourtListener API across 14 federal courts, one caption-style query per case
-(gold: reporter citations, docket + party tokens, cluster id); **`code`** —
+(gold: reporter citations, docket + party tokens, cluster id); each court
+searches `--months-per-court` (default 3) random months of the last
+`--months-back` (18), one request each, to stay under the token's 50
+searches/hour; **`code`** —
 eCFR sections; an LLM projects each into a query about the section's
 substance with one verbatim quoted span, and the bench rejects it if it
 leaks the citation (gold: the `title CFR section` citation). `run` scans
@@ -265,7 +278,7 @@ engine's per-query results)
 and refreshes `daily_queries.jsonl` at the dataset root: a rolling window of
 the queries evaluated by runs from the last 24 hours
 (`scripts/daily_queries.py`; `backfill` rebuilds it from the archive). The
-workflow needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, and the
+workflow needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, `COURTLISTENER_API_TOKEN`, and the
 per-engine keys.
 
 The deployed site also serves the results page at

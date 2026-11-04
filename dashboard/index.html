@@ -923,7 +923,7 @@
     <div class="prose">
       <p>We send each engine in a run the same query text. We pin the per-engine request shapes in git (Appendix F). The runner sends requests in sequence, one call at a time across the whole run. Thus the latency percentiles are comparable across engines, and no engine gets concurrent load. Engines see the live web minutes apart in a run, not at the same instant.</p>
       <p>We judge an engine on its own ranking, titles, and snippets. We do not fetch pages and we do not re-rank. We cap the evidence at the same snippet length for each engine, so engines that return more content get no extra signal to the judge or the answer matchers. We judge each distinct combination of URL, title, snippet, and date once per query. We use that rating again where the identical result occurs for other engines (Appendix E gives the full judging setup).</p>
-      <p>We remove failed searches and judgements from the mean and report them as <code>search_errors</code> and <code>judge_errors</code>. An outage decreases <code>num_scored</code> and increases the error rate; it does not decrease the quality score.</p>
+      <p>A failed search scores zero when the engine's side caused it (timeout, server error, content filter, a rejected query); an agent gets nothing back either. We remove a failed search from the mean only when our own account or plan caused it (HTTP 401, 402, 403 or 429, a plan limit, or a message about our credits, quota, billing or API key). We pace each engine to its rate limit and retry a 429 with exponential backoff. We also remove failed judgements. Reports list <code>search_errors</code>, split into <code>account_errors</code> and <code>service_errors</code>, and <code>judge_errors</code>.</p>
       <p>We make fresh <span class="vert" data-vert="news"></span> queries each hour and new known-answer queries each day from public sources (Appendix B), so there is no fixed benchmark set to overfit. We archive the exact queries with each run (Appendix G).</p>
       <p>Each vertical also reports <em>ultimate</em>, a synthetic engine. It pools all engines' results per query and ranks them oracle-style: best judge rating first on the judged verticals, and the gold item first on the known-answer verticals. Its score shows what one engine could get if it always returned the best results that the full field found. This separates "the engine ranked poorly" from "no engine found better results". We do not include <em>ultimate</em> in the overlap and uniqueness statistics.</p>
     </div>
@@ -941,7 +941,7 @@
       <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>applied to engine ratings before scoring: a duplicate URL drops the rating to 0. The pooled ideal is already deduplicated, so no penalty applies there. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
-        <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher, with an LLM-judge backstop for paraphrased answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
+        <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher: a 0.1% band for money, with bare table figures in thousands or millions and parenthesized losses; an LLM-judge backstop for paraphrased non-money answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
         <td>known-item: the gold opinion or CFR section identified by citation, docket (with a party-token check), CFR citation, or URL match.</td></tr>
       <tr><td>latency p50 / p95</td><td>all</td>
@@ -974,7 +974,6 @@
       <tr><td>brave-llmcontext</td><td>Brave POST /llm/context</td><td>q = query text clipped to 75 words / 600 chars; country=us, search_lang=en; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; per-URL snippets joined with newlines and clipped client-side to the 2,000-char budget, published date from the sources map</td></tr>
       <tr><td>exa</td><td>Exa POST /search</td><td>type=auto, numResults=k, contents.highlights.maxCharacters=2000; site: → includeDomains, after:/before: → startPublishedDate/endPublishedDate (full-day UTC bounds)</td></tr>
       <tr><td>exa-lite</td><td>Exa POST /search</td><td>same as exa but type=lite</td></tr>
-      <tr><td>exa-instant</td><td>Exa POST /search</td><td>same as exa but type=instant</td></tr>
       <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=advanced, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
       <tr><td>parallel-fast</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=fast</td></tr>
       <tr><td>parallel-turbo</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=turbo</td></tr>
@@ -1004,7 +1003,7 @@
         <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results)</td>
         <td><a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF: keenable-ai/needle-results</a>, runs/&lt;run-id&gt;/</td></tr>
       <tr><td>query files</td>
-        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, agentic_rare.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
         <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, independence.json, runs.json, ci_scores.jsonl, ci.json</td>
@@ -1037,7 +1036,7 @@ const RUNS_BASE = "https://huggingface.co/datasets/keenable-ai/needle-results/re
 
 let ENGINES = [];
 const ENGINE_SLOT = new Map();
-const HIDDEN_ENGINES = new Set(["ceramic", "keenable"]);
+const HIDDEN_ENGINES = new Set(["ceramic", "keenable", "exa-instant"]);
 
 function registerEngines(names) {
   for (const name of names) {
@@ -1175,12 +1174,13 @@ const ROLLING_MS = 7 * 86400e3;
 const ROLLING_NOTE = "7-day rolling mean";
 const PCT_NOTE = "% of ultimate's score";
 
-function seriesFor(bench, metric, rows) {
+function seriesFor(bench, metric, weight, rows) {
   const out = {};
   for (const e of ENGINES) out[e] = [];
   for (const r of rows) {
-    if (r.bench === bench && r[metric] != null && r.num_scored > 0 && out[r.engine]) {
-      out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
+    const field = r.engine === ULTIMATE_ENGINE && metric === "mrr" ? "recall" : metric;
+    if (r.bench === bench && r[field] != null && r[weight] > 0 && out[r.engine]) {
+      out[r.engine].push({ t: new Date(r.ts), v: r[field], w: r[weight] });
     }
   }
   for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
@@ -1188,13 +1188,16 @@ function seriesFor(bench, metric, rows) {
 }
 
 function rollingMean(series) {
+  const stamps = [...new Set(ENGINES.flatMap((e) => series[e].map((p) => p.t.getTime())))].sort((a, b) => a - b);
+  const until = new Map(stamps.map((t, i) => [t, stamps[i + 1] ?? Date.now()]));
   const out = {};
   for (const e of ENGINES) {
-    const pts = series[e], ts = pts.map((p) => p.t.getTime());
+    const pts = series[e];
     out[e] = pts.map((p, i) => {
-      let sum = 0, n = 0;
-      for (let j = i; j >= 0 && ts[i] - ts[j] <= ROLLING_MS; j--) { sum += pts[j].v; n++; }
-      return { t: p.t, v: sum / n };
+      const cutoff = Math.min(until.get(p.t.getTime()) - ROLLING_MS, p.t.getTime());
+      let sum = 0, w = 0;
+      for (let j = i; j >= 0 && pts[j].t.getTime() >= cutoff; j--) { sum += pts[j].v * pts[j].w; w += pts[j].w; }
+      return { t: p.t, v: sum / w };
     });
   }
   return out;
@@ -1215,7 +1218,7 @@ function newsSeries(rows) {
   for (const [e, buckets] of byEngine) {
     out[e] = [...buckets]
       .sort(([a], [b]) => a - b)
-      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
+      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n, w: agg.n }));
   }
   return out;
 }
@@ -1467,27 +1470,27 @@ function drawSlice(cardId, series, empty) {
 }
 
 const TREND_SLICES = [
-  ["trend-rare", "agentic_rare", "ndcg"],
-  ["trend-finance-recall", "finance", "recall"],
-  ["trend-finance-mrr", "finance", "mrr"],
-  ["trend-finance-filings", "finance", "filings_recall"],
-  ["trend-finance-filingdoc", "finance", "filingdoc_recall"],
-  ["trend-scholar-recall", "scholar", "recall"],
-  ["trend-scholar-title", "scholar", "title_recall"],
-  ["trend-scholar-body", "scholar", "body_recall"],
-  ["trend-scholar-clue", "scholar", "clue_recall"],
-  ["trend-scholar-tot", "scholar", "tot_recall"],
-  ["trend-legal-recall", "legal", "recall"],
-  ["trend-legal-caselaw", "legal", "caselaw_recall"],
-  ["trend-legal-code", "legal", "code_recall"],
+  ["trend-rare", "agentic_rare", "ndcg", "num_scored"],
+  ["trend-finance-recall", "finance", "recall", "num_scored"],
+  ["trend-finance-mrr", "finance", "mrr", "num_scored"],
+  ["trend-finance-filings", "finance", "filings_recall", "filings_n"],
+  ["trend-finance-filingdoc", "finance", "filingdoc_recall", "filingdoc_n"],
+  ["trend-scholar-recall", "scholar", "recall", "num_scored"],
+  ["trend-scholar-title", "scholar", "title_recall", "title_n"],
+  ["trend-scholar-body", "scholar", "body_recall", "body_n"],
+  ["trend-scholar-clue", "scholar", "clue_recall", "clue_n"],
+  ["trend-scholar-tot", "scholar", "tot_recall", "tot_n"],
+  ["trend-legal-recall", "legal", "recall", "num_scored"],
+  ["trend-legal-caselaw", "legal", "caselaw_recall", "caselaw_n"],
+  ["trend-legal-code", "legal", "code_recall", "code_n"],
 ];
 
 let drawAllTrends = null;
 
 function drawTrends(rows) {
   const pending = new Map([["trend-news", () => drawSlice("trend-news", newsSeries(rows))]]);
-  for (const [id, bench, metric] of TREND_SLICES) {
-    pending.set(id, () => drawSlice(id, seriesFor(bench, metric, rows),
+  for (const [id, bench, metric, weight] of TREND_SLICES) {
+    pending.set(id, () => drawSlice(id, seriesFor(bench, metric, weight, rows),
       `No ${verticalName(bench)} data yet — collected daily.`));
   }
   const flush = (all) => {

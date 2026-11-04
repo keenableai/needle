@@ -3,12 +3,12 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from needle.shared.recall import (
-    answered,
     build_match_rows,
     first_rank,
     group_recall,
     recall_summary,
     run_known_item_eval,
+    scored_queries,
 )
 from needle.shared.search import (
     DEFAULT_SNIPPET_CHARS,
@@ -21,11 +21,8 @@ CLUSTER_URL_RE = re.compile(r"courtlistener\.com/opinion/(\d+)/", re.IGNORECASE)
 JUSTIA_US_RE = re.compile(
     r"supreme\.justia\.com/cases/federal/us/(\d{1,4})/(\d{1,5})", re.IGNORECASE
 )
-JUSTIA_APPELLATE_RE = re.compile(
-    r"law\.justia\.com/cases/federal/appellate-courts/[a-z0-9]+/(\d{2}-\d{1,5})", re.IGNORECASE
-)
 CITE_RE = re.compile(r"(\d{1,4})\s+([A-Za-z][\w.'’]*(?:\s[A-Za-z][\w.'’]*){0,3}?)\s+(\d{1,5})")
-DOCKET_RE = re.compile(r"\b(\d{2})\s?[-–]\s?(\d{1,5})\b|\b(\d{2})([aA])(\d{1,4})\b")
+DOCKET_RE = re.compile(r"\b(\d{2})\s*[-–]\s*(\d{1,5})\b|\b(\d{2})([aA])(\d{1,4})\b")
 CFR_TEXT_RE = re.compile(
     r"(\d{1,2})\s*C\.?\s?F\.?\s?R\.?\s*(?:part\s*)?(?:§+\s*)?(\d+\.[\w.\-]+)", re.IGNORECASE
 )
@@ -56,8 +53,11 @@ def norm_citation(raw: str) -> str | None:
     return f"{m.group(1)}:{reporter}:{m.group(3)}"
 
 
-def norm_docket(raw: str) -> str:
-    return re.sub(r"[\s–]", "", raw.replace("–", "-")).lower()
+def extract_dockets(text: str) -> set[str]:
+    return {
+        f"{m.group(1)}-{m.group(2)}" if m.group(1) else f"{m.group(3)}a{m.group(5)}".lower()
+        for m in DOCKET_RE.finditer(text)
+    }
 
 
 @dataclass
@@ -88,17 +88,11 @@ def extract_legal_ids(result: SearchResult, *, snippet_chars: int) -> LegalIds:
         ids.clusters.add(m.group(1))
     for m in JUSTIA_US_RE.finditer(url):
         ids.cites.add(f"{m.group(1)}:us:{m.group(2)}")
-    for m in JUSTIA_APPELLATE_RE.finditer(url):
-        ids.dockets.add(norm_docket(m.group(1)))
     for m in CITE_RE.finditer(text):
         reporter = norm_reporter(m.group(2))
         if reporter in REPORTER_ALLOWED:
             ids.cites.add(f"{m.group(1)}:{reporter}:{m.group(3)}")
-    for m in DOCKET_RE.finditer(f"{text} {url}"):
-        if m.group(1):
-            ids.dockets.add(f"{m.group(1)}-{m.group(2)}")
-        else:
-            ids.dockets.add(f"{m.group(3)}a{m.group(5)}".lower())
+    ids.dockets |= extract_dockets(f"{text} {url}")
     for m in CFR_TEXT_RE.finditer(text):
         ids.cfr.add(f"{int(m.group(1))}:{m.group(2).rstrip('.')}")
     for pat in CFR_URL_RES:
@@ -129,7 +123,7 @@ def ids_match(gold: GoldLegal, found: LegalIds, *, result_text: str) -> bool:
         return True
     if gold.cfr and gold.cfr in found.cfr:
         return True
-    if gold.docket and norm_docket(gold.docket) in found.dockets:
+    if extract_dockets(gold.docket) & found.dockets:
         if any(
             token.strip()
             and re.search(
@@ -144,7 +138,7 @@ def ids_match(gold: GoldLegal, found: LegalIds, *, result_text: str) -> bool:
 
 
 def _summary(per_query: list[dict], latency: dict | None) -> dict[str, Any]:
-    scored = answered(per_query)
+    scored = scored_queries(per_query)
     return {
         **recall_summary(per_query, latency),
         "by_bucket": group_recall(scored, lambda pq: pq["bucket"]),

@@ -1,12 +1,14 @@
 import asyncio
+import random
 from collections.abc import Awaitable, Callable
 
 import httpx
 
 MAX_ERROR_CHARS = 500
 RETRY_ATTEMPTS = 3
+RATE_LIMIT_ATTEMPTS = 6
 RETRY_BASE_S = 1.0
-RETRY_MAX_S = 30.0
+RETRY_MAX_S = 60.0
 RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
 
 
@@ -19,9 +21,12 @@ async def send_with_retry(
 ) -> tuple[httpx.Response | None, tuple[str, str] | None]:
     err: tuple[str, str] | None = None
     delay = base_s
-    for attempt in range(attempts):
+    limit = attempts
+    for attempt in range(max(attempts, RATE_LIMIT_ATTEMPTS)):
         if attempt:
-            await asyncio.sleep(delay)
+            if attempt >= limit:
+                break
+            await asyncio.sleep(delay * random.uniform(1.0, 1.25))
             delay = min(delay * 2, RETRY_MAX_S)
         try:
             resp = await send()
@@ -34,6 +39,8 @@ async def send_with_retry(
             continue
         if resp.status_code in RETRYABLE_STATUSES:
             err = ("http_error", f"{resp.status_code}: {resp.text[:MAX_ERROR_CHARS]}")
+            if resp.status_code == 429:
+                limit = max(attempts, RATE_LIMIT_ATTEMPTS)
             retry_after = resp.headers.get("retry-after")
             if retry_after is not None:
                 try:

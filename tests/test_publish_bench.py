@@ -25,7 +25,9 @@ def _report(by_bucket):
                 "by_bucket": by_bucket,
                 "by_syntax": {},
                 "num_scored": 7,
-                "search_errors": 1,
+                "search_errors": 3,
+                "account_errors": 1,
+                "service_errors": 2,
                 "latency": None,
             }
         },
@@ -44,6 +46,7 @@ def test_scholar_rows_publish_slice_denominators():
     )[0]
     assert row["title_n"] == 2
     assert row["body_n"] == 5
+    assert (row["search_errors"], row["account_errors"], row["service_errors"]) == (3, 1, 2)
 
 
 def test_suite_rows_publish_slice_denominators():
@@ -58,6 +61,7 @@ def test_suite_rows_publish_slice_denominators():
     )[0]
     assert row["filings_n"] == 3
     assert row["filingdoc_n"] == 4
+    assert (row["search_errors"], row["account_errors"], row["service_errors"]) == (3, 1, 2)
 
 
 def test_publish_writes_ci_files(tmp_path):
@@ -68,6 +72,8 @@ def test_publish_writes_ci_files(tmp_path):
                 "mean_ndcg": 0.5,
                 "num_scored": 2,
                 "search_errors": 0,
+                "account_errors": 0,
+                "service_errors": 0,
                 "judge_errors": 0,
                 "latency": None,
                 "per_query": [
@@ -106,6 +112,8 @@ def test_publish_trims_old_latency_and_writes_independence(tmp_path):
                 "mean_ndcg": 0.5,
                 "num_scored": 1,
                 "search_errors": 0,
+                "account_errors": 0,
+                "service_errors": 0,
                 "judge_errors": 0,
                 "latency": {"p50_ms": 100, "p95_ms": 200, "samples_ms": [100]},
                 "per_query": [
@@ -131,6 +139,7 @@ def test_publish_trims_old_latency_and_writes_independence(tmp_path):
     history = [json.loads(line) for line in (data / "history.jsonl").read_text().splitlines()]
     assert [("lat_ms" in r) for r in history] == [True, True, True, True, False, False]
     assert all(r["p50_ms"] == 100 for r in history)
+    assert all(r["account_errors"] == 0 and r["service_errors"] == 0 for r in history)
     independence = json.loads((data / "independence.json").read_text(encoding="utf-8"))
     assert independence["all"]["overlap"][0]["union_urls"] == 3
     assert independence["week"]["overlap"][0]["union_urls"] == 2
