@@ -61,7 +61,7 @@ def extract_pmcid(url: str) -> set[str]:
 
 
 def _clean_doi(raw: str) -> str:
-    doi = raw.rstrip(".)").rstrip(",")
+    doi = raw.rstrip(".,;:)/")
     return DOI_SUFFIX_RE.sub("", doi).lower()
 
 
