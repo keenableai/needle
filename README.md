@@ -55,10 +55,11 @@ All `run` commands share one interface:
 
 Each engine has one request in flight at a time (scholar runs with
 `--search-concurrency 2`), so latency samples are comparable across engines.
-They time successful requests on an open connection: the requests that open an
-engine's first connections in a run are not timed, since they include
-connection setup and, where a bench queries all engines in parallel, every
-engine starting at once. A later request that has to open a new connection is
+They time successful requests excluding connection warm-up: the requests that
+open an engine's first connections in a run are not timed, since they pay
+one-time connection setup and, where a bench queries all engines in parallel,
+every engine starting at once. Latency therefore shows performance on repeated
+requests. A later request that has to open a new connection is
 timed and counted in `latency.reconnects`. Per-engine tuning uses env vars: `TAVILY_DEPTH`, `LINKUP_DEPTH`, `NEEDLE_CLAUDE_SEARCH_MODEL`
 (default `claude-sonnet-5`), `NEEDLE_CHATGPT_SEARCH_MODEL` (default `gpt-5.5`); the engine
 entry fixes Keenable's, Exa's, Parallel's and Perplexity's modes and Brave's
