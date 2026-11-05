@@ -78,6 +78,7 @@ scored on the title, URL and snippet an agent receives. It does not score
 the agent's final answer, as BrowseComp does \citep{wei2025browsecomp}, or
 hold the corpus fixed, as FreshStack does \citep{thakur2025freshstack}.
 Fresh queries and reference answers limit dependence on a fixed test set,
+which can leak into training data \citep{sainz2023trouble,balloccu2024leak},
 though registry facts and rare queries can repeat.
 
 The benchmark combines five tasks, automatic scoring and a pooled
@@ -104,6 +105,35 @@ run-level bootstrap intervals. Scores follow the dashboard rules.}
 \label{fig:results}
 \end{figure*}
 
+\section{Related Work}
+\label{sec:related}
+
+\textbf{Live benchmarks.} LiveBench, LiveCodeBench, RealTime QA, FreshQA,
+LiveSearchBench and LiveNewsBench draw new items from dated sources
+\citep{white2025livebench,jain2025livecodebench,kasai2023realtimeqa,vu2024freshllms,zhou2026livesearchbench,zhang2026livenewsbench}.
+They score a model's answer; FreshStack scores retrievers on a fixed corpus
+\citep{thakur2025freshstack}.
+
+\textbf{Agents and search APIs.} BrowseComp, GAIA and AssistantBench score
+agents end to end \citep{wei2025browsecomp,mialon2024gaia,yoran2024assistantbench};
+BrowseComp-Plus fixes the corpus to isolate the retriever
+\citep{chen2026browsecompplus}. Recent studies and leaderboards swap the
+search API under one agent on static questions
+\citep{selvam2026search,aa2026searchindex,openbenchmarks2026websearch}.
+Other studies describe how agents search
+\citep{ning2026agentic,pezzuti2026agentssearch}. Web engine audits compare
+engines on fixed query sets
+\citep{lewandowski2015evaluating,bevendorff2024google,kirsten2026characterizing}.
+
+\textbf{Judges and known items.} LLM assessors can reproduce system
+rankings \citep{thomas2024llms,upadhyay2025largescale,arabzadeh2025benchmarking}.
+Simulated known-item and tip-of-tongue queries can rank systems
+\citep{azzopardi2007simulated,he2025totelicitation}, and full text helps
+retrieval beyond abstracts \citep{lin2009fulltext}. Domain benchmarks
+cover literature, caselaw and finance search
+\citep{ajith2024litsearch,hou2025clerc,hu2026finsearchcomp}. \needle
+combines fresh queries, isolated API scoring and these scorers.
+
 \section{The Benchmark}
 \label{sec:bench}
 
@@ -118,18 +148,26 @@ counts.
 \textbf{News.} Each hour an LLM writes short event queries from the newest
 items in 124 feeds and Google Trends RSS for 52 US geographies. A run
 samples 20 queries across topics and rejects evergreen items.
-\textbf{Finance.} Queries ask for company facts from Wikidata and GLEIF,
-quarterly 10-Q figures from SEC XBRL, or filings by description.
-\textbf{Scholar.} Each paper yields four paired queries: its normalized
-\emph{title}; \emph{body keywords} for a detail absent from title and
-abstract; a
-\emph{body question} about that detail; and a \emph{tip-of-tongue}
-description without names or exact values. All four must pass the filters.
-\textbf{Legal.} Recent opinions from 14 federal courts yield caption
-queries. CFR sections yield queries based on a verbatim two-to-eight-word
-span, quoted in one of four variants. Filters reject citation leaks.
-\textbf{Rare.} We sample a fixed public stream of English agent queries
-containing a word split into at least five WordPieces.
+\textbf{Finance.} Queries ask for company facts from Wikidata
+\citep{vrandecic2014wikidata} and GLEIF, quarterly 10-Q figures from SEC
+XBRL, or filings by description.
+\textbf{Scholar.} Each recent arXiv or Europe PMC \citep{europepmc2015}
+paper yields four paired known-item queries \citep{azzopardi2007simulated}:
+its normalized \emph{title}; \emph{body keywords} for a detail absent from
+title and abstract; a \emph{body question} about that detail; and a
+\emph{tip-of-tongue} description \citep{arguello2021tot} without names or
+exact values. All four must pass the filters.
+\textbf{Legal.} Recent opinions from 14 federal courts on CourtListener
+yield caption queries. eCFR sections yield queries based on a verbatim
+two-to-eight-word span, quoted in one of four variants. Filters reject
+citation leaks.\footnote{Sources: \url{trends.google.com},
+\url{api.gleif.org}, \url{data.sec.gov}, \url{courtlistener.com},
+\url{ecfr.gov}.}
+\textbf{Rare.} We sample a fixed public stream of agent queries
+\citep{ning2026agentic,li2026openresearcher,zhou2026lrat}, keeping English
+ones (fastText language ID; \citealp{joulin2017bag,joulin2016fasttextzip})
+that contain a word split into at least five BERT WordPieces
+\citep{wu2016gnmt,devlin2019bert}.
 Appendix~\ref{app:leak} gives filters and examples.
 
 At least half of legal queries and finance money and filing queries carry
@@ -141,15 +179,17 @@ operators to native filters where available (Appendix~\ref{app:ops}).
 
 \textbf{News and rare.} GPT-6 rates each distinct result from 0 to 4 using
 a shared query profile, with checks for relevance, coverage, freshness and
-literal operator compliance. The scale follows the Needs Met guidelines
-\citep{google2025sqrg}. Ratings 0--4 map to gains
-$\{0,0,.117,.667,1\}$, with high weight on strong results
-\citep{chapelle2009err}. Snippets have a 2,000-character cap. Repeated URLs
-score zero except on \texttt{site:} queries.
+literal operator compliance, as LLM relevance assessors do
+\citep{thomas2024llms,upadhyay2025largescale}. The scale adapts the Needs
+Met levels of \citet{google2025sqrg}. Ratings 0--4 map to gains
+$\{0,0,.117,.667,1\}$; this design choice puts high weight on strong
+results \citep{kanoulas2009empirical}. Snippets have a 2,000-character cap.
+Repeated URLs score zero except on \texttt{site:} queries.
 
 For each query, the \emph{ceiling} keeps the best rating per normalized
-URL across all configurations, variants included, and sorts these ratings.
-An engine's \ndcg uses this list as its ideal. We drop a query-run from
+URL across all configurations, variants included, and sorts these ratings,
+as in pooled test collections \citep{sparckjones1975pool,zobel1998reliable}.
+An engine's \ndcg \citep{jarvelin2002cumulated} uses this list as its ideal. We drop a query-run from
 all engines if any judgment fails or no result reaches rating 2.
 Appendix~\ref{app:example} gives the formula and an example.
 
@@ -180,8 +220,8 @@ all 21 main engines took part. On finance, scholar and legal, account-side
 failures (our quota, rate limit, login or credit) are excluded; other
 failures score zero. On news and rare, every failure in this window scores
 zero. These exclusions remove up to 28\% of an engine's query-runs.
-Intervals use run-level bootstraps and measure sampling error, not scorer
-error. Appendices~\ref{app:examples} and~\ref{app:checks} specify the rules
+Intervals use run-level bootstraps \citep{efron1993bootstrap} and measure
+sampling error, not scorer error. Appendices~\ref{app:examples} and~\ref{app:checks} specify the rules
 and test alternatives.
 
 \begin{table*}[t]
@@ -213,7 +253,7 @@ $^\S$Account-side exclusions leave rank uncertain
 \paragraph{Most engine pairs differ, but rank alone is not enough.}
 Overall shares span 14.7\% (Ceramic) to 73.2\% (Keenable).
 Run-resampled paired tests separate 188 of 210 pairs at 95\%, 178 after
-Bonferroni adjustment, and 164 under both day-level resampling and matched
+Bonferroni adjustment \citep{carterette2012multiple}, and 164 under both day-level resampling and matched
 query support. Only Keenable and Ceramic differ from every other engine
 after adjustment. Scholar supplies 3.7 points of Keenable's 4.7-point lead
 over Exa; without it the lead is 1.2 points. Appendix~\ref{app:checks}
@@ -226,7 +266,8 @@ from titles. The same 23 span .08--.72 on body keywords
 .72, followed by its realtime mode (.71) and Kagi (.67).
 
 \paragraph{Weekly ranks are stable, not fixed.}
-Adjacent weekly rankings agree at Kendall's $\tau_b$ .81--.94, and Keenable
+Adjacent weekly rankings agree at Kendall's $\tau_b$ \citep{kendall1945ties}
+.81--.94, and Keenable
 leads all eight weeks (Figure~\ref{fig:results}b). Lower ranks shift:
 Perplexity passes Parallel, and Claude search falls about 13 points, about
 half due to our credit lapse. A later day's runs put Perplexity ahead of
@@ -234,8 +275,8 @@ Keenable, 72.4 to 71.3. That change rests on one scholar and one legal run,
 within each bench's run-to-run range (Appendix~\ref{app:checks}).
 
 \paragraph{LLM raters broadly agree with the judge.}
-Blinded raters from three vendors grade 1,200 results with agreement
-$\kappa$ .90--.94 with one another and .77--.79 with the judge. On 100
+Blinded raters from three vendors grade 1,200 results with quadratic-weighted
+$\kappa$ \citep{cohen1968weighted} .90--.94 with one another and .77--.79 with the judge. On 100
 complete query pools, two raters each rank engines at Spearman .94 with
 the judge, but neither separates Keenable from Exa. These are checks of
 model agreement, not human validation. Removing an engine from the ceiling
@@ -246,8 +287,10 @@ Appendices~\ref{app:validation} and~\ref{app:checks} give the checks.
 In a paired test, adding \texttt{site:courtlistener.com} to the same 80
 case captions lowers mean recall@5 by .36, from .85; 15 of 18 engines lose
 beyond their 95\% intervals. Site restrictions help SEC filings (+.35) and
-CFR sections (+.25). The test does not separate index coverage, ranking
-and filter behavior (Appendix~\ref{app:opsres}).
+CFR sections (+.25). An earlier test with paired queries found that most
+operators had no significant effect on three web engines
+\citep{eastman2003operators}. The test does not separate index
+coverage, ranking and filter behavior (Appendix~\ref{app:opsres}).
 
 \section*{Limitations}
 
@@ -260,13 +303,16 @@ whether a vendor changed its index for the benchmark or for other reasons.
 
 \paragraph{Evidence and judge.}
 Scores measure the API response, not the fetched page. Short snippets can
-hide relevant content, and identifier matching can miss a target without
+hide relevant content \citep{turpin2009summaries,kazai2022less}, and identifier matching can miss a target without
 its id. On 400 sampled results, page text changes 25\% of grades. News and
 rare depend on one judge; all audit raters are LLMs, and none provides
-human validation. Shared rules can cause shared errors. Query-term
-stuffing can fool judges \citep{alaofi2024fooled}; vendor and model biases
-can affect scores \citep{balog2025rankers,soboroff2025dont}. The judge shares
-a vendor with ChatGPT search; a second judge shares one with Claude search.
+human validation, which LLM labels cannot replace
+\citep{faggioli2023perspectives,clarke2025llmbased}. Shared rules can cause
+shared errors. Query-term stuffing can fool judges \citep{alaofi2024fooled};
+vendor and model biases can affect scores
+\citep{balog2025rankers,soboroff2025dont}. The judge shares a vendor with
+ChatGPT search, and a second judge shares one with Claude search; LLM
+evaluators can favor their own outputs \citep{panickssery2024self}.
 
 \paragraph{Matcher error.}
 Finance table figures can match the wrong period when snippets omit column
@@ -282,7 +328,7 @@ agent traffic, and the lead depends strongly on scholar. Default API tiers
 need not be each vendor's best. ChatGPT and Claude search return sources
 through answer-generating tools, so their quality scores are comparable
 but their latency and cost are not. The ceiling depends on the engine
-pool; compare shares within a common window.
+pool \citep{buckley2007bias}; compare shares within a common window.
 
 \paragraph{Failures and timing.}
 Excluding account-side failures assumes those requests would score like
@@ -465,8 +511,8 @@ dates or per-run code revisions, so re-judging is approximate.
 
 \subsection{Data and release terms}
 
-The rare stream draws from DeepResearchGym search logs (59\%, CC BY 4.0;
-\citealp{ning2026agentic}), OpenResearcher trajectories (39\%, MIT;
+The rare stream draws from DeepResearchGym \citep{coelho2026deepresearchgym}
+search logs (59\%, CC BY 4.0; \citealp{ning2026agentic}), OpenResearcher trajectories (39\%, MIT;
 \citealp{li2026openresearcher}) and LRAT-Train (1\%, no stated license;
 \citealp{zhou2026lrat}). Source terms govern query texts. Our code is MIT;
 our CC BY 4.0 covers our results, judgments and metadata, not source text.
@@ -557,7 +603,9 @@ snippet; \texttt{site:} must match the URL host. The judge must use the
 result's text and authority, not its own answer knowledge.
 
 Ratings 0--1 mean Fails to Meet, 2 Slightly Meets, 3 Highly Meets and 4
-Fully Meets. Prompts live in \texttt{src/needle/shared/prompts}.
+Fully Meets. The scale has no Moderately Meets level, and rating 4 does not
+need the single-answer intent that the guidelines require for Fully Meets
+\citep{google2025sqrg}. Prompts live in \texttt{src/needle/shared/prompts}.
 
 \subsection{Ceiling and worked example}
 \label{app:example}
@@ -975,7 +1023,8 @@ five, so the audit checks query-level recall decisions
 (\texttt{fresh\_finance.py}, \texttt{audit/fresh/}).
 
 Exact-band precision is .93. Of 335 table-reading hits, 235 confirm the
-right figure and period (.70, Wilson interval .65--.75), 95 omit period
+right figure and period (.70, Wilson interval
+\citealp{wilson1927probable}, .65--.75), 95 omit period
 labels and five contradict the answer. Precision is .70 if unresolved
 hits count as wrong, .99 if only contradictions do. Confirmation rates
 vary: Exa 42/44 and Perplexity 27/31, versus Keenable 14/20, Parallel
