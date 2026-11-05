@@ -21,9 +21,12 @@ USER_AGENT = "needle/0.1 (contact@keenable.ai)"
 
 
 KEEPALIVE_EXPIRY_S = 300.0
+CONNECT_EVENT = "connection.connect_tcp.started"
 
 
-def latency_stats(latencies_ms: list[float]) -> dict[str, float | int | list[float]] | None:
+def latency_stats(
+    latencies_ms: list[float], reconnects: int = 0
+) -> dict[str, float | int | list[float]] | None:
     if not latencies_ms:
         return None
     values = sorted(latencies_ms)
@@ -33,6 +36,7 @@ def latency_stats(latencies_ms: list[float]) -> dict[str, float | int | list[flo
 
     return {
         "n": len(values),
+        "reconnects": reconnects,
         "mean_ms": round(sum(values) / len(values), 1),
         "p50_ms": round(pct(0.5), 1),
         "p95_ms": round(pct(0.95), 1),
@@ -111,6 +115,7 @@ def serp_results(
 class SearchClient(Protocol):
     engine: str
     latencies_ms: list[float]
+    reconnects: int
 
     async def search(
         self, query: str, *, num_results: int = 10
@@ -190,6 +195,8 @@ class HttpSearchClient:
             self.base_url = base_url.rstrip("/")
         self.timeout_s = timeout_s
         self.latencies_ms: list[float] = []
+        self.reconnects = 0
+        self._warm = False
         self._client: httpx.AsyncClient | None = None
         self._sem = asyncio.Semaphore(max_concurrency)
         self._next_send_at = 0.0
@@ -201,6 +208,7 @@ class HttpSearchClient:
 
     def _http(self) -> httpx.AsyncClient:
         if self._client is None:
+            self._warm = False
             self._client = httpx.AsyncClient(
                 timeout=self.timeout_s,
                 headers=self.default_headers,
@@ -227,16 +235,29 @@ class HttpSearchClient:
 
     async def _send(
         self, method: str, url: str, **kwargs: Any
-    ) -> tuple[httpx.Response | None, float, dict[str, str] | None]:
-        elapsed_ms = 0.0
+    ) -> tuple[httpx.Response | None, float | None, dict[str, str] | None]:
+        elapsed_ms: float | None = None
 
         async def send() -> httpx.Response:
             nonlocal elapsed_ms
             await self._pace()
             note_request_time()
+            http = self._http()
+            warming = not self._warm
+            connected = False
+
+            async def trace(event: str, info: dict[str, Any]) -> None:
+                nonlocal connected
+                connected = connected or event == CONNECT_EVENT
+
             started = time.perf_counter()
-            resp = await self._http().request(method, url, **kwargs)
+            resp = await http.request(method, url, extensions={"trace": trace}, **kwargs)
             elapsed_ms = (time.perf_counter() - started) * 1000.0
+            self._warm = True
+            if connected and warming:
+                elapsed_ms = None
+            elif connected:
+                self.reconnects += 1
             return resp
 
         async with self._sem:
@@ -245,7 +266,7 @@ class HttpSearchClient:
             )
         if resp is None:
             assert err is not None
-            return None, 0.0, {"error_type": err[0], "error_message": err[1]}
+            return None, None, {"error_type": err[0], "error_message": err[1]}
         return resp, elapsed_ms, None
 
     async def _request_json(
@@ -271,7 +292,8 @@ class HttpSearchClient:
                 "error_type": "api_error",
                 "error_message": str(payload[error_field])[:MAX_ERROR_CHARS],
             }
-        self.latencies_ms.append(elapsed_ms)
+        if elapsed_ms is not None:
+            self.latencies_ms.append(elapsed_ms)
         return payload, None
 
     async def _request_text(

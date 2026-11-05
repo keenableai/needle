@@ -13,6 +13,7 @@ class FakeEngine:
     def __init__(self, engine, table):
         self.engine = engine
         self.latencies_ms = []
+        self.reconnects = 0
         self._table = table
 
     async def search(self, query, *, num_results=10):
@@ -66,6 +67,7 @@ async def test_recall_mrr_and_rank():
     assert e["by_bucket"]["title"]["recall_at_k"] == 0.5
     assert e["latency"] == {
         "n": 1,
+        "reconnects": 0,
         "mean_ms": 50.0,
         "p50_ms": 50.0,
         "p95_ms": 50.0,

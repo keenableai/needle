@@ -167,7 +167,10 @@ async def run_known_item_eval(
         **(extra or {}),
         "engines": summarize_engines(
             query_outs,
-            {name: latency_stats(engines[name].latencies_ms) for name in engine_names},
+            {
+                name: latency_stats(engines[name].latencies_ms, engines[name].reconnects)
+                for name in engine_names
+            },
             summary,
             ultimate_fn,
             cap=num_results,

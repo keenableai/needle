@@ -134,7 +134,9 @@ def _fully_judged(run: QueryRun) -> bool:
     return all(j is not None for judgements in run.judgements for j in judgements)
 
 
-def _summarize(per_query: list[dict[str, Any]], *, latencies_ms: list[float]) -> dict[str, Any]:
+def _summarize(
+    per_query: list[dict[str, Any]], *, latencies_ms: list[float], reconnects: int = 0
+) -> dict[str, Any]:
     for pq in per_query:
         pq["score"] = pq["ndcg"]
     scored = [pq["ndcg"] for pq in per_query if pq["ndcg"] is not None]
@@ -143,7 +145,7 @@ def _summarize(per_query: list[dict[str, Any]], *, latencies_ms: list[float]) ->
         "num_scored": len(scored),
         **error_counts(per_query),
         "judge_errors": sum(pq["judge_errors"] for pq in per_query),
-        "latency": latency_stats(latencies_ms),
+        "latency": latency_stats(latencies_ms, reconnects),
         "per_query": per_query,
     }
 
@@ -251,7 +253,11 @@ async def run_ndcg(
                     queried_at=search.queried_at,
                 )
             )
-        engines_out[name] = _summarize(per_query, latencies_ms=engines[name].latencies_ms)
+        engines_out[name] = _summarize(
+            per_query,
+            latencies_ms=engines[name].latencies_ms,
+            reconnects=engines[name].reconnects,
+        )
     if names:
         engines_out[ULTIMATE] = _summarize(ultimate_pqs, latencies_ms=[])
 

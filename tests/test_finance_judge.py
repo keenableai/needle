@@ -28,6 +28,7 @@ class FakeEngine:
     def __init__(self, canned):
         self.canned = canned
         self.latencies_ms = []
+        self.reconnects = 0
 
     async def search(self, query, *, num_results=10):
         return self.canned.get(query, ([], None))
