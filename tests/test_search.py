@@ -1,6 +1,9 @@
 import asyncio
+import json
 import re
+import threading
 from datetime import UTC, date, datetime, timedelta
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 import httpx
 import pytest
@@ -1693,6 +1696,7 @@ def test_latency_stats():
     assert latency_stats([]) is None
     assert latency_stats([100.0]) == {
         "n": 1,
+        "reconnects": 0,
         "mean_ms": 100.0,
         "p50_ms": 100.0,
         "p95_ms": 100.0,
@@ -1703,6 +1707,63 @@ def test_latency_stats():
     assert stats["mean_ms"] == 50.5
     assert stats["p50_ms"] == 50.0
     assert stats["p95_ms"] == 95.0
+    assert latency_stats([100.0], 3)["reconnects"] == 3
+
+
+@pytest.fixture
+def local_api():
+    class Handler(BaseHTTPRequestHandler):
+        protocol_version = "HTTP/1.1"
+
+        def do_POST(self):
+            query = json.loads(self.rfile.read(int(self.headers["Content-Length"])))["query"]
+            body = json.dumps({"results": []}).encode()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            if query == "close":
+                self.send_header("Connection", "close")
+                self.close_connection = True
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *args):
+            pass
+
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    yield f"http://127.0.0.1:{server.server_address[1]}"
+    server.shutdown()
+    server.server_close()
+
+
+async def test_first_connection_is_not_timed(local_api):
+    c = KeenableClient(base_url=local_api)
+    for q in ("a", "b", "c"):
+        _, err = await c.search(q)
+        assert err is None
+    await c.aclose()
+    assert len(c.latencies_ms) == 2
+    assert c.reconnects == 0
+
+
+async def test_concurrent_first_connections_are_not_timed(local_api):
+    c = KeenableClient(base_url=local_api)
+    c.set_max_concurrency(2)
+    await asyncio.gather(c.search("a"), c.search("b"))
+    await c.search("c")
+    await c.aclose()
+    assert len(c.latencies_ms) == 1
+    assert c.reconnects == 0
+
+
+async def test_reconnect_is_timed_and_counted(local_api):
+    c = KeenableClient(base_url=local_api)
+    for q in ("a", "close", "b"):
+        await c.search(q)
+    await c.aclose()
+    assert len(c.latencies_ms) == 2
+    assert c.reconnects == 1
 
 
 def test_parse_ops_extracts_operators():

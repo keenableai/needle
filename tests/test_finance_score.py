@@ -64,6 +64,7 @@ class FakeEngine:
         self.canned = canned
         self.closed = False
         self.latencies_ms = []
+        self.reconnects = 0
 
     async def search(self, query, *, num_results=10):
         return self.canned.get(query, ([], None))
@@ -169,6 +170,7 @@ async def test_run_answers_reports_latency():
     report = await run_answers([CEO_Q], {"timed": timed, "plain": FakeEngine({})})
     assert report["engines"]["timed"]["latency"] == {
         "n": 1,
+        "reconnects": 0,
         "mean_ms": 50.0,
         "p50_ms": 50.0,
         "p95_ms": 50.0,

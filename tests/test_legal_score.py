@@ -82,6 +82,7 @@ class FakeEngine:
         self._results = results
         self._error = error
         self.latencies_ms = [10.0]
+        self.reconnects = 0
 
     async def search(self, query, *, num_results=10):
         if self._error is not None:

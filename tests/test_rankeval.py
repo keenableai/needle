@@ -29,6 +29,7 @@ class FakeEngine:
         self._results = results
         self._error = error
         self.latencies_ms = []
+        self.reconnects = 0
 
     async def search(self, query, *, num_results=10):
         if self._error is not None:
@@ -78,6 +79,7 @@ async def test_run_ndcg_excludes_search_error_without_ideal():
     class FlakyEngine:
         engine = "flaky"
         latencies_ms = []
+        reconnects = 0
 
         async def search(self, query, *, num_results=10):
             if query == "q_err":
@@ -216,6 +218,7 @@ async def test_run_ndcg_reports_latency():
     report = await run_ndcg([q("q1")], {"timed": timed, "plain": FakeEngine([])}, FakeJudge())
     assert report["engines"]["timed"]["latency"] == {
         "n": 2,
+        "reconnects": 0,
         "mean_ms": 200.0,
         "p50_ms": 100.0,
         "p95_ms": 300.0,
