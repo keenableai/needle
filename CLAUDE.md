@@ -12,13 +12,17 @@ the filtered artifact and evaluates it like news.
 
 ## Layout
 
-- `dashboard/index.html` — the whole dashboard: one self-contained static
-  page, vanilla JS, no build step; the bench workflow deploys it to gh-pages.
+- `dashboard/` — static site, vanilla JS, no build step; the bench workflow
+  deploys the tree to gh-pages. `index.html` is the live leaderboard;
+  `compare/`, `news/`, `finance/`, `scholar/`, `legal/`, and `methodology/`
+  are crawlable subpages; `assets/` holds shared CSS/JS; `llms.txt`,
+  `llms-full.txt`, `robots.txt`, and `sitemap.xml` are for search/GEO.
 - Dashboard data: `scripts/publish_bench.py` publishes `data/history.jsonl`,
   `overlap.jsonl`, `uniqueness.jsonl`, `independence.json` (their
   all-runs and last-7-days totals, the only form the dashboard loads),
-  `latest_*.json`, `runs.json`, and `families.json`; `history.jsonl`
-  keeps raw `lat_ms` samples only for the last 7 days; per-run artifacts live on the HF dataset
+  `latest_*.json`, `runs.json`, `families.json`, and `catalog.json`;
+  `history.jsonl` keeps raw `lat_ms` samples only for the last 7 days;
+  per-run artifacts live on the HF dataset
   `keenable-ai/needle-results` as a slim `<bench>.json` whose engine
   entries carry `per_query_path` pointing at `<bench>/<engine>.json`; the
   dashboard follows the pointer, and `needle.shared.hf.fetch_report` merges
@@ -29,10 +33,11 @@ the filtered artifact and evaluates it like news.
 
 ## Verifying dashboard changes
 
-No dev server or test data in the repo. Copy `dashboard/index.html` into a
+No dev server or test data in the repo. Copy the `dashboard/` tree into a
 scratch `site/`, add fixtures under `site/data/` (`history.jsonl`,
-`runs.json`, an `ndcg.json`/`recall.json` in the rankeval shape), and serve
-over local HTTP (`fetch` fails on file://). Screenshot with playwright-core:
+`runs.json`, `catalog.json`, an `ndcg.json`/`recall.json` in the rankeval
+shape), and serve over local HTTP (`fetch` fails on file://). Screenshot
+with playwright-core:
 reuse the globally vendored module (`find "$(npm root -g)" -path
 '*/playwright-core/index.mjs'`, import by absolute path) and a cached
 chromium under `~/.cache/ms-playwright/`. Intercept

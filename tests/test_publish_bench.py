@@ -102,6 +102,9 @@ def test_publish_writes_ci_files(tmp_path):
     assert per_engine["per_query"] == report["engines"]["e"]["per_query"]
     runs = json.loads((site / "data" / "runs.json").read_text(encoding="utf-8"))
     assert runs[0]["artifacts"] == ["ndcg.json"]
+    catalog = json.loads((site / "data" / "catalog.json").read_text(encoding="utf-8"))
+    assert catalog["benches"]["news"]["latest"] == "latest_news.json"
+    assert catalog["updated"] == "2026-08-17T00:00Z"
 
 
 def test_publish_trims_old_latency_and_writes_independence(tmp_path):

@@ -159,6 +159,57 @@ def publish(
         ts = t.strftime(TS_FMT)
     run_id = ts.replace(":", "")
     write_json(FAMILIES, str(data / "families.json"))
+    write_json(
+        {
+            "name": "NEEDLE",
+            "url": "https://keenableai.github.io/needle/",
+            "updated": ts,
+            "benches": {
+                "news": {
+                    "metric": "nDCG@5",
+                    "cadence": "hourly",
+                    "latest": "latest_news.json",
+                    "page": "news/",
+                },
+                "finance": {
+                    "metric": "answer-recall@5",
+                    "cadence": "daily",
+                    "latest": "latest_finance.json",
+                    "page": "finance/",
+                },
+                "scholar": {
+                    "metric": "recall@10",
+                    "cadence": "daily",
+                    "latest": "latest_scholar.json",
+                    "page": "scholar/",
+                },
+                "legal": {
+                    "metric": "recall@5",
+                    "cadence": "daily",
+                    "latest": "latest_legal.json",
+                    "page": "legal/",
+                },
+                "agentic_rare": {
+                    "metric": "nDCG@5",
+                    "cadence": "daily",
+                    "latest": "latest_agentic_rare.json",
+                    "note": "query producer plus news-style eval, not a gold bench",
+                },
+            },
+            "aggregates": [
+                "history.jsonl",
+                "overlap.jsonl",
+                "uniqueness.jsonl",
+                "runs.json",
+                "families.json",
+                "ci.json",
+            ],
+            "artifacts": "https://huggingface.co/datasets/keenable-ai/needle-results",
+            "compare": "https://keenableai.github.io/needle/compare/",
+            "llms_txt": "https://keenableai.github.io/needle/llms.txt",
+        },
+        str(data / "catalog.json"),
+    )
     run_dir = Path(runs_out) / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
 

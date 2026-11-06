@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" data-root="..">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  try {
+    const t = localStorage.getItem("theme");
+    if (t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.dataset.theme = "dark";
+    }
+  } catch {}
+</script>
+<title>News search benchmark — NEEDLE</title>
+<meta name="description" content="NEEDLE news is an hourly AI search benchmark. Fresh queries from RSS and Google Trends are judged with nDCG@5 so providers cannot hide behind a stale “best search tools” list.">
+<link rel="canonical" href="https://keenableai.github.io/needle/news/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#005CFF">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NEEDLE">
+<meta property="og:title" content="News search benchmark — NEEDLE">
+<meta property="og:description" content="NEEDLE news is an hourly AI search benchmark. Fresh queries from RSS and Google Trends are judged with nDCG@5 so providers cannot hide behind a stale “best search tools” list.">
+<meta property="og:url" content="https://keenableai.github.io/needle/news/">
+<meta property="og:image" content="https://keenableai.github.io/needle/og/card-standings.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="News search benchmark — NEEDLE">
+<meta name="twitter:description" content="NEEDLE news is an hourly AI search benchmark. Fresh queries from RSS and Google Trends are judged with nDCG@5 so providers cannot hide behind a stale “best search tools” list.">
+<meta name="twitter:image" content="https://keenableai.github.io/needle/og/card-standings.png">
+<link rel="alternate" type="text/plain" href="https://keenableai.github.io/needle/llms.txt" title="llms.txt">
+<link rel="alternate" type="text/markdown" href="https://keenableai.github.io/needle/news.md" title="Markdown">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEVMaXEAYP8AXP8AXP8AXP8AXP8AXP8AXP8AXf8AXv8AXP8AXP8AXP////8qKiqArf8UQ5Zgmf/m6/Qbbv88P0UEV+mampq30f+/v78aPXo4f/8MTsF8gIdOg95fX189a72nQrWLAAAADHRSTlMAEJ9Bae+Ev98iz7BHKf9kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAAHESURBVHja7VbHlsMgDDTV4I7T2+7//+U6AVPlkuS2z3OUZwYJhEWWbdiwAYSkWLCqYkXJiQ0SWpoglfNymlcexIuOuPCDBZ2Wk4CpLTLKgCAIhCsAAgpiBBUPUicg5Hd6wCHUX5VS110o2Q0x5WIiqqLwmG1fv9B6cnXSsV6NkTLQc4+q5f35+HCeRl7X5+P9YIL+WUinb7X8p2kurqJ+lO+bATcdZV4RONY/iQe7vtU3GuYLBxK4aua98RMY9S/bJ/aHKAUccXsv0TEpY6vRRbtgj1Bp5vG5SpJA/WMNTBH5eAUs9+QMLpHpgH0Tp4DiM6ydwS0yDQ2MvbnwuWshjUfXdfYMVDvit3MINqGoPgXWBuxjA9POH+vHY/jagH1rsPpXwkQewtyGMnWmKE0rJ1M/Yx4vRP3mGP9AZGYYRFwJuIq5gYJCLo0uiDOdRDiOMuBs8PxAI2kCUQ0LEzFIwRbmpVAsjWSS9EaYQrk41Dlg4N1SvmiABLCYZOsNHLmAGgRnbzggwEGsetuIdGJZB/KGQzh2TTBf98DiLN0xxNO8ZpLAIt1zid9wGHoKF1UZdS6iQxDL9W9FBHGl3B7RG/4z/gBHkkudWe+2TgAAAABJRU5ErkJggg==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@300;400;500&family=TASA+Orbiter:wght@400..800&family=STIX+Two+Text:ital@0;1&display=swap">
+<link rel="stylesheet" href="../assets/needle.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Dataset",
+      "name": "NEEDLE news search benchmark",
+      "description": "NEEDLE news is an hourly AI search benchmark. Fresh queries from RSS and Google Trends are judged with nDCG@5 so providers cannot hide behind a stale \u201cbest search tools\u201d list.",
+      "url": "https://keenableai.github.io/needle/news/",
+      "license": "https://opensource.org/licenses/MIT",
+      "creator": {
+        "@type": "Organization",
+        "name": "Keenable",
+        "url": "https://keenable.ai"
+      },
+      "measurementTechnique": "nDCG@5 \u00b7 hourly \u00b7 LLM judge",
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "application/json",
+          "contentUrl": "https://keenableai.github.io/needle/data/latest_news.json"
+        },
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "application/jsonl",
+          "contentUrl": "https://keenableai.github.io/needle/data/history.jsonl"
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "NEEDLE",
+          "item": "https://keenableai.github.io/needle/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "News",
+          "item": "https://keenableai.github.io/needle/news/"
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<div class="llms-directive">For AI agents: a documentation index is available at <a href="../llms.txt">llms.txt</a>. Markdown versions of these pages are at <a href="../index.md">index.md</a>, <a href="../compare.md">compare.md</a>, <a href="../news.md">news.md</a>, <a href="../finance.md">finance.md</a>, <a href="../scholar.md">scholar.md</a>, <a href="../legal.md">legal.md</a>, and <a href="../methodology.md">methodology.md</a>.</div>
+<nav class="site-nav topbar" aria-label="Needle">
+  <a class="wordmark" href="../">NEEDLE</a>
+  <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+  <div class="site-links" id="site-links">
+      <a href="../">Leaderboards</a>
+      <a href="../compare/">Compare</a>
+      <a href="../news/" aria-current="page">News</a>
+      <a href="../finance/">Finance</a>
+      <a href="../scholar/">Scholar</a>
+      <a href="../legal/">Legal</a>
+      <a href="../methodology/">Methodology</a>
+      <a href="https://github.com/keenableai/needle">GitHub</a>
+  </div>
+  <div class="header-actions">
+    <button id="theme-toggle" type="button" title="Dark theme" aria-label="Dark theme"><svg class="moon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.5 1.5a6.5 6.5 0 1 0 8 8A5.5 5.5 0 0 1 6.5 1.5z"/></svg><svg class="sun" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg></button>
+  </div>
+</nav><div class="wrap">
+  <p class="crumb"><a href="../">NEEDLE</a> / News</p>
+  <header class="page-prose">
+    <p class="eyebrow">nDCG@5 · hourly · LLM judge</p>
+    <h1>Hourly news search: which API ranks breaking stories?</h1>
+    <p class="lede">News is the vertical blog reviews never keep current. NEEDLE builds new keyword queries each hour from curated RSS and Google Trends, then scores every engine with a blind LLM judge and nDCG@5.</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="../compare/?bench=news">Compare providers on news</a>
+      <a class="btn" href="../methodology/">Methodology</a>
+      <a class="btn" href="../data/latest_news.json">latest_news.json</a>
+    </div>
+  </header>
+  <div class="fact-grid">
+    <article class="fact"><h3>Queries</h3><p>Newest item per feed from ~124 public RSS feeds, merged with Google Trends across 52 US geos. An LLM projects each item into a keyword query and refuses evergreen content.</p></article>
+    <article class="fact"><h3>Score</h3><p>Needs Met 0–4, nDCG@5 against the pooled ultimate ranking, with a redundancy penalty for duplicate URLs.</p></article>
+    <article class="fact"><h3>Why it exists</h3><p>A review written last month cannot tell you who finds this hour’s story. Agents that search the live web need a freshness bench.</p></article>
+  </div>
+  <div class="card" id="card-bench" data-markdown-ignore>
+    <h2>7-day leaderboard</h2>
+    <div class="sub" id="bench-sub">Loading published history…</div>
+    <div class="lb-filter">
+      <input type="search" id="bench-filter" placeholder="Filter engines…" aria-label="Filter engines">
+    </div>
+    <div id="bench-leaderboard" data-bench="news"></div>
+  </div>
+  <section class="page-prose">
+    <p>These numbers are computed in the browser from <a href="../data/history.jsonl">history.jsonl</a>. They are not sample copy. The live dashboard, including per-query judgements, is on the <a href="../#news">home leaderboards</a>.</p>
+  </section>
+<footer class="site-footer">
+  <div>NEEDLE is an MIT-licensed benchmark from <a href="https://keenable.ai">Keenable</a>. Cite <a href="https://doi.org/10.5281/zenodo.22095155">DOI 10.5281/zenodo.22095155</a>.</div>
+  <nav aria-label="Footer">
+    <a href="../">Leaderboards</a>
+    <a href="../compare/">Compare</a>
+    <a href="../methodology/">Methodology</a>
+    <a href="../llms.txt">llms.txt</a>
+    <a href="https://huggingface.co/datasets/keenable-ai/needle-results">Artifacts</a>
+    <a href="https://github.com/keenableai/needle">Source</a>
+  </nav>
+</footer>
+</div>
+<script src="../assets/common.js"></script>
+<script src="../assets/bench.js"></script>
+</body>
+</html>

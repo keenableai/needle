@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-root=".">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,496 +11,119 @@
     }
   } catch {}
 </script>
-<title>NEEDLE — search engine benchmarks</title>
-<meta name="description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<title>NEEDLE — the live public benchmark for AI search engines</title>
+<meta name="description" content="Blog-post reviews cannot tell you which AI search API is best. NEEDLE is the live public benchmark: hourly news and daily finance, scholar, and legal retrieval, same queries, open method.">
+<link rel="canonical" href="https://keenableai.github.io/needle/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#005CFF">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEEDLE">
-<meta property="og:title" content="NEEDLE — search engine benchmarks">
-<meta property="og:description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta property="og:title" content="NEEDLE — the live public benchmark for AI search engines">
+<meta property="og:description" content="Blog-post reviews cannot tell you which AI search API is best. NEEDLE is the live public benchmark: hourly news and daily finance, scholar, and legal retrieval, same queries, open method.">
 <meta property="og:url" content="https://keenableai.github.io/needle/">
 <meta property="og:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NEEDLE — the live public benchmark for AI search engines">
+<meta name="twitter:description" content="Blog-post reviews cannot tell you which AI search API is best. NEEDLE is the live public benchmark: hourly news and daily finance, scholar, and legal retrieval, same queries, open method.">
+<meta name="twitter:image" content="https://keenableai.github.io/needle/og/card-standings.png">
+<link rel="alternate" type="text/plain" href="https://keenableai.github.io/needle/llms.txt" title="llms.txt">
+<link rel="alternate" type="text/markdown" href="https://keenableai.github.io/needle/index.md" title="Markdown">
 <meta name="google-site-verification" content="mLmZhVYwO2grOy5wExFSRkDiTlLjQxGJpixi11YI7Q0">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEVMaXEAYP8AXP8AXP8AXP8AXP8AXP8AXP8AXf8AXv8AXP8AXP8AXP////8qKiqArf8UQ5Zgmf/m6/Qbbv88P0UEV+mampq30f+/v78aPXo4f/8MTsF8gIdOg95fX189a72nQrWLAAAADHRSTlMAEJ9Bae+Ev98iz7BHKf9kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAAHESURBVHja7VbHlsMgDDTV4I7T2+7//+U6AVPlkuS2z3OUZwYJhEWWbdiwAYSkWLCqYkXJiQ0SWpoglfNymlcexIuOuPCDBZ2Wk4CpLTLKgCAIhCsAAgpiBBUPUicg5Hd6wCHUX5VS110o2Q0x5WIiqqLwmG1fv9B6cnXSsV6NkTLQc4+q5f35+HCeRl7X5+P9YIL+WUinb7X8p2kurqJ+lO+bATcdZV4RONY/iQe7vtU3GuYLBxK4aua98RMY9S/bJ/aHKAUccXsv0TEpY6vRRbtgj1Bp5vG5SpJA/WMNTBH5eAUs9+QMLpHpgH0Tp4DiM6ydwS0yDQ2MvbnwuWshjUfXdfYMVDvit3MINqGoPgXWBuxjA9POH+vHY/jagH1rsPpXwkQewtyGMnWmKE0rJ1M/Yx4vRP3mGP9AZGYYRFwJuIq5gYJCLo0uiDOdRDiOMuBs8PxAI2kCUQ0LEzFIwRbmpVAsjWSS9EaYQrk41Dlg4N1SvmiABLCYZOsNHLmAGgRnbzggwEGsetuIdGJZB/KGQzh2TTBf98DiLN0xxNO8ZpLAIt1zid9wGHoKF1UZdS6iQxDL9W9FBHGl3B7RG/4z/gBHkkudWe+2TgAAAABJRU5ErkJggg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@300;400;500&family=TASA+Orbiter:wght@400..800&family=STIX+Two+Text:ital@0;1&display=swap">
-<style>
-  :root {
-    --measure: 760px;
-    color-scheme: light;
-    --keenable-white: #FFFFFF;
-    --keenable-black: #2A2A2A;
-    --keenable-blue: #005CFF;
-    --keenable-orange: #F25F34;
-    --surface-1: #FFFFFF;
-    --surface-sunken: #F9F9F9;
-    --page: #FFFFFF;
-    --text-primary: #2A2A2A;
-    --text-strong: #0E0E0E;
-    --text-secondary: #646464;
-    --text-muted: #8D8D8D;
-    --grid: #DDDDDD;
-    --baseline: #BBBBBB;
-    --border: #DDDDDD;
-    --track: #F0F0F0;
-    --link: #0A57E8;
-    --expressive: #F25F34;
-    --expressive-text: #D34517;
-    --home-tint: #EAF2FF;
-    --delta-up: #0A57E8;
-    --shadow: rgba(0, 0, 0, 0.1);
-    --ease: cubic-bezier(0.4, 0, 0.2, 1);
-    --font-display: "Stack Sans", "Stack Sans Headline", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    --font-body: "Stack Sans", "Stack Sans Headline", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    --font-utility: "TASA Orbiter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-    --series-1: #005CFF;
-    --series-2: #74A6FF;
-    --series-3: #009798;
-    --series-4: #10602D;
-    --series-5: #7F4188;
-    --series-6: #994920;
-    --series-7: #CD7E5A;
-    --series-8: #563E98;
-    --series-9: #8877C8;
-    --series-10: #A63C72;
-    --series-11: #6F8433;
-    --series-12: #814800;
-    --series-13: #B3322B;
-    --series-14: #8A7500;
-    --series-15: #0F6E8C;
-    --series-16: #C2185B;
-    --series-17: #7B1FA2;
-    --series-18: #00897B;
-    --series-19: #D84315;
-    --series-20: #455A64;
-    --series-21: #283593;
-    --series-22: #5D4037;
-    --series-23: #9E9D24;
-    --series-24: #00838F;
-  }
-  @media screen {
-    [data-theme="dark"] {
-      color-scheme: dark;
-      --surface-1: #1C1C1C;
-      --surface-sunken: #161616;
-      --page: #111111;
-      --text-primary: #E6E6E6;
-      --text-strong: #FFFFFF;
-      --text-secondary: #A6A6A6;
-      --text-muted: #8C8C8C;
-      --grid: #333333;
-      --baseline: #555555;
-      --track: #2A2A2A;
-      --link: #74A6FF;
-      --expressive-text: #FF8A65;
-      --home-tint: #142543;
-      --delta-up: #74A6FF;
-      --shadow: rgba(0, 0, 0, 0.5);
-      --series-1: #3D7DFF;
-      --series-3: #2FBFBF;
-      --series-4: #4FB06E;
-      --series-5: #B06BBA;
-      --series-6: #C77A4E;
-      --series-8: #9A86D9;
-      --series-10: #D46A9F;
-      --series-11: #9DB25A;
-      --series-12: #C98A3A;
-      --series-13: #E0605A;
-      --series-14: #C2A93A;
-      --series-15: #3FA3C4;
-      --series-16: #E85A8C;
-      --series-17: #B26BE0;
-      --series-18: #2FA88F;
-      --series-19: #FF7043;
-      --series-20: #90A4AE;
-      --series-21: #7986CB;
-      --series-22: #A1887F;
-      --series-23: #D4E157;
-      --series-24: #4DD0E1;
+<link rel="stylesheet" href="assets/needle.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "name": "NEEDLE",
+      "url": "https://keenableai.github.io/needle/",
+      "description": "Live open-source search benchmark for AI search and retrieval APIs.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Keenable",
+        "url": "https://keenable.ai"
+      }
+    },
+    {
+      "@type": "Dataset",
+      "name": "NEEDLE search benchmark results",
+      "url": "https://keenableai.github.io/needle/",
+      "license": "https://opensource.org/licenses/MIT",
+      "identifier": "https://doi.org/10.5281/zenodo.22095155",
+      "creator": {
+        "@type": "Organization",
+        "name": "Keenable",
+        "url": "https://keenable.ai"
+      },
+      "measurementTechnique": "nDCG@5, answer-recall@5, recall@10, recall@5",
+      "distribution": [
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "application/jsonl",
+          "contentUrl": "https://keenableai.github.io/needle/data/history.jsonl"
+        },
+        {
+          "@type": "DataDownload",
+          "encodingFormat": "application/json",
+          "contentUrl": "https://keenableai.github.io/needle/data/catalog.json"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What problem does NEEDLE solve?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "One-off blog posts titled best AI search tools pick a handful of queries, hide their method, and go stale. NEEDLE is a continuous, methodology-public, multi-vertical benchmark that scores the same engines on news, finance, scholar, and legal retrieval."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How often does NEEDLE run?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "News runs each hour. Finance, scholar, legal, and the rare-word suite run each day. Query sets are generated from public sources so there is no fixed set to overfit."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which metrics does NEEDLE report?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "News and AgenticRare: nDCG@5 with a blind LLM judge. Finance: answer-recall@5 and MRR@5. Scholar: recall@10 and MRR@10 by paper id. Legal: recall@5 and MRR@5 by citation, docket, or URL."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How should I cite NEEDLE?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Cite NEEDLE: A Live Open-Source Search Benchmark for AI Agents (Styskin, Petri, Gusev, 2026), https://keenableai.github.io/needle/ and DOI 10.5281/zenodo.22095155."
+          }
+        }
+      ]
     }
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--page);
-    color: var(--text-primary);
-    font: 400 14px/1.5 var(--font-body);
-    letter-spacing: 0.010em;
-    counter-reset: sec;
-  }
-  a { color: var(--link); }
-  .wrap { max-width: calc(var(--measure) + 40px); margin: 0 auto; padding: 28px 20px 56px; }
-  .topbar {
-    position: sticky; top: -1px; z-index: 60;
-    display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center;
-    background: var(--page); padding: 12px 0; margin-bottom: 22px;
-  }
-  .topbar.stuck { box-shadow: 0 1px 0 var(--grid); }
-  .brand { display: block; color: var(--text-primary); }
-  .brand svg { display: block; height: 22px; width: auto; }
-  header h1 {
-    font-family: var(--font-display); font-size: 38px; font-weight: 400;
-    line-height: 0.92; letter-spacing: 0.010em; margin: 0 0 14px; text-wrap: balance;
-  }
-  header p { margin: 4px 0 0; color: var(--text-secondary); }
-  .fm p, .fm ul { max-width: var(--measure); }
-  .fm .hook {
-    font-size: 15px; font-weight: 500; color: var(--text-primary);
-    margin: 12px 0 8px;
-  }
-  .fm p {
-    margin: 0 0 10px; font-size: 14px; font-weight: 300; line-height: 1.6;
-    color: var(--text-secondary);
-  }
-  .fm ul { margin: 0 0 12px; padding-left: 18px; }
-  .fm li {
-    font-size: 14px; font-weight: 300; line-height: 1.6; margin-bottom: 4px;
-    color: var(--text-secondary);
-  }
-  .fm b { font-weight: 500; color: var(--text-primary); }
-  .fm h3 {
-    font-size: 14px; font-weight: 500; color: var(--text-primary);
-    margin: 12px 0 3px;
-  }
-  .fm .lastrun { font-weight: 400; color: var(--text-primary); }
-  .fm .lastrun #updated { font-weight: 500; }
-  .fm .cadence { font-weight: 300; color: var(--text-muted); }
-  header { margin-bottom: 20px; position: relative; }
-  header a { color: inherit; }
-  .header-actions { display: flex; gap: 6px; }
-  .header-actions button, .header-actions a {
-    display: flex; align-items: center; justify-content: center;
-    height: 30px; padding: 0 10px;
-    background: var(--surface-1); border: 1px solid var(--grid); border-radius: 0;
-    color: var(--text-secondary); cursor: pointer; text-decoration: none;
-    font: 500 11px var(--font-utility); letter-spacing: -0.004em;
-    transition: color 0.12s var(--ease), border-color 0.12s var(--ease), transform 0.12s var(--ease);
-  }
-  .header-actions button:hover, .header-actions a:hover { color: var(--text-primary); border-color: var(--baseline); }
-  .header-actions button:active, .header-actions a:active { transform: scale(0.94); }
-  #theme-toggle .sun, [data-theme="dark"] #theme-toggle .moon { display: none; }
-  [data-theme="dark"] #theme-toggle .sun { display: block; }
-
-  .chart-tools { display: flex; gap: 6px; position: absolute; top: 14px; right: 18px; }
-  .chart-tools button {
-    display: flex; align-items: center; justify-content: center;
-    background: var(--surface-1); border: 1px solid var(--grid); border-radius: 0;
-    color: var(--text-muted); cursor: pointer; padding: 4px 7px;
-    transition: color 0.12s var(--ease), border-color 0.12s var(--ease);
-  }
-  .chart-tools button svg { display: block; }
-  .chart-tools button:hover { color: var(--text-primary); border-color: var(--baseline); }
-  .card, .lb-panel { scroll-margin-top: 54px; }
-
-  td .key {
-    display: inline-block; width: 14px; height: 3px; border-radius: 2px;
-    vertical-align: middle; margin-right: 6px;
-  }
-
-  .legend { display: flex; flex-wrap: wrap; gap: 2px 4px; align-items: center; margin: 6px 0 4px; color: var(--text-secondary); font-size: 12px; }
-  .legend .key { display: inline-block; width: 14px; height: 3px; vertical-align: middle; margin-right: 6px; }
-  .key-logo {
-    width: 14px; height: 14px; object-fit: contain;
-    vertical-align: -2px; margin-right: 6px;
-    transition: opacity 0.12s var(--ease);
-  }
-  .legend button {
-    display: inline-flex; align-items: center; padding: 2px 7px;
-    background: none; border: 1px solid transparent; border-radius: 0;
-    color: inherit; cursor: pointer; font: inherit;
-    transition: border-color 0.12s var(--ease), color 0.12s var(--ease);
-  }
-  .legend button:hover:not(:disabled) { border-color: var(--grid); }
-  .legend button:disabled { cursor: default; }
-  .legend button[aria-pressed="true"] { border-color: var(--keenable-blue); color: var(--text-primary); }
-
-  .grid2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
-  .lb-tabs {
-    position: relative; display: flex;
-    background: none; border-bottom: 1px solid var(--grid);
-    border-radius: 0; padding: 0; margin-bottom: 10px;
-  }
-  .lb-tabs button {
-    position: relative; z-index: 1; flex: 1 1 0; min-width: 0;
-    font: inherit; font-size: 13px; font-weight: 400;
-    padding: 8px 8px 9px; cursor: pointer;
-    color: var(--text-secondary); background: none; border: none; border-radius: 0;
-    transition: color 0.12s var(--ease);
-  }
-  .lb-tabs button:hover { color: var(--text-primary); }
-  .lb-tabs button.active { color: var(--text-primary); }
-  #lb-ind, .tab-ind {
-    position: absolute; top: 0; left: 0; height: 2px;
-    background: var(--keenable-blue);
-    transition: transform 0.22s var(--ease), width 0.22s var(--ease);
-  }
-  #card-independence .lb-tabs button { flex: 1 1 auto; }
-  .lb-panel { display: none; }
-  .chart-host { position: relative; }
-  .chart-host svg { height: auto; cursor: crosshair; touch-action: pan-y; }
-  .chart-host .zoom-sel { fill: var(--keenable-blue); opacity: 0.15; }
-  .lb-panel.active { display: block; }
-  .lb-panel h2 { display: none; }
-  .lb-panel .sub { margin: 10px 0 6px; }
-  @media (max-width: 720px) {
-    .grid2 { grid-template-columns: minmax(0, 1fr); }
-    .lb-tabs { flex-wrap: wrap; }
-    .lb-tabs button { flex: 1 1 auto; white-space: nowrap; }
-  }
-  .section-title {
-    font-family: var(--font-display); font-size: 30px; font-weight: 400;
-    line-height: 0.9; letter-spacing: 0.010em;
-    color: var(--text-primary); margin: 64px 0 10px; padding-top: 18px;
-    border-top: 1px solid var(--grid); scroll-margin-top: 54px;
-  }
-  .section-title::before {
-    counter-increment: sec; content: counter(sec, decimal-leading-zero);
-    display: block; margin-bottom: 12px;
-    font: 500 12px/1 var(--font-utility); letter-spacing: -0.004em;
-    color: var(--text-muted);
-  }
-  .section-desc { color: var(--text-secondary); font-size: 13px; font-weight: 300; line-height: 1.6; margin: 0 0 14px; }
-  .hint { border-bottom: 1px dotted var(--text-muted); cursor: help; }
-
-  #toc { display: none; }
-  @media (min-width: 1440px) {
-    #toc {
-      display: block; position: fixed; top: 28px; width: 150px;
-      left: calc((100vw - 1080px) / 2 - 172px);
-      font-size: 13px; line-height: 1.5;
-    }
-    #toc .toc-head {
-      font: 500 11px var(--font-utility); letter-spacing: -0.004em;
-      color: var(--text-muted); margin-bottom: 8px;
-    }
-    #toc ul { list-style: none; margin: 0; padding: 0; }
-    #toc ul ul { margin: 3px 0 3px 12px; }
-    #toc li { margin: 5px 0; }
-    #toc a { color: var(--text-secondary); text-decoration: none; }
-    #toc a:hover { color: var(--text-primary); }
-  }
-  .card {
-    background: var(--surface-1); border: 1px solid var(--grid);
-    border-radius: 0; padding: 16px 18px 10px; margin-bottom: 14px;
-    position: relative;
-  }
-  .card h2 { font-family: var(--font-display); font-size: 16px; font-weight: 500; margin: 0; }
-  .card .sub { color: var(--text-muted); font-size: 12px; line-height: 1.6; margin: 2px 0 8px; }
-  .card .sub a { color: inherit; }
-  .card svg { display: block; width: 100%; }
-  .card svg:focus { outline: 2px solid var(--keenable-blue); outline-offset: 2px; }
-  .empty { color: var(--text-muted); padding: 32px 0 40px; text-align: center; }
-
-  .stats { display: flex; gap: 48px; flex-wrap: wrap; margin: 18px 0 8px; }
-  .stat-num {
-    display: block; font-family: var(--font-display); font-size: 72px;
-    font-weight: 300; line-height: 0.9; letter-spacing: 0.010em;
-    color: var(--text-primary); font-variant-numeric: tabular-nums;
-  }
-  .stat-num.gap { color: var(--expressive); }
-  .stat-cap {
-    font: 400 12px/1.6 var(--font-utility); letter-spacing: -0.004em;
-    color: var(--text-secondary); margin-top: 8px; max-width: 250px;
-  }
-
-  .tooltip {
-    position: absolute; pointer-events: none; display: none; z-index: 2;
-    background: var(--surface-1); border: 1px solid var(--grid);
-    border-radius: 0; padding: 8px 10px; box-shadow: 0 4px 12px var(--shadow);
-    font-size: 12px; min-width: 130px;
-  }
-  .tooltip .when { color: var(--text-muted); margin-bottom: 4px; }
-  .tooltip .row { display: flex; align-items: center; gap: 6px; }
-  .tooltip .row .key { width: 12px; height: 3px; flex: none; }
-  .tooltip .row .val { font-weight: 500; }
-  .tooltip .row .name { color: var(--text-secondary); }
-
-  .home { background: var(--home-tint); }
-  tr.ultimate td { color: var(--text-muted); font-style: italic; }
-
-  table { border-collapse: collapse; width: 100%; font-size: 13px; }
-  th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--grid); }
-  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
-  td.ci-col { color: var(--text-muted); white-space: nowrap; }
-  .slower { color: var(--text-muted); font-size: 11px; }
-  th.ci-col { cursor: help; }
-  th { color: var(--text-secondary); font: 500 12px/1.6 var(--font-utility); letter-spacing: -0.004em; }
-  tr:last-child td { border-bottom: none; }
-  .best { font-weight: 500; color: var(--text-strong); }
-
-  details { margin-top: 14px; }
-  summary { cursor: pointer; color: var(--text-secondary); }
-  svg text { letter-spacing: normal; }
-  .axis-text { fill: var(--text-muted); font-family: var(--font-utility); font-size: 11px; letter-spacing: -0.004em; font-variant-numeric: tabular-nums; }
-  .end-label { fill: var(--text-secondary); font-family: var(--font-body); font-size: 11.5px; }
-
-  .runbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0 12px; }
-  .runbar select {
-    font: inherit; color: var(--text-primary); background: var(--surface-1);
-    border: 1px solid var(--grid); border-radius: 0; padding: 4px 8px;
-  }
-  .qrow { border: 1px solid var(--grid); border-radius: 0; margin: 8px 0; }
-  .qrow > summary {
-    list-style: none; display: flex; gap: 10px; align-items: baseline;
-    padding: 8px 12px; color: var(--text-primary);
-  }
-  .qrow > summary::-webkit-details-marker { display: none; }
-  .qrow > summary .score { margin-left: auto; color: var(--text-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .qrow[open] > summary { border-bottom: 1px solid var(--grid); }
-  .result { padding: 10px 12px; border-bottom: 1px solid var(--grid); }
-  .result:last-child { border-bottom: none; }
-  .result .head { display: flex; gap: 8px; align-items: baseline; }
-  .result .title { font-weight: 500; }
-  .result .title a { color: inherit; }
-  .result .host { color: var(--text-muted); font-size: 12px; }
-  .result .snippet { color: var(--text-muted); font-size: 12px; margin-top: 2px; }
-  .result .judgement {
-    display: flex; gap: 8px; align-items: baseline;
-    margin-top: 8px; padding: 7px 10px;
-    background: var(--surface-sunken); border: 1px solid var(--grid); border-radius: 0;
-    font-size: 13px; color: var(--text-secondary);
-  }
-  .result .judgement .label { font-weight: 500; color: var(--text-primary); }
-  .chip {
-    display: inline-block; min-width: 20px; text-align: center; border-radius: 0;
-    border: 1px solid var(--grid); color: var(--text-secondary);
-    font: 500 11px/1.5 var(--font-utility); letter-spacing: -0.004em;
-    padding: 1px 5px; flex: none;
-  }
-  .chips { display: inline-flex; gap: 3px; }
-  .hit-marker { color: var(--delta-up); font-weight: 600; font-size: 12px; }
-  .miss-marker { color: var(--text-muted); font-size: 12px; }
-
-  .overlap-matrix, #fields-table, #history-table, .bar-table, #prices-table,
-  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
-  #app-queries, #app-metrics, #app-engines, #app-data { overflow-x: auto; }
-  #card-standings { max-width: var(--measure); }
-  #standings .st-layout { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-  #standings .st-layout svg { flex: 1 1 380px; min-width: 0; width: auto; height: auto; display: block; }
-  #standings .st-table { width: auto; flex: none; font-size: 12px; margin-top: 8px; }
-  #standings .st-table th, #standings .st-table td { padding: 2px 8px; white-space: nowrap; line-height: 1.5; }
-  #standings .st-table .st-key { padding: 2px 0 2px 8px; }
-  #standings .st-table td.st-key svg { display: block; }
-  #standings .st-table tr { cursor: pointer; }
-  #standings .st-table tr:hover td { color: var(--text-primary); }
-  #standings .st-table tr.cold td { opacity: 0.4; }
-  #latency-dumbbell svg { width: 100%; height: auto; display: block; }
-  #standings { padding: 4px 0 8px; overflow-x: auto; }
-  #standings .series { transition: opacity 0.18s ease; }
-  #standings .series.cold { opacity: 0.15; }
-  #standings svg.dim .series:not(.hot) { opacity: 0.1; }
-  #standings svg .series.hot { opacity: 1; }
-  #standings .series:focus { outline: none; }
-  @media (max-width: 720px) {
-    #standings .stats { justify-content: center; text-align: center; }
-    #standings .stat-cap { margin-left: auto; margin-right: auto; }
-    #standings .st-layout { justify-content: center; }
-  }
-  #standings .st-col { fill: var(--text-secondary); font-size: 12px; font-weight: 500; text-anchor: middle; }
-  #standings .st-gap { fill: var(--expressive-text); font-family: var(--font-utility); font-size: 10px; font-weight: 600; letter-spacing: -0.004em; text-anchor: middle; font-variant-numeric: tabular-nums; }
-  #card-quality-price { width: fit-content; max-width: 100%; margin-left: auto; margin-right: auto; }
-  #quality-price { padding: 4px 0 8px; overflow-x: auto; }
-  #quality-price svg { height: auto; }
-  #quality-price .qp-tick { fill: var(--text-primary); fill-opacity: 0.32; font-family: var(--font-utility); font-size: 11px; letter-spacing: -0.004em; font-variant-numeric: tabular-nums; }
-  #quality-price .qp-axis { fill: var(--text-primary); font-family: var(--font-utility); font-size: 12px; letter-spacing: -0.004em; }
-  #quality-price .qp-axis .dim { fill: var(--text-muted); }
-  #quality-price .qp-hit { fill: none; pointer-events: all; }
-  #quality-price .qp-mark { transition: opacity 0.12s var(--ease); }
-  #quality-price svg.qp-hot .qp-mark { opacity: 0.4; }
-  #quality-price svg.qp-hot .qp-mark.is-hot { opacity: 1; }
-  .qp-tip { min-width: 172px; }
-  .qp-tip .head { display: flex; align-items: center; font-weight: 500; margin-bottom: 6px; }
-  .qp-tip .head.home-name { color: var(--keenable-blue); }
-  .qp-tip .row { justify-content: space-between; gap: 16px; line-height: 1.7; }
-  .qp-tip .row .val { font-variant-numeric: tabular-nums; }
-  .qp-tip .plan { color: var(--text-muted); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--grid); }
-  .prose { color: var(--text-secondary); font-size: 14px; font-weight: 300; line-height: 1.6; }
-  .prose p { margin: 0 0 10px; max-width: 90ch; }
-  .defn var, .defn .eq { font-family: "STIX Two Text", "STIX Two Math", "Cambria Math", "Times New Roman", serif; font-size: 15px; }
-  .defn .eq { text-align: center; color: var(--text-primary); margin: 12px 0; }
-  .defn b { color: var(--text-primary); font-weight: 500; }
-  .overlap-matrix { padding: 10px 0 14px; }
-  .overlap-matrix table { border-collapse: separate; border-spacing: 2px; width: auto; margin: 0 auto; font-size: 11px; }
-  .overlap-matrix th, .overlap-matrix td { border-bottom: none; }
-  .overlap-matrix td:first-child { white-space: nowrap; padding: 0 8px 0 2px; }
-  .overlap-matrix th.col { vertical-align: bottom; text-align: center; padding: 2px 0 6px; font-weight: 500; }
-  .overlap-matrix th.col .col-head {
-    display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0;
-    min-height: 18px;
-  }
-  .overlap-matrix th.col .key-logo,
-  .overlap-matrix th.col .key,
-  .overlap-matrix td.row-logo .key-logo,
-  .overlap-matrix td.row-logo .key { margin: 0; width: 16px; height: 16px; }
-  .overlap-matrix td.row-logo { width: 22px; padding: 0 4px 0 6px; text-align: center; }
-  .overlap-matrix td:first-child .key-logo,
-  .overlap-matrix td:first-child .key { width: 16px; height: 16px; }
-  .overlap-matrix td.overlap-cell {
-    width: 28px; min-width: 28px; height: 28px; padding: 0;
-    border-radius: 0; text-align: center; font-variant-numeric: tabular-nums;
-    font-family: var(--font-utility); letter-spacing: -0.004em;
-  }
-  .overlap-matrix .hl-axis { background: color-mix(in srgb, var(--keenable-blue) 12%, transparent); }
-  .overlap-matrix td.overlap-cell.hl-cross { outline: 1.5px solid var(--text-primary); outline-offset: -1px; }
-  .overlap-pair {
-    min-height: 1.3em; margin: 2px 0 0; text-align: center;
-    color: var(--text-secondary); font-size: 12px;
-  }
-  .overlap-pair b { color: var(--text-primary); font-weight: 500; }
-  .bar-table td, .bar-table th { white-space: nowrap; padding: 6px 8px; }
-  .bar-table .bar-track {
-    display: inline-block; width: 100px; height: 8px; border-radius: 0;
-    background: var(--track); vertical-align: middle; margin-right: 8px;
-  }
-  .bar-table .bar-fill { display: block; height: 100%; border-radius: 0; }
-  @media (max-width: 560px) {
-    .overlap-matrix table { border-spacing: 1px; font-size: 9px; }
-    .overlap-matrix td:first-child { padding: 0 3px 0 1px; }
-    .overlap-matrix td:first-child .ename { display: none; }
-    .overlap-matrix th:last-child, .overlap-matrix td.row-logo { display: none; }
-    .overlap-matrix td.overlap-cell { width: 16px; min-width: 16px; height: 16px; padding: 0; }
-    .overlap-matrix td.overlap-cell .pct { display: none; }
-    .overlap-matrix th.col .key-logo,
-    .overlap-matrix th.col .key,
-    .overlap-matrix td:first-child .key-logo,
-    .overlap-matrix td:first-child .key { width: 13px; height: 13px; }
-    .bar-table { font-size: 12px; }
-    .bar-table td, .bar-table th { padding: 6px 4px; }
-    .bar-table td:last-child, .bar-table th:last-child { white-space: normal; }
-    .bar-table .bar-track { width: 36px; margin-right: 5px; }
-  }
-  #sharegraph svg { max-width: 460px; margin: 0 auto; }
-  #sharegraph .sg-edge { stroke: var(--text-muted); }
-  #sharegraph .sg-arrow { fill: var(--text-primary); }
-  #sharegraph .sg-label {
-    fill: var(--text-secondary); font-family: var(--font-utility); font-size: 11px;
-    letter-spacing: -0.004em; font-variant-numeric: tabular-nums;
-    text-anchor: middle; paint-order: stroke; stroke: var(--surface-1); stroke-width: 3px;
-  }
-  #sharegraph .sg-name { fill: var(--text-primary); font-size: 12px; font-weight: 500; }
-
-  @media print {
-    .header-actions, .chart-tools, #toc, .runbar, #run-detail, #history-details, .lb-tabs { display: none; }
-    .topbar { position: static; }
-    #card-runs .sub a::after { content: " (" attr(href) ")"; }
-    .lb-panel { display: block; }
-    .lb-panel h2 { display: block; }
-    .card, .lb-panel { break-inside: avoid; }
-    .card:has(.lb-panel), .lb-panel:has(.lb-panel) { break-inside: auto; }
-    .card svg { max-width: 100%; height: auto; }
-    .overlap-cell, .bar-track, .bar-fill, .key, .home {
-      -webkit-print-color-adjust: exact; print-color-adjust: exact;
-    }
-  }
-</style>
+  ]
+}
+</script>
 </head>
 <body>
+<div class="llms-directive">For AI agents: a documentation index is available at <a href="llms.txt">llms.txt</a>. Markdown versions of these pages are at <a href="index.md">index.md</a>, <a href="compare.md">compare.md</a>, <a href="news.md">news.md</a>, <a href="finance.md">finance.md</a>, <a href="scholar.md">scholar.md</a>, <a href="legal.md">legal.md</a>, and <a href="methodology.md">methodology.md</a>.</div>
 <nav id="toc" aria-label="Contents">
   <div class="toc-head">Contents</div>
   <ul>
-    <li><a href="#top">Overview</a></li>
+    <li><a href="#top">The problem</a></li>
     <li><a href="#sec-results">Quality results</a></li>
+    <li><a href="#card-compare">Compare</a></li>
     <li><a href="#sec-trends">Slices over time</a></li>
     <li><a href="#sec-price">Quality vs price</a></li>
     <li><a href="#sec-latency">Search latency</a></li>
@@ -509,34 +132,65 @@
   </ul>
 </nav>
 <div class="wrap">
-  <div class="topbar">
+  <nav class="site-nav topbar" aria-label="Needle">
+    <a class="wordmark" href="./">NEEDLE</a>
+    <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+    <div class="site-links" id="site-links">
+      <a href="./" aria-current="page">Leaderboards</a>
+      <a href="compare/">Compare</a>
+      <a href="news/">News</a>
+      <a href="finance/">Finance</a>
+      <a href="scholar/">Scholar</a>
+      <a href="legal/">Legal</a>
+      <a href="methodology/">Methodology</a>
+    </div>
     <div class="header-actions">
       <a href="https://github.com/keenableai/needle" title="Source on GitHub" aria-label="Source on GitHub"><svg viewBox="0 0 16 16" width="15" height="15" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg></a>
       <a id="export-md" href="results.md" title="This page as Markdown">MD</a>
       <button id="export-pdf" title="Print / save as PDF">PDF</button>
       <button id="theme-toggle" title="Dark theme" aria-label="Dark theme"><svg class="moon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.5 1.5a6.5 6.5 0 1 0 8 8A5.5 5.5 0 0 1 6.5 1.5z"/></svg><svg class="sun" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg></button>
     </div>
-    <a class="brand" href="https://keenable.ai" aria-label="Keenable"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 737.122 134" width="737.122" height="134" role="img" aria-label="Keenable"><g fill="currentColor"><path transform="translate(0,0)" d="M 0 128.576 L 0 0 L 20.043 0 L 20.043 128.576 L 0 128.576 Z M 19.854 63.153 L 76.011 0 L 99.646 0 L 37.249 69.204 L 38.195 55.968 L 101.348 128.576 L 75.633 128.576 L 19.854 63.153 Z"></path><path transform="translate(288.14,31.387)" d="M 84.803 38.006 L 84.803 97.188 L 65.895 97.188 L 65.895 42.543 C 65.895 38.258 64.824 34.35 62.681 30.82 C 60.601 27.228 57.796 24.392 54.267 22.312 C 50.737 20.169 46.798 19.097 42.449 19.097 C 38.1 19.097 34.129 20.169 30.537 22.312 C 27.007 24.392 24.171 27.228 22.028 30.82 C 19.948 34.35 18.908 38.258 18.908 42.543 L 18.908 97.188 L 0 97.188 L 0 2.647 L 18.908 2.647 L 18.908 13.047 C 22.186 9.013 26.251 5.83 31.104 3.498 C 35.957 1.166 41.22 0 46.892 0 C 53.888 0 60.254 1.702 65.99 5.105 C 71.725 8.509 76.295 13.078 79.698 18.814 C 83.102 24.549 84.803 30.946 84.803 38.006 Z"></path><path transform="translate(384.394,31.387)" d="M 79.698 2.647 L 98.606 2.647 L 98.606 97.188 L 79.698 97.188 L 78.847 83.007 C 76.074 87.986 72.261 92.02 67.408 95.108 C 62.618 98.134 56.945 99.646 50.39 99.646 C 43.394 99.646 36.84 98.354 30.726 95.77 C 24.675 93.123 19.318 89.499 14.654 84.898 C 10.053 80.234 6.46 74.845 3.876 68.731 C 1.292 62.618 0 56.094 0 49.161 C 0 42.354 1.261 35.989 3.782 30.064 C 6.303 24.139 9.801 18.94 14.276 14.465 C 18.751 9.927 23.95 6.397 29.875 3.876 C 35.8 1.292 42.134 0 48.878 0 C 55.811 0 61.924 1.607 67.219 4.822 C 72.576 7.973 76.988 12.07 80.454 17.112 L 79.698 2.647 Z M 49.918 81.4 C 55.59 81.4 60.538 79.982 64.761 77.146 C 69.047 74.309 72.355 70.528 74.687 65.801 C 77.019 61.011 78.185 55.716 78.185 49.918 C 78.185 43.993 76.988 38.667 74.593 33.94 C 72.261 29.15 68.983 25.369 64.761 22.595 C 60.538 19.759 55.59 18.341 49.918 18.341 C 44.308 18.341 39.172 19.759 34.507 22.595 C 29.843 25.432 26.156 29.245 23.446 34.035 C 20.736 38.825 19.381 44.119 19.381 49.918 C 19.381 55.779 20.768 61.105 23.541 65.895 C 26.377 70.622 30.096 74.404 34.697 77.24 C 39.361 80.013 44.434 81.4 49.918 81.4 Z"></path><path transform="translate(504,0.713)" d="M 48.878 30.675 C 58.08 30.675 66.431 32.912 73.931 37.387 C 81.494 41.862 87.514 47.881 91.988 55.444 C 96.463 62.945 98.701 71.296 98.701 80.498 C 98.701 87.368 97.409 93.828 94.825 99.879 C 92.241 105.866 88.648 111.161 84.047 115.762 C 79.509 120.3 74.215 123.861 68.164 126.445 C 62.177 129.029 55.748 130.321 48.878 130.321 C 42.134 130.321 36.241 128.777 31.199 125.689 C 26.156 122.537 22.06 118.472 18.908 113.493 L 18.908 127.863 L 0 127.863 L 0 0 L 18.908 0 L 18.908 47.503 C 22.06 42.524 26.156 38.49 31.199 35.402 C 36.241 32.25 42.134 30.675 48.878 30.675 Z M 48.689 111.98 C 54.361 111.98 59.498 110.562 64.099 107.726 C 68.763 104.889 72.482 101.076 75.255 96.286 C 78.028 91.496 79.415 86.233 79.415 80.498 C 79.415 74.573 77.996 69.247 75.16 64.52 C 72.387 59.73 68.668 55.949 64.004 53.176 C 59.34 50.339 54.235 48.921 48.689 48.921 C 43.079 48.921 38.132 50.371 33.846 53.27 C 29.623 56.106 26.345 59.919 24.013 64.71 C 21.681 69.437 20.515 74.699 20.515 80.498 C 20.515 86.359 21.681 91.685 24.013 96.475 C 26.408 101.202 29.717 104.984 33.94 107.82 C 38.163 110.593 43.079 111.98 48.689 111.98 Z"></path><path transform="translate(613,0.713)" d="M 0 127.863 L 0 0 L 18.908 0 L 18.908 127.863 L 0 127.863 Z"></path><path transform="translate(642.839,31.71)" d="M 47.271 99.646 C 38.573 99.646 30.631 97.409 23.446 92.934 C 16.324 88.459 10.62 82.471 6.334 74.971 C 2.111 67.408 0 59.057 0 49.918 C 0 42.985 1.229 36.524 3.687 30.537 C 6.145 24.486 9.517 19.192 13.803 14.654 C 18.152 10.053 23.194 6.46 28.93 3.876 C 34.665 1.292 40.779 0 47.271 0 C 54.456 0 61.074 1.481 67.124 4.443 C 73.175 7.406 78.343 11.503 82.629 16.734 C 86.915 21.965 90.066 28.016 92.083 34.886 C 94.1 41.693 94.73 48.909 93.974 56.536 L 20.232 56.536 C 21.051 61.137 22.69 65.265 25.148 68.92 C 27.606 72.513 30.726 75.381 34.507 77.524 C 38.289 79.604 42.543 80.675 47.271 80.738 C 52.25 80.738 56.756 79.478 60.79 76.956 C 64.887 74.435 68.227 71 70.811 66.651 L 90.003 71.095 C 86.221 79.478 80.518 86.348 72.891 91.705 C 65.265 96.999 56.725 99.646 47.271 99.646 Z M 19.57 42.071 L 74.877 42.071 C 74.309 37.407 72.702 33.152 70.055 29.308 C 67.471 25.463 64.193 22.406 60.223 20.137 C 56.252 17.868 51.935 16.734 47.271 16.734 C 42.607 16.734 38.321 17.868 34.413 20.137 C 30.505 22.343 27.259 25.369 24.675 29.213 C 22.091 33.058 20.389 37.344 19.57 42.071 Z"></path></g><g transform="translate(99.081,31.71)"><path fill="#005CFF" d="M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z"></path><path fill="currentColor" transform="translate(51.255,21.698)" d="M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z"></path></g><g transform="translate(180.218,31.71)"><path fill="#005CFF" d="M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z"></path><path fill="currentColor" transform="translate(49.161,21.698)" d="M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z"></path></g></svg></a>
-  </div>
-  <header id="top">
-    <h1>NEEDLE: Which search API moves the needle for AI&nbsp;agents?</h1>
+  </nav>
+  <header id="top" class="hero">
+    <p class="eyebrow">The public AI search benchmark</p>
+    <h1>One-off reviews cannot tell you which AI search engine is best.</h1>
+    <p class="lede">Vendor lists and “best AI search tools” posts pick a handful of queries, hide the method, and go stale the day they ship. Agents, retrieval products, and GEO systems need a scoreboard that is continuous, multi-vertical, and reproducible. <b>NEEDLE is that scoreboard.</b></p>
+    <div class="hero-actions">
+      <a class="btn primary" href="#sec-results">See the leaderboards</a>
+      <a class="btn" href="compare/">Compare providers</a>
+      <a class="btn" href="methodology/">Read the method</a>
+    </div>
     <div class="fm">
       <p class="lastrun"><span id="updated"></span>
-        <span class="cadence">News runs each hour; all other suites run
+        <span class="cadence">News runs each hour; finance, scholar, legal, and rare-word run
         each day. Times are UTC.</span><span id="results-link"></span></p>
+      <h2 class="section-title" id="sec-problem" style="margin-top:36px">The problem NEEDLE solves</h2>
+      <div class="issue-grid">
+        <article class="issue">
+          <h3>Cherry-picked queries</h3>
+          <p>A blog review can choose the ten prompts that flatter a vendor. NEEDLE rebuilds news queries every hour and the other gold sets every day from public sources, so there is no fixed set to overfit.</p>
+        </article>
+        <article class="issue">
+          <h3>Hidden method</h3>
+          <p>Most “best tools” posts do not publish the request shape, the snippet budget, or the judge. NEEDLE sends every engine the same query, scores the ranking it returned, and pins the protocol in git.</p>
+        </article>
+        <article class="issue">
+          <h3>Stale rankings</h3>
+          <p>A list published last month cannot tell you who finds this hour’s story or this quarter’s 10-Q. NEEDLE is a live leaderboard with archived artifacts anyone can re-score.</p>
+        </article>
+      </div>
       <p>NEEDLE (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
-        <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is a
-        live open-source search benchmark. It compares search engines with
-        queries that model agent behavior. The five verticals match
-        the use cases we see each day in Keenable's own search
-        traffic:</p>
+        <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is the
+        live open-source search benchmark for AI agents. The verticals match
+        the jobs we see in Keenable search traffic — and the jobs a review
+        post cannot cover:</p>
       <ul>
-        <li><b><span class="vert" data-vert="scholar"></span>:</b> expert literature searches: find a specific
+        <li><b><a href="scholar/"><span class="vert" data-vert="scholar"></span></a>:</b> expert literature searches: find a specific
           paper from a degraded title, a full-text detail, or a
           tip-of-the-tongue description</li>
-        <li><b><span class="vert" data-vert="news"></span>:</b> breaking and developing stories; new queries
+        <li><b><a href="news/"><span class="vert" data-vert="news"></span></a>:</b> breaking and developing stories; new queries
           each hour from curated RSS feeds and Google Trends</li>
-        <li><b><span class="vert" data-vert="finance"></span>:</b> everyday company and SEC-filing lookups with
+        <li><b><a href="finance/"><span class="vert" data-vert="finance"></span></a>:</b> everyday company and SEC-filing lookups with
           known answers from public registries</li>
         <li><b><span class="vert" data-vert="agentic_rare"></span>:</b> obscure, long-tail entities; rare-word
           queries sampled from the
@@ -544,7 +198,7 @@
           <a href="https://arxiv.org/abs/2603.20278">OpenResearcher</a>, and
           <a href="https://arxiv.org/abs/2604.04949">LRAT</a>
           agentic search logs</li>
-        <li><b><span class="vert" data-vert="legal"></span>:</b> find a specific court opinion or section of the
+        <li><b><a href="legal/"><span class="vert" data-vert="legal"></span></a>:</b> find a specific court opinion or section of the
           Code of Federal Regulations</li>
       </ul>
       <p><b>Methodology.</b> Each engine in a run receives the same query
@@ -553,8 +207,8 @@
         judge does not see the engine name. We make new query sets from
         public sources, <span class="vert" data-vert="news"></span> each hour and the rest each day, so
         there is no fixed set to overfit.
-        <a href="#app-protocol">Appendix C</a> gives the full comparison
-        protocol. <b>The benchmark is open source: the
+        The <a href="methodology/">methodology page</a> and
+        <a href="#app-protocol">Appendix C</a> give the full comparison protocol. <b>The benchmark is open source: the
         <a href="https://github.com/keenableai/needle">keenableai/needle</a>
         repo is public, every run executes in plain GitHub Actions, and
         we welcome contributions.</b></p>
@@ -574,10 +228,35 @@
         pools all engines' results per query and ranks them by their relevance labels
         (<a href="#app-protocol">Appendix C</a>). The standings radar plots each
         engine as a share of <em>ultimate</em>.</p>
+      <div class="faq" id="sec-faq">
+        <details>
+          <summary>What problem does NEEDLE solve?</summary>
+          <p>One-off blog posts titled best AI search tools pick a handful of queries, hide their method, and go stale. NEEDLE is a continuous, methodology-public, multi-vertical benchmark that scores the same engines on news, finance, scholar, and legal retrieval.</p>
+        </details>
+        <details>
+          <summary>How often does NEEDLE run?</summary>
+          <p>News runs each hour. Finance, scholar, legal, and the rare-word suite run each day. Query sets are generated from public sources so there is no fixed set to overfit.</p>
+        </details>
+        <details>
+          <summary>Which metrics does NEEDLE report?</summary>
+          <p>News and AgenticRare: nDCG@5 with a blind LLM judge. Finance: answer-recall@5 and MRR@5. Scholar: recall@10 and MRR@10 by paper id. Legal: recall@5 and MRR@5 by citation, docket, or URL.</p>
+        </details>
+        <details>
+          <summary>How should I cite NEEDLE?</summary>
+          <p>Cite NEEDLE: A Live Open-Source Search Benchmark for AI Agents (Styskin, Petri, Gusev, 2026), <a href="https://keenableai.github.io/needle/">https://keenableai.github.io/needle/</a> and DOI <a href="https://doi.org/10.5281/zenodo.22095155">10.5281/zenodo.22095155</a>.</p>
+        </details>
+        <details>
+          <summary>Where are the raw scores?</summary>
+          <p><a href="data/history.jsonl">data/history.jsonl</a>, <a href="data/catalog.json">data/catalog.json</a>, and per-query artifacts on <a href="https://huggingface.co/datasets/keenable-ai/needle-results">Hugging Face</a>. See <a href="llms.txt">llms.txt</a>.</p>
+        </details>
+      </div>
+      <h2>How to read the scoreboard</h2>
+      <p>The charts and tables below are computed in the browser from published JSON and JSONL. Do not invent live scores. Fetch <a href="data/history.jsonl">history.jsonl</a> or <a href="data/catalog.json">catalog.json</a>. Compare two providers at <a href="compare/">compare/</a>. The protocol is on the <a href="methodology/">methodology page</a>. Markdown copies of the prose live at <a href="index.md">index.md</a>.</p>
 
     </div>
   </header>
 
+  <div data-markdown-ignore>
   <h2 class="section-title" id="sec-results">Quality results</h2>
   <div class="card" id="card-standings" data-tools>
     <h2>Standings — all verticals</h2>
@@ -593,6 +272,9 @@
     <div class="sub">Query-weighted 7-day means with a 95% CI;
       <span class="hint" title="title, body, clue, and tot for Scholar; filings and filingdoc for Finance; caselaw and code for Legal">suite columns</span>
       split the score.</div>
+    <div class="lb-filter">
+      <input type="search" id="lb-engine-filter" placeholder="Filter engines…" aria-label="Filter engines">
+    </div>
     <div class="lb-tabs" id="lb-tabs" role="tablist" aria-label="Bench leaderboards">
       <button role="tab" aria-selected="true" class="active" data-panel="card-lb-overall">Overall</button>
       <button role="tab" aria-selected="false" data-panel="card-lb-scholar"><span class="vert" data-vert="scholar"></span></button>
@@ -632,6 +314,21 @@
       <div class="sub" id="lb-legal-sub"></div>
       <div id="lb-legal" data-static></div>
     </div>
+  </div>
+
+  <div class="card" id="card-compare" data-tools>
+    <h2>Compare two providers</h2>
+    <div class="sub" id="home-cmp-note">Query-weighted 7-day means on the same published history as the leaderboards.
+      <a href="compare/">Open the full comparison page</a> for 30-day and all-run windows.</div>
+    <div class="cmp-bar">
+      <label>Provider A
+        <select id="home-cmp-a" aria-label="Provider A"></select>
+      </label>
+      <label>Provider B
+        <select id="home-cmp-b" aria-label="Provider B"></select>
+      </label>
+    </div>
+    <div id="home-cmp-table"></div>
   </div>
 
   <h2 class="section-title" id="sec-trends">Slices over time</h2>
@@ -851,6 +548,7 @@
       <select id="run-select" aria-label="Run"></select>
       <select id="run-engine" aria-label="Engine"></select>
       <select id="run-page" aria-label="Page" hidden></select>
+      <input type="search" id="run-query-filter" placeholder="Filter queries…" aria-label="Filter queries">
     </div>
     <div id="run-detail"></div>
   </div>
@@ -1011,6 +709,7 @@
     </table>
   </div>
 
+  </div>
   <div class="card" id="app-cite">
     <h2>Citation</h2>
     <div class="chart-tools"><button id="cite-copy" title="Copy BibTeX to clipboard" style="font: 500 11px var(--font-utility); letter-spacing: -0.004em">Copy</button></div>
@@ -1025,6 +724,16 @@
   </div>
 
 
+  <footer class="site-footer">
+    <div>NEEDLE is an MIT-licensed benchmark from <a href="https://keenable.ai">Keenable</a>. Cite <a href="https://doi.org/10.5281/zenodo.22095155">DOI 10.5281/zenodo.22095155</a>.</div>
+    <nav aria-label="Footer">
+      <a href="compare/">Compare</a>
+      <a href="methodology/">Methodology</a>
+      <a href="llms.txt">llms.txt</a>
+      <a href="https://huggingface.co/datasets/keenable-ai/needle-results">Artifacts</a>
+      <a href="https://github.com/keenableai/needle">Source</a>
+    </nav>
+  </footer>
 </div>
 
 <script>
@@ -2967,6 +2676,13 @@ async function initRunBrowser() {
     runSel.disabled = matching.length === 0;
   }
 
+  for (const b of BENCHES) {
+    const artifacts = RUN_ARTIFACT[b];
+    if (runs.some((r) => artifacts.some((a) => r.artifacts.includes(a)))) {
+      benchSel.value = b;
+      break;
+    }
+  }
   populateRuns();
   benchSel.addEventListener("change", () => { populateRuns(); renderRunDetail(runs); });
   runSel.addEventListener("change", () => renderRunDetail(runs));
@@ -3330,6 +3046,100 @@ for (const bar of document.querySelectorAll(".lb-tabs")) {
   new ResizeObserver(move).observe(bar);
 }
 
+
+const navToggle = document.getElementById("nav-toggle");
+const siteNav = document.querySelector(".site-nav");
+if (navToggle && siteNav) {
+  navToggle.addEventListener("click", () => {
+    const open = !siteNav.classList.contains("open");
+    siteNav.classList.toggle("open", open);
+    navToggle.setAttribute("aria-expanded", String(open));
+  });
+}
+
+function applyEngineFilter(root, q) {
+  const needle = (q || "").trim().toLowerCase();
+  for (const table of root.querySelectorAll("table")) {
+    for (const tr of table.querySelectorAll("tr")) {
+      if (!tr.querySelector("td")) continue;
+      tr.hidden = needle && !tr.textContent.toLowerCase().includes(needle);
+    }
+  }
+}
+const lbFilter = document.getElementById("lb-engine-filter");
+if (lbFilter) {
+  lbFilter.addEventListener("input", () =>
+    applyEngineFilter(document.getElementById("card-leaderboards"), lbFilter.value));
+}
+const runFilter = document.getElementById("run-query-filter");
+if (runFilter) {
+  runFilter.addEventListener("input", () => {
+    const q = runFilter.value.trim().toLowerCase();
+    for (const row of document.querySelectorAll("#run-detail .qrow")) {
+      row.hidden = q && !row.textContent.toLowerCase().includes(q);
+    }
+  });
+}
+
+function fillEngineSelect(sel, names, prefer) {
+  const current = sel.value;
+  sel.replaceChildren();
+  for (const e of names) {
+    sel.appendChild(el("option", { value: e }, displayName(e)));
+  }
+  sel.value = names.includes(current) ? current
+    : names.includes(prefer) ? prefer
+    : names[0] || "";
+}
+
+function renderHomeCompare() {
+  const aSel = document.getElementById("home-cmp-a");
+  const bSel = document.getElementById("home-cmp-b");
+  const holder = document.getElementById("home-cmp-table");
+  const note = document.getElementById("home-cmp-note");
+  if (!aSel || !holder || !history.length) return;
+  const names = ENGINES.filter((e) => e !== ULTIMATE_ENGINE);
+  fillEngineSelect(aSel, names, "keenable-realtime");
+  fillEngineSelect(bSel, names, names.includes("exa") ? "exa" : names[1] || names[0]);
+  const a = aSel.value, b = bSel.value;
+  holder.replaceChildren();
+  if (!a || !b || a === b) {
+    holder.appendChild(el("div", { class: "empty" }, "Pick two different providers."));
+    return;
+  }
+  const table = el("table");
+  const head = el("tr");
+  for (const [label, cls] of [["vertical", ""], ["metric", ""], [displayName(a), "num"], [displayName(b), "num"], ["delta (A − B)", "num"]]) {
+    head.appendChild(el("th", { class: cls }, label));
+  }
+  table.appendChild(head);
+  for (const [bench, metric, label] of STANDINGS_BENCHES) {
+    const rows = ciWindowed(history, bench);
+    const av = wmean(rows.filter((r) => r.engine === a), metric);
+    const bv = wmean(rows.filter((r) => r.engine === b), metric);
+    if (av == null && bv == null) continue;
+    const tr = el("tr");
+    tr.appendChild(el("td", {}, verticalName(bench)));
+    tr.appendChild(el("td", {}, label));
+    const tdA = el("td", { class: "num" }, fmt3(av));
+    const tdB = el("td", { class: "num" }, fmt3(bv));
+    if (av != null && bv != null) {
+      if (av > bv) tdA.classList.add("cmp-winner");
+      if (bv > av) tdB.classList.add("cmp-winner");
+    }
+    const tdD = el("td", { class: "num" },
+      av == null || bv == null ? "–" : `${av - bv > 0 ? "+" : ""}${(av - bv).toFixed(3)}`);
+    if (av != null && bv != null) {
+      tdD.classList.add(av - bv > 0.0005 ? "delta-pos" : av - bv < -0.0005 ? "delta-neg" : "delta-zero");
+    }
+    tr.append(tdA, tdB, tdD);
+    table.appendChild(tr);
+  }
+  holder.appendChild(table);
+  const href = `compare/?a=${encodeURIComponent(a)}&b=${encodeURIComponent(b)}`;
+  note.innerHTML = `Query-weighted 7-day means on the same published history as the leaderboards. <a href="${href}">Open the full comparison page</a> for 30-day and all-run windows.`;
+}
+
 async function main() {
   const fetchRows = (url) =>
     fetch(url, { cache: "no-store" })
@@ -3354,6 +3164,9 @@ async function main() {
   }
 
   renderLeaderboards(history);
+  renderHomeCompare();
+  document.getElementById("home-cmp-a")?.addEventListener("change", renderHomeCompare);
+  document.getElementById("home-cmp-b")?.addEventListener("change", renderHomeCompare);
   drawTrends(history);
   renderLatencySummary(history);
   renderAll();

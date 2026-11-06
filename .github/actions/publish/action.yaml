@@ -24,7 +24,7 @@ runs:
           rm -rf staged
           uv run python scripts/backfill_overlap.py --site site-data --hours 24 || echo "overlap backfill skipped"
           TS=$(uv run python scripts/publish_bench.py --site site-data --runs-out staged $ARGS)
-          cp dashboard/index.html site-data/index.html
+          rsync -a dashboard/ site-data/
           touch site-data/.nojekyll
           git -C site-data add -A
           git -C site-data commit -m "bench: $TS"

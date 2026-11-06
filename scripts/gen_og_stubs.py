@@ -5,16 +5,19 @@ import sys
 from pathlib import Path
 
 BASE = "https://keenableai.github.io/needle/"
-SITE_TITLE = "NEEDLE — search engine benchmarks"
+SITE_TITLE = "NEEDLE — the live public benchmark for AI search engines"
 TITLE_SUFFIX = " | NEEDLE search benchmark"
-BLURB = ("NEEDLE is a live open-source benchmark that compares public "
-         "search APIs on news, finance, scholar, rare-word, and legal "
-         "queries.")
+BLURB = ("NEEDLE is the live public benchmark for AI search APIs: "
+         "hourly news and daily finance, scholar, rare-word, and legal "
+         "suites. Same queries, open method — not a blog-post review.")
+RESERVED_DIRS = {"compare", "methodology", "news", "finance", "scholar",
+                 "legal", "assets", "data", "og", ".well-known", "results"}
 
 VERTICALS = {"news": "News", "finance": "Finance", "scholar": "Scholar",
              "agentic_rare": "AgenticRare", "legal": "Legal"}
 
 SECTION_DESCRIPTIONS = {
+    "sec-problem": "Why blog-post AI search reviews fail, and what NEEDLE measures instead.",
     "sec-results": "Standings and 7-day leaderboards for every vertical.",
     "sec-trends": "Per-engine quality over time for this slice.",
     "sec-price": "7-day search quality against public price per 1,000 "
@@ -110,6 +113,9 @@ def main():
                      f'<meta property="og:image:width" content="{w}">\n'
                      f'<meta property="og:image:height" content="{h}">\n')
             card = "summary_large_image"
+        if anchor in RESERVED_DIRS:
+            print(f"skip reserved path {anchor!r}", file=sys.stderr)
+            continue
         stub_dir = out / anchor
         stub_dir.mkdir(parents=True, exist_ok=True)
         slice_desc = SECTION_DESCRIPTIONS.get(section_for(pos), "")

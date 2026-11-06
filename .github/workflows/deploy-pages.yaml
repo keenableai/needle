@@ -25,9 +25,7 @@ jobs:
         with:
           path: _src
           sparse-checkout: |
-            dashboard/history_posts.json
-            dashboard/index.html
-            dashboard/results.html
+            dashboard
             scripts/dashboard_page.mjs
             scripts/gen_og_stubs.py
             scripts/render_og_images.mjs
@@ -36,7 +34,7 @@ jobs:
           sparse-checkout-cone-mode: false
       - uses: astral-sh/setup-uv@v5
       - run: |
-          cp _src/dashboard/index.html index.html
+          rsync -a _src/dashboard/ .
           npm --prefix _src install --no-save --no-audit --no-fund playwright-core
           node _src/scripts/render_static_results.mjs .
           node _src/scripts/render_og_images.mjs . og

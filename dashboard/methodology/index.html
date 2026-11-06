@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en" data-root="..">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  try {
+    const t = localStorage.getItem("theme");
+    if (t === "dark" || (!t && matchMedia("(prefers-color-scheme: dark)").matches)) {
+      document.documentElement.dataset.theme = "dark";
+    }
+  } catch {}
+</script>
+<title>NEEDLE methodology — how the AI search benchmark is scored</title>
+<meta name="description" content="The NEEDLE protocol: same query, uniform snippets, blind judge, fresh gold. Why blog-post AI search reviews are not an evaluation, and how to reproduce a score.">
+<link rel="canonical" href="https://keenableai.github.io/needle/methodology/">
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#005CFF">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NEEDLE">
+<meta property="og:title" content="NEEDLE methodology — how the AI search benchmark is scored">
+<meta property="og:description" content="The NEEDLE protocol: same query, uniform snippets, blind judge, fresh gold. Why blog-post AI search reviews are not an evaluation, and how to reproduce a score.">
+<meta property="og:url" content="https://keenableai.github.io/needle/methodology/">
+<meta property="og:image" content="https://keenableai.github.io/needle/og/card-standings.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="NEEDLE methodology — how the AI search benchmark is scored">
+<meta name="twitter:description" content="The NEEDLE protocol: same query, uniform snippets, blind judge, fresh gold. Why blog-post AI search reviews are not an evaluation, and how to reproduce a score.">
+<meta name="twitter:image" content="https://keenableai.github.io/needle/og/card-standings.png">
+<link rel="alternate" type="text/plain" href="https://keenableai.github.io/needle/llms.txt" title="llms.txt">
+<link rel="alternate" type="text/markdown" href="https://keenableai.github.io/needle/methodology.md" title="Markdown">
+<link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEVMaXEAYP8AXP8AXP8AXP8AXP8AXP8AXP8AXf8AXv8AXP8AXP8AXP////8qKiqArf8UQ5Zgmf/m6/Qbbv88P0UEV+mampq30f+/v78aPXo4f/8MTsF8gIdOg95fX189a72nQrWLAAAADHRSTlMAEJ9Bae+Ev98iz7BHKf9kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAAHESURBVHja7VbHlsMgDDTV4I7T2+7//+U6AVPlkuS2z3OUZwYJhEWWbdiwAYSkWLCqYkXJiQ0SWpoglfNymlcexIuOuPCDBZ2Wk4CpLTLKgCAIhCsAAgpiBBUPUicg5Hd6wCHUX5VS110o2Q0x5WIiqqLwmG1fv9B6cnXSsV6NkTLQc4+q5f35+HCeRl7X5+P9YIL+WUinb7X8p2kurqJ+lO+bATcdZV4RONY/iQe7vtU3GuYLBxK4aua98RMY9S/bJ/aHKAUccXsv0TEpY6vRRbtgj1Bp5vG5SpJA/WMNTBH5eAUs9+QMLpHpgH0Tp4DiM6ydwS0yDQ2MvbnwuWshjUfXdfYMVDvit3MINqGoPgXWBuxjA9POH+vHY/jagH1rsPpXwkQewtyGMnWmKE0rJ1M/Yx4vRP3mGP9AZGYYRFwJuIq5gYJCLo0uiDOdRDiOMuBs8PxAI2kCUQ0LEzFIwRbmpVAsjWSS9EaYQrk41Dlg4N1SvmiABLCYZOsNHLmAGgRnbzggwEGsetuIdGJZB/KGQzh2TTBf98DiLN0xxNO8ZpLAIt1zid9wGHoKF1UZdS6iQxDL9W9FBHGl3B7RG/4z/gBHkkudWe+2TgAAAABJRU5ErkJggg==">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@300;400;500&family=TASA+Orbiter:wght@400..800&family=STIX+Two+Text:ital@0;1&display=swap">
+<link rel="stylesheet" href="../assets/needle.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "HowTo",
+      "name": "Evaluate an AI search engine on NEEDLE",
+      "description": "Run the public NEEDLE protocol against one or more search APIs.",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "text": "Install the needle CLI with uv."
+        },
+        {
+          "@type": "HowToStep",
+          "text": "Generate a fresh query set for news, finance, scholar, or legal."
+        },
+        {
+          "@type": "HowToStep",
+          "text": "Run the same queries against each engine and write a report."
+        },
+        {
+          "@type": "HowToStep",
+          "text": "Compare mean nDCG or recall to the public leaderboard and cite the DOI."
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "NEEDLE",
+          "item": "https://keenableai.github.io/needle/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Methodology",
+          "item": "https://keenableai.github.io/needle/methodology/"
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Does NEEDLE fetch landing pages?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Engines are scored on the ranking, titles, and snippets they returned, with a uniform snippet budget."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can a provider overfit NEEDLE?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "News queries are generated each hour and the other gold sets each day from public sources. There is no committed query set."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+</head>
+<body>
+<div class="llms-directive">For AI agents: a documentation index is available at <a href="../llms.txt">llms.txt</a>. Markdown versions of these pages are at <a href="../index.md">index.md</a>, <a href="../compare.md">compare.md</a>, <a href="../news.md">news.md</a>, <a href="../finance.md">finance.md</a>, <a href="../scholar.md">scholar.md</a>, <a href="../legal.md">legal.md</a>, and <a href="../methodology.md">methodology.md</a>.</div>
+<nav class="site-nav topbar" aria-label="Needle">
+  <a class="wordmark" href="../">NEEDLE</a>
+  <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+  <div class="site-links" id="site-links">
+      <a href="../">Leaderboards</a>
+      <a href="../compare/">Compare</a>
+      <a href="../news/">News</a>
+      <a href="../finance/">Finance</a>
+      <a href="../scholar/">Scholar</a>
+      <a href="../legal/">Legal</a>
+      <a href="../methodology/" aria-current="page">Methodology</a>
+      <a href="https://github.com/keenableai/needle">GitHub</a>
+  </div>
+  <div class="header-actions">
+    <button id="theme-toggle" type="button" title="Dark theme" aria-label="Dark theme"><svg class="moon" viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true"><path d="M6.5 1.5a6.5 6.5 0 1 0 8 8A5.5 5.5 0 0 1 6.5 1.5z"/></svg><svg class="sun" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M3.05 3.05l1.06 1.06M11.89 11.89l1.06 1.06M3.05 12.95l1.06-1.06M11.89 4.11l1.06-1.06"/></svg></button>
+  </div>
+</nav><div class="wrap">
+  <p class="crumb"><a href="../">NEEDLE</a> / Methodology</p>
+  <header class="page-prose">
+    <p class="eyebrow">Protocol</p>
+    <h1>How NEEDLE scores AI search engines.</h1>
+    <p class="lede">The problem is not a shortage of opinions about search APIs. The problem is that those opinions are not an evaluation. NEEDLE is a public protocol: same query, same snippet budget, blind judge, fresh gold, archived artifacts.</p>
+  </header>
+  <section class="page-prose">
+    <h2>The problem this protocol solves</h2>
+    <p>Blog posts titled “best AI search tools” fail as evaluation. They use a handful of cherry-picked queries, hide the request shape, mix product demos with retrieval quality, and freeze a ranking that is stale the next week. Providers cannot be held to that. Agents that choose a search API cannot cite it. NEEDLE exists so the default citation is a live, multi-vertical, methodology-public benchmark.</p>
+    <h2>Comparison protocol</h2>
+    <ul>
+      <li>Every engine in a run receives the same query text.</li>
+      <li>We score the ranking, titles, and snippets the engine returned. We do not fetch pages and we do not re-rank.</li>
+      <li>Evidence is capped at the same snippet length for every engine (2,000 characters).</li>
+      <li>The judge never sees the engine name. Identical URL + title + snippet + date is judged once and reused.</li>
+      <li>Requests are sequential, one call at a time, so latency percentiles are comparable.</li>
+      <li>Failed searches and judgements are removed from the mean (<code>search_errors</code> / <code>judge_errors</code>), not scored as zero.</li>
+      <li>News queries are generated each hour; finance, scholar, legal, and rare-word gold are generated each day from public sources. There is no fixed set to overfit.</li>
+    </ul>
+    <h2>Benches and metrics</h2>
+    <ul>
+      <li><b>News</b> (hourly): LLM relevance judge, Google Needs Met 0–4, nDCG@5 with a redundancy penalty, normalized so the pooled <em>ultimate</em> ranking scores 1.</li>
+      <li><b>Finance</b> (daily): answer-recall@5 + MRR@5. Deterministic matchers on registry and SEC facts, with an LLM backstop that can upgrade a miss but never revoke a hit.</li>
+      <li><b>Scholar</b> (daily): known-item papers. recall@10 + MRR@10 by arXiv / DOI / PMID match. Title, body, clue, and tip-of-the-tongue buckets stay on the same papers.</li>
+      <li><b>Legal</b> (daily): known-item caselaw and CFR. recall@5 + MRR@5 by citation, docket + party token, or URL identity.</li>
+      <li><b>AgenticRare</b> is a query producer plus a news-style eval, not a fourth gold bench. Rare-word English queries are sampled from public agent logs and scored with nDCG@5.</li>
+    </ul>
+    <h2>The ultimate ceiling</h2>
+    <p><em>ultimate</em> is a synthetic engine. It pools every engine's results per query and ranks them oracle-style: best judge rating first on judged benches, gold item first on known-item benches. A standings share is an engine's score divided by ultimate. The hatched band on the radar is quality no single engine currently captures.</p>
+    <h2>What we do not claim</h2>
+    <p>NEEDLE does not measure generated answers, citations inside a chatbot reply, or end-to-end agent success. It measures search and retrieval: did the engine return the right evidence, in the right order, in the snippet an agent actually sees.</p>
+    <h2>Reproduce a number</h2>
+    <p>Install with uv, generate a query set, and run the same engines:</p>
+    <p><code>uv sync && uv run needle news generate --source rss --out queries.jsonl && uv run needle news run --queries queries.jsonl --out ndcg.json</code></p>
+    <p>Archived runs live on <a href="https://huggingface.co/datasets/keenable-ai/needle-results">keenable-ai/needle-results</a>. Dashboard aggregates are at <a href="../data/history.jsonl">data/history.jsonl</a>, <a href="../data/catalog.json">data/catalog.json</a>, and <a href="../data/latest_news.json">data/latest_*.json</a>.</p>
+    <h2>Citation</h2>
+    <pre>@misc{needle2026,
+  author = {Styskin, Andrey and Petri, Matthias and Gusev, Ilya},
+  title  = {{NEEDLE}: A Live Open-Source Search Benchmark for {AI} Agents},
+  year   = {2026},
+  url    = {https://keenableai.github.io/needle/},
+  doi    = {10.5281/zenodo.22095155}
+}</pre>
+    <div class="faq">
+      <details>
+        <summary>Does NEEDLE fetch landing pages?</summary>
+        <p>No. Engines are scored on the ranking, titles, and snippets they returned, with a uniform snippet budget.</p>
+      </details>
+      <details>
+        <summary>Can a provider overfit NEEDLE?</summary>
+        <p>News queries are generated each hour and the other gold sets each day from public sources. There is no committed query set.</p>
+      </details>
+    </div>
+  </section>
+<footer class="site-footer">
+  <div>NEEDLE is an MIT-licensed benchmark from <a href="https://keenable.ai">Keenable</a>. Cite <a href="https://doi.org/10.5281/zenodo.22095155">DOI 10.5281/zenodo.22095155</a>.</div>
+  <nav aria-label="Footer">
+    <a href="../">Leaderboards</a>
+    <a href="../compare/">Compare</a>
+    <a href="../methodology/">Methodology</a>
+    <a href="../llms.txt">llms.txt</a>
+    <a href="https://huggingface.co/datasets/keenable-ai/needle-results">Artifacts</a>
+    <a href="https://github.com/keenableai/needle">Source</a>
+  </nav>
+</footer>
+</div>
+<script src="../assets/common.js"></script>
+</body>
+</html>

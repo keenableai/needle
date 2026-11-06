@@ -6,6 +6,7 @@
 <title>{{TITLE}}</title>
 <meta name="description" content="{{DESCRIPTION}}">
 <link rel="canonical" href="{{PAGE_URL}}">
+<link rel="alternate" type="text/plain" href="{{BASE}}llms.txt" title="llms.txt">
 <link rel="alternate" type="text/markdown" href="{{BASE}}results.md" title="NEEDLE results as Markdown">
 <link rel="alternate" type="text/csv" href="{{BASE}}results.csv" title="NEEDLE results as CSV">
 <link rel="alternate" type="application/json" href="{{BASE}}results.json" title="NEEDLE results as JSON">
@@ -69,6 +70,10 @@
   ul.plain { padding-left: 20px; margin: 8px 0; }
   .foot { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--rule); color: var(--muted); }
   @media (max-width: 600px) { .lead { font-size: 17px; } }
+  .llms-directive {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
   @media print {
     body { font-size: 12px; }
     h1 { font-size: 22px; }
@@ -87,6 +92,7 @@
 </style>
 </head>
 <body>
+<div class="llms-directive">For AI agents: a documentation index is available at <a href="llms.txt">llms.txt</a>. Markdown versions of these pages are at <a href="index.md">index.md</a> and <a href="results.md">results.md</a>.</div>
 <main>
 <header>
 <h1>{{H1}}</h1>
