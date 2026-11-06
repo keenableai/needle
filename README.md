@@ -65,7 +65,7 @@ timed and counted in `latency.reconnects`. Per-engine tuning uses env vars: `TAV
 entry fixes Keenable's, Exa's, Parallel's and Perplexity's modes and Brave's
 endpoint (`keenable-realtime` = realtime, `exa` = auto,
 `exa-instant` = instant, `exa-lite` = lite,
-`parallel` = advanced, `parallel-turbo` = turbo,
+`parallel` = advanced, `parallel-fast` = fast, `parallel-turbo` = turbo,
 `perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
 `brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). A failed
 search scores zero when the engine's side caused it (timeout, server error,
