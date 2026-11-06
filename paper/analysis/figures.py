@@ -37,8 +37,8 @@ FIELD = "#bab9b1"
 
 plt.rcParams.update({
     "font.family": "serif", "font.serif": ["Nimbus Roman", "Times New Roman", "TeX Gyre Termes", "Liberation Serif"],
-    "font.size": 7.5, "axes.edgecolor": AXIS, "axes.linewidth": 0.5, "axes.labelcolor": INK2, "xtick.color": INK2,
-    "ytick.color": INK2, "xtick.labelsize": 7.5, "ytick.labelsize": 7.5, "axes.titlesize": 8,
+    "font.size": 8.5, "axes.edgecolor": AXIS, "axes.linewidth": 0.5, "axes.labelcolor": INK2, "xtick.color": INK2,
+    "ytick.color": INK2, "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "axes.titlesize": 9,
     "axes.titleweight": "bold", "axes.titlecolor": INK, "lines.linewidth": 1.0, "lines.markersize": 3.2,
     "pdf.fonttype": 42,
 })
@@ -66,7 +66,7 @@ def label_ends(ax, ends, x, gap, dx, floor):
     for i in range(len(pos) - 2, -1, -1):
         pos[i] = max(pos[i], pos[i + 1] + gap)
     for (y, label, color), p in zip(ends, pos, strict=True):
-        ax.annotate(label, xy=(x, y), xytext=(x + dx, p), fontsize=7.5, color=color, va="center", ha="left",
+        ax.annotate(label, xy=(x, y), xytext=(x + dx, p), fontsize=8.5, color=color, va="center", ha="left",
                     annotation_clip=False,
                     arrowprops={"arrowstyle": "-", "color": MUTED, "lw": 0.4, "shrinkA": 0, "shrinkB": 1}
                     if abs(p - y) > gap * 0.15 else None)
@@ -97,10 +97,10 @@ def series(ax, xs, ys, cis, e):
             lw=0.9 if e == ULT else 1.0, zorder=3)
 
 
-W, H = 6.3, 1.85
+W, H = 6.3, 2.3
 fig = plt.figure(figsize=(W, H))
-ax1 = fig.add_axes([0.34 / W, 0.4 / H, 2.0 / W, 1.24 / H])
-ax2 = fig.add_axes([3.55 / W, 0.4 / H, 1.85 / W, 1.24 / H])
+ax1 = fig.add_axes([0.38 / W, 0.45 / H, 1.95 / W, 1.6 / H])
+ax2 = fig.add_axes([3.65 / W, 0.45 / H, 1.65 / W, 1.6 / H])
 
 buckets = ["title", "body", "clue", "tot"]
 blabels = ["title", "body\nkeyword", "body\nquestion", "tip of\ntongue"]
@@ -123,7 +123,7 @@ ax1.set_xlim(-0.2, 3.15)
 ax1.set_ylim(0, 1.0)
 ax1.set_yticks([0, .25, .5, .75, 1], ["0", ".25", ".50", ".75", "1"])
 ax1.set_ylabel("recall@10", labelpad=2)
-ax1.set_title("a  Scholar recall by query bucket", loc="left", x=-0.12)
+ax1.set_title("a  Scholar query types", loc="left", x=-0.12)
 clean(ax1)
 
 byweek = collections.defaultdict(list)

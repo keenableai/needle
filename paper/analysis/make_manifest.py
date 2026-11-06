@@ -8,7 +8,14 @@ HISTORY = "gh-pages data/history.jsonl, rows up to 2026-10-29T11:53Z"
 pairs = json.load(open(os.path.join(here, "audit", "adjacent_pairs.json")))
 audits = sorted(os.path.relpath(p, here) for p in glob.glob(os.path.join(here, "audit", "**", "*"), recursive=True) if os.path.isfile(p))
 manifest = {
-    "paper_commit": sys.argv[1],
+    "historical_analysis_commit": sys.argv[1],
+    "dashboard_history": {
+        "revision": "9f839e398b5b41dd0036226f423471a1f3a3a3f3",
+        "path": "data/history.jsonl", "through": "2026-10-29T11:53Z",
+        "note": "Use the backfilled history at this revision, not the uncorrected snapshot published at the cutoff.",
+    },
+    "current_judged_scoring_version": "ndcg-dedup-all-v1",
+    "historical_tables_use_current_duplicate_rule": False,
     "results_dataset": {"repo": "keenable-ai/needle-results", "revision": "6a5be09d6d2eed18227b8e1d2c0656bc1c14e5be"},
     "scoring_rules": {
         "service_side_failure": "scored zero",
@@ -30,7 +37,14 @@ manifest = {
     "raters": ["Claude Opus 5.5", "Gemini 4", "Grok 4.7"],
     "results": {
         "table_results": {"source": HISTORY, "rule": "runs since 2026-10-17 in which every listed configuration ran", "runs": pairs["runs"], "engines": pairs["order"]},
-        "table_ci": {"source": [HISTORY, "audit/matched_pairs.json"], "same_runs_as": "table_results"},
+        "table_ci": {
+            "source": [HISTORY, "audit/matched_pairs.json"],
+            "historical_column": "same as table_results",
+            "consistent_policy_column": "audit/matched_pairs.json base: account failures excluded across all tasks; service failures zero",
+            "matched_column": "audit/matched_pairs.json matched",
+            "delta": "matched minus base; ci_diff is the paired interval",
+            "support": "274 of the 276 main-window runs; two news runs lack per-query artifacts",
+        },
         "matched_support": {"file": "audit/matched_pairs.json"},
         "figure_results_a": {"source": HISTORY, "bench": "scholar", "window_days": 30, "window_end": "2026-10-29"},
         "figure_results_b": {"source": HISTORY, "weeks": "2026-W36..2026-W43"},
@@ -45,6 +59,12 @@ manifest = {
         "rare_quoted": {"file": "audit/rare_quoted.json"},
         "bench_weights": {"file": "audit/bench_weights.json"},
         "scholar_strata": {"file": "audit/scholar_strata.json"},
+        "scholar_paired": {
+            "input": "audit/scholar_paired.jsonl", "file": "audit/scholar_paired.json",
+            "command": "uv run python analysis/scholar_paired.py analysis/audit/scholar_paired.jsonl analysis/audit/scholar_paired.json",
+            "source": "Stored scholar per-query identifier hits and query metadata at results_dataset.revision; 31 runs from 2026-09-29T1453Z through 2026-10-28T1506Z",
+            "support": "29 runs, 2629 paper-runs with all four query types scored by all five selected configurations",
+        },
         "list_pair_diffs": {"files": ["audit/lists100/list_pair_diffs_gemini.json", "audit/lists100/list_pair_diffs_grok.json"]},
         "pairs_survive": {"file": "audit/pairs_survive.json"},
         "ceiling_drop": {"file": "audit/ceiling_drop.json"},

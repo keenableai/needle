@@ -551,8 +551,9 @@
         text. We score each engine on the ranking, titles, and snippets
         it returned. We do not fetch pages and we do not re-rank. The
         judge does not see the engine name. We make new query sets from
-        public sources, <span class="vert" data-vert="news"></span> each hour and the rest each day, so
-        there is no fixed set to overfit.
+        public sources, <span class="vert" data-vert="news"></span> each hour and the rest each day.
+        Registry facts and the fixed rare-query stream can repeat; public queries
+        can also permit tuning to the benchmark.
         <a href="#app-protocol">Appendix C</a> gives the full comparison
         protocol. <b>The benchmark is open source: the
         <a href="https://github.com/keenableai/needle">keenableai/needle</a>
@@ -581,6 +582,14 @@
   <h2 class="section-title" id="sec-results">Quality results</h2>
   <div class="card" id="card-standings" data-tools>
     <h2>Standings — all verticals</h2>
+    <p class="sub"><b>Scope and limits.</b> The five tasks have equal weight,
+      not weights drawn from agent traffic. Scores measure API titles, URLs
+      and snippets, not page quality or final answers. Scoring audits use
+      LLMs, not human labels. Historical failure rules differ: some runs count
+      our credit or quota failures as zero, while others exclude them.
+      Stored scores can use older matchers and duplicate rules; old judge inputs
+      are incomplete. Compare engines within the same window and protocol,
+      not across scoring versions. See <a href="#app-protocol">the protocol</a>.</p>
     <div class="sub">share of <em>ultimate</em> (all engines pooled, the
       outer ring) per vertical, farther out is better; click a table row to
       toggle an engine &middot;

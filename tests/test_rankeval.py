@@ -72,6 +72,28 @@ async def test_run_ndcg_ranks_engines():
     assert b == 0.0
 
 
+async def test_run_ndcg_preserves_judge_inputs():
+    result = SearchResult(url="https://a.com/1", title="GOODDOC", published_date="2026-06-30")
+    report = await run_ndcg([q("q1")], {"e": FakeEngine([result])}, FakeJudge(), max_content_chars=200)
+    assert report["max_content_chars"] == 200
+    assert report["scoring_version"] == "ndcg-dedup-all-v1"
+    for engine in ("e", "ultimate"):
+        pq = report["engines"][engine]["per_query"][0]
+        assert pq["today"] == TODAY
+        assert pq["results"][0]["published_date"] == "2026-06-30"
+
+
+async def test_site_duplicates_do_not_exceed_ceiling():
+    results = [
+        SearchResult(url="https://a.com/1", title="GOODDOC"),
+        SearchResult(url="http://www.a.com/1/", title="GOODDOC"),
+    ]
+    report = await run_ndcg([q("site:a.com docs")], {"e": FakeEngine(results)}, FakeJudge())
+    pq = report["engines"]["e"]["per_query"][0]
+    assert pq["penalized_ratings"] == [4, 0]
+    assert pq["ndcg"] == pytest.approx(1.0)
+
+
 async def test_run_ndcg_excludes_search_error_without_ideal():
     good = [SearchResult(url="https://g1", title="GOODDOC one")]
 

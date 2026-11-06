@@ -71,10 +71,10 @@ def test_penalties_url_variants_count_as_duplicates():
     assert apply_redundancy_penalties(urls, [4, 4]) == [4, 0]
 
 
-def test_penalties_site_queries_exempt():
-    urls = ["https://a.com/1", "https://a.com/2", "https://a.com/1"]
-    ratings = [4, 4, 4]
-    assert apply_redundancy_penalties(urls, ratings, query_text="site:a.com docs") == ratings
+@pytest.mark.parametrize("query", ["site:a.com docs", "SITE:a.com docs"])
+def test_penalties_site_queries_deduplicate(query):
+    urls = ["https://a.com/1", "https://a.com/2", "http://www.a.com/1/"]
+    assert apply_redundancy_penalties(urls, [4, 4, 4], query_text=query) == [4, 4, 0]
 
 
 def test_penalties_website_word_not_exempt():

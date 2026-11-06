@@ -51,11 +51,10 @@ open(out, "w").write("\n".join(lines) + "\n")
 
 ci_lines = []
 for o, e in table:
-    lo, hi = ci[e]
     d = 100 * (matched["matched"][e] - matched["base"][e])
     dlo, dhi = (100 * x for x in matched["ci_diff"][e])
-    cols = [NAMES[e], f"{o * 100:.1f}", f"{lo * 100:.1f}--{hi * 100:.1f}", signed(d), f"{signed(dlo)}, {signed(dhi)}"]
-    cols += [fmt(sh[e][b][1]) for b, _ in BENCHES]
+    cols = [NAMES[e], f"{o * 100:.1f}", f"{matched['base'][e] * 100:.1f}",
+            f"{matched['matched'][e] * 100:.1f}", signed(d), f"{signed(dlo)}, {signed(dhi)}"]
     ci_lines.append(" & ".join(cols) + r" \\")
 open(out.replace("table_results", "table_ci"), "w").write("\n".join(ci_lines) + "\n")
 print(f"window to {end:%d %b %Y}; runs:",

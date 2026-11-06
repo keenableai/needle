@@ -84,11 +84,16 @@ async def test_openrouter_reports_truncation(monkeypatch):
     assert text is None and err["error_type"] == "truncated"
 
 
-def test_news_run_passes_keenable_api_key(monkeypatch, tmp_path):
+@pytest.mark.parametrize("revision", [None, "a" * 40])
+def test_news_run_passes_keenable_api_key(monkeypatch, tmp_path, revision):
     qfile = tmp_path / "q.jsonl"
     qfile.write_text("mayor of austin\n")
     monkeypatch.setenv("OPENROUTER_API_KEY", "or-key")
     monkeypatch.setenv("KEENABLE_API_KEY", "kb-key")
+    if revision is None:
+        monkeypatch.delenv("GITHUB_SHA", raising=False)
+    else:
+        monkeypatch.setenv("GITHUB_SHA", revision)
 
     created = {}
 
@@ -105,6 +110,7 @@ def test_news_run_passes_keenable_api_key(monkeypatch, tmp_path):
     monkeypatch.setattr(search_factory, "KeenableClient", FakeKeenable)
     monkeypatch.setattr(shared_cli, "run_ndcg", fake_run_ndcg)
     news_cli.News().run(queries=str(qfile), engines="keenable", out=str(tmp_path / "r.json"))
+    assert json.loads((tmp_path / "r.json").read_text())["code_revision"] == revision
     assert created == {
         "api_key": "kb-key",
         "mode": "pro",

@@ -1,5 +1,13 @@
 {
- "paper_commit": "216dc24e",
+ "historical_analysis_commit": "216dc24e",
+ "dashboard_history": {
+  "revision": "9f839e398b5b41dd0036226f423471a1f3a3a3f3",
+  "path": "data/history.jsonl",
+  "through": "2026-10-29T11:53Z",
+  "note": "Use the backfilled history at this revision, not the uncorrected snapshot published at the cutoff."
+ },
+ "current_judged_scoring_version": "ndcg-dedup-all-v1",
+ "historical_tables_use_current_duplicate_rule": false,
  "results_dataset": {
   "repo": "keenable-ai/needle-results",
   "revision": "6a5be09d6d2eed18227b8e1d2c0656bc1c14e5be"
@@ -347,7 +355,11 @@
     "gh-pages data/history.jsonl, rows up to 2026-10-29T11:53Z",
     "audit/matched_pairs.json"
    ],
-   "same_runs_as": "table_results"
+   "historical_column": "same as table_results",
+   "consistent_policy_column": "audit/matched_pairs.json base: account failures excluded across all tasks; service failures zero",
+   "matched_column": "audit/matched_pairs.json matched",
+   "delta": "matched minus base; ci_diff is the paired interval",
+   "support": "274 of the 276 main-window runs; two news runs lack per-query artifacts"
   },
   "matched_support": {
    "file": "audit/matched_pairs.json"
@@ -402,6 +414,13 @@
   },
   "scholar_strata": {
    "file": "audit/scholar_strata.json"
+  },
+  "scholar_paired": {
+   "input": "audit/scholar_paired.jsonl",
+   "file": "audit/scholar_paired.json",
+   "command": "uv run python analysis/scholar_paired.py analysis/audit/scholar_paired.jsonl analysis/audit/scholar_paired.json",
+   "source": "Stored scholar per-query identifier hits and query metadata at results_dataset.revision; 31 runs from 2026-09-29T1453Z through 2026-10-28T1506Z",
+   "support": "29 runs, 2629 paper-runs with all four query types scored by all five selected configurations"
   },
   "list_pair_diffs": {
    "files": [
@@ -631,6 +650,8 @@
   "audit/raters/third_rater_results.json",
   "audit/repeat_queries.json",
   "audit/sample.json",
+  "audit/scholar_paired.json",
+  "audit/scholar_paired.jsonl",
   "audit/scholar_rejects.json",
   "audit/scholar_strata.json",
   "audit/sensitivity.json",

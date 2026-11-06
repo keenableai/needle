@@ -169,6 +169,7 @@ def run_ndcg_eval(
 
     report = asyncio.run(_go())
     report["judge_model"] = model
+    report["code_revision"] = os.environ.get("GITHUB_SHA")
     write_json(report, out)
 
     print(f"\n{bench}: {report['num_queries']} queries, judge={model}", file=sys.stderr)

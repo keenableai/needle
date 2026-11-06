@@ -54,6 +54,7 @@ def _score_query(
 ) -> dict[str, Any]:
     out: dict[str, Any] = {
         "query": query.text,
+        "today": query.today,
         "query_profile": profile,
         "queried_at": queried_at,
         "ndcg": None,
@@ -88,6 +89,7 @@ def _score_query(
             "url": r.url,
             "title": r.title,
             "snippet": r.snippet,
+            "published_date": r.published_date,
             "rating": j.rating if j is not None else None,
             "label": j.label if j is not None else None,
             "reasoning": j.reasoning if j is not None else None,
@@ -259,6 +261,8 @@ async def run_ndcg(
         "num_queries": len(queries),
         "num_results": num_results,
         "k": k,
+        "max_content_chars": max_content_chars,
+        "scoring_version": "ndcg-dedup-all-v1",
         "judged_pairs": sum(run.n_judged for run in query_outs),
         "engines": engines_out,
     }

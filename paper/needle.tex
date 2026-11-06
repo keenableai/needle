@@ -53,15 +53,12 @@
 law and rare-word queries. It draws queries and reference answers from
 public sources on each run, except for a fixed rare-query stream, and
 scores the returned titles, URLs and snippets. We study 26 API
-configurations. Across 12 days with all 21 main engines present, overall
-shares of a pooled ceiling span 15--73\%; paired tests separate 178 of
-210 engine pairs after Bonferroni adjustment. Title queries hide large
-differences: 23 configurations achieve scholar recall@10 of .71--.98 from
-titles, but .08--.72 from body keywords. Keenable leads all eight weekly
-comparisons, while Perplexity leads on a later day's runs. Blinded LLM
-raters from three vendors agree with the relevance judge at $\kappa$
-.77--.79; no human audited the scorers. The results support choosing an API
-by task and paired comparison, not by rank alone. Code, data and dashboard
+configurations. Across 12 days with all 21 main engines present, paired
+tests separate 178 of 210 engine pairs after Bonferroni adjustment.
+Title queries hide large differences: 23 configurations achieve scholar
+recall@10 of .71--.98 from titles, but .08--.72 from body keywords.
+Blinded LLM raters broadly agree with the relevance judge; no human
+audited the scorers. Code, data and dashboard
 are public; links are withheld for review.
 \end{abstract}
 
@@ -108,31 +105,24 @@ run-level bootstrap intervals. Scores follow the dashboard rules.}
 \section{Related Work}
 \label{sec:related}
 
-\textbf{Live benchmarks.} LiveBench, LiveCodeBench, RealTime QA, FreshQA,
-LiveSearchBench and LiveNewsBench draw new items from dated sources
-\citep{white2025livebench,jain2025livecodebench,kasai2023realtimeqa,vu2024freshllms,zhou2026livesearchbench,zhang2026livenewsbench}.
-They score a model's answer; FreshStack scores retrievers on a fixed corpus
-\citep{thakur2025freshstack}.
+\textbf{Live and API benchmarks.} LiveBench and LiveSearchBench draw new
+items from dated sources but score model answers
+\citep{white2025livebench,zhou2026livesearchbench}. BrowseComp scores agents
+end to end \citep{wei2025browsecomp}; FreshStack and BrowseComp-Plus fix
+the corpus to isolate retrieval
+\citep{thakur2025freshstack,chen2026browsecompplus}. API comparisons use
+static questions under one agent \citep{selvam2026search,aa2026searchindex},
+while web engine audits use fixed query sets
+\citep{lewandowski2015evaluating,kirsten2026characterizing}.
 
-\textbf{Agents and search APIs.} BrowseComp, GAIA and AssistantBench score
-agents end to end \citep{wei2025browsecomp,mialon2024gaia,yoran2024assistantbench};
-BrowseComp-Plus fixes the corpus to isolate the retriever
-\citep{chen2026browsecompplus}. Recent studies and leaderboards swap the
-search API under one agent on static questions
-\citep{selvam2026search,aa2026searchindex,openbenchmarks2026websearch}.
-Other studies describe how agents search
-\citep{ning2026agentic,pezzuti2026agentssearch}. Web engine audits compare
-engines on fixed query sets
-\citep{lewandowski2015evaluating,bevendorff2024google,kirsten2026characterizing}.
-
-\textbf{Judges and known items.} LLM assessors can reproduce system
-rankings \citep{thomas2024llms,upadhyay2025largescale,arabzadeh2025benchmarking}.
-Simulated known-item and tip-of-tongue queries can rank systems
-\citep{azzopardi2007simulated,he2025totelicitation}, and full text helps
-retrieval beyond abstracts \citep{lin2009fulltext}. Domain benchmarks
-cover literature, caselaw and finance search
-\citep{ajith2024litsearch,hou2025clerc,hu2026finsearchcomp}. \needle
-combines fresh queries, isolated API scoring and these scorers.
+\textbf{Scorers and tasks.} LLM assessors and simulated known-item queries
+can reproduce system rankings
+\citep{thomas2024llms,upadhyay2025largescale,azzopardi2007simulated,he2025totelicitation}.
+Domain benchmarks cover literature, caselaw and finance search
+\citep{ajith2024litsearch,hou2025clerc,hu2026finsearchcomp}; full text helps
+retrieval beyond abstracts \citep{lin2009fulltext}. \needle combines these
+methods with fresh queries and isolated API scoring. Its contribution is
+the live comparison and paired diagnostics across APIs, not a new scorer.
 
 \section{The Benchmark}
 \label{sec:bench}
@@ -145,9 +135,8 @@ counts.
 
 \subsection{Queries}
 
-\textbf{News.} Each hour an LLM writes short event queries from the newest
-items in 124 feeds and Google Trends RSS for 52 US geographies. A run
-samples 20 queries across topics and rejects evergreen items.
+\textbf{News.} Each hour an LLM writes 20 event queries from news feeds
+and Google Trends, rejecting evergreen items.
 \textbf{Finance.} Queries ask for company facts from Wikidata
 \citep{vrandecic2014wikidata} and GLEIF, quarterly 10-Q figures from SEC
 XBRL, or filings by description.
@@ -157,22 +146,17 @@ its normalized \emph{title}; \emph{body keywords} for a detail absent from
 title and abstract; a \emph{body question} about that detail; and a
 \emph{tip-of-tongue} description \citep{arguello2021tot} without names or
 exact values. All four must pass the filters.
-\textbf{Legal.} Recent opinions from 14 federal courts on CourtListener
-yield caption queries. eCFR sections yield queries based on a verbatim
-two-to-eight-word span, quoted in one of four variants. Filters reject
-citation leaks.\footnote{Sources: \url{trends.google.com},
-\url{api.gleif.org}, \url{data.sec.gov}, \url{courtlistener.com},
-\url{ecfr.gov}.}
-\textbf{Rare.} We sample a fixed public stream of agent queries
-\citep{ning2026agentic,li2026openresearcher,zhou2026lrat}, keeping English
-ones (fastText language ID; \citealp{joulin2017bag,joulin2016fasttextzip})
-that contain a word split into at least five BERT WordPieces
-\citep{wu2016gnmt,devlin2019bert}.
+\textbf{Legal.} CourtListener opinions yield caption queries; eCFR
+sections yield queries based on verbatim spans. Filters reject citation
+leaks.
+\textbf{Rare.} We sample a fixed public stream of English agent queries
+containing rare words \citep{ning2026agentic,li2026openresearcher,zhou2026lrat}.
 Appendix~\ref{app:leak} gives filters and examples.
 
 At least half of legal queries and finance money and filing queries carry
 quotes, \texttt{site:}, \texttt{after:} or \texttt{before:}. The client maps
-operators to native filters where available (Appendix~\ref{app:ops}).
+operators to native filters where available; Appendix~\ref{app:ops}
+gives the mappings and paired tests of operator effects.
 
 \subsection{Scores}
 \label{sec:scoring}
@@ -184,7 +168,8 @@ literal operator compliance, as LLM relevance assessors do
 Met levels of \citet{google2025sqrg}. Ratings 0--4 map to gains
 $\{0,0,.117,.667,1\}$; this design choice puts high weight on strong
 results \citep{kanoulas2009empirical}. Snippets have a 2,000-character cap.
-Repeated URLs score zero except on \texttt{site:} queries.
+The studied runs exempt \texttt{site:} queries from duplicate penalties;
+Appendix~\ref{app:example} gives the corrected rule.
 
 For each query, the \emph{ceiling} keeps the best rating per normalized
 URL across all configurations, variants included, and sorts these ratings,
@@ -221,8 +206,9 @@ failures (our quota, rate limit, login or credit) are excluded; other
 failures score zero. On news and rare, every failure in this window scores
 zero. These exclusions remove up to 28\% of an engine's query-runs.
 Intervals use run-level bootstraps \citep{efron1993bootstrap} and measure
-sampling error, not scorer error. Appendices~\ref{app:examples} and~\ref{app:checks} specify the rules
-and test alternatives.
+sampling error, not scorer error. Table~\ref{tab:ci} gives companion
+scores with one account-failure policy across all five tasks;
+Appendix~\ref{app:examples} maps the scoring protocols.
 
 \begin{table*}[t]
 \centering\footnotesize
@@ -264,15 +250,13 @@ Over 31 scholar runs, 23 of 26 configurations reach recall@10 .71--.98
 from titles. The same 23 span .08--.72 on body keywords
 (Figure~\ref{fig:results}a; Table~\ref{tab:buckets}). Keenable leads at
 .72, followed by its realtime mode (.71) and Kagi (.67).
+Appendix~\ref{app:scholarpaired} gives paired intervals on common papers.
 
 \paragraph{Weekly ranks are stable, not fixed.}
 Adjacent weekly rankings agree at Kendall's $\tau_b$ \citep{kendall1945ties}
-.81--.94, and Keenable
-leads all eight weeks (Figure~\ref{fig:results}b). Lower ranks shift:
-Perplexity passes Parallel, and Claude search falls about 13 points, about
-half due to our credit lapse. A later day's runs put Perplexity ahead of
-Keenable, 72.4 to 71.3. That change rests on one scholar and one legal run,
-within each bench's run-to-run range (Appendix~\ref{app:checks}).
+.81--.94. Keenable leads all eight weeks, but lower ranks change
+(Figure~\ref{fig:results}b). Appendix~\ref{app:checks} checks changes in
+the engine pool, account failures and dispatch times.
 
 \paragraph{LLM raters broadly agree with the judge.}
 Blinded raters from three vendors grade 1,200 results with quadratic-weighted
@@ -282,15 +266,6 @@ the judge, but neither separates Keenable from Exa. These are checks of
 model agreement, not human validation. Removing an engine from the ceiling
 changes its overall share by at most 0.8 points.
 Appendices~\ref{app:validation} and~\ref{app:checks} give the checks.
-
-\paragraph{A site restriction can reduce recall.}
-In a paired test, adding \texttt{site:courtlistener.com} to the same 80
-case captions lowers mean recall@5 by .36, from .85; 15 of 18 engines lose
-beyond their 95\% intervals. Site restrictions help SEC filings (+.35) and
-CFR sections (+.25). An earlier test with paired queries found that most
-operators had no significant effect on three web engines
-\citep{eastman2003operators}. The test does not separate index
-coverage, ranking and filter behavior (Appendix~\ref{app:opsres}).
 
 \section*{Limitations}
 
@@ -340,9 +315,9 @@ Vendor redirect links can break URL matching in later runs.
 
 \paragraph{Repetition and reproducibility.}
 Registry facts and the fixed rare stream can repeat. Public sources and
-queries permit tuning or special handling of benchmark traffic. We archive
-queries, reference answers, results and judgments, but not API publication
-dates or each run's code revision. Stored ratings reproduce the tables;
+queries permit tuning or special handling of benchmark traffic. The studied
+runs archive queries, reference answers, results and judgments, but lack
+API publication dates and each run's code revision. Stored ratings reproduce the tables;
 re-judging cannot exactly reproduce the inputs. Appendix~\ref{app:examples}
 lists the release terms and reconstruction steps.
 
@@ -354,51 +329,10 @@ lists the release terms and reconstruction steps.
 \section{Run Protocol and Reproduction}
 \label{app:examples}
 
-Figure~\ref{fig:pipeline} shows the workflow for all five benches.
-
-\begin{figure*}[t]
-\centering
-\scriptsize
-\begin{tikzpicture}[
-  x=1cm, y=1cm,
-  box/.style={draw=axis, fill=boxfill, rounded corners=2pt, inner sep=3pt, align=left, text=ink, execute at begin node={\hyphenpenalty10000\relax}},
-  tag/.style={rounded corners=2pt, inner sep=2.5pt, text=white, font=\scriptsize\bfseries, align=center},
-  head/.style={text=ink2, font=\scriptsize\bfseries, anchor=south west, inner sep=0pt},
-  flow/.style={-{Stealth[length=3pt,width=2.5pt]}, ink2, line width=0.5pt},
-]
-\def\rowh{0.56}
-\def\boxh{0.46}
-\pgfmathsetmacro{\tallh}{4*\rowh+\boxh}
-\foreach \i/\name/\col/\cad/\gen/\score in {
-  0/news/bnews/hourly/{RSS feeds, Google Trends; an LLM writes the query}/{judge 0--4; \ndcg vs.\ ceiling},
-  1/finance/bfinance/daily/{Wikidata, GLEIF, SEC XBRL: company facts, 10-Q items}/{answer match; recall@5},
-  2/scholar/bscholar/daily/{arXiv, Europe PMC: four paired queries per paper}/{arXiv id, DOI, PMID; recall@10},
-  3/legal/blegal/daily/{CourtListener captions; verbatim eCFR spans}/{citation, docket, URL; recall@5},
-  4/rare/brare/daily/{fixed agent query stream; a word of $\geq$5 WordPieces}/{judge 0--4; \ndcg vs.\ ceiling}%
-}{
-  \pgfmathsetmacro{\yy}{-\i*\rowh}
-  \node[tag, fill=\col, minimum width=1.7cm, minimum height=\boxh cm] (T\i) at (0.85,\yy) {\name~{\mdseries\tiny\cad}};
-  \node[box, text width=6.5cm, minimum height=\boxh cm, anchor=west] (B\i) at (1.85,\yy) {\gen};
-  \node[box, text width=3.7cm, minimum height=\boxh cm, anchor=west] (D\i) at (12.05,\yy) {\score};
-}
-\node[box, text width=2.45cm, minimum height=\tallh cm, anchor=north west, fill=white] (C) at (9.0,{\boxh/2}) {\textbf{26 configurations}\\one request at a time\\top-$k$ results\\2,000-character snippets\\native operator filters};
-\foreach \i in {0,...,4}{
-  \draw[flow] (B\i.east) -- (B\i.east -| C.west);
-  \draw[flow] (D\i.west -| C.east) -- (D\i.west);
-}
-\node[head] at (1.85,{\boxh/2+0.12}) {Sources and query generation};
-\node[head] at (9.0,{\boxh/2+0.12}) {Search APIs};
-\node[head] at (12.05,{\boxh/2+0.12}) {Scoring};
-\end{tikzpicture}
-\caption{Each query goes to every configuration without its reference
-answer. The scorer checks the returned title, URL and snippet against that
-answer, or the judge rates relevance.}
-\label{fig:pipeline}
-\end{figure*}
-
 \subsection{Requests and configurations}
 
-All engines receive the same query and requested $k$ (Table~\ref{tab:protocol}).
+All engines receive the same query and requested result count
+(Table~\ref{tab:protocol}).
 Each engine processes one request at a time; engines run concurrently.
 Requests have a 30-second timeout and up to three attempts, with exponential
 back-off from 1 to 30 seconds on HTTP 429, 5xx and timeouts. We record the
@@ -420,13 +354,14 @@ Bench & Cadence & Queries/run & $k$ & Metric \\
 \midrule
 news & hourly & 20 & 5 & \ndcg \\
 finance & daily & 120 & 5 & recall@5 \\
-scholar & daily & 420 & 10 & recall@10 \\
+scholar & daily & up to 420 & 10 & recall@10 \\
 legal & daily & 40 + 0--20 & 5 & recall@5 \\
 rare & daily & 100 & 5 & \ndcg \\
 \bottomrule
 \end{tabular}
-\caption{Scholar samples seven papers per domain--age cell, four queries
-each. Legal adds one caption query per opinion published by the 14 courts.}
+\caption{Scholar targets seven accepted papers per domain--age cell,
+four queries each; cells can fall short after filtering. Legal adds one
+caption query per opinion published by the 14 courts.}
 \label{tab:protocol}
 \end{table}
 
@@ -466,8 +401,8 @@ ChatGPT search & api.openai.com & \texttt{gpt-5.5}, \texttt{web\_search}, \textt
 
 \subsection{Score sources and failure rules}
 
-Tables~\ref{tab:results}, \ref{tab:ci} and~\ref{tab:buckets},
-Figure~\ref{fig:results} and the primary paired tests use published
+Tables~\ref{tab:results} and~\ref{tab:buckets}, Figure~\ref{fig:results}
+and the primary paired tests use published
 \texttt{data/history.jsonl} from the \texttt{gh-pages} branch. Per-query
 checks read archived results and import the repository's scoring code.
 \texttt{paper/analysis/manifest.json} lists each result's data, runs,
@@ -484,15 +419,43 @@ per-query overall base by up to 6.3 points (Claude search). Eleven of the
 12 published scholar runs use a different DOI matcher. Finance, scholar
 and legal per-query checks nevertheless reproduce every main-window
 dashboard row. The later-day news and rare scores exclude every failure.
-These differences matter when comparing the checks with the main table;
-they do not change the stored table values.
+Table~\ref{tab:protocols} separates these protocols. Table~\ref{tab:ci}
+shows the historical overall share beside the consistent-policy estimate;
+the latter is not a pure successful-request score, since service failures
+still count as zero.
+
+\begin{table*}[t]
+\centering\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}p{4.1cm}p{3.4cm}p{3.4cm}p{4.2cm}@{}}
+\toprule
+Result & News / rare failures & Other task failures & Score source \\
+\midrule
+Table~\ref{tab:results}; primary paired tests & All zero & Account excluded; others zero & Published history, 276 runs \\
+Table~\ref{tab:ci}, consistent policy & Account excluded; others zero & Account excluded; others zero & Stored per-query scores; finance rematched; 274 runs \\
+Table~\ref{tab:ci}, matched support & Drop query for all engines if any has account error; others zero & Same & Same 274 runs, common account-success support \\
+Figure~\ref{fig:results}; Table~\ref{tab:buckets} & All zero (weeks shown) & Account excluded; others zero & Published history; windows in captions \\
+Later-day check & All excluded & Account excluded; others zero & Published later-day history \\
+\bottomrule
+\end{tabular}
+\caption{Failure policies and score sources. A failed judgment or empty
+judged ceiling excludes a query-run from every engine. Table~\ref{tab:ci}
+lacks two news runs whose per-query files are unavailable. The paired
+scholar check uses stored hits, not new judgments.}
+\label{tab:protocols}
+\end{table*}
 
 \subsection{Rebuilding the results}
 
-From \texttt{paper/}, run the following on dashboard history retaining
-rows through 11:53 UTC on 29 October 2026:
+Use the backfilled dashboard history revision pinned in
+\texttt{analysis/manifest.json}, retaining rows through 11:53 UTC on
+29 October 2026. The original history snapshot from that date predates
+score corrections and does not reproduce the tables. From \texttt{paper/}:
 \begin{quote}\footnotesize
 \begin{verbatim}
+uv run python \
+  analysis/history_snapshot.py \
+  history.jsonl
 uv run python \
   analysis/table_rows.py \
   history.jsonl table_results.tex \
@@ -503,11 +466,22 @@ uv run python \
   analysis/audit/adjacent_pairs.json
 \end{verbatim}
 \end{quote}
-The first command rebuilds the main table and intervals; the second
-rebuilds the paired tests. Audit scripts, samples and labels are under
+The commands extract the pinned history, rebuild the main and companion
+tables, and rebuild the paired tests. The pinned \texttt{gh-pages} commit
+must be present in the local Git clone. Audit scripts, samples and labels are under
 \texttt{paper/analysis/}. Repository and dataset revision hashes are
-withheld for review. The archive stores ratings but not API publication
-dates or per-run code revisions, so re-judging is approximate.
+withheld from the text for review and pinned in the release manifest.
+The archive supports deterministic re-aggregation of stored labels, not
+exact replay of the original judge. Historical API publication dates and
+per-run code revisions are irrecoverable; current code cannot restore
+them. New judged reports retain publication dates, the query date,
+snippet cap and scoring version; CI runs also record the code revision.
+A frozen client/prompt configuration and independent human labels remain
+requirements for a fully audited future window.
+
+The paired scholar check can run offline from its compact saved hit
+records with \texttt{analysis/scholar\_paired.py}; its source and output
+paths appear in the manifest. No new API calls or judgments are needed.
 
 \subsection{Data and release terms}
 
@@ -525,8 +499,9 @@ Filters reject links, common host names and hash, wallet or vehicle ids,
 and cap near-duplicates. A scan of the 1,100 released rare queries finds
 no email or HTTP/WWW link, 66 host-like names (61 in \texttt{site:}) and
 four long mixed-case alphanumeric tokens. Queries can name people. A
-human reads each new query artifact before release; removal requests go
-to the repository issue tracker. We publish API titles, URLs and snippets
+human reads each new query artifact before release. Removal requests can
+use private email to the release contacts in the repository README;
+requesters should not post personal query text in public issues. We publish API titles, URLs and snippets
 as evaluation records under our reading of vendor terms and withdraw an
 engine's archived outputs on request.
 
@@ -553,6 +528,14 @@ An instrumented run accepts 323 of 572 candidates (56\%); domain rates
 range from .41 to .73. Each domain--age cell takes its first seven accepted
 papers. The effect of rejecting other papers on engine order is untested
 (\texttt{scholar\_rejects.py}).
+
+News draws from 124 feeds and Google Trends RSS for 52 US geographies.
+Legal caption queries use opinions from 14 federal courts on CourtListener.
+Sources include \url{trends.google.com}, \url{api.gleif.org},
+\url{data.sec.gov}, \url{courtlistener.com} and \url{ecfr.gov}.
+Rare queries must pass fastText English language ID
+\citep{joulin2017bag,joulin2016fasttextzip} and contain a word split into
+at least five BERT WordPieces \citep{wu2016gnmt,devlin2019bert}.
 
 A CFR query needs at least three words and exactly one verbatim span of
 two to eight words. It must not contain a citation form (CFR, U.S.C.,
@@ -626,10 +609,14 @@ $\mathrm{IDCG}=1+.667/1.585+.117/2=1.479$.
 A scores $(1+.117/1.585)/1.479=.73$; B scores
 $(.667+1/1.585)/1.479=.88$.
 
-URL normalization removes tracking parameters. Later copies of a URL
-score zero except on \texttt{site:} queries. That exception affects 3 of
-1,748 rare \texttt{site:} engine--query pairs in the main window and can
-produce \ndcg above 1 because the ceiling still keeps each URL once.
+URL normalization removes tracking parameters. The historical scorer
+exempts \texttt{site:} queries from duplicate penalties. That exception
+affects 3 of 1,748 rare \texttt{site:} engine--query pairs in the main
+window and can produce \ndcg above 1, so the pooled ideal is not a strict
+upper bound for those records. The corrected scorer
+(\texttt{ndcg-dedup-all-v1}) gives every repeated normalized URL zero gain,
+including on \texttt{site:} queries. The historical tables retain their
+stored scores; they do not mix this correction with old results.
 
 \subsection{Finance matching rules}
 
@@ -713,8 +700,8 @@ rank 16 to 13; no other share moves more than 0.9 points. To remove unequal
 query support, we also drop a query-run for every engine if any engine has
 an account-side failure. This retains 4,048 of 12,313 query-runs with
 available artifacts (230 of 232 news runs and every other run).
-Table~\ref{tab:ci} reports changes from the per-query base, which already
-excludes account-side failures on news and rare. The matched overall
+Table~\ref{tab:ci} displays both the consistent-policy per-query base and
+the matched estimate; their difference uses no dashboard baseline. The matched overall
 order has $\tau_b=.89$ against the main table; Keenable and Exa stay first
 and second, Tavily and Ceramic last (\texttt{matched\_pairs.py}). We keep
 the larger, unequal-support estimate as primary and show both.
@@ -722,19 +709,19 @@ the larger, unequal-support estimate as primary and show both.
 \begin{table*}[t]
 \centering\footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{@{}lrlrlrrrrr@{}}
+\begin{tabular}{@{}lrrrll@{}}
 \toprule
-Engine & Share & 95\% CI & $\Delta$ matched & 95\% CI & Sch. & News & Fin. & Rare & Legal \\
+Engine & Historical & Consistent policy & Matched & $\Delta$ matched & 95\% CI for $\Delta$ \\
 \midrule
 \input{table_ci.tex}
 \bottomrule
 \end{tabular}
-\caption{Overall shares in percent; bench shares as fractions.
-$\Delta$ matched is the change in percentage points
-when all engines use the same 4,048 query-runs, with a run-resampled 95\%
-interval. Both terms of that change use per-query scoring; its base exceeds
-the Share column by up to 6.3 points (Claude search) because of failure
-handling (Appendix~\ref{app:examples}).}
+\caption{Overall shares in percent. Historical repeats Table~\ref{tab:results}.
+Consistent policy excludes account-side failures on every task and scores
+other failures zero, using 12,313 available query-runs. Matched restricts
+these to 4,048 query-runs with no account failure in any main engine.
+$\Delta$ is Matched minus Consistent policy, in percentage points, with a
+paired run-bootstrap interval.}
 \label{tab:ci}
 \end{table*}
 
@@ -794,23 +781,45 @@ body keywords and +.33 on body questions. This is mainly a recent-paper
 and full-text lead, not a uniform one (\texttt{bench\_weights.py},
 \texttt{scholar\_strata.py}). Table~\ref{tab:buckets} gives all query types.
 
-\begin{table}[t]
-\centering\footnotesize
-\setlength{\tabcolsep}{2.5pt}
-\begin{tabular}{@{}lrrrrr@{}}
+\begin{table*}[t]
+\centering\small
+\setlength{\tabcolsep}{8pt}
+\begin{tabular}{@{}lrrrrrr@{}}
 \toprule
- & & body & body & tip of & query- \\
-Engine & title & keyword & question & tongue & runs \\
+Engine & Title & Body keyword & Body question & Tip of tongue & Runs & Query-runs \\
 \midrule
 \input{table_buckets.tex}
 \bottomrule
 \end{tabular}
 \caption{Scholar recall@10 by query type, 31 runs, 29 September--28 October
 2026. The ceiling has 3,005 query-runs per type; the last column sums all
-four types. Counts fall where an engine misses runs or loses queries.
-Bold marks the best configuration per type (\texttt{bucket\_table.py}).}
+four types. The 31 runs contain 332--420 queries each, totaling 12,020
+rather than $31\times420$: 420 is a target, not a fixed sample size.
+Run counts show scored support; Exa Lite has only one run. Counts also
+fall after account failures. Bold marks the best configuration per type
+(\texttt{bucket\_table.py}).}
 \label{tab:buckets}
-\end{table}
+\end{table*}
+
+\subsection{Paired scholar queries on common support}
+\label{app:scholarpaired}
+
+We retain 2,629 paper-runs from 29 runs where Keenable, its realtime mode,
+Kagi, Exa and ChatGPT search all have scores for all four query types.
+Account-side failures exclude the paper from all five configurations;
+other failures score zero. This gives 10,516 common query-runs. We use
+stored identifier hits and 2,000 paired run-bootstrap resamples, not new
+searches or labels (\texttt{scholar\_paired.py}). Intervals are pointwise
+95\% intervals, not adjusted tests across all configurations.
+
+Body-keyword minus title recall is $-.154$ [$-.178$, $-.132$] for Keenable,
+$-.165$ [$-.190$, $-.141$] for realtime, $-.284$ [$-.311$, $-.261$] for Kagi,
+$-.267$ [$-.292$, $-.242$] for Exa and $-.802$ [$-.833$, $-.772$] for
+ChatGPT search. On body keywords, Keenable's paired lead is .012
+[.007, .018] over realtime, .048 [.021, .074] over Kagi, .199 [.174, .226]
+over Exa and .644 [.619, .669] over ChatGPT search. These are common-support
+contrasts, not replacements for Table~\ref{tab:buckets}'s available-case
+means. They do not measure identifier-matcher error.
 
 \subsection{Time, dispatch and later runs}
 
@@ -837,8 +846,9 @@ against the main table, with the same five leaders and Ceramic last, but
 Perplexity leads Keenable 72.4 to 71.3. Their single scholar and legal
 runs explain the change and stay within the main window's run-to-run
 ranges. Google and Jina carry redirect URLs on about half of results,
-which hides identifiers from URL matchers. One day checks variation; it
-does not establish a new ranking (\texttt{later\_day.py}).
+which hides identifiers from URL matchers. Unlike the main table, this
+sample excludes all news and rare failures. It therefore cannot isolate
+time effects or establish a new ranking (\texttt{later\_day.py}).
 
 \section{Judge and Identifier Checks}
 \label{app:validation}
@@ -897,17 +907,14 @@ different orders. Keenable--Exa is unresolved under each: +.035
 for judge, Gemini and Grok (\texttt{list\_analysis.py},
 \texttt{list\_pair\_diffs.py}).
 
-A second judge, Claude Opus 5.5, uses the production prompts on eight
-queries per bench (803 news and 566 rare results). Quadratic $\kappa$
-with the production judge is .79 on news and .90 on rare; engine-share
-Spearman correlations are .90 and .87. API publication dates are not
-archived, so this judge lacks that input. Re-running the production judge
-without dates gives $\kappa=.80$ against its original news grades and .97
-on rare: the date effect is as large as the news model effect. Both judges
-also share the stored profile. A separate LLM profile check finds 13 of
-16 aligned in intent, two narrower and one broader, with no wrong intent
-or answer leak (\texttt{rejudge\_analysis.py}, \texttt{audit/profiles/}).
-Eight queries per bench give only a small-sample check.
+A smaller check uses Claude Opus 5.5 with production prompts on eight
+queries per bench (803 news and 566 rare results). Agreement with the
+production judge is $\kappa=.79$ on news and .90 on rare. Both use stored
+profiles, but Claude lacks the unarchived API publication dates.
+Re-running the production judge without dates gives $\kappa=.80$ on news
+and .97 on rare: the news date effect is as large as the model effect.
+An LLM finds 13 of 16 profiles aligned in intent, two narrower and one
+broader (\texttt{rejudge\_analysis.py}, \texttt{audit/profiles/}).
 
 \subsection{Snippet length and literal quotes}
 
@@ -996,21 +1003,17 @@ non-money results; production therefore uses no money backstop
 
 \subsection{Table figures and missed answers}
 
-Of 80 sampled bare table figures or parenthesized losses equal to the
-answer at a thousand/million scale, 73 state the right answer. The
-production money-cue rule accepts 73 and confirms 71. In 100 sampled money
-query-runs missed even at a 2\% band without table reading, an LLM finds
-the answer in 29. Table reading recovers 19 of those and falsely accepts
-one other query; 10 of the remaining 80 still contain the answer.
+In an initial sample of 80 bare table figures or parenthesized losses,
+the money-cue rule accepts 73, of which an LLM confirms 71. Among 100
+money query-runs missed at a 2\% band without table reading, an LLM finds
+29 answers; table reading recovers 19 and adds one false hit.
 
-Applying the pooled false-hit and missed-answer rates by field to the main
-window changes finance recall from $-.025$ (Keenable) to +.021 (Ceramic).
-It compresses the finance spread from .481 to .443; Perplexity narrowly
-passes Keenable on finance, and ChatGPT search passes DeepSeek. Overall
-$\tau_b=.99$, with Kagi passing ChatGPT search and Keenable's lead over Exa
-at 4.5 points. These are error estimates, not new gold labels. The miss
-sample cannot estimate each engine's error rate
-(\texttt{finance\_bias\_table1.py}).
+Applying pooled hit and miss errors by field changes main-window finance
+recall by $-.025$ to +.021 and gives overall $\tau_b=.99$, with Keenable's
+lead over Exa at 4.5 points. These estimates cannot show each engine's
+error rate (\texttt{finance\_bias\_table1.py}). The fresh audit below
+instead samples first matching results from unseen queries and reports
+unresolved period labels separately.
 
 \subsection{Fresh-data check}
 
@@ -1023,8 +1026,8 @@ five, so the audit checks query-level recall decisions
 (\texttt{fresh\_finance.py}, \texttt{audit/fresh/}).
 
 Exact-band precision is .93. Of 335 table-reading hits, 235 confirm the
-right figure and period (.70, Wilson interval
-\citealp{wilson1927probable}, .65--.75), 95 omit period
+right figure and period (.70; 95\% Wilson interval .65--.75;
+\citealp{wilson1927probable}), 95 omit period
 labels and five contradict the answer. Precision is .70 if unresolved
 hits count as wrong, .99 if only contradictions do. Confirmation rates
 vary: Exa 42/44 and Perplexity 27/31, versus Keenable 14/20, Parallel
@@ -1095,6 +1098,8 @@ dates, so date compliance cannot be checked (\texttt{site\_compliance.py},
 \subsection{Paired operator test}
 \label{app:opsres}
 
+An earlier paired test found that most operators had no significant
+effect on three web engines \citep{eastman2003operators}.
 Production assigns variants to different targets. To isolate operator
 effects, we take 80 filing, 80 caselaw and 80 CFR targets, remove operators
 and quotes, and create quoted, site-restricted and date-restricted
@@ -1105,8 +1110,8 @@ Kagi, You.com or DeepSeek (\texttt{paired\_build.py},
 site losses measure recall, not compliance.
 
 \begin{table*}[t]
-\centering\footnotesize
-\setlength{\tabcolsep}{3pt}
+\centering\small
+\setlength{\tabcolsep}{4pt}
 \input{table_paired.tex}
 \caption{Plain recall@5 and paired changes on the same targets, 30 October
 2026. $^\dagger$ marks a target-resampled 95\% interval containing zero;

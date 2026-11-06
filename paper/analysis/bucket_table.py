@@ -26,10 +26,11 @@ order = sorted(engines, key=lambda e: -rec[e]["title"])
 best = {b: max(round(rec[e][b], 3) for e in engines) for b in BUCKETS}
 
 lines = [r"\textit{ceiling (pooled)} & " + " & ".join(rf"\textit{{{fmt(rec[ULT][b])}}}" for b in BUCKETS)
-         + rf" & \textit{{{sum(query_runs(ULT, b) for b in BUCKETS):,}}} \\"]
+         + rf" & \textit{{{len({r['ts'] for r in sch if r['engine'] == ULT})}}} & \textit{{{sum(query_runs(ULT, b) for b in BUCKETS):,}}} \\"]
 for e in order:
     cells = [rf"\textbf{{{fmt(rec[e][b])}}}" if round(rec[e][b], 3) == best[b] else fmt(rec[e][b]) for b in BUCKETS]
-    lines.append(" & ".join([LABELS[e], *cells, f"{sum(query_runs(e, b) for b in BUCKETS):,}"]) + r" \\")
+    runs = len({r["ts"] for r in sch if r["engine"] == e and any(r.get(f"{b}_n") for b in BUCKETS)})
+    lines.append(" & ".join([LABELS[e], *cells, str(runs), f"{sum(query_runs(e, b) for b in BUCKETS):,}"]) + r" \\")
 open(out, "w").write("\n".join(lines) + "\n")
 
 ts = sorted({r["ts"] for r in sch})
