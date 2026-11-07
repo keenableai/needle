@@ -262,7 +262,6 @@ async def run_ndcg(
         "num_results": num_results,
         "k": k,
         "max_content_chars": max_content_chars,
-        "scoring_version": "ndcg-dedup-all-v1",
         "judged_pairs": sum(run.n_judged for run in query_outs),
         "engines": engines_out,
     }

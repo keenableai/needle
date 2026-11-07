@@ -27,7 +27,7 @@ from common import (
     window,
 )
 
-hist, out = sys.argv[1], sys.argv[2]
+hist, scholar_out, weekly_out = sys.argv[1:4]
 rows = load(hist)
 w, _ = window(rows, 30)
 rnd = random.Random(1926)
@@ -97,10 +97,11 @@ def series(ax, xs, ys, cis, e):
             lw=0.9 if e == ULT else 1.0, zorder=3)
 
 
-W, H = 6.3, 2.3
-fig = plt.figure(figsize=(W, H))
-ax1 = fig.add_axes([0.38 / W, 0.45 / H, 1.95 / W, 1.6 / H])
-ax2 = fig.add_axes([3.65 / W, 0.45 / H, 1.65 / W, 1.6 / H])
+W, H = 3.3, 2.3
+scholar_fig = plt.figure(figsize=(W, H))
+weekly_fig = plt.figure(figsize=(W, H))
+ax1 = scholar_fig.add_axes([0.38 / W, 0.45 / H, 1.95 / W, 1.6 / H])
+ax2 = weekly_fig.add_axes([0.38 / W, 0.45 / H, 1.9 / W, 1.6 / H])
 
 buckets = ["title", "body", "clue", "tot"]
 blabels = ["title", "body\nkeyword", "body\nquestion", "tip of\ntongue"]
@@ -123,7 +124,7 @@ ax1.set_xlim(-0.2, 3.15)
 ax1.set_ylim(0, 1.0)
 ax1.set_yticks([0, .25, .5, .75, 1], ["0", ".25", ".50", ".75", "1"])
 ax1.set_ylabel("recall@10", labelpad=2)
-ax1.set_title("a  Scholar query types", loc="left", x=-0.12)
+ax1.set_title("Scholar query types", loc="left", x=-0.12)
 clean(ax1)
 
 byweek = collections.defaultdict(list)
@@ -147,9 +148,10 @@ ax2.set_xlim(-0.3, last + 0.2)
 ax2.set_ylim(35, 80)
 ax2.set_yticks([40, 50, 60, 70, 80])
 ax2.set_xlabel("week starting", labelpad=2)
-ax2.set_title("b  Weekly overall share, %", loc="left", x=-0.14)
+ax2.set_title("Weekly overall share, %", loc="left", x=-0.14)
 clean(ax2)
 
-fig.savefig(out, metadata={"CreationDate": None})
+scholar_fig.savefig(scholar_out, metadata={"CreationDate": None})
+weekly_fig.savefig(weekly_out, metadata={"CreationDate": None})
 
-print("wrote", out, "weeks", keys)
+print("wrote", scholar_out, weekly_out, "weeks", keys)

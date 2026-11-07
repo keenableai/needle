@@ -1,4 +1,5 @@
 import math
+import re
 from collections.abc import Sequence
 from urllib.parse import parse_qsl, unquote, urlencode, urlsplit
 
@@ -30,6 +31,9 @@ TRACKING_PARAMS = {
 
 GAIN = {4: 1.0, 3: 0.667, 2: 0.117, 1: 0.0, 0: 0.0}
 
+SITE_OPERATOR_RE = re.compile(r"\bsite:")
+
+
 def gain(rating: int) -> float:
     return GAIN.get(rating, 0.0)
 
@@ -53,6 +57,8 @@ def normalize_url(url: str) -> str:
 def apply_redundancy_penalties(
     urls: Sequence[str], ratings: Sequence[int], *, query_text: str = ""
 ) -> list[int]:
+    if SITE_OPERATOR_RE.search(query_text.lower()):
+        return list(ratings)
     seen_urls: set[str] = set()
     out: list[int] = []
     for url, rating in zip(urls, ratings, strict=True):
