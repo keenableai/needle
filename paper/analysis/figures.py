@@ -44,10 +44,6 @@ plt.rcParams.update({
 })
 
 
-def short(e):
-    return NAMES[e].split(" (")[0]
-
-
 def clean(ax, grid="y"):
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
@@ -117,7 +113,7 @@ for j, e in enumerate(series_a):
     ys = [bucket_recall(sch, e, b) for b in buckets]
     xs = [x + (j - 3.5) * 0.035 for x in range(4)]
     series(ax1, xs, ys, [bucket_ci(sch, e, b) for b in buckets], e)
-    ends.append((ys[-1], "pooled ceiling" if e == ULT else short(e), MUTED if e == ULT else INK))
+    ends.append((ys[-1], "pooled ceiling" if e == ULT else NAMES[e], MUTED if e == ULT else INK))
 label_ends(ax1, ends, 3.1, 0.083, 0.1, 0.05)
 ax1.set_xticks(range(4), blabels)
 ax1.set_xlim(-0.2, 3.15)
@@ -139,7 +135,7 @@ for i, e in enumerate(series_b):
            for j, k in enumerate(keys) if overall(wk[k], e) is not None and e in ci[k]]
     xs, ys, cis = zip(*pts, strict=True)
     series(ax2, xs, ys, cis, e)
-    ends.append((ys[-1], short(e), INK))
+    ends.append((ys[-1], NAMES[e], INK))
 last = len(keys) - 1
 label_ends(ax2, ends, last + 0.15, 3.4, 0.35, 38)
 ticks = list(range(1, len(keys), 2))

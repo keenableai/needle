@@ -18,6 +18,10 @@
 \usepackage{url}
 \usepackage{enumitem}
 \usepackage{array}
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\scriptsize,breaklines=true,columns=fullflexible,
+  keepspaces=true,aboveskip=2pt,belowskip=6pt,
+  literate={—}{{---}}1 {§}{{\S}}1 {≥}{{$\geq$}}1 {ü}{{\"u}}1}
 \setcounter{dbltopnumber}{1}\renewcommand{\dbltopfraction}{0.75}\renewcommand{\textfraction}{0.07}
 
 \definecolor{ink}{HTML}{0B0B0B}
@@ -49,82 +53,101 @@
 \maketitle
 
 \begin{abstract}
-\needle measures web search APIs on five tasks: news, finance, papers,
-law and rare-word queries. It draws queries and reference answers from
-public sources on each run, except for a fixed rare-query stream, and
-scores the returned titles, URLs and snippets. We study 26 API
-configurations. Title queries hide large differences: 23 configurations achieve scholar
-recall@10 of .71--.98 from titles, but .08--.72 from body keywords.
-Blinded LLM raters broadly agree with the relevance judge. Code, data and
-dashboard are public; links are withheld for review.
+\needle is a live benchmark of web search APIs for AI agents. Agent
+benchmarks rarely test the search API alone; \needle scores what the API
+returns to the agent: titles, URLs and snippets. Hourly and daily runs
+draw new queries from public sources for news, finance, papers and law,
+plus a fixed stream of rare-word queries. We compare each engine, an API
+at one setting, with the best results any tested engine found. Over
+eight weeks we test 26 engines from 20 vendors. On 12.4k shared
+query-runs, paired tests order 178 of 210 engine pairs. Title lookups
+hide large gaps: 23 engines find a paper from its title at recall@10
+.71--.98, but from body keywords at only .08--.72. These results provide
+evidence that API comparisons should also test queries built from a
+paper's body.
 \end{abstract}
 
 \suppressfloats[t]
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig_weekly.pdf}
-\caption{Overall share by ISO week, 31 August--25 October 2026.
+\caption{The top rank holds all eight weeks; lower ranks change.
+Overall share by ISO week, 31 August--25 October 2026.
 ChatGPT and Claude search start on 14 September; the pool grows from
-18 to 25 configurations. Points are query-weighted means; bars are 95\%
+18 to 25 engines. Points are query-weighted means; bars are 95\%
 run-level bootstrap intervals. Scores follow the dashboard rules.}
 \label{fig:weekly}
 \end{figure}
 
 \section{Introduction}
 
-AI agents use web search APIs to find evidence for their answers. The API
-controls which sources the agent can inspect and what it sees before
-opening a page: a title, URL and snippet. End-to-end agent benchmarks
-combine this retrieval step with query planning, page reading and answer
-generation. They do not isolate the quality of the search API itself.
+An AI agent may need the paper behind a detail it read elsewhere. The
+query ``gap rent regularity'' in Table~\ref{tab:examples} names a detail
+from one arXiv paper's body, absent from its title and abstract. The
+agent finds such evidence through a web search API. The API decides which
+sources the agent can inspect, and shows only a title, URL and snippet
+before the agent opens a page. A weak API leaves the agent without its
+evidence, whatever its planning or reading skill.
 
-\needle evaluates this step directly: one query in, up to $k$ results
-out, scored on the evidence returned to the agent. It tests the live web
-rather than a fixed corpus, and draws fresh queries from public sources
-to track retrieval quality over time. This reduces dependence on fixed
-test sets that can leak into training data
-\citep{sainz2023trouble,balloccu2024leak}, though registry facts and rare
-queries can repeat.
+Testing the API alone is hard. The live web has no fixed corpus, so no
+complete relevance labels exist. Fixed test sets go stale and can leak
+into training data \citep{sainz2023trouble,balloccu2024leak}. Agents see
+only what the API returns, so a score must use that output, not the page
+behind it. End-to-end agent benchmarks combine retrieval with query
+planning, page reading and answer generation, and do not isolate the API
+(Section~\ref{sec:related}).
 
-The benchmark combines five tasks, automatic scoring and a pooled
-ceiling: the best results found by any tested configuration. We report:
+\needle tests this step directly: one query in, up to $k$ results out,
+scored on the evidence returned to the agent. Hourly and daily runs draw
+new queries from public sources for five tasks. Automatic scorers compare
+each engine with a pooled ceiling: the best results found by any tested
+engine. Registry facts and rare queries can repeat, and all judge checks
+use LLMs, not humans. Our claims:
 \begin{itemize}[nosep,leftmargin=1.2em]
-\item Results for 26 configurations, including paired tests on 12.4k
-  query-runs shared by the 21 main engines.
-\item Paired scholar query types that expose differences between title
-  and full-text retrieval.
-\item Checks of the judge, matchers, ceiling and failure rules, with
-  samples and labels for readers to inspect.
+\item Paired tests order 178 of 210 pairs of the 21 main engines on
+  12.4k shared query-runs; 32 pairs stay unresolved
+  (Section~\ref{sec:results}, Table~\ref{tab:results}).
+\item Title lookups hide large gaps: 23 of 26 engines reach scholar
+  recall@10 .71--.98 from titles but .08--.72 from body keywords
+  (Section~\ref{sec:results}, Figure~\ref{fig:scholar}).
+\item Weekly ranks are stable but not fixed: adjacent weekly rankings
+  agree at Kendall's $\tau_b$ .81--.94 (Section~\ref{sec:results},
+  Figure~\ref{fig:weekly}).
 \end{itemize}
+Two LLM raters from other vendors rank engines like the production
+judge, at Spearman .94 (Section~\ref{sec:validation}).
 
 \section{Related Work}
 \label{sec:related}
 
 \textbf{Live and API benchmarks.} LiveBench and LiveSearchBench draw new
 items from dated sources but score model answers
-\citep{white2025livebench,zhou2026livesearchbench}. BrowseComp scores agents
-end to end \citep{wei2025browsecomp}; FreshStack and BrowseComp-Plus fix
-the corpus to isolate retrieval
-\citep{thakur2025freshstack,chen2026browsecompplus}. API comparisons use
-static questions under one agent \citep{selvam2026search,aa2026searchindex},
-while web engine audits use fixed query sets
-\citep{lewandowski2015evaluating,kirsten2026characterizing}.
+\citep{white2025livebench,zhou2026livesearchbench}; \needle scores the
+search results behind such answers. BrowseComp scores agents end to end
+\citep{wei2025browsecomp}; FreshStack and BrowseComp-Plus fix the corpus
+to isolate retrieval \citep{thakur2025freshstack,chen2026browsecompplus},
+while \needle keeps the live web. API comparisons use static questions
+under one agent \citep{selvam2026search,aa2026searchindex}, and web
+engine audits use fixed query sets
+\citep{lewandowski2015evaluating,kirsten2026characterizing}; \needle
+draws new queries each run and scores the API without an agent.
 
 \textbf{Scorers and tasks.} LLM assessors and simulated known-item queries
 can reproduce system rankings
-\citep{thomas2024llms,upadhyay2025largescale,azzopardi2007simulated,he2025totelicitation}.
-Domain benchmarks cover literature, caselaw and finance search
-\citep{ajith2024litsearch,hou2025clerc,hu2026finsearchcomp}; full text helps
-retrieval beyond abstracts \citep{lin2009fulltext}. \needle combines these
-methods with fresh queries and isolated API scoring. Its contribution is
-the live comparison and paired diagnostics across APIs, not a new scorer.
+\citep{thomas2024llms,upadhyay2025largescale,azzopardi2007simulated,he2025totelicitation};
+\needle uses both and checks its judge against raters from other vendors.
+Domain benchmarks cover literature, caselaw and finance search on fixed
+sets \citep{ajith2024litsearch,hou2025clerc,hu2026finsearchcomp}; \needle
+runs these tasks on new queries each day. Full text helps retrieval beyond
+abstracts \citep{lin2009fulltext}; our body queries test that gap on live
+APIs. \needle contributes the live comparison and paired diagnostics
+across APIs, not a new scorer.
 
 \section{The Benchmark}
 \label{sec:bench}
 
-A \emph{configuration} is an API at one setting. We test 26 configurations
-from 20 vendors, including five mode variants, and call each an
-\emph{engine}. A \emph{query-run} is one query issued in one run.
+An \emph{engine} is an API at one setting. We test 26 engines from 20
+vendors, including five mode variants. A \emph{query-run} is one query issued in one run.
 Appendix~\ref{app:examples} gives the API settings and data sources.
 
 \subsection{Queries}
@@ -203,9 +226,10 @@ the judge profile specifies what a result must contain.}
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig_scholar.pdf}
-\caption{Scholar recall@10 by query type: 31 runs, 29 September--28
+\caption{Engines that find papers from titles differ widely on body
+queries. Scholar recall@10 by query type: 31 runs, 29 September--28
 October 2026; 2,600--3,005 query-runs per line and type. Lines show seven
-main engines, grey dots the other 19 configurations, and dashes the
+main engines, grey dots the other 19 engines, and dashes the
 pooled ceiling. Points are query-weighted means; bars are 95\% run-level
 bootstrap intervals.}
 \label{fig:scholar}
@@ -222,7 +246,7 @@ $g=\{0,0,.117,.667,1\}$, putting high weight on strong results
 \citep{kanoulas2009empirical}. Snippets have a 2,000-character cap.
 
 For each query, the \emph{ceiling} keeps the best rating per normalized
-URL across all configurations, variants included, and sorts these ratings
+URL across all engines, variants included, and sorts these ratings
 \citep{sparckjones1975pool,zobel1998reliable}. With $r_i$ the rating at
 rank $i$, we compute \ndcg \citep{jarvelin2002cumulated} as
 \begin{align*}
@@ -232,7 +256,7 @@ rank $i$, we compute \ndcg \citep{jarvelin2002cumulated} as
 IDCG is the DCG of the top five pooled ratings. Missing ranks contribute
 zero. Repeated normalized URLs receive zero gain except on
 \texttt{site:} queries.\footnote{The pool still keeps each URL once, so
-this exception can yield \ndcg above 1. It affects 3 of 1,748 rare
+this exception can yield \ndcg above 1. The exception affects 3 of 1,748 rare
 \texttt{site:} engine--query pairs in the main window.} We drop a query-run
 from all engines if any judgment fails or no result reaches rating 2.
 The task score is the mean over retained query-runs; the judged ceiling
@@ -249,7 +273,7 @@ matching result in the top $k$. Scholar matches arXiv ids, DOIs and PMIDs;
 legal matches citations, dockets and identifiers in URLs and snippets.
 Caselaw recall measures case identity, not necessarily the opinion page.
 Finance checks whether the snippets contain the answer, with a 0.1\%
-money band and a 15\% headcount band. It reads table figures and
+money band and a 15\% headcount band. The matcher reads table figures and
 parenthesized losses. An LLM may upgrade a non-money miss, but cannot
 revoke a hit; a failed backstop judgment excludes an engine's query only
 if no result matches. The ceiling is a hit by any engine.
@@ -258,22 +282,25 @@ Appendix~\ref{app:finance} checks matcher error.
 \subsection{Overall share and failures}
 \label{sec:agg}
 
-For bench metric $M_b$, an engine's overall share is
+For task metric $M_t$, an engine's overall share is
 \[
-S(e)=\frac{1}{5}\sum_{b=1}^{5}
-\frac{M_b(e)}{M_b(\mathrm{ceiling})}.
+S(e)=\frac{1}{5}\sum_{t=1}^{5}
+\frac{M_t(e)}{M_t(\mathrm{ceiling})}.
 \]
-The benches have equal weight. The ceiling is the best the tested engines
+The tasks have equal weight. The ceiling is the best the tested engines
 found, not the best the web contains.
 
 Table~\ref{tab:results} uses dashboard scores from the 276 runs in which
-all 21 main engines took part. On finance, scholar and legal, account-side
-failures (our quota, rate limit, login or credit) are excluded; other
+all 21 main engines took part. On finance, scholar and legal, we exclude
+account-side failures (our quota, rate limit, login or credit); other
 failures score zero. On news and rare, every failure in this window scores
 zero. These exclusions remove up to 28\% of an engine's query-runs.
 \paragraph{Comparing two engines.}
-We estimate the difference $S(a)-S(b)$, not whether their individual
-confidence intervals overlap. Within each task, we sample whole runs
+A gap between two overall shares can come from the queries that runs
+happened to draw, not from the engines. Query difficulty varies widely
+and affects all engines alike, so individual intervals can overlap even
+when one engine beats the other on the same queries. We therefore
+estimate the difference $S(a)-S(b)$ on shared runs. Within each task, we sample whole runs
 with replacement 2,000 times, drawing the same runs for every engine
 \citep{efron1993bootstrap}. Each sample preserves within-run dependence
 and each engine's exclusions; we recompute query-weighted task and
@@ -299,7 +326,7 @@ Engine & \multicolumn{2}{c}{Overall share, \%} & Scholar & News & Finance & Rare
 \bottomrule
 \end{tabular}
 \caption{Results on 276 shared runs, 17--28 October 2026 (12.4k
-query-runs, 21 engines); the ceiling also includes variants. Bench cells
+query-runs, 21 engines); the ceiling also includes variants. Task cells
 are absolute metrics, best in bold; italics mark the ceiling. Failed
 counts all request failures. Latency is the per-run median on news.
 $^\dagger$Server-side search tool; latency includes answer generation.
@@ -345,7 +372,7 @@ Gemini vs.\ judge & .74 & .81 & .78 \\
 Grok vs.\ judge & .75 & .81 & .79 \\
 \bottomrule
 \end{tabular}
-\caption{Agreement on 1,200 blinded results, 600 per bench. Consensus is
+\caption{Agreement on 1,200 blinded results, 600 per task. Consensus is
 the rounded mean of the two Claude page grades. The judge--consensus
 95\% query-bootstrap interval is .74--.81.}
 \label{tab:raters}
@@ -357,13 +384,13 @@ the rounded mean of the two Claude page grades. The judge--consensus
 \paragraph{The data support most pairwise rankings, not every rank.}
 The adjusted score-difference intervals exclude zero for 178 of 210
 engine pairs. We cannot reliably order the remaining 32 pairs from this
-sample; this does not establish that their scores are equivalent.
+sample; an unresolved pair does not mean equal scores.
 The overall lead also depends on the task mix: scholar contributes 3.7
 points of Keenable's 4.7-point lead over Exa. Without scholar, the lead
 is 1.2 points (Appendix~\ref{app:checks}).
 
 \paragraph{Body queries expose gaps that title queries hide.}
-Over 31 scholar runs, 23 of 26 configurations reach recall@10 .71--.98
+Over 31 scholar runs, 23 of 26 engines reach recall@10 .71--.98
 from titles. The same 23 span .08--.72 on body keywords
 (Figure~\ref{fig:scholar}; Table~\ref{tab:buckets}). Keenable leads at
 .72, followed by its realtime mode (.71) and Kagi (.67).
@@ -405,7 +432,7 @@ show each engine's error rate. Caselaw recall credits pages about the case,
 not just the opinion. Appendix~\ref{app:finance} gives the finance checks.
 
 \paragraph{Coverage and weights.}
-Queries are English and US-centric. Equal bench weights do not estimate
+Queries are English and US-centric. Equal task weights do not estimate
 agent traffic, and the lead depends strongly on scholar. Default API tiers
 need not be each vendor's best. ChatGPT and Claude search return sources
 through answer-generating tools, so their quality scores are comparable
@@ -445,7 +472,7 @@ Short result lists score as returned. Snippets have a 2,000-character cap.
 The generators and judge use GPT-6 Luna
 (\texttt{openai/gpt-6-luna}) through OpenRouter, temperature 0 and high
 reasoning effort. Table~\ref{tab:config} lists the search clients and
-settings. Supporting scripts, samples and labels are under
+settings. Appendix~\ref{app:prompts} gives all prompts. Supporting scripts, samples and labels are under
 \texttt{paper/analysis/}; the manifest identifies each analysis's inputs.
 
 \begin{table*}[t]
@@ -453,7 +480,7 @@ settings. Supporting scripts, samples and labels are under
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{@{}lll@{}}
 \toprule
-Engine & Endpoint & Variant or non-default parameters \\
+Vendor & Endpoint & Variant or non-default parameters \\
 \midrule
 Keenable & api.keenable.ai & default; realtime variant \\
 Exa & api.exa.ai & \texttt{type=auto}; instant and lite variants \\
@@ -477,7 +504,7 @@ Claude search & api.anthropic.com & \texttt{claude-sonnet-5}, \texttt{web\_searc
 ChatGPT search & api.openai.com & \texttt{gpt-5.5}, \texttt{web\_search}, \texttt{search\_context\_size=low} \\
 \bottomrule
 \end{tabular}
-\caption{API configurations. Clients live in
+\caption{Search clients and settings by vendor. Clients live in
 \texttt{src/needle/shared/search/}; clients also implement the native query filters.}
 \label{tab:config}
 \end{table*}
@@ -552,7 +579,7 @@ The adjusted interval is
 \[
 \widehat{\Delta}_{ab}\ \pm\ 3.683\,s_{ab}.
 \]
-This is a normal approximation, not a percentile bootstrap interval.
+The interval is a normal approximation, not a percentile bootstrap interval.
 The implemented critical value is slightly more conservative than 3.675,
 the two-sided Bonferroni value for 210 comparisons at familywise level
 .05. Individual engine intervals in Table~\ref{tab:results} instead use
@@ -593,7 +620,7 @@ Engine & Title & Body keyword & Body question & Tip of tongue & Runs & Query-run
 four types. The 31 runs contain 332--420 queries each, totaling 12,020
 rather than $31\times420$: 420 is a target, not a fixed sample size.
 Run counts show scored support; Exa Lite has only one run. Counts also
-fall after account failures. Bold marks the best configuration per type
+fall after account failures. Bold marks the best engine per type
 (\texttt{bucket\_table.py}).}
 \label{tab:buckets}
 \end{table*}
@@ -604,7 +631,7 @@ Removing an engine from the pool changes its overall share by at most
 Keenable--Exa gap from 1.2 to 6.4 points. The lead's size is sensitive to
 task choice even when the leader stays the same.
 
-Among the 15 configurations present in all eight plotted weeks, adjacent
+Among the 15 engines present in all eight plotted weeks, adjacent
 rankings have $\tau_b=.85$--.94. Fixing the news pool to those 15 changes
 no sampled weekly order. Restricting news comparisons to requests sent
 within five minutes of the first engine retains 96\% of scored pairs,
@@ -614,7 +641,7 @@ These checks address changing engine participation and dispatch lag.
 \section{Scholar Query Types and Paired Differences}
 \label{app:scholarpaired}
 
-Table~\ref{tab:buckets} reports every configuration and its sample size,
+Table~\ref{tab:buckets} reports every engine and its sample size,
 rather than only the seven lines in Figure~\ref{fig:scholar}.
 In the main window, Keenable's recall lead over Exa is .38 for 7-day
 papers, .10 for 30-day papers and .03 for one-year papers; it is negative
@@ -655,7 +682,7 @@ The staged snippet-versus-page check changes 25\% of 400 grades
 On 803 news results from eight queries, a Claude Opus 5.5 judge grades both
 full snippets and versions capped at 200 characters. The resulting engine
 orders agree at $\tau_b=.73$ (95\% interval .40--.84); mean absolute share
-change is .084. Exa and Keenable lose, while Bing and Google gain.
+change is .084. Exa and Keenable lose, while Bing (SearchAPI) and Google (Serper) gain.
 The sample does not distinguish the top two at either length.
 Snippet length is thus part of the measured API quality, not a controlled
 property of the underlying page.
@@ -690,7 +717,7 @@ excluding them. These are model judgments, not human gold labels.
 
 \paragraph{Unseen-query check.}
 A separate sample has 307 unseen queries (146 money, 161 other), tested
-on 17 configurations. An LLM checks the first matching result for 335
+on 17 engines. An LLM checks the first matching result for 335
 table-reading hits, 100 exact-band money hits and 50 other-field hits,
 using at least the full 2,000-character input. Exact-band precision is .93.
 Of 335 table-reading hits, 235 confirm the correct figure and period
@@ -705,8 +732,47 @@ Discounting each engine's main-window table-reading hits by its fresh
 unconfirmed fraction lowers finance recall by up to 6.0 points; overall
 ranks 1--10 stay fixed. Dropping table reading entirely lowers finance
 recall by 0.1--7.5 points, with finance $\tau_b=.84$ and overall .97;
-overall ranks 1--3 stay fixed. This bounds one scoring choice, not all
+overall ranks 1--3 stay fixed. The check bounds one scoring choice, not all
 matcher error. The fresh sample has more money queries than production
 and lacks the non-money backstop, so it cannot replace the main table.
+
+\section{Prompts}
+\label{app:prompts}
+
+These Jinja templates are verbatim copies of the prompts in
+\path{src/needle/*/prompts/}; the code fills the braces at run time.
+Scholar title queries use no prompt.
+
+\paragraph{Query generation.}
+\noindent\texttt{projection.jinja}: News queries from feed items.
+\lstinputlisting{prompts/news/projection.jinja}
+\noindent\texttt{trends\_projection.jinja}: News queries from Google Trends items.
+\lstinputlisting{prompts/news/trends_projection.jinja}
+\noindent\texttt{filing\_query.jinja}: Finance filing queries by description.
+\lstinputlisting{prompts/finance/filing_query.jinja}
+\noindent\texttt{code\_query.jinja}: Legal CFR queries.
+\lstinputlisting{prompts/legal/code_query.jinja}
+\noindent\texttt{body\_query.jinja}: Scholar body-keyword queries.
+\lstinputlisting{prompts/scholar/body_query.jinja}
+\noindent\texttt{clue\_query.jinja}: Scholar body-question queries.
+\lstinputlisting{prompts/scholar/clue_query.jinja}
+\noindent\texttt{tot\_query.jinja}: Scholar tip-of-tongue queries.
+\lstinputlisting{prompts/scholar/tot_query.jinja}
+
+\paragraph{Judging.}
+\noindent\texttt{query\_profile.jinja}: News and rare query profile, system prompt.
+\lstinputlisting{prompts/shared/query_profile.jinja}
+\noindent\texttt{query\_profile\_input.jinja}: Query profile, user message.
+\lstinputlisting{prompts/shared/query_profile_input.jinja}
+\noindent\texttt{judgement.jinja}: News and rare relevance judge, system prompt.
+\lstinputlisting{prompts/shared/judgement.jinja}
+\noindent\texttt{judgement\_input.jinja}: Judge, user message.
+\lstinputlisting{prompts/shared/judgement_input.jinja}
+\noindent\texttt{query\_types.jinja}: Included by the profile and judge prompts.
+\lstinputlisting{prompts/shared/query_types.jinja}
+\noindent\texttt{content\_archetypes.jinja}: Included by the profile and judge prompts.
+\lstinputlisting{prompts/shared/content_archetypes.jinja}
+\noindent\texttt{answer\_match.jinja}: Finance LLM backstop for non-money fields.
+\lstinputlisting{prompts/finance/answer_match.jinja}
 
 \end{document}

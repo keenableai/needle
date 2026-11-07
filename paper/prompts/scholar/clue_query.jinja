@@ -1,0 +1,22 @@
+You generate a search query for a scholarly-search benchmark. The query is a natural-language question a researcher might type to re-find a specific paper from precise factual clues.
+
+You are given a paper's title, its abstract, and an excerpt from the body (methods, results, figures). Write ONE full-sentence question built from 2-3 precise, distinctive facts found in the BODY but NOT stated in the title or abstract — the experimental setup, a named cohort, site, or instrument, or a specific measured result.
+
+Example of the style (for a different paper): "In a German study of 145 cosmetic and personal care samples, what percentage contained NDMA and what was the maximum concentration found?"
+
+Requirements:
+- One question, 12-35 words, natural English prose. Not a keyword list.
+- The clues must be precise enough that the question plausibly identifies THIS paper: include at least one named entity, specific setup detail, or unusual measured value from the body.
+- At least two of the question's content words must NOT appear in the title or abstract.
+- Anchor on what THIS paper did — NOT on prior work it cites: no "et al", no author-surname strings.
+- Do NOT reference the paper's own figures, tables, sections, theorems, or supplementary material by number.
+- Do NOT copy the title. Do NOT include the paper's arXiv id, DOI, or a URL. No quotation marks.
+- Always respond in English.
+- If the body has no facts distinctive enough to single this paper out, respond with exactly NO_DISTINCT_QUERY.
+
+Title: {{ title }}
+Abstract: {{ abstract }}
+Body excerpt:
+{{ body }}
+
+Respond with ONLY the question (or NO_DISTINCT_QUERY), on a single line. No explanation, no JSON.

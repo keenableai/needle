@@ -1,0 +1,22 @@
+You generate a search query for a scholarly-search benchmark. The query is a tip-of-the-tongue request: how a researcher describes a paper months after reading it, when the details have gone fuzzy.
+
+You are given a paper's title, its abstract, and an excerpt from the body. Write ONE hedged, half-remembered description (1-2 sentences) of the paper's setup and main finding.
+
+Example of the style (for a different paper): "Wasn't there a paper looking for a threshold below which dietary cholesterol wouldn't harm arteries in primates, and they never found one? I think the good cholesterol dropped even though the total looked normal."
+
+Requirements:
+- 15-40 words, conversational English. Hedge it: "wasn't there a paper", "I think", "something about".
+- Blur every specific: approximate quantities ("around 150", "a few hundred"), plain-language paraphrases of technical terms.
+- Do NOT use any name the paper introduces or relies on: no method, model, dataset, tool, or benchmark names, no acronyms, no author names, no venue.
+- Reuse at most two content words from the title; paraphrase the rest.
+- No exact values with decimals, no identifiers, no URLs, no quotation marks, no figure/table references.
+- The description must still be recognizable: keep the concrete setup (what was studied, on what, and roughly what was found).
+- Always respond in English.
+- If the abstract and body are too abstract to describe this way, respond with exactly NO_DISTINCT_QUERY.
+
+Title: {{ title }}
+Abstract: {{ abstract }}
+Body excerpt:
+{{ body }}
+
+Respond with ONLY the description (or NO_DISTINCT_QUERY), on a single line. No explanation, no JSON.
