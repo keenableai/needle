@@ -2,7 +2,7 @@
 \PassOptionsToPackage{table}{xcolor}
 \documentclass[11pt]{article}
 
-\usepackage[review]{acl}
+\usepackage[preprint]{acl}
 \usepackage{times}
 \usepackage{latexsym}
 \usepackage[T1]{fontenc}
@@ -57,9 +57,9 @@
 benchmarks rarely test the search API alone; \needle scores what the API
 returns to the agent: titles, URLs and snippets. Hourly and daily runs
 draw new queries from public sources for news, finance, papers and law,
-plus a fixed stream of rare-word queries. We compare each engine, an API
-at one setting, with the best results any tested engine found. Over
-eight weeks we test 26 engines from 20 vendors. On 12.4k shared
+plus a fixed stream of rare-word queries, and compare each API with the
+best results any tested API found. Over eight weeks we test 26 API
+settings (engines) from 20 vendors. On 12.4k shared
 query-runs, paired tests order 178 of 210 engine pairs. Title lookups
 hide large gaps: 23 engines find a paper from its title at recall@10
 .71--.98, but from body keywords at only .08--.72. These results provide
@@ -81,28 +81,23 @@ run-level bootstrap intervals. Scores follow the dashboard rules.}
 
 \section{Introduction}
 
-An AI agent may need the paper behind a detail it read elsewhere. The
-query ``gap rent regularity'' in Table~\ref{tab:examples} names a detail
-from one arXiv paper's body, absent from its title and abstract. The
-agent finds such evidence through a web search API. The API decides which
-sources the agent can inspect, and shows only a title, URL and snippet
-before the agent opens a page. A weak API leaves the agent without its
-evidence, whatever its planning or reading skill.
+An AI agent may need the paper behind a detail it read elsewhere, such
+as the query ``gap rent regularity'' (Table~\ref{tab:examples}), whose
+words are absent from the paper's title and abstract. A web search API
+decides which sources the agent can inspect, and shows only a title, URL
+and snippet before the agent opens a page.
 
-Testing the API alone is hard. The live web has no fixed corpus, so no
-complete relevance labels exist. Fixed test sets go stale and can leak
-into training data \citep{sainz2023trouble,balloccu2024leak}. Agents see
-only what the API returns, so a score must use that output, not the page
-behind it. End-to-end agent benchmarks combine retrieval with query
-planning, page reading and answer generation, and do not isolate the API
-(Section~\ref{sec:related}).
+Testing the API alone is hard. The live web has no fixed corpus or
+complete relevance labels; fixed test sets go stale and can leak into
+training data \citep{sainz2023trouble,balloccu2024leak}; and a score
+must use what the API returns, not the page behind it. End-to-end agent
+benchmarks do not isolate the API (Section~\ref{sec:related}).
 
 \needle tests this step directly: one query in, up to $k$ results out,
-scored on the evidence returned to the agent. Hourly and daily runs draw
-new queries from public sources for five tasks. Automatic scorers compare
-each engine with a pooled ceiling: the best results found by any tested
-engine. Registry facts and rare queries can repeat, and all judge checks
-use LLMs, not humans. Our claims:
+scored on the evidence returned to the agent, for five tasks with new
+queries each run. Scorers compare each engine with a pooled ceiling: the
+best results any tested engine found. Registry facts and rare queries can
+repeat, and all judge checks use LLMs, not humans. Our claims:
 \begin{itemize}[nosep,leftmargin=1.2em]
 \item Paired tests order 178 of 210 pairs of the 21 main engines on
   12.4k shared query-runs; 32 pairs stay unresolved
@@ -114,8 +109,6 @@ use LLMs, not humans. Our claims:
   agree at Kendall's $\tau_b$ .81--.94 (Section~\ref{sec:results},
   Figure~\ref{fig:weekly}).
 \end{itemize}
-Two LLM raters from other vendors rank engines like the production
-judge, at Spearman .94 (Section~\ref{sec:validation}).
 
 \section{Related Work}
 \label{sec:related}
@@ -140,8 +133,7 @@ Domain benchmarks cover literature, caselaw and finance search on fixed
 sets \citep{ajith2024litsearch,hou2025clerc,hu2026finsearchcomp}; \needle
 runs these tasks on new queries each day. Full text helps retrieval beyond
 abstracts \citep{lin2009fulltext}; our body queries test that gap on live
-APIs. \needle contributes the live comparison and paired diagnostics
-across APIs, not a new scorer.
+APIs.
 
 \section{The Benchmark}
 \label{sec:bench}
@@ -223,6 +215,29 @@ the judge profile specifies what a result must contain.}
 \label{tab:examples}
 \end{table*}
 
+\begin{table*}[t]
+\centering\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{0.8}
+\begin{tabular}{@{}lrlrrrrrrr@{}}
+\toprule
+Engine & \multicolumn{2}{c}{Overall share, \%} & Scholar & News & Finance & Rare & Legal & Failed, \% & Latency \\
+\cmidrule(lr){2-3}
+ & mean & 95\% CI & R@10 & \ndcg & R@5 & \ndcg & R@5 & requests & $p_{50}$, ms \\
+\midrule
+\input{table_results.tex}
+\bottomrule
+\end{tabular}
+\caption{Results on 276 shared runs, 17--28 October 2026 (12.4k
+query-runs, 21 engines); the ceiling also includes variants. Task cells
+are absolute metrics, best in bold; italics mark the ceiling. Failed
+counts all request failures. Latency is the per-run median on news.
+$^\dagger$Server-side search tool; latency includes answer generation.
+$^\S$Account-side exclusions leave rank uncertain
+(Appendix~\ref{app:checks}).}
+\label{tab:results}
+\end{table*}
+
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{fig_scholar.pdf}
@@ -296,10 +311,9 @@ account-side failures (our quota, rate limit, login or credit); other
 failures score zero. On news and rare, every failure in this window scores
 zero. These exclusions remove up to 28\% of an engine's query-runs.
 \paragraph{Comparing two engines.}
-A gap between two overall shares can come from the queries that runs
-happened to draw, not from the engines. Query difficulty varies widely
-and affects all engines alike, so individual intervals can overlap even
-when one engine beats the other on the same queries. We therefore
+Query difficulty varies widely and affects all engines alike, so
+individual intervals can overlap even when one engine beats the other on
+the same queries. We therefore
 estimate the difference $S(a)-S(b)$ on shared runs. Within each task, we sample whole runs
 with replacement 2,000 times, drawing the same runs for every engine
 \citep{efron1993bootstrap}. Each sample preserves within-run dependence
@@ -311,29 +325,6 @@ at a 5\% familywise level \citep{carterette2012multiple}. An interval that exclu
 ordering that pair under these scoring rules. The intervals measure
 sampling uncertainty, not scorer error. Appendix~\ref{app:checks} gives
 the interval formula and checks other sampling units and failure policies.
-
-\begin{table*}[t]
-\centering\footnotesize
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{0.8}
-\begin{tabular}{@{}lrlrrrrrrr@{}}
-\toprule
-Engine & \multicolumn{2}{c}{Overall share, \%} & Scholar & News & Finance & Rare & Legal & Failed, \% & Latency \\
-\cmidrule(lr){2-3}
- & mean & 95\% CI & R@10 & \ndcg & R@5 & \ndcg & R@5 & requests & $p_{50}$, ms \\
-\midrule
-\input{table_results.tex}
-\bottomrule
-\end{tabular}
-\caption{Results on 276 shared runs, 17--28 October 2026 (12.4k
-query-runs, 21 engines); the ceiling also includes variants. Task cells
-are absolute metrics, best in bold; italics mark the ceiling. Failed
-counts all request failures. Latency is the per-run median on news.
-$^\dagger$Server-side search tool; latency includes answer generation.
-$^\S$Account-side exclusions leave rank uncertain
-(Appendix~\ref{app:checks}).}
-\label{tab:results}
-\end{table*}
 
 \subsection{Judge validation}
 \label{sec:validation}
@@ -426,9 +417,10 @@ evaluators can favor their own outputs \citep{panickssery2024self}.
 
 \paragraph{Matcher error.}
 Finance table figures can match the wrong period when snippets omit column
-headers. A fresh audit confirms only 70\% of table-reading hits; most
-others are unresolved, not contradicted. The pooled error estimates cannot
-show each engine's error rate. Caselaw recall credits pages about the case,
+headers. In a fresh LLM audit, 5 of 335 table-reading hits contradict the
+answer; 95 show the right figure without a period label, which the
+snippet alone cannot confirm. The pooled audit cannot show each engine's
+error rate. Caselaw recall credits pages about the case,
 not just the opinion. Appendix~\ref{app:finance} gives the finance checks.
 
 \paragraph{Coverage and weights.}
