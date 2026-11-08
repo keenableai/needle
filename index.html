@@ -12,11 +12,11 @@
   } catch {}
 </script>
 <title>NEEDLE — search engine benchmarks</title>
-<meta name="description" content="Live open-source search benchmark: hourly news and twice-daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta name="description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEEDLE">
 <meta property="og:title" content="NEEDLE — search engine benchmarks">
-<meta property="og:description" content="Live open-source search benchmark: hourly news and twice-daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta property="og:description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
 <meta property="og:url" content="https://keenableai.github.io/needle/">
 <meta property="og:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -711,7 +711,7 @@
     </div>
     <div class="lb-panel" id="trend-rare" role="tabpanel">
       <h2><span class="vert" data-vert="agentic_rare"></span> — nDCG@5 over time</h2>
-      <div class="sub">100 rare-entity queries per run, twice daily</div>
+      <div class="sub">100 rare-entity queries per daily run</div>
     </div>
     <div class="lb-panel" id="trend-legal" role="tabpanel">
       <div class="lb-tabs" role="tablist" aria-label="Legal slices">
@@ -1486,7 +1486,7 @@ function drawTrends(rows) {
   const pending = new Map([["trend-news", () => drawSlice("trend-news", newsSeries(rows))]]);
   for (const [id, bench, metric, weight] of TREND_SLICES) {
     pending.set(id, () => drawSlice(id, seriesFor(bench, metric, weight, rows),
-      `No ${verticalName(bench)} data yet — collected twice daily.`));
+      `No ${verticalName(bench)} data yet — collected daily.`));
   }
   const flush = (all) => {
     for (const [id, draw] of pending) {
