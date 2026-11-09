@@ -53,7 +53,7 @@ ci_lines = []
 for o, e in table:
     d = 100 * (matched["matched"][e] - matched["base"][e])
     dlo, dhi = (100 * x for x in matched["ci_diff"][e])
-    cols = [NAMES[e], f"{o * 100:.1f}", f"{matched['base'][e] * 100:.1f}",
+    cols = [NAMES[e], f"{matched['base'][e] * 100:.1f}",
             f"{matched['matched'][e] * 100:.1f}", signed(d), f"{signed(dlo)}, {signed(dhi)}"]
     ci_lines.append(" & ".join(cols) + r" \\")
 open(out.replace("table_results", "table_ci"), "w").write("\n".join(ci_lines) + "\n")

@@ -1,33 +1,48 @@
 {
  "chatgpt-search": {
-  "overall": 0.5145934395671152,
+  "overall": 0.5241493362354233,
   "excluded_scored_zero": 0.4824395096485998,
-  "excluded_scored_as_ceiling": 0.5452334238947962,
+  "excluded_scored_as_ceiling": 0.5700291572443141,
   "excluded_fraction": {
    "scholar": 0.19730290456431535,
-   "news": 0.0,
+   "news": 0.039525691699604744,
    "finance": 0.11666666666666667,
-   "agentic_rare": 0.0,
+   "agentic_rare": 0.08445297504798464,
    "legal": 0.0
   },
   "rank": 11,
-  "rank_scored_zero": 14,
-  "rank_scored_as_ceiling": 11
+  "rank_scored_zero": 15,
+  "rank_scored_as_ceiling": 9
  },
  "claude-search": {
-  "overall": 0.45091224230014093,
-  "excluded_scored_zero": 0.3466738779071725,
-  "excluded_scored_as_ceiling": 0.5202479615862873,
+  "overall": 0.5134923550412074,
+  "excluded_scored_zero": 0.34667387790717247,
+  "excluded_scored_as_ceiling": 0.6794710866026195,
   "excluded_fraction": {
    "scholar": 0.3360995850622407,
-   "news": 0.0,
+   "news": 0.40360122968818624,
    "finance": 0.32083333333333336,
-   "agentic_rare": 0.0,
+   "agentic_rare": 0.3925143953934741,
    "legal": 0.2109375
   },
-  "rank": 16,
+  "rank": 13,
   "rank_scored_zero": 20,
-  "rank_scored_as_ceiling": 11
+  "rank_scored_as_ceiling": 3
+ },
+ "exa": {
+  "overall": 0.6856667737773565,
+  "excluded_scored_zero": 0.6830569549371212,
+  "excluded_scored_as_ceiling": 0.6864803190126592,
+  "excluded_fraction": {
+   "scholar": 0.0,
+   "news": 0.00878348704435661,
+   "finance": 0.008333333333333333,
+   "agentic_rare": 0.0,
+   "legal": 0.0
+  },
+  "rank": 2,
+  "rank_scored_zero": 2,
+  "rank_scored_as_ceiling": 2
  },
  "jina": {
   "overall": 0.4378160542503893,
@@ -45,29 +60,44 @@
   "rank_scored_as_ceiling": 18
  },
  "kagi": {
-  "overall": 0.513137573581982,
+  "overall": 0.521349191869932,
   "excluded_scored_zero": 0.47515342700855756,
-  "excluded_scored_as_ceiling": 0.5317058129006738,
+  "excluded_scored_as_ceiling": 0.5584680526730111,
   "excluded_fraction": {
    "scholar": 0.08713692946058091,
-   "news": 0.0,
+   "news": 0.05511638120333773,
    "finance": 0.1175,
-   "agentic_rare": 0.0,
+   "agentic_rare": 0.07869481765834933,
    "legal": 0.078125
   },
   "rank": 12,
-  "rank_scored_zero": 15,
-  "rank_scored_as_ceiling": 11
+  "rank_scored_zero": 16,
+  "rank_scored_as_ceiling": 10
+ },
+ "parallel": {
+  "overall": 0.6510322786497013,
+  "excluded_scored_zero": 0.6473100923238827,
+  "excluded_scored_as_ceiling": 0.6531140009756174,
+  "excluded_fraction": {
+   "scholar": 0.0,
+   "news": 0.021519543258673692,
+   "finance": 0.0075,
+   "agentic_rare": 0.0,
+   "legal": 0.0
+  },
+  "rank": 4,
+  "rank_scored_zero": 4,
+  "rank_scored_as_ceiling": 4
  },
  "tinyfish": {
-  "overall": 0.44499164158919935,
+  "overall": 0.4506116684592511,
   "excluded_scored_zero": 0.3756538070965102,
-  "excluded_scored_as_ceiling": 0.5203080256303968,
+  "excluded_scored_as_ceiling": 0.542956778029629,
   "excluded_fraction": {
    "scholar": 0.7149377593360996,
    "news": 0.0,
    "finance": 0.008333333333333333,
-   "agentic_rare": 0.0,
+   "agentic_rare": 0.11324376199616124,
    "legal": 0.0
   },
   "rank": 17,
