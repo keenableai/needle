@@ -268,7 +268,7 @@ engines: news hourly (`--limit 20`); twice daily with fresh gold — finance
 00:17/12:17 UTC (`--limit 120 --judge`), agentic_rare 03:17/15:17
 (`--limit 100`), scholar 06:17/18:17 (`--per-cell 7`), legal 09:17/21:17. Gold lives on `gh-pages` between runs;
 a manual dispatch runs only the benches it selects; a daily bench also runs
-off-schedule when its gold file is missing. Each bench is its own job and publishes its
+at any scheduled hour when its gold file is missing. Each bench is its own job and publishes its
 own run, so a slow daily bench never delays the hourly news result. Each
 run appends summary rows
 (`history.jsonl`), engine-pair URL overlap (`overlap.jsonl`), and per-engine

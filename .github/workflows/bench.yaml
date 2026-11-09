@@ -63,10 +63,9 @@ env:
 
 jobs:
   plan:
-    name: Plan benches
+    name: Plan twice-daily benches
     runs-on: ubuntu-latest
     outputs:
-      news: ${{ steps.plan.outputs.news }}
       finance: ${{ steps.plan.outputs.finance }}
       agentic_rare: ${{ steps.plan.outputs.agentic_rare }}
       scholar: ${{ steps.plan.outputs.scholar }}
@@ -83,7 +82,6 @@ jobs:
       - id: plan
         env:
           SCHEDULE: ${{ github.event.schedule }}
-          NEWS: ${{ inputs.news }}
           FINANCE: ${{ inputs.finance }}
           AGENTIC_RARE: ${{ inputs.agentic_rare }}
           SCHOLAR: ${{ inputs.scholar }}
@@ -91,12 +89,11 @@ jobs:
         run: |
           want() {
             if [ "$SCHEDULE" = "$1" ] || [ "$2" = "true" ]; then echo true
-            elif [ -n "$3" ] && [ ! -s "$3" ]; then echo true
+            elif [ -n "$SCHEDULE" ] && [ -n "$3" ] && [ ! -s "$3" ]; then echo true
             else echo false
             fi
           }
           {
-            echo "news=$([ -n "$SCHEDULE" ] || [ "$NEWS" = true ] && echo true || echo false)"
             echo "finance=$(want '17 0,12 * * *' "$FINANCE" data/gold.jsonl)"
             echo "agentic_rare=$(want '17 3,15 * * *' "$AGENTIC_RARE" '')"
             echo "scholar=$(want '17 6,18 * * *' "$SCHOLAR" data/scholar.jsonl)"
@@ -104,8 +101,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
   news:
-    needs: plan
-    if: needs.plan.outputs.news == 'true'
+    if: github.event_name == 'schedule' || inputs.news
     runs-on: gke-use5-amd64
     timeout-minutes: 80
     steps:
