@@ -9,20 +9,24 @@ on:
     - cron: "17 1,2,4,5,7,8,10,11,13,14,16,17,19,20,22,23 * * *"
   workflow_dispatch:
     inputs:
+      news:
+        description: "Run news"
+        type: boolean
+        default: false
       finance:
-        description: "Also run finance (regenerates gold)"
+        description: "Run finance (regenerates gold)"
         type: boolean
         default: false
       agentic_rare:
-        description: "Also run agentic_rare (rare-entity nDCG eval)"
+        description: "Run agentic_rare (rare-entity nDCG eval)"
         type: boolean
         default: false
       scholar:
-        description: "Also run scholar (regenerates gold)"
+        description: "Run scholar (regenerates gold)"
         type: boolean
         default: false
       legal:
-        description: "Also run legal (regenerates gold)"
+        description: "Run legal (regenerates gold)"
         type: boolean
         default: false
 
@@ -85,7 +89,7 @@ jobs:
         run: |
           want() {
             if [ "$SCHEDULE" = "$1" ] || [ "$2" = "true" ]; then echo true
-            elif [ -n "$3" ] && [ ! -s "$3" ]; then echo true
+            elif [ -n "$SCHEDULE" ] && [ -n "$3" ] && [ ! -s "$3" ]; then echo true
             else echo false
             fi
           }
@@ -97,6 +101,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
   news:
+    if: github.event_name == 'schedule' || inputs.news
     runs-on: gke-use5-amd64
     timeout-minutes: 80
     steps:
