@@ -117,7 +117,7 @@ jobs:
     needs: plan
     if: needs.plan.outputs.finance == 'true'
     runs-on: gke-use5-amd64
-    timeout-minutes: 270
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
