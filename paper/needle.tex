@@ -289,11 +289,10 @@ For each query, the ceiling keeps the best rating per normalized URL
 across all engines, variants included, and sorts these ratings
 \citep{sparckjones1975pool,zobel1998reliable}. With $r_i$ the rating at
 rank $i$, we compute \ndcg \citep{jarvelin2002cumulated} as
-\begin{align*}
-\mathrm{DCG}_e(q)&=\sum_{i=1}^{5}\frac{g(r_i)}{\log_2(i+1)},\\
-\mathrm{nDCG}_e(q)&=\frac{\mathrm{DCG}_e(q)}{\mathrm{IDCG}(q)}.
-\end{align*}
-IDCG is the DCG of the top five pooled ratings. Missing ranks contribute
+\[
+\mathrm{nDCG}_e(q)=\frac{1}{\mathrm{IDCG}(q)}\sum_{i=1}^{5}\frac{g(r_i)}{\log_2(i+1)}.
+\]
+IDCG is the same sum over the top five pooled ratings. Missing ranks contribute
 zero. Repeated normalized URLs receive zero gain except on
 \texttt{site:} queries. We drop a query-run from all engines if any
 judgment fails or no result reaches rating 2. The task score is the mean
