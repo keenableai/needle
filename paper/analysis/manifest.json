@@ -387,7 +387,8 @@
    "file": "audit/finance_bias_table1.json"
   },
   "raters": {
-   "dir": "audit/raters"
+   "dir": "audit/raters",
+   "table": "audit/raters/snippet_agreement.json from analysis/snippet_agreement.py; snippet grades only"
   },
   "caselaw_identity": {
    "dir": "audit/caselaw_identity"
@@ -639,6 +640,7 @@
   "audit/raters/pages.json",
   "audit/raters/rater_engine_ci.json",
   "audit/raters/rater_results.json",
+  "audit/raters/snippet_agreement.json",
   "audit/raters/staged/guideline_snippet.md",
   "audit/raters/staged/labels_S_part1.json",
   "audit/raters/staged/labels_S_part2.json",

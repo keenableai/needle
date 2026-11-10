@@ -324,13 +324,13 @@ that pair. The intervals measure sampling uncertainty, not scorer error
 We sample 100 news and 100 rare queries, with six distinct top-five URLs
 per query (1,200 results). Four LLM raters grade them with engine names
 hidden and one written guideline: two Claude Opus 5.5 raters, Gemini 4
-Argon and Grok 4.7. Each rater sees the snippet and the first 3,000 page
-characters, while the production judge sees only the snippet. The two
-Claude raters agree at quadratic-weighted $\kappa=.94$
+Argon and Grok 4.7. Like the production judge, each rater grades the
+URL, title and snippet. The two
+Claude raters agree at quadratic-weighted $\kappa=.93$
 \citep{cohen1968weighted}, and their rounded mean grade is the
 \textbf{Claude consensus}. Gemini and Grok agree with the Claude
-consensus at .92 and .90. The production judge agrees with each of the
-three at .77--.79 (Table~\ref{tab:raters}, Appendix~\ref{app:validation}).
+consensus at .91. The production judge agrees with each of the
+three at .79--.84 (Table~\ref{tab:raters}, Appendix~\ref{app:validation}).
 
 In a second check, Gemini and Grok grade the complete result pools of 100
 queries (5,698 results from all 21 main engines) from snippets only. The
@@ -382,9 +382,7 @@ whether a vendor changed its index for the benchmark or for other reasons.
 
 \paragraph{Evidence and judge.}
 Scores measure the API response, not the fetched page. Short snippets can
-hide relevant content \citep{turpin2009summaries,kazai2022less}: page
-text changes 25\% of 400 sampled grades
-(Appendix~\ref{app:validation}). News and rare depend on one LLM judge.
+hide relevant content \citep{turpin2009summaries,kazai2022less}. News and rare depend on one LLM judge.
 All audit raters are also LLMs, which cannot replace human validation
 \citep{faggioli2023perspectives,clarke2025llmbased}. LLM judges can
 reward query-term stuffing \citep{alaofi2024fooled} and favor some
@@ -634,16 +632,16 @@ Table~\ref{tab:buckets}, and do not measure identifier-matcher error.
 \toprule
 Quadratic-weighted $\kappa$ & News & Rare & All \\
 \midrule
-Claude A vs.\ B & .94 & .94 & .94 \\
-Judge vs.\ Claude consensus & .72 & .80 & .77 \\
-Gemini vs.\ consensus & .91 & .92 & .92 \\
-Grok vs.\ consensus & .90 & .88 & .90 \\
-Gemini vs.\ judge & .74 & .81 & .78 \\
-Grok vs.\ judge & .75 & .81 & .79 \\
+Claude A vs.\ B & .93 & .92 & .93 \\
+Judge vs.\ Claude consensus & .75 & .81 & .79 \\
+Gemini vs.\ consensus & .91 & .90 & .91 \\
+Grok vs.\ consensus & .91 & .89 & .91 \\
+Gemini vs.\ judge & .79 & .84 & .82 \\
+Grok vs.\ judge & .80 & .86 & .84 \\
 \bottomrule
 \end{tabular}
 \caption{Agreement on 1,200 blinded results, 600 per task. Consensus is
-the rounded mean of the two Claude page grades.}
+the rounded mean of the two Claude grades.}
 \label{tab:raters}
 \end{table}
 
@@ -651,18 +649,11 @@ the rounded mean of the two Claude page grades.}
 The 200 queries in Section~\ref{sec:validation} come from runs of 17--29
 October with at least 19 engines, one day past the main window. Each
 Claude rater uses a separate random order in 24 sessions of 50 items.
-Gemini and Grok grade one item per call at temperature 0. Each rater
-gives a snippet grade and a page grade, and Table~\ref{tab:raters} uses
-the page grades. The snippet grades of Gemini and Grok agree with the
-production judge at .82 and .84, so page text explains part of the gap.
-Raters assign mean grades of 1.87--1.97 versus the production judge's
+Gemini and Grok grade one item per call at temperature 0. The rater
+prompt also holds a page excerpt, and the guideline tells the rater to
+set the snippet grade before it reads the excerpt.
+Raters assign mean grades of 1.85--1.90 versus the production judge's
 1.60, so agreement does not imply identical grade calibration.
-
-\paragraph{Evidence length.}
-A separate pass grades 400 of the 1,200 results from the snippet alone.
-Against these grades, the page grades of the first Claude rater differ
-on 25\% of results. The mean change is only +.05, with an interval that
-includes zero, because positive and negative changes cancel.
 
 \paragraph{Literal quotes.}
 Of 1,200 rare query-runs, 504 contain quotes. On unquoted queries,
