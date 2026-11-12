@@ -1174,6 +1174,23 @@ const ROLLING_MS = 7 * 86400e3;
 const ROLLING_NOTE = "7-day rolling mean";
 const PCT_NOTE = "% of ultimate's score";
 
+const MIN_HISTORY_MS = WEEK_MS;
+
+function establishedRows(rows) {
+  const span = new Map();
+  for (const r of rows) {
+    const key = `${r.bench}\u0000${r.engine}`;
+    const t = Date.parse(r.ts);
+    const cur = span.get(key);
+    if (!cur) span.set(key, [t, t]);
+    else { if (t < cur[0]) cur[0] = t; if (t > cur[1]) cur[1] = t; }
+  }
+  return rows.filter((r) => {
+    const cur = span.get(`${r.bench}\u0000${r.engine}`);
+    return cur && cur[1] - cur[0] >= MIN_HISTORY_MS;
+  });
+}
+
 function seriesFor(bench, metric, weight, rows) {
   const out = {};
   for (const e of ENGINES) out[e] = [];
@@ -3351,8 +3368,10 @@ async function main() {
   ciData = ci;
   ENGINE_FAMILY = new Map(Object.entries(families));
   for (const r of histRows) r.bench = LEGACY_BENCH[r.bench] || r.bench;
-  history = histRows.filter((r) => BENCHES.includes(r.bench) && !HIDDEN_ENGINES.has(r.engine));
-  registerEngines(history.map((r) => r.engine));
+  history = establishedRows(histRows.filter((r) => BENCHES.includes(r.bench) && !HIDDEN_ENGINES.has(r.engine)));
+  const established = new Set(history.map((r) => r.engine));
+  registerEngines([...established]);
+  ENGINES = ENGINES.filter((e) => established.has(e));
 
   if (history.length) {
     const lastTs = history[history.length - 1].ts;
