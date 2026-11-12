@@ -26433,5 +26433,13 @@
       "fresh.jsonl",
       "ndcg.json"
     ]
+  },
+  {
+    "id": "2026-11-12T0555Z",
+    "ts": "2026-11-12T05:55Z",
+    "artifacts": [
+      "agentic_rare.json",
+      "agentic_rare.jsonl"
+    ]
   }
 ]
