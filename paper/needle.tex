@@ -171,7 +171,7 @@ draws new queries each run and scores the API without an agent.
 \textbf{Scorers and tasks.} LLM assessors and simulated known-item queries
 can reproduce system rankings
 \citep{thomas2024llms,upadhyay2025largescale,azzopardi2007simulated,he2025totelicitation}.
-\needle uses both and checks its judge against raters from other vendors.
+\needle uses both and checks its judge against models from other vendors.
 Domain benchmarks cover literature, caselaw and finance search on fixed
 sets \citep{ajith2024litsearch,hou2025clerc,hu2026finsearchcomp}, while
 \needle runs these tasks on new queries each day. Full text helps
@@ -322,18 +322,18 @@ that pair. The intervals measure sampling uncertainty, not scorer error
 \label{sec:validation}
 
 We sample 100 news and 100 rare queries, with six distinct top-five URLs
-per query (1,200 results). Four LLM raters grade them with engine names
-hidden and one written guideline: two Claude Opus 5.5 raters, Gemini 4
-Argon and Grok 4.7. Like the production judge, each rater grades the
-URL, title and snippet. The two
-Claude raters agree at quadratic-weighted $\kappa=.93$
-\citep{cohen1968weighted}, and their rounded mean grade is the
-\textbf{Claude consensus}. Gemini and Grok agree with the Claude
-consensus at .91. The production judge agrees with each of the
-three at .79--.84 (Table~\ref{tab:raters}, Appendix~\ref{app:validation}).
+per query (1,200 results). Four models judge them with the production
+prompt, input and settings: GPT-6 Luna (the production judge), Claude
+Opus 5.5, Gemini 4 Argon and Grok 4.7. We score each model against the
+mean grade of the other three. GPT-6 Luna agrees with this leave-one-out
+consensus at quadratic-weighted $\kappa=.89$
+\citep{cohen1968weighted}, and the other three models at .91--.92
+(Table~\ref{tab:raters}, Appendix~\ref{app:validation}). Its mean grade
+of 1.59 is inside the 1.55--1.67 range of the others.
 
 In a second check, Gemini and Grok grade the complete result pools of 100
-queries (5,698 results from all 21 main engines) from snippets only. The
+queries (5,698 results from all 21 main engines) from snippets, with a
+separate written guideline. The
 engine ranking from each rater agrees with the ranking from the
 production judge at Spearman .94. Neither rater separates Keenable from
 Exa on this sample. Both checks measure model agreement, not human
@@ -627,33 +627,38 @@ Table~\ref{tab:buckets}, and do not measure identifier-matcher error.
 
 \begin{table}[ht]
 \centering\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{@{}lrrr@{}}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lrrrrrr@{}}
 \toprule
-Quadratic-weighted $\kappa$ & News & Rare & All \\
+ & \multicolumn{3}{c}{$\kappa$} & & & \\
+\cmidrule(lr){2-4}
+Model & News & Rare & All & $\rho$ & Exact & Mean \\
 \midrule
-Claude A vs.\ B & .93 & .92 & .93 \\
-Judge vs.\ Claude consensus & .75 & .81 & .79 \\
-Gemini vs.\ consensus & .91 & .90 & .91 \\
-Grok vs.\ consensus & .91 & .89 & .91 \\
-Gemini vs.\ judge & .79 & .84 & .82 \\
-Grok vs.\ judge & .80 & .86 & .84 \\
+GPT-6 Luna & .88 & .89 & .89 & .90 & 69 & 1.59 \\
+Claude Opus 5.5 & .91 & .90 & .91 & .93 & 71 & 1.67 \\
+Gemini 4 Argon & .90 & .92 & .91 & .93 & 74 & 1.63 \\
+Grok 4.7 & .91 & .92 & .92 & .93 & 73 & 1.55 \\
 \bottomrule
 \end{tabular}
-\caption{Agreement on 1,200 blinded results, 600 per task. Consensus is
-the rounded mean of the two Claude grades.}
+\caption{Each model against the leave-one-out consensus of the other
+three on 1,194 results. $\kappa$ is quadratic-weighted, $\rho$ is
+Spearman, Exact is the share of identical grades in percent, and Mean is
+the mean grade.}
 \label{tab:raters}
 \end{table}
 
 \paragraph{Audit protocol.}
 The 200 queries in Section~\ref{sec:validation} come from runs of 17--29
 October with at least 19 engines, one day past the main window. Each
-Claude rater uses a separate random order in 24 sessions of 50 items.
-Gemini and Grok grade one item per call at temperature 0. The rater
-prompt also holds a page excerpt, and the guideline tells the rater to
-set the snippet grade before it reads the excerpt.
-Raters assign mean grades of 1.85--1.90 versus the production judge's
-1.60, so agreement does not imply identical grade calibration.
+model receives the production system prompt, the query profile, the URL,
+the title and the snippet at temperature 0 with high reasoning effort.
+Claude Opus 5.5 refuses the six results of one rare query, so all
+numbers use the other 1,194. $\kappa$ and Exact use the consensus rounded
+to a grade, and $\rho$ uses the mean. The 95\% interval of GPT-6 Luna's
+$\kappa$ from a query bootstrap is .87--.91, which overlaps the
+intervals of the other models. Pairwise $\kappa$ is .86--.92. The new
+GPT-6 Luna grades agree with the stored production grades at .92, with
+83\% identical, so repeated runs of one judge already differ.
 
 \paragraph{Literal quotes.}
 Of 1,200 rare query-runs, 504 contain quotes. On unquoted queries,

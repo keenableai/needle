@@ -49,7 +49,7 @@ manifest = {
         "adjacent_pairs": {"files": ["audit/adjacent_pairs.json", "audit/adjacent_pairs_day.json"], "resamples": 2000},
         "lag_subset": {"file": "audit/lag_subset.json"},
         "finance_bias": {"file": "audit/finance_bias_table1.json"},
-        "raters": {"dir": "audit/raters", "table": "audit/raters/snippet_agreement.json from analysis/snippet_agreement.py; snippet grades only"},
+        "judge_panel": {"file": "audit/panel/panel_agreement.json", "scripts": ["judge_panel.py", "panel_agreement.py"], "items": "audit/raters/items_key.json", "note": "four models, production prompt, snippet-only input, high reasoning effort"},
         "caselaw_identity": {"dir": "audit/caselaw_identity"},
         "list_level_raters": {"dir": "audit/lists100", "files": ["audit/lists100/list_level_gemini.json", "audit/lists100/list_level_grok.json"]},
         "ceramic_rawops": {"file": "audit/ceramic_rawops.json"},
