@@ -827,7 +827,7 @@
         on the judged verticals, the known-item gold hit on the known-answer
         verticals); the URLs column counts unique relevant URLs / all URLs
         the engine returned; same-family engines (Exa/Exa-instant,
-        Parallel/Parallel-turbo) do not count against each other</div>
+        Parallel Advanced/Parallel Turbo/Parallel Fast) do not count against each other</div>
       <div id="uniqueness-table" class="bar-table"></div>
     </div>
   </div>
@@ -1080,6 +1080,7 @@ function markHome(node, engine) {
 }
 
 const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable"],
+  ["parallel", "parallel-advanced"],
   ["google", "google/serper"], ["bing", "bing/searchapi"], ["context", "context.dev"]]);
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
