@@ -158,8 +158,8 @@ ENGINES: dict[str, EngineSpec] = {
     "parallel": EngineSpec(
         key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("advanced")
     ),
-    "parallel-turbo": EngineSpec(
-        key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("turbo")
+    "parallel-fast": EngineSpec(
+        key_env="PARALLEL_API_KEY", key_required=True, build=_build_parallel("fast")
     ),
     "perplexity": EngineSpec(
         key_env="PERPLEXITY_API_KEY", key_required=True, build=_build_perplexity(None)
