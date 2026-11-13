@@ -14,6 +14,11 @@ manifest = {
         "path": "data/history.jsonl", "through": "2026-10-29T11:53Z",
         "note": "Use the backfilled history at this revision, not the uncorrected snapshot published at the cutoff.",
     },
+    "weekly_history": {
+        "revision": "a6768c4665e178fa477d7ac0efb6980337ce2fee",
+        "path": "data/history.jsonl", "through": "2026-11-13T11:07Z",
+        "note": "Used only by fig_weekly.pdf and audit/weekly_tau.json; the last, incomplete ISO week is dropped.",
+    },
     "results_dataset": {"repo": "keenable-ai/needle-results", "revision": "6a5be09d6d2eed18227b8e1d2c0656bc1c14e5be"},
     "scoring_rules": {
         "service_side_failure": "scored zero",
@@ -45,7 +50,7 @@ manifest = {
         },
         "matched_support": {"file": "audit/matched_pairs.json"},
         "figure_scholar": {"file": "fig_scholar.pdf", "source": HISTORY, "bench": "scholar", "window_days": 30, "window_end": "2026-10-29"},
-        "figure_weekly": {"file": "fig_weekly.pdf", "source": HISTORY, "weeks": "2026-W36..2026-W43"},
+        "figure_weekly": {"file": "fig_weekly.pdf", "source": "weekly_history", "weeks": "2026-W36..2026-W45"},
         "adjacent_pairs": {"files": ["audit/adjacent_pairs.json", "audit/adjacent_pairs_day.json"], "resamples": 2000},
         "lag_subset": {"file": "audit/lag_subset.json"},
         "finance_bias": {"file": "audit/finance_bias_table1.json"},

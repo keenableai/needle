@@ -38,15 +38,18 @@ def p50(e):
 
 
 best = {b: max(sh[e][b][0] for _, e in table) for b, _ in BENCHES}
-lines = [r"\textit{ceiling (pooled)} & \textit{100} & & " + " & ".join(rf"\textit{{{fmt(ult[b])}}}" for b, _ in BENCHES) + r" & & \\"]
-for o, e in table:
+lines = []
+for i, (o, e) in enumerate(table):
     lo, hi = ci[e]
     cells = []
     for b, _ in BENCHES:
         v = sh[e][b][0]
         cells.append(rf"\textbf{{{fmt(v)}}}" if round(v, 3) == round(best[b], 3) else fmt(v))
-    lines.append(rf"{NAMES[e]}{NOTE.get(e, '')} & {o * 100:.1f} & \shareci{{{lo * 100:.1f}}}{{{hi * 100:.1f}}} & "
+    share = f"{o * 100:.1f}"
+    lines.append(("\\addlinespace[3pt]\n" if i and i % 5 == 0 else "")
+                 + rf"{NAMES[e]}{NOTE.get(e, '')} & {share if i else rf'\textbf{{{share}}}'} & \shareci{{{lo * 100:.1f}}}{{{hi * 100:.1f}}} & "
                  + " & ".join(cells) + rf" & {fail(e)} & {p50(e)} \\")
+lines.append("\\midrule\n" + r"\textit{Pooled ceiling} & \textit{100} & & " + " & ".join(rf"\textit{{{fmt(ult[b])}}}" for b, _ in BENCHES) + r" & -- & -- \\")
 open(out, "w").write("\n".join(lines) + "\n")
 
 ci_lines = []

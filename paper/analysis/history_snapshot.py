@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
-source = json.loads((root / "paper/analysis/manifest.json").read_text())["dashboard_history"]
+source = json.loads((root / "paper/analysis/manifest.json").read_text())[sys.argv[2] if len(sys.argv) > 2 else "dashboard_history"]
 result = subprocess.run(
     ["git", "-C", str(root), "show", f"{source['revision']}:{source['path']}"],
     check=True, capture_output=True, text=True,

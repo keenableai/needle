@@ -124,28 +124,33 @@ ax1.set_title("Scholar query types", loc="left", x=-0.12)
 clean(ax1)
 
 byweek = collections.defaultdict(list)
-for r in rows:
+for r in load(sys.argv[4]) if len(sys.argv) > 4 else rows:
     byweek[datetime.strptime(r["ts"], FMT).strftime("%G-W%V")].append(r)
-keys = sorted(byweek)[-9:-1]
+keys = [k for k in sorted(byweek)[:-1] if k >= "2026-W36"]
 wk = {k: shares(byweek[k], series_b)[0] for k in keys}
 ci = {k: bootstrap(byweek[k], series_b, n=500, seed=7 + i) for i, k in enumerate(keys)}
 ends = []
-for i, e in enumerate(series_b):
-    pts = [(j + (i - 3) * 0.05, overall(wk[k], e) * 100, [v * 100 for v in ci[k][e]])
+last = len(keys) - 1
+for e in series_b:
+    pts = [(j, overall(wk[k], e) * 100, [v * 100 for v in ci[k][e]])
            for j, k in enumerate(keys) if overall(wk[k], e) is not None and e in ci[k]]
     xs, ys, cis = zip(*pts, strict=True)
-    series(ax2, xs, ys, cis, e)
+    c = COLORS[e]
+    ax2.fill_between(xs, [lo for lo, _ in cis], [hi for _, hi in cis], color=c, alpha=0.16, lw=0, zorder=2)
+    ax2.plot(xs, ys, "-", color=c, lw=1.3, zorder=3)
+    ax2.plot(xs[-1], ys[-1], MARKERS[e], color=c, ms=4, mec=SURFACE, mew=0.5, zorder=4)
     ends.append((ys[-1], NAMES[e], INK))
-last = len(keys) - 1
-label_ends(ax2, ends, last + 0.15, 3.4, 0.35, 38)
-ticks = list(range(1, len(keys), 2))
+label_ends(ax2, ends, last + 0.12, 3.6, 0.4, 39)
+ticks = list(range(0, len(keys), 2))
 ax2.set_xticks(ticks, [datetime.strptime(keys[j] + "-1", "%G-W%V-%u").strftime("%-d %b") for j in ticks])
-ax2.set_xlim(-0.3, last + 0.2)
-ax2.set_ylim(35, 80)
+ax2.set_xticks(range(len(keys)), minor=True)
+ax2.set_xlim(-0.15, last + 0.15)
+ax2.set_ylim(36, 80)
 ax2.set_yticks([40, 50, 60, 70, 80])
 ax2.set_xlabel("week starting", labelpad=2)
-ax2.set_title("Weekly overall share, %", loc="left", x=-0.14)
+ax2.set_title("Overall share, %", loc="left", x=-0.14)
 clean(ax2)
+ax2.tick_params(axis="x", which="minor", length=2, color=AXIS)
 
 scholar_fig.savefig(scholar_out, metadata={"CreationDate": None})
 weekly_fig.savefig(weekly_out, metadata={"CreationDate": None})

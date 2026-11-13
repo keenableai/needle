@@ -6,6 +6,12 @@
   "through": "2026-10-29T11:53Z",
   "note": "Use the backfilled history at this revision, not the uncorrected snapshot published at the cutoff."
  },
+ "weekly_history": {
+  "revision": "a6768c4665e178fa477d7ac0efb6980337ce2fee",
+  "path": "data/history.jsonl",
+  "through": "2026-11-13T11:07Z",
+  "note": "Used only by fig_weekly.pdf and audit/weekly_tau.json; the last, incomplete ISO week is dropped."
+ },
  "results_dataset": {
   "repo": "keenable-ai/needle-results",
   "revision": "6a5be09d6d2eed18227b8e1d2c0656bc1c14e5be"
@@ -370,8 +376,8 @@
   },
   "figure_weekly": {
    "file": "fig_weekly.pdf",
-   "source": "gh-pages data/history.jsonl, rows up to 2026-10-29T11:53Z",
-   "weeks": "2026-W36..2026-W43"
+   "source": "weekly_history",
+   "weeks": "2026-W36..2026-W45"
   },
   "adjacent_pairs": {
    "files": [

@@ -12,7 +12,7 @@ rows = load(hist)
 byweek = collections.defaultdict(list)
 for r in rows:
     byweek[datetime.strptime(r["ts"], FMT).strftime("%G-W%V")].append(r)
-keys = sorted(byweek)[-9:-1]
+keys = [k for k in sorted(byweek)[:-1] if k >= "2026-W36"]
 
 
 def table1(e):
