@@ -111,7 +111,7 @@ results, each with a title, a URL and a snippet.
 
 Many vendors sell such APIs, but a developer who must choose one has
 little public evidence. Agent benchmarks score the final answer, which
-mixes the search API with the model and the prompt. Testing the API alone is hard. The live web
+mixes the search API with the model and the prompt. The live web
 has no fixed document list or full relevance labels, and fixed test sets
 go stale. Models overfit them \citep{gupta2024changing}, and their
 answers leak into training data
@@ -123,7 +123,7 @@ to every \textbf{engine}, which is one search API with fixed settings,
 and scores the results that each engine returns. The queries come from
 five tasks: news events, company finance facts, research papers, US law
 and rare-word queries from agent logs.
-When a query has a known answer, such as a paper's arXiv id, we check
+When a query has a known answer, we check
 whether the results contain it. Otherwise an LLM judge rates each result.
 We compare each engine with the \textbf{ceiling}: the best results that
 any tested engine found for that query.
@@ -131,8 +131,7 @@ any tested engine found for that query.
 We ran \needle for ten weeks on 26 engines from 20 vendors. Our
 contributions:
 \begin{itemize}[nosep,leftmargin=1.2em]
-\item \textbf{A method to compare web search APIs.} \needle needs no
-  fixed document list and no full relevance labels. It builds new queries
+\item \textbf{A method to compare web search APIs.} \needle builds new queries
   for each run, scores each engine against the ceiling and tests which
   pairs of engines differ (Section~\ref{sec:bench}).
 \item \textbf{A public live benchmark.} The code, prompts, queries and
