@@ -1177,18 +1177,14 @@ const PCT_NOTE = "% of ultimate's score";
 const MIN_HISTORY_MS = 2 * 86400e3;
 
 function establishedRows(rows) {
-  const span = new Map();
+  const first = new Map();
+  let latest = -Infinity;
   for (const r of rows) {
-    const key = `${r.bench}\u0000${r.engine}`;
     const t = Date.parse(r.ts);
-    const cur = span.get(key);
-    if (!cur) span.set(key, [t, t]);
-    else { if (t < cur[0]) cur[0] = t; if (t > cur[1]) cur[1] = t; }
+    if (!(first.get(r.engine) <= t)) first.set(r.engine, t);
+    if (t > latest) latest = t;
   }
-  return rows.filter((r) => {
-    const cur = span.get(`${r.bench}\u0000${r.engine}`);
-    return cur && cur[1] - cur[0] >= MIN_HISTORY_MS;
-  });
+  return rows.filter((r) => latest - first.get(r.engine) >= MIN_HISTORY_MS);
 }
 
 function seriesFor(bench, metric, weight, rows) {
