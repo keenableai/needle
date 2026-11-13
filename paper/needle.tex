@@ -113,8 +113,10 @@ Many vendors sell such APIs, but a developer who must choose one has
 little public evidence. Agent benchmarks score the final answer, which
 mixes the search API with the model and the prompt. Testing the API alone is hard. The live web
 has no fixed document list or full relevance labels, and fixed test sets
-go stale and can leak into model training data
-\citep{sainz2023trouble,balloccu2024leak}.
+go stale. Models overfit them \citep{gupta2024changing}, and their
+answers leak into training data
+\citep{sainz2023trouble,balloccu2024leak} or onto the web that an agent
+searches \citep{han2025searchtime}.
 
 \needle tests the search step alone. Each run sends the same new queries
 to every \textbf{engine}, which is one search API with fixed settings,
@@ -144,9 +146,17 @@ contributions:
 \section{Related Work}
 \label{sec:related}
 
-\textbf{Live and API benchmarks.} LiveBench and LiveSearchBench draw new
-items from dated sources but score model answers
-\citep{white2025livebench,zhou2026livesearchbench}. \needle scores the
+\textbf{Test collections.} IR evaluation since Cranfield and TREC fixes
+a document set and pools human judgments over the tested systems
+\citep{sanderson2010test,voorhees2000variations}, as do the web
+collections MS MARCO and TREC Deep Learning
+\citep{bajaj2016msmarco,craswell2020trecdl}. A commercial search API has
+its own index, so \needle keeps the pooling and drops the fixed
+document set.
+
+\textbf{Live and API benchmarks.} Live benchmarks draw new items from
+dated sources but score model answers or code
+\citep{white2025livebench,jain2025livecodebench,zhang2025swebenchlive,zhou2026livesearchbench}. \needle scores the
 search results behind such answers. BrowseComp scores agents end to end
 \citep{wei2025browsecomp}. FreshStack and BrowseComp-Plus fix the corpus
 to isolate retrieval \citep{thakur2025freshstack,chen2026browsecompplus},
@@ -160,6 +170,9 @@ draws new queries each run and scores the API without an agent.
 can reproduce system rankings
 \citep{thomas2024llms,upadhyay2025largescale,azzopardi2007simulated,he2025totelicitation}.
 \needle uses both and checks its judge against models from other vendors.
+Agent queries differ from human queries
+\citep{ning2026agentic,pezzuti2026picture}, so one task samples agent
+logs.
 Domain benchmarks cover literature, caselaw and finance search on fixed
 sets \citep{ajith2024litsearch,hou2025clerc,hu2026finsearchcomp}, while
 \needle runs these tasks on new queries each day. Full text helps
@@ -193,7 +206,8 @@ for quarterly 10-Q figures from SEC XBRL, and \textbf{filing} queries
 for one SEC filing by description.
 
 \textbf{Scholar.} Each recent arXiv or Europe PMC \citep{europepmc2015}
-paper yields four paired known-item queries \citep{azzopardi2007simulated}:
+paper yields four paired known-item queries
+\citep{azzopardi2007simulated,exa2026publications}:
 its normalized \textbf{title}, \textbf{body keywords} for a detail absent
 from title and abstract, a \textbf{body question} about that detail, and
 a \textbf{tip-of-tongue} description \citep{arguello2021tot} without
