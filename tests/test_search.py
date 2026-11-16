@@ -28,6 +28,7 @@ from needle.shared.search import (
     PerplexityClient,
     SearchApiClient,
     SearchResult,
+    SeltzClient,
     SerperClient,
     TavilyClient,
     TinyFishClient,
@@ -906,6 +907,54 @@ async def test_deepseek_tolerates_null_results(monkeypatch):
     assert await c.search("hi") == ([], None)
 
 
+async def test_seltz_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "documents": [
+            {
+                "url": "https://a",
+                "content": "# Title A\\.\n\nBody 1\\.5 \\[x\\]",
+                "published_date": "2026-09-03T20:26:00Z",
+            },
+            {"url": "https://b", "content": "no heading"},
+            {"url": "https://c"},
+            {"content": "no url"},
+        ]
+    }
+    c = SeltzClient(api_key="k", snippet_chars=500)
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(
+        "hi site:sec.gov after:2026-06-01 before:2026-06-30", num_results=5
+    )
+    assert err is None
+    assert [r.url for r in results] == ["https://a", "https://b", "https://c"]
+    assert results[0].title == "Title A."
+    assert results[0].snippet == "Body 1.5 [x]"
+    assert results[0].published_date == "2026-09-03T20:26:00Z"
+    assert results[1].title is None
+    assert results[1].snippet == "no heading"
+    assert results[2].snippet is None
+    assert calls["url"] == "https://api.seltz.ai/v1/search"
+    assert calls["json"] == {
+        "query": "hi",
+        "max_results": 5,
+        "fields": {"content": {"max_characters_per_result": 500}},
+        "include_domains": ["sec.gov"],
+        "from_date": "2026-06-01",
+        "to_date": "2026-06-30",
+    }
+    assert calls["headers"] == {"x-api-key": "k"}
+
+
+async def test_seltz_tolerates_null_documents(monkeypatch):
+    c = SeltzClient(api_key="k")
+    fake, calls = _canned({"documents": None})
+    monkeypatch.setattr(c, "_request_json", fake)
+    assert await c.search("hi") == ([], None)
+    assert calls["json"]["fields"] == {"content": True}
+
+
 async def test_tinyfish_maps_fields_and_builds_params(monkeypatch):
     payload = {
         "results": [
@@ -1331,6 +1380,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("JINA_API_KEY", "jk")
     monkeypatch.setenv("CONTEXT_DEV_API_KEY", "cdk")
     monkeypatch.setenv("DEEPSEEK_API_KEY", "dk")
+    monkeypatch.setenv("SELTZ_API_KEY", "slk")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "ak")
     monkeypatch.setenv("OPENAI_API_KEY", "oak")
     clients = build_search_clients(
@@ -1354,6 +1404,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "jina",
             "context",
             "deepseek",
+            "seltz",
         ]
     )
     assert isinstance(clients["google"], SerperClient)
@@ -1397,6 +1448,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["context"].engine == "context"
     assert isinstance(clients["deepseek"], DeepSeekClient)
     assert clients["deepseek"].api_key == "dk"
+    assert isinstance(clients["seltz"], SeltzClient)
+    assert clients["seltz"].api_key == "slk"
 
 
 def test_factory_builds_engine_variants(monkeypatch):

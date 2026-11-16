@@ -26,6 +26,7 @@ from needle.shared.search.octen import OctenClient
 from needle.shared.search.parallel import ParallelClient
 from needle.shared.search.perplexity import PerplexityClient
 from needle.shared.search.searchapi import SearchApiClient
+from needle.shared.search.seltz import SeltzClient
 from needle.shared.search.serper import SerperClient
 from needle.shared.search.tavily import TavilyClient
 from needle.shared.search.tinyfish import TinyFishClient
@@ -54,6 +55,7 @@ __all__ = [
     "SearchClient",
     "SearchResult",
     "SearchRun",
+    "SeltzClient",
     "SerperClient",
     "TavilyClient",
     "TinyFishClient",

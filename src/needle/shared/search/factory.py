@@ -19,6 +19,7 @@ from needle.shared.search.octen import OctenClient
 from needle.shared.search.parallel import ParallelClient
 from needle.shared.search.perplexity import PerplexityClient
 from needle.shared.search.searchapi import SearchApiClient
+from needle.shared.search.seltz import SeltzClient
 from needle.shared.search.serper import SerperClient
 from needle.shared.search.tavily import TavilyClient
 from needle.shared.search.tinyfish import TinyFishClient
@@ -127,6 +128,10 @@ def _build_deepseek(api_key: str | None, snippet_chars: int) -> SearchClient:
     return DeepSeekClient(api_key=api_key or "")
 
 
+def _build_seltz(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return SeltzClient(api_key=api_key or "", snippet_chars=snippet_chars)
+
+
 def _build_claude(api_key: str | None, snippet_chars: int) -> SearchClient:
     return ClaudeSearchClient(api_key=api_key or "")
 
@@ -181,6 +186,7 @@ ENGINES: dict[str, EngineSpec] = {
     "jina": EngineSpec(key_env="JINA_API_KEY", key_required=True, build=_build_jina),
     "context": EngineSpec(key_env="CONTEXT_DEV_API_KEY", key_required=True, build=_build_context),
     "deepseek": EngineSpec(key_env="DEEPSEEK_API_KEY", key_required=True, build=_build_deepseek),
+    "seltz": EngineSpec(key_env="SELTZ_API_KEY", key_required=True, build=_build_seltz),
     "claude-search": EngineSpec(
         key_env="ANTHROPIC_API_KEY", key_required=True, build=_build_claude
     ),
