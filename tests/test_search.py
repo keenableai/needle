@@ -954,6 +954,10 @@ async def test_seltz_tolerates_null_documents(monkeypatch):
     assert await c.search("hi") == ([], None)
     assert calls["json"]["fields"] == {"content": True}
 
+    c.snippet_chars = 50
+    await c.search("hi")
+    assert calls["json"]["fields"] == {"content": {"max_characters_per_result": 100}}
+
 
 async def test_tinyfish_maps_fields_and_builds_params(monkeypatch):
     payload = {

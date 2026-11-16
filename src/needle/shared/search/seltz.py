@@ -1,18 +1,26 @@
 import re
 from typing import Any
 
-from needle.shared.search.base import HttpSearchClient, SearchResult
+from needle.shared.search.base import HttpSearchClient, SearchResult, clamped_chars
 from needle.shared.search.queryops import parse_ops
 
 MD_ESCAPE_RE = re.compile(r"\\([\\`*_{}\[\]()#+\-.!|<>~])")
+MIN_CONTENT_CHARS = 100
+MAX_CONTENT_CHARS = 1_000_000
 
 
-def _title_and_body(content: str) -> tuple[str | None, str]:
-    text = MD_ESCAPE_RE.sub(r"\1", content).strip()
+def _result(d: dict[str, Any]) -> SearchResult:
+    text = MD_ESCAPE_RE.sub(r"\1", d.get("content") or "").strip()
+    title = None
     if text.startswith("# "):
-        head, _, body = text.partition("\n")
-        return head[2:].strip() or None, body.strip()
-    return None, text
+        head, _, text = text.partition("\n")
+        title = head[2:].strip() or None
+    return SearchResult(
+        url=d["url"],
+        title=title,
+        snippet=text.strip() or None,
+        published_date=d.get("published_date") or None,
+    )
 
 
 class SeltzClient(HttpSearchClient):
@@ -23,26 +31,15 @@ class SeltzClient(HttpSearchClient):
         super().__init__(api_key=api_key, timeout_s=timeout_s)
         self.snippet_chars = snippet_chars
 
-    def _result(self, d: dict[str, Any]) -> SearchResult:
-        title, body = _title_and_body(d.get("content") or "")
-        return SearchResult(
-            url=d["url"],
-            title=title,
-            snippet=body or None,
-            published_date=d.get("published_date") or None,
-        )
-
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
         ops = parse_ops(query)
-        content: dict[str, Any] | bool = (
-            {"max_characters_per_result": self.snippet_chars} if self.snippet_chars > 0 else True
-        )
+        max_chars = clamped_chars(self.snippet_chars, MIN_CONTENT_CHARS, MAX_CONTENT_CHARS)
         body: dict[str, Any] = {
             "query": ops.text,
             "max_results": num_results,
-            "fields": {"content": content},
+            "fields": {"content": {"max_characters_per_result": max_chars} if max_chars else True},
         }
         if ops.sites:
             body["include_domains"] = list(ops.sites)
@@ -60,7 +57,7 @@ class SeltzClient(HttpSearchClient):
             return None, err
         raw = payload.get("documents") if isinstance(payload, dict) else None
         results = [
-            self._result(d)
+            _result(d)
             for d in (raw if isinstance(raw, list) else [])
             if isinstance(d, dict) and d.get("url")
         ]
