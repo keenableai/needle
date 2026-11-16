@@ -1,31 +1,11 @@
-from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from needle.shared.search.base import HttpSearchClient, SearchResult
-from needle.shared.search.queryops import QueryOps, clipped_text, parse_ops
+from needle.shared.search.queryops import clipped_text, parse_ops, recency
 
 MAX_QUERY_CHARS = 500
 MIN_NUM = 10
 MAX_NUM = 100
-
-
-def _freshness(ops: QueryOps, now: datetime | None = None) -> str | None:
-    if ops.before or not ops.after:
-        return None
-    current = now or datetime.now(UTC)
-    start = datetime(ops.after.year, ops.after.month, ops.after.day, tzinfo=UTC)
-    if start > current:
-        return None
-    elapsed = current - start
-    if elapsed <= timedelta(hours=24):
-        return "last_24_hours"
-    if elapsed <= timedelta(days=7):
-        return "last_week"
-    if elapsed <= timedelta(days=31):
-        return "last_month"
-    if elapsed <= timedelta(days=366):
-        return "last_year"
-    return None
 
 
 class ContextDevClient(HttpSearchClient):
@@ -50,7 +30,7 @@ class ContextDevClient(HttpSearchClient):
         }
         if ops.sites:
             body["includeDomains"] = list(ops.sites)
-        if fresh := _freshness(ops):
+        if fresh := recency(ops):
             body["freshness"] = fresh
         if self.description_chars > 0:
             body["descriptionMaxCharacters"] = self.description_chars

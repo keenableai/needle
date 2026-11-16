@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 EPOCH = date(1970, 1, 1)
 
@@ -29,6 +29,25 @@ def freshness_window(ops: QueryOps) -> str | None:
     lo = ops.after or EPOCH
     hi = ops.before or datetime.now(UTC).date()
     return f"{lo.isoformat()}to{hi.isoformat()}"
+
+
+def recency(ops: QueryOps, now: datetime | None = None) -> str | None:
+    if ops.before or not ops.after:
+        return None
+    current = now or datetime.now(UTC)
+    start = datetime(ops.after.year, ops.after.month, ops.after.day, tzinfo=UTC)
+    if start > current:
+        return None
+    elapsed = current - start
+    if elapsed <= timedelta(hours=24):
+        return "last_24_hours"
+    if elapsed <= timedelta(days=7):
+        return "last_week"
+    if elapsed <= timedelta(days=31):
+        return "last_month"
+    if elapsed <= timedelta(days=366):
+        return "last_year"
+    return None
 
 
 def clipped_text(text: str, max_chars: int) -> str:

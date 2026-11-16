@@ -1,8 +1,8 @@
 from typing import Any
 
+from needle.shared.retry import MAX_ERROR_CHARS
 from needle.shared.search.base import HttpSearchClient, SearchResult
-from needle.shared.search.context import _freshness
-from needle.shared.search.queryops import clipped_text, parse_ops
+from needle.shared.search.queryops import clipped_text, parse_ops, recency
 
 MAX_QUERY_CHARS = 500
 MAX_RESULTS = 50
@@ -29,7 +29,7 @@ class ClawifiClient(HttpSearchClient):
         }
         if ops.sites:
             body["include_domains"] = list(ops.sites[:MAX_DOMAINS])
-        if time_range := TIME_RANGES.get(_freshness(ops) or ""):
+        if time_range := TIME_RANGES.get(recency(ops) or ""):
             body["time_range"] = time_range
         payload, err = await self._request_json(
             "POST",
@@ -39,6 +39,11 @@ class ClawifiClient(HttpSearchClient):
         )
         if err is not None:
             return None, err
+        if isinstance(payload, dict) and payload.get("success") is False:
+            return None, {
+                "error_type": "api_error",
+                "error_message": str(payload.get("errors"))[:MAX_ERROR_CHARS],
+            }
         raw = payload.get("results") if isinstance(payload, dict) else None
         results = [
             SearchResult(

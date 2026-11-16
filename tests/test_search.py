@@ -40,9 +40,8 @@ from needle.shared.search import (
     search_all,
 )
 from needle.shared.search import base as search_base
-from needle.shared.search.context import _freshness
 from needle.shared.search.factory import ENGINES
-from needle.shared.search.queryops import parse_ops
+from needle.shared.search.queryops import parse_ops, recency
 
 OPS_QUERY = "acme filing site:sec.gov after:2026-06-01 before:2026-06-30"
 
@@ -769,7 +768,7 @@ async def test_context_maps_recent_after_to_freshness(monkeypatch):
     ],
 )
 def test_context_freshness_covers_after_midnight(now, after, expected):
-    assert _freshness(parse_ops(f"hello after:{after}"), now=now) == expected
+    assert recency(parse_ops(f"hello after:{after}"), now=now) == expected
 
 
 async def test_context_omits_freshness_for_future_after(monkeypatch):
@@ -958,6 +957,8 @@ async def test_seltz_tolerates_null_documents(monkeypatch):
     c.snippet_chars = 50
     await c.search("hi")
     assert calls["json"]["fields"] == {"content": {"max_characters_per_result": 100}}
+
+
 async def test_clawifi_maps_fields_and_builds_body(monkeypatch):
     payload = {
         "results": [
@@ -1007,6 +1008,16 @@ async def test_clawifi_maps_recent_after_to_time_range(monkeypatch):
     await c.search(OPS_QUERY)
     assert calls["json"]["include_domains"] == ["sec.gov"]
     assert "time_range" not in calls["json"]
+
+
+async def test_clawifi_reports_failed_search(monkeypatch):
+    c = ClawifiClient(api_key="k")
+    fake, _ = _canned({"success": False, "errors": [{"code": "upstream"}], "results": []})
+    monkeypatch.setattr(c, "_request_json", fake)
+    results, err = await c.search("hi")
+    assert results is None
+    assert err["error_type"] == "api_error"
+    assert "upstream" in err["error_message"]
 
 
 async def test_clawifi_tolerates_null_results(monkeypatch):
