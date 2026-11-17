@@ -27801,5 +27801,13 @@
       "gold.jsonl",
       "recall.json"
     ]
+  },
+  {
+    "id": "2026-11-17T1714Z",
+    "ts": "2026-11-17T17:14Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "ndcg.json"
+    ]
   }
 ]
