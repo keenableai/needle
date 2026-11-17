@@ -939,7 +939,7 @@
       <tr><td>nDCG@5</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>DCG over the top 5 results (Σ gain(rᵢ) / log₂(i + 1), with judge ratings mapped to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0), divided by the DCG of the ideal ranking: the pooled ultimate ordering of every engine's deduplicated results, so ultimate scores exactly 1. A query is scored only if every one of its results was judged (otherwise it is dropped from the mean and counted as judge errors) and only if the pooled ideal has any gain; queries where no engine found anything relevant are excluded.</td></tr>
       <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
-        <td>applied to engine ratings before scoring: a duplicate URL drops the rating to 0. The pooled ideal is already deduplicated, so no penalty applies there. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
+        <td>later copies of a canonical URL receive a rating of 0, including for <code>site:</code> queries. Distinct pages from the same site still count separately. The pooled ideal is already deduplicated. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
         <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher: a 0.1% band for money, with bare table figures in thousands or millions and parenthesized losses; an LLM-judge backstop for paraphrased non-money answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
@@ -2781,6 +2781,21 @@ function pooledIdcg(report, query, k) {
   return dcgAtK([...best.values()].sort((a, b) => b - a), k) || null;
 }
 
+function legacyPenalizedRatings(pq) {
+  const ratings = pq.penalized_ratings;
+  const results = pq.results || [];
+  if (!ratings || ratings.length !== results.length || results.some((r) => !r.url)) {
+    return ratings;
+  }
+  const seen = new Set();
+  return ratings.map((rating, i) => {
+    const url = normalizeUrl(results[i].url);
+    if (seen.has(url)) return 0;
+    seen.add(url);
+    return rating;
+  });
+}
+
 function legacyNdcg(report) {
   const k = report.k ?? report.num_results ?? 5;
   const ultimate = report.engines?.ultimate;
@@ -2788,14 +2803,14 @@ function legacyNdcg(report) {
   for (const pq of ultimate?.per_query || []) {
     if (pq.rbp != null) idcg.set(pq.query, dcgAtK(pq.penalized_ratings, k));
   }
-  return (pq) => {
-    if (!pq.penalized_ratings) return null;
+  return (pq, ratings) => {
+    if (!ratings) return null;
     let ideal = idcg.get(pq.query);
     if (ideal === undefined && !ultimate) {
       ideal = pooledIdcg(report, pq.query, k);
       idcg.set(pq.query, ideal);
     }
-    return ideal ? dcgAtK(pq.penalized_ratings, k) / ideal : null;
+    return ideal ? dcgAtK(ratings, k) / ideal : null;
   };
 }
 
@@ -2807,13 +2822,15 @@ function renderNewsRun(holder, per, legacy) {
     const chips = el("span", { class: "chips" });
     for (const r of pq.ratings || []) chips.appendChild(ratingChip(r));
     summary.appendChild(chips);
+    const legacyRatings = pq.ndcg == null ? legacyPenalizedRatings(pq) : null;
     summary.appendChild(el("span", { class: "score" },
-      pq.search_error ? "search error" : `nDCG ${fmt3(pq.ndcg ?? legacy(pq))}`));
+      pq.search_error ? "search error" : `nDCG ${fmt3(pq.ndcg ?? legacy(pq, legacyRatings))}`));
     row.appendChild(summary);
-    for (const r of pq.results || []) {
+    for (const [i, r] of (pq.results || []).entries()) {
       const chips = [ratingChip(r.rating, "judge rating")];
-      if (r.penalized != null && r.penalized !== r.rating) {
-        chips.push(ratingChip(r.penalized, "after redundancy penalty"));
+      const penalized = legacyRatings?.[i] ?? r.penalized;
+      if (penalized != null && penalized !== r.rating) {
+        chips.push(ratingChip(penalized, "after redundancy penalty"));
       }
       row.appendChild(resultBlock(r, [], chips));
     }
