@@ -6,7 +6,7 @@ import httpx
 
 from needle.shared.hf import fetch_report, resolve_base
 from needle.shared.io import load_jsonl, write_jsonl
-from needle.shared.metrics import dcg_at_k, normalize_url
+from needle.shared.metrics import apply_redundancy_penalties, dcg_at_k, normalize_url
 
 ARTIFACTS = {
     "news": ("ndcg.json", "rbp.json"),
@@ -58,7 +58,11 @@ def report_ndcg(report: dict) -> dict[str, float]:
             idcg = idcgs.get(pq["query"])
             if pq["rbp"] is None or not idcg:
                 continue
-            scored.append(dcg_at_k(pq["penalized_ratings"], k=k) / idcg)
+            ratings = pq["penalized_ratings"]
+            results = pq.get("results") or []
+            if len(results) == len(ratings) and all(r.get("url") for r in results):
+                ratings = apply_redundancy_penalties([r["url"] for r in results], ratings)
+            scored.append(dcg_at_k(ratings, k=k) / idcg)
         out[name] = sum(scored) / len(scored) if scored else 0.0
     out.setdefault("ultimate", 1.0 if any(idcgs.values()) else 0.0)
     return out
