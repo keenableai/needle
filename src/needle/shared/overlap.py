@@ -1,4 +1,4 @@
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Any
 
 from needle.shared.metrics import normalize_url
@@ -120,59 +120,46 @@ def uniqueness_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
     return rows
 
 
+Key = Callable[[dict[str, Any]], dict[str, Any]]
+
+
+def _pair(r: dict[str, Any]) -> dict[str, Any]:
+    a, b = sorted((r["a"], r["b"]))
+    return {"a": a, "b": b}
+
+
+def _engine(r: dict[str, Any]) -> dict[str, Any]:
+    return {"engine": r["engine"]}
+
+
+def _sum_by(rows: Iterable[dict[str, Any]], key: Key) -> list[dict[str, Any]]:
+    out: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for r in rows:
+        ids = key(r)
+        t = out.setdefault(tuple(ids.values()), ids)
+        for k, v in r.items():
+            if k != "ts" and k not in ids:
+                t[k] = t.get(k, 0) + v
+    return list(out.values())
+
+
 def independence_totals(
     overlap: list[dict[str, Any]], uniqueness: list[dict[str, Any]], *, since: str = ""
 ) -> dict[str, list[dict[str, Any]]]:
-    pairs: dict[tuple[str, str], dict[str, Any]] = {}
-    for r in overlap:
-        if r["ts"] < since:
-            continue
-        a, b = sorted((r["a"], r["b"]))
-        t = pairs.setdefault(
-            (a, b),
-            {
-                "a": a,
-                "b": b,
-                "num_suspect": 0,
-                "low_shared_urls": 0,
-                "num_queries": 0,
-                "shared_urls": 0,
-                "union_urls": 0,
-            },
-        )
-        if r.get("num_suspect") is not None:
-            t["num_suspect"] += r["num_suspect"]
-            t["low_shared_urls"] += r.get("low_shared_urls") or 0
-            t["num_queries"] += r["num_queries"]
-        if r.get("union_urls") is not None:
-            t["shared_urls"] += r["shared_urls"]
-            t["union_urls"] += r["union_urls"]
-    engines: dict[str, dict[str, Any]] = {}
-    for r in uniqueness:
-        if r["ts"] < max(since, UNIQUENESS_START):
-            continue
-        t = engines.setdefault(
-            r["engine"],
-            {"engine": r["engine"], "unique_urls": 0, "total_urls": 0, "unique_relevant_urls": 0},
-        )
-        for k in ("unique_urls", "total_urls", "unique_relevant_urls"):
-            t[k] += r[k]
-    return {"overlap": list(pairs.values()), "uniqueness": list(engines.values())}
+    unique_since = max(since, UNIQUENESS_START)
+    return {
+        "overlap": _sum_by((r for r in overlap if r["ts"] >= since), _pair),
+        "uniqueness": _sum_by((r for r in uniqueness if r["ts"] >= unique_since), _engine),
+    }
+
+
+def _compact(rows: list[dict[str, Any]], key: Key, day: str) -> list[dict[str, Any]]:
+    old = (r for r in rows if r["ts"][:10] < day)
+    daily = _sum_by(old, lambda r: {"ts": r["ts"][:10] + "T00:00Z", **key(r)})
+    return daily + [r for r in rows if r["ts"][:10] >= day]
 
 
 def compact_daily(
-    rows: list[dict[str, Any]], keys: tuple[str, ...], *, before: str
-) -> list[dict[str, Any]]:
-    days: dict[tuple[str, ...], dict[str, Any]] = {}
-    recent = []
-    for r in rows:
-        if r["ts"] >= before:
-            recent.append(r)
-            continue
-        day = r["ts"][:10] + "T00:00Z"
-        ids = dict(zip(keys, sorted(r[k] for k in keys), strict=True))
-        t = days.setdefault((day, *ids.values()), {"ts": day, **ids})
-        for k, v in r.items():
-            if k != "ts" and k not in keys:
-                t[k] = t.get(k, 0) + v
-    return list(days.values()) + recent
+    overlap: list[dict[str, Any]], uniqueness: list[dict[str, Any]], *, before: str
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    return _compact(overlap, _pair, before[:10]), _compact(uniqueness, _engine, before[:10])

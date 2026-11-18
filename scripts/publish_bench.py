@@ -205,18 +205,16 @@ def publish(
     history = _merged_rows(data / "history.jsonl", rows, ts, republish)
     newest = max((row["ts"] for row in history), default=ts)
     week_start = (datetime.strptime(newest, TS_FMT) - timedelta(days=7)).strftime(TS_FMT)
+    if republish and ts[:10] < week_start[:10]:
+        raise SystemExit(f"{ts}: overlap rows before {week_start[:10]} are merged by day")
     for row in history:
         if row["ts"] < week_start:
             row.pop("lat_ms", None)
     write_jsonl(history, str(data / "history.jsonl"))
-    week_day = week_start[:10] + "T00:00Z"
-    overlap_all = compact_daily(
-        _merged_rows(data / "overlap.jsonl", overlap, ts, republish), ("a", "b"), before=week_day
-    )
-    uniqueness_all = compact_daily(
+    overlap_all, uniqueness_all = compact_daily(
+        _merged_rows(data / "overlap.jsonl", overlap, ts, republish),
         _merged_rows(data / "uniqueness.jsonl", uniqueness, ts, republish),
-        ("engine",),
-        before=week_day,
+        before=week_start,
     )
     write_jsonl(overlap_all, str(data / "overlap.jsonl"))
     write_jsonl(uniqueness_all, str(data / "uniqueness.jsonl"))
