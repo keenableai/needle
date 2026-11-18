@@ -1,4 +1,9 @@
-from needle.shared.overlap import independence_totals, overlap_rows, uniqueness_rows
+from needle.shared.overlap import (
+    compact_daily,
+    independence_totals,
+    overlap_rows,
+    uniqueness_rows,
+)
 
 
 def _report(per_query_by_engine):
@@ -309,3 +314,46 @@ def test_independence_totals_sum_pairs_and_engines():
     week = independence_totals(overlap, uniqueness, since="2026-08-02T00:00Z")
     assert week["overlap"][0]["num_queries"] == 10
     assert week["uniqueness"][0]["total_urls"] == 5
+
+
+def test_compact_daily_keeps_totals_and_recent_rows():
+    def pair(ts, a, b, n):
+        return {
+            "ts": ts,
+            "a": a,
+            "b": b,
+            "num_suspect": n,
+            "low_shared_urls": n,
+            "shared_urls": n,
+            "union_urls": 2 * n,
+            "num_queries": 10,
+        }
+
+    overlap = [
+        pair("2026-08-01T01:00Z", "e1", "e2", 1),
+        pair("2026-08-01T02:00Z", "e2", "e1", 2),
+        pair("2026-08-01T03:00Z", "e1", "e3", 3),
+        pair("2026-08-02T01:00Z", "e1", "e2", 4),
+        pair("2026-08-03T01:00Z", "e1", "e2", 5),
+        pair("2026-08-03T02:00Z", "e1", "e2", 6),
+    ]
+    uniqueness = [
+        {"ts": ts, "engine": "e1", "unique_urls": 1, "total_urls": 5, "unique_relevant_urls": 1}
+        for ts in ("2026-08-01T01:00Z", "2026-08-01T02:00Z", "2026-08-03T01:00Z")
+    ]
+    before = "2026-08-03T00:00Z"
+    compact_overlap = compact_daily(overlap, ("a", "b"), before=before)
+    compact_uniqueness = compact_daily(uniqueness, ("engine",), before=before)
+    assert [(r["ts"], r["a"], r["b"], r["num_suspect"]) for r in compact_overlap] == [
+        ("2026-08-01T00:00Z", "e1", "e2", 3),
+        ("2026-08-01T00:00Z", "e1", "e3", 3),
+        ("2026-08-02T00:00Z", "e1", "e2", 4),
+        ("2026-08-03T01:00Z", "e1", "e2", 5),
+        ("2026-08-03T02:00Z", "e1", "e2", 6),
+    ]
+    assert len(compact_uniqueness) == 2
+    for since in ("", before):
+        assert independence_totals(compact_overlap, compact_uniqueness, since=since) == (
+            independence_totals(overlap, uniqueness, since=since)
+        )
+    assert compact_daily(compact_overlap, ("a", "b"), before=before) == compact_overlap

@@ -158,3 +158,21 @@ def independence_totals(
         for k in ("unique_urls", "total_urls", "unique_relevant_urls"):
             t[k] += r[k]
     return {"overlap": list(pairs.values()), "uniqueness": list(engines.values())}
+
+
+def compact_daily(
+    rows: list[dict[str, Any]], keys: tuple[str, ...], *, before: str
+) -> list[dict[str, Any]]:
+    days: dict[tuple[str, ...], dict[str, Any]] = {}
+    recent = []
+    for r in rows:
+        if r["ts"] >= before:
+            recent.append(r)
+            continue
+        day = r["ts"][:10] + "T00:00Z"
+        ids = dict(zip(keys, sorted(r[k] for k in keys), strict=True))
+        t = days.setdefault((day, *ids.values()), {"ts": day, **ids})
+        for k, v in r.items():
+            if k != "ts" and k not in keys:
+                t[k] = t.get(k, 0) + v
+    return list(days.values()) + recent
