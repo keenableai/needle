@@ -1,4 +1,9 @@
-from needle.shared.overlap import independence_totals, overlap_rows, uniqueness_rows
+from needle.shared.overlap import (
+    compact_daily,
+    independence_totals,
+    overlap_rows,
+    uniqueness_rows,
+)
 
 
 def _report(per_query_by_engine):
@@ -270,26 +275,31 @@ def test_overlap_and_uniqueness_exclude_ultimate():
     assert all(r["unique_urls"] == 1 for r in urows)
 
 
-def test_independence_totals_sum_pairs_and_engines():
-    def pair(ts, a, b, **kw):
-        return {"ts": ts, "a": a, "b": b, "num_queries": 10, **kw}
+def _pair_row(ts, a, b, n):
+    return {
+        "ts": ts,
+        "a": a,
+        "b": b,
+        "num_suspect": n,
+        "low_shared_urls": n,
+        "shared_urls": n,
+        "union_urls": 2 * n,
+        "num_queries": 10,
+    }
 
+
+def _unique_row(ts):
+    return {"ts": ts, "engine": "e1", "unique_urls": 1, "total_urls": 5, "unique_relevant_urls": 1}
+
+
+def test_independence_totals_sum_pairs_and_engines():
     overlap = [
-        pair("2026-08-01T00:00Z", "e1", "e2", num_suspect=2, low_shared_urls=3),
-        pair(
-            "2026-08-02T00:00Z",
-            "e2",
-            "e1",
-            num_suspect=1,
-            low_shared_urls=1,
-            shared_urls=4,
-            union_urls=20,
-        ),
-        pair("2026-08-03T00:00Z", "e1", "e2"),
+        _pair_row("2026-08-01T00:00Z", "e1", "e2", 1),
+        _pair_row("2026-08-02T00:00Z", "e2", "e1", 2),
+        _pair_row("2026-08-03T00:00Z", "e1", "e2", 0),
     ]
     uniqueness = [
-        {"ts": ts, "engine": "e1", "unique_urls": 1, "total_urls": 5, "unique_relevant_urls": 1}
-        for ts in ("2026-07-31T00:00Z", "2026-08-01T00:00Z", "2026-08-02T00:00Z")
+        _unique_row(ts) for ts in ("2026-07-31T00:00Z", "2026-08-01T00:00Z", "2026-08-02T00:00Z")
     ]
     totals = independence_totals(overlap, uniqueness)
     assert totals["overlap"] == [
@@ -297,15 +307,47 @@ def test_independence_totals_sum_pairs_and_engines():
             "a": "e1",
             "b": "e2",
             "num_suspect": 3,
-            "low_shared_urls": 4,
-            "num_queries": 20,
-            "shared_urls": 4,
-            "union_urls": 20,
+            "low_shared_urls": 3,
+            "shared_urls": 3,
+            "union_urls": 6,
+            "num_queries": 30,
         }
     ]
     assert totals["uniqueness"] == [
         {"engine": "e1", "unique_urls": 2, "total_urls": 10, "unique_relevant_urls": 2}
     ]
     week = independence_totals(overlap, uniqueness, since="2026-08-02T00:00Z")
-    assert week["overlap"][0]["num_queries"] == 10
+    assert week["overlap"][0]["num_queries"] == 20
     assert week["uniqueness"][0]["total_urls"] == 5
+
+
+def test_compact_daily_keeps_totals_and_recent_rows():
+    overlap = [
+        _pair_row("2026-08-01T01:00Z", "e1", "e2", 1),
+        _pair_row("2026-08-01T02:00Z", "e2", "e1", 2),
+        _pair_row("2026-08-01T03:00Z", "e1", "e3", 3),
+        _pair_row("2026-08-02T01:00Z", "e1", "e2", 4),
+        _pair_row("2026-08-03T01:00Z", "e1", "e2", 5),
+        _pair_row("2026-08-03T02:00Z", "e1", "e2", 6),
+    ]
+    uniqueness = [
+        _unique_row(ts) for ts in ("2026-08-01T01:00Z", "2026-08-01T02:00Z", "2026-08-03T01:00Z")
+    ]
+    before = "2026-08-03T00:30Z"
+    compact_overlap, compact_uniqueness = compact_daily(overlap, uniqueness, before=before)
+    assert [(r["ts"], r["a"], r["b"], r["num_suspect"]) for r in compact_overlap] == [
+        ("2026-08-01T00:00Z", "e1", "e2", 3),
+        ("2026-08-01T00:00Z", "e1", "e3", 3),
+        ("2026-08-02T00:00Z", "e1", "e2", 4),
+        ("2026-08-03T01:00Z", "e1", "e2", 5),
+        ("2026-08-03T02:00Z", "e1", "e2", 6),
+    ]
+    assert len(compact_uniqueness) == 2
+    for since in ("", before):
+        assert independence_totals(compact_overlap, compact_uniqueness, since=since) == (
+            independence_totals(overlap, uniqueness, since=since)
+        )
+    assert compact_daily(compact_overlap, compact_uniqueness, before=before) == (
+        compact_overlap,
+        compact_uniqueness,
+    )

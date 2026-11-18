@@ -28,7 +28,7 @@ def _merge_write(existing: list[dict], new: list[dict], path: Path) -> None:
     write_jsonl([r for r in existing if r["ts"] not in redone] + new, str(path))
 
 
-def backfill(site: str, hours: int | None = None, dataset: str | None = None) -> None:
+def backfill(site: str, hours: int, dataset: str | None = None) -> None:
     data = Path(site) / "data"
     index_path = data / "runs.json"
     if not index_path.exists():
@@ -40,9 +40,7 @@ def backfill(site: str, hours: int | None = None, dataset: str | None = None) ->
     uniqueness = load_jsonl(data / "uniqueness.jsonl")
     overlap_done = _done(overlap, ("num_suspect", "low_shared_urls", "shared_urls", "union_urls"))
     uniqueness_done = _done(uniqueness, ("unique_relevant_urls",))
-    cutoff = (
-        (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT) if hours is not None else ""
-    )
+    cutoff = (datetime.now(UTC) - timedelta(hours=hours)).strftime(TS_FMT)
 
     new_overlap: list[dict] = []
     new_uniqueness: list[dict] = []

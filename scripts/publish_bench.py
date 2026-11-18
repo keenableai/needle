@@ -11,6 +11,7 @@ from needle.shared.io import load_jsonl, write_json, write_jsonl
 from needle.shared.overlap import (
     FAMILIES,
     TS_FMT,
+    compact_daily,
     independence_totals,
     overlap_rows,
     uniqueness_rows,
@@ -204,12 +205,17 @@ def publish(
     history = _merged_rows(data / "history.jsonl", rows, ts, republish)
     newest = max((row["ts"] for row in history), default=ts)
     week_start = (datetime.strptime(newest, TS_FMT) - timedelta(days=7)).strftime(TS_FMT)
+    if republish and ts[:10] < week_start[:10]:
+        raise SystemExit(f"{ts}: overlap rows before {week_start[:10]} are merged by day")
     for row in history:
         if row["ts"] < week_start:
             row.pop("lat_ms", None)
     write_jsonl(history, str(data / "history.jsonl"))
-    overlap_all = _merged_rows(data / "overlap.jsonl", overlap, ts, republish)
-    uniqueness_all = _merged_rows(data / "uniqueness.jsonl", uniqueness, ts, republish)
+    overlap_all, uniqueness_all = compact_daily(
+        _merged_rows(data / "overlap.jsonl", overlap, ts, republish),
+        _merged_rows(data / "uniqueness.jsonl", uniqueness, ts, republish),
+        before=week_start,
+    )
     write_jsonl(overlap_all, str(data / "overlap.jsonl"))
     write_jsonl(uniqueness_all, str(data / "uniqueness.jsonl"))
     write_json(
