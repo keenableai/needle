@@ -31,7 +31,7 @@ const PROSE_NAMES = new Map([
   ["parallel-turbo", "Parallel Turbo"], ["parallel-fast", "Parallel Fast"], ["perplexity", "Perplexity"],
   ["perplexity-fast", "Perplexity Fast"], ["tavily", "Tavily"], ["linkup", "Linkup"],
   ["you", "You.com"], ["firecrawl", "Firecrawl"], ["tinyfish", "TinyFish"], ["kagi", "Kagi"],
-  ["jina", "Jina"], ["deepseek", "DeepSeek"], ["seltz", "Seltz"], ["octen", "Octen"], ["claude-search", "Claude web search"],
+  ["jina", "Jina"], ["deepseek", "DeepSeek"], ["seltz", "Seltz"], ["webiq", "Web IQ"], ["octen", "Octen"], ["claude-search", "Claude web search"],
   ["chatgpt-search", "ChatGPT search"],
 ]);
 const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];

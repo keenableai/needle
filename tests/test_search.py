@@ -32,6 +32,7 @@ from needle.shared.search import (
     SerperClient,
     TavilyClient,
     TinyFishClient,
+    WebIqClient,
     YouClient,
     build_search_clients,
     latency_stats,
@@ -959,6 +960,64 @@ async def test_seltz_tolerates_null_documents(monkeypatch):
     assert calls["json"]["fields"] == {"content": {"max_characters_per_result": 100}}
 
 
+async def test_webiq_maps_fields_and_builds_body(monkeypatch):
+    payload = {
+        "webResults": [
+            {
+                "url": "https://a",
+                "title": "Title A",
+                "content": "Body A",
+                "lastUpdatedAt": "2026-11-18T19:00:00.0000000Z",
+                "crawledAt": "2026-11-19T11:06:00.0000000Z",
+            },
+            {"url": "https://b", "title": "", "content": ""},
+            {"title": "no url"},
+        ]
+    }
+    c = WebIqClient(api_key="k", snippet_chars=500)
+    fake, calls = _canned(payload)
+    monkeypatch.setattr(c, "_request_json", fake)
+
+    results, err = await c.search(
+        "hi site:sec.gov site:nasdaq.com after:2026-06-01 before:2026-06-30", num_results=5
+    )
+    assert err is None
+    assert results == [
+        SearchResult(
+            url="https://a",
+            title="Title A",
+            snippet="Body A",
+            published_date="2026-11-18T19:00:00.0000000Z",
+        ),
+        SearchResult(url="https://b"),
+    ]
+    assert calls["url"] == "https://api.microsoft.ai/v3/search/web"
+    assert calls["json"] == {
+        "query": "hi site:sec.gov OR site:nasdaq.com",
+        "maxResults": 5,
+        "language": "en",
+        "region": "US",
+        "contentFormat": "passage",
+        "maxLength": 500,
+        "safeSearch": "off",
+    }
+    assert calls["headers"] == {"x-apikey": "k"}
+
+
+async def test_webiq_clamps_limits_and_tolerates_null_results(monkeypatch):
+    c = WebIqClient(api_key="k")
+    fake, calls = _canned({"webResults": None})
+    monkeypatch.setattr(c, "_request_json", fake)
+    assert await c.search("w " * 600, num_results=80) == ([], None)
+    assert calls["json"]["maxResults"] == 50
+    assert calls["json"]["maxLength"] == 3000
+    assert len(calls["json"]["query"]) <= 1000
+
+    c.snippet_chars = 5000
+    await c.search("hi")
+    assert calls["json"]["maxLength"] == 3000
+
+
 async def test_tinyfish_maps_fields_and_builds_params(monkeypatch):
     payload = {
         "results": [
@@ -1385,6 +1444,7 @@ def test_factory_builds_new_engines(monkeypatch):
     monkeypatch.setenv("CONTEXT_DEV_API_KEY", "cdk")
     monkeypatch.setenv("DEEPSEEK_API_KEY", "dk")
     monkeypatch.setenv("SELTZ_API_KEY", "slk")
+    monkeypatch.setenv("WEBIQ_API_TOKEN", "wk")
     monkeypatch.setenv("ANTHROPIC_API_KEY", "ak")
     monkeypatch.setenv("OPENAI_API_KEY", "oak")
     clients = build_search_clients(
@@ -1409,6 +1469,7 @@ def test_factory_builds_new_engines(monkeypatch):
             "context",
             "deepseek",
             "seltz",
+            "webiq",
         ]
     )
     assert isinstance(clients["google"], SerperClient)
@@ -1454,6 +1515,8 @@ def test_factory_builds_new_engines(monkeypatch):
     assert clients["deepseek"].api_key == "dk"
     assert isinstance(clients["seltz"], SeltzClient)
     assert clients["seltz"].api_key == "slk"
+    assert isinstance(clients["webiq"], WebIqClient)
+    assert clients["webiq"].api_key == "wk"
 
 
 def test_factory_builds_engine_variants(monkeypatch):

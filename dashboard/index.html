@@ -79,6 +79,7 @@
     --series-23: #9E9D24;
     --series-24: #00838F;
     --series-25: #F57F17;
+    --series-26: #1B1B1B;
   }
   @media screen {
     [data-theme="dark"] {
@@ -120,6 +121,7 @@
       --series-23: #D4E157;
       --series-24: #4DD0E1;
       --series-25: #FFB300;
+      --series-26: #F0F0F0;
     }
   }
   * { box-sizing: border-box; }
@@ -990,6 +992,7 @@
       <tr><td>context.dev</td><td>Context.dev POST /v1/web/search</td><td>query = query text clipped to 500 chars, numResults=min(max(k,10),100) (API floor is 10), country=us, queryFanout=false; site: → includeDomains, after: (with no before:) → freshness last_24_hours/last_week/last_month/last_year covering that date, before: dropped; snippet is the SERP description, markdown scrape left off</td></tr>
       <tr><td>deepseek</td><td>DeepSeek POST /v1/tools/search</td><td>query = query text clipped to fit 128 chars with site: (several joined by OR), lang:en and after:/before: as native operators, count=min(k,50), need_content=false; snippet is the long query-aware summary, falling back to the short snippet; published date from date</td></tr>
       <tr><td>seltz</td><td>Seltz POST /v1/search</td><td>query = query text, max_results=k, default scope and tier (pro), fields.content capped at the snippet length; site: → include_domains, after:/before: → from_date/to_date (ISO dates); the leading “# heading” line of content becomes the title, markdown backslash escapes removed</td></tr>
+      <tr><td>webiq</td><td>Microsoft Web IQ POST /v3/search/web</td><td>query = query text clipped to fit 1,000 chars with site: (several joined by OR) kept as native operators, maxResults=min(k,50), language=en, region=US, safeSearch=off, contentFormat=passage, maxLength = snippet length capped at 3,000 (the API ceiling without full document access); after:/before: dropped (no date filter); snippet is the query-relevant passage, published date from lastUpdatedAt</td></tr>
       <tr><td>claude-search</td><td>Anthropic POST /v1/messages</td><td>model=claude-sonnet-5, max_tokens=32000, tools=[web_search_20250305 with max_uses=1], system prompt asks for a JSON array of every search result with the snippet copied verbatim (≤500 chars); rank = web_search_tool_result order, title/snippet from the JSON row with the same URL, published_date = page_age; the prompt tells the model to pass the query to the tool verbatim (operators kept as text), site: also → allowed_domains</td></tr>
       <tr><td>chatgpt-search</td><td>OpenAI POST /v1/responses</td><td>model=gpt-5.5, reasoning.effort=low, max_output_tokens=32000, tools=[web_search with search_context_size=low], tool_choice forces the search, include=web_search_call.action.sources, same system prompt; rank = action.sources order, title/snippet from the JSON row with the same URL (utm_ parameters stripped); the prompt tells the model to pass the query to the tool verbatim (operators kept as text), site: also → filters.allowed_domains</td></tr>
     </table>
@@ -1050,9 +1053,9 @@ function registerEngines(names) {
 
 registerEngines(["keenable-realtime", "google", "bing", "brave", "brave-llmcontext",
   "exa", "exa-instant", "exa-lite", "parallel", "parallel-turbo", "perplexity-fast", "perplexity", "tavily", "linkup", "you", "firecrawl",
-  "tinyfish", "kagi", "jina", "context", "deepseek", "octen", "claude-search", "chatgpt-search", "parallel-fast", "seltz"]);
+  "tinyfish", "kagi", "jina", "context", "deepseek", "octen", "claude-search", "chatgpt-search", "parallel-fast", "seltz", "webiq"]);
 
-const SERIES_COUNT = 25;
+const SERIES_COUNT = 26;
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
   const slot = ENGINE_SLOT.get(engine);
@@ -2044,6 +2047,7 @@ const PRICES = new Map([
   ["context", { usd: 0.50, plan: "Scale — $499/mo / 1M credits, 1 credit per 10 results" }],
   ["deepseek", { usd: 0.75, plan: "pay-as-you-go — $0.75 / 1k requests" }],
   ["seltz", { usd: 5.00, plan: "pay-as-you-go — $5 / 1k requests" }],
+  ["webiq", { usd: 7.00, plan: "pay-as-you-go — $7 / 1k requests" }],
   ["octen", { usd: 1.00, plan: "pay-as-you-go" }],
   ["tinyfish", { usd: 0.00, plan: "free" }],
   ["ceramic", { usd: 0.05, plan: "pay-as-you-go" }],

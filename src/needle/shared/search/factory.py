@@ -23,6 +23,7 @@ from needle.shared.search.seltz import SeltzClient
 from needle.shared.search.serper import SerperClient
 from needle.shared.search.tavily import TavilyClient
 from needle.shared.search.tinyfish import TinyFishClient
+from needle.shared.search.webiq import WebIqClient
 from needle.shared.search.you import YouClient
 
 
@@ -132,6 +133,10 @@ def _build_seltz(api_key: str | None, snippet_chars: int) -> SearchClient:
     return SeltzClient(api_key=api_key or "", snippet_chars=snippet_chars)
 
 
+def _build_webiq(api_key: str | None, snippet_chars: int) -> SearchClient:
+    return WebIqClient(api_key=api_key or "", snippet_chars=snippet_chars)
+
+
 def _build_claude(api_key: str | None, snippet_chars: int) -> SearchClient:
     return ClaudeSearchClient(api_key=api_key or "")
 
@@ -187,6 +192,7 @@ ENGINES: dict[str, EngineSpec] = {
     "context": EngineSpec(key_env="CONTEXT_DEV_API_KEY", key_required=True, build=_build_context),
     "deepseek": EngineSpec(key_env="DEEPSEEK_API_KEY", key_required=True, build=_build_deepseek),
     "seltz": EngineSpec(key_env="SELTZ_API_KEY", key_required=True, build=_build_seltz),
+    "webiq": EngineSpec(key_env="WEBIQ_API_TOKEN", key_required=True, build=_build_webiq),
     "claude-search": EngineSpec(
         key_env="ANTHROPIC_API_KEY", key_required=True, build=_build_claude
     ),
