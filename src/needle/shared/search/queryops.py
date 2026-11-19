@@ -35,6 +35,11 @@ def clipped_text(text: str, max_chars: int) -> str:
     return text[:max_chars].rsplit(" ", 1)[0] if len(text) > max_chars else text
 
 
+def clipped_with_suffix(text: str, suffix: str, max_chars: int) -> str:
+    budget = max(max_chars - len(suffix) - 1, 0)
+    return " ".join(p for p in (clipped_text(text, budget), suffix) if p)
+
+
 def parse_ops(query: str) -> QueryOps:
     text_parts: list[str] = []
     sites: list[str] = []
