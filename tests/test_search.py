@@ -1010,12 +1010,16 @@ async def test_webiq_clamps_limits_and_tolerates_null_results(monkeypatch):
     monkeypatch.setattr(c, "_request_json", fake)
     assert await c.search("w " * 600, num_results=80) == ([], None)
     assert calls["json"]["maxResults"] == 50
-    assert calls["json"]["maxLength"] == 3000
     assert len(calls["json"]["query"]) <= 1000
 
-    c.snippet_chars = 5000
+
+@pytest.mark.parametrize("chars,expected", [(0, 3000), (500, 500), (5000, 3000)])
+async def test_webiq_clamps_snippet_chars(monkeypatch, chars, expected):
+    c = WebIqClient(api_key="k", snippet_chars=chars)
+    fake, calls = _canned({"webResults": []})
+    monkeypatch.setattr(c, "_request_json", fake)
     await c.search("hi")
-    assert calls["json"]["maxLength"] == 3000
+    assert calls["json"]["maxLength"] == expected
 
 
 async def test_tinyfish_maps_fields_and_builds_params(monkeypatch):

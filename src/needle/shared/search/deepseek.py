@@ -1,7 +1,7 @@
 from typing import Any
 
 from needle.shared.search.base import HttpSearchClient, SearchResult
-from needle.shared.search.queryops import QueryOps, clipped_text, parse_ops
+from needle.shared.search.queryops import QueryOps, clipped_with_suffix, parse_ops
 
 MAX_QUERY_CHARS = 128
 MAX_COUNT = 50
@@ -14,9 +14,7 @@ def _query(ops: QueryOps) -> str:
         tail.append(f"after:{ops.after.isoformat()}")
     if ops.before:
         tail.append(f"before:{ops.before.isoformat()}")
-    suffix = " ".join(tail)
-    budget = MAX_QUERY_CHARS - len(suffix) - 1
-    return " ".join(p for p in (clipped_text(ops.text, max(budget, 0)), suffix) if p)
+    return clipped_with_suffix(ops.text, " ".join(tail), MAX_QUERY_CHARS)
 
 
 class DeepSeekClient(HttpSearchClient):

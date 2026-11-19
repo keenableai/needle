@@ -1,5 +1,5 @@
-from needle.shared.search.base import HttpSearchClient, SearchResult, clamped_chars
-from needle.shared.search.queryops import QueryOps, clipped_text, parse_ops
+from needle.shared.search.base import HttpSearchClient, SearchResult
+from needle.shared.search.queryops import QueryOps, clipped_with_suffix, parse_ops
 
 MAX_QUERY_CHARS = 1000
 MAX_RESULTS = 50
@@ -7,9 +7,8 @@ MAX_CONTENT_CHARS = 3000
 
 
 def _query(ops: QueryOps) -> str:
-    suffix = " OR ".join(f"site:{s}" for s in ops.sites)
-    budget = MAX_QUERY_CHARS - len(suffix) - 1
-    return " ".join(p for p in (clipped_text(ops.text, max(budget, 0)), suffix) if p)
+    sites = " OR ".join(f"site:{s}" for s in ops.sites)
+    return clipped_with_suffix(ops.text, sites, MAX_QUERY_CHARS)
 
 
 class WebIqClient(HttpSearchClient):
@@ -32,8 +31,7 @@ class WebIqClient(HttpSearchClient):
                 "language": "en",
                 "region": "US",
                 "contentFormat": "passage",
-                "maxLength": clamped_chars(self.snippet_chars, 1, MAX_CONTENT_CHARS)
-                or MAX_CONTENT_CHARS,
+                "maxLength": min(self.snippet_chars or MAX_CONTENT_CHARS, MAX_CONTENT_CHARS),
                 "safeSearch": "off",
             },
             headers={"x-apikey": self.api_key},
