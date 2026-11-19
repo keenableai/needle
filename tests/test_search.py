@@ -993,7 +993,7 @@ async def test_webiq_maps_fields_and_builds_body(monkeypatch):
     ]
     assert calls["url"] == "https://api.microsoft.ai/v3/search/web"
     assert calls["json"] == {
-        "query": "hi site:sec.gov OR site:nasdaq.com",
+        "query": "hi site:sec.gov OR site:nasdaq.com after:2026-06-01 before:2026-06-30",
         "maxResults": 5,
         "language": "en",
         "region": "US",
@@ -1013,7 +1013,7 @@ async def test_webiq_clamps_limits_and_tolerates_null_results(monkeypatch):
     assert len(calls["json"]["query"]) <= 1000
 
 
-@pytest.mark.parametrize("chars,expected", [(0, 3000), (500, 500), (5000, 3000)])
+@pytest.mark.parametrize("chars,expected", [(-1, 3000), (0, 3000), (500, 500), (5000, 3000)])
 async def test_webiq_clamps_snippet_chars(monkeypatch, chars, expected):
     c = WebIqClient(api_key="k", snippet_chars=chars)
     fake, calls = _canned({"webResults": []})

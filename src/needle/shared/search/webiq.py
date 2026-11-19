@@ -1,4 +1,4 @@
-from needle.shared.search.base import HttpSearchClient, SearchResult
+from needle.shared.search.base import HttpSearchClient, SearchResult, clamped_chars
 from needle.shared.search.queryops import QueryOps, clipped_with_suffix, parse_ops
 
 MAX_QUERY_CHARS = 1000
@@ -7,8 +7,12 @@ MAX_CONTENT_CHARS = 3000
 
 
 def _query(ops: QueryOps) -> str:
-    sites = " OR ".join(f"site:{s}" for s in ops.sites)
-    return clipped_with_suffix(ops.text, sites, MAX_QUERY_CHARS)
+    tail = [" OR ".join(f"site:{s}" for s in ops.sites)] if ops.sites else []
+    if ops.after:
+        tail.append(f"after:{ops.after.isoformat()}")
+    if ops.before:
+        tail.append(f"before:{ops.before.isoformat()}")
+    return clipped_with_suffix(ops.text, " ".join(tail), MAX_QUERY_CHARS)
 
 
 class WebIqClient(HttpSearchClient):
@@ -22,6 +26,7 @@ class WebIqClient(HttpSearchClient):
     async def search(
         self, query: str, *, num_results: int = 10
     ) -> tuple[list[SearchResult] | None, dict[str, str] | None]:
+        max_chars = clamped_chars(self.snippet_chars, 1, MAX_CONTENT_CHARS) or MAX_CONTENT_CHARS
         payload, err = await self._request_json(
             "POST",
             f"{self.base_url}/v3/search/web",
@@ -31,7 +36,7 @@ class WebIqClient(HttpSearchClient):
                 "language": "en",
                 "region": "US",
                 "contentFormat": "passage",
-                "maxLength": min(self.snippet_chars or MAX_CONTENT_CHARS, MAX_CONTENT_CHARS),
+                "maxLength": max_chars,
                 "safeSearch": "off",
             },
             headers={"x-apikey": self.api_key},
