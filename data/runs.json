@@ -28209,5 +28209,13 @@
       "fresh.jsonl",
       "ndcg.json"
     ]
+  },
+  {
+    "id": "2026-11-20T0402Z",
+    "ts": "2026-11-20T04:02Z",
+    "artifacts": [
+      "fresh.jsonl",
+      "ndcg.json"
+    ]
   }
 ]
