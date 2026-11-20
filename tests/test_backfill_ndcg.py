@@ -23,7 +23,8 @@ def _pq(query, urls_ratings, rbp=0.5):
     }
 
 
-def test_report_ndcg_uses_stored_ultimate_as_ideal():
+@pytest.mark.parametrize("with_result_details", [False, True])
+def test_report_ndcg_uses_stored_ultimate_as_ideal(with_result_details):
     report = {
         "num_results": 5,
         "k": 5,
@@ -32,6 +33,9 @@ def test_report_ndcg_uses_stored_ultimate_as_ideal():
             "ultimate": {"per_query": [_pq("q", [("https://y.com/1", 4), ("https://x.com/1", 0)])]},
         },
     }
+    if not with_result_details:
+        for engine in report["engines"].values():
+            engine["per_query"][0].pop("results")
     out = report_ndcg(report)
     assert out["ultimate"] == pytest.approx(1.0)
     assert out["a"] == pytest.approx(1.0 / math.log2(3))
@@ -63,6 +67,21 @@ def test_report_ndcg_reconstruction_takes_best_rating_per_url():
     out = report_ndcg(report)
     assert out["b"] == pytest.approx(1.0)
     assert out["a"] == pytest.approx(0.117)
+
+
+@pytest.mark.parametrize("stored_ultimate", [False, True])
+def test_report_ndcg_dedupes_legacy_site_ratings(stored_ultimate):
+    query = "site:example.com docs"
+    first = ("https://example.com/docs", 4)
+    second = ("https://example.com/guide", 4)
+    same = ("http://www.example.com/docs/?utm_source=fixture", 4)
+    engines = {"a": {"per_query": [_pq(query, [first, same, second])]}}
+    if stored_ultimate:
+        engines["ultimate"] = {"per_query": [_pq(query, [first, second])]}
+    out = report_ndcg({"k": 5, "engines": engines})
+    expected = (1.0 + 1.0 / math.log2(4)) / (1.0 + 1.0 / math.log2(3))
+    assert out["a"] == pytest.approx(expected)
+    assert out["ultimate"] == pytest.approx(1.0)
 
 
 def test_report_ndcg_excludes_zero_ideal_queries():
