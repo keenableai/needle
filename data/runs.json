@@ -28433,5 +28433,13 @@
       "fresh.jsonl",
       "ndcg.json"
     ]
+  },
+  {
+    "id": "2026-11-21T0027Z",
+    "ts": "2026-11-21T00:27Z",
+    "artifacts": [
+      "legal.json",
+      "legal.jsonl"
+    ]
   }
 ]
