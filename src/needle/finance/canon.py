@@ -1,6 +1,7 @@
 import re
 import string
 import unicodedata
+from collections.abc import Iterator
 from functools import lru_cache
 from typing import Any
 
@@ -58,6 +59,20 @@ AMOUNT_SCALES = {
     "thousand": 1e3,
     "k": 1e3,
 }
+TABLE_FIGURE_RE = re.compile(
+    r"(?<![\w.])(\()?\s*\$?\s*(-)?(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?\s*(\))?"
+    rf"(?:\s*({'|'.join(sorted(AMOUNT_SCALES, key=len, reverse=True))})\b|(?![\w.]))"
+    r"(?!\s*(?:%|percent\b|per cent\b|x\b|times\b))",
+    re.IGNORECASE,
+)
+MONEY_CONTEXT_RE = re.compile(
+    r"\$|\busd\b|\bdollars?\b|\b(?:millions|thousands)\b"
+    r"|\b(?:revenues?|sales|income|loss(?:es)?|earnings|profits?|eps)\b",
+    re.IGNORECASE,
+)
+MONEY_CONTEXT_CHARS = 200
+MONEY_REL_TOL = 0.001
+HEADCOUNT_REL_TOL = 0.15
 
 
 def squad_norm(value: Any) -> str:
@@ -257,6 +272,33 @@ def _match_amount(value: Any, aliases: tuple[str, ...], raw_text: str, *, rel_to
     return False
 
 
+def _table_amounts(raw_text: str) -> Iterator[float]:
+    for match in TABLE_FIGURE_RE.finditer(raw_text):
+        paren_open, minus, digits, decimals, paren_close, unit = match.groups()
+        figure = float(digits.replace(",", "") + (decimals or ""))
+        if figure < 1:
+            continue
+        year_like = "," not in digits and not decimals and 1900 <= figure <= 2100
+        money_context = MONEY_CONTEXT_RE.search(
+            raw_text, max(0, match.start() - MONEY_CONTEXT_CHARS), match.end()
+        )
+        if unit:
+            scales: tuple[float, ...] = (AMOUNT_SCALES[unit.lower()],)
+        elif money_context and figure < 1e6 and not year_like:
+            scales = (1.0, 1e3, 1e6)
+        else:
+            scales = (1.0,)
+        sign = -1.0 if minus or (paren_open and paren_close) else 1.0
+        yield from (sign * figure * scale for scale in scales)
+
+
+def _match_table_figure(value: Any, raw_text: str, *, rel_tol: float) -> bool:
+    gold = parse_amount(value)
+    if not gold:
+        return False
+    return any(abs(amount - gold) / abs(gold) <= rel_tol for amount in _table_amounts(raw_text))
+
+
 FIELD_TYPES = frozenset(
     {"person", "entity", "year", "country", "domain", "exact_id", "money", "numeric_band"}
 )
@@ -288,7 +330,9 @@ def gold_in_text(
     if field_type == "exact_id":
         return _match_exact_id(value, aliases, raw, url)
     if field_type == "money":
-        return _match_amount(value, aliases, raw, rel_tol=0.02)
+        return _match_amount(value, aliases, raw, rel_tol=MONEY_REL_TOL) or _match_table_figure(
+            value, raw, rel_tol=MONEY_REL_TOL
+        )
     if field_type == "numeric_band":
-        return _match_amount(value, aliases, raw, rel_tol=0.15)
+        return _match_amount(value, aliases, raw, rel_tol=HEADCOUNT_REL_TOL)
     raise ValueError(f"unknown field_type {field_type!r}")

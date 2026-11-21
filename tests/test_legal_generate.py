@@ -42,8 +42,10 @@ def _case(n: int, court: str = "ca9") -> Case:
 class FakeCourtListener:
     def __init__(self, cases_by_court):
         self._by_court = cases_by_court
+        self.calls = []
 
     async def opinions(self, court, *, filed_after, filed_before):
+        self.calls.append((court, filed_after))
         return list(self._by_court.get(court, []))
 
 
@@ -78,6 +80,7 @@ async def test_caselaw_rows_cycle_syntaxes_and_dedupe():
         courts=("ca9",),
         per_court=12,
         months_back=1,
+        months_per_court=1,
         titles=(),
         per_title=0,
         seed=0,
@@ -89,6 +92,28 @@ async def test_caselaw_rows_cycle_syntaxes_and_dedupe():
     golds = [r["gold"] for r in rows]
     assert all(g["ids"]["cluster"] for g in golds)
     assert all(g["party_tokens"] for g in golds)
+
+
+async def test_caselaw_requests_capped_at_months_per_court():
+    courts = ("ca1", "ca2", "ca9")
+    client = FakeCourtListener({})
+    await run_generate(
+        courtlistener=client,
+        ecfr=None,
+        llm=None,
+        hour_ts=HOUR,
+        now=NOW,
+        courts=courts,
+        per_court=4,
+        months_back=18,
+        months_per_court=3,
+        titles=(),
+        per_title=0,
+        seed=0,
+    )
+    assert len(client.calls) == len(set(client.calls)) == 9
+    assert Counter(court for court, _ in client.calls) == dict.fromkeys(courts, 3)
+    assert len({month for _, month in client.calls}) > 3
 
 
 async def test_caselaw_selection_varies_with_seed():
@@ -104,6 +129,7 @@ async def test_caselaw_selection_varies_with_seed():
             courts=("ca9",),
             per_court=4,
             months_back=1,
+            months_per_court=1,
             titles=(),
             per_title=0,
             seed=seed,
@@ -132,6 +158,7 @@ async def test_code_rows_project_and_gate():
         courts=(),
         per_court=0,
         months_back=1,
+        months_per_court=1,
         titles=(17,),
         per_title=1,
         seed=0,
@@ -160,6 +187,7 @@ async def test_code_rows_drop_leaky_queries():
         courts=(),
         per_court=0,
         months_back=1,
+        months_per_court=1,
         titles=(17,),
         per_title=1,
         seed=0,
@@ -234,6 +262,7 @@ async def test_code_llm_errors_counted_with_sample():
         courts=(),
         per_court=0,
         months_back=1,
+        months_per_court=1,
         titles=(17,),
         per_title=1,
         seed=0,

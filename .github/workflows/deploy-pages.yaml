@@ -25,6 +25,7 @@ jobs:
         with:
           path: _src
           sparse-checkout: |
+            dashboard/history_posts.json
             dashboard/index.html
             dashboard/results.html
             scripts/dashboard_page.mjs

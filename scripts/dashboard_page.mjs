@@ -22,7 +22,7 @@ function serveSite(root) {
   });
 }
 
-export async function withDashboard(siteDir, pageOptions, use) {
+export async function withDashboard(siteDir, { now, ...pageOptions }, use) {
   const server = serveSite(resolve(siteDir));
   let browser;
   try {
@@ -31,6 +31,7 @@ export async function withDashboard(siteDir, pageOptions, use) {
       process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH }
                               : { channel: "chrome" });
     const page = await browser.newPage(pageOptions);
+    if (now) await page.clock.setFixedTime(new Date(now));
     await page.goto(`http://127.0.0.1:${server.address().port}/`, { waitUntil: "load" });
     return await use(page);
   } finally {

@@ -1,0 +1,70 @@
+name: Monthly snapshot
+
+on:
+  schedule:
+    - cron: "41 2 1 * *"
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Month to save, YYYY-MM (default: the month before)"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: snapshot
+
+jobs:
+  snapshot:
+    name: Save last month's results
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site-data
+          filter: blob:none
+      - uses: astral-sh/setup-uv@v5
+      - name: Build the snapshot
+        env:
+          MONTH: ${{ inputs.month }}
+        run: |
+          MONTH=${MONTH:-$(date -u -d "$(date -u +%Y-%m-01) -1 day" +%Y-%m)}
+          echo "MONTH=$MONTH" >> "$GITHUB_ENV"
+          git -C site-data fetch --shallow-since="$MONTH-01" origin gh-pages
+          npm install --no-save --no-audit --no-fund playwright-core
+          uv run --no-project python scripts/snapshot_month.py build --site site-data --out snapshot --month "$MONTH"
+      - name: Commit it to gh-pages
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          git -C site-data config user.name "github-actions[bot]"
+          git -C site-data config user.email "github-actions[bot]@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git -C site-data fetch origin gh-pages
+            git -C site-data reset --hard FETCH_HEAD
+            uv run --no-project python scripts/snapshot_month.py store --site site-data --out snapshot --month "$MONTH"
+            git -C site-data add history
+            if git -C site-data diff --cached --quiet; then
+              echo "nothing new for $MONTH"
+              exit 0
+            fi
+            git -C site-data commit -m "history: $MONTH snapshot"
+            if git -C site-data push origin HEAD:gh-pages; then
+              curl --fail -sS -X POST \
+                -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/workflows/deploy-pages.yaml/dispatches" \
+                -d "{\"ref\":\"$GITHUB_REF_NAME\"}"
+              exit 0
+            fi
+            echo "push rejected, retrying"
+            sleep $((attempt * 10))
+          done
+          echo "snapshot push failed after 5 attempts"
+          exit 1

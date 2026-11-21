@@ -1,10 +1,10 @@
 # NEEDLE
 
 Hourly search-engine benchmarks; full docs in README.md. Four benches:
-news (hourly, nDCG@5, LLM judge), finance (daily, answer-recall@5 +
-MRR@5, deterministic matcher with LLM judge backstop), scholar (daily,
+news (hourly, nDCG@5, LLM judge), finance (twice daily, answer-recall@5 +
+MRR@5, deterministic matcher with LLM judge backstop), scholar (twice daily,
 known-item papers, recall@10 + MRR@10 by arXiv/DOI/PMID match), and legal
-(daily, known-item caselaw/CFR, recall@5 + MRR@5 by citation/docket/URL
+(twice daily, known-item caselaw/CFR, recall@5 + MRR@5 by citation/docket/URL
 match). agentic_rare is a query producer, not a bench: `scripts/agentic_rare_filter.py`
 filters a query stream for English rare-word queries (BERT WordPiece +
 fastText language ID), and `needle agentic_rare generate` / `run` samples
@@ -15,8 +15,12 @@ the filtered artifact and evaluates it like news.
 - `dashboard/index.html` — the whole dashboard: one self-contained static
   page, vanilla JS, no build step; the bench workflow deploys it to gh-pages.
 - Dashboard data: `scripts/publish_bench.py` publishes `data/history.jsonl`,
-  `overlap.jsonl`, `uniqueness.jsonl`, `latest_*.json`, `runs.json`, and
-  `families.json`; per-run artifacts live on the HF dataset
+  `overlap.jsonl`, `uniqueness.jsonl`, `independence.json` (their
+  all-runs and last-7-days totals, the only form the dashboard loads),
+  `latest_*.json`, `runs.json`, and `families.json`; `history.jsonl`
+  keeps raw `lat_ms` samples only for the last 7 days, and `overlap.jsonl`/
+  `uniqueness.jsonl` merge older rows into one row per day (gh-pages caps
+  files at 100 MB); per-run artifacts live on the HF dataset
   `keenable-ai/needle-results` as a slim `<bench>.json` whose engine
   entries carry `per_query_path` pointing at `<bench>/<engine>.json`; the
   dashboard follows the pointer, and `needle.shared.hf.fetch_report` merges

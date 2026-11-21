@@ -1,10 +1,11 @@
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from typing import Any
 
 from needle.shared.metrics import normalize_url
 from needle.shared.recall import ULTIMATE
 
 TS_FMT = "%Y-%m-%dT%H:%MZ"
+UNIQUENESS_START = "2026-08-01T00:00Z"
 
 
 GOOD_LABELS = frozenset({"HM", "FullyM"})
@@ -23,7 +24,9 @@ def _engine_sets(
 FAMILIES = {
     "keenable-realtime": "keenable",
     "exa-instant": "exa",
+    "exa-lite": "exa",
     "parallel-turbo": "parallel",
+    "parallel-fast": "parallel",
     "perplexity-fast": "perplexity",
     "brave-llmcontext": "brave",
 }
@@ -115,3 +118,48 @@ def uniqueness_rows(report: dict[str, Any], *, ts: str) -> list[dict[str, Any]]:
             }
         )
     return rows
+
+
+Key = Callable[[dict[str, Any]], dict[str, Any]]
+
+
+def _pair(r: dict[str, Any]) -> dict[str, Any]:
+    a, b = sorted((r["a"], r["b"]))
+    return {"a": a, "b": b}
+
+
+def _engine(r: dict[str, Any]) -> dict[str, Any]:
+    return {"engine": r["engine"]}
+
+
+def _sum_by(rows: Iterable[dict[str, Any]], key: Key) -> list[dict[str, Any]]:
+    out: dict[tuple[Any, ...], dict[str, Any]] = {}
+    for r in rows:
+        ids = key(r)
+        t = out.setdefault(tuple(ids.values()), ids)
+        for k, v in r.items():
+            if k != "ts" and k not in ids:
+                t[k] = t.get(k, 0) + v
+    return list(out.values())
+
+
+def independence_totals(
+    overlap: list[dict[str, Any]], uniqueness: list[dict[str, Any]], *, since: str = ""
+) -> dict[str, list[dict[str, Any]]]:
+    unique_since = max(since, UNIQUENESS_START)
+    return {
+        "overlap": _sum_by((r for r in overlap if r["ts"] >= since), _pair),
+        "uniqueness": _sum_by((r for r in uniqueness if r["ts"] >= unique_since), _engine),
+    }
+
+
+def _compact(rows: list[dict[str, Any]], key: Key, day: str) -> list[dict[str, Any]]:
+    old = (r for r in rows if r["ts"][:10] < day)
+    daily = _sum_by(old, lambda r: {"ts": r["ts"][:10] + "T00:00Z", **key(r)})
+    return daily + [r for r in rows if r["ts"][:10] >= day]
+
+
+def compact_daily(
+    overlap: list[dict[str, Any]], uniqueness: list[dict[str, Any]], *, before: str
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    return _compact(overlap, _pair, before[:10]), _compact(uniqueness, _engine, before[:10])

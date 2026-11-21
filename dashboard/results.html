@@ -14,8 +14,13 @@
 <meta property="og:title" content="Web search API benchmark: {{ENGINES}} engines compared">
 <meta property="og:description" content="{{OG_DESCRIPTION}}">
 <meta property="og:url" content="{{PAGE_URL}}">
-<meta property="og:image" content="{{BASE}}og/card-standings.png">
+<meta property="og:image" content="{{SHARE_PNG}}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="{{SHARE_WIDTH}}">
+<meta property="og:image:height" content="{{SHARE_HEIGHT}}">
+<meta property="og:image:alt" content="{{SHARE_ALT}}">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="{{SHARE_ALT}}">
 <script type="application/ld+json">
 {{JSON_LD}}
 </script>
@@ -39,6 +44,8 @@
   p, li, dd { max-width: 68ch; }
   .meta { color: var(--muted); margin: 0 0 18px; }
   .lead { font-size: 18px; line-height: 1.55; margin: 0 0 8px; }
+  .chart { margin: 20px 0 0; max-width: 760px; }
+  .chart img { display: block; width: 100%; height: auto; border: 1px solid var(--rule); border-radius: 6px; }
   .scroll { overflow-x: auto; margin: 14px 0 6px; border-top: 1px solid var(--rule); }
   table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
   caption { text-align: left; color: var(--muted); padding: 10px 0 8px; caption-side: top; }
@@ -69,6 +76,7 @@
     .new-page { break-before: page; }
     main { max-width: none; padding: 0; }
     .lead { font-size: 13px; }
+    .chart { display: none; }
     h2 { margin-top: 20px; break-after: avoid; }
     .scroll { overflow: visible; }
     table { font-size: 10px; }
@@ -82,9 +90,10 @@
 <main>
 <header>
 <h1>{{H1}}</h1>
-<p class="meta">By {{AUTHORS}}, Keenable. Updated <time datetime="{{LAST_RUN}}">{{UPDATED}}</time>
+<p class="meta">{{BYLINE}} Updated <time datetime="{{LAST_RUN}}">{{UPDATED}}</time>
   after every benchmark run.</p>
 <p class="lead">{{LEAD}}</p>
+<figure class="chart"><img src="{{SHARE_WEBP}}" width="{{SHARE_WIDTH}}" height="{{SHARE_HEIGHT}}" alt="{{SHARE_ALT}}"></figure>
 </header>
 
 <h2>Leaders by vertical</h2>
@@ -106,7 +115,9 @@
 <h2>Download the data</h2>
 <p class="dl"><a href="../results.csv">results.csv</a> <a href="../results.json">results.json</a>
   <a href="../results.md">results.md</a> <a href="../results.pdf">results.pdf</a></p>
-<p class="small">The files are rewritten after every benchmark run.</p>
+<p class="small">The files are rewritten after every benchmark run. {{LICENSE}}</p>
+
+{{HISTORY}}
 
 <h2>Methodology</h2>
 <ul class="plain">
@@ -120,7 +131,9 @@
   match does not accept.</li>
 <li>We score what the engine returned: ranking, titles and snippets, with the same 2,000-character snippet
   budget for every engine. We do not fetch pages and we do not re-rank.</li>
-<li>Failed searches are left out of the mean and reported as errors. They are not scored as zero.</li>
+<li>A failed search scores zero when the engine caused it (timeout, server error, content filter, a rejected
+  query). We leave it out of the mean only when our own account or plan caused it (auth, quota, rate limit,
+  billing). Reports list both kinds of error.</li>
 <li>Keenable operates NEEDLE, and the judge has not yet had a systematic human-agreement audit. The queries,
   prompts and raw results are public, so anyone can score any result again.</li>
 </ul>

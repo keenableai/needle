@@ -37,7 +37,7 @@ The CLI loads `.env` from the working directory (copy
 | Variable | Purpose |
 | --- | --- |
 | `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`) and judging |
-| `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `LINKUP_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY`, `FIRECRAWL_API_KEY`, `TINYFISH_API_KEY`, `KAGI_API_KEY`, `JINA_API_KEY`, `CONTEXT_DEV_API_KEY` (`context`), `DEEPSEEK_API_KEY`, `CLAWIFI_API_KEY`, `ANTHROPIC_API_KEY` (`claude-search`), `OPENAI_API_KEY` (`chatgpt-search`) | one per engine, required when that engine is in `--engines` |
+| `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `LINKUP_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY`, `FIRECRAWL_API_KEY`, `TINYFISH_API_KEY`, `KAGI_API_KEY`, `JINA_API_KEY`, `CONTEXT_DEV_API_KEY` (`context`), `DEEPSEEK_API_KEY`, `CLAWIFI_API_KEY`, `SELTZ_API_KEY`, `WEBIQ_API_TOKEN` (`webiq`), `ANTHROPIC_API_KEY` (`claude-search`), `OPENAI_API_KEY` (`chatgpt-search`) | one per engine, required when that engine is in `--engines` |
 | `KEENABLE_API_KEY` | optional — without it the CLI uses the keyless, rate-limited endpoint |
 | `NEEDLE_LLM_MODEL`, `NEEDLE_JUDGE_MODEL` | both default to `openai/gpt-6-luna`; `--llm-model` / `--judge-model` override |
 
@@ -53,17 +53,31 @@ All `run` commands share one interface:
 | `--limit` / `--sample` / `--seed` | `0` / `stratified` / `0` | deterministic sample of N queries |
 | `--judge-model` / `--judge-concurrency` | env / `8` | LLM judge knobs |
 
-Every engine issues one request at a time, so latency samples are comparable
-across engines. Per-engine tuning uses env vars: `TAVILY_DEPTH`, `LINKUP_DEPTH`, `NEEDLE_CLAUDE_SEARCH_MODEL`
+Each engine has one request in flight at a time (scholar runs with
+`--search-concurrency 2`), so latency samples are comparable across engines.
+They time successful requests excluding connection warm-up: the requests that
+open an engine's first connections in a run are not timed, since they pay
+one-time connection setup and, where a bench queries all engines in parallel,
+every engine starting at once. Latency therefore shows performance on repeated
+requests. A later request that has to open a new connection is
+timed and counted in `latency.reconnects`. Per-engine tuning uses env vars: `TAVILY_DEPTH`, `LINKUP_DEPTH`, `NEEDLE_CLAUDE_SEARCH_MODEL`
 (default `claude-sonnet-5`), `NEEDLE_CHATGPT_SEARCH_MODEL` (default `gpt-5.5`); the engine
 entry fixes Keenable's, Exa's, Parallel's and Perplexity's modes and Brave's
-endpoint (`keenable` = pro, `keenable-realtime` = realtime, `exa` = auto,
-`exa-instant` = instant, `parallel` = advanced, `parallel-turbo` = turbo,
+endpoint (`keenable-realtime` = realtime, `exa` = auto,
+`exa-instant` = instant, `exa-lite` = lite,
+`parallel` = advanced, `parallel-fast` = fast, `parallel-turbo` = turbo,
 `perplexity` = the default `web` search type, `perplexity-fast` = `fast`,
-`brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). The mean skips queries whose
-search or judging failed
-(via `num_scored`; the report lists `search_errors` / `judge_errors`) and
-does not score them as zero.
+`brave` = `/web/search`, `brave-llmcontext` = `/llm/context`). A failed
+search scores zero when the engine's side caused it (timeout, server error,
+content filter, a rejected query). The mean skips it only when our own
+account or plan caused it: HTTP 401, 402, 403, 429, 432 or 433, or a 400 or
+API error that names our credits, quota, usage limit, billing or API key.
+Clients pace requests to the vendor's rate limit (`min_interval_s`) and retry
+a 429 up to 6 times with exponential backoff, holding their concurrency slot
+while they wait. The mean also
+skips queries whose judging failed. The report lists `search_errors`, split
+into `account_errors` and `service_errors`, and `judge_errors`;
+`num_scored` counts the queries in the mean.
 
 `claude-search` and `chatgpt-search` go through a model's server-side web
 search tool, since neither vendor exposes the search index directly. The
@@ -135,10 +149,13 @@ known-item filing retrieval, gold = the accession number. ~50% of
 `after:`/`before:`), tagged in `query_origin.syntax`.
 
 A deterministic matcher scores each field: nickname-tolerant person names,
-a 2% band for money, 15% for employee counts, country aliases,
+a 0.1% band for money, 15% for employee counts, country aliases,
 registrable-domain match for websites, and required cue words for
-low-entropy fields so a stray number cannot score. `--judge` adds an LLM
-backstop, consulted only for rejected results ranked ahead of the first
+low-entropy fields so a stray number cannot score. Money also matches a
+bare table figure in thousands or millions (`801` for $801M, `185,808` for
+$185.8M) and a parenthesized loss (`(458)`, `$(3.98)`); a year or a
+percentage never counts. `--judge` adds an LLM backstop for non-money
+fields, consulted only for rejected results ranked ahead of the first
 deterministic hit — it can upgrade a miss but never revoke a hit. The report
 breaks down by field, suite, syntax, cap tier, and freshness, and splits
 misses into system-specific vs universal. Snippet-only checks give a lower
@@ -183,7 +200,10 @@ needle legal run --queries legal.jsonl --out legal.json
 
 Two suites (`--suites`): **`caselaw`** — recent published opinions from the
 CourtListener API across 14 federal courts, one caption-style query per case
-(gold: reporter citations, docket + party tokens, cluster id); **`code`** —
+(gold: reporter citations, docket + party tokens, cluster id); each court
+searches `--months-per-court` (default 3) random months of the last
+`--months-back` (18), one request each, to stay under the token's 50
+searches/hour; **`code`** —
 eCFR sections; an LLM projects each into a query about the section's
 substance with one verbatim quoted span, and the bench rejects it if it
 leaks the citation (gold: the `title CFR section` citation). `run` scans
@@ -244,16 +264,20 @@ the overlap and uniqueness stats exclude it.
 ## Continuous benchmarks
 
 [`bench.yaml`](.github/workflows/bench.yaml) runs against all registered
-engines: news hourly (`--limit 20`); daily with fresh gold — finance 00:17
-UTC (`--limit 120 --judge`), agentic_rare 06:17 (`--limit 100`), scholar
-12:17 (`--per-cell 7`), legal 18:17. Gold lives on `gh-pages` between runs;
-a daily bench also runs off-schedule when a manual dispatch selects it or
-when its gold file is missing. Each bench is its own job and publishes its
+engines: news hourly (`--limit 20`); twice daily with fresh gold — finance
+00:17/12:17 UTC (`--limit 120 --judge`), agentic_rare 03:17/15:17
+(`--limit 100`), scholar 06:17/18:17 (`--per-cell 7`), legal 09:17/21:17. Gold lives on `gh-pages` between runs;
+a manual dispatch runs only the benches it selects; a daily bench also runs
+at any scheduled hour when its gold file is missing. Each bench is its own job and publishes its
 own run, so a slow daily bench never delays the hourly news result. Each
 run appends summary rows
 (`history.jsonl`), engine-pair URL overlap (`overlap.jsonl`), and per-engine
-unique-URL counts (`uniqueness.jsonl`) to `gh-pages`; the dashboard at
-<https://keenableai.github.io/needle/> renders them. Each run also
+unique-URL counts (`uniqueness.jsonl`) to `gh-pages`, and rewrites
+`independence.json` with their all-runs and last-7-days totals; the dashboard at
+<https://keenableai.github.io/needle/> renders `history.jsonl` and
+`independence.json`. Raw per-query latency samples (`lat_ms`) stay in
+`history.jsonl` for 7 days only; older `overlap.jsonl` and
+`uniqueness.jsonl` rows merge into one row per day. Each run also
 archives full artifacts to the HF dataset
 [`keenable-ai/needle-results`](https://huggingface.co/datasets/keenable-ai/needle-results)
 (a slim `<bench>.json` per run plus `<bench>/<engine>.json` with each
@@ -261,8 +285,23 @@ engine's per-query results)
 and refreshes `daily_queries.jsonl` at the dataset root: a rolling window of
 the queries evaluated by runs from the last 24 hours
 (`scripts/daily_queries.py`; `backfill` rebuilds it from the archive). The
-workflow needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, and the
+workflow needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, `COURTLISTENER_API_TOKEN`, and the
 per-engine keys.
+
+The deployed site also serves the results page at
+<https://keenableai.github.io/needle/results/> with `results.csv`,
+`results.json`, `results.md` and `results.pdf`, rebuilt on every deploy,
+plus a `sitemap.xml` that lists the dashboard and the results page.
+[`snapshot.yaml`](.github/workflows/snapshot.yaml) runs on the 1st of each
+month and saves the month before as it stood at its end (the 7-day mean to
+its last day) under `history/` on `gh-pages`:
+`needle-results-YYYY-MM.{csv,json,md}` and
+`needle-overall-YYYY-MM.{webp,png}`. It renders the gh-pages state from
+just before the next month's first run with the browser clock set to the
+month's end, and it never overwrites a month that already exists. The
+results page lists the months in its History section; add a month's blog
+post to [`dashboard/history_posts.json`](dashboard/history_posts.json) as
+`{"YYYY-MM": "https://..."}`.
 
 ## Development
 
@@ -285,4 +324,7 @@ uv run pytest   # deterministic, no network
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+Code: MIT — see [LICENSE](LICENSE). Benchmark results data (the dashboard
+data, the results page files, the monthly snapshots and the
+[`keenable-ai/needle-results`](https://huggingface.co/datasets/keenable-ai/needle-results)
+dataset): [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).

@@ -12,14 +12,15 @@
   } catch {}
 </script>
 <title>NEEDLE — search engine benchmarks</title>
-<meta name="description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta name="description" content="Live open-source search benchmark: hourly news and twice-daily finance, scholar, rare-word, and legal suites compare public search APIs.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEEDLE">
 <meta property="og:title" content="NEEDLE — search engine benchmarks">
-<meta property="og:description" content="Live open-source search benchmark: hourly news and daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta property="og:description" content="Live open-source search benchmark: hourly news and twice-daily finance, scholar, rare-word, and legal suites compare public search APIs.">
 <meta property="og:url" content="https://keenableai.github.io/needle/">
 <meta property="og:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="google-site-verification" content="mLmZhVYwO2grOy5wExFSRkDiTlLjQxGJpixi11YI7Q0">
 <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEVMaXEAYP8AXP8AXP8AXP8AXP8AXP8AXP8AXf8AXv8AXP8AXP8AXP////8qKiqArf8UQ5Zgmf/m6/Qbbv88P0UEV+mampq30f+/v78aPXo4f/8MTsF8gIdOg95fX189a72nQrWLAAAADHRSTlMAEJ9Bae+Ev98iz7BHKf9kAAAACXBIWXMAAAsTAAALEwEAmpwYAAAADnRFWHRTb2Z0d2FyZQBGaWdtYZ6xlmMAAAHESURBVHja7VbHlsMgDDTV4I7T2+7//+U6AVPlkuS2z3OUZwYJhEWWbdiwAYSkWLCqYkXJiQ0SWpoglfNymlcexIuOuPCDBZ2Wk4CpLTLKgCAIhCsAAgpiBBUPUicg5Hd6wCHUX5VS110o2Q0x5WIiqqLwmG1fv9B6cnXSsV6NkTLQc4+q5f35+HCeRl7X5+P9YIL+WUinb7X8p2kurqJ+lO+bATcdZV4RONY/iQe7vtU3GuYLBxK4aua98RMY9S/bJ/aHKAUccXsv0TEpY6vRRbtgj1Bp5vG5SpJA/WMNTBH5eAUs9+QMLpHpgH0Tp4DiM6ydwS0yDQ2MvbnwuWshjUfXdfYMVDvit3MINqGoPgXWBuxjA9POH+vHY/jagH1rsPpXwkQewtyGMnWmKE0rJ1M/Yx4vRP3mGP9AZGYYRFwJuIq5gYJCLo0uiDOdRDiOMuBs8PxAI2kCUQ0LEzFIwRbmpVAsjWSS9EaYQrk41Dlg4N1SvmiABLCYZOsNHLmAGgRnbzggwEGsetuIdGJZB/KGQzh2TTBf98DiLN0xxNO8ZpLAIt1zid9wGHoKF1UZdS6iQxDL9W9FBHGl3B7RG/4z/gBHkkudWe+2TgAAAABJRU5ErkJggg==">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -77,6 +78,9 @@
     --series-22: #5D4037;
     --series-23: #9E9D24;
     --series-24: #00838F;
+    --series-25: #F57F17;
+    --series-26: #00A651;
+    --series-27: #AD1457;
   }
   @media screen {
     [data-theme="dark"] {
@@ -117,6 +121,9 @@
       --series-22: #A1887F;
       --series-23: #D4E157;
       --series-24: #4DD0E1;
+      --series-25: #FFB300;
+      --series-26: #00E676;
+      --series-27: #F06292;
     }
   }
   * { box-sizing: border-box; }
@@ -710,7 +717,7 @@
     </div>
     <div class="lb-panel" id="trend-rare" role="tabpanel">
       <h2><span class="vert" data-vert="agentic_rare"></span> — nDCG@5 over time</h2>
-      <div class="sub">100 rare-entity queries per daily run</div>
+      <div class="sub">100 rare-entity queries per run, twice daily</div>
     </div>
     <div class="lb-panel" id="trend-legal" role="tabpanel">
       <div class="lb-tabs" role="tablist" aria-label="Legal slices">
@@ -751,8 +758,8 @@
     adds directly to task time.</p>
   <div class="card" id="card-latency-dumbbell" data-tools>
     <h2>Search latency — last 7 days</h2>
-    <div class="sub">p50 (filled) to p95 (open), successful calls, log
-      scale; hover for values (<a href="#app-protocol">Appendix C</a>)</div>
+    <div class="sub">p50 (filled) to p95 (open), successful calls excluding
+      connection warm-up, log scale; hover for values (<a href="#app-protocol">Appendix C</a>)</div>
     <div id="latency-dumbbell" data-static></div>
   </div>
 
@@ -824,7 +831,7 @@
         on the judged verticals, the known-item gold hit on the known-answer
         verticals); the URLs column counts unique relevant URLs / all URLs
         the engine returned; same-family engines (Exa/Exa-instant,
-        Parallel/Parallel-turbo) do not count against each other</div>
+        Parallel Advanced/Parallel Turbo/Parallel Fast) do not count against each other</div>
       <div id="uniqueness-table" class="bar-table"></div>
     </div>
   </div>
@@ -918,9 +925,9 @@
     <h2>Appendix C — comparison protocol</h2>
     <div class="sub">the fairness rules behind every number on this page</div>
     <div class="prose">
-      <p>We send each engine in a run the same query text. We pin the per-engine request shapes in git (Appendix F). The runner sends requests in sequence, one call at a time across the whole run. Thus the latency percentiles are comparable across engines, and no engine gets concurrent load. Engines see the live web minutes apart in a run, not at the same instant.</p>
+      <p>We send each engine in a run the same query text. We pin the per-engine request shapes in git (Appendix F). Each engine has one request in flight at a time, two on <span class="vert" data-vert="scholar"></span>, so the latency percentiles are comparable across engines. On <span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span> and <span class="vert" data-vert="scholar"></span> the runner queries all engines in parallel; on <span class="vert" data-vert="finance"></span> and <span class="vert" data-vert="legal"></span> it queries them one after another. We do not time each engine's connection warm-up, the requests that open its first connections in a run: they pay one-time connection setup and, in a parallel run, every engine starting at once. The latency figures therefore show performance on repeated requests. A later request that has to reconnect is timed, and reports count it in <code>latency.reconnects</code>. Engines see the live web minutes apart in a run, not at the same instant.</p>
       <p>We judge an engine on its own ranking, titles, and snippets. We do not fetch pages and we do not re-rank. We cap the evidence at the same snippet length for each engine, so engines that return more content get no extra signal to the judge or the answer matchers. We judge each distinct combination of URL, title, snippet, and date once per query. We use that rating again where the identical result occurs for other engines (Appendix E gives the full judging setup).</p>
-      <p>We remove failed searches and judgements from the mean and report them as <code>search_errors</code> and <code>judge_errors</code>. An outage decreases <code>num_scored</code> and increases the error rate; it does not decrease the quality score.</p>
+      <p>A failed search scores zero when the engine's side caused it (timeout, server error, content filter, a rejected query); an agent gets nothing back either. We remove a failed search from the mean only when our own account or plan caused it (HTTP 401, 402, 403 or 429, a plan limit, or a message about our credits, quota, billing or API key). We pace each engine to its rate limit and retry a 429 with exponential backoff. We also remove failed judgements. Reports list <code>search_errors</code>, split into <code>account_errors</code> and <code>service_errors</code>, and <code>judge_errors</code>.</p>
       <p>We make fresh <span class="vert" data-vert="news"></span> queries each hour and new known-answer queries each day from public sources (Appendix B), so there is no fixed benchmark set to overfit. We archive the exact queries with each run (Appendix G).</p>
       <p>Each vertical also reports <em>ultimate</em>, a synthetic engine. It pools all engines' results per query and ranks them oracle-style: best judge rating first on the judged verticals, and the gold item first on the known-answer verticals. Its score shows what one engine could get if it always returned the best results that the full field found. This separates "the engine ranked poorly" from "no engine found better results". We do not include <em>ultimate</em> in the overlap and uniqueness statistics.</p>
     </div>
@@ -938,7 +945,7 @@
       <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>applied to engine ratings before scoring: a duplicate URL drops the rating to 0. The pooled ideal is already deduplicated, so no penalty applies there. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
-        <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher, with an LLM-judge backstop for paraphrased answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
+        <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher: a 0.1% band for money, with bare table figures in thousands or millions and parenthesized losses; an LLM-judge backstop for paraphrased non-money answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
         <td>known-item: the gold opinion or CFR section identified by citation, docket (with a party-token check), CFR citation, or URL match.</td></tr>
       <tr><td>latency p50 / p95</td><td>all</td>
@@ -970,8 +977,9 @@
       <tr><td>brave</td><td>Brave GET /web/search</td><td>q = query text with site: kept, clipped to 75 words / 600 chars; count=min(k,20), country=us, search_lang=en, result_filter=web, text_decorations=false; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; extra_snippets joined with newlines, falling back to description when absent</td></tr>
       <tr><td>brave-llmcontext</td><td>Brave POST /llm/context</td><td>q = query text clipped to 75 words / 600 chars; country=us, search_lang=en; after:/before: → freshness=YYYY-MM-DDtoYYYY-MM-DD; per-URL snippets joined with newlines and clipped client-side to the 2,000-char budget, published date from the sources map</td></tr>
       <tr><td>exa</td><td>Exa POST /search</td><td>type=auto, numResults=k, contents.highlights.maxCharacters=2000; site: → includeDomains, after:/before: → startPublishedDate/endPublishedDate (full-day UTC bounds)</td></tr>
-      <tr><td>exa-instant</td><td>Exa POST /search</td><td>same as exa but type=instant</td></tr>
-      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=basic, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
+      <tr><td>exa-lite</td><td>Exa POST /search</td><td>same as exa but type=lite</td></tr>
+      <tr><td>parallel</td><td>Parallel POST /v1/search</td><td>mode=advanced, search_queries=[query text], advanced_settings.max_results=k; site: → source_policy.include_domains, after: → source_policy.after_date (before: has no mapping and is dropped)</td></tr>
+      <tr><td>parallel-fast</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=fast</td></tr>
       <tr><td>parallel-turbo</td><td>Parallel POST /v1/search</td><td>same as parallel but mode=turbo</td></tr>
       <tr><td>perplexity</td><td>Perplexity POST /search</td><td>max_results=min(k,20), search_context_size=low; site: → search_domain_filter, after:/before: → search_after_date_filter/search_before_date_filter (MM/DD/YYYY)</td></tr>
       <tr><td>perplexity-fast</td><td>Perplexity POST /search</td><td>same as perplexity but search_type=fast (perplexity leaves the field unset, so it takes the API default web)</td></tr>
@@ -985,6 +993,8 @@
       <tr><td>jina</td><td>Jina GET s.jina.ai</td><td>q = full query with site:/after:/before: kept as Google operators, num=min(k,20); default mode fetches each result page, so the snippet is the page markdown (content) clipped client-side to the 2,000-char budget, falling back to the SERP description when the fetch returns nothing; published date from publishedTime, else the SERP date string</td></tr>
       <tr><td>context.dev</td><td>Context.dev POST /v1/web/search</td><td>query = query text clipped to 500 chars, numResults=min(max(k,10),100) (API floor is 10), country=us, queryFanout=false; site: → includeDomains, after: (with no before:) → freshness last_24_hours/last_week/last_month/last_year covering that date, before: dropped; snippet is the SERP description, markdown scrape left off</td></tr>
       <tr><td>deepseek</td><td>DeepSeek POST /v1/tools/search</td><td>query = query text clipped to fit 128 chars with site: (several joined by OR), lang:en and after:/before: as native operators, count=min(k,50), need_content=false; snippet is the long query-aware summary, falling back to the short snippet; published date from date</td></tr>
+      <tr><td>seltz</td><td>Seltz POST /v1/search</td><td>query = query text, max_results=k, default scope and tier (pro), fields.content capped at the snippet length; site: → include_domains, after:/before: → from_date/to_date (ISO dates); the leading “# heading” line of content becomes the title, markdown backslash escapes removed</td></tr>
+      <tr><td>webiq</td><td>Microsoft Web IQ POST /v3/search/web</td><td>query = query text clipped to fit 1,000 chars with site: (several joined by OR) and after:/before: kept as native operators (dates act as a soft filter), maxResults=min(k,50), language=en, region=US, safeSearch=off, contentFormat=passage, maxLength = snippet length capped at 3,000 (the API ceiling without full document access); snippet is the query-relevant passage, published date from lastUpdatedAt</td></tr>
       <tr><td>clawifi</td><td>Clawifi POST /search/free</td><td>query = query text clipped to 500 chars, max_results=min(k,50), provider=free_auto (the hosted default); site: → include_domains (up to 20), after: (with no before:) → time_range day/week/month/year covering that date, before: dropped; snippet is the SERP description; published date from published_at</td></tr>
       <tr><td>claude-search</td><td>Anthropic POST /v1/messages</td><td>model=claude-sonnet-5, max_tokens=32000, tools=[web_search_20250305 with max_uses=1], system prompt asks for a JSON array of every search result with the snippet copied verbatim (≤500 chars); rank = web_search_tool_result order, title/snippet from the JSON row with the same URL, published_date = page_age; the prompt tells the model to pass the query to the tool verbatim (operators kept as text), site: also → allowed_domains</td></tr>
       <tr><td>chatgpt-search</td><td>OpenAI POST /v1/responses</td><td>model=gpt-5.5, reasoning.effort=low, max_output_tokens=32000, tools=[web_search with search_context_size=low], tool_choice forces the search, include=web_search_call.action.sources, same system prompt; rank = action.sources order, title/snippet from the JSON row with the same URL (utm_ parameters stripped); the prompt tells the model to pass the query to the tool verbatim (operators kept as text), site: also → filters.allowed_domains</td></tr>
@@ -1000,10 +1010,10 @@
         <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results)</td>
         <td><a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF: keenable-ai/needle-results</a>, runs/&lt;run-id&gt;/</td></tr>
       <tr><td>query files</td>
-        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl)</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, agentic_rare.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
-        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, runs.json, ci_scores.jsonl, ci.json</td>
+        <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, independence.json, runs.json, ci_scores.jsonl, ci.json</td>
         <td>data/ on this site (gh-pages)</td></tr>
       <tr><td>prompts &amp; scoring code</td>
         <td>judge prompt (shared/prompts/judgement.jinja), metric implementations, engine clients</td>
@@ -1033,7 +1043,7 @@ const RUNS_BASE = "https://huggingface.co/datasets/keenable-ai/needle-results/re
 
 let ENGINES = [];
 const ENGINE_SLOT = new Map();
-const HIDDEN_ENGINES = new Set(["ceramic", "keenable"]);
+const HIDDEN_ENGINES = new Set(["ceramic", "keenable", "exa-instant"]);
 
 function registerEngines(names) {
   for (const name of names) {
@@ -1045,10 +1055,10 @@ function registerEngines(names) {
 }
 
 registerEngines(["keenable-realtime", "google", "bing", "brave", "brave-llmcontext",
-  "exa", "exa-instant", "parallel", "parallel-turbo", "perplexity-fast", "perplexity", "tavily", "linkup", "you", "firecrawl",
-  "tinyfish", "kagi", "jina", "context", "deepseek", "clawifi", "octen", "claude-search", "chatgpt-search"]);
+  "exa", "exa-instant", "exa-lite", "parallel", "parallel-turbo", "perplexity-fast", "perplexity", "tavily", "linkup", "you", "firecrawl",
+  "tinyfish", "kagi", "jina", "context", "deepseek", "octen", "claude-search", "chatgpt-search", "parallel-fast", "seltz", "webiq", "clawifi"]);
 
-const SERIES_COUNT = 24;
+const SERIES_COUNT = 27;
 function colorOf(engine) {
   if (engine === ULTIMATE_ENGINE) return "var(--text-muted)";
   const slot = ENGINE_SLOT.get(engine);
@@ -1077,6 +1087,7 @@ function markHome(node, engine) {
 }
 
 const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable"],
+  ["parallel", "parallel-advanced"],
   ["google", "google/serper"], ["bing", "bing/searchapi"], ["context", "context.dev"]]);
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
@@ -1088,6 +1099,7 @@ const ENGINE_LOGOS = new Map([
   ["keenable", "data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 177.922 102.29%22 width%3D%22177.922%22 height%3D%22102.29%22 role%3D%22img%22 aria-label%3D%22Keenable icon%22%3E%3Cg transform%3D%22translate(0,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(51.255,21.698)%22 d%3D%22M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3Cg transform%3D%22translate(81.137,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(49.16,21.698)%22 d%3D%22M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E"], ["keenable-realtime", "data:image/svg+xml,%3Csvg xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22 viewBox%3D%220 0 177.922 102.29%22 width%3D%22177.922%22 height%3D%22102.29%22 role%3D%22img%22 aria-label%3D%22Keenable icon%22%3E%3Cg transform%3D%22translate(0,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.023 58.063 C 33.115 58.082 25.821 92.045 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 52.608 16.733 C 47.944 16.733 43.659 17.869 39.751 20.138 C 35.843 22.344 32.597 25.368 30.013 29.213 C 27.429 33.057 25.728 37.343 24.908 42.07 L 80.215 42.07 C 79.648 37.406 78.04 33.152 75.393 29.308 C 72.809 25.463 69.531 22.407 65.561 20.138 C 61.59 17.869 57.272 16.733 52.608 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(51.255,21.698)%22 d%3D%22M 15.499 0 C 15.947 0 16.39 0.019 16.828 0.057 C 19.685 2.096 22.123 4.613 24.138 7.61 C 26.785 11.455 28.392 15.709 28.959 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3Cg transform%3D%22translate(81.137,0)%22%3E%3Cpath fill%3D%22%23005CFF%22 d%3D%22M 48.524 0 C 55.9 0 62.694 1.521 68.905 4.562 C 75.116 7.602 80.422 11.808 84.821 17.178 C 89.221 22.548 92.456 28.759 94.526 35.812 C 96.597 42.799 97.244 50.208 96.468 58.036 L 58.067 58.036 C 33.141 58.036 25.813 92.017 48.524 102.29 C 39.596 102.29 31.444 99.993 24.068 95.399 C 16.757 90.806 10.902 84.659 6.502 76.96 C 2.167 69.196 0 60.623 0 51.242 C 0 44.125 1.262 37.493 3.785 31.347 C 6.308 25.136 9.77 19.701 14.169 15.043 C 18.633 10.32 23.81 6.632 29.697 3.979 C 35.585 1.327 41.861 0 48.524 0 Z M 51.485 16.733 C 46.821 16.733 42.536 17.869 38.628 20.138 C 34.72 22.344 31.475 25.368 28.891 29.213 C 26.307 33.057 24.605 37.343 23.785 42.07 L 79.092 42.07 C 78.525 37.406 76.917 33.152 74.27 29.308 C 71.685 25.463 68.408 22.407 64.438 20.138 C 60.467 17.869 56.149 16.733 51.485 16.733 Z%22%3E%3C%2Fpath%3E%3Cpath fill%3D%22%232A2A2A%22 transform%3D%22translate(49.16,21.698)%22 d%3D%22M 15.499 0 C 16.352 0 17.189 0.07 18.005 0.202 C 20.775 2.215 23.143 4.684 25.109 7.61 C 27.757 11.455 29.364 15.709 29.932 20.373 L 0.783 20.373 C 0.276 18.84 0 17.202 0 15.499 C 0 6.939 6.939 0 15.499 0 Z%22%3E%3C%2Fpath%3E%3C%2Fg%3E%3C%2Fsvg%3E"],
   ["google", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAApVBMVEVHcEz4+Pj8/Pz9/f38/Pz59/by8/Pz8/T7+/v9/f309PX29/fy8vP29/f///84qlfsUENHiPT8wBLrTD88rFpJivNEhvUqp006g/T7/PvT4P3rRjjqPSzg8Ojva1uWz6T7ugWWt/j4xcH+78jA4slxv4T85eTtW0v61tRctGaDrPdSj/YtffRmmvb1p6L+3I790mKuuUHykIg+nZ3G2Pv0lCs8o3o82clfAAAADnRSTlMAoetQ0/wdM7c/jGYSeQFEN8MAAAMjSURBVFiF5VdZm6IwEBQURBFQRGOGwxOvUWd0dvf//7QNEpLOAeLDPm09+QFV6erudGKn888wsgeeYTiOYXgD+2227TqmD2A67jsi3Z6vgdNtSXdNHf0ZRxuJgXb1Cr3BK77RRC9gNNLtxuVpEA3ZHLymF6i10W3H9/2aXKp8a38k2FvtFPrSR/tbNp7GSRLH4+y2l172Vf4IC19sDkk8HRNMCeI4OWyE13ikCAj532Qlu1IgSLIj/KIn8z349sHphE8l4uQBv/EkAzB1WTwGmDIkGbQpmnBA8g5Tkc4kEiEPTk0FLJk/1fPFSoAAMmA/TsZZdiCV1PFhCDZ/emP+ieWNRUzj/SYjEgrf9/mmGPIEMH6cgeY5Zhq+P2QCbILgRyWQ3IRv8VFmE5iqg+2KplDi16Dy4LInX2H4bIL40UDjcJUahAS/SeEPuIHG4cgp2K4KhdVBlzEdTHkffj0FwhVs2Q8FKXuH5Tb8LgXCb7DKZSHhcuYvy2bkkzCk2AKBxYxjUmB+fSmwahb45AbL8dptKzApBWZcoPuehUlNBG0tTCoBXxIAVaACX0DgMmegCkoS+TijfRDegcB5XeFcKixAGelYqw4OXHZieEepLwD7he31orSwZs8t2spsouOnQBQEua/BtYzg8sGeVLOdzxOShHtEgHYq/xcNYMZPumq08yxuV/egEIiCVObjTzUFbKyywuJTyScuZIVrGcBkwR1gNtL4tWSHIqqAlpCe0vWFncAvK+BYyGkIJA+nHXWL0xz9zJUUwoOBn6wWEyBBRPmSID8hFAR/ZnMpA/B8BXcLZuKZCVQgKEEUFmAfiLeMHlQIGD8gP4OIChAbk1QfgHi9ogqBjAj9gATIVy1wOvpphBR2EUEES+t0JHBzpPNzVQGhJZz1WOZ3+sJRQAqHRHoudBbW3LKESw6RWJ4Qw2kpNaan8uGeqjR2yyd2ysYY6vj6izbWHXK1F+5hqyMR16xfwG2hgN16PqlF7b+VCqYm/2/YaAq/gu3USmCn3V8327A0Gtgy2v/zG7mOqIEtx1Uv6M3oe0bPtAjMnuG9ytz/jb8i8rQexpJ/GAAAAABJRU5ErkJggg=="], ["bing", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAABuklEQVRYhe2WsXXCMBCG/xMNpbIBmSB0aa0wQDJBkgmINrDZwDgLQCZIBuDJKdN5gzCCShrrUhiwCNiI95wq/quz/XP3cZLOBnr1+u+iUKPUJoIrHwBxD2C0vV2AuACJmU3V+k8ApDYSjBjMuj0Tp1sQ2xmA1EbCuRygm8B8BQSpSyBE61NGfFCckUOQgqArm90RBCkAS+8XY7CLQ4sDLR2Q2ozg+Nujmdlskpz0TlcJQHXhqgt5CEBzB1xZFyNaNBUHAJtNEjDqgs49hBRvB4CoW08HbT6tAc3qC7rvAADjXRDYzsKLR10A7CW1kec8lx6/EIC1F4+bTDtJbSLvsmjyXQDAH/uw5PNHy5XP+5ioAwAh3uuEiOTUNEJUz8ST5581eX+rfRJOVylAL7WbFyCxtKnKt/tijJJjEKK9h5Hb1zvVDYA2Eo4NAvbAr7SJzVRQF1pPgU2VrcYtz89m8gcROGlbsmCAHYTNJhqCrlHNfX+DrQGeQ5Cq2s7evw6DCP4eCNXRe+HMcgy6Bth8veXD20cCKNreioa3z9h8LT9P+YMm4aWqXlyHy9Hk/ROAYwgOngu9ev0//QDmCZ48wX3K8AAAAABJRU5ErkJggg=="], ["brave", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAUVBMVEVHcEz/QAD/QQD/////SgD/QwD/OQD/PAD/PgD/KwD/MAD/RwD/KAD/QQD/UAD/OwD/IQD/TQT/NgD/VAn/7un/29P/bU3/jXX/q5r/xLf/CwAIaoj2AAAACnRSTlMAYAv/3qwghzrR7UleYgAAA+lJREFUWIWdV9mi6iAMdGmtUihbocv/f+gNhbCVnuO50QerZhiGIYTbrRXv0QXzwSGUUuTd/Ot1PvMAPAKo17f5r1G2GBD1+C7/0fl0jxAZAIXPdwCQ32bwBYLj2If8mgGBF+3Dn5oxdNMku06G8RsMCKEfQin9DE3mE4SEwPSzBh6DUkEbc+l0BJCZBtwH5lOX7yBOCJ2OAJwFBkwRZi2nRIUpwNDkAgHyA8Co18VCAldEruYJYRYmIGMXdlkDBUFFieDGDwBsdknztq7HBx9mXc3xaHZkIESfAfQaGajt+WOsO+aLfCleyGBcfs5/Pq1AhEc1Bwcw2t/yn08uPECp4nAAyHH+HcDsXsR7YxXYIcBszLZtpkpzX3khDxkqBu9DAy+AsZS6hR8X1HPeLHGq7bs1KEOlwQD5wAATVq04mJAw/0jBSooKjQs7724KxSq4CWiWrSCYh4+M+LUXnFO1ZHNadgfwyWfgCMhy1qti2n8CG6/lbweASCUu2KCSeyNhUa2oFA0AmQjTMYXqbzMN4y6ihq6nAFaenJlLF2wiiLLuJfRMTiLe/TKWPrQ0ABpR/DArv4y5k15+GQuELawiZIhchNltbgdQOHHymylHkDw+SKLT92NzL/RhOyeEVfG4M8GI0SNShIJSFtY7FhSGWZrxuPgLwRXF3QwA5VH5mLCk4bgrYXrzTlzHyMCKWNJuZaSiigMbCXV0tJZBGdRBxAUr2rksD6kqK7TDQo9DQQmcC1TEUJVrCfyGxrIe/WS0YozY9Lyng6E+6x9TBMjNAPLl+0iGcwGUvNURTyZW1GVdmHAVOIX+BDBEEfMdMSuWPzoRPMD9BPCODPJ8ybnOnxGANtqdyCD53sDZzJRMHLYwhfPZCtEHgOTmTbnTmal0WqGI9CzB7XEPAFNwkrEE6qqWFApqWMlF4OF6lgC2dOwPnJuNhdLOXSU1i3MPfJqPfM+g2ebI2KEwNhKwYCzjCxR2wV1zEBi0m60+b3E4yY9ZN7jr0pBBs0e63VOLM7KlOiVnS32HdPRI7a73lTHg1UHgdpZrkgKDZj7UNQSAt6oaBSgEKjK46jf7TAOmbN7iMOp6ZWTQlgDcnDEYwULRkmBAbBMPBpdte9FojiydTKFbDwyuO+YhZwDvo5SC/qnRPBi0bOjjIXMG4CelZ8NUvC94BuQyH6yQGPgbCyekaHUdgx+vPkPJoLqxHAyuJ4AcEoOxui+4+PXq9eou7wvw/nxzbRrwvsCq+wJRVw6q4t21GXy+vve5e9P5zvTl8IHEiQH/w8UVSeQa/Gl4JIEyct79dfhAAhn8x/CBxMHgP4f3MbDuF+v+A4tzcSbr/fGlAAAAAElFTkSuQmCC"], ["brave-llmcontext", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAUVBMVEVHcEz/QAD/QQD/////SgD/QwD/OQD/PAD/PgD/KwD/MAD/RwD/KAD/QQD/UAD/OwD/IQD/TQT/NgD/VAn/7un/29P/bU3/jXX/q5r/xLf/CwAIaoj2AAAACnRSTlMAYAv/3qwghzrR7UleYgAAA+lJREFUWIWdV9mi6iAMdGmtUihbocv/f+gNhbCVnuO50QerZhiGIYTbrRXv0QXzwSGUUuTd/Ot1PvMAPAKo17f5r1G2GBD1+C7/0fl0jxAZAIXPdwCQ32bwBYLj2If8mgGBF+3Dn5oxdNMku06G8RsMCKEfQin9DE3mE4SEwPSzBh6DUkEbc+l0BJCZBtwH5lOX7yBOCJ2OAJwFBkwRZi2nRIUpwNDkAgHyA8Co18VCAldEruYJYRYmIGMXdlkDBUFFieDGDwBsdknztq7HBx9mXc3xaHZkIESfAfQaGajt+WOsO+aLfCleyGBcfs5/Pq1AhEc1Bwcw2t/yn08uPECp4nAAyHH+HcDsXsR7YxXYIcBszLZtpkpzX3khDxkqBu9DAy+AsZS6hR8X1HPeLHGq7bs1KEOlwQD5wAATVq04mJAw/0jBSooKjQs7724KxSq4CWiWrSCYh4+M+LUXnFO1ZHNadgfwyWfgCMhy1qti2n8CG6/lbweASCUu2KCSeyNhUa2oFA0AmQjTMYXqbzMN4y6ihq6nAFaenJlLF2wiiLLuJfRMTiLe/TKWPrQ0ABpR/DArv4y5k15+GQuELawiZIhchNltbgdQOHHymylHkDw+SKLT92NzL/RhOyeEVfG4M8GI0SNShIJSFtY7FhSGWZrxuPgLwRXF3QwA5VH5mLCk4bgrYXrzTlzHyMCKWNJuZaSiigMbCXV0tJZBGdRBxAUr2rksD6kqK7TDQo9DQQmcC1TEUJVrCfyGxrIe/WS0YozY9Lyng6E+6x9TBMjNAPLl+0iGcwGUvNURTyZW1GVdmHAVOIX+BDBEEfMdMSuWPzoRPMD9BPCODPJ8ybnOnxGANtqdyCD53sDZzJRMHLYwhfPZCtEHgOTmTbnTmal0WqGI9CzB7XEPAFNwkrEE6qqWFApqWMlF4OF6lgC2dOwPnJuNhdLOXSU1i3MPfJqPfM+g2ebI2KEwNhKwYCzjCxR2wV1zEBi0m60+b3E4yY9ZN7jr0pBBs0e63VOLM7KlOiVnS32HdPRI7a73lTHg1UHgdpZrkgKDZj7UNQSAt6oaBSgEKjK46jf7TAOmbN7iMOp6ZWTQlgDcnDEYwULRkmBAbBMPBpdte9FojiydTKFbDwyuO+YhZwDvo5SC/qnRPBi0bOjjIXMG4CelZ8NUvC94BuQyH6yQGPgbCyekaHUdgx+vPkPJoLqxHAyuJ4AcEoOxui+4+PXq9eou7wvw/nxzbRrwvsCq+wJRVw6q4t21GXy+vve5e9P5zvTl8IHEiQH/w8UVSeQa/Gl4JIEyct79dfhAAhn8x/CBxMHgP4f3MbDuF+v+A4tzcSbr/fGlAAAAAElFTkSuQmCC"],
   ["exa", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"], ["exa-instant", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"],
+  ["exa-lite", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAYFBMVEUfQO3w8v7///+7xfqWpvf9/f/DzPphePKdrPexvPlVbvF1ifSisPils/jb4Pz2+P5EX/BmffPV2/wmRu44Vu9CXvB8j/QjQ+3L0/ttg/MtTO7i5v08We/Q1/tQavHr7v3UMFLmAAAAkElEQVQ4jd2SzQ6CQAyE21mqgMCCoCg/8v5v6QbDwWxNueKcmvZL2mlL9FfK+EvnCHDgZFMqyBUAly0uUMYtHCpff8IG11YBpPbVmu/Y35QhndAdRQj6BxrNRQAow5MoQarVV2AYecpl7n8C9JJ54U6tBxenIAbiFe0FzBZ7hrRsWouyVm0eyz638TDmyx1ab/9IBsdakyN7AAAAAElFTkSuQmCC"],
   ["parallel", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEX///8dHBoAAAASEQ5eXl3x8fGysbGBgYAZGBbPz88pKCbJycgbGhgVFBLX19Z7e3oLCANLSkm7u7uQkJCHh4Zqamlvb27h4eFDQkH5+fk8OzowMC5RUVCampmmpqXBwcCxW53tAAABoklEQVRYhc2X2RaCIBBAZVxwIylTMZf+/y+zzGPDYpAPed84hxmYhWHG8wy02UiDW0pIJ+prlISmfXqaQQAAZzkhJI99Pi3E0NhKt2P3lJ54yi8wgFtkdzotrjNlyv0XbNYRAwxuhgTVTA8rFycVC+UKtbPjgNwLulKUFhJnjHjFdQFqVaCsET1niJggoFDk0Qk89sk2Ska0eFmBCss/gWzTA2Gr4Il3Xs5wcHxfhyBMMFlr2hnpKWW3LpG4Z5iLJgRPuBTKnM/yo7LzSw6syTC/zES6QNIZbgCQYwVMOLlggssaT45xaE4SB02m0EzDU4yfaBQYYzARS8Do1d9itQmn3lBIVOCbkZWzQLWg6QMzKS5cHDpHB49U4vpLmP6KjQmuTtwdxn2J5FONnY6prLL7MR0ay5J2MXFXnPoqqrvL+u6PpY2km0aG801fm4rt56rLoi2U791R/v9sN1m727wBlxrCvqWAMnpQXLuEa6ursN1sV84edG/3D8bw29D149j3MXh2ePBkEFu9P+Poe7YfOjXDd28/fL/vgcb/k7GzfwA4QDbEYc0sKAAAAABJRU5ErkJggg=="], ["parallel-turbo", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAYFBMVEX///8dHBoAAAASEQ5eXl3x8fGysbGBgYAZGBbPz88pKCbJycgbGhgVFBLX19Z7e3oLCANLSkm7u7uQkJCHh4Zqamlvb27h4eFDQkH5+fk8OzowMC5RUVCampmmpqXBwcCxW53tAAABoklEQVRYhc2X2RaCIBBAZVxwIylTMZf+/y+zzGPDYpAPed84hxmYhWHG8wy02UiDW0pIJ+prlISmfXqaQQAAZzkhJI99Pi3E0NhKt2P3lJ54yi8wgFtkdzotrjNlyv0XbNYRAwxuhgTVTA8rFycVC+UKtbPjgNwLulKUFhJnjHjFdQFqVaCsET1niJggoFDk0Qk89sk2Ska0eFmBCss/gWzTA2Gr4Il3Xs5wcHxfhyBMMFlr2hnpKWW3LpG4Z5iLJgRPuBTKnM/yo7LzSw6syTC/zES6QNIZbgCQYwVMOLlggssaT45xaE4SB02m0EzDU4yfaBQYYzARS8Do1d9itQmn3lBIVOCbkZWzQLWg6QMzKS5cHDpHB49U4vpLmP6KjQmuTtwdxn2J5FONnY6prLL7MR0ay5J2MXFXnPoqqrvL+u6PpY2km0aG801fm4rt56rLoi2U791R/v9sN1m727wBlxrCvqWAMnpQXLuEa6ursN1sV84edG/3D8bw29D149j3MXh2ePBkEFu9P+Poe7YfOjXDd28/fL/vgcb/k7GzfwA4QDbEYc0sKAAAAABJRU5ErkJggg=="],
   ["perplexity", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAASFBMVEUAAAAAAAD9/fqXl5UAAAAAAAD///8HBwcAAAAAAADy8vCnp6X4+PXU1NKLi4pBQUDDw8Hk5OGenpwmJiWRkZB2dnRbW1qxsa/SbbTeAAAACnRSTlME////0jT//vOEODX2gQAAAoJJREFUWIWll9u2qyAMRYV2R6t4v/3/n54EBAPWgoc8dDQIUwjJQoqiKD7vqhSPrazen4Lsr3o+2Fr1h4CM8UjA+eeMF+JTvPMA77wV0Br+I/7cyiJoWHrfVWrx+veeixYCGli5+wJ4cX+FJgrwRrwubhwgYbgDDPgwASBhnL8B5pGepcxAgtqugE3pRwkx2PFN0IWADhvHPSUGOJbWuvuAXcemSwSIBQBaDmixYRHpANHXAHVvAdZ7AKAtA8wpDVglHFv7BECdYcK1LBPwtnSAmbiU+DvaAnkG0JmHxjJz+QVQoI1GWFPSmGtwT9UXQM07uu4BwLbX3wFtYKMZP4btd4BzXsZmAuAyxj54oO4Avrxh9Ry74IuMKNMAlAcL/nSLq4xHAKoem4nAJSIRgNUjN1sLG+5DvT0BoPiY6jmqEZNSntIUB1D4zJxtOZOcuYyMAmjNrfl7KlJLgeiTAFyYmSaSTJn9jAA87eaq3FhR/gmYmaIGANJVCVMEQK9heecfLKuZQgTw62gzepAB6CIA/J0ur+TnOQIwBrfVKIdhGCUHUEbyKsAwjtjpVlCMZJ0AymBpctoB5K0iWU08AXSckrmjVh+Qt5rYk80siJTR+o3SCQrGYJ91xy8AY2cQSUda5DVUBYsDxM4FBzAVoXfhTO4HgOOEN3mw2/JKB9C0acePRJqOAk8FnBVlM7EzspgG6HplBJEBtCyqPg0wKHDJc9YCndVqSAFILuKsmPS64l9pE6VO61yvGtuU78Qp90t18lcZ6EGTEoOOu+HXehcH+AdxCBBrDBBcYC4AMfuuCK88vluW8/z7TlRGLl3lZU6BVfnXvuyLZ/bVN//ynXn9/wfurDA/lO1fuwAAAABJRU5ErkJggg=="], ["perplexity-fast", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAASFBMVEUAAAAAAAD9/fqXl5UAAAAAAAD///8HBwcAAAAAAADy8vCnp6X4+PXU1NKLi4pBQUDDw8Hk5OGenpwmJiWRkZB2dnRbW1qxsa/SbbTeAAAACnRSTlME////0jT//vOEODX2gQAAAoJJREFUWIWll9u2qyAMRYV2R6t4v/3/n54EBAPWgoc8dDQIUwjJQoqiKD7vqhSPrazen4Lsr3o+2Fr1h4CM8UjA+eeMF+JTvPMA77wV0Br+I/7cyiJoWHrfVWrx+veeixYCGli5+wJ4cX+FJgrwRrwubhwgYbgDDPgwASBhnL8B5pGepcxAgtqugE3pRwkx2PFN0IWADhvHPSUGOJbWuvuAXcemSwSIBQBaDmixYRHpANHXAHVvAdZ7AKAtA8wpDVglHFv7BECdYcK1LBPwtnSAmbiU+DvaAnkG0JmHxjJz+QVQoI1GWFPSmGtwT9UXQM07uu4BwLbX3wFtYKMZP4btd4BzXsZmAuAyxj54oO4Avrxh9Ry74IuMKNMAlAcL/nSLq4xHAKoem4nAJSIRgNUjN1sLG+5DvT0BoPiY6jmqEZNSntIUB1D4zJxtOZOcuYyMAmjNrfl7KlJLgeiTAFyYmSaSTJn9jAA87eaq3FhR/gmYmaIGANJVCVMEQK9heecfLKuZQgTw62gzepAB6CIA/J0ur+TnOQIwBrfVKIdhGCUHUEbyKsAwjtjpVlCMZJ0AymBpctoB5K0iWU08AXSckrmjVh+Qt5rYk80siJTR+o3SCQrGYJ91xy8AY2cQSUda5DVUBYsDxM4FBzAVoXfhTO4HgOOEN3mw2/JKB9C0acePRJqOAk8FnBVlM7EzspgG6HplBJEBtCyqPg0wKHDJc9YCndVqSAFILuKsmPS64l9pE6VO61yvGtuU78Qp90t18lcZ6EGTEoOOu+HXehcH+AdxCBBrDBBcYC4AMfuuCK88vluW8/z7TlRGLl3lZU6BVfnXvuyLZ/bVN//ynXn9/wfurDA/lO1fuwAAAABJRU5ErkJggg=="], ["tavily", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAEMklEQVRYhcWXXVCUVRjHf+e8uyzI4rvDgqPxNXwbHzcK2YzaFNYFgnbn1FVTjWNidduQNXIbU0rjmGmWQobZRaVeOOMQ0Ea22ER+DBe5DMiIAirDtm3Ygu97unj5kI+FhYX6z7w37zznPP/zPOf5n+cRGRkZoBRAJvAGsB1IA1YBNkAQHRTwCBgBbgMXgaNAD4Bt3HkpcBh4ahkczoQA7IA+/hUCW4G3gV81l65nAieAp1fAeThCqUAx0KK5dL0a2PUfOX8cKUBIAuWLda6UQlmpiwYCKJdYF25RWLMmmbi4uOUgkSaB+EitDcOguKiQhlMneOvNvWiaFi2BeBtWqS0IpRROp5Oqqj08WVTME6kpeL1XaP3REw0RmyTC/CtTsXPHdrZtew6MMXSXi6qqPSS53dGkQshIrEzTJDsni927XyfG4bB+GgabNpXy0su7EGLpBRQhAUVpaQnZ2VkTqmktttl54fkyEhKcS46C5tL1moWMhBAMDQ3h83XhTkxkXWoKD0dG+Oz45zQ2nuXWrd4lOYcIIyCEYGBgkMYzZ7np8wGSUCjE9+cu4Gn7GdM0V5bABAmbzYaUE0sEmqahyYi3iI7AYrAYpVw8ASEBDTQt7O2Pj19FcnJSREQiEqFJ30LQ8VsHd/r6cDgcBINBlFIYhjFpo5TitVdf4cWdlTR82ci3350jEAiEFSuRkZ4ecf2YponbnUhRUSHd3T3cv/+AgoL1xMXFTlanEIJ9+/ayZeszjI0+xNPq4cgnx+j4/erSCBiGMRnqpKQkag7sp7KiHI+njXeq36fuYC0lJRumRcFut0+dWNN4cO8edXWHOf3V17P2nzcFUko2btzAn34/w8N+amreo3JHBUJqrNZ1YmMdxK9OwB7rxM4UAUxjSrBMRVJyMvn5eUgpZ5VsWAKmaZKWlsqhjz4gFAoxMDjI5i2bEVLS29NDbe2HhP4J0dzUgveyd9plKyt7lty8XBCCwbv91DecpvHMN9OiuTABpcjNyWHturXEOBzk5ueBUvR29/Du/gNc/qUdKSUHD308a63T6SQrM5Omph84cvQ4165dB5izasISEEBBwXrr8RkPm2manDzVgOentskcyxlCpJTii5P1NLe04vW2Ewj8Ne9zHVYHHI4YCgsLph5MIZD2GCoqynG7E8PWtxACn6+LS5eaCAb/XrBXsGH17dNio5QiIWE1mVlZgMRUimAgQH//AB0dVxkdHZ1305lRmQfKhjU02GeeYmRkhPPnL9Du9XLjRid/3PTR13cHv9+PaZpR9QCP4ZHISE8fBlxz0gMYVzohBFLK5XI8Ab/EGpfmhGDqFdTm0f4ocFtizWpR99dLgAIuSuAY0P4/EGgHPtVcuj4MXMea1VJY+RFNAVewhtNOzaXrAHeBZmAMa4J1ABqWTizXeB4EuoB6oBroRAj+BajZemNynEWXAAAAAElFTkSuQmCC"], ["you", "data:image/png;base64,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"],
   ["kagi", "data:image/png;base64,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"],
@@ -1095,6 +1107,8 @@ const ENGINE_LOGOS = new Map([
   ["context", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACWElEQVR4AexVS2gTQRj+djfGvEtpPEhF8FBPUhW8Sm3UkyKIiBCiF0+iVZCCivjASrWe9KAEChWhPhBvgoqKDzyFSgVPbcilbfqgaZOmSZvNJtntzDY5JDObdCm0UDbwMTvf/PPPN9/MPxH3XkxomwkRm/yzBFgOWA6YcsDfJOJO0I0H5z2mcC/kwS6/yC14PssNBQ612RAKOHGuw2EKwSMOHN5n52Y1JUDgplgfaUrA+pbiz7YE1HVg+zZg9w4JXlf16SsFDR/+yOjuz+BaeBEDX3PI5DS+xw1YrgCvU9DLLPKsBd8eNSPytAXhLh9a/RISaRVnexdw+1UWHyN5fPmroO/9Ek7eTWE0XmywHDvMCKC7HrjepJeZ0766c4lEde63o/uMG73vshiZKDGZZlIqul5koBTNOUFSV+cKdjrRvsdWTZZ7AtFjVM80ZGy2hN//Ffq5ZjACjh3kPxiVjIED9cejk6w7lbm8lhFAz58XWOG8DgHUiUq/tvXVXNja8do+IyA2VX8HsekSNINjtklAR3t9hxoKGPyRg2qwAJ08u6BCFOgXi0snXHrZsiPGDOPAcKyIh2+yKHKMGI4V9D+V8FUf2lrJdst5dzaL6LngwZVTrjLDNovLGksShhFAOLz+KeN0TwovyQPz/V8eb3/JCD1JI9iXRuBGUhcoKxrc5D44iOMS0dL/eRnHbyW5OHoziU9DeZqaAVcAjYrGS3hMHpjLzzO4P5jFULSgn/3kvIrxhIoJgiVZg6wA8TlV5yjPAx03ujeGAqiIjYAlwHJg6zvQqJJWAAAA///6NLaSAAAABklEQVQDAHBHI7DdQJRaAAAAAElFTkSuQmCC"],
   ["linkup", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAAAAABWESUoAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAAJcEhZcwAACxMAAAsTAQCanBgAAAAHdElNRQfqCggUECHpi6upAAABf0lEQVQ4y2NgGA6AEcFkUlRnunPnD04FQvm2r/+JX+55jMMo/rnzNViYFXo2K6KKM8MYpRJ5T//9/7BfJfChq6fWt7foCgyzKp4wMDAw/Ocs8Gb+pZL47xKaDd31DAwMDAxirXsm75FgYLA5aARzOoSSNVjLwMDAYDpPKK34pSsDw5HjrqgKLF7dZGBgDOzdXHDv1xYPVgaGe1KoCqxO/mZgSipsmfmTgeGwqDIDA8dPFAU8KmcZmDKiS3YxMDAwPHtsxsCgfB9FgSTbPYaUkKJTDAwMDAz/TpswSWl/UpVlZ2BgYGBhYGBgYJD//DYyqvgCAwMDA5uYgpKnqKxSUizzzdr3MAWyL2yyas4ysErrmmoIfnv756Dv1On/jDpl4QrEhcomnDK1NRV9e2XhjWcMi1mZln7zTtt6E26FsP8WjXi2a6vPP/3FwMDA8K54s30A8/Stv+EK+Nil7k869w4WrK/lrfkX7/mEFN0+vHtfIYW7leHBm7+pkNhGFAAAt/R3CaRv9kwAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMTAtMDhUMjA6MTY6MzMrMDA6MDD6gO4vAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTEwLTA4VDIwOjE2OjMzKzAwOjAwi91WkwAAAA50RVh0U29mdHdhcmUARmlnbWGesZZjAAAAAElFTkSuQmCC"],
   ["deepseek", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH6goRFBcFt9jBqgAABLpJREFUWMPt12+o3nUZBvDP9Txnwz+bzj8xTCG1FCPBGaGNIEEkMreliCRUhCZaZ/VCobCQIBMiNZJgRyIRzLDEsvQcKYvCjDRGfyBMbCVJKppQ6nRzbXueqxfPmdvOzsz1Ksj7effj+7uv63df131/74c34v89cqAvrJkeiQ7IYY0jsT08g9HshqG10yM4BaekuafR2ZnB6ycwSdDIYHnblWIFlmi2YDNOip6L1eIY3I1rsKWNhLbXRtbRNXgqHbj35t1Qa67YRgYxGOwmsHb9iApOxsWSc3B8dTkGmu3YgqMSh0Lbx/EBsmmgxpN0S3Bn0gtwb+tGPJzYuatCTaRdhbXZA3wpPozPSU56PXK0fQoX4DcRnTxeirsT582f+Ue4Grfj1MaJqWNxKVk2XLt+BEMxLW6QHPP6DZTDEmcmnsbjoclglPTd5ExIcgg5GaeJa8lHw7mSlWXjoA28H18gyw/IkYGchlvLx5suqTF1v9qyx7lTJJeQN4WhRNtX6F0D6ZvL1eSoAwLfm8nR4gbN5e14iJ/T22n3I55wJ+6awgdxxn8PvluO6nUxGFVviVyjiivEpA/bimfVd3B9YvNU5AIsVU/Qp8gUVpZjEgcdEIlkRduvkJW4ifwUl2GgHscNrYfCY9gxu2FoSr2zvIjLxMOpqXKkeAd9X1kXjt/vzKrnyu+kJ+PEJIdVr9GcTYdYMv/uX8htYdueg2mAFZPUfVltnZ0ZbJ6bGTxB76teiXNbN7V9YT8f/sfw5XBhmJvomynxXsl7ZD47z5XtC00xmMjn0HBc9vjKuQ1DcxumxuoxfBaX0k2LlOBYelWbw9W0+vV+iD4aHUv3IbADU2VVs2sU7465mSG6I8kPcAl9ZIHyK8m7wpFNnsR19MUF4FvFb4nNB29dQCCenbjYWWkPX4z63MyUtNo8pD6tfXI3vsPFsdKL6Il4Uic594hN4Q/CgzcuX0BAfz+f6XSsbmLdJ0b7kLh3ZihqRwYPiC/RVxYc+RD5WZMfkre9KtDk92PN32vfsTBQ96ntYhm5LO2h3c/tOTsztKRj6tvzvbynFINwfDhBDHdbxN9wR42NDtq6CAHux7yuPQ8Xj5N9vPAqzOTxK7heF/phYXSEb+j4keBHX9130mfN+rG06yU3YUr7V3ysyS/TTpqKQTnfpIQ/wcuT5umF4hayYlH49nvhcvH87IbhohQHmYzrO7RzRZMTykzas+1sqPFo1Og5+C5uTayab9l71I1tt+8FPAH/RfiMeN54P1fCvAeI5/H56MYgyanltk5lWhyR4aDi+5JtSS4qd8n4I2JQvoav194k8GLjLWWZwcCa9TsWlxTWTY+ME9FVmCGr50u4XWyMbCzHhfNNFg70pfJN3KL+iU/hqsn9v6sS3YoHUldi0+zMcHEC7NqKQvrW8kV1YZLXvIyqjTzTidNfkD6thpG3V1dgJ/4UuRp/Xmw53euGWffJGmcMy8RaXIEzIge/BovR/IjeIL7VZiuW0UPmCbw0WjrYNvWvkdmbp16bwK5Ys36nGKrxEVhNzlKnh6Nl3mWTcfsofoUHU09PVvDF3b6/+I//C86bHkOiB4elk70buqOTeTCeO0DQN+J/Kv4N8i0LCZOZV/cAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMTAtMTdUMjA6MjM6MDUrMDA6MDBhWN3KAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTEwLTE3VDIwOjIzOjA1KzAwOjAwEAVldgAAAABJRU5ErkJggg=="],
+  ["seltz", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAVFBMVEX///8cwZwAv5jr+fWU38z2/fwixKFdz7KY4M9iz7Tw+/g+yqvb9vDz/Prm+fTQ8ups07rL7eM0xaPG7uVQza+F2cO06Nui5NS+6+B318Cr5daM3Mju0M2xAAACH0lEQVRYhc1X25KDIAyVWEWQLaj06v//54pctHFFizudnocddw45DSEJIcuiEE0j4iui4IoAEMWTBRiQAcBS7fOWjGjzRAFRWoEyNQzCe5AscNSDO3G4JgpQgHpACTrJvGDkab+ehBUJAoxI/ylJQio8oJv+6eCx167IR5zp3N4oKEvkG5u50XIEwPOVqIBYhj7/tvTLwJ2cRumb144AqNbtuV81FBBytaCeIvV6deZkXYBBINdr67sF6Ec8+NFhEf1B3CUIaEzNcAWXCIDzIDtbavgbLe5O0REaekyJBzOM6v6ym29jBO9BnQJu55EqDLNhPoHBHKfddgGnKepm69G2eJZiWaTVq8BtsaAQ0u6Mq7Ys20VokMCiBO/Gytx6LsVAxgVwEDrw+SbdCvWegHK0zBr3Vb8n4DoHNEGgfU+gDQLS5S59T8AV5xA6X2b4GLaCSHwQdx7jIhU7f4zZSiLdNvJgSqQViA0PttG/VBNOk3WYkrUbktVU0Ap6bgt9w1xeTNNg/aLt9aBtq7ngnH/BNfQtHJ+8dgcfbWlTU4ULomZdOdJU//Niod93tX1GYBowSCQGkQFjSJewCv0Mn054cWfNUdV+yEJ9fEgxO2XVG2XF7TAnNBrziJaW2f18QYPm/moMODrqmmHb+XBPG7azTENrxv1lx96Lqz/Ue6LAvz260gWOesCPPjwPP32znJorgSY7MHRZ2TQyfhX8AjQuFwECvVDNAAAAAElFTkSuQmCC"],
+  ["webiq", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAB1SURBVFhH7daxDYAwDERRm0wCLOINwkbxLmEHFBgqAgYwstjATZorfnnWK01vXuXOs0bzfblISmONRH7k2RaL5ns/pCdbJAAAAAAAAAAAgIb/A6l24do1mu/tSGKNNRL5kWnvFs33/7HJIgEAAAAAAADAcMAHzW+BkkFXWVgAAAAASUVORK5CYII="],
   ["clawifi", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAIAAAD8GO2jAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAEUGVYSWZNTQAqAAAACAABh2kABAAAAAEAAAAaAAAAAAAEkoYABwAAA/8AAABQoAEAAwAAAAEAAQAAoAIABAAAAAEAAAAgoAMABAAAAAEAAAAgAAAAAEFTQ0lJAAAAU2lnbmF0dXJlOiBGQWRGSzJRZTBocDJ0Q2lwblJST0NYcWRndndMdkNwSmZVME1NRlBjd3JuNGpveEE1NHUwaFQ4aDc5RDQzWW10MmdTbFBNM2dsUnBCcHh0c2srU1p5ZUlOMGdhRmJHQzdLbzJ3QnVpbHBOYzlMazMwZVBCZldQVGZkNlhaNzRaUGdQeEVDa2t0U3VmWnBiamtVakRHd1VFaFErZUd2dHYrbGY1dW1pSUZkakV4aysvL0RISk5GZ1VjWHF0WHV0eTBqT0g5WTRKY0lrRE0xK3lkSDNOM05TWkgvbEZTd0tZN3RXazdIS0Q5a3VzR25mbXduaFRpdklaMG1SbDcvS1BSS2VVYVI1OU40SCtvZGJDNkd4aURjbzJ4M0c4OXRlL2ZhWENQYk5UVjNIUWhoOTRUM1g4TGRpWGh6M3NUVkNvSHVrSHBwclJYSzFSMng1TXB3bXZzaU5PN0xGSk9RWVYzZ1FRYkhRUzl1UDdVS1ViUFU4Sks1ZmVRV1lxWXR4MVU2QWU4NkNpK2Y5ODRDcEZRNnRseWY4UWtqbFByQ3VOUDFHQ1lmN3Q5S0lvZE5sMWxXS3Zrd0t1REtoUE9GSnB0VzAvYlJDc0tPZno2Z21RdGdrUlg1c2tzTHJFY25XcTB5NEZ4TjFiZVd5ZXZTOGh4b0hHaDA2RjRhOXZRdG5ZdTZwblVKaXQ5VU9od2pscjZneWFyVGpzWmhqMDZVVkM2SHZOOENwbnBMUGk5QWhBYWdlWkJPSTZpSmFUc1J5eUhmK2NxYnR6SllKaHh2M1F6WmtnYndIbWM4L3I5czFPa3JRN3RkemxaYit6UHdUY1JCcC9yZ2Zldm5pNWkzYVFRRkhqZ3BaaUtsa2g1emlEUWJJbHpSek0zUms5a0M3ZGQ4b1JwTzRaM0ttYm9WWmZOdDBmYnpaYlpCVW4yV2kyRko4Y05ZQ3lXSWh0c1p1UU1qMnYwMnBzbUdCNHhQR0FKS3d5ak9NSDdMSFhGNHhMR1RtRTg2RGw2VWROZklHZGVaVkQvdUxMeEpUWjZFK0doWjZBS1VxdHY0STFSQ25aRi9QL3VENEFvWjR3TW9tWXZEbHVTUGo2NWVZT3JybGd2K0E2T2pSdWJJcjJ4NDcvUEZjdEp2ZzNKc3p5V2ZLbFJZdUFHSlpaV3FRN3lydHJNa2JSOVdGNHU1ZVMwMWpmQURveC9aUG9pNmJ5bkZXdjlXWUE2SG9jY3daQW5BT2ZBOENwTUFlU2IwdHZ2Snl6VmE1cEExV0RmVmNEdlVDZXpzbnV0cmJqQjBTSWVyRVVKekt2M1dRTFJjYkhrM0srUzFQWWZZcEJZWDRnPQAARoR1AAAKuGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNi4wLjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczpleGlmPSJodHRwOi8vbnMuYWRvYmUuY29tL2V4aWYvMS4wLyIKICAgICAgICAgICAgeG1sbnM6ZGM9Imh0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvIj4KICAgICAgICAgPGV4aWY6VXNlckNvbW1lbnQ+U2lnbmF0dXJlOiBGQWRGSzJRZTBocDJ0Q2lwblJST0NYcWRndndMdkNwSmZVME1NRlBjd3JuNGpveEE1NHUwaFQ4aDc5RDQzWW10MmdTbFBNM2dsUnBCcHh0c2srU1p5ZUlOMGdhRmJHQzdLbzJ3QnVpbHBOYzlMazMwZVBCZldQVGZkNlhaNzRaUGdQeEVDa2t0U3VmWnBiamtVakRHd1VFaFErZUd2dHYrbGY1dW1pSUZkakV4aysvL0RISk5GZ1VjWHF0WHV0eTBqT0g5WTRKY0lrRE0xK3lkSDNOM05TWkgvbEZTd0tZN3RXazdIS0Q5a3VzR25mbXduaFRpdklaMG1SbDcvS1BSS2VVYVI1OU40SCtvZGJDNkd4aURjbzJ4M0c4OXRlL2ZhWENQYk5UVjNIUWhoOTRUM1g4TGRpWGh6M3NUVkNvSHVrSHBwclJYSzFSMng1TXB3bXZzaU5PN0xGSk9RWVYzZ1FRYkhRUzl1UDdVS1ViUFU4Sks1ZmVRV1lxWXR4MVU2QWU4NkNpK2Y5ODRDcEZRNnRseWY4UWtqbFByQ3VOUDFHQ1lmN3Q5S0lvZE5sMWxXS3Zrd0t1REtoUE9GSnB0VzAvYlJDc0tPZno2Z21RdGdrUlg1c2tzTHJFY25XcTB5NEZ4TjFiZVd5ZXZTOGh4b0hHaDA2RjRhOXZRdG5ZdTZwblVKaXQ5VU9od2pscjZneWFyVGpzWmhqMDZVVkM2SHZOOENwbnBMUGk5QWhBYWdlWkJPSTZpSmFUc1J5eUhmK2NxYnR6SllKaHh2M1F6WmtnYndIbWM4L3I5czFPa3JRN3RkemxaYit6UHdUY1JCcC9yZ2Zldm5pNWkzYVFRRkhqZ3BaaUtsa2g1emlEUWJJbHpSek0zUms5a0M3ZGQ4b1JwTzRaM0ttYm9WWmZOdDBmYnpaYlpCVW4yV2kyRko4Y05ZQ3lXSWh0c1p1UU1qMnYwMnBzbUdCNHhQR0FKS3d5ak9NSDdMSFhGNHhMR1RtRTg2RGw2VWROZklHZGVaVkQvdUxMeEpUWjZFK0doWjZBS1VxdHY0STFSQ25aRi9QL3VENEFvWjR3TW9tWXZEbHVTUGo2NWVZT3JybGd2K0E2T2pSdWJJcjJ4NDcvUEZjdEp2ZzNKc3p5V2ZLbFJZdUFHSlpaV3FRN3lydHJNa2JSOVdGNHU1ZVMwMWpmQURveC9aUG9pNmJ5bkZXdjlXWUE2SG9jY3daQW5BT2ZBOENwTUFlU2IwdHZ2Snl6VmE1cEExV0RmVmNEdlVDZXpzbnV0cmJqQjBTSWVyRVVKekt2M1dRTFJjYkhrM0srUzFQWWZZcEJZWDRnPTwvZXhpZjpVc2VyQ29tbWVudD4KICAgICAgICAgPGV4aWY6UGl4ZWxZRGltZW5zaW9uPjQwMDwvZXhpZjpQaXhlbFlEaW1lbnNpb24+CiAgICAgICAgIDxleGlmOlBpeGVsWERpbWVuc2lvbj40MDA8L2V4aWY6UGl4ZWxYRGltZW5zaW9uPgogICAgICAgICA8ZXhpZjpDb2xvclNwYWNlPjE8L2V4aWY6Q29sb3JTcGFjZT4KICAgICAgICAgPGRjOmRlc2NyaXB0aW9uPgogICAgICAgICAgICA8cmRmOkFsdD4KICAgICAgICAgICAgICAgPHJkZjpsaSB4bWw6bGFuZz0ieC1kZWZhdWx0Ij5TaWduYXR1cmU6IEZBZEZLMlFlMGhwMnRDaXBuUlJPQ1hxZGd2d0x2Q3BKZlUwTU1GUGN3cm40am94QTU0dTBoVDhoNzlENDNZbXQyZ1NsUE0zZ2xScEJweHRzaytTWnllSU4wZ2FGYkdDN0tvMndCdWlscE5jOUxrMzBlUEJmV1BUZmQ2WFo3NFpQZ1B4RUNra3RTdWZacGJqa1VqREd3VUVoUStlR3Z0ditsZjV1bWlJRmRqRXhrKy8vREhKTkZnVWNYcXRYdXR5MGpPSDlZNEpjSWtETTEreWRIM04zTlNaSC9sRlN3S1k3dFdrN0hLRDlrdXNHbmZtd25oVGl2SVowbVJsNy9LUFJLZVVhUjU5TjRIK29kYkM2R3hpRGNvMngzRzg5dGUvZmFYQ1BiTlRWM0hRaGg5NFQzWDhMZGlYaHozc1RWQ29IdWtIcHByUlhLMVIyeDVNcHdtdnNpTk83TEZKT1FZVjNnUVFiSFFTOXVQN1VLVWJQVThKSzVmZVFXWXFZdHgxVTZBZTg2Q2krZjk4NENwRlE2dGx5ZjhRa2psUHJDdU5QMUdDWWY3dDlLSW9kTmwxbFdLdmt3S3VES2hQT0ZKcHRXMC9iUkNzS09mejZnbVF0Z2tSWDVza3NMckVjbldxMHk0RnhOMWJlV3lldlM4aHhvSEdoMDZGNGE5dlF0bll1NnBuVUppdDlVT2h3amxyNmd5YXJUanNaaGowNlVWQzZIdk44Q3BucExQaTlBaEFhZ2VaQk9JNmlKYVRzUnl5SGYrY3FidHpKWUpoeHYzUXpaa2did0htYzgvcjlzMU9rclE3dGR6bFpiK3pQd1RjUkJwL3JnZmV2bmk1aTNhUVFGSGpncFppS2xraDV6aURRYklselJ6TTNSazlrQzdkZDhvUnBPNFozS21ib1ZaZk50MGZielpiWkJVbjJXaTJGSjhjTllDeVdJaHRzWnVRTWoydjAycHNtR0I0eFBHQUpLd3lqT01IN0xIWEY0eExHVG1FODZEbDZVZE5mSUdkZVpWRC91TEx4SlRaNkUrR2haNkFLVXF0djRJMVJDblpGL1AvdUQ0QW9aNHdNb21ZdkRsdVNQajY1ZVlPcnJsZ3YrQTZPalJ1YklyMng0Ny9QRmN0SnZnM0pzenlXZktsUll1QUdKWlpXcVE3eXJ0ck1rYlI5V0Y0dTVlUzAxamZBRG94L1pQb2k2YnluRld2OVdZQTZIb2Njd1pBbkFPZkE4Q3BNQWVTYjB0dnZKeXpWYTVwQTFXRGZWY0R2VUNlenNudXRyYmpCMFNJZXJFVUp6S3YzV1FMUmNiSGszSytTMVBZZllwQllYNGc9PC9yZGY6bGk+CiAgICAgICAgICAgIDwvcmRmOkFsdD4KICAgICAgICAgPC9kYzpkZXNjcmlwdGlvbj4KICAgICAgPC9yZGY6RGVzY3JpcHRpb24+CiAgIDwvcmRmOlJERj4KPC94OnhtcG1ldGE+CvkDhBEAAAKtSURBVEgN7VJLTBNBGJ7H7rbbFhaLVFNpUgyiCSgKaNSERBJDMPEVAzEmQLjozehFD3rx4sVETYzGgxdjTFSQgxcOGpOiCFGDPDwIqZQiAqa0xdp2t9vdnXFLwybS1XLAW+cy/+v7vsz3DwCFU3Cg4MB/dwCuRQHZOKayFFc48UY7AJBERHU6on4Nk2Q6LzyPALu9zHZmD3d4G/II0M4BBusAqlGQlLWZn/Jrv/RkVJkM/UPmrwKoyOK40GjtrEcuByCELEn0R1yLSjoAO23QXQRLrAAiEkpIj4eTt9+SuGwqYy7AVDiFOyeYg15AqPZ5IdUzLvum1OASlRSdBfEs9jotTVv5tlpUswlirAwFf51/oQQiuRomApBBzp52tqmShJPi7QHx4ces15BjsJOnAJCoRNNqRsnO8V0N9ouNqMyh+KairY+oSlZpMKvybApLeDIfi53tld8F9YrlgJc/XcvWleNSnlKgRUV1ZE56NiYPBpP3BpWROeFBGxSsplTYpEoocgs6THo6hkp44XqL41ozs68cuuyARZBnkbuYqdtiPV7NeATlw6zqD2MHpwWjcn8gl81MAAD1Swgk0tr3mHDzmLWrAWgk3R8Q7w5K94dS3ePqp3nIYuzdwO714DJHqm8CESq/8lMxs6G1Hri8HefzDtfsVXtHPczmK2g9tbXXub5dKe3t1Gt/NleGlm/zFxgjukV0MRm/4YMY8S07HOf2W5qrEIfVQEQZnWc8xen3s8rwnDGfG+QR0CbDIJZSZ5aKLx8qunUU73IzuzdbW3ciAOWBaSRrqZd+mtZyeY2K+S8y2iQhp95kVqdMhDKfVf9DuiEYqxOLeiD5TLZqYLNBnhcY0+rkIlmIW45U6V4lLvWJ3WNGaz0D/mS17VTNejIWuAoOFBxYDwd+A6hLCGDERObcAAAAAElFTkSuQmCC"],
   ["firecrawl", "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACWUlEQVR42u2XX0hTURjAf3c256RVbmEyVrEyHCIM6yENwoiCoAejPy8x6EUiMqqXQCIjMh/C6qWCAskYPYgvLhgFUYFBZLGgUvBBcWtBfzbQxKXOTW8P9+Gydnd33b1tBJ2Xc78/fOfHd893zncEURRFSjhMlHj8wwChIHyfLCHAyBC018OjS5BOlQCgZgukkjDQDdePFQyhYw8I8ufbxzDQVWSAr+OZcuAWzMSLBJBOwfBgpm7hF4SeFAng6V34Ec7Wfx4pAsD4O/BfVLbNzfxlgFgEug9Bcl7ZvroK0ovw0i9ViKEACwm41gpT33L72J3QuQ/utIGpTFPYVZoB+i5A5JO6T/9VSEyDYIKfMXA4DcrAlzF41pvfLzEtzeJydpXoAnjRB0vple2uwRuQnDMIYHRo5aUai0DgpgEAogjxqLLN7QWLVSULPfJvKQhg4j2IS7nT790P7fcz74WMc2EWhgM6APwd0N8F5nJle20jtPigYXfuGGOvdZRhPAofnivbXHXQfBgEAfb4YPRV7hgFZ0BcVtaXV8C5h2CukOSt29WC6ACwuxTaAAFO34O6JllnXSPpLZXZ/o6NOgA8Tdm6Ix2w98Qf1/MinH0APoWmxNOs3taovgvCH+F8o1SKALU7oOcNlJmV/WenoG0zzCck2VIJvWFYW11gBtxe2NkqywfP5F4cwGaHXUdl+cAp1cW1HUQnb0NVjQyUbzS0SPOmejh+xYCTcL0LLgdhXbW2ztdsAec26AyC1Za/tdX8NoxHpcvF5VH3mwjBBjfYHNp66/+P01ID/AbrBqtU2IrxsQAAAABJRU5ErkJggg=="],
   ["tinyfish", "data:image/png;base64,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"],
@@ -1102,6 +1116,8 @@ const ENGINE_LOGOS = new Map([
   ["claude-search", "data:image/png;base64,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"],
   ["chatgpt-search", "data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20xmlns%3Axlink%3D%22http%3A%2F%2Fwww.w3.org%2F1999%2Fxlink%22%20viewBox%3D%220%200%202406%202406%22%3E%3Cpath%20d%3D%22M1%20578.4C1%20259.5%20259.5%201%20578.4%201h1249.1c319%200%20577.5%20258.5%20577.5%20577.4V2406H578.4C259.5%202406%201%202147.5%201%201828.6V578.4z%22%20fill%3D%22%2374aa9c%22%2F%3E%3Cpath%20id%3D%22a%22%20d%3D%22M1107.3%20299.1c-197.999%200-373.9%20127.3-435.2%20315.3L650%20743.5v427.9c0%2021.4%2011%2040.4%2029.4%2051.4l344.5%20198.515V833.3h.1v-27.9L1372.7%20604c33.715-19.52%2070.44-32.857%20108.47-39.828L1447.6%20450.3C1361%20353.5%201237.1%20298.5%201107.3%20299.1zm0%20117.5-.6.6c79.699%200%20156.3%2027.5%20217.6%2078.4-2.5%201.2-7.4%204.3-11%206.1L952.8%20709.3c-18.4%2010.4-29.4%2030-29.4%2051.4V1248l-155.1-89.4V755.8c-.1-187.099%20151.601-338.9%20339-339.2z%22%20fill%3D%22%23fff%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%2860%201203%201203%29%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%28120%201203%201203%29%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%28180%201203%201203%29%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%28240%201203%201203%29%22%2F%3E%3Cuse%20xlink%3Ahref%3D%22%23a%22%20transform%3D%22rotate%28300%201203%201203%29%22%2F%3E%3C%2Fsvg%3E"],
 ]);
+
+ENGINE_LOGOS.set("parallel-fast", ENGINE_LOGOS.get("parallel"));
 
 const isDarkTheme = () => document.documentElement.dataset.theme === "dark";
 const LOGO_DARK = new Map([[ENGINE_LOGOS.get("keenable"), ENGINE_LOGOS.get("keenable").replaceAll("%232A2A2A", "%23E6E6E6")]]);
@@ -1134,8 +1150,7 @@ function engineCell(engine, cls = "") {
   return td;
 }
 let history = [];
-let uniqueness = [];
-let overlap = [];
+let independence = null;
 let ciData = null;
 
 const fmt3 = (v) => v == null ? "–" : v.toFixed(3);
@@ -1170,12 +1185,26 @@ const ROLLING_MS = 7 * 86400e3;
 const ROLLING_NOTE = "7-day rolling mean";
 const PCT_NOTE = "% of ultimate's score";
 
-function seriesFor(bench, metric, rows) {
+const MIN_HISTORY_MS = 2 * 86400e3;
+
+function establishedRows(rows) {
+  const first = new Map();
+  let latest = -Infinity;
+  for (const r of rows) {
+    const t = Date.parse(r.ts);
+    if (!(first.get(r.engine) <= t)) first.set(r.engine, t);
+    if (t > latest) latest = t;
+  }
+  return rows.filter((r) => latest - first.get(r.engine) >= MIN_HISTORY_MS);
+}
+
+function seriesFor(bench, metric, weight, rows) {
   const out = {};
   for (const e of ENGINES) out[e] = [];
   for (const r of rows) {
-    if (r.bench === bench && r[metric] != null && r.num_scored > 0 && out[r.engine]) {
-      out[r.engine].push({ t: new Date(r.ts), v: r[metric] });
+    const field = r.engine === ULTIMATE_ENGINE && metric === "mrr" ? "recall" : metric;
+    if (r.bench === bench && r[field] != null && r[weight] > 0 && out[r.engine]) {
+      out[r.engine].push({ t: new Date(r.ts), v: r[field], w: r[weight] });
     }
   }
   for (const e of ENGINES) out[e].sort((a, b) => a.t - b.t);
@@ -1183,13 +1212,16 @@ function seriesFor(bench, metric, rows) {
 }
 
 function rollingMean(series) {
+  const stamps = [...new Set(ENGINES.flatMap((e) => series[e].map((p) => p.t.getTime())))].sort((a, b) => a - b);
+  const until = new Map(stamps.map((t, i) => [t, stamps[i + 1] ?? Date.now()]));
   const out = {};
   for (const e of ENGINES) {
-    const pts = series[e], ts = pts.map((p) => p.t.getTime());
+    const pts = series[e];
     out[e] = pts.map((p, i) => {
-      let sum = 0, n = 0;
-      for (let j = i; j >= 0 && ts[i] - ts[j] <= ROLLING_MS; j--) { sum += pts[j].v; n++; }
-      return { t: p.t, v: sum / n };
+      const cutoff = Math.min(until.get(p.t.getTime()) - ROLLING_MS, p.t.getTime());
+      let sum = 0, w = 0;
+      for (let j = i; j >= 0 && pts[j].t.getTime() >= cutoff; j--) { sum += pts[j].v * pts[j].w; w += pts[j].w; }
+      return { t: p.t, v: sum / w };
     });
   }
   return out;
@@ -1210,7 +1242,7 @@ function newsSeries(rows) {
   for (const [e, buckets] of byEngine) {
     out[e] = [...buckets]
       .sort(([a], [b]) => a - b)
-      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n }));
+      .map(([t, agg]) => ({ t: new Date(t), v: agg.sum / agg.n, w: agg.n }));
   }
   return out;
 }
@@ -1462,28 +1494,28 @@ function drawSlice(cardId, series, empty) {
 }
 
 const TREND_SLICES = [
-  ["trend-rare", "agentic_rare", "ndcg"],
-  ["trend-finance-recall", "finance", "recall"],
-  ["trend-finance-mrr", "finance", "mrr"],
-  ["trend-finance-filings", "finance", "filings_recall"],
-  ["trend-finance-filingdoc", "finance", "filingdoc_recall"],
-  ["trend-scholar-recall", "scholar", "recall"],
-  ["trend-scholar-title", "scholar", "title_recall"],
-  ["trend-scholar-body", "scholar", "body_recall"],
-  ["trend-scholar-clue", "scholar", "clue_recall"],
-  ["trend-scholar-tot", "scholar", "tot_recall"],
-  ["trend-legal-recall", "legal", "recall"],
-  ["trend-legal-caselaw", "legal", "caselaw_recall"],
-  ["trend-legal-code", "legal", "code_recall"],
+  ["trend-rare", "agentic_rare", "ndcg", "num_scored"],
+  ["trend-finance-recall", "finance", "recall", "num_scored"],
+  ["trend-finance-mrr", "finance", "mrr", "num_scored"],
+  ["trend-finance-filings", "finance", "filings_recall", "filings_n"],
+  ["trend-finance-filingdoc", "finance", "filingdoc_recall", "filingdoc_n"],
+  ["trend-scholar-recall", "scholar", "recall", "num_scored"],
+  ["trend-scholar-title", "scholar", "title_recall", "title_n"],
+  ["trend-scholar-body", "scholar", "body_recall", "body_n"],
+  ["trend-scholar-clue", "scholar", "clue_recall", "clue_n"],
+  ["trend-scholar-tot", "scholar", "tot_recall", "tot_n"],
+  ["trend-legal-recall", "legal", "recall", "num_scored"],
+  ["trend-legal-caselaw", "legal", "caselaw_recall", "caselaw_n"],
+  ["trend-legal-code", "legal", "code_recall", "code_n"],
 ];
 
 let drawAllTrends = null;
 
 function drawTrends(rows) {
   const pending = new Map([["trend-news", () => drawSlice("trend-news", newsSeries(rows))]]);
-  for (const [id, bench, metric] of TREND_SLICES) {
-    pending.set(id, () => drawSlice(id, seriesFor(bench, metric, rows),
-      `No ${verticalName(bench)} data yet — collected daily.`));
+  for (const [id, bench, metric, weight] of TREND_SLICES) {
+    pending.set(id, () => drawSlice(id, seriesFor(bench, metric, weight, rows),
+      `No ${verticalName(bench)} data yet — collected twice daily.`));
   }
   const flush = (all) => {
     for (const [id, draw] of pending) {
@@ -1774,7 +1806,7 @@ function renderStandings(rows) {
   ];
   card._summaryData = () => {
     const latency = new Map(latencyStats(rows).map((s) => [s.e, s]));
-    const unique = uniquenessAgg(inRange(uniqueness, WEEK_MS));
+    const unique = uniquenessAgg(independence.week.uniqueness);
     const runTimes = STANDINGS_BENCHES.map(([b]) => [...new Set(ciWindowed(rows, b).map((r) => r.ts))].sort());
     const allTimes = runTimes.flat().sort();
     return {
@@ -1786,7 +1818,7 @@ function renderStandings(rows) {
         const price = PRICES.get(x.e) ?? null;
         const lat = latency.get(x.e);
         const u = unique.get(x.e);
-        const uniqueShare = u?.relDen ? u.relUnique / u.relDen : null;
+        const uniqueShare = u?.total ? u.relUnique / u.total : null;
         return {
           engine: x.e, name: displayName(x.e), home: x.e === HOME_ENGINE,
           overall: x.overall, ci: c ? [c.lo, c.hi] : null,
@@ -1997,16 +2029,18 @@ function renderStandings(rows) {
 
 const PRICES_ASOF = "2026-08-21";
 const PRICES = new Map([
-  ["keenable", { usd: 1.00, plan: "Frontier Tier — at 100 RPS+" }],
-  ["keenable-realtime", { usd: 1.00, plan: "Frontier Tier — at 100 RPS+" }],
+  ["keenable", { usd: 1.00, plan: "Dedicated capacity — at 100+ RPS", url: "https://keenable.ai/pricing" }],
+  ["keenable-realtime", { usd: 1.00, plan: "Dedicated capacity — at 100+ RPS", url: "https://keenable.ai/pricing" }],
   ["google", { usd: 0.30, plan: "Serper Ultimate — $3,750 / 12.5M credits" }],
   ["bing", { usd: 1.00, plan: "SearchApi.io Octo 5M — $5,000/mo" }],
   ["brave", { usd: 5.00, plan: "flat rate" }],
   ["brave-llmcontext", { usd: 5.00, plan: "flat rate" }],
   ["exa", { usd: 7.00, plan: "pay-as-you-go" }],
-  ["exa-instant", { usd: 7.00, plan: "pay-as-you-go" }],
+  ["exa-instant", { usd: 4.00, plan: "pay-as-you-go" }],
+  ["exa-lite", { usd: 4.00, plan: "pay-as-you-go" }],
   ["parallel", { usd: 5.00, plan: "pay-as-you-go" }],
   ["parallel-turbo", { usd: 1.00, plan: "pay-as-you-go" }],
+  ["parallel-fast", { usd: 1.00, plan: "pay-as-you-go" }],
   ["perplexity", { usd: 5.00, plan: "flat rate" }],
   ["perplexity-fast", { usd: 1.00, plan: "fast search — $1 / 1k requests" }],
   ["tavily", { usd: 5.00, plan: "Growth — $500/mo / 100k credits" }],
@@ -2017,6 +2051,8 @@ const PRICES = new Map([
   ["jina", { usd: 3.40, plan: "$0.05 / 1M tokens, ≈68k tokens per search" }],
   ["context", { usd: 0.50, plan: "Scale — $499/mo / 1M credits, 1 credit per 10 results" }],
   ["deepseek", { usd: 0.75, plan: "pay-as-you-go — $0.75 / 1k requests" }],
+  ["seltz", { usd: 5.00, plan: "pay-as-you-go — $5 / 1k requests" }],
+  ["webiq", { usd: 7.00, plan: "pay-as-you-go — $7 / 1k requests" }],
   ["clawifi", { usd: 0.60, plan: "Scale — $299/mo / 500k credits, 1 credit per search" }],
   ["octen", { usd: 1.00, plan: "pay-as-you-go" }],
   ["tinyfish", { usd: 0.00, plan: "free" }],
@@ -2049,7 +2085,9 @@ function renderPriceTable() {
     markHome(tr, e);
     tr.appendChild(engineCell(e));
     tr.appendChild(el("td", { class: "num" }, fmtUsd(p.usd)));
-    tr.appendChild(el("td", {}, p.plan));
+    const planCell = el("td", {}, p.url ? null : p.plan);
+    if (p.url) planCell.appendChild(el("a", { href: p.url }, p.plan));
+    tr.appendChild(planCell);
     table.appendChild(tr);
   }
   holder.appendChild(table);
@@ -2459,24 +2497,10 @@ function renderOverlap(rows, uniqAgg) {
   shareHolder.replaceChildren();
   graphHolder.replaceChildren();
   const pairKey = (a, b) => (a < b ? `${a}|${b}` : `${b}|${a}`);
-  const pairs = new Map();
-  const seen = new Set();
-  for (const r of rows) {
-    seen.add(r.a);
-    seen.add(r.b);
-    const key = pairKey(r.a, r.b);
-    let agg = pairs.get(key);
-    if (!agg) pairs.set(key, agg = { low2: 0, lowUrls: 0, nLow: 0, shared: 0, union: 0 });
-    if (r.num_suspect != null) {
-      agg.low2 += r.num_suspect;
-      agg.lowUrls += r.low_shared_urls || 0;
-      agg.nLow += r.num_queries;
-    }
-    if (r.union_urls != null) {
-      agg.shared += r.shared_urls;
-      agg.union += r.union_urls;
-    }
-  }
+  const pairs = new Map(rows.map((r) => [pairKey(r.a, r.b), {
+    low2: r.num_suspect, lowUrls: r.low_shared_urls, nLow: r.num_queries, shared: r.shared_urls, union: r.union_urls,
+  }]));
+  const seen = new Set(rows.flatMap((r) => [r.a, r.b]));
   const engines = ENGINES.filter((e) => seen.has(e));
   const rank = new Map(engines.map((e, i) => [e, i]));
   const famRank = (e) => rank.get(ENGINE_FAMILY.get(e) ?? e) ?? rank.get(e);
@@ -2635,46 +2659,33 @@ function renderSharingGraph(holder, engines, pairs, uniqAgg) {
 }
 
 function uniquenessAgg(rows) {
-  const agg = new Map();
-  for (const r of rows) {
-    if (Date.parse(r.ts) < TREND_START) continue;
-    const e = agg.get(r.engine) || { unique: 0, total: 0, relUnique: 0, relDen: 0 };
-    e.unique += r.unique_urls;
-    e.total += r.total_urls;
-    if (r.unique_relevant_urls != null) {
-      e.relUnique += r.unique_relevant_urls;
-      e.relDen += r.total_urls;
-    }
-    agg.set(r.engine, e);
-  }
-  return agg;
+  return new Map(rows.map((r) => [r.engine, { unique: r.unique_urls, total: r.total_urls, relUnique: r.unique_relevant_urls }]));
 }
 
 function renderIndependence(range) {
-  const weekOnly = range === "last 7 days";
-  const pick = (rows) => (weekOnly ? inRange(rows, WEEK_MS) : rows);
+  const totals = independence[range === "last 7 days" ? "week" : "all"];
   for (const span of document.querySelectorAll(".ind-range")) span.textContent = range;
-  const uniqAgg = uniquenessAgg(pick(uniqueness));
-  renderOverlap(pick(overlap), uniqAgg);
+  const uniqAgg = uniquenessAgg(totals.uniqueness);
+  renderOverlap(totals.overlap, uniqAgg);
   renderUniqueness(uniqAgg);
 }
 
 function renderUniqueness(agg) {
   const holder = document.getElementById("uniqueness-table");
   holder.replaceChildren();
-  const engines = ENGINES.filter((e) => agg.get(e)?.relDen);
+  const engines = ENGINES.filter((e) => agg.get(e)?.total);
   if (!engines.length) {
     holder.appendChild(el("div", { class: "empty" }, "No uniqueness data yet."));
     return;
   }
-  engines.sort((a, b) => agg.get(b).relUnique / agg.get(b).relDen - agg.get(a).relUnique / agg.get(a).relDen);
+  engines.sort((a, b) => agg.get(b).relUnique / agg.get(b).total - agg.get(a).relUnique / agg.get(a).total);
   const table = el("table");
   const head = el("tr");
   for (const h of ["engine", "", "unique", "URLs"]) head.appendChild(el("th", {}, h));
   table.appendChild(head);
   for (const e of engines) {
     const unique = agg.get(e).relUnique;
-    const total = agg.get(e).relDen;
+    const total = agg.get(e).total;
     const pct = unique / total;
     const tr = el("tr");
     markHome(tr, e);
@@ -3058,13 +3069,14 @@ function md(node) {
   return walk(node).replace(/\s+/g, " ").trim();
 }
 
-function buildMarkdown(lead) {
+function buildMarkdown({ byline, lead, license }) {
   drawAllTrends?.();
   const header = document.getElementById("top");
   const lines = [`# ${md(header.querySelector("h1"))}`];
   const push = (...blocks) => { for (const b of blocks) if (b) lines.push("", b); };
+  const mdHtml = (html) => html && md(Object.assign(document.createElement("div"), { innerHTML: html }));
 
-  push(md(header.querySelector(".lastrun")), lead);
+  push(mdHtml(byline), md(header.querySelector(".lastrun")), mdHtml(lead));
   for (const n of header.querySelectorAll(".fm > p:not(.lastrun), .fm > ul")) {
     push(n.tagName === "UL" ? [...n.children].map((li) => `- ${md(li)}`).join("\n") : md(n));
   }
@@ -3090,6 +3102,7 @@ function buildMarkdown(lead) {
     else if (n.matches("p.section-desc")) push(md(n));
     else if (n.matches(".card")) pushCard(n, 3);
   }
+  push(mdHtml(license));
   return lines.join("\n") + "\n";
 }
 
@@ -3356,18 +3369,19 @@ async function main() {
       .then((r) => (r.ok ? r.text() : ""))
       .catch(() => "")
       .then((text) => text.split("\n").filter(Boolean).map((l) => JSON.parse(l)));
-  const [histRows, overlapRows, uniquenessRows, families, ci] = await Promise.all([
+  const [histRows, indep, families, ci] = await Promise.all([
     fetchRows("data/history.jsonl"),
-    fetchRows("data/overlap.jsonl"),
-    fetchRows("data/uniqueness.jsonl"),
+    fetchJson("data/independence.json").catch(() => ({})),
     fetchJson("data/families.json").catch(() => ({})),
     fetchJson("data/ci.json").catch(() => null),
   ]);
   ciData = ci;
   ENGINE_FAMILY = new Map(Object.entries(families));
   for (const r of histRows) r.bench = LEGACY_BENCH[r.bench] || r.bench;
-  history = histRows.filter((r) => BENCHES.includes(r.bench) && !HIDDEN_ENGINES.has(r.engine));
-  registerEngines(history.map((r) => r.engine));
+  history = establishedRows(histRows.filter((r) => BENCHES.includes(r.bench) && !HIDDEN_ENGINES.has(r.engine)));
+  const established = new Set(history.map((r) => r.engine));
+  registerEngines([...established]);
+  ENGINES = ENGINES.filter((e) => established.has(e));
 
   if (history.length) {
     const lastTs = history[history.length - 1].ts;
@@ -3378,8 +3392,11 @@ async function main() {
   drawTrends(history);
   renderLatencySummary(history);
   renderAll();
-  uniqueness = uniquenessRows.filter((r) => !HIDDEN_ENGINES.has(r.engine));
-  overlap = overlapRows.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b));
+  const visible = ({ overlap = [], uniqueness = [] } = {}) => ({
+    overlap: overlap.filter((r) => !HIDDEN_ENGINES.has(r.a) && !HIDDEN_ENGINES.has(r.b)),
+    uniqueness: uniqueness.filter((r) => !HIDDEN_ENGINES.has(r.engine)),
+  });
+  independence = { all: visible(indep.all), week: visible(indep.week) };
   renderIndependence("all runs");
   document.getElementById("independence-range").addEventListener("click", (ev) => {
     const btn = ev.target.closest("button");
