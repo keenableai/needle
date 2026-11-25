@@ -39,6 +39,16 @@ from needle.shared.search import SearchResult
             "doc:doc.qt.io/qtforpython/pyside6/qtopcua/qopcuanode",
         ),
         ("https://example.com/docs/api/main.html", "doc:example.com/docs/api/main"),
+        ("https://example.com/docs/1.0.0-rc.2/guide.html", "doc:example.com/docs/guide"),
+        ("https://example.com/3d-models/intro", "doc:example.com/3d-models/intro"),
+        (
+            "https://example.com/changelog/2026-11-19-radar/notes",
+            "doc:example.com/changelog/2026-11-19-radar/notes",
+        ),
+        (
+            "https://docs.aws.amazon.com/bedrock/latest/userguide/watermarking.html",
+            "doc:docs.aws.amazon.com/bedrock/userguide/watermarking",
+        ),
         ("https://example.com/en/guide", "doc:example.com/en/guide"),
         (
             "https://docs.rs/tracing-tunnel/latest/tracing_tunnel/struct.TracingEventSender.html",

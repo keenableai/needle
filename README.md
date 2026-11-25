@@ -216,12 +216,13 @@ it breaks down by suite, syntax, and court.
 ## coding
 
 Known-item retrieval of the pages a coding agent looks for. One slice with
-three doc types: 20 API docs, 20 issues and 10 Stack Overflow questions per
-run (`--counts`):
+five doc types; each run has 20 API docs, 20 issues, 20 Mintlify pages, 10
+fresh changelog entries and 10 Stack Overflow questions (`--counts`):
 
 ```bash
-needle coding generate --out coding.jsonl   # --counts api=20,issue=20,qa=10
+needle coding generate --out coding.jsonl   # --counts api=20,issue=20,mintlify=20,fresh=10,qa=10
 needle coding run --queries coding.jsonl --out coding.json
+uv run python scripts/refresh_mintlify_hosts.py --date 2026-12-01   # monthly, needs bq
 ```
 
 - **`api`** — a random documented item from a long-tail docs site. Half come
@@ -239,12 +240,25 @@ needle coding run --queries coding.jsonl --out coding.json
   bug would type, with one quoted span copied verbatim from the issue (the
   error message or symptom); the bench checks the span and rejects the issue
   number.
+- **`mintlify`** — a random page of a product docs site hosted on Mintlify.
+  `src/needle/coding/data/mintlify_hosts.csv` lists every host whose home
+  page loads Mintlify fonts or assets in the HTTP Archive crawl, with its
+  CrUX rank bucket; `scripts/refresh_mintlify_hosts.py` rebuilds it with one
+  BigQuery query (about 40 GB). The sampler skips hosts in the top 1M,
+  reads the site's `/llms.txt` (drops starter kits and sites with fewer than
+  10 pages), and takes one page as Markdown (`<page>.md`). The query names
+  the product and must add two words from the page that are not in its title.
+- **`fresh`** — an entry from the last 14 days of the Cloudflare, Vercel,
+  GitHub and Supabase changelogs or the Amazon Bedrock doc history; gold is
+  the entry's own page, so the bench measures how fast an engine indexes new
+  pages. The query names the product and must add two words from the entry
+  that are not in its title.
 - **`qa`** — a Stack Overflow question with score ≥ 1 and an answer, from a
   random month in one of `--tags` (python, javascript, typescript, rust, go,
   java). An LLM rephrases the problem; the bench rejects the query unless it
   adds two words that are not in the title.
 
-`api` and `qa` alternate plain and `site:` queries; `issue` cycles plain,
+`api`, `mintlify`, `fresh` and `qa` alternate plain and `site:` queries; `issue` cycles plain,
 `"quoted"`, plain, `site:github.com`. `run` maps each result URL to a doc
 key and scores a hit when it equals the gold key. A docs page keeps its host
 and path without version and locale parts (`/en/latest/`, `/v0.6.0/`,
@@ -311,7 +325,7 @@ the overlap and uniqueness stats exclude it.
 engines: news hourly (`--limit 20`); twice daily with fresh gold — finance
 00:17/12:17 UTC (`--limit 120 --judge`), agentic_rare 03:17/15:17
 (`--limit 100`), scholar 06:17/18:17 (`--per-cell 7`), legal 09:17/21:17, coding 01:17/13:17
-(`--counts api=20,issue=20,qa=10`). Gold lives on `gh-pages` between runs;
+(80 queries). Gold lives on `gh-pages` between runs;
 a manual dispatch runs only the benches it selects; a daily bench also runs
 at any scheduled hour when its gold file is missing. Each bench is its own job and publishes its
 own run, so a slow daily bench never delays the hourly news result. Each

@@ -8,7 +8,13 @@ from typing import Any
 
 from needle.coding.models import Doc, build_row
 from needle.coding.projection import SYNTAX_CYCLES, build_prompt, query_ok, syntax_query
-from needle.coding.sources import ApiDocsClient, GitHubClient, StackExchangeClient
+from needle.coding.sources import (
+    ApiDocsClient,
+    ChangelogClient,
+    GitHubClient,
+    MintlifyClient,
+    StackExchangeClient,
+)
 from needle.shared.concurrency import bounded_gather
 from needle.shared.llm import GENERATION_MAX_TOKENS, REASONING_EFFORT, LLMClient
 from needle.shared.prompts import clean_llm_line
@@ -90,6 +96,8 @@ async def run_generate(
     stackexchange: StackExchangeClient | None,
     llm: LLMClient,
     hour_ts: datetime,
+    mintlify: MintlifyClient | None = None,
+    changelogs: ChangelogClient | None = None,
     now: datetime,
     counts: dict[str, int],
     repos: tuple[str, ...],
@@ -106,6 +114,10 @@ async def run_generate(
         fetches["issue"] = _issues(
             github, repos, now=now, months_back=months_back, seed=seed, n=n["issue"]
         )
+    if mintlify is not None:
+        fetches["mintlify"] = mintlify.docs(n=n["mintlify"], seed=seed)
+    if changelogs is not None:
+        fetches["fresh"] = changelogs.docs(n=n["fresh"], seed=seed, now=now)
     if stackexchange is not None:
         fetches["qa"] = _windowed(
             stackexchange.questions,
@@ -122,7 +134,7 @@ async def run_generate(
         candidates={t: len(docs) for t, docs in candidates.items()},
         source_errors=[
             e
-            for client in (api, github, stackexchange)
+            for client in (api, github, mintlify, changelogs, stackexchange)
             if client is not None
             for e in client.errors
         ],

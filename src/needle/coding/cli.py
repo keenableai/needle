@@ -5,7 +5,13 @@ from collections import Counter
 from needle.coding.generate import GenStats, run_generate
 from needle.coding.models import DOC_TYPES
 from needle.coding.score import GoldDoc, run_coding
-from needle.coding.sources import ApiDocsClient, GitHubClient, StackExchangeClient
+from needle.coding.sources import (
+    ApiDocsClient,
+    ChangelogClient,
+    GitHubClient,
+    MintlifyClient,
+    StackExchangeClient,
+)
 from needle.shared.cli import (
     aclose_all,
     build_clients_or_exit,
@@ -23,7 +29,7 @@ from needle.shared.llm import resolve_llm_model
 from needle.shared.search import DEFAULT_SNIPPET_CHARS
 
 DEFAULT_TAGS = "python,javascript,typescript,rust,go,java"
-DEFAULT_COUNTS = "api=20,issue=20,qa=10"
+DEFAULT_COUNTS = "api=20,issue=20,mintlify=20,fresh=10,qa=10"
 
 
 def parse_counts(value: str | tuple[str, ...]) -> dict[str, int]:
@@ -69,6 +75,8 @@ class Coding:
         api = ApiDocsClient() if "api" in type_counts else None
         github = GitHubClient() if "issue" in type_counts else None
         stackexchange = StackExchangeClient() if "qa" in type_counts else None
+        mintlify = MintlifyClient() if "mintlify" in type_counts else None
+        changelogs = ChangelogClient() if "fresh" in type_counts else None
 
         async def _go() -> tuple[list[dict], GenStats]:
             try:
@@ -76,6 +84,8 @@ class Coding:
                     api=api,
                     github=github,
                     stackexchange=stackexchange,
+                    mintlify=mintlify,
+                    changelogs=changelogs,
                     llm=llm,
                     hour_ts=hour_ts,
                     now=now,
@@ -87,7 +97,7 @@ class Coding:
                     concurrency=concurrency,
                 )
             finally:
-                await aclose_all(api, github, stackexchange, llm)
+                await aclose_all(api, github, stackexchange, mintlify, changelogs, llm)
 
         rows, stats = asyncio.run(_go())
         per_type_rows = Counter(r["query_origin"]["bucket"] for r in rows)

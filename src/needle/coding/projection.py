@@ -7,9 +7,17 @@ from needle.shared.prompts import render_prompt
 SYNTAX_CYCLES = {
     "api": ("plain", "site"),
     "issue": ("plain", "quoted", "plain", "site"),
+    "mintlify": ("plain", "site"),
+    "fresh": ("plain", "site"),
     "qa": ("plain", "site"),
 }
-WORD_LIMITS = {"api": (4, 12), "issue": (5, 16), "qa": (4, 12)}
+WORD_LIMITS = {
+    "api": (4, 12),
+    "issue": (5, 16),
+    "mintlify": (4, 12),
+    "fresh": (4, 14),
+    "qa": (4, 12),
+}
 SPAN_WORDS = (2, 12)
 MIN_NOVEL_WORDS = 2
 MIN_NOVEL_CHARS = 4
@@ -71,6 +79,8 @@ def query_ok(query: str, doc: Doc) -> bool:
         return _names_source(query, doc)
     if doc.doc_type == "issue":
         return _names_source(query, doc) and _span_in_doc(query, doc)
+    if doc.doc_type in ("mintlify", "fresh"):
+        return _names_source(query, doc) and _rephrased(query, doc)
     return _rephrased(query, doc)
 
 

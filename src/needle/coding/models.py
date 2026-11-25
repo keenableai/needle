@@ -7,14 +7,15 @@ from urllib.parse import urlsplit
 from needle.shared.identity import query_hash, query_id
 
 CODING_SOURCE = "coding"
-DOC_TYPES = ("api", "issue", "qa")
+DOC_TYPES = ("api", "issue", "mintlify", "fresh", "qa")
 
 DOC_KEY_RULES = (
     ("github.com", "gh", re.compile(r"^([\w.-]+/[\w.-]+)/(?:issues|pull)/(\d+)(?:/|$)")),
     ("stackoverflow.com", "so", re.compile(r"^(?:questions|q)/(\d+)(?:/|$)")),
 )
 VERSION_SEGMENT_RE = re.compile(
-    r"^(?:latest|stable|dev|devel|main|master|current|release|v?\d+(?:\.\d+)*[a-z0-9.+-]*)$"
+    r"^(?:latest|stable|dev|devel|main|master|current|release|"
+    r"v?\d+(?:\.\d+)*(?:[-.+]?(?:rc|alpha|beta|dev|post|pre|a|b)[\d.]*)?)$"
 )
 LOCALE_SEGMENT_RE = re.compile(r"^[a-z]{2}(?:[-_][a-z]{2})?$")
 VERSION_SUFFIX_RE = re.compile(r"(?<=[a-z])[-_]v?\d+(?:\.\d+)*$")

@@ -191,6 +191,69 @@ def test_generate_refuses_a_set_missing_a_doc_type(tmp_path, monkeypatch):
 
 def test_parse_counts():
     assert parse_counts("api=20,issue=20,qa=10") == {"api": 20, "issue": 20, "qa": 10}
+    assert parse_counts("mintlify=20,fresh=10") == {"mintlify": 20, "fresh": 10}
     for bad in ("api=0", "api=x", "docs=5", ""):
         with pytest.raises(SystemExit):
             parse_counts(bad)
+
+
+MINT = Doc(
+    "mintlify",
+    "https://docs.lithosai.com/billing",
+    "Billing",
+    "Set an automatic reload threshold and a monthly cap for credits.",
+    context="LithosAI",
+)
+FRESH = Doc(
+    "fresh",
+    "https://vercel.com/changelog/drives",
+    "Vercel Drives adds CLI commands",
+    "Drives REST API now supports drive-specific permissions and standalone SDKs.",
+    context="Vercel",
+)
+
+
+def test_mintlify_and_fresh_queries_need_product_and_new_words():
+    assert query_ok("LithosAI automatic reload threshold monthly cap", MINT)
+    assert not query_ok("automatic reload threshold monthly cap credits", MINT)
+    assert not query_ok("LithosAI billing", MINT)
+    assert query_ok("Vercel drives drive-specific permissions standalone SDKs", FRESH)
+    assert not query_ok("Vercel Drives adds CLI commands", FRESH)
+
+
+class FakeSource:
+    errors: list[str] = []
+
+    def __init__(self, docs):
+        self._docs = docs
+
+    async def docs(self, *, n, seed, now=None):
+        return list(self._docs)[:n]
+
+
+async def test_run_generate_adds_mintlify_and_fresh_types():
+    llm = FakeLLM(
+        {
+            "product's developer documentation": "LithosAI automatic reload threshold monthly cap",
+            "changelog": "Vercel drives drive-specific permissions standalone SDKs",
+        }
+    )
+    rows, stats = await run_generate(
+        api=None,
+        github=None,
+        stackexchange=None,
+        mintlify=FakeSource([MINT]),
+        changelogs=FakeSource([FRESH]),
+        llm=llm,
+        hour_ts=HOUR,
+        now=NOW,
+        counts={"mintlify": 1, "fresh": 1},
+        repos=(),
+        tags=(),
+        months_back=12,
+        seed=0,
+    )
+    assert [r["query_origin"]["bucket"] for r in rows] == ["mintlify", "fresh"]
+    assert rows[0]["gold"]["doc_key"] == "doc:docs.lithosai.com/billing"
+    assert rows[1]["gold"]["doc_key"] == "doc:vercel.com/changelog/drives"
+    assert stats.candidates == {"mintlify": 1, "fresh": 1}

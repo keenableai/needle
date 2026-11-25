@@ -1,13 +1,19 @@
 import zlib
-from datetime import date
+from datetime import UTC, date, datetime
 
 from needle.coding.sources import (
     GitHubClient,
     docs_bases,
     docsrs_entry,
     docsrs_items,
+    host_label,
+    load_mintlify_hosts,
+    markdown_page,
+    page_main_text,
+    parse_feed,
     parse_inventory,
     parse_issue,
+    parse_llms_txt,
     parse_question,
     small_repo_names,
     sphinx_entry,
@@ -172,3 +178,82 @@ async def test_source_clients_record_fetch_errors():
     )
     assert docs == []
     assert client.errors == ["github pandas-dev/pandas: http_error: 403: rate limit"]
+
+
+def test_load_mintlify_hosts_skips_popular_hosts(tmp_path):
+    path = tmp_path / "hosts.csv"
+    path.write_text("docs.discord.com,1000000\ndocs.small.dev,50000000\nbad-line\n")
+    assert load_mintlify_hosts(path, min_rank=5_000_000) == ["docs.small.dev"]
+    assert len(load_mintlify_hosts()) > 1000
+
+
+def test_host_label():
+    assert host_label("docs.cognee.ai") == "cognee"
+    assert host_label("developers.dwolla.com") == "dwolla"
+    assert host_label("kingdee.mintlify.app") == "kingdee"
+
+
+LLMS = (
+    "# Cognee Documentation\n\n> Memory for agents.\n\n## Docs\n\n"
+    + "\n".join(
+        f"- [Page {i}](https://docs.cognee.ai/guides/page-{i}.md): about {i}" for i in range(10)
+    )
+    + "\n- [Home](https://docs.cognee.ai/)\n- [Elsewhere](https://example.com/x.md)\n"
+)
+
+
+def test_parse_llms_txt_cleans_name_and_keeps_same_host_pages():
+    name, links = parse_llms_txt(LLMS, "docs.cognee.ai")
+    assert name == "Cognee"
+    assert links[0] == ("Page 0", "https://docs.cognee.ai/guides/page-0.md")
+    assert len(links) == 10
+    assert (
+        parse_llms_txt(LLMS.replace("Cognee Documentation", "Mint Starter Kit"), "docs.cognee.ai")
+        is None
+    )
+    assert parse_llms_txt(LLMS, "other.host") is None
+    assert parse_llms_txt("<!doctype html>" + LLMS, "docs.cognee.ai") is None
+
+
+def test_markdown_page_strips_frontmatter_and_needs_words():
+    page = "---\ntitle: Billing\n---\n" + "Set an automatic reload threshold. " * 10
+    assert markdown_page(page).startswith("Set an automatic reload threshold.")
+    assert markdown_page("<!DOCTYPE html><html>" + "word " * 50) is None
+    assert markdown_page("too short") is None
+
+
+RSS = b"""<?xml version="1.0"?>
+<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>
+<item><title>Radar  AS types</title><link>https://developers.cloudflare.com/changelog/post/a/</link>
+<pubDate>Wed, 19 Nov 2026 10:00:00 GMT</pubDate><description>short</description>
+<content:encoded><![CDATA[<p>Radar now shows <b>AS categories</b>.</p>]]></content:encoded></item>
+<item><title>No link</title><pubDate>Wed, 19 Nov 2026 10:00:00 GMT</pubDate></item>
+</channel></rss>"""
+
+ATOM_FEED = b"""<?xml version="1.0"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<entry><title>Drives SDK</title><link rel="alternate" href="https://vercel.com/changelog/drives"/>
+<updated>2026-11-24T08:00:00Z</updated><summary type="html">&lt;p&gt;New SDKs.&lt;/p&gt;</summary></entry>
+</feed>"""
+
+
+def test_parse_feed_reads_rss_and_atom():
+    (rss,) = parse_feed(RSS)
+    assert (rss.title, rss.url, rss.text) == (
+        "Radar AS types",
+        "https://developers.cloudflare.com/changelog/post/a/",
+        "Radar now shows AS categories .",
+    )
+    assert rss.published == datetime(2026, 11, 19, 10, tzinfo=UTC)
+    (atom,) = parse_feed(ATOM_FEED)
+    assert (atom.url, atom.text, atom.published) == (
+        "https://vercel.com/changelog/drives",
+        "New SDKs.",
+        datetime(2026, 11, 24, 8, tzinfo=UTC),
+    )
+    assert parse_feed(b"not xml") == []
+
+
+def test_page_main_text_prefers_main():
+    assert page_main_text("<nav>menu</nav><main><p>Body text.</p></main>") == "Body text."
+    assert page_main_text("<p>Only body.</p>") == "Only body."

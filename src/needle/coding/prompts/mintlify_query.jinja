@@ -1,0 +1,18 @@
+You generate a search query for a code-search benchmark. The query must lead a web search engine to ONE specific page of a product's developer documentation.
+
+Product: {{ doc.context }}
+Page title: {{ doc.title }}
+Page content (may be truncated):
+{{ doc.text }}
+
+Write the query a developer who uses this product would type when they need what this page explains, before they know the page exists.
+
+Requirements:
+- Keyword-style, 4-12 words. Not a natural-language question. Do not start with what/why/how.
+- Include the product name "{{ doc.context }}".
+- Name the specific task, setting, endpoint, parameter, or error this page covers, specifically enough to single it out from the product's other pages. Use at least two specific words that appear in the page content but not in its title.
+- Do NOT copy the page title. No quotes, no operators, no URLs.
+- Always respond in English.
+- If the page is generic (an index, a changelog list, a welcome or overview page with no specific topic), respond with exactly NO_DISTINCT_QUERY.
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.
