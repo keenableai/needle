@@ -25,7 +25,7 @@ from needle.shared.search import DEFAULT_SNIPPET_CHARS
 DEFAULT_REPOS = (
     "pandas-dev/pandas,numpy/numpy,pytorch/pytorch,huggingface/transformers,"
     "scikit-learn/scikit-learn,pydantic/pydantic,astral-sh/uv,microsoft/TypeScript,"
-    "vercel/next.js,vitejs/vite,nodejs/node,facebook/react,rust-lang/rust,tokio-rs/tokio,"
+    "vercel/next.js,vitejs/vite,nodejs/node,react/react,rust-lang/rust,tokio-rs/tokio,"
     "golang/go"
 )
 DEFAULT_TAGS = "python,javascript,typescript,rust,go,java"
