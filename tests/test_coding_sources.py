@@ -1,6 +1,8 @@
 import zlib
+from datetime import date
 
 from needle.coding.sources import (
+    GitHubClient,
     mdn_names,
     parse_inventory,
     parse_issue,
@@ -108,3 +110,17 @@ def test_parse_question_requires_score_and_answer():
     )
     assert parse_question({**item, "score": 0}, "python") is None
     assert parse_question({**item, "answer_count": 0}, "python") is None
+
+
+async def test_source_clients_record_fetch_errors():
+    client = GitHubClient(token="t")
+
+    async def fail(method, url, **kwargs):
+        return None, {"error_type": "http_error", "error_message": "403: rate limit"}
+
+    client._request_json = fail
+    docs = await client.issues(
+        "pandas-dev/pandas", created_after=date(2026, 1, 1), created_before=date(2026, 2, 1)
+    )
+    assert docs == []
+    assert client.errors == ["github pandas-dev/pandas: http_error: 403: rate limit"]

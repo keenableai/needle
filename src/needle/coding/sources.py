@@ -121,7 +121,22 @@ def _epoch(day: date) -> int:
     return int(datetime(day.year, day.month, day.day, tzinfo=UTC).timestamp())
 
 
-class ApiDocsClient(HttpSearchClient):
+class SourceClient(HttpSearchClient):
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(**kwargs)
+        self.errors: list[str] = []
+
+    def _note(self, source: str, message: str) -> None:
+        self.errors.append(f"{source}: {message}"[:300])
+
+    async def _fetch_json(self, source: str, url: str, **kwargs: Any) -> Any:
+        payload, err = await self._request_json("GET", url, **kwargs)
+        if err is not None:
+            self._note(source, f"{err['error_type']}: {err['error_message']}")
+        return payload
+
+
+class ApiDocsClient(SourceClient):
     default_headers = {"User-Agent": USER_AGENT}
 
     def __init__(self, **kwargs: Any) -> None:
@@ -138,8 +153,12 @@ class ApiDocsClient(HttpSearchClient):
 
     async def _sphinx(self, site: tuple[str, str, str], *, n: int, seed: int) -> list[Doc]:
         name, base, path_prefix = site
-        resp, _, _ = await self._send("GET", f"{base}objects.inv", follow_redirects=True)
-        if resp is None or resp.status_code != 200:
+        resp, _, err = await self._send("GET", f"{base}objects.inv", follow_redirects=True)
+        if resp is None:
+            self._note(f"{name} objects.inv", str(err))
+            return []
+        if resp.status_code != 200:
+            self._note(f"{name} objects.inv", f"http {resp.status_code}")
             return []
         entries = parse_inventory(resp.content, path_prefix=path_prefix)
         picked = random.Random(f"{seed}:{name}").sample(entries, min(n, len(entries)))
@@ -157,8 +176,8 @@ class ApiDocsClient(HttpSearchClient):
         return Doc("api", key, url, symbol, entry, context=name, banned=banned)
 
     async def _mdn(self, *, n: int, seed: int) -> list[Doc]:
-        payload, err = await self._request_json("GET", MDN_INDEX)
-        if err is not None or not isinstance(payload, list):
+        payload = await self._fetch_json("mdn index", MDN_INDEX)
+        if not isinstance(payload, list):
             return []
         paths = [str(rec.get("url") or "") for rec in payload if isinstance(rec, dict)]
         paths = [p for p in paths if mdn_names(p)]
@@ -181,7 +200,7 @@ class ApiDocsClient(HttpSearchClient):
         return Doc("api", key, url, title, summary, context="javascript", banned=names)
 
 
-class GitHubClient(HttpSearchClient):
+class GitHubClient(SourceClient):
     def __init__(self, *, token: str | None = None, **kwargs: Any) -> None:
         super().__init__(api_key=token or os.environ.get("GITHUB_TOKEN"), **kwargs)
         self.default_headers = {"User-Agent": USER_AGENT, "Accept": "application/vnd.github+json"}
@@ -194,18 +213,18 @@ class GitHubClient(HttpSearchClient):
             f"repo:{repo} is:issue comments:>{MIN_ISSUE_COMMENTS} "
             f"created:{created_after.isoformat()}..{created_before.isoformat()}"
         )
-        payload, err = await self._request_json(
-            "GET",
+        payload = await self._fetch_json(
+            f"github {repo}",
             GITHUB_SEARCH,
             params={"q": query, "sort": "comments", "order": "desc", "per_page": PAGE_SIZE},
         )
-        if err is not None or not isinstance(payload, dict):
+        if not isinstance(payload, dict):
             return []
         docs = [parse_issue(item, repo) for item in payload.get("items") or []]
         return [d for d in docs if d is not None]
 
 
-class StackExchangeClient(HttpSearchClient):
+class StackExchangeClient(SourceClient):
     default_headers = {"User-Agent": USER_AGENT}
 
     def __init__(self, *, key: str | None = None, **kwargs: Any) -> None:
@@ -224,10 +243,13 @@ class StackExchangeClient(HttpSearchClient):
         }
         if self.api_key:
             params["key"] = self.api_key
-        payload, err = await self._request_json(
-            "GET", STACKEXCHANGE_QUESTIONS, params=params, error_field="error_message"
+        payload = await self._fetch_json(
+            f"stackexchange {tag}",
+            STACKEXCHANGE_QUESTIONS,
+            params=params,
+            error_field="error_message",
         )
-        if err is not None or not isinstance(payload, dict):
+        if not isinstance(payload, dict):
             return []
         docs = [parse_question(item, tag) for item in payload.get("items") or []]
         return [d for d in docs if d is not None]

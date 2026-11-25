@@ -32,6 +32,7 @@ class GenStats:
     rejected: int = 0
     llm_errors: int = 0
     llm_error_sample: str = ""
+    source_errors: list[str] = field(default_factory=list)
 
 
 async def _windowed(
@@ -120,6 +121,9 @@ async def run_generate(
         months_back=months_back,
         seed=seed,
     )
+    stats.source_errors = [
+        e for client in (api, github, stackexchange) if client is not None for e in client.errors
+    ]
     docs = [d for t in DOC_TYPES for d in candidates.get(t, [])]
     projected = await bounded_gather(docs, lambda d: _project(d, llm), concurrency=concurrency)
 

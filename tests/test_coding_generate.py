@@ -1,8 +1,12 @@
+import dataclasses
 import json
 from datetime import UTC, datetime
 
-from needle.coding.generate import run_generate
-from needle.coding.models import Doc
+import pytest
+
+from needle.coding.cli import Coding
+from needle.coding.generate import GenStats, run_generate
+from needle.coding.models import Doc, build_row
 from needle.coding.projection import query_ok, syntax_query
 from needle.shared.io import serialize_row
 
@@ -45,6 +49,7 @@ def test_api_query_rejects_banned_names_in_any_form():
     camel = Doc("api", "k", "u", "Array.flatMap", "t", context="javascript", banned=("flatMap",))
     assert not query_ok("javascript array flat map then flatten one level", camel)
     assert not query_ok("python groups", API)
+    assert not query_ok("iterator of consecutive equal key runs grouped", API)
 
 
 def test_issue_query_needs_one_verbatim_span():
@@ -52,11 +57,18 @@ def test_issue_query_needs_one_verbatim_span():
     assert not query_ok('pandas "truediv is not supported" bool series', ISSUE)
     assert not query_ok("pandas operator truediv not implemented bool series", ISSUE)
     assert not query_ok("pandas \"operator 'truediv' not implemented\" 63250 bool", ISSUE)
+    assert not query_ok("\"operator 'truediv' not implemented\" bool series dtype", ISSUE)
 
 
 def test_qa_query_must_rephrase_the_title():
     assert query_ok("pandas np.gradient ValueError ambiguous per column", QA)
     assert not query_ok("compute a gradient column-wise in a pandas DataFrame", QA)
+    assert not query_ok("pandas gradient numerical derivative slope estimate", QA)
+    assert not query_ok(
+        "How to compute a gradient column-wise in a pandas DataFrame ValueError ambiguous", QA
+    )
+    with_tag = dataclasses.replace(QA, text=f"{QA.text} in python")
+    assert not query_ok("python valueerror pandas gradient per column", with_tag)
 
 
 def test_syntax_variants():
@@ -68,14 +80,17 @@ def test_syntax_variants():
 
 
 class FakeApi:
+    errors: list[str] = []
+
     async def docs(self, *, n, seed):
         return [API][:n]
 
 
 class FakeWindowed:
-    def __init__(self, docs):
+    def __init__(self, docs, errors=()):
         self._docs = docs
         self.calls = []
+        self.errors = list(errors)
 
     async def fetch(self, key, *, created_after, created_before):
         self.calls.append((key, created_after, created_before))
@@ -97,7 +112,7 @@ class FakeLLM:
 
 
 async def test_run_generate_builds_rows_per_type_and_counts_drops():
-    github = FakeWindowed([ISSUE])
+    github = FakeWindowed([ISSUE], errors=["github numpy/numpy: http_error: 403"])
     stackexchange = FakeWindowed([QA])
     llm = FakeLLM(
         {
@@ -130,6 +145,24 @@ async def test_run_generate_builds_rows_per_type_and_counts_drops():
     assert stats.candidates == {"api": 1, "issue": 1, "qa": 1}
     assert stats.rows == {"api": 1, "issue": 1, "qa": 0}
     assert stats.rejected == 1
+    assert stats.source_errors == ["github numpy/numpy: http_error: 403"]
     assert {key for key, _, _ in github.calls} == {"pandas-dev/pandas", "numpy/numpy"}
     assert all(after < before <= NOW.date() for _, after, before in github.calls)
     assert json.loads(serialize_row(rows[0])["gold"])["doc_key"] == "py:library/itertools"
+
+
+def test_generate_refuses_a_set_missing_a_doc_type(tmp_path, monkeypatch):
+    class DummyLLM:
+        async def aclose(self):
+            pass
+
+    async def fake_run_generate(**kwargs):
+        row = build_row(API, query_text="q", syntax="plain", hour_ts=HOUR)
+        return [row], GenStats(rows={"api": 1, "issue": 0})
+
+    monkeypatch.setattr("needle.coding.cli.require_openrouter_client", lambda *a, **k: DummyLLM())
+    monkeypatch.setattr("needle.coding.cli.run_generate", fake_run_generate)
+    out = tmp_path / "coding.jsonl"
+    with pytest.raises(SystemExit, match="no issue queries"):
+        Coding().generate(out=str(out), types="api,issue")
+    assert not out.exists()

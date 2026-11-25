@@ -220,8 +220,8 @@ jobs:
           site-data: true
       - env:
           GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          uv run needle coding generate --per-type 20 --out coding.jsonl
+        run: uv run needle coding generate --per-type 20 --out coding.jsonl
+      - run: |
           uv run needle coding run --queries coding.jsonl \
             --engines "$ENGINES" --out coding.json
       - uses: ./.github/actions/publish

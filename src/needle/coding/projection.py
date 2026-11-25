@@ -51,14 +51,24 @@ def _span_in_doc(query: str, doc: Doc) -> bool:
     return " ".join(spans[0].lower().split()) in haystack
 
 
+def _words(text: str) -> list[str]:
+    return WORD_RE.findall(text.lower())
+
+
 def _rephrased(query: str, doc: Doc) -> bool:
-    title_words = set(WORD_RE.findall(doc.title.lower()))
+    query_words, title_words = _words(query), _words(doc.title)
+    if f" {' '.join(title_words)} " in f" {' '.join(query_words)} ":
+        return False
+    known = set(title_words) | set(_words(doc.context))
+    body_words = set(_words(doc.text))
     novel = {
-        w
-        for w in WORD_RE.findall(query.lower())
-        if len(w) >= MIN_NOVEL_CHARS and w not in title_words
+        w for w in query_words if len(w) >= MIN_NOVEL_CHARS and w not in known and w in body_words
     }
     return len(novel) >= MIN_NOVEL_WORDS
+
+
+def _names_source(query: str, doc: Doc) -> bool:
+    return any(mentions(query, name) for name in doc.context.split("/"))
 
 
 def query_ok(query: str, doc: Doc) -> bool:
@@ -67,11 +77,11 @@ def query_ok(query: str, doc: Doc) -> bool:
         return False
     if any(mentions(query, name) for name in doc.banned):
         return False
+    if doc.doc_type == "api":
+        return _names_source(query, doc)
     if doc.doc_type == "issue":
-        return _span_in_doc(query, doc)
-    if doc.doc_type == "qa":
-        return _rephrased(query, doc)
-    return True
+        return _names_source(query, doc) and _span_in_doc(query, doc)
+    return _rephrased(query, doc)
 
 
 def syntax_query(query: str, doc: Doc, syntax: str) -> str:
