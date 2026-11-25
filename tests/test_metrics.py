@@ -71,10 +71,10 @@ def test_penalties_url_variants_count_as_duplicates():
     assert apply_redundancy_penalties(urls, [4, 4]) == [4, 0]
 
 
-def test_penalties_site_queries_exempt():
+def test_penalties_site_queries_only_penalize_the_same_page():
     urls = ["https://a.com/1", "https://a.com/2", "https://a.com/1"]
     ratings = [4, 4, 4]
-    assert apply_redundancy_penalties(urls, ratings, query_text="site:a.com docs") == ratings
+    assert apply_redundancy_penalties(urls, ratings, query_text="site:a.com docs") == [4, 4, 0]
 
 
 def test_penalties_website_word_not_exempt():
