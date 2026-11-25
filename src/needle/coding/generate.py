@@ -91,19 +91,21 @@ async def run_generate(
     llm: LLMClient,
     hour_ts: datetime,
     now: datetime,
-    per_type: int,
+    counts: dict[str, int],
     repos: tuple[str, ...],
     tags: tuple[str, ...],
     months_back: int,
     seed: int,
     concurrency: int = 8,
 ) -> tuple[list[dict[str, Any]], GenStats]:
-    n = per_type * OVERSAMPLE
+    n = {t: c * OVERSAMPLE for t, c in counts.items()}
     fetches: dict[str, Awaitable[list[Doc]]] = {}
     if api is not None:
-        fetches["api"] = api.docs(n=n, seed=seed)
+        fetches["api"] = api.docs(n=n["api"], seed=seed)
     if github is not None:
-        fetches["issue"] = _issues(github, repos, now=now, months_back=months_back, seed=seed, n=n)
+        fetches["issue"] = _issues(
+            github, repos, now=now, months_back=months_back, seed=seed, n=n["issue"]
+        )
     if stackexchange is not None:
         fetches["qa"] = _windowed(
             stackexchange.questions,
@@ -113,7 +115,7 @@ async def run_generate(
         )
     found = await asyncio.gather(*fetches.values())
     candidates = {
-        t: dedupe_by(docs, lambda d: d.key)[:n] for t, docs in zip(fetches, found, strict=True)
+        t: dedupe_by(docs, lambda d: d.key)[: n[t]] for t, docs in zip(fetches, found, strict=True)
     }
 
     stats = GenStats(
@@ -136,7 +138,7 @@ async def run_generate(
             if q is not None and d.doc_type == doc_type
         ]
         syntax_cycle = itertools.cycle(SYNTAX_CYCLES[doc_type])
-        for doc, query in kept[:per_type]:
+        for doc, query in kept[: counts[doc_type]]:
             syntax = next(syntax_cycle)
             rows.append(
                 build_row(

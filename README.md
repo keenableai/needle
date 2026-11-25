@@ -216,10 +216,11 @@ it breaks down by suite, syntax, and court.
 ## coding
 
 Known-item retrieval of the pages a coding agent looks for. One slice with
-three doc types, an equal share of each:
+three doc types: 20 API docs, 20 issues and 10 Stack Overflow questions per
+run (`--counts`):
 
 ```bash
-needle coding generate --per-type 20 --out coding.jsonl
+needle coding generate --out coding.jsonl   # --counts api=20,issue=20,qa=10
 needle coding run --queries coding.jsonl --out coding.json
 ```
 
@@ -310,7 +311,7 @@ the overlap and uniqueness stats exclude it.
 engines: news hourly (`--limit 20`); twice daily with fresh gold — finance
 00:17/12:17 UTC (`--limit 120 --judge`), agentic_rare 03:17/15:17
 (`--limit 100`), scholar 06:17/18:17 (`--per-cell 7`), legal 09:17/21:17, coding 01:17/13:17
-(`--per-type 20`). Gold lives on `gh-pages` between runs;
+(`--counts api=20,issue=20,qa=10`). Gold lives on `gh-pages` between runs;
 a manual dispatch runs only the benches it selects; a daily bench also runs
 at any scheduled hour when its gold file is missing. Each bench is its own job and publishes its
 own run, so a slow daily bench never delays the hourly news result. Each

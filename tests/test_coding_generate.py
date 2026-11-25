@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from needle.coding.cli import Coding
+from needle.coding.cli import Coding, parse_counts
 from needle.coding.generate import GenStats, run_generate
 from needle.coding.models import Doc, build_row
 from needle.coding.projection import query_ok, syntax_query
@@ -128,7 +128,7 @@ async def test_run_generate_builds_rows_per_type_and_counts_drops():
         llm=llm,
         hour_ts=HOUR,
         now=NOW,
-        per_type=2,
+        counts={"api": 2, "issue": 2, "qa": 1},
         repos=("pandas-dev/pandas", "numpy/numpy"),
         tags=("python",),
         months_back=12,
@@ -162,7 +162,7 @@ async def test_run_generate_samples_small_repos_without_a_repo_list():
         llm=FakeLLM({"GitHub issue": "pandas \"operator 'truediv' not implemented\" bool"}),
         hour_ts=HOUR,
         now=NOW,
-        per_type=1,
+        counts={"issue": 1},
         repos=(),
         tags=(),
         months_back=12,
@@ -185,5 +185,12 @@ def test_generate_refuses_a_set_missing_a_doc_type(tmp_path, monkeypatch):
     monkeypatch.setattr("needle.coding.cli.run_generate", fake_run_generate)
     out = tmp_path / "coding.jsonl"
     with pytest.raises(SystemExit, match="no issue queries"):
-        Coding().generate(out=str(out), types="api,issue")
+        Coding().generate(out=str(out), counts="api=1,issue=1")
     assert not out.exists()
+
+
+def test_parse_counts():
+    assert parse_counts("api=20,issue=20,qa=10") == {"api": 20, "issue": 20, "qa": 10}
+    for bad in ("api=0", "api=x", "docs=5", ""):
+        with pytest.raises(SystemExit):
+            parse_counts(bad)
