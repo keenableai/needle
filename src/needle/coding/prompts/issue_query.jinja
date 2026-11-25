@@ -9,7 +9,7 @@ Write the query a developer would type after hitting this bug in their own proje
 
 Requirements:
 - Keyword-style, 5-16 words total.
-- Include the project name "{{ project }}".
+- Include the project name "{{ doc.context.split("/")[-1] }}".
 - Wrap EXACTLY ONE span of 2-12 consecutive words in double quotes, copied CHARACTER-FOR-CHARACTER from the issue title or body: the most distinctive error message or symptom. Prefer an exception or error message line. Pick a span without user-specific parts (file paths, memory addresses, the reporter's own variable names).
 - The span must single out this issue, not a generic error shared by thousands of issues (not "AssertionError: Series are different", not "the compiler unexpectedly panicked", not "subprocess-exited-with-error").
 - Do NOT include the issue number, a user name, or a URL.

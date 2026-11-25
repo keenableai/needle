@@ -59,22 +59,7 @@ def agentic_rare_rows(report: dict, ts: str) -> list[dict]:
 
 
 def scholar_rows(report: dict, ts: str) -> list[dict]:
-    rows = []
-    for name, e in report["engines"].items():
-        row = {
-            "ts": ts,
-            "bench": "scholar",
-            "engine": name,
-            "recall": e["recall_at_k"],
-            "mrr": e["mrr_at_k"],
-        }
-        for b in QUERY_BUCKETS:
-            bucket = e["by_bucket"].get(b, {})
-            row[f"{b}_recall"] = bucket.get("recall_at_k")
-            row[f"{b}_n"] = bucket.get("n")
-        row.update({**_count_fields(report, e), **_latency_fields(e)})
-        rows.append(row)
-    return rows
+    return _suite_rows(report, ts, "scholar", QUERY_BUCKETS)
 
 
 def _suite_rows(report: dict, ts: str, bench: str, suites: tuple[str, ...] = ()) -> list[dict]:

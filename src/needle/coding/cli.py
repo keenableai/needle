@@ -1,5 +1,6 @@
 import asyncio
 import sys
+from collections import Counter
 
 from needle.coding.generate import GenStats, run_generate
 from needle.coding.models import DOC_TYPES
@@ -82,8 +83,9 @@ class Coding:
                 await aclose_all(api, github, stackexchange, llm)
 
         rows, stats = asyncio.run(_go())
+        per_type_rows = Counter(r["query_origin"]["bucket"] for r in rows)
         counts = ", ".join(
-            f"{t}={stats.rows.get(t, 0)} of {stats.candidates.get(t, 0)}" for t in type_names
+            f"{t}={per_type_rows[t]} of {stats.candidates.get(t, 0)}" for t in type_names
         )
         print(
             f"coding: {len(rows)} queries ({counts}; drops: no_query={stats.no_query}, "
@@ -94,7 +96,7 @@ class Coding:
             print(f"coding first llm error: {stats.llm_error_sample}", file=sys.stderr)
         for err in stats.source_errors:
             print(f"coding source error: {err}", file=sys.stderr)
-        empty = [t for t in type_names if not stats.rows.get(t)]
+        empty = [t for t in type_names if not per_type_rows[t]]
         if empty:
             raise SystemExit(f"error: no {','.join(empty)} queries; not writing a partial set")
         write_jsonl([serialize_row(r) for r in rows], out)

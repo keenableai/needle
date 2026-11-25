@@ -50,12 +50,15 @@ def doc_key(url: str) -> str | None:
 @dataclass(frozen=True)
 class Doc:
     doc_type: str
-    key: str
     url: str
     title: str
     text: str
     context: str
     banned: tuple[str, ...] = ()
+
+    @property
+    def key(self) -> str:
+        return doc_key(self.url) or self.url
 
 
 def build_row(doc: Doc, *, query_text: str, syntax: str, hour_ts: datetime) -> dict[str, Any]:

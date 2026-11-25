@@ -8,7 +8,8 @@ import zlib
 from datetime import UTC, date, datetime
 from typing import Any
 
-from needle.coding.models import Doc, doc_key
+from needle.coding.models import Doc
+from needle.shared.htmltext import html_text
 from needle.shared.sampling import dedupe_by, interleave
 from needle.shared.search.base import USER_AGENT, HttpSearchClient
 
@@ -32,15 +33,10 @@ TEXT_CHARS = 3000
 PAGE_SIZE = 50
 
 INV_LINE_RE = re.compile(r"^(\S+)\s+py:(?:function|method|class)\s+-?\d+\s+(\S+)")
-TAG_RE = re.compile(r"<[^>]+>")
 HEADERLINK_RE = re.compile(r'<a class="headerlink".*?</a>', re.S)
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
 PARA_RE = re.compile(r"<p>(.*?)</p>", re.S)
 MDN_SUFFIX_RE = re.compile(r"_(?:static|event)$")
-
-
-def html_text(fragment: str) -> str:
-    return " ".join(html.unescape(TAG_RE.sub(" ", fragment)).split())
 
 
 def parse_inventory(raw: bytes, *, path_prefix: str) -> list[tuple[str, str]]:
@@ -93,28 +89,22 @@ def parse_issue(item: dict[str, Any], repo: str) -> Doc | None:
     if item.get("pull_request"):
         return None
     url = str(item.get("html_url") or "")
-    key = doc_key(url)
     title = " ".join(str(item.get("title") or "").split())
     body = HTML_COMMENT_RE.sub("", str(item.get("body") or "")).strip()[:TEXT_CHARS]
-    if key is None or not title or not body:
+    if not url or not title or not body:
         return None
-    return Doc(
-        "issue", key, url, title, body, context=repo, banned=(str(item.get("number") or ""),)
-    )
+    return Doc("issue", url, title, body, context=repo, banned=(str(item.get("number") or ""),))
 
 
 def parse_question(item: dict[str, Any], tag: str) -> Doc | None:
     if int(item.get("score") or 0) < MIN_QUESTION_SCORE or not item.get("answer_count"):
         return None
     url = str(item.get("link") or "")
-    key = doc_key(url)
     title = html.unescape(" ".join(str(item.get("title") or "").split()))
     body = html_text(str(item.get("body") or ""))[:TEXT_CHARS]
-    if key is None or not title or not body:
+    if not url or not title or not body:
         return None
-    return Doc(
-        "qa", key, url, title, body, context=tag, banned=(str(item.get("question_id") or ""),)
-    )
+    return Doc("qa", url, title, body, context=tag, banned=(str(item.get("question_id") or ""),))
 
 
 def _epoch(day: date) -> int:
@@ -149,7 +139,7 @@ class ApiDocsClient(SourceClient):
             *[self._sphinx(site, n=per_source, seed=seed) for site in SPHINX_SITES],
             self._mdn(n=per_source, seed=seed),
         )
-        return dedupe_by(interleave(list(lists)), lambda d: d.key)[:n]
+        return interleave(list(lists))
 
     async def _sphinx(self, site: tuple[str, str, str], *, n: int, seed: int) -> list[Doc]:
         name, base, path_prefix = site
@@ -162,47 +152,48 @@ class ApiDocsClient(SourceClient):
             return []
         entries = parse_inventory(resp.content, path_prefix=path_prefix)
         picked = random.Random(f"{seed}:{name}").sample(entries, min(n, len(entries)))
+        picked = dedupe_by(picked, lambda e: e[1].split("#", 1)[0])
         docs = await asyncio.gather(*[self._sphinx_doc(name, base, *e) for e in picked])
         return [d for d in docs if d is not None]
 
     async def _sphinx_doc(self, name: str, base: str, symbol: str, uri: str) -> Doc | None:
         url = base + uri.split("#", 1)[0]
-        key = doc_key(url)
         page = await self._get_text(url)
         entry = sphinx_entry(page, symbol) if page else None
-        if key is None or entry is None:
+        if entry is None:
             return None
         banned = tuple(p for p in symbol.split(".") if p != name)
-        return Doc("api", key, url, symbol, entry, context=name, banned=banned)
+        return Doc("api", url, symbol, entry, context=name, banned=banned)
 
     async def _mdn(self, *, n: int, seed: int) -> list[Doc]:
         payload = await self._fetch_json("mdn index", MDN_INDEX)
         if not isinstance(payload, list):
             return []
-        paths = [str(rec.get("url") or "") for rec in payload if isinstance(rec, dict)]
-        paths = [p for p in paths if mdn_names(p)]
-        picked = random.Random(f"{seed}:mdn").sample(paths, min(n, len(paths)))
-        docs = await asyncio.gather(*[self._mdn_doc(p) for p in picked])
+        named = []
+        for rec in payload:
+            path = str(rec.get("url") or "") if isinstance(rec, dict) else ""
+            names = mdn_names(path)
+            if names is not None:
+                named.append((path, names))
+        picked = random.Random(f"{seed}:mdn").sample(named, min(n, len(named)))
+        docs = await asyncio.gather(*[self._mdn_doc(*p) for p in picked])
         return [d for d in docs if d is not None]
 
-    async def _mdn_doc(self, path: str) -> Doc | None:
+    async def _mdn_doc(self, path: str, names: tuple[str, ...]) -> Doc | None:
         payload, err = await self._request_json("GET", f"{MDN_BASE}{path}/index.json")
         doc = payload.get("doc") if isinstance(payload, dict) else None
         if err is not None or not isinstance(doc, dict):
             return None
-        url = f"{MDN_BASE}{path}"
-        key = doc_key(url)
         summary = " ".join(str(doc.get("summary") or "").split())
-        names = mdn_names(path)
-        if key is None or names is None or len(summary.split()) < MIN_DESC_WORDS:
+        if len(summary.split()) < MIN_DESC_WORDS:
             return None
         title = str(doc.get("title") or path.rsplit("/", 1)[-1])
-        return Doc("api", key, url, title, summary, context="javascript", banned=names)
+        return Doc("api", f"{MDN_BASE}{path}", title, summary, context="javascript", banned=names)
 
 
 class GitHubClient(SourceClient):
-    def __init__(self, *, token: str | None = None, **kwargs: Any) -> None:
-        super().__init__(api_key=token or os.environ.get("GITHUB_TOKEN"), **kwargs)
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(api_key=os.environ.get("GITHUB_TOKEN"), **kwargs)
         self.default_headers = {"User-Agent": USER_AGENT, "Accept": "application/vnd.github+json"}
         if self.api_key:
             self.default_headers["Authorization"] = f"Bearer {self.api_key}"
@@ -227,8 +218,8 @@ class GitHubClient(SourceClient):
 class StackExchangeClient(SourceClient):
     default_headers = {"User-Agent": USER_AGENT}
 
-    def __init__(self, *, key: str | None = None, **kwargs: Any) -> None:
-        super().__init__(api_key=key or os.environ.get("STACKEXCHANGE_KEY"), **kwargs)
+    def __init__(self, **kwargs: Any) -> None:
+        super().__init__(api_key=os.environ.get("STACKEXCHANGE_KEY"), **kwargs)
 
     async def questions(self, tag: str, *, created_after: date, created_before: date) -> list[Doc]:
         params: dict[str, Any] = {

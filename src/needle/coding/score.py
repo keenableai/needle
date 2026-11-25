@@ -73,4 +73,5 @@ async def run_coding(
         _summary,
         num_results=num_results,
         snippet_chars=snippet_chars,
+        concurrent_search=True,
     )

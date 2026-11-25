@@ -15,7 +15,6 @@ HOUR = NOW.replace(minute=0)
 
 API = Doc(
     "api",
-    "py:library/itertools",
     "https://docs.python.org/3/library/itertools.html",
     "itertools.groupby",
     "groupby(iterable)\nMake an iterator that returns consecutive keys and groups.",
@@ -24,7 +23,6 @@ API = Doc(
 )
 ISSUE = Doc(
     "issue",
-    "gh:pandas-dev/pandas#63250",
     "https://github.com/pandas-dev/pandas/issues/63250",
     "BUG: Series bool truediv",
     "TypeError: operator 'truediv' not implemented for bool dtypes",
@@ -33,7 +31,6 @@ ISSUE = Doc(
 )
 QA = Doc(
     "qa",
-    "so:80003283",
     "https://stackoverflow.com/questions/80003283/x",
     "How to compute a gradient column-wise in a pandas DataFrame",
     "np.gradient raises ValueError ambiguous truth value",
@@ -46,7 +43,7 @@ def test_api_query_rejects_banned_names_in_any_form():
     assert query_ok("python iterator of consecutive equal key runs", API)
     assert not query_ok("python groupby consecutive equal key runs", API)
     assert not query_ok("python itertools consecutive equal key runs", API)
-    camel = Doc("api", "k", "u", "Array.flatMap", "t", context="javascript", banned=("flatMap",))
+    camel = Doc("api", "u", "Array.flatMap", "t", context="javascript", banned=("flatMap",))
     assert not query_ok("javascript array flat map then flatten one level", camel)
     assert not query_ok("python groups", API)
     assert not query_ok("iterator of consecutive equal key runs grouped", API)
@@ -143,7 +140,6 @@ async def test_run_generate_builds_rows_per_type_and_counts_drops():
     }
     assert rows[1]["query_text"] == "pandas operator 'truediv' not implemented bool series"
     assert stats.candidates == {"api": 1, "issue": 1, "qa": 1}
-    assert stats.rows == {"api": 1, "issue": 1, "qa": 0}
     assert stats.rejected == 1
     assert stats.source_errors == ["github numpy/numpy: http_error: 403"]
     assert {key for key, _, _ in github.calls} == {"pandas-dev/pandas", "numpy/numpy"}
@@ -158,7 +154,7 @@ def test_generate_refuses_a_set_missing_a_doc_type(tmp_path, monkeypatch):
 
     async def fake_run_generate(**kwargs):
         row = build_row(API, query_text="q", syntax="plain", hour_ts=HOUR)
-        return [row], GenStats(rows={"api": 1, "issue": 0})
+        return [row], GenStats(candidates={"api": 1, "issue": 3})
 
     monkeypatch.setattr("needle.coding.cli.require_openrouter_client", lambda *a, **k: DummyLLM())
     monkeypatch.setattr("needle.coding.cli.run_generate", fake_run_generate)

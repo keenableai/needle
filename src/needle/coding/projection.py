@@ -2,9 +2,8 @@ import re
 from urllib.parse import urlsplit
 
 from needle.coding.models import Doc
-from needle.shared.prompts import clean_llm_line, render_prompt
+from needle.shared.prompts import render_prompt
 
-TEMPLATES = {"api": "api_query.jinja", "issue": "issue_query.jinja", "qa": "qa_query.jinja"}
 SYNTAX_CYCLES = {
     "api": ("plain", "site"),
     "issue": ("plain", "quoted", "plain", "site"),
@@ -21,16 +20,7 @@ WORD_RE = re.compile(r"[a-z][a-z0-9_+#]*")
 
 
 def build_prompt(doc: Doc) -> str:
-    return render_prompt(
-        __package__,
-        TEMPLATES[doc.doc_type],
-        doc=doc,
-        project=doc.context.rsplit("/", 1)[-1],
-    )
-
-
-def clean_query(text: str | None) -> str | None:
-    return clean_llm_line(text, sentinel="NO_DISTINCT_QUERY")
+    return render_prompt(__package__, f"{doc.doc_type}_query.jinja", doc=doc)
 
 
 def mentions(query: str, name: str) -> bool:

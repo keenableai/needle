@@ -113,7 +113,7 @@ def test_parse_question_requires_score_and_answer():
 
 
 async def test_source_clients_record_fetch_errors():
-    client = GitHubClient(token="t")
+    client = GitHubClient()
 
     async def fail(method, url, **kwargs):
         return None, {"error_type": "http_error", "error_message": "403: rate limit"}
