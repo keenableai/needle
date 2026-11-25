@@ -5,8 +5,9 @@ from pathlib import Path
 import fire
 import httpx
 from huggingface_hub import get_token
-from publish_bench import finance_rows, legal_rows, scholar_rows
+from publish_bench import coding_rows, finance_rows, legal_rows, scholar_rows
 
+from needle.coding.score import _summary as coding_summary
 from needle.finance.cli import _gold_query
 from needle.finance.score import _summary as finance_summary
 from needle.finance.score import _ultimate as finance_ultimate
@@ -24,6 +25,7 @@ BENCHES = {
     "finance": ("recall.json", finance_summary, finance_ultimate, finance_rows),
     "scholar": ("scholar.json", scholar_summary, ultimate_per_query, scholar_rows),
     "legal": ("legal.json", legal_summary, ultimate_per_query, legal_rows),
+    "coding": ("coding.json", coding_summary, ultimate_per_query, coding_rows),
 }
 LATENCY_KEYS = frozenset({"p50_ms", "p95_ms", "lat_ms"})
 

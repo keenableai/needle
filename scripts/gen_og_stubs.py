@@ -8,11 +8,12 @@ BASE = "https://keenableai.github.io/needle/"
 SITE_TITLE = "NEEDLE — search engine benchmarks"
 TITLE_SUFFIX = " | NEEDLE search benchmark"
 BLURB = ("NEEDLE is a live open-source benchmark that compares public "
-         "search APIs on news, finance, scholar, rare-word, and legal "
+         "search APIs on news, finance, scholar, rare-word, legal, and coding "
          "queries.")
 
 VERTICALS = {"news": "News", "finance": "Finance", "scholar": "Scholar",
-             "agentic_rare": "AgenticRare", "legal": "Legal"}
+             "agentic_rare": "AgenticRare", "legal": "Legal",
+             "coding": "Coding"}
 
 SECTION_DESCRIPTIONS = {
     "sec-results": "Standings and 7-day leaderboards for every vertical.",

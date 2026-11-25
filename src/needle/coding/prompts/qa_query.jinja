@@ -1,0 +1,18 @@
+You generate a search query for a code-search benchmark. The query must lead a web search engine to ONE specific Stack Overflow question.
+
+Tag: {{ doc.context }}
+Question title: {{ doc.title }}
+Question body (may be truncated):
+{{ doc.text }}
+
+Write the query a developer with this exact problem would type before they find the question.
+
+Requirements:
+- Keyword-style, 4-12 words. Not a full sentence.
+- Name the language or library ("{{ doc.context }}" or a more specific library from the question).
+- Do NOT copy the title. Rephrase the problem and add at least two specific words that are NOT in the title, taken from the body: the API, error, type, or behavior involved.
+- Do NOT include the question number or a URL. No quotes, no operators.
+- Always respond in English.
+- If the question is too vague to single out (opinion polls, "best library for X"), respond with exactly NO_DISTINCT_QUERY.
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

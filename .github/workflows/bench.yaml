@@ -6,7 +6,8 @@ on:
     - cron: "17 3,15 * * *"
     - cron: "17 6,18 * * *"
     - cron: "17 9,21 * * *"
-    - cron: "17 1,2,4,5,7,8,10,11,13,14,16,17,19,20,22,23 * * *"
+    - cron: "17 1,13 * * *"
+    - cron: "17 2,4,5,7,8,10,11,14,16,17,19,20,22,23 * * *"
   workflow_dispatch:
     inputs:
       news:
@@ -27,6 +28,10 @@ on:
         default: false
       legal:
         description: "Run legal (regenerates gold)"
+        type: boolean
+        default: false
+      coding:
+        description: "Run coding (regenerates gold)"
         type: boolean
         default: false
 
@@ -59,6 +64,7 @@ env:
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
   OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   COURTLISTENER_API_TOKEN: ${{ secrets.COURTLISTENER_API_TOKEN }}
+  STACKEXCHANGE_KEY: ${{ secrets.STACKEXCHANGE_KEY }}
   HF_TOKEN: ${{ secrets.HF_TOKEN }}
   HF_DATASET: keenable-ai/needle-results
   ENGINES: keenable-realtime,keenable,exa,exa-lite,google,bing,brave,brave-llmcontext,parallel-turbo,parallel-fast,parallel,tavily,linkup,perplexity-fast,perplexity,octen,ceramic,you,firecrawl,tinyfish,kagi,jina,context,deepseek,seltz,webiq,claude-search,chatgpt-search
@@ -72,6 +78,7 @@ jobs:
       agentic_rare: ${{ steps.plan.outputs.agentic_rare }}
       scholar: ${{ steps.plan.outputs.scholar }}
       legal: ${{ steps.plan.outputs.legal }}
+      coding: ${{ steps.plan.outputs.coding }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -80,6 +87,7 @@ jobs:
             data/gold.jsonl
             data/scholar.jsonl
             data/legal.jsonl
+            data/coding.jsonl
           sparse-checkout-cone-mode: false
       - id: plan
         env:
@@ -88,6 +96,7 @@ jobs:
           AGENTIC_RARE: ${{ inputs.agentic_rare }}
           SCHOLAR: ${{ inputs.scholar }}
           LEGAL: ${{ inputs.legal }}
+          CODING: ${{ inputs.coding }}
         run: |
           want() {
             if [ "$SCHEDULE" = "$1" ] || [ "$2" = "true" ]; then echo true
@@ -100,6 +109,7 @@ jobs:
             echo "agentic_rare=$(want '17 3,15 * * *' "$AGENTIC_RARE" '')"
             echo "scholar=$(want '17 6,18 * * *' "$SCHOLAR" data/scholar.jsonl)"
             echo "legal=$(want '17 9,21 * * *' "$LEGAL" data/legal.jsonl)"
+            echo "coding=$(want '17 1,13 * * *' "$CODING" data/coding.jsonl)"
           } >> "$GITHUB_OUTPUT"
 
   news:
@@ -198,3 +208,23 @@ jobs:
           args: --legal legal.json --legal-queries legal.jsonl
           daily_args: --legal legal.jsonl --legal_report legal.json
 
+  coding:
+    needs: plan
+    if: needs.plan.outputs.coding == 'true'
+    runs-on: gke-use5-amd64
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          site-data: true
+      - env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          uv run needle coding generate --per-type 20 --out coding.jsonl
+          uv run needle coding run --queries coding.jsonl \
+            --engines "$ENGINES" --out coding.json
+      - uses: ./.github/actions/publish
+        with:
+          args: --coding coding.json --coding-queries coding.jsonl
+          daily_args: --coding coding.jsonl --coding_report coding.json

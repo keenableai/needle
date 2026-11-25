@@ -1,0 +1,19 @@
+You generate a search query for a code-search benchmark. The query must lead a web search engine to ONE specific API reference page — without naming the API.
+
+Library: {{ doc.context }}
+API: {{ doc.title }}
+Reference entry:
+{{ doc.text }}
+
+Write the query a developer would type when they need this behavior but do not remember the API's name.
+
+Requirements:
+- Keyword-style, 4-12 words. Not a natural-language question. Do not start with what/why/how.
+- Include the word "{{ doc.context }}" so the query names the language or library.
+- Describe what the API does — its effect, inputs, or output — specifically enough to single it out from its neighbours.
+- Do NOT use any of these names in any form (as written, split into words, or with underscores replaced by spaces): {{ doc.banned | join(", ") }}.
+- No quotes, no operators, no code.
+- Always respond in English.
+- If the entry is too generic to single out this API (trivial getters, aliases, "see X"), respond with exactly NO_DISTINCT_QUERY.
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

@@ -64,6 +64,31 @@ def test_suite_rows_publish_slice_denominators():
     assert (row["search_errors"], row["account_errors"], row["service_errors"]) == (3, 1, 2)
 
 
+def test_coding_publishes_one_slice_and_keeps_gold(tmp_path):
+    report = _report({"api": {"n": 4, "recall_at_k": 0.5}})
+    report["engines"]["engine"]["per_query"] = [
+        {"query": "q", "score": 1.0, "search_error": None, "results": []}
+    ]
+    report_path = tmp_path / "coding.json"
+    report_path.write_text(json.dumps(report), encoding="utf-8")
+    queries = tmp_path / "coding.jsonl"
+    queries.write_text('{"query_text": "q"}\n', encoding="utf-8")
+    site = tmp_path / "site"
+    publish_bench.publish(
+        site=str(site),
+        runs_out=str(tmp_path / "runs"),
+        coding=str(report_path),
+        coding_queries=str(queries),
+        ts="2026-11-25T01:17Z",
+    )
+    row = json.loads((site / "data" / "history.jsonl").read_text(encoding="utf-8"))
+    assert (row["bench"], row["recall"], row["mrr"], row["num_scored"]) == ("coding", 0.5, 0.4, 7)
+    assert "api_recall" not in row
+    assert (site / "data" / "coding.jsonl").read_text(encoding="utf-8") == '{"query_text": "q"}\n'
+    runs = json.loads((site / "data" / "runs.json").read_text(encoding="utf-8"))
+    assert runs[0]["artifacts"] == ["coding.json", "coding.jsonl"]
+
+
 def test_publish_writes_ci_files(tmp_path):
     report = {
         "num_queries": 2,
