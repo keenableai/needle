@@ -2,7 +2,7 @@
   "confidence": 0.95,
   "resamples": 10000,
   "window_days": 7,
-  "window_end": "2026-11-25T00:03Z",
+  "window_end": "2026-11-25T00:28Z",
   "method": "percentile cluster bootstrap, wider of query and run clustering",
   "runs": {
     "agentic_rare": [
@@ -43,7 +43,8 @@
       "2026-11-23T00:47Z",
       "2026-11-23T12:52Z",
       "2026-11-24T00:22Z",
-      "2026-11-24T12:40Z"
+      "2026-11-24T12:40Z",
+      "2026-11-25T00:28Z"
     ],
     "news": [
       "2026-11-18T17:38Z",
@@ -508,149 +509,149 @@
     },
     "legal": {
       "bing": {
-        "point": 0.7387,
-        "lo": 0.7139,
-        "hi": 0.7632
+        "point": 0.7433,
+        "lo": 0.7196,
+        "hi": 0.7669
       },
       "brave": {
-        "point": 0.8199,
-        "lo": 0.7986,
-        "hi": 0.8416
-      },
-      "brave-llmcontext": {
-        "point": 0.8416,
-        "lo": 0.8207,
-        "hi": 0.8622
-      },
-      "ceramic": {
-        "point": 0.1889,
-        "lo": 0.1645,
-        "hi": 0.2123
-      },
-      "chatgpt-search": {
-        "point": 0.7026,
-        "lo": 0.6769,
-        "hi": 0.7282
-      },
-      "claude-search": {
-        "point": 0.758,
-        "lo": 0.7324,
-        "hi": 0.7822
-      },
-      "context": {
-        "point": 0.7797,
-        "lo": 0.7412,
-        "hi": 0.8135
-      },
-      "deepseek": {
-        "point": 0.7621,
-        "lo": 0.7385,
-        "hi": 0.7858
-      },
-      "exa": {
-        "point": 0.9011,
-        "lo": 0.883,
-        "hi": 0.9181
-      },
-      "exa-lite": {
-        "point": 0.893,
-        "lo": 0.8743,
-        "hi": 0.9125
-      },
-      "firecrawl": {
-        "point": 0.6693,
-        "lo": 0.6425,
-        "hi": 0.6959
-      },
-      "google": {
-        "point": 0.6584,
-        "lo": 0.6312,
-        "hi": 0.6845
-      },
-      "jina": {
-        "point": 0.5482,
-        "lo": 0.5206,
-        "hi": 0.5764
-      },
-      "kagi": {
-        "point": 0.2219,
-        "lo": 0.0539,
-        "hi": 0.3995
-      },
-      "keenable": {
-        "point": 0.918,
-        "lo": 0.9026,
-        "hi": 0.9331
-      },
-      "keenable-realtime": {
-        "point": 0.9172,
-        "lo": 0.9018,
-        "hi": 0.9324
-      },
-      "linkup": {
-        "point": 0.6977,
-        "lo": 0.672,
-        "hi": 0.7239
-      },
-      "octen": {
-        "point": 0.7709,
-        "lo": 0.7472,
-        "hi": 0.7944
-      },
-      "parallel": {
-        "point": 0.9204,
-        "lo": 0.9047,
-        "hi": 0.9354
-      },
-      "parallel-fast": {
-        "point": 0.8947,
-        "lo": 0.8758,
-        "hi": 0.9145
-      },
-      "parallel-turbo": {
-        "point": 0.8859,
-        "lo": 0.8673,
-        "hi": 0.9037
-      },
-      "perplexity": {
-        "point": 0.9043,
-        "lo": 0.8879,
-        "hi": 0.9205
-      },
-      "perplexity-fast": {
-        "point": 0.9076,
-        "lo": 0.8913,
-        "hi": 0.9234
-      },
-      "seltz": {
-        "point": 0.2982,
-        "lo": 0.2717,
-        "hi": 0.3251
-      },
-      "tavily": {
-        "point": 0.4783,
-        "lo": 0.4463,
-        "hi": 0.508
-      },
-      "tinyfish": {
-        "point": 0.8207,
-        "lo": 0.7986,
+        "point": 0.8224,
+        "lo": 0.8016,
         "hi": 0.8429
       },
+      "brave-llmcontext": {
+        "point": 0.8418,
+        "lo": 0.8219,
+        "hi": 0.8614
+      },
+      "ceramic": {
+        "point": 0.1896,
+        "lo": 0.1664,
+        "hi": 0.2122
+      },
+      "chatgpt-search": {
+        "point": 0.6993,
+        "lo": 0.6737,
+        "hi": 0.7235
+      },
+      "claude-search": {
+        "point": 0.7612,
+        "lo": 0.7366,
+        "hi": 0.7842
+      },
+      "context": {
+        "point": 0.7716,
+        "lo": 0.7336,
+        "hi": 0.8073
+      },
+      "deepseek": {
+        "point": 0.7619,
+        "lo": 0.738,
+        "hi": 0.7846
+      },
+      "exa": {
+        "point": 0.9048,
+        "lo": 0.8882,
+        "hi": 0.9211
+      },
+      "exa-lite": {
+        "point": 0.8966,
+        "lo": 0.8792,
+        "hi": 0.9158
+      },
+      "firecrawl": {
+        "point": 0.6736,
+        "lo": 0.6482,
+        "hi": 0.6987
+      },
+      "google": {
+        "point": 0.6604,
+        "lo": 0.6347,
+        "hi": 0.6861
+      },
+      "jina": {
+        "point": 0.5552,
+        "lo": 0.5269,
+        "hi": 0.5836
+      },
+      "kagi": {
+        "point": 0.206,
+        "lo": 0.0499,
+        "hi": 0.3731
+      },
+      "keenable": {
+        "point": 0.9157,
+        "lo": 0.9004,
+        "hi": 0.9303
+      },
+      "keenable-realtime": {
+        "point": 0.9149,
+        "lo": 0.8996,
+        "hi": 0.9297
+      },
+      "linkup": {
+        "point": 0.697,
+        "lo": 0.6723,
+        "hi": 0.7222
+      },
+      "octen": {
+        "point": 0.7724,
+        "lo": 0.7496,
+        "hi": 0.7946
+      },
+      "parallel": {
+        "point": 0.9216,
+        "lo": 0.9068,
+        "hi": 0.936
+      },
+      "parallel-fast": {
+        "point": 0.897,
+        "lo": 0.8787,
+        "hi": 0.9159
+      },
+      "parallel-turbo": {
+        "point": 0.8843,
+        "lo": 0.866,
+        "hi": 0.9019
+      },
+      "perplexity": {
+        "point": 0.903,
+        "lo": 0.8866,
+        "hi": 0.9187
+      },
+      "perplexity-fast": {
+        "point": 0.906,
+        "lo": 0.8896,
+        "hi": 0.9212
+      },
+      "seltz": {
+        "point": 0.3052,
+        "lo": 0.2796,
+        "hi": 0.3311
+      },
+      "tavily": {
+        "point": 0.4873,
+        "lo": 0.4539,
+        "hi": 0.5201
+      },
+      "tinyfish": {
+        "point": 0.8187,
+        "lo": 0.7976,
+        "hi": 0.8398
+      },
       "ultimate": {
-        "point": 0.9871,
-        "lo": 0.9806,
-        "hi": 0.9928
+        "point": 0.9873,
+        "lo": 0.9807,
+        "hi": 0.9926
       },
       "webiq": {
-        "point": 0.7929,
-        "lo": 0.7668,
-        "hi": 0.8185
+        "point": 0.7975,
+        "lo": 0.7724,
+        "hi": 0.8214
       },
       "you": {
-        "point": 0.8143,
-        "lo": 0.7901,
-        "hi": 0.8376
+        "point": 0.8142,
+        "lo": 0.7909,
+        "hi": 0.8356
       }
     },
     "news": {
