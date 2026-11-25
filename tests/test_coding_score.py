@@ -9,46 +9,69 @@ from needle.shared.search import SearchResult
     ("url", "key"),
     [
         (
-            "https://docs.python.org/3/library/itertools.html#itertools.groupby",
-            "py:library/itertools",
-        ),
-        ("https://docs.python.org/3.12/library/itertools.html", "py:library/itertools"),
-        ("https://docs.python.org/ja/3/library/itertools.html", "py:library/itertools"),
-        (
-            "https://numpy.org/doc/1.26/reference/generated/numpy.argsort.html",
-            "numpy:reference/generated/numpy.argsort",
+            "https://python-flint.readthedocs.io/en/latest/fmpz.html#flint.fmpz.gcd",
+            "doc:python-flint.readthedocs.io/fmpz",
         ),
         (
-            "https://numpy.org/devdocs/reference/generated/numpy.argsort.html",
-            "numpy:reference/generated/numpy.argsort",
+            "https://python-flint.readthedocs.io/en/v0.6.0/fmpz.html",
+            "doc:python-flint.readthedocs.io/fmpz",
         ),
         (
-            "https://pandas.pydata.org/pandas-docs/version/2.1.4/reference/api/pandas.DataFrame.explode.html",
-            "pandas:reference/api/pandas.dataframe.explode",
+            "https://docs.python.org/3.12/library/tkinter.html",
+            "doc:docs.python.org/library/tkinter",
         ),
         (
-            "https://pandas.pydata.org/docs/dev/reference/api/pandas.DataFrame.explode.html",
-            "pandas:reference/api/pandas.dataframe.explode",
+            "https://docs.python.org/ja/3/library/tkinter.html",
+            "doc:docs.python.org/library/tkinter",
+        ),
+        ("http://docs.python.org//library/tkinter.html", "doc:docs.python.org/library/tkinter"),
+        ("https://webargs.readthedocs.io/en/stable/api/", "doc:webargs.readthedocs.io/api"),
+        (
+            "https://webargs.readthedocs.io/en/latest/api/index.html",
+            "doc:webargs.readthedocs.io/api",
         ),
         (
-            "https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout_static",
-            "mdn:web/api/abortsignal/timeout_static",
+            "https://doc.qt.io/qtforpython-6.11/PySide6/QtOpcUa/QOpcUaNode.html",
+            "doc:doc.qt.io/qtforpython/pyside6/qtopcua/qopcuanode",
         ),
         (
-            "https://developer.mozilla.org/docs/Web/API/AbortSignal/timeout_static/",
-            "mdn:web/api/abortsignal/timeout_static",
+            "https://doc.qt.io/qtforpython-6/PySide6/QtOpcUa/QOpcUaNode.html",
+            "doc:doc.qt.io/qtforpython/pyside6/qtopcua/qopcuanode",
         ),
+        ("https://example.com/docs/api/main.html", "doc:example.com/docs/api/main"),
+        ("https://example.com/en/guide", "doc:example.com/en/guide"),
+        (
+            "https://docs.rs/tracing-tunnel/latest/tracing_tunnel/struct.TracingEventSender.html",
+            "rustdoc:tracing_tunnel/struct.tracingeventsender",
+        ),
+        (
+            "https://docs.rs/tracing-tunnel/0.1.0/tracing_tunnel/struct.TracingEventSender.html#method.new",
+            "rustdoc:tracing_tunnel/struct.tracingeventsender",
+        ),
+        (
+            "https://slowli.github.io/tracing-toolbox/tracing_tunnel/struct.TracingEventSender.html",
+            "rustdoc:tracing_tunnel/struct.tracingeventsender",
+        ),
+        (
+            "https://docs.rs/qp2p/latest/qp2p/config/struct.Config.html",
+            "rustdoc:qp2p/config/struct.config",
+        ),
+        ("https://docs.rs/qp2p/latest/qp2p/", "doc:docs.rs/qp2p/qp2p"),
+        ("https://docs.rs/qp2p/0.36.4/src/qp2p/lib.rs.html", "doc:docs.rs/qp2p/src/qp2p/lib.rs"),
         (
             "https://github.com/Pandas-Dev/pandas/issues/63250#issuecomment-1",
             "gh:pandas-dev/pandas#63250",
         ),
         ("https://github.com/pandas-dev/pandas/pull/63250/files", "gh:pandas-dev/pandas#63250"),
+        (
+            "https://github.com/pandas-dev/pandas/blob/main/x.py",
+            "doc:github.com/pandas-dev/pandas/blob/x.py",
+        ),
         ("https://stackoverflow.com/questions/80003283/how-to-x", "so:80003283"),
         ("https://www.stackoverflow.com/q/80003283", "so:80003283"),
-        ("https://stackoverflow.com/a/80003283", None),
-        ("https://github.com/pandas-dev/pandas/blob/main/x.py", None),
-        ("https://example.com/questions/80003283", None),
+        ("https://stackoverflow.com/a/80003283", "doc:stackoverflow.com/a/80003283"),
         ("http://[broken", None),
+        ("not a url", None),
     ],
 )
 def test_doc_key(url, key):
@@ -74,7 +97,7 @@ class FakeEngine:
 GOLD = [
     GoldDoc(
         text="python group consecutive items",
-        doc_key="py:library/itertools",
+        doc_key="doc:docs.python.org/library/itertools",
         bucket="api",
         syntax="plain",
     ),
@@ -104,8 +127,12 @@ async def test_run_coding_matches_canonical_urls_only():
     good = report["engines"]["good"]
     assert good["recall_at_k"] == 1.0
     assert [pq["hit_rank"] for pq in good["per_query"]] == [2, 3]
-    assert good["per_query"][0]["results"][1]["ids"] == {"doc": ["py:library/itertools"]}
-    assert good["per_query"][0]["results"][0]["ids"] == {}
+    assert good["per_query"][0]["results"][1]["ids"] == {
+        "doc": ["doc:docs.python.org/library/itertools"]
+    }
+    assert good["per_query"][0]["results"][0]["ids"] == {
+        "doc": ["doc:example.com/pandas-dev/pandas/issues/63250"]
+    }
     assert good["by_bucket"]["issue"] == {"n": 1, "recall_at_k": 1.0}
     assert good["by_syntax"]["site"]["n"] == 1
     bad = report["engines"]["bad"]

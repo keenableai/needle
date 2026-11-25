@@ -223,17 +223,21 @@ needle coding generate --per-type 20 --out coding.jsonl
 needle coding run --queries coding.jsonl --out coding.json
 ```
 
-- **`api`** — a random public function, method, or class from the Python,
-  NumPy, and pandas Sphinx inventories (`objects.inv`), or an MDN Web API /
-  JavaScript reference page. An LLM describes what it does, with the library
-  name, and the bench rejects the query if it uses any part of the API's
-  name. Python stdlib gold is the module page, so the module name is banned
-  too.
-- **`issue`** — an issue with 3+ comments, created in a random month of the
-  last `--months-back` (12) in one of `--repos` (15 popular Python, JS/TS,
-  Rust, and Go repos). An LLM writes the query a developer who hits the bug
-  would type, with one quoted span copied verbatim from the issue (the error
-  message or symptom); the bench checks the span and rejects the issue number.
+- **`api`** — a random documented item from a long-tail docs site. Half come
+  from Python packages ranked 2,000–15,000 by PyPI downloads (the
+  `top-pypi-packages` list): the package's listed docs site or
+  `<name>.readthedocs.io`, read through its Sphinx `objects.inv`. The other
+  half come from Rust crates ranked 2,000–20,000 by crates.io downloads,
+  read through the crate's docs.rs `all.html`. An LLM describes what the item
+  does, with the library name, and the bench rejects the query if it uses any
+  other part of the item's name.
+- **`issue`** — an issue with 3+ comments from the last `--months-back` (12)
+  in a small active repo: 6 random languages per run, repos with 100–2,000
+  stars, pushed in the last 90 days, 10+ open issues (`--repos` replaces the
+  sample with a fixed list). An LLM writes the query a developer who hits the
+  bug would type, with one quoted span copied verbatim from the issue (the
+  error message or symptom); the bench checks the span and rejects the issue
+  number.
 - **`qa`** — a Stack Overflow question with score ≥ 1 and an answer, from a
   random month in one of `--tags` (python, javascript, typescript, rust, go,
   java). An LLM rephrases the problem; the bench rejects the query unless it
@@ -241,12 +245,14 @@ needle coding run --queries coding.jsonl --out coding.json
 
 `api` and `qa` alternate plain and `site:` queries; `issue` cycles plain,
 `"quoted"`, plain, `site:github.com`. `run` maps each result URL to a doc
-key and scores a hit when it equals the gold key: Python/NumPy/pandas docs
-pages under any version or locale prefix, MDN pages under any locale, a
-GitHub issue or the pull request with the same number, and a Stack Overflow
-question id. Copies on other sites do not count, so recall is a lower bound,
-the same for every engine. The report breaks down by doc type (`by_bucket`)
-and syntax. `coding` is not yet part of the overall standings.
+key and scores a hit when it equals the gold key. A docs page keeps its host
+and path without version and locale parts (`/en/latest/`, `/v0.6.0/`,
+`qtforpython-6.11` → `qtforpython`); a rustdoc item keys on its crate and
+item path on any host, so docs.rs and a self-hosted build match; a GitHub
+issue matches the pull request with the same number; a Stack Overflow
+question matches by id. Other copies do not count, so recall is a lower
+bound, the same for every engine. The report breaks down by doc type
+(`by_bucket`) and syntax. `coding` is not yet part of the overall standings.
 
 ## agentic_rare
 

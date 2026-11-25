@@ -3,10 +3,13 @@ from datetime import date
 
 from needle.coding.sources import (
     GitHubClient,
-    mdn_names,
+    docs_bases,
+    docsrs_entry,
+    docsrs_items,
     parse_inventory,
     parse_issue,
     parse_question,
+    small_repo_names,
     sphinx_entry,
 )
 
@@ -16,21 +19,21 @@ def _inventory(lines: list[str]) -> bytes:
     return header + zlib.compress("\n".join(lines).encode())
 
 
-def test_parse_inventory_keeps_public_python_objects_under_prefix():
+def test_parse_inventory_keeps_public_dotted_python_objects():
     raw = _inventory(
         [
             "itertools.groupby py:function 1 library/itertools.html#$ -",
             "csv.csvreader.__next__ py:method 1 library/csv.html#$ -",
             "itertools py:module 0 library/itertools.html#module-$ -",
             "glossary std:label -1 glossary.html#$ Glossary",
-            "tutorial.func py:function 1 tutorial/x.html#$ -",
+            "Toplevel py:class 1 api.html#$ -",
         ]
     )
-    assert parse_inventory(raw, path_prefix="library/") == [
+    assert parse_inventory(raw) == [
         ("itertools.groupby", "library/itertools.html#itertools.groupby")
     ]
-    assert parse_inventory(b"not an inventory", path_prefix="library/") == []
-    assert parse_inventory(b"a\nb\nc\nd\nnot zlib", path_prefix="library/") == []
+    assert parse_inventory(b"not an inventory") == []
+    assert parse_inventory(b"# Sphinx inventory\nb\nc\nd\nnot zlib") == []
 
 
 PAGE = """
@@ -57,18 +60,63 @@ def test_sphinx_entry_reads_signature_and_description():
     assert sphinx_entry(PAGE, "itertools.missing") is None
 
 
-def test_mdn_names():
-    assert mdn_names("/en-US/docs/Web/API/AbortSignal/timeout_static") == (
-        "AbortSignal",
-        "timeout",
+def test_docs_bases_prefers_listed_docs_then_read_the_docs():
+    info = {
+        "project_urls": {
+            "Documentation": "https://webargs.readthedocs.io/en/latest",
+            "Source": "https://github.com/marshmallow-code/webargs",
+        }
+    }
+    assert docs_bases(info, "webargs") == ["https://webargs.readthedocs.io/en/latest/"]
+    assert docs_bases({}, "cf_units") == ["https://cf-units.readthedocs.io/en/latest/"]
+
+
+DOCSRS_ALL = """
+<ul class="all-items">
+<li><a href="struct.Endpoint.html">Endpoint</a></li>
+<li><a href="config/struct.Config.html">config::Config</a></li>
+<li><a href="fn.connect.html">connect</a></li>
+<li><a href="index.html">crate</a></li>
+<li><a href="struct.Endpoint.html">Endpoint</a></li>
+</ul>
+"""
+
+DOCSRS_ITEM = """
+<pre class="rust item-decl"><code>pub struct <a href="#">WireMsg</a>(pub UsrMsgBytes);</code></pre>
+<details class="toggle top-doc" open><summary class="hideme"><span>Expand</span></summary>
+<div class="docblock"><p>Final type serialised and sent on the wire by the endpoint to its peers.</p>
+<div class="example-wrap"><pre>let x = 1;</pre></div></div></details>
+<h2 id="fields">Tuple Fields</h2>
+"""
+
+
+def test_docsrs_items_and_entry():
+    assert docsrs_items(DOCSRS_ALL) == [
+        "struct.Endpoint.html",
+        "config/struct.Config.html",
+        "fn.connect.html",
+    ]
+    assert docsrs_entry(DOCSRS_ITEM) == (
+        "pub struct WireMsg (pub UsrMsgBytes);\n"
+        "Final type serialised and sent on the wire by the endpoint to its peers."
     )
-    assert mdn_names("/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap") == (
-        "Array",
-        "flatMap",
+    short = DOCSRS_ITEM.replace(
+        "Final type serialised and sent on the wire by the endpoint to its peers.", "A message."
     )
-    assert mdn_names("/en-US/docs/Web/JavaScript/Reference/Errors/Not_defined") is None
-    assert mdn_names("/en-US/docs/Web/JavaScript/Reference/Operators") is None
-    assert mdn_names("/en-US/docs/Web/CSS/color") is None
+    assert docsrs_entry(short) is None
+    assert docsrs_entry("<p>no declaration</p>") is None
+
+
+def test_small_repo_names_keeps_repos_with_open_issues():
+    payload = {
+        "items": [
+            {"full_name": "a/one", "has_issues": True, "open_issues_count": 40},
+            {"full_name": "b/two", "has_issues": True, "open_issues_count": 3},
+            {"full_name": "c/three", "has_issues": False, "open_issues_count": 90},
+        ]
+    }
+    assert small_repo_names(payload) == ["a/one"]
+    assert small_repo_names(None) == []
 
 
 def test_parse_issue_skips_pull_requests_and_strips_template_comments():

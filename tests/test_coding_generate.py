@@ -96,6 +96,9 @@ class FakeWindowed:
     issues = fetch
     questions = fetch
 
+    async def small_repos(self, *, now, seed, n):
+        return ["small/one", "small/two"][:n]
+
 
 class FakeLLM:
     def __init__(self, replies):
@@ -133,8 +136,8 @@ async def test_run_generate_builds_rows_per_type_and_counts_drops():
     )
     assert [r["query_origin"]["bucket"] for r in rows] == ["api", "issue"]
     assert rows[0]["gold"] == {
-        "doc_key": "py:library/itertools",
-        "ids": {"doc": "py:library/itertools"},
+        "doc_key": "doc:docs.python.org/library/itertools",
+        "ids": {"doc": "doc:docs.python.org/library/itertools"},
         "url": API.url,
         "title": API.title,
     }
@@ -144,7 +147,29 @@ async def test_run_generate_builds_rows_per_type_and_counts_drops():
     assert stats.source_errors == ["github numpy/numpy: http_error: 403"]
     assert {key for key, _, _ in github.calls} == {"pandas-dev/pandas", "numpy/numpy"}
     assert all(after < before <= NOW.date() for _, after, before in github.calls)
-    assert json.loads(serialize_row(rows[0])["gold"])["doc_key"] == "py:library/itertools"
+    assert json.loads(serialize_row(rows[0])["gold"])["doc_key"] == (
+        "doc:docs.python.org/library/itertools"
+    )
+    assert len({(after, before) for _, after, before in github.calls}) == 1
+
+
+async def test_run_generate_samples_small_repos_without_a_repo_list():
+    github = FakeWindowed([ISSUE])
+    rows, _ = await run_generate(
+        api=None,
+        github=github,
+        stackexchange=None,
+        llm=FakeLLM({"GitHub issue": "pandas \"operator 'truediv' not implemented\" bool"}),
+        hour_ts=HOUR,
+        now=NOW,
+        per_type=1,
+        repos=(),
+        tags=(),
+        months_back=12,
+        seed=0,
+    )
+    assert [r["query_origin"]["bucket"] for r in rows] == ["issue"]
+    assert {key for key, _, _ in github.calls} == {"small/one", "small/two"}
 
 
 def test_generate_refuses_a_set_missing_a_doc_type(tmp_path, monkeypatch):

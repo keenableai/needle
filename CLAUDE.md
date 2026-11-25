@@ -5,9 +5,10 @@ news (hourly, nDCG@5, LLM judge), finance (twice daily, answer-recall@5 +
 MRR@5, deterministic matcher with LLM judge backstop), scholar (twice daily,
 known-item papers, recall@10 + MRR@10 by arXiv/DOI/PMID match), legal
 (twice daily, known-item caselaw/CFR, recall@5 + MRR@5 by citation/docket/URL
-match), and coding (twice daily, known-item API docs / GitHub issues / Stack
-Overflow questions, recall@5 + MRR@5 by canonical URL match; not yet in the
-overall standings). agentic_rare is a query producer, not a bench: `scripts/agentic_rare_filter.py`
+match), and coding (twice daily, known-item long-tail API docs from small
+PyPI docs sites and docs.rs / GitHub issues from small repos / Stack Overflow
+questions, recall@5 + MRR@5 by version-free URL key; not yet in the overall
+standings). agentic_rare is a query producer, not a bench: `scripts/agentic_rare_filter.py`
 filters a query stream for English rare-word queries (BERT WordPiece +
 fastText language ID), and `needle agentic_rare generate` / `run` samples
 the filtered artifact and evaluates it like news.

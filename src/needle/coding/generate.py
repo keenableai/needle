@@ -3,7 +3,7 @@ import itertools
 import random
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any
 
 from needle.coding.models import Doc, build_row
@@ -31,12 +31,9 @@ async def _windowed(
     fetch: Callable[..., Awaitable[list[Doc]]],
     keys: tuple[str, ...],
     *,
-    now: datetime,
-    months_back: int,
+    windows: list[tuple[date, date]],
     seed: int,
 ) -> list[Doc]:
-    windows = month_windows(now=now, months_back=months_back)
-
     async def one(key: str) -> list[Doc]:
         rng = random.Random(f"{seed}:{key}")
         after, before = rng.choice(windows)
@@ -45,6 +42,21 @@ async def _windowed(
         return docs
 
     return interleave(await bounded_gather(list(keys), one, concurrency=2))
+
+
+async def _issues(
+    github: GitHubClient,
+    repos: tuple[str, ...],
+    *,
+    now: datetime,
+    months_back: int,
+    seed: int,
+    n: int,
+) -> list[Doc]:
+    repos = repos or tuple(await github.small_repos(now=now, seed=seed, n=n))
+    windows = month_windows(now=now, months_back=months_back)
+    full_range = [(min(a for a, _ in windows), max(b for _, b in windows))]
+    return await _windowed(github.issues, repos, windows=full_range, seed=seed)
 
 
 async def _project(doc: Doc, llm: LLMClient, stats: GenStats) -> str | None:
@@ -91,12 +103,13 @@ async def run_generate(
     if api is not None:
         fetches["api"] = api.docs(n=n, seed=seed)
     if github is not None:
-        fetches["issue"] = _windowed(
-            github.issues, repos, now=now, months_back=months_back, seed=seed
-        )
+        fetches["issue"] = _issues(github, repos, now=now, months_back=months_back, seed=seed, n=n)
     if stackexchange is not None:
         fetches["qa"] = _windowed(
-            stackexchange.questions, tags, now=now, months_back=months_back, seed=seed
+            stackexchange.questions,
+            tags,
+            windows=month_windows(now=now, months_back=months_back),
+            seed=seed,
         )
     found = await asyncio.gather(*fetches.values())
     candidates = {

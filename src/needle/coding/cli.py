@@ -23,12 +23,6 @@ from needle.shared.io import serialize_row, write_json, write_jsonl
 from needle.shared.llm import resolve_llm_model
 from needle.shared.search import DEFAULT_SNIPPET_CHARS
 
-DEFAULT_REPOS = (
-    "pandas-dev/pandas,numpy/numpy,pytorch/pytorch,huggingface/transformers,"
-    "scikit-learn/scikit-learn,pydantic/pydantic,astral-sh/uv,microsoft/TypeScript,"
-    "vercel/next.js,vitejs/vite,nodejs/node,react/react,rust-lang/rust,tokio-rs/tokio,"
-    "golang/go"
-)
 DEFAULT_TAGS = "python,javascript,typescript,rust,go,java"
 
 
@@ -48,7 +42,7 @@ class Coding:
         out: str = "-",
         types: str | tuple[str, ...] = "api,issue,qa",
         per_type: int = 20,
-        repos: str | tuple[str, ...] = DEFAULT_REPOS,
+        repos: str | tuple[str, ...] = "",
         tags: str | tuple[str, ...] = DEFAULT_TAGS,
         months_back: int = 12,
         seed: int | None = None,
