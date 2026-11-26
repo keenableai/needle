@@ -235,6 +235,21 @@ async def test_leak_and_no_query_drop_the_paper():
     assert stats.drops == {"body_leak": 1, "body_no_query": 1}
 
 
+async def test_minus_term_drops_the_paper():
+    papers = [_paper(i, "computer science", datetime(2026, 7, 1, tzinfo=UTC)) for i in range(2)]
+    bodies = {p.arxiv_id: f"body {p.arxiv_id}" for p in papers}
+    arxiv = FakeArxiv({"computer science": papers}, bodies)
+    llm = FakeLLM(
+        {
+            "body 2607.00000": "distinct anchor beta gamma",
+            "body 2607.00001": "generalized -path anchor gamma",
+        }
+    )
+    rows, stats = await _run(arxiv, llm, per_cell=5)
+    assert stats.papers == 1
+    assert stats.drops == {"body_minus_term": 1}
+
+
 async def test_paper_without_matchable_ids_dropped():
     good = _paper(0, "computer science", datetime(2026, 7, 1, tzinfo=UTC))
     noids = Paper(

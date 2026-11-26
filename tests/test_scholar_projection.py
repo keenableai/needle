@@ -5,6 +5,7 @@ from needle.scholar.projection import (
     clue_query_ok,
     content_tokens,
     degrade_title,
+    has_minus_term,
     query_ok,
     title_is_specific,
     tot_query_ok,
@@ -51,6 +52,28 @@ def test_degrade_title_strips_latex_and_punctuation():
     assert "$" not in out
     assert "mathcal" not in out
     assert "sparse-graph" in out
+
+
+def test_degrade_title_keeps_accented_letters():
+    assert (
+        degrade_title("Moiré-induced self-trapping in a Bose-Einstein condensate")
+        == "moiré-induced self-trapping in a bose-einstein condensate"
+    )
+    assert (
+        degrade_title("Moire\u0301-induced self-trapping in condensates")
+        == "moir\u00e9-induced self-trapping in condensates"
+    )
+
+
+def test_degrade_title_never_emits_minus_terms():
+    assert (
+        degrade_title(r"On the non-extendibility of triangular $D(-1)$-pairs with primes")
+        == "on the non-extendibility of triangular pairs with primes"
+    )
+    assert (
+        degrade_title("Spin -- orbit coupling in - doped graphene")
+        == "spin orbit coupling in doped graphene"
+    )
 
 
 def test_degrade_title_too_short():
@@ -121,6 +144,15 @@ def test_body_has_bad_anchor():
     assert body_has_bad_anchor("Schur complement bisection Theorem 7.2")
     assert body_has_bad_anchor("Supplementary Table 3 benchmark properties")
     assert body_has_bad_anchor("classification accuracy Figure 2 curves")
+
+
+def test_has_minus_term():
+    assert has_minus_term("generalized -path problem")
+    assert has_minus_term("-440.00 energy Polarbear")
+    assert has_minus_term('"ProteinLeadOpt" benchmark --quick')
+    assert not has_minus_term("k-path problem Bose-Einstein")
+    assert not has_minus_term('"-440.00 eV" binding energy')
+    assert not has_minus_term("spin - orbit coupling")
 
 
 def test_body_has_bad_anchor_allows_distinctive_numeric_anchors():
