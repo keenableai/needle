@@ -12,6 +12,7 @@ from needle.scholar.projection import (
     build_query_prompt,
     clean_body_query,
     degrade_title,
+    has_minus_term,
     query_ok,
     title_is_specific,
 )
@@ -251,6 +252,8 @@ async def run_generate(
                 return cand, None, f"{bucket}_no_query"
             if body_has_bad_anchor(query):
                 return cand, None, f"{bucket}_bad_anchor"
+            if has_minus_term(query):
+                return cand, None, f"{bucket}_minus_term"
             if not query_ok(bucket, query, title=cand.paper.title, abstract=cand.paper.abstract):
                 return cand, None, f"{bucket}_leak"
             queries[bucket] = query

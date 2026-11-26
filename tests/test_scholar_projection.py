@@ -5,6 +5,7 @@ from needle.scholar.projection import (
     clue_query_ok,
     content_tokens,
     degrade_title,
+    has_minus_term,
     query_ok,
     title_is_specific,
     tot_query_ok,
@@ -143,6 +144,15 @@ def test_body_has_bad_anchor():
     assert body_has_bad_anchor("Schur complement bisection Theorem 7.2")
     assert body_has_bad_anchor("Supplementary Table 3 benchmark properties")
     assert body_has_bad_anchor("classification accuracy Figure 2 curves")
+
+
+def test_has_minus_term():
+    assert has_minus_term("generalized -path problem")
+    assert has_minus_term("-440.00 energy Polarbear")
+    assert has_minus_term('"ProteinLeadOpt" benchmark --quick')
+    assert not has_minus_term("k-path problem Bose-Einstein")
+    assert not has_minus_term('"-440.00 eV" binding energy')
+    assert not has_minus_term("spin - orbit coupling")
 
 
 def test_body_has_bad_anchor_allows_distinctive_numeric_anchors():

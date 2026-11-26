@@ -83,6 +83,7 @@ BAD_ANCHOR_RE = re.compile(
     r"|\bsupplementary\b",
     re.IGNORECASE,
 )
+MINUS_TERM_RE = re.compile(r"(?:^|\s)-\S")
 PRECISE_VALUE_RE = re.compile(r"\d+\.\d+|\d{5,}")
 WORD_RE = re.compile(r"[A-Za-z][A-Za-z0-9\-]+")
 COINED_WORD_RE = re.compile(r"^(?:[A-Z]{2,}|[A-Za-z0-9\-]*(?:[a-z][A-Z]|\d))[A-Za-z0-9\-]*$")
@@ -124,6 +125,10 @@ def clean_body_query(text: str | None) -> str | None:
 
 def body_has_bad_anchor(query: str) -> bool:
     return bool(BAD_ANCHOR_RE.search(query))
+
+
+def has_minus_term(query: str) -> bool:
+    return bool(MINUS_TERM_RE.search(query))
 
 
 def body_query_ok(query: str, *, title: str, abstract: str) -> bool:

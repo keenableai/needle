@@ -42,9 +42,21 @@ def test_html_body_text():
     lines = text.split("\n")
     assert lines == [
         "First paragraph with inline markup.",
-        "Uses notation.",
+        "Uses x notation.",
         "Figure 1: accuracy vs size.",
     ]
+
+
+def test_html_body_text_keeps_inline_math_attached():
+    html = (
+        "<article>"
+        '<p>The <math alttext="k"><semantics><mi>k</mi>'
+        "<annotation-xml><ci>\U0001d458</ci></annotation-xml><annotation>k</annotation>"
+        "</semantics></math>-path problem on sp<math><msup><mi></mi><mn>3</mn></msup></math>-hybridized"
+        " carbon with an <math>\n  <mi>x</mi>\n  <mo>\u2062</mo>\n  <mi>y</mi>\n</math>-plane.</p>"
+        "</article>"
+    )
+    assert html_body_text(html) == "The k-path problem on sp3-hybridized carbon with an xy-plane."
 
 
 def test_html_body_text_empty():
