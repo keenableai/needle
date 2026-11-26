@@ -868,6 +868,11 @@
       <select id="run-bench" aria-label="Benchmark"></select>
       <select id="run-select" aria-label="Run"></select>
       <select id="run-engine" aria-label="Engine"></select>
+      <select id="run-subset" aria-label="Subset" hidden></select>
+      <select id="run-outcome" aria-label="Outcome">
+        <option value="all">all queries</option>
+        <option value="miss">misses only</option>
+      </select>
       <select id="run-page" aria-label="Page" hidden></select>
     </div>
     <div id="run-detail"></div>
@@ -957,7 +962,7 @@
       <tr><td>nDCG@5</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
         <td>DCG over the top 5 results (Σ gain(rᵢ) / log₂(i + 1), with judge ratings mapped to gain 4 → 1.0, 3 → 0.667, 2 → 0.117, 1/0 → 0), divided by the DCG of the ideal ranking: the pooled ultimate ordering of every engine's deduplicated results, so ultimate scores exactly 1. A query is scored only if every one of its results was judged (otherwise it is dropped from the mean and counted as judge errors) and only if the pooled ideal has any gain; queries where no engine found anything relevant are excluded.</td></tr>
       <tr><td>redundancy penalty</td><td><span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span></td>
-        <td>applied to engine ratings before scoring: a duplicate URL drops the rating to 0. The pooled ideal is already deduplicated, so no penalty applies there. Skipped when the query itself carries a site: operator. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
+        <td>later copies of a canonical URL receive a rating of 0, including for <code>site:</code> queries. Distinct pages from the same site still count separately. The pooled ideal is already deduplicated. Raw and penalized ratings are both shown in the judgement browser.</td></tr>
       <tr><td>answer-recall@5, MRR@5</td><td><span class="vert" data-vert="finance"></span></td>
         <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher: a 0.1% band for money, with bare table figures in thousands or millions and parenthesized losses; an LLM-judge backstop for paraphrased non-money answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
@@ -2807,6 +2812,21 @@ function pooledIdcg(report, query, k) {
   return dcgAtK([...best.values()].sort((a, b) => b - a), k) || null;
 }
 
+function legacyPenalizedRatings(pq) {
+  const ratings = pq.penalized_ratings;
+  const results = pq.results || [];
+  if (!ratings || ratings.length !== results.length || results.some((r) => !r.url)) {
+    return ratings;
+  }
+  const seen = new Set();
+  return ratings.map((rating, i) => {
+    const url = normalizeUrl(results[i].url);
+    if (seen.has(url)) return 0;
+    seen.add(url);
+    return rating;
+  });
+}
+
 function legacyNdcg(report) {
   const k = report.k ?? report.num_results ?? 5;
   const ultimate = report.engines?.ultimate;
@@ -2814,14 +2834,14 @@ function legacyNdcg(report) {
   for (const pq of ultimate?.per_query || []) {
     if (pq.rbp != null) idcg.set(pq.query, dcgAtK(pq.penalized_ratings, k));
   }
-  return (pq) => {
-    if (!pq.penalized_ratings) return null;
+  return (pq, ratings) => {
+    if (!ratings) return null;
     let ideal = idcg.get(pq.query);
     if (ideal === undefined && !ultimate) {
       ideal = pooledIdcg(report, pq.query, k);
       idcg.set(pq.query, ideal);
     }
-    return ideal ? dcgAtK(pq.penalized_ratings, k) / ideal : null;
+    return ideal ? dcgAtK(ratings, k) / ideal : null;
   };
 }
 
@@ -2833,13 +2853,15 @@ function renderNewsRun(holder, per, legacy) {
     const chips = el("span", { class: "chips" });
     for (const r of pq.ratings || []) chips.appendChild(ratingChip(r));
     summary.appendChild(chips);
+    const legacyRatings = pq.ndcg == null ? legacyPenalizedRatings(pq) : null;
     summary.appendChild(el("span", { class: "score" },
-      pq.search_error ? "search error" : `nDCG ${fmt3(pq.ndcg ?? legacy(pq))}`));
+      pq.search_error ? "search error" : `nDCG ${fmt3(pq.ndcg ?? legacy(pq, legacyRatings))}`));
     row.appendChild(summary);
-    for (const r of pq.results || []) {
+    for (const [i, r] of (pq.results || []).entries()) {
       const chips = [ratingChip(r.rating, "judge rating")];
-      if (r.penalized != null && r.penalized !== r.rating) {
-        chips.push(ratingChip(r.penalized, "after redundancy penalty"));
+      const penalized = legacyRatings?.[i] ?? r.penalized;
+      if (penalized != null && penalized !== r.rating) {
+        chips.push(ratingChip(penalized, "after redundancy penalty"));
       }
       row.appendChild(resultBlock(r, [], chips));
     }
@@ -2928,6 +2950,8 @@ async function renderRunDetail(runs) {
   const benchSel = document.getElementById("run-bench");
   const engineSel = document.getElementById("run-engine");
   const pageSel = document.getElementById("run-page");
+  const subsetSel = document.getElementById("run-subset");
+  const outcomeSel = document.getElementById("run-outcome");
   holder.replaceChildren();
   const run = runs.find((r) => r.id === runSel.value);
   if (!run) {
@@ -2956,9 +2980,21 @@ async function renderRunDetail(runs) {
       entry = await fetchEngineReport(`${base}/${entry.per_query_path}`);
       if (seq !== runDetailSeq) return;
     }
-    const per = entry?.per_query || [];
+    const all = entry?.per_query || [];
+    const subsets = [...new Set(all.map((pq) => pq.bucket).filter(Boolean))];
+    const subset = subsets.includes(subsetSel.value) ? subsetSel.value : "";
+    subsetSel.replaceChildren(el("option", { value: "" }, "all subsets"),
+      ...subsets.map((b) => el("option", { value: b }, b)));
+    subsetSel.value = subset;
+    subsetSel.hidden = subsets.length <= 1;
+    const legacy = legacyNdcg(report);
+    const isMiss = (pq) => "hit_rank" in pq
+      ? !pq.hit_rank
+      : (pq.ndcg ?? legacy(pq, legacyPenalizedRatings(pq))) === 0;
+    const missesOnly = outcomeSel.value === "miss";
+    const per = all.filter((pq) => (!subset || pq.bucket === subset) && (!missesOnly || isMiss(pq)));
     const pages = Math.ceil(per.length / RUN_PAGE_SIZE);
-    const key = `${benchSel.value}|${run.id}|${engineSel.value}`;
+    const key = `${benchSel.value}|${run.id}|${engineSel.value}|${subset}|${missesOnly}`;
     const page = key === pageSel.dataset.key
       ? Math.max(0, Math.min(Number(pageSel.value) || 0, pages - 1))
       : 0;
@@ -2977,9 +3013,10 @@ async function renderRunDetail(runs) {
     else if (benchSel.value === "scholar") renderKnownItemRun(holder, slice, "paper_key");
     else if (benchSel.value === "legal") renderKnownItemRun(holder, slice, "case_key");
     else if (benchSel.value === "coding") renderKnownItemRun(holder, slice, "doc_key");
-    else renderNewsRun(holder, slice, legacyNdcg(report));
+    else renderNewsRun(holder, slice, legacy);
     if (!holder.children.length) {
-      holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
+      holder.appendChild(el("div", { class: "empty" },
+        all.length ? "No queries match these filters." : "No per-query data in this run."));
     } else {
       const cfg = [];
       if (report.judge_model) cfg.push(`judge ${report.judge_model}`);
@@ -3022,6 +3059,9 @@ async function initRunBrowser() {
   runSel.addEventListener("change", () => renderRunDetail(runs));
   engineSel.addEventListener("change", () => renderRunDetail(runs));
   pageSel.addEventListener("change", () => renderRunDetail(runs));
+  for (const id of ["run-subset", "run-outcome"]) {
+    document.getElementById(id).addEventListener("change", () => renderRunDetail(runs));
+  }
   const card = document.getElementById("card-runs");
   const observer = new IntersectionObserver(([e]) => {
     if (!e.isIntersecting) return;
