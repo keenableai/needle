@@ -258,6 +258,13 @@ uv run python scripts/refresh_mintlify_hosts.py --date 2026-12-01   # monthly, n
   java). An LLM rephrases the problem; the bench rejects the query unless it
   adds two words that are not in the title.
 
+Every doc needs 50+ words of content: the item's whole reference entry for
+`api` (on docs.rs, the item's own docs without the trait-implementation
+lists), the issue or question body, the page or entry text. The LLM answers
+`NO_DISTINCT_QUERY` for docs it cannot single out: stubs, boilerplate and
+trivial accessors, bot or template issues, digests and roundups, opinion and
+common beginner questions.
+
 `api`, `mintlify`, `fresh` and `qa` alternate plain and `site:` queries; `issue` cycles plain,
 `"quoted"`, plain, `site:github.com`. `run` maps each result URL to a doc
 key and scores a hit when it equals the gold key. A docs page keeps its host

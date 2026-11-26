@@ -49,19 +49,22 @@ PAGE = """
 <a class="headerlink" href="#itertools.groupby" title="Link">¶</a></dt>
 <dd><p>Make an iterator that returns consecutive keys and groups from the
 <em>iterable</em>.</p>
-<p>The key is a function computing a key value for each element.</p>
+<dl class="field-list"><dt>Parameters</dt><dd><p>iterable – any iterable.</p></dd></dl>
+<p>LONG</p>
 </dd></dl>
 <dl><dt id="itertools.short">short()</dt><dd><p>Too short.</p></dd></dl>
-"""
+""".replace("LONG", "The key is a function computing a key value for each element. " * 4)
 
 
-def test_sphinx_entry_reads_signature_and_description():
+def test_sphinx_entry_reads_signature_and_whole_entry():
     entry = sphinx_entry(PAGE, "itertools.groupby")
-    assert entry == (
+    assert entry.startswith(
         "itertools. groupby ( iterable )\n"
         "Make an iterator that returns consecutive keys and groups from the iterable . "
-        "The key is a function computing a key value for each element."
+        "Parameters iterable – any iterable. The key is"
     )
+    assert entry.endswith("for each element.")
+    assert "Too short" not in entry
     assert sphinx_entry(PAGE, "itertools.short") is None
     assert sphinx_entry(PAGE, "itertools.missing") is None
 
@@ -91,9 +94,12 @@ DOCSRS_ITEM = """
 <pre class="rust item-decl"><code>pub struct <a href="#">WireMsg</a>(pub UsrMsgBytes);</code></pre>
 <details class="toggle top-doc" open><summary class="hideme"><span>Expand</span></summary>
 <div class="docblock"><p>Final type serialised and sent on the wire by the endpoint to its peers.</p>
+<p>LONG</p>
 <div class="example-wrap"><pre>let x = 1;</pre></div></div></details>
 <h2 id="fields">Tuple Fields</h2>
-"""
+<h2 id="trait-implementations">Trait Implementations</h2><p>impl Clone for WireMsg</p>
+</main>
+""".replace("LONG", "Peers decode it with the matching codec before dispatch. " * 5)
 
 
 def test_docsrs_items_and_entry():
@@ -102,13 +108,14 @@ def test_docsrs_items_and_entry():
         "config/struct.Config.html",
         "fn.connect.html",
     ]
-    assert docsrs_entry(DOCSRS_ITEM) == (
+    entry = docsrs_entry(DOCSRS_ITEM)
+    assert entry.startswith(
         "pub struct WireMsg (pub UsrMsgBytes);\n"
-        "Final type serialised and sent on the wire by the endpoint to its peers."
+        "Final type serialised and sent on the wire by the endpoint to its peers. Peers decode"
     )
-    short = DOCSRS_ITEM.replace(
-        "Final type serialised and sent on the wire by the endpoint to its peers.", "A message."
-    )
+    assert entry.endswith("let x = 1; Tuple Fields")
+    assert "Expand" not in entry
+    short = DOCSRS_ITEM.replace("Peers decode it with the matching codec before dispatch. ", "")
     assert docsrs_entry(short) is None
     assert docsrs_entry("<p>no declaration</p>") is None
 
@@ -125,12 +132,15 @@ def test_small_repo_names_keeps_repos_with_open_issues():
     assert small_repo_names(None) == []
 
 
+STEPS = "Call truediv on two nullable integer series and the error appears. " * 5
+
+
 def test_parse_issue_skips_pull_requests_and_strips_template_comments():
     item = {
         "html_url": "https://github.com/pandas-dev/pandas/issues/63250",
         "number": 63250,
         "title": "BUG:  truediv  fails",
-        "body": "<!-- template -->\nTypeError: operator 'truediv' not implemented",
+        "body": "<!-- template -->\nTypeError: operator 'truediv' not implemented\n" + STEPS,
     }
     doc = parse_issue(item, "pandas-dev/pandas")
     assert doc is not None
@@ -140,9 +150,9 @@ def test_parse_issue_skips_pull_requests_and_strips_template_comments():
         "pandas-dev/pandas",
         ("63250",),
     )
-    assert doc.text == "TypeError: operator 'truediv' not implemented"
+    assert doc.text.startswith("TypeError: operator 'truediv' not implemented\nCall truediv")
     assert parse_issue({**item, "pull_request": {"url": "x"}}, "pandas-dev/pandas") is None
-    assert parse_issue({**item, "body": "<!-- only -->"}, "pandas-dev/pandas") is None
+    assert parse_issue({**item, "body": "<!-- " + STEPS + " -->"}, "pandas-dev/pandas") is None
 
 
 def test_parse_question_requires_score_and_answer():
@@ -150,7 +160,7 @@ def test_parse_question_requires_score_and_answer():
         "link": "https://stackoverflow.com/questions/80003283/how-to-x",
         "question_id": 80003283,
         "title": "Why &quot;x&quot; fails",
-        "body": "<p>I call <code>np.gradient</code> &amp; get an error.</p>",
+        "body": "<p>I call <code>np.gradient</code> &amp; get an error.</p><p>" + STEPS + "</p>",
         "score": 2,
         "answer_count": 1,
     }
@@ -159,9 +169,10 @@ def test_parse_question_requires_score_and_answer():
     assert (doc.key, doc.title, doc.text, doc.banned) == (
         "so:80003283",
         'Why "x" fails',
-        "I call np.gradient & get an error.",
+        "I call np.gradient & get an error. " + STEPS.strip(),
         ("80003283",),
     )
+    assert parse_question({**item, "body": "<p>I call np.gradient.</p>"}, "python") is None
     assert parse_question({**item, "score": 0}, "python") is None
     assert parse_question({**item, "answer_count": 0}, "python") is None
 

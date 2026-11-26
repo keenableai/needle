@@ -14,6 +14,10 @@ Requirements:
 - Do NOT use any of these names in any form (as written, split into words, or with underscores replaced by spaces): {{ doc.banned | join(", ") }}.
 - No quotes, no operators, no code.
 - Always respond in English.
-- If the entry is too generic to single out this API (trivial getters, aliases, "see X"), respond with exactly NO_DISTINCT_QUERY.
+- Respond with exactly NO_DISTINCT_QUERY if ANY of these is true:
+  - The entry does not explain in words what the API does: it only repeats the name, shows a signature or code, says "see X", or is an alias, re-export, or deprecated stub.
+  - The API is a trivial getter, setter, constructor, builder step, or conversion of the kind many APIs in this library share.
+  - The entry is generated boilerplate: SDK model fields, trait or operator implementations, constants that hold data.
+  - Without the banned names, a query would fit many other entries of this library just as well.
 
 Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

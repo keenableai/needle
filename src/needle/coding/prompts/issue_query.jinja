@@ -14,6 +14,9 @@ Requirements:
 - The span must single out this issue, not a generic error shared by thousands of issues (not "AssertionError: Series are different", not "the compiler unexpectedly panicked", not "subprocess-exited-with-error").
 - Do NOT include the issue number, a user name, or a URL.
 - Always respond in English.
-- If the issue has no distinctive error message or symptom text (feature requests, discussions, docs, release tracking), respond with exactly NO_DISTINCT_QUERY.
+- Respond with exactly NO_DISTINCT_QUERY if ANY of these is true:
+  - The issue is not a bug report: a feature request, question, discussion, docs task, release or dependency tracking.
+  - A bot or a template wrote it (dependency dashboard, automated test or CI report) and no person describes the problem.
+  - The issue has no distinctive error message or symptom text: the only error is generic (a bare HTTP status, "permission denied", "segmentation fault", "test failed") or consists of user-specific parts.
 
 Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

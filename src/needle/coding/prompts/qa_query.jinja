@@ -13,6 +13,9 @@ Requirements:
 - Do NOT copy the title. Rephrase the problem and add at least two specific words that are NOT in the title, taken from the body: the API, error, type, or behavior involved.
 - Do NOT include the question number or a URL. No quotes, no operators.
 - Always respond in English.
-- If the question is too vague to single out (opinion polls, "best library for X"), respond with exactly NO_DISTINCT_QUERY.
+- Respond with exactly NO_DISTINCT_QUERY if ANY of these is true:
+  - The question is vague or asks for opinions ("best library for X", "is X better than Y").
+  - The question is a common beginner problem that thousands of other questions share (a typo, a missing import, a basic syntax error).
+  - The body is mostly code or a log and does not say what the asker wants or what goes wrong.
 
 Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

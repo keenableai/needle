@@ -62,8 +62,7 @@ CHANGELOG_FEEDS = (
 )
 FRESH_DAYS = 14
 
-MIN_DESC_WORDS = 8
-MIN_PAGE_WORDS = 30
+MIN_CONTENT_WORDS = 50
 MIN_ISSUE_COMMENTS = 2
 MIN_QUESTION_SCORE = 1
 TEXT_CHARS = 3000
@@ -72,16 +71,18 @@ PAGE_SIZE = 50
 INV_LINE_RE = re.compile(r"^(\S+)\s+py:(?:function|method|class)\s+-?\d+\s+(\S+)")
 HEADERLINK_RE = re.compile(r'<a class="headerlink".*?</a>', re.S)
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
-PARA_RE = re.compile(r"<p>(.*?)</p>", re.S)
+DD_TAG_RE = re.compile(r"<(/?)dd\b[^>]*>")
 DOCS_URL_KEY_RE = re.compile(r"doc", re.I)
 RTD_SLUG_RE = re.compile(r"[._]")
 DOCSRS_ITEM_RE = re.compile(
     r'<li><a href="((?:\w+/)*(?:struct|enum|fn|trait|macro|type|constant|union)\.\w+\.html)">'
 )
 DOCSRS_DECL_RE = re.compile(r'<pre class="rust item-decl"><code>(.*?)</code></pre>', re.S)
-DOCSRS_TOP_DOC_RE = re.compile(
-    r'<details class="toggle top-doc"[^>]*>.*?<div class="docblock">(.*?)</div></details>', re.S
+DOCSRS_OWN_END_RE = re.compile(
+    r'<h2 id="(?:implementors|dyn-compatibility|(?:trait|synthetic|blanket)-implementations)"'
+    r"|</main>"
 )
+DOCSRS_HIDEME_RE = re.compile(r'<summary class="hideme">.*?</summary>', re.S)
 LLMS_TITLE_RE = re.compile(r"^#\s+(.+)$", re.M)
 LLMS_LINK_RE = re.compile(r"^\s*[-*]\s*\[([^\]]+)\]\((https?://[^)\s]+)\)", re.M)
 SITE_NAME_SUFFIX_RE = re.compile(
@@ -125,28 +126,38 @@ def parse_inventory(raw: bytes) -> list[tuple[str, str]]:
     return entries
 
 
+def has_content(text: str) -> bool:
+    return len(text.split()) >= MIN_CONTENT_WORDS
+
+
 def sphinx_entry(page: str, symbol: str) -> str | None:
-    m = re.search(
-        rf'<dt[^>]*\bid="{re.escape(symbol)}"[^>]*>(.*?)</dt>\s*<dd[^>]*>(.*?)</dd>', page, re.S
-    )
+    m = re.search(rf'<dt[^>]*\bid="{re.escape(symbol)}"[^>]*>(.*?)</dt>\s*<dd[^>]*>', page, re.S)
     if not m:
         return None
-    signature = html_text(HEADERLINK_RE.sub("", m.group(1))).replace("[source]", "").strip()
-    return _with_description(signature, m.group(2))
+    depth = 1
+    for tag in DD_TAG_RE.finditer(page, m.end()):
+        depth += -1 if tag.group(1) else 1
+        if depth == 0:
+            return _api_entry(m.group(1), page[m.end() : tag.start()])
+    return None
 
 
 def docsrs_entry(page: str) -> str | None:
-    decl, doc = DOCSRS_DECL_RE.search(page), DOCSRS_TOP_DOC_RE.search(page)
-    if not decl or not doc:
+    decl = DOCSRS_DECL_RE.search(page)
+    if not decl:
         return None
-    return _with_description(html_text(decl.group(1)).strip(), doc.group(1))
+    end = DOCSRS_OWN_END_RE.search(page, decl.end())
+    body = page[decl.end() : end.start() if end else len(page)]
+    return _api_entry(decl.group(1), DOCSRS_HIDEME_RE.sub("", body))
 
 
-def _with_description(signature: str, body: str) -> str | None:
-    description = " ".join(html_text(p) for p in PARA_RE.findall(body)[:3])
-    if len(description.split()) < MIN_DESC_WORDS:
-        return None
-    return f"{signature}\n{description}"
+def _api_entry(signature: str, body: str) -> str | None:
+    content = _entry_text(body)
+    return f"{_entry_text(signature)}\n{content}"[:TEXT_CHARS] if has_content(content) else None
+
+
+def _entry_text(fragment: str) -> str:
+    return html_text(HEADERLINK_RE.sub("", fragment)).replace("[source]", "").strip()
 
 
 def docs_bases(info: dict[str, Any], package: str) -> list[str]:
@@ -201,7 +212,7 @@ def markdown_page(text: str) -> str | None:
     if text.lstrip().startswith("<"):
         return None
     body = FRONTMATTER_RE.sub("", text.lstrip()).strip()
-    return body[:TEXT_CHARS] if len(body.split()) >= MIN_PAGE_WORDS else None
+    return body[:TEXT_CHARS] if has_content(body) else None
 
 
 def _feed_date(value: str | None) -> datetime | None:
@@ -258,10 +269,17 @@ def parse_issue(item: dict[str, Any], repo: str) -> Doc | None:
         return None
     url = str(item.get("html_url") or "")
     title = " ".join(str(item.get("title") or "").split())
-    body = HTML_COMMENT_RE.sub("", str(item.get("body") or "")).strip()[:TEXT_CHARS]
-    if not url or not title or not body:
+    body = HTML_COMMENT_RE.sub("", str(item.get("body") or "")).strip()
+    if not url or not title or not has_content(body):
         return None
-    return Doc("issue", url, title, body, context=repo, banned=(str(item.get("number") or ""),))
+    return Doc(
+        "issue",
+        url,
+        title,
+        body[:TEXT_CHARS],
+        context=repo,
+        banned=(str(item.get("number") or ""),),
+    )
 
 
 def parse_question(item: dict[str, Any], tag: str) -> Doc | None:
@@ -269,10 +287,17 @@ def parse_question(item: dict[str, Any], tag: str) -> Doc | None:
         return None
     url = str(item.get("link") or "")
     title = html.unescape(" ".join(str(item.get("title") or "").split()))
-    body = html_text(str(item.get("body") or ""))[:TEXT_CHARS]
-    if not url or not title or not body:
+    body = html_text(str(item.get("body") or ""))
+    if not url or not title or not has_content(body):
         return None
-    return Doc("qa", url, title, body, context=tag, banned=(str(item.get("question_id") or ""),))
+    return Doc(
+        "qa",
+        url,
+        title,
+        body[:TEXT_CHARS],
+        context=tag,
+        banned=(str(item.get("question_id") or ""),),
+    )
 
 
 def small_repo_names(payload: Any) -> list[str]:
@@ -525,9 +550,9 @@ class ChangelogClient(SourceClient):
     async def _entry_doc(self, name: str, entry: FeedEntry) -> Doc | None:
         url = entry.url.split("#", 1)[0]
         text = entry.text
-        if len(text.split()) < MIN_PAGE_WORDS:
+        if not has_content(text):
             page = await self._get_text(url)
             text = f"{text}\n{page_main_text(page)}".strip() if page else text
-        if len(text.split()) < MIN_PAGE_WORDS:
+        if not has_content(text):
             return None
         return Doc("fresh", url, entry.title, text[:TEXT_CHARS], context=name)
