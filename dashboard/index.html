@@ -854,6 +854,11 @@
       <select id="run-bench" aria-label="Benchmark"></select>
       <select id="run-select" aria-label="Run"></select>
       <select id="run-engine" aria-label="Engine"></select>
+      <select id="run-subset" aria-label="Subset" hidden></select>
+      <select id="run-outcome" aria-label="Outcome">
+        <option value="all">all queries</option>
+        <option value="miss">misses only</option>
+      </select>
       <select id="run-page" aria-label="Page" hidden></select>
     </div>
     <div id="run-detail"></div>
@@ -2924,6 +2929,8 @@ async function renderRunDetail(runs) {
   const benchSel = document.getElementById("run-bench");
   const engineSel = document.getElementById("run-engine");
   const pageSel = document.getElementById("run-page");
+  const subsetSel = document.getElementById("run-subset");
+  const outcomeSel = document.getElementById("run-outcome");
   holder.replaceChildren();
   const run = runs.find((r) => r.id === runSel.value);
   if (!run) {
@@ -2952,9 +2959,21 @@ async function renderRunDetail(runs) {
       entry = await fetchEngineReport(`${base}/${entry.per_query_path}`);
       if (seq !== runDetailSeq) return;
     }
-    const per = entry?.per_query || [];
+    const all = entry?.per_query || [];
+    const subsets = [...new Set(all.map((pq) => pq.bucket).filter(Boolean))];
+    const subset = subsets.includes(subsetSel.value) ? subsetSel.value : "";
+    subsetSel.replaceChildren(el("option", { value: "" }, "all subsets"),
+      ...subsets.map((b) => el("option", { value: b }, b)));
+    subsetSel.value = subset;
+    subsetSel.hidden = subsets.length <= 1;
+    const legacy = legacyNdcg(report);
+    const isMiss = (pq) => "hit_rank" in pq
+      ? !pq.hit_rank
+      : (pq.ndcg ?? legacy(pq, legacyPenalizedRatings(pq))) === 0;
+    const missesOnly = outcomeSel.value === "miss";
+    const per = all.filter((pq) => (!subset || pq.bucket === subset) && (!missesOnly || isMiss(pq)));
     const pages = Math.ceil(per.length / RUN_PAGE_SIZE);
-    const key = `${benchSel.value}|${run.id}|${engineSel.value}`;
+    const key = `${benchSel.value}|${run.id}|${engineSel.value}|${subset}|${missesOnly}`;
     const page = key === pageSel.dataset.key
       ? Math.max(0, Math.min(Number(pageSel.value) || 0, pages - 1))
       : 0;
@@ -2972,9 +2991,10 @@ async function renderRunDetail(runs) {
     if (benchSel.value === "finance") renderFinanceRun(holder, slice);
     else if (benchSel.value === "scholar") renderKnownItemRun(holder, slice, "paper_key");
     else if (benchSel.value === "legal") renderKnownItemRun(holder, slice, "case_key");
-    else renderNewsRun(holder, slice, legacyNdcg(report));
+    else renderNewsRun(holder, slice, legacy);
     if (!holder.children.length) {
-      holder.appendChild(el("div", { class: "empty" }, "No per-query data in this run."));
+      holder.appendChild(el("div", { class: "empty" },
+        all.length ? "No queries match these filters." : "No per-query data in this run."));
     } else {
       const cfg = [];
       if (report.judge_model) cfg.push(`judge ${report.judge_model}`);
@@ -3017,6 +3037,9 @@ async function initRunBrowser() {
   runSel.addEventListener("change", () => renderRunDetail(runs));
   engineSel.addEventListener("change", () => renderRunDetail(runs));
   pageSel.addEventListener("change", () => renderRunDetail(runs));
+  for (const id of ["run-subset", "run-outcome"]) {
+    document.getElementById(id).addEventListener("change", () => renderRunDetail(runs));
+  }
   const card = document.getElementById("card-runs");
   const observer = new IntersectionObserver(([e]) => {
     if (!e.isIntersecting) return;
