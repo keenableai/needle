@@ -58,12 +58,17 @@ def test_degrade_title_keeps_accented_letters():
         degrade_title("Moiré-induced self-trapping in a Bose-Einstein condensate")
         == "moiré-induced self-trapping in a bose-einstein condensate"
     )
-    assert degrade_title("Moiré-induced self-trapping in condensates").startswith("moiré-induced ")
+    assert (
+        degrade_title("Moire\u0301-induced self-trapping in condensates")
+        == "moir\u00e9-induced self-trapping in condensates"
+    )
 
 
 def test_degrade_title_never_emits_minus_terms():
-    out = degrade_title(r"On the non-extendibility of triangular $D(-1)$-pairs with primes")
-    assert out == "on the non-extendibility of triangular pairs with primes"
+    assert (
+        degrade_title(r"On the non-extendibility of triangular $D(-1)$-pairs with primes")
+        == "on the non-extendibility of triangular pairs with primes"
+    )
     assert (
         degrade_title("Spin -- orbit coupling in - doped graphene")
         == "spin orbit coupling in doped graphene"

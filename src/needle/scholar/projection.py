@@ -99,7 +99,7 @@ def content_tokens(text: str) -> set[str]:
 def degrade_title(title: str) -> str | None:
     text = LATEX_RE.sub(" ", unicodedata.normalize("NFC", title))
     text = PUNCT_RE.sub(" ", text)
-    words = [w for w in (w.strip("-") for w in text.lower().split()) if w]
+    words = [s for w in text.lower().split() if (s := w.strip("-"))]
     if len(words) < MIN_TITLE_WORDS:
         return None
     return " ".join(words)
