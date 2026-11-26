@@ -1,4 +1,5 @@
 import re
+import unicodedata
 
 from needle.scholar.models import Paper
 from needle.shared.prompts import clean_llm_line, render_prompt
@@ -74,7 +75,7 @@ STOPWORDS = frozenset(
 
 TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9\-]*")
 LATEX_RE = re.compile(r"\$[^$]*\$|\\[a-zA-Z]+\{[^}]*\}|\\[a-zA-Z]+")
-PUNCT_RE = re.compile(r"[^a-zA-Z0-9\s\-]")
+PUNCT_RE = re.compile(r"[^\w\s\-]|_")
 DISTINCTIVE_RE = re.compile(r"\d|[A-Z]{2,}|[a-z][A-Z]|[A-Za-z]{3,}-[A-Za-z]{3,}")
 BAD_ANCHOR_RE = re.compile(
     r"\bet al\b"
@@ -96,9 +97,9 @@ def content_tokens(text: str) -> set[str]:
 
 
 def degrade_title(title: str) -> str | None:
-    text = LATEX_RE.sub(" ", title)
+    text = LATEX_RE.sub(" ", unicodedata.normalize("NFC", title))
     text = PUNCT_RE.sub(" ", text)
-    words = text.lower().split()
+    words = [w for w in (w.strip("-") for w in text.lower().split()) if w]
     if len(words) < MIN_TITLE_WORDS:
         return None
     return " ".join(words)
