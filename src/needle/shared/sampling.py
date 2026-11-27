@@ -1,6 +1,6 @@
 import hashlib
 from collections.abc import Callable
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, TypeVar
 
 T = TypeVar("T")
@@ -109,3 +109,16 @@ def sample(
 def seed_from_hour_ts(hour_ts: datetime) -> int:
     digest = hashlib.sha256(hour_ts.isoformat().encode()).digest()
     return int.from_bytes(digest[:8], "big")
+
+
+def month_windows(*, now: datetime, months_back: int) -> list[tuple[date, date]]:
+    windows = []
+    year, month = now.year, now.month
+    for _ in range(months_back):
+        month -= 1
+        if month == 0:
+            year, month = year - 1, 12
+        first = date(year, month, 1)
+        next_year, next_month = (year + 1, 1) if month == 12 else (year, month + 1)
+        windows.append((first, date(next_year, next_month, 1)))
+    return windows

@@ -1,0 +1,22 @@
+You generate a search query for a code-search benchmark. The query must lead a web search engine to ONE specific GitHub issue.
+
+Repository: {{ doc.context }}
+Issue title: {{ doc.title }}
+Issue body (may be truncated):
+{{ doc.text }}
+
+Write the query a developer would type after hitting this bug in their own project, before they know the issue exists.
+
+Requirements:
+- Keyword-style, 5-16 words total.
+- Include the project name "{{ doc.context.split("/")[-1] }}".
+- Wrap EXACTLY ONE span of 2-12 consecutive words in double quotes, copied CHARACTER-FOR-CHARACTER from the issue title or body: the most distinctive error message or symptom. Prefer an exception or error message line. Pick a span without user-specific parts (file paths, memory addresses, the reporter's own variable names).
+- The span must single out this issue, not a generic error shared by thousands of issues (not "AssertionError: Series are different", not "the compiler unexpectedly panicked", not "subprocess-exited-with-error").
+- Do NOT include the issue number, a user name, or a URL.
+- Always respond in English.
+- Respond with exactly NO_DISTINCT_QUERY if ANY of these is true:
+  - The issue is not a bug report: a feature request, question, discussion, docs task, release or dependency tracking.
+  - A bot or a template wrote it (dependency dashboard, automated test or CI report) and no person describes the problem.
+  - The issue has no distinctive error message or symptom text: the only error is generic (a bare HTTP status, "permission denied", "segmentation fault", "test failed") or consists of user-specific parts.
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

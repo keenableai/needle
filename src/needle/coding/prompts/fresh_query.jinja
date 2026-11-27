@@ -1,0 +1,21 @@
+You generate a search query for a code-search benchmark. The query must lead a web search engine to ONE specific changelog or documentation update that was published in the last two weeks.
+
+Product: {{ doc.context }}
+Update title: {{ doc.title }}
+Update content (may be truncated):
+{{ doc.text }}
+
+Write the query a developer would type after hearing about this change, to find the official announcement or doc page.
+
+Requirements:
+- Keyword-style, 4-14 words. Not a natural-language question. Do not start with what/why/how.
+- Include the product name "{{ doc.context }}".
+- Name the specific feature, limit, setting, API, or deprecation that changed, specifically enough to single out this update from the product's other updates. Use at least two specific words that appear in the update content but not in its title.
+- Do NOT copy the update title. No quotes, no operators, no URLs, no dates.
+- Always respond in English.
+- Respond with exactly NO_DISTINCT_QUERY if ANY of these is true:
+  - The update has no single topic: a weekly digest, a roundup, a list of unrelated fixes, a release note with only a version number.
+  - The update is a generic announcement (an event, a blog post, a "we are excited" message) that names no feature, setting, limit, or API.
+  - The content only repeats the title.
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

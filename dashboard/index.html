@@ -12,11 +12,11 @@
   } catch {}
 </script>
 <title>NEEDLE — search engine benchmarks</title>
-<meta name="description" content="Live open-source search benchmark: hourly news and twice-daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta name="description" content="Live open-source search benchmark: hourly news and twice-daily finance, scholar, rare-word, legal, and coding suites compare public search APIs.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NEEDLE">
 <meta property="og:title" content="NEEDLE — search engine benchmarks">
-<meta property="og:description" content="Live open-source search benchmark: hourly news and twice-daily finance, scholar, rare-word, and legal suites compare public search APIs.">
+<meta property="og:description" content="Live open-source search benchmark: hourly news and twice-daily finance, scholar, rare-word, legal, and coding suites compare public search APIs.">
 <meta property="og:url" content="https://keenableai.github.io/needle/">
 <meta property="og:image" content="https://keenableai.github.io/needle/og/card-standings.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -377,7 +377,7 @@
   .miss-marker { color: var(--text-muted); font-size: 12px; }
 
   .overlap-matrix, #fields-table, #history-table, .bar-table, #prices-table,
-  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal,
+  #lb-fresh, #lb-company, #lb-scholar, #lb-rare, #lb-legal, #lb-coding,
   #app-queries, #app-metrics, #app-engines, #app-data { overflow-x: auto; }
   #card-standings { max-width: var(--measure); }
   #standings .st-layout { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
@@ -531,7 +531,7 @@
       <p>NEEDLE (<b>N</b>ews, <b>E</b>veryday, <b>E</b>xpert,
         <b>D</b>eep-tail, and <b>L</b>egal <b>E</b>valuation) is a
         live open-source search benchmark. It compares search engines with
-        queries that model agent behavior. The five verticals match
+        queries that model agent behavior. The six verticals match
         the use cases we see each day in Keenable's own search
         traffic:</p>
       <ul>
@@ -550,6 +550,9 @@
           agentic search logs</li>
         <li><b><span class="vert" data-vert="legal"></span>:</b> find a specific court opinion or section of the
           Code of Federal Regulations</li>
+        <li><b><span class="vert" data-vert="coding"></span>:</b> find a specific API reference page, GitHub
+          issue, or Stack Overflow question from the words a developer
+          would type</li>
       </ul>
       <p><b>Methodology.</b> Each engine in a run receives the same query
         text. We score each engine on the ranking, titles, and snippets
@@ -569,7 +572,7 @@
         exactly&nbsp;1, with a penalty for duplicate
         URLs. <span class="vert" data-vert="finance"></span> measures if the answer text reaches the
         agent: we scan the top-5 titles and snippets and report
-        answer-recall@5 with MRR@5. <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are
+        answer-recall@5 with MRR@5. <span class="vert" data-vert="scholar"></span>, <span class="vert" data-vert="legal"></span>, and <span class="vert" data-vert="coding"></span> are
         known-item tasks: we match identifiers and report recall@10 and
         recall@5 with MRR. <a href="#app-metrics">Appendix D</a> gives the exact
         definitions.</p>
@@ -604,6 +607,7 @@
       <button role="tab" aria-selected="false" data-panel="card-lb-company"><span class="vert" data-vert="finance"></span></button>
       <button role="tab" aria-selected="false" data-panel="card-lb-rare"><span class="vert" data-vert="agentic_rare"></span></button>
       <button role="tab" aria-selected="false" data-panel="card-lb-legal"><span class="vert" data-vert="legal"></span></button>
+      <button role="tab" aria-selected="false" data-panel="card-lb-coding"><span class="vert" data-vert="coding"></span></button>
       <div id="lb-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="card-lb-overall" role="tabpanel">
@@ -636,6 +640,11 @@
       <div class="sub" id="lb-legal-sub"></div>
       <div id="lb-legal" data-static></div>
     </div>
+    <div class="lb-panel" id="card-lb-coding" role="tabpanel">
+      <h2><span class="vert" data-vert="coding"></span> — 7-day mean</h2>
+      <div class="sub" id="lb-coding-sub"></div>
+      <div id="lb-coding" data-static></div>
+    </div>
   </div>
 
   <h2 class="section-title" id="sec-trends">Slices over time</h2>
@@ -652,6 +661,7 @@
       <button role="tab" aria-selected="false" data-panel="trend-finance"><span class="vert" data-vert="finance"></span></button>
       <button role="tab" aria-selected="false" data-panel="trend-rare"><span class="vert" data-vert="agentic_rare"></span></button>
       <button role="tab" aria-selected="false" data-panel="trend-legal"><span class="vert" data-vert="legal"></span></button>
+      <button role="tab" aria-selected="false" data-panel="trend-coding"><span class="vert" data-vert="coding"></span></button>
       <div class="tab-ind" aria-hidden="true"></div>
     </div>
     <div class="lb-panel active" id="trend-scholar" role="tabpanel">
@@ -736,6 +746,10 @@
         <h2><span class="vert" data-vert="legal"></span> — code recall@5 over time</h2>
         <div class="sub">recall@5 on CFR sections found from their regulatory substance</div>
       </div>
+    </div>
+    <div class="lb-panel" id="trend-coding" role="tabpanel">
+      <h2><span class="vert" data-vert="coding"></span> — recall@5 over time</h2>
+      <div class="sub">recall@5 on API reference pages, GitHub issues, and Stack Overflow questions, 20 of each per run</div>
     </div>
   </div>
 
@@ -921,6 +935,8 @@
         <td>recent published opinions from the CourtListener API across 14 federal courts, one caption-style query per case; gold is the reporter citation, docket number with party tokens, and cluster id</td></tr>
       <tr><td><span class="vert" data-vert="legal"></span></td><td>code</td>
         <td>eCFR sections; an LLM projects each section into a query about its regulatory substance with one verbatim quoted span, rejected if it leaks the citation; gold is the "title CFR section" citation</td></tr>
+      <tr><td><span class="vert" data-vert="coding"></span></td><td>coding</td>
+        <td>five doc types: 20 API reference pages, 20 GitHub issues, 20 Mintlify docs pages, 10 fresh changelog entries and 10 Stack Overflow questions per run. API reference: a random documented item from a long-tail docs site, either a Python package ranked 2,000&ndash;15,000 by PyPI downloads (its Sphinx docs) or a Rust crate ranked 2,000&ndash;20,000 by crates.io downloads (its docs.rs page); an LLM describes what it does with the library name, rejected if it uses the item's own name. GitHub issue: an issue from the last 12 months in a small active repo (100&ndash;2,000 stars); an LLM writes the query a developer who hits the bug would type, with one quoted error or symptom span copied from the issue. Mintlify: a random page of a product docs site hosted on Mintlify, from the HTTP Archive crawl outside the top 1M sites. Fresh: an entry from the last 14 days of the Cloudflare, Vercel, GitHub or Supabase changelog or the Amazon Bedrock doc history. Stack Overflow: an answered question from a recent month in one of 6 language tags. For Mintlify, fresh and Stack Overflow an LLM writes the query, rejected unless it adds two words from the page that are not in its title. Gold is the page itself under any version or locale path; half the queries carry "quoted" or site: syntax</td></tr>
     </table>
   </div>
 
@@ -928,7 +944,7 @@
     <h2>Appendix C — comparison protocol</h2>
     <div class="sub">the fairness rules behind every number on this page</div>
     <div class="prose">
-      <p>We send each engine in a run the same query text. We pin the per-engine request shapes in git (Appendix F). Each engine has one request in flight at a time, two on <span class="vert" data-vert="scholar"></span>, so the latency percentiles are comparable across engines. On <span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span> and <span class="vert" data-vert="scholar"></span> the runner queries all engines in parallel; on <span class="vert" data-vert="finance"></span> and <span class="vert" data-vert="legal"></span> it queries them one after another. We do not time each engine's connection warm-up, the requests that open its first connections in a run: they pay one-time connection setup and, in a parallel run, every engine starting at once. The latency figures therefore show performance on repeated requests. A later request that has to reconnect is timed, and reports count it in <code>latency.reconnects</code>. Engines see the live web minutes apart in a run, not at the same instant.</p>
+      <p>We send each engine in a run the same query text. We pin the per-engine request shapes in git (Appendix F). Each engine has one request in flight at a time, two on <span class="vert" data-vert="scholar"></span>, so the latency percentiles are comparable across engines. On <span class="vert" data-vert="news"></span>, <span class="vert" data-vert="agentic_rare"></span>, <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="coding"></span> the runner queries all engines in parallel; on <span class="vert" data-vert="finance"></span> and <span class="vert" data-vert="legal"></span> it queries them one after another. We do not time each engine's connection warm-up, the requests that open its first connections in a run: they pay one-time connection setup and, in a parallel run, every engine starting at once. The latency figures therefore show performance on repeated requests. A later request that has to reconnect is timed, and reports count it in <code>latency.reconnects</code>. Engines see the live web minutes apart in a run, not at the same instant.</p>
       <p>We judge an engine on its own ranking, titles, and snippets. We do not fetch pages and we do not re-rank. We cap the evidence at the same snippet length for each engine, so engines that return more content get no extra signal to the judge or the answer matchers. We judge each distinct combination of URL, title, snippet, and date once per query. We use that rating again where the identical result occurs for other engines (Appendix E gives the full judging setup).</p>
       <p>A failed search scores zero when the engine's side caused it (timeout, server error, content filter, a rejected query); an agent gets nothing back either. We remove a failed search from the mean only when our own account or plan caused it (HTTP 401, 402, 403 or 429, a plan limit, or a message about our credits, quota, billing or API key). We pace each engine to its rate limit and retry a 429 with exponential backoff. We also remove failed judgements. Reports list <code>search_errors</code>, split into <code>account_errors</code> and <code>service_errors</code>, and <code>judge_errors</code>.</p>
       <p>We make fresh <span class="vert" data-vert="news"></span> queries each hour and new known-answer queries each day from public sources (Appendix B), so there is no fixed benchmark set to overfit. We archive the exact queries with each run (Appendix G).</p>
@@ -951,6 +967,8 @@
         <td>a query is a hit when the gold answer appears in a top-5 title or snippet (deterministic matcher: a 0.1% band for money, with bare table figures in thousands or millions and parenthesized losses; an LLM-judge backstop for paraphrased non-money answers). MRR is the mean reciprocal rank of the first hit.</td></tr>
       <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="legal"></span></td>
         <td>known-item: the gold opinion or CFR section identified by citation, docket (with a party-token check), CFR citation, or URL match.</td></tr>
+      <tr><td>recall@5, MRR@5</td><td><span class="vert" data-vert="coding"></span></td>
+        <td>known-item: a result URL that points to the gold docs page, GitHub issue (or the pull request with the same number), or Stack Overflow question. Docs versions and locales count as the same page; copies on other sites do not count.</td></tr>
       <tr><td>latency p50 / p95</td><td>all</td>
         <td>percentiles over per-call durations of successful search API calls, pooled across queries in the window; runs published without per-call samples contribute their per-run percentiles instead. Failed calls carry no latency sample and show up in the error rate.</td></tr>
     </table>
@@ -958,7 +976,7 @@
 
   <div class="card" id="app-judge">
     <h2>Appendix E — LLM judge</h2>
-    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; <span class="vert" data-vert="finance"></span> fallback matcher only; <span class="vert" data-vert="scholar"></span> and <span class="vert" data-vert="legal"></span> are deterministic</div>
+    <div class="sub">rates <span class="vert" data-vert="news"></span> and <span class="vert" data-vert="agentic_rare"></span> results; <span class="vert" data-vert="finance"></span> fallback matcher only; <span class="vert" data-vert="scholar"></span>, <span class="vert" data-vert="legal"></span> and <span class="vert" data-vert="coding"></span> are deterministic</div>
     <div class="prose">
       <p>We judge with <code>openai/gpt-6-luna</code> via OpenRouter, high reasoning effort, temperature 0, one pointwise call per document. We record the model for each run as <code>judge_model</code> in its archived report. The judgement browser shows it when you select a run, so judge changes stay visible in the history.</p>
       <p>The judge does not see the engine identity. The prompt contains the query, the document title, the URL, the published date, and the snippet — not the engine name. We judge each distinct combination of URL, title, snippet, and date once per query and use that rating again where the identical result occurs for other engines. We judge the same URL with a different snippet separately, with the same blind judge and rubric.</p>
@@ -1012,7 +1030,7 @@
         <td>every query and result (title, URL, snippet), judge rating + penalized rating + reasoning, per-call latencies, and the run's config (judge_model, num_results)</td>
         <td><a href="https://huggingface.co/datasets/keenable-ai/needle-results">HF: keenable-ai/needle-results</a>, runs/&lt;run-id&gt;/</td></tr>
       <tr><td>query files</td>
-        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, agentic_rare.jsonl)</td>
+        <td>the exact queries each run issued, including gold answers (fresh.jsonl, gold.jsonl, scholar.jsonl, legal.jsonl, coding.jsonl, agentic_rare.jsonl)</td>
         <td>same run folder</td></tr>
       <tr><td>dashboard aggregates</td>
         <td>history.jsonl, overlap.jsonl, uniqueness.jsonl, independence.json, runs.json, ci_scores.jsonl, ci.json</td>
@@ -1094,7 +1112,8 @@ const DISPLAY_NAMES = new Map([["keenable-realtime", "Keenable"],
 const displayName = (e) => DISPLAY_NAMES.get(e) ?? e;
 
 const VERTICALS = new Map([["news", "News"], ["finance", "Finance"],
-  ["scholar", "Scholar"], ["agentic_rare", "AgenticRare"], ["legal", "Legal"]]);
+  ["scholar", "Scholar"], ["agentic_rare", "AgenticRare"], ["legal", "Legal"],
+  ["coding", "Coding"]]);
 const verticalName = (b) => VERTICALS.get(b) ?? b;
 
 const ENGINE_LOGOS = new Map([
@@ -1508,6 +1527,7 @@ const TREND_SLICES = [
   ["trend-legal-recall", "legal", "recall", "num_scored"],
   ["trend-legal-caselaw", "legal", "caselaw_recall", "caselaw_n"],
   ["trend-legal-code", "legal", "code_recall", "code_n"],
+  ["trend-coding", "coding", "recall", "num_scored"],
 ];
 
 let drawAllTrends = null;
@@ -1660,6 +1680,7 @@ function renderLeaderboards(rows) {
     ["caselaw_recall", "caselaw", "caselaw_n"],
     ["code_recall", "code", "code_n"],
   ]);
+  renderLeaderboard("lb-coding", "lb-coding-sub", rows, "coding", [["recall", "recall@5"]]);
 }
 
 const STANDINGS_BENCHES = [
@@ -2902,7 +2923,7 @@ function renderKnownItemRun(holder, per, goldKey) {
 }
 
 const LEGACY_BENCH = { freshstream: "news", companyfill: "finance", rarestream: "agentic_rare" };
-const RUN_ARTIFACT = { scholar: ["scholar.json"], news: ["ndcg.json", "rbp.json"], finance: ["recall.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], legal: ["legal.json"] };
+const RUN_ARTIFACT = { scholar: ["scholar.json"], news: ["ndcg.json", "rbp.json"], finance: ["recall.json"], agentic_rare: ["agentic_rare.json", "rarestream.json"], legal: ["legal.json"], coding: ["coding.json"] };
 const BENCHES = Object.keys(RUN_ARTIFACT);
 
 let runDetailSeq = 0;
@@ -2991,6 +3012,7 @@ async function renderRunDetail(runs) {
     if (benchSel.value === "finance") renderFinanceRun(holder, slice);
     else if (benchSel.value === "scholar") renderKnownItemRun(holder, slice, "paper_key");
     else if (benchSel.value === "legal") renderKnownItemRun(holder, slice, "case_key");
+    else if (benchSel.value === "coding") renderKnownItemRun(holder, slice, "doc_key");
     else renderNewsRun(holder, slice, legacy);
     if (!holder.children.length) {
       holder.appendChild(el("div", { class: "empty" },

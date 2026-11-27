@@ -22,6 +22,7 @@ dependencies = [
     "huggingface-hub>=1.22.0",
     "numpy>=1.26",
     "pyarrow>=24.0.0",
+    "snowballstemmer>=3.1.1",
 ]
 
 [project.scripts]

@@ -1,9 +1,9 @@
 import itertools
 from datetime import date
-from html.parser import HTMLParser
 
 from needle.finance.models import Filing, QuarterFact
 from needle.finance.registries import RegistryClient
+from needle.shared.htmltext import html_text
 
 SEC_SUBMISSIONS_URL = "https://data.sec.gov/submissions/CIK{cik:010d}.json"
 
@@ -20,37 +20,6 @@ QUARTERLY_CONCEPTS = {
 }
 CONCEPT_UNITS = {"eps_diluted": "USD/shares"}
 QUARTER_FPS = frozenset({"Q1", "Q2", "Q3"})
-
-SKIP_TAGS = {"script", "style", "svg", "noscript", "head", "title"}
-
-
-class _TextExtractor(HTMLParser):
-    def __init__(self) -> None:
-        super().__init__(convert_charrefs=True)
-        self._skip = 0
-        self.parts: list[str] = []
-
-    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag in SKIP_TAGS:
-            self._skip += 1
-
-    def handle_endtag(self, tag: str) -> None:
-        if tag in SKIP_TAGS:
-            self._skip = max(0, self._skip - 1)
-
-    def handle_data(self, data: str) -> None:
-        if not self._skip and data.strip():
-            self.parts.append(data)
-
-
-def html_text(html: str) -> str:
-    extractor = _TextExtractor()
-    try:
-        extractor.feed(html)
-        extractor.close()
-    except Exception:
-        pass
-    return " ".join(" ".join(extractor.parts).split())
 
 
 def quarterly_facts(facts: dict, field: str) -> list[QuarterFact]:

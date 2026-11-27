@@ -18,6 +18,7 @@ needle <benchmark> run --queries queries.jsonl ...    # evaluate engines on them
 | [`finance`](#finance) | company and financial fact lookups, gold from public registries and SEC filings | answer-recall@K + MRR@K, deterministic (optional LLM backstop) |
 | [`scholar`](#scholar) | known-item paper retrieval: by title vs. by a full-text-only detail | recall@K + MRR@K by paper-id match |
 | [`legal`](#legal) | known-item caselaw / CFR retrieval | recall@K + MRR@K by citation/docket/URL identity |
+| [`coding`](#coding) | known-item API reference / GitHub issue / Stack Overflow retrieval | recall@K + MRR@K by canonical URL |
 | [`agentic_rare`](#agentic_rare) | English rare-word queries sampled from a filtered query stream | LLM relevance judge → nDCG@5 |
 
 Each bench generates gold on demand from public sources; the repo commits
@@ -36,9 +37,10 @@ The CLI loads `.env` from the working directory (copy
 
 | Variable | Purpose |
 | --- | --- |
-| `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`) and judging |
+| `OPENROUTER_API_KEY` | all LLM work — query projection (news, finance `filingdoc`, scholar, legal `code`, coding) and judging |
 | `EXA_API_KEY`, `SERPER_API_KEY` (`google`), `SEARCHAPI_API_KEY` (`bing`), `BRAVE_API_KEY`, `PARALLEL_API_KEY`, `TAVILY_API_KEY`, `LINKUP_API_KEY`, `PERPLEXITY_API_KEY`, `OCTEN_API_KEY`, `CERAMIC_API_KEY`, `YOU_API_KEY`, `FIRECRAWL_API_KEY`, `TINYFISH_API_KEY`, `KAGI_API_KEY`, `JINA_API_KEY`, `CONTEXT_DEV_API_KEY` (`context`), `DEEPSEEK_API_KEY`, `SELTZ_API_KEY`, `WEBIQ_API_TOKEN` (`webiq`), `ANTHROPIC_API_KEY` (`claude-search`), `OPENAI_API_KEY` (`chatgpt-search`) | one per engine, required when that engine is in `--engines` |
 | `KEENABLE_API_KEY` | optional — without it the CLI uses the keyless, rate-limited endpoint |
+| `GITHUB_TOKEN`, `STACKEXCHANGE_KEY` | optional — raise the GitHub issue-search limit (10 → 30 requests/min) and the Stack Exchange daily quota for `coding generate` |
 | `NEEDLE_LLM_MODEL`, `NEEDLE_JUDGE_MODEL` | both default to `openai/gpt-6-luna`; `--llm-model` / `--judge-model` override |
 
 All `run` commands share one interface:
@@ -211,6 +213,78 @@ result URLs and snippets for reporter citations, docket numbers (scored only
 next to a gold party token), CourtListener/Justia URLs, and CFR citations;
 it breaks down by suite, syntax, and court.
 
+## coding
+
+Known-item retrieval of the pages a coding agent looks for. One slice with
+five doc types; each run has 20 API docs, 20 issues, 20 Mintlify pages, 10
+fresh changelog entries and 10 Stack Overflow questions (`--counts`):
+
+```bash
+needle coding generate --out coding.jsonl   # --counts api=20,issue=20,mintlify=20,fresh=10,qa=10
+needle coding run --queries coding.jsonl --out coding.json
+uv run python scripts/refresh_mintlify_hosts.py --date 2026-12-01   # monthly, needs bq
+```
+
+- **`api`** — a random documented item from a long-tail docs site. Half come
+  from Python packages ranked 2,000–15,000 by PyPI downloads (the
+  `top-pypi-packages` list): the package's listed docs site or
+  `<name>.readthedocs.io`, read through its Sphinx `objects.inv`. The other
+  half come from Rust crates ranked 2,000–20,000 by crates.io downloads,
+  read through the crate's docs.rs `all.html`. An LLM describes what the item
+  does, with the library name, and the bench rejects the query if it uses any
+  other part of the item's name.
+- **`issue`** — an issue with 3+ comments from the last `--months-back` (12)
+  in a small active repo: 6 random languages per run, repos with 100–2,000
+  stars, pushed in the last 90 days, 10+ open issues (`--repos` replaces the
+  sample with a fixed list). An LLM writes the query a developer who hits the
+  bug would type, with one quoted span copied verbatim from the issue (the
+  error message or symptom); the bench checks the span and rejects the issue
+  number.
+- **`mintlify`** — a random page of a product docs site hosted on Mintlify.
+  `src/needle/coding/data/mintlify_hosts.csv` lists every host whose home
+  page loads Mintlify fonts or assets in the HTTP Archive crawl, with its
+  CrUX rank bucket; `scripts/refresh_mintlify_hosts.py` rebuilds it with one
+  BigQuery query (about 40 GB). The sampler skips hosts in the top 1M,
+  reads the site's `/llms.txt` (drops starter kits and sites with fewer than
+  10 pages), and takes one page as Markdown (`<page>.md`). The query names
+  the product and must add two words from the page that are not in its title.
+- **`fresh`** — an entry from the last 14 days of the Cloudflare, Vercel,
+  GitHub and Supabase changelogs or the Amazon Bedrock doc history; gold is
+  the entry's own page, so the bench measures how fast an engine indexes new
+  pages. The query names the product and must add two words from the entry
+  that are not in its title.
+- **`qa`** — a Stack Overflow question with score ≥ 1 and an answer, from a
+  random month in one of `--tags` (python, javascript, typescript, rust, go,
+  java). An LLM rephrases the problem; the bench rejects the query unless it
+  adds two words that are not in the title.
+
+Every doc needs 50+ words of content: the item's whole reference entry for
+`api` (on docs.rs, the item's own docs without the trait-implementation
+lists), the issue or question body, the page or entry text. The LLM answers
+`NO_DISTINCT_QUERY` for docs it cannot single out: stubs, boilerplate and
+trivial accessors, bot or template issues, digests and roundups, opinion and
+common beginner questions.
+
+A query must then single out its page on its own site: ranked by BM25
+(English stemmer) against the site's other pages, the gold page must come
+first, with no tie. The other pages come from the Sphinx `searchindex.js`
+for `api` on PyPI sites; the crate root, the item's module page and up to 20
+items with similar names for docs.rs; `llms-full.txt` for `mintlify`; and
+every entry of the same feed for `fresh`. For `issue`, a GitHub search for
+the quoted span in the repo must return the gold issue and nothing else.
+`qa` has no check.
+
+`api`, `mintlify`, `fresh` and `qa` alternate plain and `site:` queries; `issue` cycles plain,
+`"quoted"`, plain, `site:github.com`. `run` maps each result URL to a doc
+key and scores a hit when it equals the gold key. A docs page keeps its host
+and path without version and locale parts (`/en/latest/`, `/v0.6.0/`,
+`qtforpython-6.11` → `qtforpython`); a rustdoc item keys on its crate and
+item path on any host, so docs.rs and a self-hosted build match; a GitHub
+issue matches the pull request with the same number; a Stack Overflow
+question matches by id. Other copies do not count, so recall is a lower
+bound, the same for every engine. The report breaks down by doc type
+(`by_bucket`) and syntax. `coding` is not yet part of the overall standings.
+
 ## agentic_rare
 
 A query producer plus a news-style eval for English rare-word queries.
@@ -266,7 +340,8 @@ the overlap and uniqueness stats exclude it.
 [`bench.yaml`](.github/workflows/bench.yaml) runs against all registered
 engines: news hourly (`--limit 20`); twice daily with fresh gold — finance
 00:17/12:17 UTC (`--limit 120 --judge`), agentic_rare 03:17/15:17
-(`--limit 100`), scholar 06:17/18:17 (`--per-cell 7`), legal 09:17/21:17. Gold lives on `gh-pages` between runs;
+(`--limit 100`), scholar 06:17/18:17 (`--per-cell 7`), legal 09:17/21:17, coding 01:17/13:17
+(80 queries). Gold lives on `gh-pages` between runs;
 a manual dispatch runs only the benches it selects; a daily bench also runs
 at any scheduled hour when its gold file is missing. Each bench is its own job and publishes its
 own run, so a slow daily bench never delays the hourly news result. Each
@@ -286,7 +361,7 @@ and refreshes `daily_queries.jsonl` at the dataset root: a rolling window of
 the queries evaluated by runs from the last 24 hours
 (`scripts/daily_queries.py`; `backfill` rebuilds it from the archive). The
 workflow needs repo secrets `OPENROUTER_API_KEY`, `HF_TOKEN`, `COURTLISTENER_API_TOKEN`, and the
-per-engine keys.
+per-engine keys; `STACKEXCHANGE_KEY` is optional.
 
 The deployed site also serves the results page at
 <https://keenableai.github.io/needle/results/> with `results.csv`,

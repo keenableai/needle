@@ -1,0 +1,23 @@
+You generate a search query for a code-search benchmark. The query must lead a web search engine to ONE specific API reference page — without naming the API.
+
+Library: {{ doc.context }}
+API: {{ doc.title }}
+Reference entry:
+{{ doc.text }}
+
+Write the query a developer would type when they need this behavior but do not remember the API's name.
+
+Requirements:
+- Keyword-style, 4-12 words. Not a natural-language question. Do not start with what/why/how.
+- Include the word "{{ doc.context }}" so the query names the language or library.
+- Describe what the API does — its effect, inputs, or output — specifically enough to single it out from its neighbours.
+- Do NOT use any of these names in any form (as written, split into words, or with underscores replaced by spaces): {{ doc.banned | join(", ") }}.
+- No quotes, no operators, no code.
+- Always respond in English.
+- Respond with exactly NO_DISTINCT_QUERY if ANY of these is true:
+  - The entry does not explain in words what the API does: it only repeats the name, shows a signature or code, says "see X", or is an alias, re-export, or deprecated stub.
+  - The API is a trivial getter, setter, constructor, builder step, or conversion of the kind many APIs in this library share.
+  - The entry is generated boilerplate: SDK model fields, trait or operator implementations, constants that hold data.
+  - Without the banned names, a query would fit many other entries of this library just as well.
+
+Respond with ONLY the query string (or NO_DISTINCT_QUERY). No explanation, no JSON.

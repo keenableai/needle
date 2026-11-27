@@ -4,8 +4,9 @@ from datetime import UTC, date, datetime
 
 from needle.legal.generate import run_generate
 from needle.legal.models import Case
-from needle.legal.sources import month_windows, parse_search_case, walk_structure_sections
+from needle.legal.sources import parse_search_case, walk_structure_sections
 from needle.shared.io import serialize_row
+from needle.shared.sampling import month_windows
 
 NOW = datetime(2026, 7, 4, 12, 0, tzinfo=UTC)
 HOUR = NOW.replace(minute=0)

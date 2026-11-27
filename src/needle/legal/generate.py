@@ -16,10 +16,10 @@ from needle.legal.projection import (
     code_syntax_query,
     party_tokens,
 )
-from needle.legal.sources import CourtListenerClient, EcfrClient, month_windows
+from needle.legal.sources import CourtListenerClient, EcfrClient
 from needle.shared.concurrency import bounded_gather
 from needle.shared.llm import GENERATION_MAX_TOKENS, REASONING_EFFORT, LLMClient
-from needle.shared.sampling import dedupe_by, interleave
+from needle.shared.sampling import dedupe_by, interleave, month_windows
 
 CODE_OVERSAMPLE = 3
 

@@ -20,6 +20,7 @@ BENCHES = (
     ("agentic_rare", "agentic_rare.jsonl", ("agentic_rare.json",)),
     ("scholar", "scholar.jsonl", ("scholar.json",)),
     ("legal", "legal.jsonl", ("legal.json",)),
+    ("coding", "coding.jsonl", ("coding.json",)),
 )
 RARE_REPORTS = ("agentic_rare.json", "rarestream.json")
 
@@ -63,6 +64,8 @@ def update(
     scholar_report: str | None = None,
     legal: str | None = None,
     legal_report: str | None = None,
+    coding: str | None = None,
+    coding_report: str | None = None,
     agentic_rare: str | None = None,
     agentic_rare_queries: str | None = None,
 ) -> None:
@@ -76,6 +79,7 @@ def update(
         "agentic_rare": (agentic_rare_queries, agentic_rare),
         "scholar": (scholar, scholar_report),
         "legal": (legal, legal_report),
+        "coding": (coding, coding_report),
     }
     new_rows = []
     for bench, (queries_path, report_path) in paths.items():

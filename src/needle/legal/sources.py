@@ -1,6 +1,6 @@
 import os
 import re
-from datetime import date, datetime
+from datetime import date
 from typing import Any
 from xml.etree.ElementTree import ParseError
 
@@ -179,16 +179,3 @@ class EcfrClient(HttpSearchClient):
         return parse_section_xml(
             xml_text, title_num=title_num, part=part, section=identifier, heading=heading
         )
-
-
-def month_windows(*, now: datetime, months_back: int) -> list[tuple[date, date]]:
-    windows = []
-    year, month = now.year, now.month
-    for _ in range(months_back):
-        month -= 1
-        if month == 0:
-            year, month = year - 1, 12
-        first = date(year, month, 1)
-        next_year, next_month = (year + 1, 1) if month == 12 else (year, month + 1)
-        windows.append((first, date(next_year, next_month, 1)))
-    return windows
