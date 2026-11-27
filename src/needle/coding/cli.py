@@ -106,7 +106,8 @@ class Coding:
         )
         print(
             f"coding: {len(rows)} queries ({counts}; drops: no_query={stats.no_query}, "
-            f"rejected={stats.rejected}, llm_err={stats.llm_errors})",
+            f"rejected={stats.rejected}, not_distinct={stats.not_distinct}, "
+            f"llm_err={stats.llm_errors})",
             file=sys.stderr,
         )
         if stats.llm_error_sample:

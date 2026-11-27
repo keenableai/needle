@@ -14,6 +14,16 @@ from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
 from needle.coding.models import Doc
+from needle.coding.projection import QUOTED_SPAN_RE
+from needle.coding.siblings import (
+    Corpus,
+    bm25,
+    llms_full_corpus,
+    page_key,
+    ranks_first,
+    sphinx_corpus,
+    terms,
+)
 from needle.shared.htmltext import html_text
 from needle.shared.sampling import dedupe_by, interleave
 from needle.shared.search.base import USER_AGENT, HttpSearchClient
@@ -27,6 +37,7 @@ CRATES_PAGES = (20, 200)
 CRATES_PAGE_SIZE = 100
 DOCSRS = "https://docs.rs"
 SYMBOLS_PER_SITE = 3
+DOCSRS_SIBLINGS = 20
 GITHUB_SEARCH = "https://api.github.com/search/issues"
 GITHUB_REPO_SEARCH = "https://api.github.com/search/repositories"
 REPO_STARS = (100, 2000)
@@ -327,6 +338,9 @@ class SourceClient(HttpSearchClient):
             self._note(source, f"{err['error_type']}: {err['error_message']}")
         return payload
 
+    async def distinct(self, query: str, doc: Doc) -> bool:
+        return True
+
 
 class ApiDocsClient(SourceClient):
     default_headers = {"User-Agent": USER_AGENT}
@@ -367,7 +381,9 @@ class ApiDocsClient(SourceClient):
                 entry = sphinx_entry(page, symbol) if page else None
                 if entry is not None:
                     library, *rest = symbol.split(".")
-                    return Doc("api", url, symbol, entry, context=library, banned=tuple(rest))
+                    return Doc(
+                        "api", url, symbol, entry, context=library, banned=tuple(rest), site=site
+                    )
             return None
         return None
 
@@ -399,8 +415,42 @@ class ApiDocsClient(SourceClient):
                 *modules, item = href.removesuffix(".html").split("/")
                 name = item.split(".", 1)[1]
                 title = "::".join([crate.replace("-", "_"), *modules, name])
-                return Doc("api", root + href, title, entry, context=crate, banned=(*modules, name))
+                return Doc(
+                    "api",
+                    root + href,
+                    title,
+                    entry,
+                    context=crate,
+                    banned=(*modules, name),
+                    site=root,
+                )
         return None
+
+    async def distinct(self, query: str, doc: Doc) -> bool:
+        if urlsplit(doc.url).hostname == "docs.rs":
+            corpus = await self._docsrs_corpus(query, doc)
+        else:
+            js = await self._get_text(f"{doc.site}searchindex.js")
+            corpus = sphinx_corpus(js, doc.site) if js else {}
+        return ranks_first(query, corpus, doc.key)
+
+    async def _docsrs_corpus(self, query: str, doc: Doc) -> Corpus:
+        index = await self._get_text(f"{doc.site}all.html")
+        by_name = bm25(query, {href: terms(href) for href in docsrs_items(index or "")})
+        nearest = sorted(
+            (h for h in by_name if by_name[h] > 0), key=by_name.__getitem__, reverse=True
+        )
+        module = doc.url.rsplit("/", 1)[0] + "/"
+        urls = dedupe_by(
+            [doc.url, doc.site, module, *(doc.site + h for h in nearest[:DOCSRS_SIBLINGS])],
+            lambda url: url,
+        )
+        pages = await asyncio.gather(*[self._get_text(url) for url in urls])
+        return {
+            page_key(url): terms(page_main_text(page))
+            for url, page in zip(urls, pages, strict=True)
+            if page
+        }
 
 
 class GitHubClient(SourceClient):
@@ -452,6 +502,16 @@ class GitHubClient(SourceClient):
             return []
         docs = [parse_issue(item, repo) for item in payload.get("items") or []]
         return [d for d in docs if d is not None]
+
+    async def distinct(self, query: str, doc: Doc) -> bool:
+        span = QUOTED_SPAN_RE.findall(query)[0]
+        payload = await self._fetch_json(
+            f"github span {doc.context}",
+            GITHUB_SEARCH,
+            params={"q": f'repo:{doc.context} "{span}"', "per_page": 2},
+        )
+        items = payload.get("items") if isinstance(payload, dict) else None
+        return [item.get("html_url") for item in items or []] == [doc.url]
 
 
 class StackExchangeClient(SourceClient):
@@ -514,9 +574,14 @@ class MintlifyClient(SourceClient):
                 text = await self._get_text(f"{page_url}.md")
                 body = markdown_page(text) if text else None
                 if body is not None:
-                    return Doc("mintlify", page_url, label, body, context=name)
+                    base = str(resp.url).removesuffix("llms.txt")
+                    return Doc("mintlify", page_url, label, body, context=name, site=base)
             return None
         return None
+
+    async def distinct(self, query: str, doc: Doc) -> bool:
+        text = await self._get_text(f"{doc.site}llms-full.txt")
+        return ranks_first(query, llms_full_corpus(text) if text else {}, doc.key)
 
 
 class ChangelogClient(SourceClient):
@@ -525,6 +590,7 @@ class ChangelogClient(SourceClient):
     def __init__(self, **kwargs: Any) -> None:
         kwargs.setdefault("max_concurrency", 4)
         super().__init__(**kwargs)
+        self.corpora: dict[str, Corpus] = {}
 
     async def docs(self, *, n: int, seed: int, now: datetime) -> list[Doc]:
         cutoff = now - timedelta(days=FRESH_DAYS)
@@ -542,7 +608,11 @@ class ChangelogClient(SourceClient):
         if resp is None or resp.status_code != 200:
             self._note(f"feed {name}", str(err) if resp is None else f"http {resp.status_code}")
             return []
-        recent = [e for e in parse_feed(resp.content) if e.published and e.published >= cutoff]
+        entries = parse_feed(resp.content)
+        self.corpora[name] = {
+            page_key(e.url.split("#", 1)[0]): terms(f"{e.title}\n{e.text}") for e in entries
+        }
+        recent = [e for e in entries if e.published and e.published >= cutoff]
         recent = dedupe_by(recent, lambda e: e.url.split("#", 1)[0])
         random.Random(f"{seed}:{name}").shuffle(recent)
         return [(name, e) for e in recent]
@@ -556,3 +626,7 @@ class ChangelogClient(SourceClient):
         if not has_content(text):
             return None
         return Doc("fresh", url, entry.title, text[:TEXT_CHARS], context=name)
+
+    async def distinct(self, query: str, doc: Doc) -> bool:
+        gold = terms(f"{doc.title}\n{doc.text}")
+        return ranks_first(query, {**self.corpora[doc.context], doc.key: gold}, doc.key)

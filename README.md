@@ -265,6 +265,15 @@ lists), the issue or question body, the page or entry text. The LLM answers
 trivial accessors, bot or template issues, digests and roundups, opinion and
 common beginner questions.
 
+A query must then single out its page on its own site: ranked by BM25
+(English stemmer) against the site's other pages, the gold page must come
+first, with no tie. The other pages come from the Sphinx `searchindex.js`
+for `api` on PyPI sites; the crate root, the item's module page and up to 20
+items with similar names for docs.rs; `llms-full.txt` for `mintlify`; and
+every entry of the same feed for `fresh`. For `issue`, a GitHub search for
+the quoted span in the repo must return the gold issue and nothing else.
+`qa` has no check.
+
 `api`, `mintlify`, `fresh` and `qa` alternate plain and `site:` queries; `issue` cycles plain,
 `"quoted"`, plain, `site:github.com`. `run` maps each result URL to a doc
 key and scores a hit when it equals the gold key. A docs page keeps its host

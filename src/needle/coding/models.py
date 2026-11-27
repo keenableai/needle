@@ -83,6 +83,7 @@ class Doc:
     text: str
     context: str
     banned: tuple[str, ...] = ()
+    site: str = ""
 
     @property
     def key(self) -> str:

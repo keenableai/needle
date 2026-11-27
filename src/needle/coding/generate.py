@@ -13,6 +13,7 @@ from needle.coding.sources import (
     ChangelogClient,
     GitHubClient,
     MintlifyClient,
+    SourceClient,
     StackExchangeClient,
 )
 from needle.shared.concurrency import bounded_gather
@@ -28,6 +29,7 @@ class GenStats:
     candidates: dict[str, int] = field(default_factory=dict)
     no_query: int = 0
     rejected: int = 0
+    not_distinct: int = 0
     llm_errors: int = 0
     llm_error_sample: str = ""
     source_errors: list[str] = field(default_factory=list)
@@ -65,7 +67,7 @@ async def _issues(
     return await _windowed(github.issues, repos, windows=full_range, seed=seed)
 
 
-async def _project(doc: Doc, llm: LLMClient, stats: GenStats) -> str | None:
+async def _project(doc: Doc, llm: LLMClient, source: SourceClient, stats: GenStats) -> str | None:
     try:
         text, err = await llm.complete(
             build_prompt(doc),
@@ -85,6 +87,9 @@ async def _project(doc: Doc, llm: LLMClient, stats: GenStats) -> str | None:
         stats.no_query += 1
     elif not query_ok(query, doc):
         stats.rejected += 1
+        query = None
+    elif not await source.distinct(query, doc):
+        stats.not_distinct += 1
         query = None
     return query
 
@@ -107,6 +112,17 @@ async def run_generate(
     concurrency: int = 8,
 ) -> tuple[list[dict[str, Any]], GenStats]:
     n = {t: c * OVERSAMPLE for t, c in counts.items()}
+    clients: dict[str, SourceClient] = {
+        t: c
+        for t, c in (
+            ("api", api),
+            ("issue", github),
+            ("mintlify", mintlify),
+            ("fresh", changelogs),
+            ("qa", stackexchange),
+        )
+        if c is not None
+    }
     fetches: dict[str, Awaitable[list[Doc]]] = {}
     if api is not None:
         fetches["api"] = api.docs(n=n["api"], seed=seed)
@@ -130,17 +146,12 @@ async def run_generate(
         t: dedupe_by(docs, lambda d: d.key)[: n[t]] for t, docs in zip(fetches, found, strict=True)
     }
 
-    stats = GenStats(
-        candidates={t: len(docs) for t, docs in candidates.items()},
-        source_errors=[
-            e
-            for client in (api, github, mintlify, changelogs, stackexchange)
-            if client is not None
-            for e in client.errors
-        ],
-    )
+    stats = GenStats(candidates={t: len(docs) for t, docs in candidates.items()})
     docs = [d for type_docs in candidates.values() for d in type_docs]
-    queries = await bounded_gather(docs, lambda d: _project(d, llm, stats), concurrency=concurrency)
+    queries = await bounded_gather(
+        docs, lambda d: _project(d, llm, clients[d.doc_type], stats), concurrency=concurrency
+    )
+    stats.source_errors = [e for client in clients.values() for e in client.errors]
 
     rows: list[dict[str, Any]] = []
     for doc_type in candidates:

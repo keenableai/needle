@@ -82,6 +82,9 @@ class FakeApi:
     async def docs(self, *, n, seed):
         return [API][:n]
 
+    async def distinct(self, query, doc):
+        return True
+
 
 class FakeWindowed:
     def __init__(self, docs, errors=()):
@@ -95,6 +98,9 @@ class FakeWindowed:
 
     issues = fetch
     questions = fetch
+
+    async def distinct(self, query, doc):
+        return True
 
     async def small_repos(self, *, now, seed, n):
         return ["small/one", "small/two"][:n]
@@ -224,11 +230,15 @@ def test_mintlify_and_fresh_queries_need_product_and_new_words():
 class FakeSource:
     errors: list[str] = []
 
-    def __init__(self, docs):
+    def __init__(self, docs, unique=True):
         self._docs = docs
+        self._unique = unique
 
     async def docs(self, *, n, seed, now=None):
         return list(self._docs)[:n]
+
+    async def distinct(self, query, doc):
+        return self._unique
 
 
 async def test_run_generate_adds_mintlify_and_fresh_types():
@@ -243,7 +253,7 @@ async def test_run_generate_adds_mintlify_and_fresh_types():
         github=None,
         stackexchange=None,
         mintlify=FakeSource([MINT]),
-        changelogs=FakeSource([FRESH]),
+        changelogs=FakeSource([FRESH], unique=False),
         llm=llm,
         hour_ts=HOUR,
         now=NOW,
@@ -253,7 +263,7 @@ async def test_run_generate_adds_mintlify_and_fresh_types():
         months_back=12,
         seed=0,
     )
-    assert [r["query_origin"]["bucket"] for r in rows] == ["mintlify", "fresh"]
+    assert [r["query_origin"]["bucket"] for r in rows] == ["mintlify"]
     assert rows[0]["gold"]["doc_key"] == "doc:docs.lithosai.com/billing"
-    assert rows[1]["gold"]["doc_key"] == "doc:vercel.com/changelog/drives"
     assert stats.candidates == {"mintlify": 1, "fresh": 1}
+    assert stats.not_distinct == 1
